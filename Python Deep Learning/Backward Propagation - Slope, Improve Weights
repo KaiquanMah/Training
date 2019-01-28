@@ -1,0 +1,71 @@
+# Part 1 - Calculate slopes
+# When plotting the mean-squared error loss function against predictions, the slope is 2 * x * (y-xb), or 2 * input_data * error.
+
+# Calculate the predictions: preds
+preds = (weights * input_data).sum()
+
+# Calculate the error: error
+error = target - preds
+
+# Calculate the slope: slope
+slope = 2 * input_data * error
+
+# Print the slope
+print(slope)
+
+
+# Part 2 - Improving model weights
+# Set the learning rate: learning_rate
+learning_rate = 0.01
+
+# Calculate the predictions: preds
+preds = (weights * input_data).sum()
+
+# Calculate the error: error
+error = preds - target
+
+# Calculate the slope: slope
+slope = 2 * input_data * error
+
+# Update the weights: weights_updated
+weights_updated = weights - (learning_rate * slope)
+
+# Get updated predictions: preds_updated
+preds_updated = (weights_updated * input_data).sum()
+
+# Calculate updated error: error_updated
+error_updated = preds_updated - target
+
+# Print the original error
+print(error)
+
+# Print the updated error
+print(error_updated)
+
+
+# Part 3 Making multiple updates to weights
+# get_slope() function takes input_data, target, and weights as arguments
+# get_mse() function takes input_data, target, and weights as arguments
+
+n_updates = 20
+mse_hist = []
+
+# Iterate over the number of updates
+for i in range(n_updates):
+    # Calculate the slope: slope
+    slope = get_slope(input_data, target, weights)
+    
+    # Update the weights: weights
+    weights = weights - 0.01 * slope
+    
+    # Calculate mse with new weights: mse
+    mse = get_mse(input_data, target, weights)
+    
+    # Append the mse to mse_hist
+    mse_hist.append(mse)
+
+# Plot the mse history
+plt.plot(mse_hist)
+plt.xlabel('Iterations')
+plt.ylabel('Mean Squared Error')
+plt.show()
