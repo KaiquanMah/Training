@@ -1,0 +1,20 @@
+# Often, we want to get a count for each record with a particular value in another column. The .group_by() method helps answer this type of query. You can pass a column to the .group_by() method and use in an aggregate function like sum() or count(). Much like the .order_by() method, .group_by() can take multiple columns as arguments.
+
+# Import func
+from sqlalchemy import func
+
+# Build a query to select the state and count of ages by state: stmt
+stmt = select([census.columns.state, func.count(census.columns.age)])
+
+# Group stmt by state
+stmt = stmt.group_by(census.columns.state)
+
+# Execute the statement and store all the records: results
+results = connection.execute(stmt).fetchall()
+
+# Print results
+print(results)
+
+# Print the keys/column names of the results returned
+# Note that results[0].keys() can be == results[1].keys()
+print(results[0].keys())
