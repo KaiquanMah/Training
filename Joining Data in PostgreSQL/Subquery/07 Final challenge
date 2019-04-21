@@ -1,0 +1,62 @@
+# In this exercise, you'll need to get the country names and other 2015 data in the economies table and the countries table for Central American countries with an official language.
+
+-- Select fields
+SELECT DISTINCT name, total_investment, imports
+  -- From table (with alias)
+  FROM countries AS c
+    -- Join with table (with alias)
+    LEFT JOIN economies AS e
+      -- Match on code
+      ON (c.code = e.code
+      -- and code in Subquery
+        AND c.code IN (
+          SELECT l.code
+          FROM languages AS l
+          WHERE official = 'true'
+        ) )
+  -- Where region and year are correct
+  WHERE c.region = 'Central America' AND e.year = 2015
+-- Order by field
+ORDER BY name;
+
+
+# Let's ease up a bit and calculate the average fertility rate for each region in 2015.
+
+-- Select fields
+SELECT region, continent, AVG(fertility_rate) AS avg_fert_rate
+  -- From left table
+  FROM countries AS c
+    -- Join to right table
+    INNER JOIN populations AS p
+      -- Match on join condition
+      ON c.code = p.country_code
+  -- Where specific records matching some condition
+  WHERE year = 2015
+-- Group appropriately
+GROUP BY region, continent
+-- Order appropriately
+ORDER BY avg_fert_rate;
+
+
+
+# You are now tasked with determining the top 10 capital cities in Europe and the Americas in terms of a calculated percentage using city_proper_pop and metroarea_pop in cities.
+# Do not use table aliasing in this exercise.
+
+-- Select fields
+SELECT name, country_code, city_proper_pop, metroarea_pop,  
+      -- Calculate city_perc
+      city_proper_pop / metroarea_pop * 100 AS city_perc
+  -- From appropriate table
+  FROM cities
+  -- Where 
+  WHERE name IN
+    -- Subquery
+    (SELECT capital
+     FROM countries
+     WHERE (continent = 'Europe'
+        OR continent LIKE '%meri%'))
+       AND metroarea_pop IS NOT NULL
+-- Order appropriately
+ORDER BY city_perc DESC
+-- Limit amount
+LIMIT 10;
