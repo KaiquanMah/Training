@@ -1,0 +1,28 @@
+# The last type of subquery you will work with is one inside of FROM.
+# You will use this to determine the number of languages spoken for each country, identified by the country's local name! (Note this may be different than the name field and is stored in the local_name field.)
+
+
+-- Select fields (with aliases)
+SELECT code, COUNT(name) AS lang_num
+  -- From languages
+  FROM languages
+-- Group by code
+GROUP BY code;
+
+
+
+-- Select fields
+SELECT local_name, subquery.lang_num
+  -- From countries
+  FROM countries,
+  	-- Subquery (alias as subquery)
+  	(-- Select fields (with aliases)
+    SELECT code, COUNT(name) AS lang_num
+    -- From languages
+    FROM languages
+    -- Group by code
+    GROUP BY code) AS subquery
+  -- Where codes match
+  WHERE countries.code = subquery.code
+-- Order by descending number of languages
+ORDER BY subquery.lang_num DESC;
