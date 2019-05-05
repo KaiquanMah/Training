@@ -1,0 +1,58 @@
+#Part1
+#  Simulating a null hypothesis concerning correlation
+# The observed correlation between female illiteracy and fertility in the data set of 162 countries may just be by chance; the fertility of a given country may actually be totally independent of its illiteracy. You will test this null hypothesis in the next exercise.
+# To do the test, you need to simulate the data assuming the null hypothesis is true. Of the following choices, which is the best way to to do it?
+
+right option
+#Do a permutation test: Permute the illiteracy values but leave the fertility values fixed to generate a new set of (illiteracy, fertility) data.
+#Yes, this exactly simulates the null hypothesis and does so more efficiently than the last option. It is exact because it uses all data and eliminates any correlation because which illiteracy value pairs to which fertility value is shuffled.
+
+
+option1
+#Do a pairs bootstrap: Sample pairs of observed data with replacement to generate a new set of (illiteracy, fertility) data.
+#Pairs bootstrap will get you a confidence interval on the Pearson correlation. You can get a confidence interval for its value. You would find, for example, that it cannot be close to zero. But this is not a simulation of the null hypothesis.
+
+option2
+#Choose 162 random numbers to represent the illiteracy rate and 162 random numbers to represent the corresponding fertility rate.
+#If you just randomly choose numbers, they have nothing at all to do with the measured data.
+
+option3
+#Do a bootstrap sampling in which you sample 162 illiteracy values with replacement and then 162 fertility values with replacement.
+#This works and is a legitimate way to simulate the data. The pairings are now random. However, it is not preferred because it is not exact like a permutation test is.
+
+option4
+#Do a permutation test: Permute both the illiteracy and fertility values to generate a new set of (illiteracy, fertility data).
+#This works perfectly, and is exact because it uses all data and eliminates any correlation because which illiteracy value pairs to which fertility value is shuffled. However, it is not necessary, and computationally inefficient, to permute both illiteracy and fertility..
+
+
+
+#Part2
+#The observed correlation between female illiteracy and fertility may just be by chance; the fertility of a given country may actually be totally independent of its illiteracy. You will test this hypothesis. To do so, permute the illiteracy values but leave the fertility values fixed. This simulates the hypothesis that they are totally independent of each other. For each permutation, compute the Pearson correlation coefficient and assess how many of your permutation replicates have a Pearson correlation coefficient greater than the observed one.
+#The function pearson_r() that you wrote in the prequel to this course for computing the Pearson correlation coefficient is already in your name space.
+
+
+
+# Compute observed correlation: r_obs
+r_obs = pearson_r(illiteracy, fertility)
+
+#Initialize an array to store your permutation replicates.
+# Initialize permutation replicates: perm_replicates
+perm_replicates = np.empty(10000)
+
+#Write a for loop to draw 10,000 replicates:
+#Permute the illiteracy measurements using np.random.permutation().
+# Draw replicates
+for i in range(10000):
+    # Permute illiteracy measurments: illiteracy_permuted
+    illiteracy_permuted = np.random.permutation(illiteracy)
+
+    #Compute the Pearson correlation between the permuted illiteracy array, illiteracy_permuted, and fertility.
+    # Compute Pearson correlation
+    perm_replicates[i] = pearson_r(illiteracy_permuted, fertility)
+
+# Compute p-value: p
+p = np.sum(perm_replicates >= r_obs)/len(perm_replicates)
+print('p-val =', p)
+
+#You got a p-value of zero. In hacker statistics, this means that your p-value is very low, since you never got a single replicate in the 10,000 you took that had a Pearson correlation greater than the observed one. You could try increasing the number of replicates you take to continue to move the upper bound on your p-value lower and lower.
+
