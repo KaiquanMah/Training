@@ -1,0 +1,26 @@
+# We saw in a previous exercise that the mean is Normally distributed. This does not necessarily hold for other statistics, but no worry: as hackers, we can always take bootstrap replicates! In this exercise, you'll generate bootstrap replicates for the variance of the annual rainfall at the Sheffield Weather Station and plot the histogram of the replicates.
+# Here, you will make use of the draw_bs_reps() function you defined a few exercises ago. It is provided below for your reference:
+
+def draw_bs_reps(data, func, size=1):
+    return np.array([bootstrap_replicate_1d(data, func) for _ in range(size)])
+
+
+# Generate 10,000 bootstrap replicates of the variance: bs_replicates
+#Draw 10000 bootstrap replicates of the variance in annual rainfall, stored in the rainfall dataset, using your draw_bs_reps() function. Hint: Pass in np.var for computing the variance.
+bs_replicates = draw_bs_reps(rainfall,np.var,10000)
+
+# Put the variance in units of square centimeters
+#Divide your variance replicates (bs_replicates) by 100 to put the variance in units of square centimeters for convenience.
+bs_replicates = bs_replicates/100
+
+# Make a histogram of the results
+#Make a histogram of bs_replicates using the normed=True keyword argument and 50 bins.
+_ = plt.hist(bs_replicates, bins=50, normed=True)
+_ = plt.xlabel('variance of annual rainfall (sq. cm)')
+_ = plt.ylabel('PDF')
+
+# Show the plot
+plt.show()
+
+#Great work! This is not normally distributed, as it has a longer tail to the right. Note that you can also compute a confidence interval on the variance, or any other statistic, using np.percentile() with your bootstrap replicates.
+
