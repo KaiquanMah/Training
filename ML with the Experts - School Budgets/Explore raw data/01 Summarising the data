@@ -1,0 +1,69 @@
+#part 1
+# What category of problem is this?
+# You're no novice to data science, but let's make sure we agree on the basics.
+# As Peter from DrivenData explained in the video, you're going to be working with school district budget data. This data can be classified in many ways according to certain labels, e.g. Function: Career & Academic Counseling, or Position_Type: Librarian.
+# Your goal is to develop a model that predicts the probability for each possible label by relying on some correctly labeled examples.
+# What type of machine learning problem is this?
+
+# Supervised Learning, because the model will be trained using labeled examples.
+
+
+#part 2
+#What is the goal of the algorithm?
+#As you know from previous courses, there are different types of supervised machine learning problems. In this exercise you will tell us what type of supervised machine learning problem this is, and why you think so.
+#Remember, your goal is to correctly label budget line items by training a supervised model to predict the probability of each possible label, taking most probable label as the correct label.
+
+#Classification, because predicted probabilities will be used to select a label class.
+# Specifically, we have ourselves a multi-class-multi-label classification problem (quite a mouthful!), because there are 9 broad categories that each take on many possible sub-label instances.
+
+
+#part 3
+#Loading the data
+#Now it's time to check out the dataset! You'll use pandas (which has been pre-imported as pd) to load your data into a DataFrame and then do some Exploratory Data Analysis (EDA) of it.
+#The training data is available as TrainingData.csv. Your first task is to load it into a DataFrame in the IPython Shell using pd.read_csv() along with the keyword argument index_col=0.
+#Use methods such as .info(), .head(), and .tail() to explore the budget data and the properties of the features and labels.
+#Some of the column names correspond to features - descriptions of the budget items - such as the Job_Title_Description column. The values in this column tell us if a budget item is for a teacher, custodian, or other employee.
+#Some columns correspond to the budget item labels you will be trying to predict with your model. For example, the Object_Type column describes whether the budget item is related classroom supplies, salary, travel expenses, etc.
+#Use df.info() in the IPython Shell to answer the following questions:
+
+#How many rows are there in the training data?
+#How many columns are there in the training data?
+#How many non-null entries are in the Job_Title_Description column?
+
+#1560 rows, 26 columns, 1131 non-null entries in Job_Title_Description.
+
+
+
+#part 4
+# Summarising the data
+#You'll continue your EDA in this exercise by computing summary statistics for the numeric data in the dataset. The data has been pre-loaded into a DataFrame called df.
+#You can use df.info() in the IPython Shell to determine which columns of the data are numeric, specifically type float64. You'll notice that there are two numeric columns, called FTE and Total.
+
+#FTE: Stands for "full-time equivalent". If the budget item is associated to an employee, this number tells us the percentage of full-time that the employee works. A value of 1 means the associated employee works for the school full-time. A value close to 0 means the item is associated to a part-time or contracted employee.
+#Total: Stands for the total cost of the expenditure. This number tells us how much the budget item cost.
+#After printing summary statistics for the numeric data, your job is to plot a histogram of the non-null FTE column to see the distribution of part-time and full-time employees in the dataset.
+
+#This course touches on a lot of concepts you may have forgotten, so if you ever need a quick refresher, download the Scikit-Learn Cheat Sheet and keep it handy!
+
+# Print the summary statistics
+#Print summary statistics of the numeric columns in the DataFrame df using the .describe() method.
+print(df.describe())
+
+# Import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+
+# Create the histogram
+#Create a histogram of the non-null 'FTE' column. You can do this by passing df['FTE'].dropna() to plt.hist().
+plt.hist(df['FTE'].dropna())
+
+# Add title and labels
+plt.title('Distribution of %full-time \n employee works')
+plt.xlabel('% of full-time')
+plt.ylabel('num employees')
+
+# Display the histogram
+plt.show()
+
+#The high variance in expenditures makes sense (some purchases are cheap some are expensive). Also, it looks like the FTE column is bimodal. That is, there are some part-time and some full-time employees.
+
+
