@@ -1,0 +1,46 @@
+# Here, you'll perform a similar preprocessing pipeline step, only this time you'll use the text column from the sample data.
+# To preprocess the text, you'll turn to CountVectorizer() to generate a bag-of-words representation of the data, as in Chapter 2. Using the default arguments, add a (step, transform) tuple to the steps list in your pipeline.
+#https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html
+# Make sure you select only the text column for splitting your training and test sets.
+# As usual, your sample_df is ready and waiting in the workspace.
+
+
+
+sample_df
+       numeric     text  with_missing label
+0   -10.856306               4.433240     b
+1     9.973454      foo      4.310229     b
+2     2.829785  foo bar      2.469828     a
+3   -15.062947               2.852981     b
+4    -5.786003  foo bar      1.826475     a
+5    16.514365               2.764315     b
+6   -24.266792  foo bar      3.024317     b
+7    -4.289126      foo      2.596040     b
+8    12.659363               2.496415     a
+9    -8.667404      bar      4.032080     a
+
+
+
+# Import CountVectorizer from sklearn.feature_extraction.text
+# Import the CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+
+#Create training and test sets by selecting the correct subset of sample_df: 'text'.
+# Split out only the text data
+X_train, X_test, y_train, y_test = train_test_split(sample_df['text'],
+                                                    pd.get_dummies(sample_df['label']), 
+                                                    random_state=456)
+
+#Add the CountVectorizer step (with the name 'vec') to the correct position in the pipeline.
+# Instantiate Pipeline object: pl
+pl = Pipeline([
+        ('vec', CountVectorizer()),
+        ('clf', OneVsRestClassifier(LogisticRegression()))
+    ])
+
+# Fit to the training data
+pl.fit(X_train, y_train)
+
+# Compute and print accuracy
+accuracy = pl.score(X_test, y_test)
+print("\nAccuracy on sample data - just text data: ", accuracy)
