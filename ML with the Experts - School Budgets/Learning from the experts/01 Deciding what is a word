@@ -1,0 +1,40 @@
+# part 1
+#How many tokens?
+#Recall from previous chapters that how you tokenize text affects the n-gram statistics used in your model.
+#Going forward, you'll use alpha-numeric sequences, and only alpha-numeric sequences, as tokens. Alpha-numeric tokens contain only letters a-z and numbers 0-9 (no other characters). In other words, you'll tokenize on punctuation to generate n-gram statistics.
+#In this exercise, you'll make sure you remember how to tokenize on punctuation.
+#Assuming we tokenize on punctuation, accepting only alpha-numeric sequences as tokens, how many tokens are in the following string from the main dataset?
+#'PLANNING,RES,DEV,& EVAL      '
+#If you want, we've loaded this string into the workspace as SAMPLE_STRING, but you may not need it to answer the question.
+
+#4, because , and & are not tokens
+#Yes! Commas, "&", and whitespace are not alpha-numeric tokens. Keep it up!
+
+
+
+#part 2
+#Deciding what is a word
+#Before you build up to the winning pipeline, it will be useful to look a little deeper into how the text features will be processed.
+#In this exercise, you will use CountVectorizer on the training data X_train (preloaded into the workspace) to see the effect of tokenization on punctuation.
+#Remember, since CountVectorizer expects a vector, you'll need to use the preloaded function, combine_text_columns before fitting to the training data.
+
+
+# Import the CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+
+#Create text_vector by preprocessing X_train using combine_text_columns. This is important, or else you won't get any tokens!
+# Create the text vector
+text_vector = combine_text_columns(X_train)
+
+# Create the token pattern: TOKENS_ALPHANUMERIC
+TOKENS_ALPHANUMERIC = '[A-Za-z0-9]+(?=\\s+)'
+
+#Instantiate CountVectorizer as text_features. Specify the keyword argument token_pattern=TOKENS_ALPHANUMERIC.
+# Instantiate the CountVectorizer: text_features
+text_features = CountVectorizer(token_pattern=TOKENS_ALPHANUMERIC)
+
+# Fit text_features to the text vector
+text_features.fit(text_vector)
+
+# Print the first 10 tokens
+print(text_features.get_feature_names()[:10])
