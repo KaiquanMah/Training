@@ -1,0 +1,57 @@
+#part 1
+#Why is hashing a useful trick?
+#In the video, Peter explained that a hash function takes an input, in your case a token, and outputs a hash value. For example, the input may be a string and the hash value may be an integer.
+#hash https://en.wikipedia.org/wiki/Feature_hashing#Feature_vectorization_using_the_hashing_trick
+#We've loaded a familiar python datatype, a dictionary called hash_dict, that makes this mapping concept a bit more explicit. In fact, python dictionaries ARE hash tables!
+#https://stackoverflow.com/questions/114830/is-a-python-dictionary-an-example-of-a-hash-table
+#Print hash_dict in the IPython Shell to get a sense of how strings can be mapped to integers.
+#By explicitly stating how many possible outputs the hashing function may have, we limit the size of the objects that need to be processed. With these limits known, computation can be made more efficient and we can get results faster, even on large datasets.
+#Using the above information, answer the following:
+#Why is hashing a useful trick?
+
+
+# {'and': 780, 'fluids': 354, 'fuel': 895, 'petro': 354, 'vend': 785}
+#ans- Some problems are memory-bound and not easily parallelizable, and hashing enforces a fixed length computation instead of using a mutable datatype (like a dictionary).
+#Yes! Enforcing a fixed length can speed up calculations drastically, especially on large datasets!
+
+#hashing enforced fixed length computation, and dictionaries are mutable.
+#hashing does not necessarily have anything to do with parallelization.
+
+
+
+#part 2
+#Implementing the hashing trick in scikit-learn
+#In this exercise you will check out the scikit-learn implementation of HashingVectorizer before adding it to your pipeline later.
+#As you saw in the video, HashingVectorizer acts just like CountVectorizer in that it can accept token_pattern and ngram_range parameters. The important difference is that it creates hash values from the text, so that we get all the computational advantages of hashing!
+
+
+#Import HashingVectorizer from sklearn.feature_extraction.text
+# Import HashingVectorizer
+from sklearn.feature_extraction.text import HashingVectorizer
+
+# Get text data: text_data
+text_data = combine_text_columns(X_train)
+
+# Create the token pattern: TOKENS_ALPHANUMERIC
+TOKENS_ALPHANUMERIC = '[A-Za-z0-9]+(?=\\s+)' 
+
+#Instantiate the HashingVectorizer as hashing_vec using the TOKENS_ALPHANUMERIC pattern.
+# Instantiate the HashingVectorizer: hashing_vec
+hashing_vec = HashingVectorizer(token_pattern=TOKENS_ALPHANUMERIC)
+
+#Fit and transform hashing_vec using text_data. Save the result as hashed_text.
+# Fit and transform the Hashing Vectorizer
+hashed_text = hashing_vec.fit_transform(text_data)
+
+# Create DataFrame and print the head
+hashed_df = pd.DataFrame(hashed_text.data)
+print(hashed_df.head())
+
+              0
+    0 -0.160128
+    1  0.160128
+    2 -0.480384
+    3 -0.320256
+    4  0.160128
+
+#As you can see, some text is hashed to the same value, but as Peter mentioned in the video, this doesn't neccessarily hurt performance.
