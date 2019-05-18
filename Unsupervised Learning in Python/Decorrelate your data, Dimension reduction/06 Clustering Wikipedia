@@ -1,0 +1,119 @@
+#Clustering Wikipedia part I
+#You saw in the video that TruncatedSVD is able to perform PCA on sparse arrays in csr_matrix format, such as word-frequency arrays. Combine your knowledge of TruncatedSVD and k-means to cluster some popular pages from Wikipedia. In this exercise, build the pipeline. In the next exercise, you'll apply it to the word-frequency array of some Wikipedia articles.
+#Create a Pipeline object consisting of a TruncatedSVD followed by KMeans. (This time, we've precomputed the word-frequency matrix for you, so there's no need for a TfidfVectorizer).
+#The Wikipedia dataset you will be working with was obtained from here.
+#https://blog.lateral.io/2015/06/the-unknown-perils-of-mining-wikipedia/
+
+
+
+# Perform the necessary imports
+from sklearn.decomposition import TruncatedSVD
+from sklearn.cluster import KMeans
+from sklearn.pipeline import make_pipeline
+
+#Create a TruncatedSVD instance called svd with n_components=50.
+# Create a TruncatedSVD instance: svd
+svd = TruncatedSVD(n_components=50)
+
+#Create a KMeans instance called kmeans with n_clusters=6.
+# Create a KMeans instance: kmeans
+kmeans = KMeans(n_clusters=6)
+
+#Create a pipeline called pipeline consisting of svd and kmeans.
+# Create a pipeline: pipeline
+pipeline = make_pipeline(svd, kmeans)
+
+
+#Excellent! Now that you have set up your pipeline, you will use it in the next exercise to cluster the articles.
+
+
+
+#Clustering Wikipedia part II
+#It is now time to put your pipeline from the previous exercise to work! You are given an array articles of tf-idf word-frequencies of some popular Wikipedia articles, and a list titles of their titles. Use your pipeline to cluster the Wikipedia articles.
+#A solution to the previous exercise has been pre-loaded for you, so a Pipeline pipeline chaining TruncatedSVD with KMeans is available.
+
+
+
+# Import pandas
+import pandas as pd
+
+#Fit the pipeline to the word-frequency array articles.
+# Fit the pipeline to articles
+pipeline.fit(articles)
+
+#Predict the cluster labels.
+# Calculate the cluster labels: labels
+labels = pipeline.predict(articles)
+
+#Align the cluster labels with the list titles of article titles by creating a DataFrame df with labels and titles as columns. This has been done for you.
+# Create a DataFrame aligning labels and titles: df
+df = pd.DataFrame({'label': labels, 'article': titles})
+
+#Use the .sort_values() method of df to sort the DataFrame by the 'label' column, and print the result.
+# Display df sorted by cluster label
+print(df.sort_values('label'))
+
+#Fantastic! Take a look at the cluster labels and see if you can identify any patterns!
+
+
+                                              article  label
+    39                                  Franck Ribéry      0
+    37                                       Football      0
+    36              2014 FIFA World Cup qualification      0
+    35                Colombia national football team      0
+    34                             Zlatan Ibrahimović      0
+    33                                 Radamel Falcao      0
+    32                                   Arsenal F.C.      0
+    31                              Cristiano Ronaldo      0
+    30                  France national football team      0
+    38                                         Neymar      0
+    18  2010 United Nations Climate Change Conference      1
+    17  Greenhouse gas emissions by the United States      1
+    16                                        350.org      1
+    15                                 Kyoto Protocol      1
+    19  2007 United Nations Climate Change Conference      1
+    13                               Connie Hedegaard      1
+    12                                   Nigel Lawson      1
+    11       Nationally Appropriate Mitigation Action      1
+    10                                 Global warming      1
+    14                                 Climate change      1
+    40                                    Tonsillitis      2
+    42                                    Doxycycline      2
+    43                                       Leukemia      2
+    44                                           Gout      2
+    41                                    Hepatitis B      2
+    46                                     Prednisone      2
+    47                                          Fever      2
+    48                                     Gabapentin      2
+    49                                       Lymphoma      2
+    45                                    Hepatitis C      2
+    58                                         Sepsis      3
+    50                                   Chad Kroeger      3
+    51                                     Nate Ruess      3
+    52                                     The Wanted      3
+    53                                   Stevie Nicks      3
+    54                                 Arctic Monkeys      3
+    55                                  Black Sabbath      3
+    56                                       Skrillex      3
+    57                          Red Hot Chili Peppers      3
+    59                                    Adam Levine      3
+    29                               Jennifer Aniston      4
+    27                                 Dakota Fanning      4
+    26                                     Mila Kunis      4
+    25                                  Russell Crowe      4
+    24                                   Jessica Biel      4
+    23                           Catherine Zeta-Jones      4
+    22                              Denzel Washington      4
+    21                             Michael Fassbender      4
+    20                                 Angelina Jolie      4
+    28                                  Anne Hathaway      4
+    1                                  Alexa Internet      5
+    2                               Internet Explorer      5
+    3                                     HTTP cookie      5
+    4                                   Google Search      5
+    8                                         Firefox      5
+    6                     Hypertext Transfer Protocol      5
+    7                                   Social search      5
+    9                                        LinkedIn      5
+    5                                          Tumblr      5
+    0                                        HTTP 404      5
