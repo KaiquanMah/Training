@@ -1,0 +1,91 @@
+#part 1
+#Non-negative data
+#Which of the following 2-dimensional arrays are examples of non-negative data?
+
+#A tf-idf word-frequency array.
+#An array daily stock market price movements (up and down), where each row represents a company.
+#An array where rows are customers, columns are products and entries are 0 or 1, indicating whether a customer has purchased a product.
+
+#1 and 3
+#Well done! Stock prices can go down as well as up, so an array of daily stock market price movements is not an example of non-negative data.
+
+
+
+#part2
+#NMF applied to Wikipedia articles
+#In the video, you saw NMF applied to transform a toy word-frequency array. Now it's your turn to apply NMF, this time using the tf-idf word-frequency array of Wikipedia articles, given as a csr matrix articles. Here, fit the model and transform the articles. In the next exercise, you'll explore the result.
+
+#Import NMF from sklearn.decomposition.
+# Import NMF
+from sklearn.decomposition import NMF
+
+#Create an NMF instance called model with 6 components.
+# Create an NMF instance: model
+model = NMF(n_components=6)
+
+type(articles)
+#scipy.sparse.csr.csr_matrix
+
+#Fit the model to the word count data articles.
+# Fit the model to articles
+model.fit(articles)
+
+#Use the .transform() method of model to transform articles, and assign the result to nmf_features.
+# Transform the articles: nmf_features
+nmf_features = model.transform(articles)
+
+# Print the NMF features
+print(nmf_features)
+
+#Fantastic - these NMF features don't make much sense at this point, but you will explore them in the next exercise!
+
+
+
+#part 3
+#NMF features of the Wikipedia articles
+#Now you will explore the NMF features you created in the previous exercise. A solution to the previous exercise has been pre-loaded, so the array nmf_features is available. Also available is a list titles giving the title of each Wikipedia article.
+#When investigating the features, notice that for both actors, the NMF feature 3 has by far the highest value. This means that both articles are reconstructed using mainly the 3rd NMF component. In the next video, you'll see why: NMF components represent topics (for instance, acting!).
+
+
+#nmf_features
+#titles
+
+# Import pandas
+import pandas as pd
+
+#Create a DataFrame df from nmf_features using pd.DataFrame(). Set the index to titles using index=titles.
+# Create a pandas DataFrame: df
+df = pd.DataFrame(nmf_features, index=titles)
+
+#Use the .loc[] accessor of df to select the row with title 'Anne Hathaway', and print the result. These are the NMF features for the article about the actress Anne Hathaway.
+# Print the row for 'Anne Hathaway'
+print(df.loc['Anne Hathaway'])
+
+#Repeat the last step for 'Denzel Washington' (another actor).
+# Print the row for 'Denzel Washington'
+print(df.loc['Denzel Washington'])
+
+#Great work! Notice that for both actors, the NMF feature 3 has by far the highest value. This means that both articles are reconstructed using mainly the 3rd NMF component. In the next video, you'll see why: NMF components represent topics (for instance, acting!).
+
+
+
+
+#part 4
+#NMF reconstructs samples
+#In this exercise, you'll check your understanding of how NMF reconstructs samples from its components using the NMF feature values. On the right are the components of an NMF model. If the NMF feature values of a sample are [2, 1], then which of the following is most likely to represent the original sample? A pen and paper will help here! You have to apply the same technique Ben used in the video to reconstruct the sample [0.1203 0.1764 0.3195 0.141].
+
+#NMF Model Components
+[[ 1.   0.5  0. ]
+ [ 0.2  0.1  2.1]]
+
+#NMF Feature Values
+[2, 1]
+
+
+NMF Feature X NMF Model Components
+1x2  X  2x3 => 1x3
+reconstructed sample: [2+.2   1+.1    2.1] = [2.2   1.1   2.1]
+#closest original data: [2.2, 1.0, 2.0]
+
+
+
