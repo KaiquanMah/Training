@@ -1,0 +1,86 @@
+#part 1
+#The first principal component
+#The first principal component of the data is the direction in which the data varies the most. In this exercise, your job is to use PCA to find the first principal component of the length and width measurements of the grain samples, and represent it as an arrow on the scatter plot.
+#The array grains gives the length and width of the grain samples. PyPlot (plt) and PCA have already been imported for you.
+
+
+# Make a scatter plot of the untransformed points
+plt.scatter(grains[:,0], grains[:,1])
+
+# Create a PCA instance: model
+model = PCA()
+
+#Fit the model to the grains data
+# Fit model to points
+model.fit(grains)
+
+#Extract the coordinates of the mean of the data using the .mean_ attribute of model.
+# Get the mean of the grain samples: mean
+mean = model.mean_
+#array([ 3.25860476,  5.62853333])
+
+#Get the first principal component of model using the .components_[0,:] attribute.
+# Get the first principal component: first_pc
+first_pc = model.components_[0,:]
+#array([ 0.63910027,  0.76912343])
+
+#Plot the first principal component as an arrow on the scatter plot, using the plt.arrow() function. You have to specify the first two arguments - mean[0] and mean[1].
+# Plot first_pc as an arrow, starting at mean
+#plt.arrow(x-y coords i want to point to, x-y coords i want my arrow to start from, color, width of arrow)
+plt.arrow(mean[0], mean[1], first_pc[0], first_pc[1], color='red', width=0.01)
+
+# Keep axes on same scale
+plt.axis('equal')
+plt.show()
+
+
+
+#part 2
+#Variance of the PCA features
+#The fish dataset is 6-dimensional. But what is its intrinsic dimension? Make a plot of the variances of the PCA features to find out. As before, samples is a 2D array, where each row represents a fish. You'll need to standardize the features first.
+
+
+# Perform the necessary imports
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+import matplotlib.pyplot as plt
+
+# Create scaler: scaler
+scaler = StandardScaler()
+
+# Create a PCA instance: pca
+pca = PCA()
+
+#Use the make_pipeline() function to create a pipeline chaining scaler and pca.
+# Create pipeline: pipeline
+pipeline = make_pipeline(scaler, pca)
+
+#Use the .fit() method of pipeline to fit it to the fish samples samples.
+# Fit the pipeline to 'samples'
+pipeline.fit(samples)
+
+#Extract the number of components used using the .n_components_ attribute of pca. Place this inside a range() function and store the result as features.
+# Plot the explained variances
+features = range(pca.n_components_)
+#feature = range(0, 6)
+
+
+#Use the plt.bar() function to plot the explained variances, with features on the x-axis and pca.explained_variance_ on the y-axis.
+plt.bar(features, pca.explained_variance_)
+plt.xlabel('PCA feature')
+plt.ylabel('variance')
+plt.xticks(features)
+plt.show()
+
+
+#Great work! It looks like PCA features 0 and 1 have significant variance.
+
+
+
+
+#part 3
+#2 PCA features
+#Great job! Since PCA features 0 and 1 have significant variance, the intrinsic dimension of this dataset appears to be 2.
+
+
