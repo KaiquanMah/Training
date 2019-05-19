@@ -1,0 +1,150 @@
+#Recommend musical artists part I
+#In this exercise and the next, you'll use what you've learned about NMF to recommend popular music artists! You are given a sparse array artists whose rows correspond to artists and whose column correspond to users. The entries give the number of times each artist was listened to by each user.
+#In this exercise, build a pipeline and transform the array into normalized NMF features. The first step in the pipeline, MaxAbsScaler, transforms the data so that all users have the same influence on the model, regardless of how many different artists they've listened to. In the next exercise, you'll use the resulting normalized NMF features for recommendation!
+#This data is part of a larger dataset available here.
+
+
+# Perform the necessary imports
+from sklearn.decomposition import NMF
+from sklearn.preprocessing import Normalizer, MaxAbsScaler
+from sklearn.pipeline import make_pipeline
+
+# Create a MaxAbsScaler: scaler
+scaler = MaxAbsScaler()
+
+#Create an NMF instance with 20 components called nmf.
+# Create an NMF model: nmf
+nmf = NMF(n_components=20)
+
+# Create a Normalizer: normalizer
+normalizer = Normalizer()
+
+#Create a pipeline called pipeline that chains together scaler, nmf, and normalizer.
+# Create a pipeline: pipeline
+pipeline = make_pipeline(scaler, nmf, normalizer)
+
+# Apply fit_transform to artists: norm_features
+norm_features = pipeline.fit_transform(artists)
+
+#Excellent work - now that you've computed the normalized NMF features, you'll use them in the next exercise to recommend musical artists!
+
+
+
+#part 2
+#Recommend musical artists part II
+#Suppose you were a big fan of Bruce Springsteen - which other musicial artists might you like? Use your NMF features from the previous exercise and the cosine similarity to find similar musical artists. A solution to the previous exercise has been run, so norm_features is an array containing the normalized NMF features as rows. The names of the musical artists are available as the list artist_names.
+
+
+# Import pandas
+import pandas as pd
+
+#Create a DataFrame df from norm_features, using artist_names as an index.
+# Create a DataFrame: df
+df = pd.DataFrame(norm_features, index=artist_names)
+
+#Use the .loc[] accessor of df to select the row of 'Bruce Springsteen'. Assign the result to artist.
+# Select row of 'Bruce Springsteen': artist
+artist = df.loc['Bruce Springsteen']
+
+0     0.494077
+1     0.000000
+2     0.000000
+3     0.000000
+4     0.000000
+5     0.000000
+6     0.000000
+7     0.000000
+8     0.056568
+9     0.000000
+10    0.000000
+11    0.137490
+12    0.000000
+13    0.000000
+14    0.000000
+15    0.856612
+16    0.000000
+17    0.000000
+18    0.000000
+19    0.000000
+Name: Bruce Springsteen, dtype: float64
+
+
+#Apply the .dot() method of df to artist to calculate the dot product of every row with artist. Save the result as similarities.
+# Compute cosine similarities: similarities
+similarities = df.dot(artist)
+
+Massive Attack              0.000000
+Sublime                     0.000000
+Beastie Boys                0.137490
+Neil Young                  0.955685
+Dead Kennedys               0.066747
+Orbital                     0.028396
+Miles Davis                 0.657127
+Leonard Cohen               0.860463
+Van Morrison                0.869616
+NOFX                        0.000000
+Rancid                      0.006915
+Lamb                        0.000000
+Korn                        0.000000
+Dropkick Murphys            0.081853
+Bob Dylan                   0.856590
+Eminem                      0.002388
+Nirvana                     0.000132
+Van Halen                   0.000000
+Damien Rice                 0.268724
+Elvis Costello              0.084863
+Everclear                   0.038946
+Jimi Hendrix                0.093564
+PJ Harvey                   0.162445
+Red Hot Chili Peppers       0.000000
+Ryan Adams                  0.794581
+Soundgarden                 0.000000
+The White Stripes           0.041925
+Madonna                     0.207015
+Eric Clapton                0.623172
+Bob Marley                  0.124671
+                              ...   
+Sparta                      0.217786
+Interpol                    0.000258
+The Crystal Method          0.000000
+The Beach Boys              0.769633
+Goldfrapp                   0.218246
+Bob Marley & the Wailers    0.061128
+Kylie Minogue               0.292840
+The Blood Brothers          0.046007
+Mirah                       0.583438
+Ludacris                    0.007107
+Snow Patrol                 0.145578
+The Mars Volta              0.000000
+Yeah Yeah Yeahs             0.055688
+Iced Earth                  0.000000
+Fiona Apple                 0.068928
+Rilo Kiley                  0.190904
+Rufus Wainwright            0.222101
+Flogging Molly              0.000000
+Hot Hot Heat                0.095539
+Dredg                       0.120809
+Switchfoot                  0.039224
+Tegan and Sara              0.056422
+Rage Against the Machine    0.000000
+Keane                       0.053020
+Jet                         0.002735
+Franz Ferdinand             0.000546
+The Postal Service          0.000707
+The Dresden Dolls           0.021818
+The Killers                 0.057709
+Death From Above 1979       0.007591
+dtype: float64
+
+
+
+#Print the result of the .nlargest() method of similarities to display the artists most similar to 'Bruce Springsteen'.
+# Display those with highest cosine similarity
+print(similarities.nlargest())
+
+Bruce Springsteen    1.000000
+Neil Young           0.955685
+Van Morrison         0.869616
+Leonard Cohen        0.860463
+Bob Dylan            0.856590
+dtype: float64
