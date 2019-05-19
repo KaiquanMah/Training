@@ -1,0 +1,133 @@
+#part 1
+#Specifying a weight on edges
+#Weights can be added to edges in a graph, typically indicating the "strength" of an edge. In NetworkX, the weight is indicated by the 'weight' key in the metadata dictionary.
+#Before attempting the exercise, use the IPython Shell to access the dictionary metadata of T and explore it, for instance by running the commands T.edges[1, 10] and then T.edges[10, 1]. Note how there's only one field, and now you're going to add another field, called 'weight'.
+
+T.edges[1, 10]
+Out[1]: {'date': datetime.date(2012, 9, 8)}
+
+T.edges[10, 1]
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+    T.edges[10, 1]
+  File "<stdin>", line 927, in __getitem__
+    return self._adjdict[u][v]
+KeyError: 1
+
+T.edges(data=True)
+#OutEdgeDataView([(1, 3, {'date': datetime.date(2012, 11, 16)}), (1, 4, {'date': datetime.date(2013, 6, 7)}), 
+(1, 5, {'date': datetime.date(2009, 7, 27)}), (1, 6, {'date': datetime.date(2014, 12, 18)}), ... , 
+(23324, 23335, {'date': datetime.date(2012, 2, 1)}), (23324, 23336, {'date': datetime.date(2010, 9, 20)})])
+
+
+
+#Set the 'weight' attribute of the edge between node 1 and 10 of T to be equal to 2. Refer to the following template to set an attribute of an edge: network_name.edges[node1, node2]['attribute'] = value. Here, the 'attribute' is 'weight'.
+# Set the weight of the edge
+T[1][10]['weight'] = 2
+
+#Set the weight of every edge involving node 293 to be equal to 1.1. To do this:
+#Using a for loop, iterate over all the edges of T, including the metadata.
+#If 293 is involved in the list of nodes [u, v]:
+#Set the weight of the edge between u and v to be 1.1.
+
+# Iterate over all the edges (with metadata)
+for u, v, d in T.edges(data=True):
+
+    # Check if node 293 is involved
+    if 293 in [u, v]:
+
+        # Set the weight to 1.1
+        T[u][v]['weight'] = 1.1
+
+#Excellent job! Being able to iterate over graphs like this to explore and alter their metadata is an important skill.
+
+
+
+#part 2
+#Checking whether there are self-loops in the graph
+#As Eric discussed, NetworkX also allows edges that begin and end on the same node; while this would be non-intuitive for a social network graph, it is useful to model data such as trip networks, in which individuals begin at one location and end in another.
+#It is useful to check for this before proceeding with further analyses, and NetworkX graphs provide a method for this purpose: .number_of_selfloops().
+#In this exercise as well as later ones, you'll find the assert statement useful. An assert-ions checks whether the statement placed after it evaluates to True, otherwise it will throw an AssertionError.
+#To begin, use the .number_of_selfloops() method on T in the IPython Shell to get the number of edges that begin and end on the same node. A number of self-loops have been synthetically added to the graph. Your job in this exercise is to write a function that returns these edges.
+
+
+#Define a function called find_selfloop_nodes() which takes one argument: G.
+#Using a for loop, iterate over all the edges in G (excluding the metadata).
+#If node u is equal to node v:
+#Append u to the list nodes_in_selfloops.
+#Return the list nodes_in_selfloops.
+
+# Define find_selfloop_nodes()
+def find_selfloop_nodes(G):
+    """
+    Finds all nodes that have self-loops in the graph G.
+    """
+    nodes_in_selfloops = []
+
+    # Iterate over all the edges of G
+    for u, v in G.edges():
+
+    # Check if node u and node v are the same
+        if u == v:
+
+            # Append node u to nodes_in_selfloops
+            nodes_in_selfloops.append(u)
+
+    return nodes_in_selfloops
+
+
+
+find_selfloop_nodes(T)
+Out[7]: 
+[535,
+ 644,
+ 1007,
+ 1802,
+ 2038,
+ 2313,
+ 2498,
+ 2950,
+ 3436,
+ 4572,
+ 5952,
+ 6739,
+ 7077,
+ 7323,
+ 7394,
+ 7693,
+ 8477,
+ 9680,
+ 10315,
+ 10356,
+ 11078,
+ 11327,
+ 11942,
+ 14436,
+ 15162,
+ 15548,
+ 15620,
+ 16310,
+ 16434,
+ 16494,
+ 17128,
+ 17429,
+ 17754,
+ 18186,
+ 18421,
+ 19416,
+ 20784,
+ 20807,
+ 21313,
+ 22103,
+ 22208,
+ 22465]
+
+
+# Check whether number of self loops equals the number of nodes in self loops
+assert T.number_of_selfloops() == len(find_selfloop_nodes(T))
+
+#no asserterror message, therefore the assertion was true
+#Great work! There are 42 nodes in T that have self-loops.
+
+
+
