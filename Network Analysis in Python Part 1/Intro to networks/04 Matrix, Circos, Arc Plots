@@ -1,0 +1,107 @@
+# part 1
+#Visualizing using Matrix plots
+#It is time to try your first "fancy" graph visualization method: a matrix plot. To do this, nxviz provides a MatrixPlot object.
+#nxviz is a package for visualizing graphs in a rational fashion. Under the hood, the MatrixPlot utilizes nx.to_numpy_matrix(G), which returns the matrix form of the graph. Here, each node is one column and one row, and an edge between the two nodes is indicated by the value 1. In doing so, however, only the weight metadata is preserved; all other metadata is lost, as you'll verify using an assert statement.
+#A corresponding nx.from_numpy_matrix(A) allows one to quickly create a graph from a NumPy matrix. The default graph type is Graph(); if you want to make it a DiGraph(), that has to be specified using the create_using keyword argument, e.g. (nx.from_numpy_matrix(A, create_using=nx.DiGraph)).
+#One final note, matplotlib.pyplot and networkx have already been imported as plt and nx, respectively, and the graph T has been pre-loaded. For simplicity and speed, we have sub-sampled only 100 edges from the network.
+
+# Import nxviz
+import nxviz as nv
+
+#Plot the graph T as a matrix plot. To do this:
+#Create the MatrixPlot object called m using the nv.MatrixPlot() function with T passed in as an argument.
+#Draw the m to the screen using the .draw() method.
+#Display the plot using plt.show().
+
+# Create the MatrixPlot object: m
+m = nv.MatrixPlot(T)
+
+# Draw m to the screen
+m.draw()
+
+# Display the plot
+plt.show()
+
+
+
+#Convert the graph to a matrix format, and then convert the graph to back to the NetworkX form from the matrix as a directed graph.
+# Convert T to a matrix format: A
+A = nx.to_numpy_matrix(T)
+
+Out[4]: 
+matrix([[ 0.,  0.,  0., ...,  0.,  0.,  0.],
+        [ 0.,  0.,  1., ...,  0.,  0.,  0.],
+        [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+        ..., 
+        [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+        [ 0.,  0.,  0., ...,  0.,  0.,  1.],
+        [ 0.,  0.,  0., ...,  0.,  0.,  0.]])
+
+
+
+# Convert A back to the NetworkX form as a directed graph: T_conv
+T_conv = nx.from_numpy_matrix(A, create_using=nx.DiGraph())
+
+# Check that the `category` metadata field is lost from each node
+for n, d in T_conv.nodes(data=True):
+    assert 'category' not in d.keys()
+    
+
+T_conv.nodes(data=True)
+NodeDataView({0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}, 8: {}, 9: {}, 10: {}, 11: {}, 12: {}, 13: {}, 14: {}, 15: {}, 16: {}, 17: {}, 18: {}, 19: {}, 20: {}, 21: {}, 22: {}, 23: {}, 24: {}, 25: {}, 26: {}, 27: {}, 28: {}, 29: {}, 30: {}, 31: {}, 32: {}, 33: {}, 34: {}, 35: {}, 36: {}, 37: {}, 38: {}, 39: {}, 40: {}, 41: {}, 42: {}, 43: {}, 44: {}, 45: {}, 46: {}, 47: {}, 48: {}, 49: {}, 50: {}, 51: {}, 52: {}, 53: {}, 54: {}, 55: {}, 56: {}, 57: {}, 58: {}, 59: {}, 60: {}, 61: {}, 62: {}, 63: {}, 64: {}, 65: {}, 66: {}, 67: {}, 68: {}, 69: {}, 70: {}, 71: {}, 72: {}, 73: {}, 74: {}, 75: {}, 76: {}, 77: {}, 78: {}, 79: {}, 80: {}, 81: {}, 82: {}, 83: {}, 84: {}, 85: {}, 86: {}, 87: {}, 88: {}, 89: {}, 90: {}, 91: {}, 92: {}, 93: {}, 94: {}, 95: {}, 96: {}, 97: {}, 98: {}, 99: {}, 100: {}, 101: {}, 102: {}, 103: {}, 104: {}, 105: {}, 106: {}, 107: {}, 108: {}, 109: {}, 110: {}, 111: {}, 112: {}, 113: {}, 114: {}, 115: {}, 116: {}, 117: {}, 118: {}, 119: {}, 120: {}, 121: {}, 122: {}, 123: {}, 124: {}, 125: {}, 126: {}, 127: {}, 128: {}, 129: {}, 130: {}, 131: {}, 132: {}, 133: {}, 134: {}, 135: {}, 136: {}, 137: {}, 138: {}, 139: {}, 140: {}, 141: {}, 142: {}, 143: {}, 144: {}, 145: {}, 146: {}, 147: {}, 148: {}, 149: {}, 150: {}, 151: {}, 152: {}, 153: {}, 154: {}, 155: {}, 156: {}, 157: {}, 158: {}, 159: {}, 160: {}, 161: {}, 162: {}, 163: {}, 164: {}, 165: {}, 166: {}, 167: {}, 168: {}, 169: {}, 170: {}, 171: {}, 172: {}, 173: {}, 174: {}, 175: {}, 176: {}, 177: {}, 178: {}, 179: {}, 180: {}, 181: {}, 182: {}, 183: {}, 184: {}, 185: {}, 186: {}, 187: {}, 188: {}, 189: {}})
+
+
+
+#part 2
+#Visualizing using Circos plots
+#Circos plots are a rational, non-cluttered way of visualizing graph data, in which nodes are ordered around the circumference in some fashion, and the edges are drawn within the circle that results, giving a beautiful as well as informative visualization about the structure of the network.
+#In this exercise, you'll continue getting practice with the nxviz API, this time with the CircosPlot object. matplotlib.pyplot has been imported for you as plt.
+
+# Import necessary modules
+import matplotlib.pyplot as plt
+from nxviz import CircosPlot
+
+#Plot the Twitter network T as a Circos plot without any styling. Use the CircosPlot() function to do this. Don't forget to draw it to the screen using .draw() and then display it using plt.show().
+# Create the CircosPlot object: c
+c = CircosPlot(T)
+
+# Draw c to the screen
+c.draw()
+
+# Display the plot
+plt.show()
+
+
+
+#part 3
+#Visualizing using Arc plots
+#Following on what you've learned about the nxviz API, now try making an ArcPlot of the network. Two keyword arguments that you will try here are node_order='keyX' and node_color='keyX', in which you specify a key in the node metadata dictionary to color and order the nodes by.
+#matplotlib.pyplot has been imported for you as plt.
+
+
+# Import necessary modules
+import matplotlib.pyplot as plt
+from nxviz import ArcPlot
+
+#Create an un-customized ArcPlot of T. To do this, use the ArcPlot() function with just T as the argument.
+# Create the un-customized ArcPlot object: a
+a = ArcPlot(T)
+
+# Draw a to the screen
+a.draw()
+
+# Display the plot
+plt.show()
+
+#Create another ArcPlot of T in which the nodes are ordered and colored by the 'category' keyword. You'll have to specify the node_order and node_color parameters to do this. For both plots, be sure to draw them to the screen and display them with plt.show().
+# Create the customized ArcPlot object: a2
+a2 = ArcPlot(T, node_order='category', node_color='category')
+
+# Draw a2 to the screen
+a2.draw()
+
+# Display the plot
+plt.show()
+
+#Excellent job! Notice the node coloring in the customized ArcPlot compared to the uncustomized version. In the customized ArcPlot, the nodes in each of the categories - 'I', 'D', and 'P' - have their own color. If it's difficult to see on your screen, you can expand the plot into a new window by clicking on the pop-out icon on the top-left next to 'Plots'.
+
