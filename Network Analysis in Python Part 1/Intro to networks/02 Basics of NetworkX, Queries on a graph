@@ -1,0 +1,83 @@
+#part 1
+#Basics of NetworkX API, using Twitter network
+#To get you up and running with the NetworkX API, we will run through some basic functions that let you query a Twitter network that has been pre-loaded for you and is available in the IPython Shell as T. The Twitter network comes from KONECT, and shows a snapshot of a subset of Twitter users. It is an anonymized Twitter network with metadata.
+#http://konect.uni-koblenz.de/
+#You're now going to use the NetworkX API to explore some basic properties of the network, and are encouraged to experiment with the data in the IPython Shell.
+#Wait for the IPython shell to indicate that the graph that has been preloaded under the variable name T (representing a Twitter network), and then answer the following question:
+#What is the size of the graph T, the type of T.nodes(), and the data structure of the third element of the last edge listed in T.edges(data=True)? The len() and type() functions will be useful here. To access the last entry of T.edges(data=True), you can use list(T.edges(data=True))[-1].
+
+T
+<networkx.classes.digraph.DiGraph at 0x7fbac8b35d30>
+
+len(T)
+23369
+
+type(T.nodes())
+networkx.classes.reportviews.NodeView
+
+list(T.edges(data=True))[-1]
+(23324, 23336, {'date': datetime.date(2010, 9, 20)})
+
+
+#23369, networkx.NodeView, dict
+#Now that you've explored the graph quantitatively, you'll explore NetworkX's drawing functionalities in the next exercise.
+
+
+
+#part 2
+#Basic drawing of a network using NetworkX
+#NetworkX provides some basic drawing functionality that works for small graphs. We have selected a subset of nodes from the graph for you to practice using NetworkX's drawing facilities. It has been pre-loaded as T_sub.
+
+
+# Import necessary modules
+import matplotlib.pyplot as plt
+import networkx as nx
+
+#Draw T_sub to the screen by using the nx.draw() function, and don't forget to also use plt.show() to display it.
+# Draw the graph to screen
+nx.draw(T_sub)
+plt.show()
+
+#Great work! Next, you'll learn how to perform basic queries on a graph.
+
+
+
+#part 3
+#Queries on a graph
+#Now that you know some basic properties of the graph and have practiced using NetworkX's drawing facilities to visualize components of it, it's time to explore how you can query it for nodes and edges. Specifically, you're going to look for "nodes of interest" and "edges of interest". To achieve this, you'll make use of the .nodes() and .edges() methods that Eric went over in the video. The .nodes() method returns a list of nodes, while the .edges() method returns a list of tuples, in which each tuple shows the nodes that are present on that edge. Recall that passing in the keyword argument data=True in these methods retrieves the corresponding metadata associated with the nodes and edges as well.
+#You'll write list comprehensions to effectively build these queries in one line. For a refresher on list comprehensions, refer to Part 2 of DataCamp's Python Data Science Toolbox course. Here's the recipe for a list comprehension:
+#[ output expression for iterator variable in iterable if predicate expression ].
+#You have to fill in the _iterable_ and the _predicate expression_. Feel free to prototype your answer by exploring the graph in the IPython Shell before submitting your solution.
+
+
+
+#Use a list comprehension to get a list of nodes from the graph T that have the 'occupation' label of 'scientist'.
+#The output expression n has been specified for you, along with the iterator variables n and d. Your task is to fill in the iterable and the conditional expression.
+#Use the .nodes() method of T access its nodes, and be sure to specify data=True to obtain the metadata for the nodes.
+#The iterator variable d is a dictionary. The key of interest here is 'occupation' and value of interest is 'scientist'.
+
+# Use a list comprehension to get the nodes of interest: noi
+noi = [n for n, d in T.nodes(data=True) if d['occupation'] == 'scientist']
+
+T.nodes(data=True)
+NodeDataView({1: {'category': 'I', 'occupation': 'politician'}, 3: {'category': 'D', 'occupation': 'celebrity'}, ... , 
+23369: {'category': 'P', 'occupation': 'celebrity'}, 23370: {'category': 'P', 'occupation': 'politician'}})
+
+
+
+#Use a list comprehension to get a list of edges from the graph T that were formed for at least 6 years, i.e., from before 1 Jan 2010.
+#Your task once again is to fill in the iterable and conditional expression.
+#Use the .edges() method of T to access its edges. Be sure to obtain the metadata for the edges as well.
+#The dates are stored as datetime.date objects in the metadata dictionary d, under the key 'date'. To access the date 1 Jan 2009, for example, the dictionary value would be date(2009, 1, 1).
+
+# Use a list comprehension to get the edges of interest: eoi
+eoi = [(u, v) for u, v, d in T.edges(data=True) if d['date'] < date(2010,1,1)]
+
+T.edges(data=True)
+#OutEdgeDataView([(1, 3, {'date': datetime.date(2012, 11, 16)}), (1, 4, {'date': datetime.date(2013, 6, 7)}), 
+(1, 5, {'date': datetime.date(2009, 7, 27)}), (1, 6, {'date': datetime.date(2014, 12, 18)}), ... , 
+(23324, 23334, {'date': datetime.date(2008, 11, 13)}), (23324, 23335, {'date': datetime.date(2012, 2, 1)}), 
+(23324, 23336, {'date': datetime.date(2010, 9, 20)})])
+
+#Well done! Now that you know how to perform basic queries on a graph, you're ready to learn about different types of graphs.
+
