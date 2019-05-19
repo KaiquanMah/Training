@@ -1,0 +1,99 @@
+#part 1
+#Explore the LED digits dataset
+#In the following exercises, you'll use NMF to decompose grayscale images into their commonly occurring patterns. Firstly, explore the image dataset and see how it is encoded as an array. You are given 100 images as a 2D array samples, where each row represents a single 13x8 image. The images in your dataset are pictures of a LED digital display.
+
+# Import pyplot
+from matplotlib import pyplot as plt
+
+#Select row 0 of samples and assign the result to digit. For example, to select column 2 of an array a, you could use a[:,2]. Remember that since samples is a NumPy array, you can't use the .loc[] or iloc[] accessors to select specific rows or columns.
+# Select the 0th row: digit
+digit = samples[0,:]
+
+# Print digit. Notice that it is a 1D array of 0s and 1s.
+print(digit)
+
+#Use the .reshape() method of digit to get a 2D array with shape (13, 8). Assign the result to bitmap.
+# Reshape digit to a 13x8 array: bitmap
+bitmap = digit.reshape(13,8)
+
+# Print bitmap
+print(bitmap)
+
+# Use plt.imshow to display bitmap
+plt.imshow(bitmap, cmap='gray', interpolation='nearest')
+plt.colorbar()
+plt.show()
+
+#Excellent job! You'll explore this dataset further in the next exercise and see for yourself how NMF can learn the parts of images.
+
+
+
+#part 2
+#NMF learns the parts of images
+#Now use what you've learned about NMF to decompose the digits dataset. You are again given the digit images as a 2D array samples. This time, you are also provided with a function show_as_image() that displays the image encoded by any 1D array:
+
+def show_as_image(sample):
+    bitmap = sample.reshape((13, 8))
+    plt.figure()
+    plt.imshow(bitmap, cmap='gray', interpolation='nearest')
+    plt.colorbar()
+    plt.show()
+#After you are done, take a moment to look through the plots and notice how NMF has expressed the digit as a sum of the components!
+
+
+
+# Import NMF
+from sklearn.decomposition import NMF
+
+#Create an NMF instance called model with 7 components. (7 is the number of cells in an LED display).
+# Create an NMF model: model
+model = NMF(n_components=7)
+
+#Apply the .fit_transform() method of model to samples. Assign the result to features.
+# Apply fit_transform to samples: features
+features = model.fit_transform(samples)
+
+#To each component of the model (accessed via model.components_), apply the show_as_image() function to that component inside the loop.
+# Call show_as_image on each component
+for component in model.components_:
+    show_as_image(component)
+
+# Assign the 0th row of features: digit_features
+digit_features = features[0,:]
+
+# Print digit_features
+print(digit_features)
+
+    [  4.76823559e-01   0.00000000e+00   0.00000000e+00   5.90605054e-01
+       4.81559442e-01   0.00000000e+00   7.37540618e-16]
+       
+#Take a moment to look through the plots and notice how NMF has expressed the digit as a sum of the components!
+
+
+
+#part 3
+#PCA doesn't learn parts
+#Unlike NMF, PCA doesn't learn the parts of things. Its components do not correspond to topics (in the case of documents) or to parts of images, when trained on images. Verify this for yourself by inspecting the components of a PCA model fit to the dataset of LED digit images from the previous exercise. The images are available as a 2D array samples. Also available is a modified version of the show_as_image() function which colors a pixel red if the value is negative.
+#After submitting the answer, notice that the components of PCA do not represent meaningful parts of images of LED digits!
+
+
+# Import PCA
+from sklearn.decomposition import PCA
+
+#Create a PCA instance called model with 7 components.
+# Create a PCA instance: model
+model = PCA(n_components=7)
+
+#Apply the .fit_transform() method of model to samples. Assign the result to features.
+# Apply fit_transform to samples: features
+features = model.fit_transform(samples)
+
+#To each component of the model (accessed via model.components_), apply the show_as_image() function to that component inside the loop.
+# Call show_as_image on each component
+for component in model.components_:
+    show_as_image(component)
+    
+#Great work! Notice that the components of PCA do not represent meaningful parts of images of LED digits!
+
+
+
