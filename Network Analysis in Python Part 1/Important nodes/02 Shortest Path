@@ -1,0 +1,110 @@
+# part 1
+#Shortest Path I - breadth first search algorithm
+#You can leverage what you know about finding neighbors to try finding paths in a network. One algorithm for path-finding between two nodes is the "breadth-first search" (BFS) algorithm. In a BFS algorithm, you start from a particular node and iteratively search through its neighbors and neighbors' neighbors until you find the destination node.
+#Pathfinding algorithms are important because they provide another way of assessing node importance; you'll see this in a later exercise.
+#In this set of 3 exercises, you're going to build up slowly to get to the final BFS algorithm. The problem has been broken into 3 parts that, if you complete in succession, will get you to a first pass implementation of the BFS algorithm.
+
+#Create a function called path_exists() that has 3 parameters - G, node1, and node2 - and returns whether or not a path exists between the two nodes.
+# Define path_exists()
+def path_exists(G, node1, node2):
+    """
+    This function checks whether a path exists between two nodes (node1, node2) in graph G.
+    """
+    visited_nodes = set()
+
+    #Initialize the queue of cells to visit with the first node, node1. queue should be a list.
+    # Initialize the queue of cells to visit with the first node: queue
+    queue = [node1]
+
+    # Iterate over the nodes in the queue
+    for node in queue:
+
+        #Get the neighbors of the node using the .neighbors() method of the graph G.
+        # Get neighbors of the node
+        neighbors = G.neighbors(node)
+
+        # Check to see if the destination node is in the set of neighbors
+        if node2 in neighbors:
+            print('Path exists between nodes {0} and {1}'.format(node1, node2))
+            return True
+            break
+
+#Great! In the next exercise, you'll extend this function by including the condition where the destination node is not present in the neighbors.
+
+
+
+
+# part 2
+#Shortest Path II
+#Now that you've got the code for checking whether the destination node is present in neighbors, next up, you're going to extend the same function to write the code for the condition where the destination node is not present in the neighbors.
+#All the code you need to write is in the else condition; that is, if node2 is not in neighbors.
+
+
+
+def path_exists(G, node1, node2):
+    """
+    This function checks whether a path exists between two nodes (node1, node2) in graph G.
+    """
+    visited_nodes = set()
+    queue = [node1]
+
+    for node in queue:
+        neighbors = G.neighbors(node)
+        if node2 in neighbors:
+            print('Path exists between nodes {0} and {1}'.format(node1, node2))
+            return True
+        else:
+            #Using the .add() method, add the current node node to the set visited_nodes to keep track of what nodes have already been visited.
+            # Add current node to visited nodes
+            visited_nodes.add(node)
+
+            #Add the neighbors of the current node node that have not yet been visited to queue. To do this, you'll need to use the .extend() method of queue together with a list comprehension. The .extend() method appends all the items in a given list.
+            #The output expression and iterator variable of the list comprehension are both n. The iterable is the list neighbors, and the conditional is if n is not in the visited nodes.
+
+            # Add neighbors of current node that have not yet been visited
+            # which will be in the queue to be visited later
+            queue.extend([n for n in neighbors if n not in visited_nodes])
+
+
+
+#Excellent work, you're almost there! To complete the function, you have to write code for the condition in which there is no path between two nodes.
+
+
+
+
+# part 3
+#Shortest Path III
+#This is the final exercise of this trio! You're now going to complete the problem by writing the code that returns False if there's no path between two nodes.
+
+
+def path_exists(G, node1, node2):
+    """
+    This function checks whether a path exists between two nodes (node1, node2) in graph G.
+    """
+    visited_nodes = set()
+    queue = [node1]
+
+    for node in queue:
+        neighbors = G.neighbors(node)
+        if node2 in neighbors:
+            print('Path exists between nodes {0} and {1}'.format(node1, node2))
+            return True
+            break
+
+        else:
+            visited_nodes.add(node)
+            queue.extend([n for n in neighbors if n not in visited_nodes])
+        
+        #when there is no neighboring node left to explore, the above IF-ELSE statement executes the ELSE segment.
+        # since there is no more neighboring node left, there is no node to add to the queue
+        # we can check the previous element of the queue
+        # Check to see if the final element of the queue has been reached
+        if node == queue[-1]:
+            print('Path does not exist between nodes {0} and {1}'.format(node1, node2))
+
+            # Place the appropriate return statement
+            return False
+            
+            
+#Fantastic! You've just written an implementation of the BFS algorithm!
+
