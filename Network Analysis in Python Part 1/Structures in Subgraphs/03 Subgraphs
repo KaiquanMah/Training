@@ -1,0 +1,96 @@
+# part 1
+# Subgraphs I
+#There may be times when you just want to analyze a subset of nodes in a network. To do so, you can copy them out into another graph object using G.subgraph(nodes), which returns a new graph object (of the same type as the original graph) that is comprised of the iterable of nodes that was passed in.
+#matplotlib.pyplot has been imported for you as plt.
+
+nodes_of_interest = [29, 38, 42]
+
+
+
+#Write a function get_nodes_and_nbrs(G, nodes_of_interest) that extracts the subgraph from graph G comprised of the nodes_of_interest and their neighbors.
+#In the first for loop, iterate over nodes_of_interest and append the current node n to nodes_to_draw.
+#In the second for loop, iterate over the neighbors of n, and append all the neighbors nbr to nodes_to_draw.
+# Define get_nodes_and_nbrs()
+def get_nodes_and_nbrs(G, nodes_of_interest):
+    """
+    Returns a subgraph of the graph `G` with only the `nodes_of_interest` and their neighbors.
+    """
+    nodes_to_draw = []
+
+    # Iterate over the nodes of interest
+    for n in nodes_of_interest:
+
+        # Append the nodes of interest to nodes_to_draw
+        nodes_to_draw.append(n)
+
+        # Iterate over all the neighbors of node n
+        for nbr in G.neighbors(n):
+
+            # Append the neighbors of n to nodes_to_draw
+            nodes_to_draw.append(nbr)
+
+    return G.subgraph(nodes_to_draw)
+
+
+#Great work! The subgraph consisting of the nodes of interest and their neighbors has 7 nodes.
+
+
+
+#Use the function to extract the subgraph from T comprised of nodes 29, 38, and 42 (contained in the pre-defined list nodes_of_interest) and their neighbors. Save the result as T_draw.
+# Extract the subgraph with the nodes of interest: T_draw
+T_draw = get_nodes_and_nbrs(T, nodes_of_interest)
+
+# Draw the subgraph T_draw to the screen
+nx.draw(T_draw)
+plt.show()
+
+
+# part 2
+# Subgraphs II
+#In the previous exercise, we gave you a list of nodes whose neighbors we asked you to extract.
+#Let's try one more exercise in which you extract nodes that have a particular metadata property and their neighbors. This should hark back to what you've learned about using list comprehensions to find nodes. The exercise will also build your capacity to compose functions that you've already written before.
+
+
+
+#Using a list comprehension, extract nodes that have the metadata 'occupation' as 'celebrity' alongside their neighbors:
+#The output expression of the list comprehension is n, and there are two iterator variables: n and d. The iterable is the list of nodes of T (including the metadata, which you can specify using data=True) and the conditional expression is if the 'occupation' key of the metadata dictionary d equals 'celebrity'.
+# Extract the nodes of interest: nodes
+nodes = [n for n, d in T.nodes(data=True) if d['occupation'] == 'celebrity']
+#[3, 8, 10, 11, 12, 14, 18, 21, 25, 26, 28, 29, 34, 38, 39, 40, 41, 43, 47, 48]
+
+
+T.nodes(data=True)
+NodeDataView({1: {'category': 'I', 'occupation': 'politician'}, 3: {'category': 'D', 'occupation': 'celebrity'}, 4: {'category': 'I', 'occupation': 'politician'}, 5: {'category': 'I', 'occupation': 'scientist'}, 
+...,
+48: {'category': 'P', 'occupation': 'celebrity'}, 49: {'category': 'P', 'occupation': 'politician'}})
+
+
+
+# Create the set of nodes: nodeset
+nodeset = set(nodes)
+#{3, 8, 10, 11, 12, 14, 18, 21, 25, 26, 28, 29, 34, 38, 39, 40, 41, 43, 47, 48}
+
+
+
+
+#Place them in a new subgraph called T_sub. To do this:
+#Iterate over the nodes, compute the neighbors of each node, and add them to the set of nodes nodeset by using the .union() method.
+#Use nodeset along with the T.subgraph() method to calculate T_sub.
+
+# Iterate over nodes
+for n in nodes:
+
+    # Compute the neighbors of n: nbrs
+    nbrs = T.neighbors(n)
+
+    # Compute the union of nodeset and nbrs: nodeset
+    nodeset = nodeset.union(nbrs)
+
+# Compute the subgraph using nodeset: T_sub
+T_sub = T.subgraph(nodeset)
+
+# Draw T_sub to the screen
+nx.draw(T_sub)
+plt.show()
+
+
