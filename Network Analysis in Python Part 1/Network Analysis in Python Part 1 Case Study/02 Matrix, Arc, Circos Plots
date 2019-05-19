@@ -1,0 +1,94 @@
+# part 1
+#MatrixPlot
+#Let's now practice making some visualizations. The first one will be the MatrixPlot. In a MatrixPlot, the matrix is the representation of the edges.
+
+# Import necessary modules
+from nxviz import MatrixPlot
+import matplotlib.pyplot as plt
+
+#First, calculate the largest connected component subgraph by using the nx.connected_component_subgraphs(G) inside the provided sorted() function. Python's built-in sorted() function takes an iterable and returns a sorted list (in ascending order, by default). Therefore, to access the largest connected component subgraph, the statement is sliced with [-1].
+#https://docs.python.org/2/library/functions.html#sorted
+# Calculate the largest connected component subgraph: largest_ccs
+largest_ccs = sorted(nx.connected_component_subgraphs(G), key=lambda x: len(x))[-1]
+
+
+#Make a MatrixPlot visualization of the largest connected component subgraph, with authors grouped by their user group number.
+# Create the customized MatrixPlot object: h
+h = MatrixPlot(graph=largest_ccs, node_grouping='grouping')
+
+# Draw the MatrixPlot to the screen
+h.draw()
+plt.show()
+
+
+#Recall that in a MatrixPlot, nodes are the rows and columns of the matrix, and cells are filled in according to whether an edge exists between the pairs of nodes.
+
+
+
+
+
+# part 2
+#ArcPlot
+#Next up, let's use the ArcPlot to visualize the network. You're going to practice sorting the nodes in the graph as well.
+#Note: this exercise may take about 4-7 seconds to execute if done correctly.
+
+
+# Import necessary modules
+from nxviz.plots import ArcPlot
+import matplotlib.pyplot as plt
+
+#Iterate over all the nodes in G, including the metadata (by specifying data=True).
+# Iterate over all the nodes in G, including the metadata
+for n, d in G.nodes(data=True):
+
+    #In each iteration of the loop, calculate the degree of each node n with nx.degree() and set its 'degree' attribute. nx.degree() accepts two arguments: A graph and a node.
+    # Calculate the degree of each node: G.node[n]['degree']
+    G.node[n]['degree'] = nx.degree(G, n)
+
+#Create the ArcPlot object a by specifying two parameters: the graph, which is G, and the node_order, which is 'degree', so that the nodes are sorted.
+# Create the ArcPlot object: a
+a = ArcPlot(G, node_order='degree')
+
+# Draw the ArcPlot to the screen
+a.draw()
+plt.show()
+
+#Excellent! You'll now transform this ArcPlot into a CircosPlot in the next exercise.
+
+
+
+# part 3
+#CircosPlot
+#Finally, you're going to make a CircosPlot of the network!
+
+# Import necessary modules
+from nxviz import CircosPlot
+import matplotlib.pyplot as plt
+
+
+#Iterate over all the nodes in G, including the metadata (by specifying data=True).
+# Iterate over all the nodes, including the metadata
+for n, d in G.nodes(data=True):
+
+    
+    #In each iteration of the loop, calculate the degree of each node n with nx.degree() and set its 'degree' attribute.
+    # Calculate the degree of each node: G.node[n]['degree']
+    G.node[n]['degree'] = nx.degree(G, n)
+
+
+#Make a CircosPlot of the network, again, with GitHub users sorted by their degree, and grouped and coloured by their 'grouping' key.
+#Create the CircosPlot object c by specifying three parameters in addition to the graph G: the node_order, which is 'degree', the node_grouping and the node_color, which are both 'grouping'.
+# Create the CircosPlot object: c
+c = CircosPlot(G, node_order='degree', node_color='grouping', node_grouping='grouping')
+
+# Draw the CircosPlot object to the screen
+c.draw()
+plt.show()
+
+
+#Fantastic! This CircosPlot provides a compact alternative to the ArcPlot. It is easy to see in this plot that most users belong to one group.
+
+
+
+
+
