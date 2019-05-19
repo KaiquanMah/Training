@@ -1,0 +1,116 @@
+# part 1
+# Compute number of neighbors for each node
+# How do you evaluate whether a node is an important one or not? There are a few ways to do so, and here, you're going to look at one metric: the number of neighbors that a node has.
+# Every NetworkX graph G exposes a .neighbors(n) method that returns a list of nodes that are the neighbors of the node n. To begin, use this method in the IPython Shell on the Twitter network T to get the neighbors of of node 1. This will get you familiar with how the function works. Then, your job in this exercise is to write a function that returns all nodes that have m neighbors.
+
+#Write a function called nodes_with_m_nbrs() that has two parameters - G and m - and returns all nodes that have m neighbors. To do this:
+# Define nodes_with_m_nbrs()
+def nodes_with_m_nbrs(G, m):
+    """
+    Returns all nodes in graph G that have m neighbors.
+    """
+    nodes = set()
+
+    #Iterate over all nodes in G (not including the metadata).
+    # Iterate over all nodes in G
+    for n in G.nodes():
+
+        #Use the len() and list() functions together with the .neighbors() method to calculate the total number of neighbors that node n in graph G has.
+        #If the number of neighbors of node n is equal to m, add n to the set nodes using the .add() method.
+
+        # Check if the number of neighbors of n matches m
+        if len(list(G.neighbors(n))) == m:
+
+            # Add the node n to the set
+            nodes.add(n)
+    
+    #After iterating over all the nodes in G, return the set nodes.
+    # Return the nodes with m neighbors
+    return nodes
+
+#Use your nodes_with_m_nbrs() function to retrieve all the nodes that have 6 neighbors in the graph T.
+# Compute and print all nodes in T that have 6 neighbors
+six_nbrs = nodes_with_m_nbrs(T, 6)
+print(six_nbrs)
+
+output:
+    {22533, 1803, 11276, 11279, 6161, 4261, 10149, 3880, 16681, 5420, 14898, 64, 14539, 6862, 20430, 9689, 475, 1374, 6112, 9186, 17762, 14956, 2927, 11764, 4725}
+
+#Great work! The number of neighbors a node has is one way to identify important nodes. It looks like 25 nodes in graph T have 6 neighbors.
+
+
+
+# part 2
+#Compute degree distribution
+#The number of neighbors that a node has is called its "degree", and it's possible to compute the degree distribution across the entire graph. In this exercise, your job is to compute the degree distribution across T.
+
+#Use a list comprehension along with the .neighbors(n) method to get the degree of every node. The result should be a list of integers.
+#Use n as your iterator variable.
+#The output expression of your list comprehension should be the number of neighbors that node n has - that is, its degree. Use the len() and list() functions together with the .neighbors() method to compute this.
+#The iterable in your list comprehension is all the nodes in T, accessed using the .nodes() method.
+
+# Compute the degree of every node: degrees
+degrees = [len(list(T.neighbors(n))) for n in T.nodes()]
+
+# Print the degrees
+print(degrees)
+
+[47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 10, 27, 0, ...,
+0, 0, 0, 0, 0, 0]
+
+#Excellent job! In the next exercise, you're going to visualize this degree distribution as well as the degree centrality distribution.
+
+
+
+# part 3
+#Degree centrality distribution
+#The degree of a node is the number of neighbors that it has. The degree centrality is the number of neighbors divided by all possible neighbors that it could have. Depending on whether self-loops are allowed, the set of possible neighbors a node could have could also include the node itself.
+#The nx.degree_centrality(G) function returns a dictionary, where the keys are the nodes and the values are their degree centrality values.
+#The degree distribution degrees you computed in the previous exercise using the list comprehension has been pre-loaded.
+
+
+
+# Import matplotlib.pyplot
+import matplotlib.pyplot as plt
+
+#Using plt.hist(), plot a histogram of the degree centrality distribution of T. This can be accessed using list(deg_cent.values()).
+# Compute the degree centrality of the Twitter network: deg_cent
+deg_cent = nx.degree_centrality(T)
+#show from 0.0 to 1.0
+
+#key value pairs
+#{1: 1.0,
+# 3: 0.02127659574468085,
+# 4: 0.02127659574468085, 
+# ...49: 0.0425531914893617}
+
+#list(deg_cent.values())
+#turns the key value pair into a list containing just the values
+#[1.0,
+# 0.02127659574468085,
+# 0.02127659574468085,...
+# 0.0425531914893617]
+
+
+
+# Plot a histogram of the degree centrality distribution of the graph.
+plt.figure()
+plt.hist(list(deg_cent.values()))
+plt.show()
+
+
+#show from 0 to bigger integer values
+#Plot a histogram of the degree distribution degrees of T. This is the same list you computed in the last exercise.
+# Plot a histogram of the degree distribution of the graph
+plt.figure()
+plt.hist(degrees)
+plt.show()
+
+
+#Create a scatter plot with degrees on the x-axis and the degree centrality distribution list(deg_cent.values()) on the y-axis.
+# Plot a scatter plot of the centrality distribution and the degree distribution
+plt.figure()
+plt.scatter(degrees, list(deg_cent.values()))
+plt.show()
+
+#Given the similarities of their histograms, it should not surprise you to see a perfect correlation between the centrality distribution and the degree distribution.
