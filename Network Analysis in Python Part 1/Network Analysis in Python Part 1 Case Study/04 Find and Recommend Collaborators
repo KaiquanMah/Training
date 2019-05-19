@@ -1,0 +1,135 @@
+# part 1
+#Finding important collaborators - Degree centrality, Betweenness centrality
+#Almost there! You'll now look at important nodes once more. Here, you'll make use of the degree_centrality() and betweenness_centrality() functions in NetworkX to compute each of the respective centrality scores, and then use that information to find the "important nodes". In other words, your job in this exercise is to find the user(s) that have collaborated with the most number of users.
+
+
+# Compute the degree centralities of G: deg_cent
+deg_cent = nx.degree_centrality(G)
+
+In [4]: deg_cent
+Out[4]: 
+{'u1': 0.00023001521639123818,
+ 'u2': 1.76934781839414e-05,
+ 'u3': 0.001857815209313847,
+ ...
+  'u999': 5.30804345518242e-05,
+ 'u1000': 0.0003892565200467108,
+ ...}
+
+
+#Compute the maximum degree centrality. Since deg_cent is a dictionary, you'll have to use the .values() method to get a list of its values before computing the maximum degree centrality with max().
+# Compute the maximum degree centrality: max_dc
+max_dc = max(list(deg_cent.values()))
+#0.005768073887964896
+
+
+#Identify the most prolific collaborators using a list comprehension:
+#Iterate over the degree centrality dictionary deg_cent that was computed earlier using its .items() method. What condition should be satisfied if you are seeking to find user(s) that have collaborated with the most number of users? Hint: It has do to with the maximum degree centrality.
+# Find the user(s) that have collaborated the most: prolific_collaborators
+prolific_collaborators = [n for n, dc in deg_cent.items() if deg_cent == max_dc]
+
+# Print the most prolific collaborator(s)
+print(prolific_collaborators)
+
+#Great work! It looks like 'u741' is the most prolific collaborator.
+
+
+
+
+
+# part 2
+#Characterizing editing communities
+#You're now going to combine what you've learned about the BFS algorithm and concept of maximal cliques to visualize the network with an ArcPlot.
+#The largest maximal clique in the Github user collaboration network has been assigned to the subgraph G_lmc. Note that for NetworkX version 2.x and later, G.subgraph(nodelist) returns only an immutable view on the original graph. We must explicitly ask for a .copy() of the graph to obtain a mutatable version.
+
+
+
+# Import necessary modules
+from nxviz import ArcPlot
+import matplotlib.pyplot as plt
+
+
+# Identify the largest maximal clique: largest_max_clique
+largest_max_clique = set(sorted(nx.find_cliques(G), key=lambda x: len(x))[-1])
+
+# Create a subgraph from the largest_max_clique: G_lmc
+G_lmc = G.subgraph(largest_max_clique).copy()  
+
+
+#Go out 1 degree of separation from the clique, and add those users to the subgraph. Inside the first for loop:
+#Add nodes to G_lmc from the neighbors of G using the .add_nodes_from() and .neighbors() methods.
+#Using the .add_edges_from(), method, add edges to G_lmc between the current node and all its neighbors. To do this, you'll have create a list of tuples using the zip() function consisting of the current node and each of its neighbors. The first argument to zip() should be [node]*len(list(G.neighbors(node))), and the second argument should be the neighbors of node.
+
+# Go out 1 degree of separation
+for node in list(G_lmc.nodes()):
+    G_lmc.add_nodes_from(G.neighbors(node))
+    G_lmc.add_edges_from(zip([node]*len(list(G.neighbors(node))), G.neighbors(node)))
+
+
+#Record each node's degree centrality score in its node metadata.
+#Do this by assigning nx.degree_centrality(G_lmc)[n] to G_lmc.node[n]['degree centrality'] in the second for loop.
+# Record each node's degree centrality score
+for n in G_lmc.nodes():
+    G_lmc.node[n]['degree centrality'] = nx.degree_centrality(G_lmc)[n]
+
+
+#Visualize this network with an ArcPlot sorting the nodes by degree centrality (you can do this using the keyword argument node_order='degree centrality').
+# Create the ArcPlot object: a
+a = ArcPlot(G_lmc, node_order='degree centrality')
+
+# Draw the ArcPlot to the screen
+a.draw()
+plt.show()
+
+#Great work! The final step that remains is to recommend collaborators who have not yet collaborated together.
+
+
+
+
+# part 3
+#Recommending co-editors who have yet to edit together
+#Finally, you're going to leverage the concept of open triangles to recommend users on GitHub to collaborate!
+
+
+# Import necessary modules
+from itertools import combinations
+from collections import defaultdict
+
+# Initialize the defaultdict: recommended
+recommended = defaultdict(int)
+
+
+
+#Compile a list of GitHub users that should be recommended to collaborate with one another. To do this:
+#In the first for loop, iterate over all the nodes in G, including the metadata (by specifying data=True).
+#In the second for loop, iterate over all the possible triangle combinations, which can be identified using the combinations() function with a size of 2.
+#If n1 and n2 do not have an edge between them, a collaboration between these two nodes (users) should be recommended, so increment the (n1), (n2) value of the recommended dictionary in this case. You can check whether or not n1 and n2 have an edge between them using the .has_edge() method.
+
+# Iterate over all the nodes in G
+for n, d in G.nodes(data=True):
+
+    # Iterate over all possible triangle relationship combinations
+    for n1, n2 in combinations(G.neighbors(n), 2):
+
+        # Check whether n1 and n2 do not have an edge
+        if not G.has_edge(n1, n2):
+
+            # Increment recommended
+            recommended[(n1, n2)] += 1
+
+
+
+#Using a list comprehension, identify the top 10 pairs of users that should be recommended to collaborate. The iterable should be the key-value pairs of the recommended dictionary (which can be accessed with the .items() method), while the conditional should be satisfied if count is greater than the top 10 in all_counts. Note that all_counts is sorted in ascending order, so you can access the top 10 with all_counts[-10].
+
+# Identify the top 10 pairs of users
+all_counts = sorted(recommended.values())
+top10_pairs = [pair for pair, count in recommended.items() if count > all_counts[-10]]
+print(top10_pairs)
+
+[('u2022', 'u4159'), ('u655', 'u2022')]
+
+#Fantastic job! You've identified pairs of users who should collaborate together, and in doing so, built your very own recommendation system!
+
+
+
+
