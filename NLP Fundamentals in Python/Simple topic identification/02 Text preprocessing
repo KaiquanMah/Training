@@ -1,0 +1,43 @@
+#part 1
+#Text preprocessing steps
+#Which of the following are useful text preprocessing steps?
+
+#Lemmatization, lowercasing, removing unwanted tokens.
+
+
+
+#part 2
+#Text preprocessing practice
+#Now, it's your turn to apply the techniques you've learned to help clean up text for better NLP results. You'll need to remove stop words and non-alphabetic characters, lemmatize, and perform a new bag-of-words on your cleaned text.
+#You start with the same tokens you created in the last exercise: lower_tokens. You also have the Counter class imported.
+
+
+#Import the WordNetLemmatizer class from nltk.stem
+# Import WordNetLemmatizer
+from nltk.stem import WordNetLemmatizer
+
+#Create a list called alpha_only that iterates through lower_tokens and retains only alphabetical characters. You can use the .isalpha() method to check for this.
+# Retain alphabetic words: alpha_only
+alpha_only = [t for t in lower_tokens if t.isalpha()]
+
+
+#Create another list called no_stops in which you remove all stop words, which are held in a list called english_stops.
+# Remove all stop words: no_stops
+no_stops = [t for t in alpha_only if t not in english_stops]
+
+#Initialize a WordNetLemmatizer object called wordnet_lemmatizer and use its .lemmatize() method on the tokens in no_stops to create a new list called lemmatized.
+# Instantiate the WordNetLemmatizer
+wordnet_lemmatizer = WordNetLemmatizer()
+
+# Lemmatize all tokens into a new list: lemmatized
+lemmatized = [wordnet_lemmatizer.lemmatize(t) for t in no_stops]
+
+
+#Finally, create a new Counter called bow with the lemmatized words and show the 10 most common tokens.
+# Create the bag-of-words: bow
+bow = Counter(lemmatized)
+
+# Print the 10 most common tokens
+print(bow.most_common(10))
+
+#    [('debugging', 40), ('system', 25), ('software', 16), ('bug', 16), ('problem', 15), ('tool', 15), ('computer', 14), ('process', 13), ('term', 13), ('used', 12)]
