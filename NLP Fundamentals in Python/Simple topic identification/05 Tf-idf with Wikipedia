@@ -1,0 +1,33 @@
+#part 1
+#What is tf-idf?
+#You want to calculate the tf-idf weight for the word "computer", which appears five times in a document containing 100 words. Given a corpus containing 200 documents, with 20 documents mentioning the word "computer", tf-idf can be calculated by multiplying term frequency with inverse document frequency.
+#Term frequency = percentage share of the word compared to all tokens in the document Inverse document frequency = logarithm of the total number of documents in a corpora divided by the number of documents containing the term
+#Which of the below options is correct?
+
+(5 / 100) * log(200 / 20)
+
+
+#part 2
+#Tf-idf with Wikipedia
+#Now it's your turn to determine new significant terms for your corpus by applying gensim's tf-idf. You will again have access to the same corpus and dictionary objects you created in the previous exercises - dictionary, corpus, and doc. Will tf-idf make for more interesting results on the document level?
+
+# Import TfidfModel from gensim.models.tfidfmodel.
+from gensim.models.tfidfmodel import TfidfModel
+
+#Initialize a new TfidfModel called tfidf using corpus.
+# Create a new TfidfModel using the corpus: tfidf
+tfidf = TfidfModel(corpus)
+
+# Calculate the tfidf weights of doc: tfidf_weights
+tfidf_weights = tfidf[doc]
+
+# Print the first five weights
+print(tfidf_weights[:5])
+
+# Sort the weights from highest to lowest: sorted_tfidf_weights
+sorted_tfidf_weights = sorted(tfidf_weights, key=lambda w: w[1], reverse=True)
+
+#Print the top five weighted words (term_id) from sorted_tfidf_weights along with their weighted score (weight).
+# Print the top 5 weighted words
+for term_id, weight in sorted_tfidf_weights[:5]:
+    print(dictionary.get(term_id), weight)
