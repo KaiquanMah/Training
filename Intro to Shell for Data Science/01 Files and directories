@@ -125,7 +125,158 @@ cp seasonal/autumn.csv seasonal/winter.csv backup
 copies all of the files into that directory.
 
 1 Make a copy of seasonal/summer.csv in the backup directory (which is also in /home/repl), calling the new file summer.bck.
+$ ls
+backup  bin  course.txt  people  seasonal
+$ ls seasonal
+autumn.csv  spring.csv  summer.csv  winter.csv
+$ cp sourcedir/sourcefilename tgtdir/tgtfilename; easy to copy just 1 file
+$ cp seasonal/summer.csv backup/summer.bck
+$ ls backup
+summer.bck
 
 2 Copy spring.csv and summer.csv from the seasonal directory into the backup directory without changing your current working directory (/home/repl).
+$ cp sourcedir/sourcefile1 sourcedir/sourcefile2 tgtdir; easy to copy >1 files
+$ cp seasonal/spring.csv seasonal/summer.csv backup
+$ ls backup
+spring.csv  summer.bck  summer.csv
+
+
+
+
+
+
+How can I move a file?
+While cp copies a file, mv moves it from one directory to another, just as if you had dragged it in a graphical file browser. It handles its parameters the same way as cp, so the command:
+mv autumn.csv winter.csv ..
+moves the files autumn.csv and winter.csv from the current working directory up one level to its parent directory (because .. always refers to the directory above your current location).
+
+Once you move files from the source dir to the tgt dir, the source files no longer remain in the source dir.
+$ mv seasonal/spring.csv seasonal/summer.csv backup
+$ ls seasonal
+autumn.csv  winter.csv
+$ ls backup
+spring.csv  summer.csv
+
+
+
+
+
+
+
+
+How can I rename files?
+mv can also be used to rename files. If you run:
+mv course.txt old-course.txt
+then the file course.txt in the current working directory is "moved" to the file old-course.txt. This is different from the way file browsers work, but is often handy.
+
+One warning: just like cp, mv will overwrite existing files. If, for example, you already have a file called old-course.txt, then the command shown above will replace it with whatever is in course.txt.
+
+1 Go into the seasonal directory.
+$ cd seasonal
+
+2 Rename the file winter.csv to be winter.csv.bck.
+$ ls
+autumn.csv  spring.csv  summer.csv  winter.csv
+$ mv winter.csv winter.csv.bck
+
+3 Run ls to check that everything has worked.
+$ ls
+autumn.csv  spring.csv  summer.csv  winter.csv.bck
+
+
+
+
+
+
+How can I delete files?
+We can copy files and move them around; to delete them, we use rm, which stands for "remove". As with cp and mv, you can give rm the names of as many files as you'd like, so:
+
+rm thesis.txt backup/thesis-2017-08.txt
+removes both thesis.txt and backup/thesis-2017-08.txt
+
+rm does exactly what its name says, and it does it right away: unlike graphical file browsers, the shell doesn't have a trash can, so when you type the command above, your thesis is gone for good.
+
+1 You are in /home/repl. Go into the seasonal directory.
+$ cd seasonal
+
+2 Remove autumn.csv.
+$ rm autumn.csv
+
+3 Go back to your home directory.
+$ cd ..
+
+4 Remove seasonal/summer.csv without changing directories again.
+$ rm seasonal/summer.csv
+$ ls seasonal
+spring.csv  winter.csv
+
+
+
+
+How can I create and delete directories?
+mv treats directories the same way it treats files: if you are in your home directory and run mv seasonal by-season, for example, mv changes the name of the seasonal directory to by-season. However, rm works differently.
+
+If you try to rm a directory, the shell prints an error message telling you it can't do that, primarily to stop you from accidentally deleting an entire directory full of work. Instead, you can use a separate command called rmdir. For added safety, it only works when the directory is empty, so you must delete the files in a directory before you delete the directory. (Experienced users can use the -r option to rm to get the same effect; we will discuss command options in the next chapter.)
+
+1 Without changing directories, delete the file agarwal.txt in the people directory.
+$ lsbackup  bin  course.txt  people  seasonal
+$ ls peopleagarwal.txt
+$ rm people/agarwal.txt
+$ ls people
+
+2a Now that the people directory is empty, use a single command to delete it.
+$ rmdir people
+$ ls
+backup  bin  course.txt  seasonal
+
+2b alternative method to remove dir
+$ rm -r seasonal
+$ ls
+backup  bin  course.txt
+
+
+3 Since a directory is not a file, you must use the command mkdir directory_name to create a new (empty) directory. Use this command to create a new directory called yearly below your home directory.
+$ mkdir yearly
+
+4 Now that yearly exists, create another directory called 2017 inside it without leaving your home directory.
+$ mkdir yearly/2017
+$ ls
+backup  bin  course.txt   yearly
+$ ls yearly
+2017
+
+
+
+
+
+
+Wrapping up
+You will often create intermediate files when analyzing data. Rather than storing them in your home directory, you can put them in /tmp, which is where people and programs often keep files they only need briefly. (Note that /tmp is immediately below the root directory /, not below your home directory.) This wrap-up exercise will show you how to do that.
+
+1 Use cd to go into /tmp.
+$ ls
+backup  bin  course.txt  people  seasonal
+$ ls /
+bin   dev  home  lib64  mnt  opt   root  sbin       srv       sys  usr
+boot  etc  lib   media  oil  proc  run   solutions  start.sh  tmp  var
+$ cd /tmp
+
+2 List the contents of /tmp without typing a directory name.
+$ ls
+tmp0frkcizr  tmpa00e2rsk  tmph9v5ej2t  tmpmc6ekn66  tmpoxp0b9bs
+tmp0gkunnch  tmpeom06c4v  tmpj05ew674  tmpmiszpnz6  tmpwbmge461
+tmp_8cpqj46  tmpf98ypg93  tmpj54vq_rn  tmpn3ncx23y
+
+3 Make a new directory inside /tmp called scratch.
+$ mkdir scratch
+$ ls
+scratch      tmp_8cpqj46  tmpf98ypg93  tmpj54vq_rn  tmpn3ncx23y
+tmp0frkcizr  tmpa00e2rsk  tmph9v5ej2t  tmpmc6ekn66  tmpoxp0b9bs
+tmp0gkunnch  tmpeom06c4v  tmpj05ew674  tmpmiszpnz6  tmpwbmge461
+
+4 Move /home/repl/people/agarwal.txt into /tmp/scratch. We suggest you use the ~ shortcut for your home directory and a relative path for the second rather than the absolute path.
+$ mv ~/people/agarwal.txt scratch
+
+
 
 
