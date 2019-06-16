@@ -1,0 +1,290 @@
+How does the shell store information?
+Like other programs, the shell stores information in variables. Some of these, called environment variables, are available all the time. Environment variables' names are conventionally written in upper case, and a few of the more commonly-used ones are shown below.
+
+Variable	    Purpose	                          Value
+HOME	        User's home directory	            /home/repl
+PWD	          Present working directory	        Same as pwd command
+SHELL	        Which shell program is being used	/bin/bash
+USER	        User's ID	                        repl
+To get a complete list (which is quite long), you can type set in the shell.
+
+Use set and grep with a pipe to display the value of HISTFILESIZE, which determines how many old commands are stored in your command history. What is its value?
+HISTFILESIZE=2000
+#Correct: the shell saves 2000 old commands by default on this system.
+
+
+
+
+
+
+
+How can I print a variable's value?
+A simpler way to find a variable's value is to use a command called echo, which prints its arguments. Typing
+echo hello DataCamp!
+prints
+hello DataCamp!
+
+If you try to use it to print a variable's value like this:
+echo USER
+it will print the variable's name, USER.
+
+To get the variable's value, you must put a dollar sign $ in front of it. Typing
+echo $USER
+prints
+repl
+This is true everywhere: to get the value of a variable called X, you must write $X. (This is so that the shell can tell whether you mean "a file named X" or "the value of a variable named X".)
+
+The variable OSTYPE holds the name of the kind of operating system you are using. Display its value using echo.
+$ echo $OSTYPE
+linux-gnu
+Excellent echoing of environment variables! You're off to a good start. Let's carry on!
+
+
+
+
+
+
+
+How else does the shell store information?
+The other kind of variable is called a shell variable, which is like a local variable in a programming language.
+
+To create a shell variable, you simply assign a value to a name:
+
+training=seasonal/summer.csv
+without any spaces before or after the = sign. Once you have done this, you can check the variable's value with:
+
+echo $training
+seasonal/summer.csv
+
+Define a variable called testing with the value seasonal/winter.csv.
+$ testing=seasonal/winter.csv
+
+Use head -n 1 SOMETHING to get the first line from seasonal/winter.csv using the value of the variable testing instead of the name of the file.
+$ head -n 1 $testing
+Date,Tooth
+
+
+
+
+
+
+How can I repeat a command many times?
+Shell variables are also used in loops, which repeat commands many times. If we run this command:
+for filetype in gif jpg png; do echo $filetype; done
+
+it produces:
+gif
+jpg
+png
+
+Notice these things about the loop:
+
+The structure is for ...variable... in ...list... ; do ...body... ; done
+The list of things the loop is to process (in our case, the words gif, jpg, and png).
+The variable that keeps track of which thing the loop is currently processing (in our case, filetype).
+The body of the loop that does the processing (in our case, echo $filetype).
+Notice that the body uses $filetype to get the variable's value instead of just filetype, just like it does with any other shell variable. Also notice where the semi-colons go: the first one comes between the list and the keyword do, and the second comes between the body and the keyword done.
+
+Modify the loop so that it prints:
+docx
+odt
+pdf
+Please use filetype as the name of the loop variable.
+$ for filetype in docx odt pdf; do echo $filetype; done
+docx
+odt
+pdf
+
+First-rate for looping! Loops are brilliant if you want to do the same thing hundreds or thousands of times.
+
+
+
+
+
+
+
+
+
+
+
+
+How can I repeat a command once for each file?
+You can always type in the names of the files you want to process when writing the loop, but it's usually better to use wildcards. Try running this loop in the console:
+
+for filename in seasonal/*.csv; do echo $filename; done
+It prints:
+
+seasonal/autumn.csv
+seasonal/spring.csv
+seasonal/summer.csv
+seasonal/winter.csv
+because the shell expands seasonal/*.csv to be a list of four filenames before it runs the loop.
+
+Modify the wildcard expression to people/* so that the loop prints the names of the files in the people directory regardless of what suffix they do or don't have. Please use filename as the name of your loop variable.
+$ for filename in people/*; do echo $filename; done
+people/agarwal.txt
+
+
+
+
+
+
+
+
+
+
+How can I record the names of a set of files?
+People often set a variable using a wildcard expression to record a list of filenames. For example, if you define datasets like this:
+
+datasets=seasonal/*.csv
+you can display the files' names later using:
+
+for filename in $datasets; do echo $filename; done
+This saves typing and makes errors less likely.
+
+If you run these two commands in your home directory, how many lines of output will they print?
+files=seasonal/*.csv
+for f in $files; do echo $f; done
+
+Four: the names of all four seasonal data files.
+Correct. The command is equivalent to for f in seasonal/*.csv; do echo $f; done
+
+
+
+
+
+
+
+
+
+
+A variable's name versus its value
+A common mistake is to forget to use $ before the name of a variable. When you do this, the shell uses the name you have typed rather than the value of that variable.
+A more common mistake for experienced users is to mis-type the variable's name. For example, if you define datasets like this:
+datasets=seasonal/*.csv
+
+and then type:
+echo $datsets
+the shell doesn't print anything, because datsets (without the second "a") isn't defined.
+
+If you were to run these two commands in your home directory, what output would be printed?
+files=seasonal/*.csv
+for f in files; do echo $f; done
+(Read the first part of the loop carefully before answering.)
+
+One line: the word "files".
+Correct: the loop uses files instead of $files, so the list consists of the word "files".
+
+
+
+
+
+
+
+
+
+
+
+How can I run many commands in a single loop?
+Printing filenames is useful for debugging, but the real purpose of loops is to do things with multiple files. This loop prints the second line of each data file:
+for file in seasonal/*.csv; do head -n 2 $file | tail -n 1; done
+It has the same structure as the other loops you have already seen: all that's different is that its body is a pipeline of two commands instead of a single command.
+
+Write a loop that produces the same output as
+grep -h 2017-07 seasonal/*.csv
+but uses a loop to process each file separately. Please use file as the name of the loop variable, and remember that the -h flag used above tells grep not to print filenames in the output.
+
+$ grep -h 2017-07 seasonal/*.csv2017-07-10,incisor
+2017-07-10,wisdom2017-07-20,incisor
+2017-07-21,bicuspid
+2017-07-10,incisor
+2017-07-16,bicuspid
+2017-07-23,bicuspid
+2017-07-25,canine
+2017-07-01,incisor
+2017-07-17,canine
+
+$ grep 2017-07 seasonal/*.csv
+seasonal/autumn.csv:2017-07-10,incisor
+seasonal/autumn.csv:2017-07-10,wisdom
+seasonal/autumn.csv:2017-07-20,incisor
+seasonal/autumn.csv:2017-07-21,bicuspid
+seasonal/spring.csv:2017-07-10,incisor
+seasonal/spring.csv:2017-07-16,bicuspid
+seasonal/spring.csv:2017-07-23,bicuspid
+seasonal/summer.csv:2017-07-25,canine
+seasonal/winter.csv:2017-07-01,incisor
+seasonal/winter.csv:2017-07-17,canine
+
+$ for file in seasonal/*.csv; do grep -h 2017-07 $file; done
+2017-07-10,incisor
+2017-07-10,wisdom
+2017-07-20,incisor
+2017-07-21,bicuspid
+2017-07-10,incisor
+2017-07-16,bicuspid
+2017-07-23,bicuspid
+2017-07-25,canine
+2017-07-01,incisor
+2017-07-17,canine
+
+
+
+
+
+
+
+
+
+
+
+Why shouldn't I use spaces in filenames?
+It's easy and sensible to give files multi-word names like July 2017.csv when you are using a graphical file explorer. However, this causes problems when you are working in the shell. For example, suppose you wanted to rename July 2017.csv to be 2017 July data.csv. You cannot type:
+
+mv July 2017.csv 2017 July data.csv
+because it looks to the shell as though you are trying to move four files called July, 2017.csv, 2017, and July (again) into a directory called data.csv. Instead, you have to quote the files' names so that the shell treats each one as a single parameter:
+mv 'July 2017.csv' '2017 July data.csv'
+
+If you have two files called current.csv and last year.csv (with a space in its name) and you type:
+rm current.csv last year.csv
+what will happen:
+The shell will print an error message because last and year.csv do not exist.
+The shell will delete current.csv.
+Correct. You can use single quotes, ', or double quotes, ", around the file names.
+
+
+
+
+
+
+
+How can I do many things in a single loop?
+The loops you have seen so far all have a single command or pipeline in their body, but a loop can contain any number of commands. To tell the shell where one ends and the next begins, you must separate them with semi-colons:
+
+for f in seasonal/*.csv; do echo $f; head -n 2 $f | tail -n 1; done
+
+seasonal/autumn.csv
+2017-01-05,canine
+seasonal/spring.csv
+2017-01-25,wisdom
+seasonal/summer.csv
+2017-01-11,canine
+seasonal/winter.csv
+2017-01-03,bicuspid
+Suppose you forget the semi-colon between the echo and head commands in the previous loop, so that you ask the shell to run:
+
+for f in seasonal/*.csv; do echo $f head -n 2 $f | tail -n 1; done
+What will the shell do?
+Print one line for each of the four files.
+The loop will run, it just won't do something sensible.
+Yes: echo produces one line that includes the filename twice, which tail then copies.
+
+$ for f in seasonal/*.csv; do echo $f head -n 2 $f | tail -n 1; done
+seasonal/autumn.csv head -n 2 seasonal/autumn.csv
+seasonal/spring.csv head -n 2 seasonal/spring.csv
+seasonal/summer.csv head -n 2 seasonal/summer.csv
+seasonal/winter.csv head -n 2 seasonal/winter.csv
+
+
+
+
