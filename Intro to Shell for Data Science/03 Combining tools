@@ -20,3 +20,252 @@ $ cat last.csv
 2017-08-11,bicuspid
 2017-08-11,wisdom
 2017-08-13,canine
+
+
+
+
+
+
+
+
+How can I use a command's output as an input?
+Suppose you want to get lines from the middle of a file. More specifically, suppose you want to get lines 3-5 from one of our data files. You can start by using head to get the first 5 lines and redirect that to a file, and then use tail to select the last 3:
+
+head -n 5 seasonal/winter.csv > top.csv
+tail -n 3 top.csv
+A quick check confirms that this is lines 3-5 of our original file, because it is the last 3 lines of the first 5.
+
+$ tail -n 2 seasonal/winter.csv > bottom.csv
+
+$ cat bottom.csv
+2017-08-11,wisdom
+2017-08-13,canine
+
+$ head -n 1 bottom.csv
+2017-08-11,wisdom
+
+
+
+
+
+
+
+
+
+
+What's a better way to combine commands?
+Using redirection to combine commands has two drawbacks:
+
+It leaves a lot of intermediate files lying around (like top.csv).
+The commands to produce your final result are scattered across several lines of history.
+The shell provides another tool that solves both of these problems at once called a pipe. Once again, start by running head:
+head -n 5 seasonal/summer.csv
+
+Instead of sending head's output to a file, add a vertical bar and the tail command without a filename:
+head -n 5 seasonal/summer.csv | tail -n 3
+The pipe symbol tells the shell to use the output of the command on the left as the input to the command on the right.
+
+Use cut to select all of the tooth names from column 2 of the comma delimited file seasonal/summer.csv, then pipe the result to grep, with an inverted match, to exclude the header line containing the word "Tooth". cut and grep were covered in detail in Chapter 2, exercises 8 and 11 respectively.
+
+
+#cut gives me 2nd col using -f 2, then -d , for comma delimiter, | pipe to pass LHS output as input to RHS| grep to match; grep -v to do an inverse match, ie records which do not match the value
+$ cut -f 2 -d , seasonal/summer.csv | grep -v Tooth
+canine
+wisdom
+bicuspid
+molar
+wisdom
+wisdom
+bicuspid
+wisdom
+canine
+molar
+bicuspid
+wisdom
+canine
+canine
+incisor
+incisor
+canine
+incisor
+incisor
+incisor
+canine
+canine
+bicuspid
+canine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+How can I combine many commands?
+You can chain any number of commands together. For example, this command:
+cut -d , -f 1 seasonal/spring.csv | grep -v Date | head -n 10
+will:
+select the first column from the spring data;
+remove the header line containing the word "Date"; and
+select the first 10 lines of actual data.
+
+
+In the previous exercise, you used the following command to select all the tooth names from column 2 of seasonal/summer.csv:
+cut -d , -f 2 seasonal/summer.csv | grep -v Tooth
+
+Extend this pipeline with a head command to only select the very first tooth name.
+$ cut -d , -f 2 seasonal/summer.csv | grep -v Tooth | head -n 1canine
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+How can I count the records in a file?
+The command wc (short for "word count") prints the number of characters, words, and lines in a file. You can make it print only one of these using -c, -w, or -l respectively.
+
+Count how many records in seasonal/spring.csv have dates in July 2017. To do this, use grep with a partial date to select the lines and pipe this result into wc with an appropriate flag to count the lines.
+
+Method 1
+grep -c: print a count of matching lines rather than the lines themselves
+$ grep -c 2017-07 seasonal/spring.csv
+3
+
+Method 2
+grep: print the matching lines; then pipe to pass LHS output as input to RHS; then do wordcount of lines
+$ grep 2017-07 seasonal/spring.csv | wc -l
+3
+
+
+
+$ grep 2017-07 seasonal/spring.csv
+2017-07-10,incisor
+2017-07-16,bicuspid
+2017-07-23,bicuspid
+
+3 lines
+'3 words'
+59 characters
+$ grep 2017-07 seasonal/spring.csv | wc      
+3       3      59
+
+
+
+
+
+
+
+
+
+
+
+
+
+How can I specify many files at once?
+
+Most shell commands will work on multiple files if you give them multiple filenames. For example, you can get the first column from all of the seasonal data files at once like this:
+cut -d , -f 1 seasonal/winter.csv seasonal/spring.csv seasonal/summer.csv seasonal/autumn.csv
+
+But typing the names of many files over and over is a bad idea: it wastes time, and sooner or later you will either leave a file out or repeat a file's name. To make your life better, the shell allows you to use wildcards to specify a list of files with a single expression. The most common wildcard is *, which means "match zero or more characters". Using it, we can shorten the cut command above to this:
+cut -d , -f 1 seasonal/*
+or:
+cut -d , -f 1 seasonal/*.csv
+
+Write a single command using head to get the first three lines from both seasonal/spring.csv and seasonal/summer.csv, a total of six lines of data, but not from the autumn or winter data files. Use a wildcard instead of spelling out the files' names in full.
+
+
+
+
+$ head -n 3 seasonal/s*==> seasonal/spring.csv <==
+Date,Tooth2017-01-25,wisdom
+2017-02-19,canine
+
+==> seasonal/summer.csv <==
+Date,Tooth
+2017-01-11,canine
+2017-01-18,wisdom
+
+
+
+
+
+
+
+What other wildcards can I use?
+The shell has other wildcards as well, though they are less commonly used:
+  ? matches a single character, so 201?.txt will match 2017.txt or 2018.txt, but not 2017-01.txt.
+  [...] matches any one of the characters inside the square brackets, so 201[78].txt matches 2017.txt or 2018.txt, but not 2016.txt.
+  {...} matches any of the comma-separated patterns inside the curly brackets, so {*.txt, *.csv} matches any file whose name ends with .txt or .csv, but not files whose names end with .pdf.
+
+Which expression would match singh.pdf and johel.txt but not sandhu.pdf or sandhu.txt?
+{singh.pdf, j*.txt}
+
+
+
+
+
+
+
+
+
+
+
+
+How can I sort lines of text?
+As its name suggests, sort puts data in order. By default it does this in ascending alphabetical order, but the flags -n and -r can be used to sort numerically and reverse the order of its output, while -b tells it to ignore leading blanks and -f tells it to fold case (i.e., be case-insensitive). Pipelines often use grep to get rid of unwanted records and then sort to put the remaining records in order.
+
+
+
+Remember the combination of cut and grep to select all the tooth names from column 2 of seasonal/summer.csv?
+cut -d , -f 2 seasonal/summer.csv | grep -v Tooth
+Starting from this recipe, sort the names of the teeth in seasonal/winter.csv (not summer.csv) in descending alphabetical order. To do this, extend the pipeline with a sort step.
+
+
+
+
+$ cut -d , -f 2 seasonal/winter.csv | grep -v Tooth | sort -r
+wisdom
+wisdom
+wisdom
+wisdom
+molar
+molar
+molar
+molar
+incisor
+incisor
+incisor
+incisor
+incisor
+incisor
+canine
+canine
+canine
+canine
+canine
+canine
+canine
+bicuspid
+bicuspid
+bicuspid
+bicuspid
+
+Sorted! sort has many uses. For example, piping sort -n to head shows you the largest values.
+
