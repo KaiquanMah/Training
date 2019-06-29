@@ -49,5 +49,218 @@ USER : I love building chatbots
 BOT : tell me more!
 
 
+import random
+
+def respond(message):
+    # Check for a question mark
+    if message.endswith("?"):
+        # Return a random question
+        return random.choice(responses["question"])
+    # Return a random statement
+    return random.choice(responses["statement"])
 
 
+# Send messages ending in a question mark
+send_message("what's today's weather?")
+send_message("what's today's weather?")
+
+# Send messages which don't end with a question mark
+send_message("I love building chatbots")
+send_message("I love building chatbots")
+
+
+responses.keys()
+responses["question"]
+responses["statement"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ELIZA II: Extracting key phrases
+The really clever thing about ELIZA is the way the program appears to understand what you told it by occasionally including phrases uttered by the user in its responses.
+
+In this exercise, you will match messages against some common patterns and extract phrases using re.search(). A dictionary called rules has already been defined, which matches the following patterns:
+
+"do you think (.*)"
+"do you remember (.*)"
+"I want (.*)"
+"if (.*)"
+Inspect this dictionary in the Shell before starting the exercise.
+
+
+Iterate over the rules dictionary using its .items() method, with pattern and responses as your iterator variables.
+Use re.search() with the pattern and message to create a match object.
+If there is a match, use random.choice() to pick a response.
+If '{0}' is in that response, use the match object's .group() method with index 1 to retrieve a phrase.
+
+
+
+
+rules
+{'I want (.*)': ['What would it mean if you got {0}',
+  'Why do you want {0}',
+  "What's stopping you from getting {0}"],
+ 'do you remember (.*)': ['Did you think I would forget {0}',
+  "Why haven't you been able to forget {0}",
+  'What about {0}',
+  'Yes .. and?'],
+ 'do you think (.*)': ['if {0}? Absolutely.', 'No chance'],
+ 'if (.*)': ["Do you really think it's likely that {0}",
+  'Do you wish that {0}',
+  'What do you think about {0}',
+  'Really--if {0}']}
+  
+  
+rules.items()
+Out[4]: dict_items([('if (.*)', ["Do you really think it's likely that {0}", 'Do you wish that {0}', 'What do you think about {0}', 'Really--if {0}']), ('do you remember (.*)', ['Did you think I would forget {0}', "Why haven't you been able to forget {0}", 'What about {0}', 'Yes .. and?']), ('do you think (.*)', ['if {0}? Absolutely.', 'No chance']), ('I want (.*)', ['What would it mean if you got {0}', 'Why do you want {0}', "What's stopping you from getting {0}"])])
+
+
+# Define match_rule()
+def match_rule(rules, message):
+    response, phrase = "default", None
+    
+    # Iterate over the rules dictionary
+    for pattern, responses in rules.items():
+        # Create a match object
+        match = re.search(pattern, message)
+        if match is not None:
+            # Choose a random response
+            response = random.choice(responses)
+            if '{0}' in response:
+                phrase = match.group(1)
+    # Return the response and phrase
+    return response.format(phrase)
+
+# {0}
+# i.e. the 'local variable' for which you will assign the substring from re.search(pattern, message)
+# which is 
+# your last birthday
+# reading: https://stackoverflow.com/questions/6682806/what-does-0-mean-in-this-python-string/6682826
+
+# Test match_rule
+print(match_rule(rules, "do you remember your last birthday"))
+
+
+
+<script.py> output:
+    Did you think I would forget do you remember your last birthday
+
+<script.py> output:
+    Did you think I would forget o
+
+<script.py> output:
+    Why haven't you been able to forget your last birthday
+
+In [6]: print(match_rule(rules, "do you remember your last birthday"))
+Yes .. and?
+
+In [7]: print(match_rule(rules, "do you remember your last birthday"))
+Did you think I would forget your last birthday
+
+In [8]: print(match_rule(rules, "do you remember your last birthday"))
+Why haven't you been able to forget your last birthday
+
+In [9]: print(match_rule(rules, "do you remember your last birthday"))
+What about your last birthday
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ELIZA III: Pronouns
+To make responses grammatically coherent, you'll want to transform the extracted phrases from first to second person and vice versa. In English, conjugating verbs is easy, and simply swapping "me" and 'you', "my" and "your" works in most cases.
+In this exercise, you'll define a function called replace_pronouns() which uses re.sub() to map "me" and "my" to "you" and "your" (and vice versa) in a string.
+
+
+If 'me' is in message, use re.sub() to replace it with 'you'.
+If 'my' is in message, replace it with 'your'.
+If 'your' is in message, replace it with 'my'.
+If 'you' is in message, replace it with 'me'.
+
+
+
+# Define replace_pronouns()
+def replace_pronouns(message):
+
+    message = message.lower()
+    if 'me' in message:
+        # Replace 'me' with 'you'
+        return re.sub('me', 'you', message)
+    if 'my' in message:
+        # Replace 'my' with 'your'
+        return re.sub('my', 'your', message)
+    if 'your' in message:
+        # Replace 'your' with 'my'
+        return re.sub('your', 'my', message)
+    if 'you' in message:
+        # Replace 'you' with 'me'
+        return re.sub('you', 'me', message)
+
+    return message
+
+print(replace_pronouns("my last birthday"))
+print(replace_pronouns("when you went to Florida"))
+print(replace_pronouns("I had my own castle"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+ELIZA IV: Putting it all together
+Now you're going to put everything from the previous exercises together and experience the magic! The match_rule(), send_message(), and replace_pronouns() functions have already been defined, and the rules dictionary is available in your workspace.
+Your job here is to write a function called respond() with a single argument message which creates an appropriate response to be handled by send_message().
+
+Get a response and phrase by calling match_rule() with the rules dictionary and message.
+
+Check if the response is a template by seeing if it includes the string '{0}'. If it does:
+Use the replace_pronouns() function on phrase.
+Include the phrase by using .format() on response and overriding the value of response.
+
+# Define respond()
+def respond(message):
+    # Call match_rule
+    response, phrase = match_rule(rules, message)
+    if '{0}' in response:
+        # Replace the pronouns in the phrase
+        phrase = replace_pronouns(phrase)
+        # Include the phrase in the response
+        response = response.format(phrase)
+    return response
+
+# Send the messages
+send_message("do you remember your last birthday")
+send_message("do you think humans should be worried about AI")
+send_message("I want a robot friend")
+send_message("what if you could be anything you wanted")
