@@ -1,0 +1,97 @@
+Rasa NLU
+In this exercise, you'll use Rasa NLU to create an interpreter, which parses incoming user messages and returns a set of entities. Your job is to train an interpreter using the MITIE entity recognition model in Rasa NLU.
+
+
+
+# Import necessary modules
+from rasa_nlu.converters import load_data
+from rasa_nlu.config import RasaNLUConfig
+from rasa_nlu.model import Trainer
+
+#Create a dictionary called args with a single key "pipeline" with value "spacy_sklearn".
+# Create args dictionary
+args = {"pipeline": "spacy_sklearn"}
+type(args)
+
+
+#Create a config by calling RasaNLUConfig() with the single argument cmdline_args with value args.
+# Create a configuration and trainer
+config = RasaNLUConfig(cmdline_args=args)
+#Create a trainer by calling Trainer() using the configuration as the argument.
+trainer = Trainer(config)
+
+# Load the training data
+training_data = load_data("./training_data.json")
+
+#Create a interpreter by calling trainer.train() with the training_data.
+# Create an interpreter by training the model
+interpreter = trainer.train(training_data)
+
+# Test the interpreter
+print(interpreter.parse("I'm looking for a Mexican restaurant in the North of town"))
+
+#Congrats! You just trained an intent and entity recognizer without having to create any arrays.
+<script.py> output:
+    Fitting 2 folds for each of 6 candidates, totalling 12 fits
+    {'intent': {'name': 'restaurant_search', 'confidence': 0.6627604390878398}, 
+    'intent_ranking': [{'name': 'restaurant_search', 'confidence': 0.6627604390878398}, 
+                       {'name': 'goodbye', 'confidence': 0.14633725788681204}, 
+                       {'name': 'affirm', 'confidence': 0.09756426473688806}, 
+                       {'name': 'greet', 'confidence': 0.09333803828846025}], 
+    'text': "I'm looking for a Mexican restaurant in the North of town", 
+    'entities': [{'value': 'mexican', 'start': 18, 'end': 25, 'extractor': 'ner_crf', 'entity': 'cuisine'}, 
+                 {'value': 'north', 'start': 44, 'end': 49, 'extractor': 'ner_crf', 'entity': 'location'}]}
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------
+Data-efficient entity recognition
+Most systems for extracting entities from text are built to extract 'Universal' things like names, dates, and places. But you probably don't have enough training data for your bot to make these systems perform well!
+
+In this exercise, you'll activate the MITIE entity recognizer inside Rasa to extract restaurants-related entities using a very small amount of training data. A dictionary args has already been defined for you, along with a training_data object.
+
+
+
+# Import necessary modules
+from rasa_nlu.config import RasaNLUConfig
+from rasa_nlu.model import Trainer
+
+pipeline = [
+    "nlp_spacy",
+    "tokenizer_spacy",
+    "ner_crf"
+]
+
+
+#Create a config by calling RasaNLUConfig() with a single argument cmdline_args with value {"pipeline": pipeline}.
+# Create a config that uses this pipeline
+config = RasaNLUConfig(cmdline_args = {"pipeline": pipeline})
+
+
+
+#Create a trainer and use it to create an interpreter, just as you did in the previous exercise.
+# Create a trainer that uses this config
+trainer = Trainer(config)
+
+# Create an interpreter by training the model
+interpreter = trainer.train(training_data)
+
+# Parse some messages
+print(interpreter.parse("show me Chinese food in the centre of town"))
+print(interpreter.parse("I want an Indian restaurant in the west"))
+print(interpreter.parse("are there any good pizza places in the center?"))
+
+#Very good! You just built a custom entity recogniser with Rasa NLU.
