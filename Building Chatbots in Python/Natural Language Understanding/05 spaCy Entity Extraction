@@ -28,3 +28,54 @@ def extract_entities(message):
 
 print(extract_entities('friends called Mary who have worked at Google since 2010'))
 print(extract_entities('people who graduated from MIT in 1999'))
+
+
+
+
+
+
+
+
+
+----------------------------------------------------
+Assigning roles using spaCy's parser
+In this exercise you'll use spaCy's powerful syntax parser to assign roles to the entities in your users' messages. To do this, you'll define two functions, find_parent_item() and assign_colors(). In doing so, you'll use a parse tree to assign roles, similar to how Alan did in the video.
+
+Recall that you can access the ancestors of a word using its .ancestors attribute.
+
+
+#Create a spacy document called doc by passing the message "let's see that jacket in red and some blue jeans" to the nlp object.
+# Create the document
+doc = nlp("let's see that jacket in red and some blue jeans")
+
+
+#In the find_parent_item(word) function, iterate over the ancestors of each word until an entity_type() of "item" is found.
+# Iterate over parents in parse tree until an item entity is found
+def find_parent_item(word):
+    # Iterate over the word's ancestors
+    for parent in word.ancestors:
+        # Check for an "item" entity
+        if entity_type(parent) == "item":
+            return parent.text
+    return None
+
+
+#In the assign_colors(doc) function, iterate over the doc until an entity_type of "color" is found. Then, find the parent item of this word.
+# For all color entities, find their parent item
+def assign_colors(doc):
+    # Iterate over the document
+    for word in doc:
+        # Check for "color" entities
+        if entity_type(word) == "color":
+            # Find the parent
+            item =  find_parent_item(word)
+            print("item: {0} has color : {1}".format(item, word))
+
+
+#Pass in the spacy document to the assign_colors() function.
+# Assign the colors
+assign_colors(doc) 
+
+<script.py> output:
+    item: jacket has color : red
+    item: jeans has color : blue
