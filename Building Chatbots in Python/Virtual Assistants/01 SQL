@@ -1,0 +1,51 @@
+SQL basics
+Time to begin writing queries for your first hotel booking chatbot! The database has been loaded as "hotels.db" and a cursor, which has access to the database, has already been defined for you as cursor.
+Three queries are provided below. Your job is to identify which query returns ONLY the "Hotel California".
+You can test each query below by calling the cursor's .execute() method and passing the query in as a string. Then, you can print the results by calling the cursor's .fetchall() method, which takes no arguments.
+SELECT name from hotels where price = 'expensive' AND area = 'center'
+SELECT name from hotels where price = 'mid' AND area = 'north'
+SELECT name from hotels where price = 'expensive'
+
+right:SELECT name from hotels where price = 'mid' AND area = 'north'
+
+
+
+
+
+
+SQL statements in Python
+It's time to begin writing SQL queries! In this exercise, your job is to run a query against the hotels database to find all the expensive hotels in the south. The connection to the database has been created for you, along with a cursor c.
+
+As Alan described in the video, you should be careful about SQL injection. Here, you'll pass parameters the safe way: As an extra tuple argument to the .execute() method. This ensures malicious code can't be injected into your query.
+
+
+# Import sqlite3
+import sqlite3
+
+# Open connection to DB
+conn = sqlite3.connect('hotels.db')
+
+# Create a cursor
+c = conn.cursor()
+
+
+#Define a tuple t of strings "south" and "hi" for the area and price.
+# Define area and price
+area, price = "south", "hi"
+t = (area, price)
+
+
+#Execute the query using the cursor's .execute() method. You're looking for all of the fields for all hotels where the area is "south" and the price is "hi".
+# Execute the query
+c.execute('SELECT * FROM hotels WHERE area=? AND price=?', t)
+
+
+#Print the results using the cursor's .fetchall() method.
+# Print the results
+print(c.fetchall())
+
+<script.py> output:
+    [('Grand Hotel', 'hi', 'south', 5)]
+
+Nice! According to our database, the Grand Hotel is the only high-end hotel in the south.
+
