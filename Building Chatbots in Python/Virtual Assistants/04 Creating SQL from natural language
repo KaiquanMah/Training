@@ -1,0 +1,72 @@
+Creating SQL from natural language
+Now you'll write a respond() function that can handle messages like "I want an expensive hotel in the south of town" and respond appropriately according to the number of matching results in a database. This is an important functionality for any database-backed chatbot.
+
+Your find_hotels() function from the previous exercises has already been defined for you, along with a Rasa NLU interpreter object, which can handle hotel queries, and a list of responses, which you can explore in the Shell.
+
+
+responses
+["I'm sorry :( I couldn't find anything like that",
+ '{} is a great hotel!',
+ '{} or {} would work!',
+ '{} is one option, but I know others too :)']
+
+
+
+# Define respond()
+def respond(message):
+    #Use the .parse() method of interpreter to extract the "entities" in the message.
+    # Extract the entities
+    entities = interpreter.parse(message)["entities"]
+    # Initialize an empty params dictionary
+    params = {}
+    # Fill the dictionary with entities
+    for ent in entities:
+        params[ent["entity"]] = str(ent["value"])
+
+    
+    #Find matching hotels using the params dictionary and find_hotels() function.
+    # Find hotels that match the dictionary
+    results = find_hotels(params)
+    
+    #Use the min() function to choose the right index for the response to send. In this case, n is the number of results.
+    # Get the names of the hotels and index of the response
+    names = [r[0] for r in results]
+    n = min(len(results),3)
+    
+    #Select the appropriate response from the responses list and insert the names of hotels using the .format() method.
+    # Select the nth element of the responses array
+    return responses[n].format(*names)
+    
+    
+    
+
+
+
+
+
+# Define respond()
+def respond(message):
+    # Extract the entities
+    entities = interpreter.parse(message)["entities"]
+    # Initialize an empty params dictionary
+    params = {}
+    # Fill the dictionary with entities
+    for ent in entities:
+        params[ent["entity"]] = str(ent["value"])
+
+    # Find hotels that match the dictionary
+    results = find_hotels(params)
+    # Get the names of the hotels and index of the response
+    names = [r[0] for r in results]
+    n = min(len(results),3)
+    # Select the nth element of the responses array
+    return responses[n].format(*names)
+
+
+#Excellent! You've built a chatbot that can interpret the results of your hotel DB queries. Now, call the respond() function with the message "I want an expensive hotel in the south of town". Place it inside a call to print() so that you can see the response of your bot in the shell.
+# Test the respond() function
+print(respond("I want an expensive hotel in the south of town"))
+
+
+<script.py> output:
+    Grand Hotel is a great hotel!
