@@ -1,0 +1,68 @@
+Basic negation
+Quite often, you'll find your users telling you what they don't want - and that's important to understand! In general, negation is a difficult problem in NLP. Here, we'll take a very simple approach that works for many cases.
+
+A list of tests called tests has been defined for you. Explore it in the Shell - you'll find that each test is a tuple consisting of:
+
+A string containing a message with entities.
+A dictionary containing the entities as keys and a Boolean saying whether they are negated as the key.
+Your job is to define a function called negated_ents() which looks for negated entities in a message.
+
+
+
+In [1]: tests
+Out[1]: 
+[("no I don't want to be in the south", {'south': False}),
+ ('no it should be in the south', {'south': True}),
+ ('no in the south not the north', {'north': False, 'south': True}),
+ ('not north', {'north': False})]
+
+
+
+# Define negated_ents()
+def negated_ents(phrase):
+    
+    #Using list comprehension, check if the words "south" or "north" appear in the message and extract those entities.
+    # Extract the entities using keyword matching
+    ents = [e for e in ["north", "south"] if e in phrase]
+    
+    
+    #Split the sentence into chunks ending with each entity. To do this:
+    #Use the .index() method of phrase to find the starting index of each entity e and add the entity's length to it to find the index of the end of the entity.
+    # Find the index of the final character of each entity
+    ends = sorted([phrase.index(e) + len(e) for e in ents])
+    # Initialise a list to store sentence chunks
+    chunks = []
+    
+    
+    #Starting with start=0, take slices of the string from start to end for each end in ends. Append each slice of the sentence to the list, chunks. Ensure you update your starting position with each iteration.
+    # Take slices of the sentence up to and including each entitiy
+    start = 0
+    for end in ends:
+        chunks.append(phrase[start:end])
+        start = end
+    result = {}
+    
+    
+    #For each entity, if "not" or "n't" appears in the chunk, consider this entity negated.
+    # Iterate over the chunks and look for entities
+    for chunk in chunks:
+        for ent in ents:
+            if ent in chunk:
+                # If the entity contains a negation, assign the key to be False
+                if "not" in chunk or "n't" in chunk:
+                    result[ent] = False
+                else:
+                    result[ent] = True
+    return result  
+
+# Check that the entities are correctly assigned as True or False
+for test in tests:
+    print(negated_ents(test[0]) == test[1])
+    
+    
+    
+<script.py> output:
+    True
+    True
+    True
+    True   
