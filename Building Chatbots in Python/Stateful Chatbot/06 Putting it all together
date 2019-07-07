@@ -1,0 +1,95 @@
+Putting it all together I
+It's time to put everything you've learned in the course together by combining the coffee ordering bot with the ELIZA rules from chapter 1.
+
+To begin, you'll define a function called chitchat_response(), which calls the predefined function match_rule() from back in chapter 1. This returns a response if the message matched an ELIZA template, and otherwise, None.
+
+The ELIZA rules are contained in a dictionary called eliza_rules.
+
+
+
+
+
+#Define a chitchat_response() function which takes in a message argument
+# Define chitchat_response()
+def chitchat_response(message):
+    
+    #Call the match_rule() function with eliza_rules and message as arguments. Unpack the output into response and phrase
+    # Call match_rule()
+    response, phrase = match_rule(eliza_rules, message)
+    # Return none if response is "default"
+    if response == "default":
+        return None
+    
+    
+    #If "{0}" is in the response, replace the pronouns of the phrase using replace_pronouns(), and then include the phrase in the response by using .format() on response
+    if '{0}' in response:
+        # Replace the pronouns of phrase
+        phrase = replace_pronouns(phrase)
+        # Calculate the response
+        response = response.format(phrase)
+    return response
+    
+#You've put it all together and your bot can now interleave chit-chat and functional conversation.    
+
+
+
+
+
+
+
+-------------------------------------------------------------------
+Putting it all together II
+With your chitchat_response(message) function defined, the next step is to define a send_message() function. This function should first call chitchat_response(message) and only use the coffee bot policy if there is no matching message.
+
+# Define send_message()
+def send_message(state, pending, message):
+    print("USER : {}".format(message))
+    
+    #Call chitchat_response(message), storing the result in response. If there is a response, print it and return the state along with None
+    response = chitchat_response(message)
+    if response is not None:
+        print("BOT : {}".format(response))
+        return state, None
+    
+    
+    
+    #Unpack the policy_rules dictionary into the variables new_state, response, and pending_state. To do this, pass in a tuple consisting of state and interpret(message)
+    #If pending is not none, extract the new states and response by using pending as the key of policy_rules.
+    # Calculate the new_state, response, and pending_state
+    new_state, response, pending_state = policy_rules[(state, interpret(message))]
+    print("BOT : {}".format(response))
+    if pending is not None:
+        new_state, response, pending_state = policy_rules[pending]
+        print("BOT : {}".format(response))        
+    if pending_state is not None:
+        pending = (pending_state, interpret(message))
+    return new_state, pending
+
+# Define send_messages()
+def send_messages(messages):
+    state = INIT
+    pending = None
+    for msg in messages:
+        state, pending = send_message(state, pending, msg)
+
+# Send the messages
+send_messages([
+    "I'd like to order some coffee",
+    "555-12345",
+    "do you remember when I ordered 1000 kilos by accident?",
+    "kenyan"
+])  
+
+
+<script.py> output:
+    USER : I'd like to order some coffee
+    BOT : you'll have to log in first, what's your phone number?
+    USER : 555-12345
+    BOT : perfect, welcome back!
+    BOT : would you like Colombian or Kenyan?
+    USER : do you remember when I ordered 1000 kilos by accident?
+    BOT : Yes .. and?
+    USER : kenyan
+    BOT : perfect, the beans are on their way!
+
+
