@@ -1,0 +1,81 @@
+Pending actions I
+
+You can really improve the user experience of your bot by asking the user simple yes or no follow-up questions. One easy way to handle these follow-ups is to define pending actions which get executed as soon as the user says "yes", and wiped if the user says "no".
+
+In this exercise, you're going to define a policy() function which takes the intent as its sole argument and returns two values: The next action to take and a pending action. The policy function should return this pending action when a "yes" or "affirm" intent is returned and should wipe the pending actions if a "no" or "deny" intent is returned.
+
+Here, the interpret(message) function has been defined for you such that if "yes" is in the message, "affirm" is returned, and if "no" is in the message, then "deny" is returned.
+
+
+
+# Define policy()
+def policy(intent):
+    # Return "do_pending" if the intent is "affirm"
+    if intent == "affirm":
+        return "do_pending", None
+    # Return "Ok" if the intent is "deny"
+    if intent == "deny":
+        return "Ok", None
+    if intent == "order":
+        return "Unfortunately, the Kenyan coffee is currently out of stock, would you like to order the Brazilian beans?", "Alright, I've ordered that for you!"
+#Excellent work! With a policy() function defined, you can now incorporate it into a send_message() function.
+
+
+
+
+
+
+
+
+
+Pending actions II
+Having defined your policy() function, it's now time to write a send_message() function which takes both a pending action and a message as its arguments and leverages the policy() function to determine the bot's response.
+
+Your policy(intent) function from the previous exercise has been pre-loaded.
+
+
+
+
+#Define a function called send_message() which takes in two arguments: pending and message
+# Define send_message()
+def send_message(pending, message):
+    
+    
+    #Pass in the interpretation of message as an argument to policy() and unpack the result into the variables action and pending_action.
+    print("USER : {}".format(message))
+    action, pending_action = policy(interpret(message))
+    
+    
+    #If the action is "do_pending" and pending is not None, print the pending response. Else, print the action.
+    if action == "do_pending" and pending is not None:
+        print("BOT : {}".format(pending))
+    else:
+        print("BOT : {}".format(action))
+    return pending_action
+    
+    
+    
+#Inside the definition of the send_messages() function, call your send_message() function with pending and msg as arguments    
+# Define send_messages()
+def send_messages(messages):
+    pending = None
+    for msg in messages:
+        pending = send_message(pending, msg)
+
+# Send the messages
+send_messages([
+    "I'd like to order some coffee",
+    "ok yes please"
+])
+
+
+
+<script.py> output:
+    USER : I'd like to order some coffee
+    BOT : Unfortunately, the Kenyan coffee is currently out of stock, would you like to order the Brazilian beans?
+    USER : ok yes please
+    BOT : Alright, I've ordered that for you!
+    
+Very well done! Your bot can now follow up on its own suggestions!
+
+    
