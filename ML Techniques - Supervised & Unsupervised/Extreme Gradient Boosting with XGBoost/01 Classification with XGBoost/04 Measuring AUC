@@ -1,0 +1,25 @@
+Now that you've used cross-validation to compute average out-of-sample accuracy (after converting from an error), it's very easy to compute any other metric you might be interested in. All you have to do is pass it (or a list of metrics) in as an argument to the metrics parameter of xgb.cv().
+Your job in this exercise is to compute another common metric used in binary classification - the area under the curve ("auc"). As before, churn_data is available in your workspace, along with the DMatrix churn_dmatrix and parameter dictionary params.
+
+
+
+#Perform 3-fold cross-validation with 5 boosting rounds and "auc" as your metric.
+# Perform cross_validation: cv_results
+cv_results = xgb.cv(dtrain=churn_dmatrix, params=params, nfold=3, num_boost_round=5, metrics="auc", as_pandas=True, seed=123)
+
+# Print cv_results
+print(cv_results)
+
+# Print the AUC
+print((cv_results["test-auc-mean"]).iloc[-1])
+
+
+
+<script.py> output:
+       train-auc-mean  train-auc-std  test-auc-mean  test-auc-std
+    0        0.768893       0.001544       0.767863      0.002820
+    1        0.790864       0.006758       0.789157      0.006846
+    2        0.815872       0.003900       0.814476      0.005997
+    3        0.822959       0.002018       0.821682      0.003912
+    4        0.827528       0.000769       0.826191      0.001937
+    0.826191
