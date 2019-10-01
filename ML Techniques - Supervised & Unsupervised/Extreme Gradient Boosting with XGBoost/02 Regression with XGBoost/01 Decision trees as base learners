@@ -1,0 +1,169 @@
+It's now time to build an XGBoost model to predict house prices - not in Boston, Massachusetts, as you saw in the video, but in Ames, Iowa! This dataset of housing prices has been pre-loaded into a DataFrame called df. If you explore it in the Shell, you'll see that there are a variety of features about the house and its location in the city.
+In this exercise, your goal is to use trees as base learners. By default, XGBoost uses trees as base learners, so you don't have to specify that you want to use trees here with booster="gbtree".
+xgboost has been imported as xgb and the arrays for the features and the target are available in X and y, respectively
+
+
+df
+MSSubClass  LotFrontage  LotArea  OverallQual  OverallCond  ...  HouseStyle_SFoyer  HouseStyle_SLvl  PavedDrive_P  PavedDrive_Y  SalePrice
+0             60         65.0     8450            7            5  ...                  0                0             0             1     208500
+1             20         80.0     9600            6            8  ...                  0                0             0             1     181500
+2             60         68.0    11250            7            5  ...                  0                0             0             1     223500
+3             70         60.0     9550            7            5  ...                  0                0             0             1     140000
+4             60         84.0    14260            8            5  ...                  0                0             0             1     250000
+5             50         85.0    14115            5            5  ...                  0                0             0             1     143000
+6             20         75.0    10084            8            5  ...                  0                0             0             1     307000
+7             60          0.0    10382            7            6  ...                  0                0             0             1     200000
+8             50         51.0     6120            7            5  ...                  0                0             0             1     129900
+9            190         50.0     7420            5            6  ...                  0                0             0             1     118000
+10            20         70.0    11200            5            5  ...                  0                0             0             1     129500
+11            60         85.0    11924            9            5  ...                  0                0             0             1     345000
+12            20          0.0    12968            5            6  ...                  0                0             0             1     144000
+13            20         91.0    10652            7            5  ...                  0                0             0             1     279500
+14            20          0.0    10920            6            5  ...                  0                0             0             1     157000
+15            45         51.0     6120            7            8  ...                  0                0             0             1     132000
+16            20          0.0    11241            6            7  ...                  0                0             0             1     149000
+17            90         72.0    10791            4            5  ...                  0                0             0             1      90000
+18            20         66.0    13695            5            5  ...                  0                0             0             1     159000
+19            20         70.0     7560            5            6  ...                  0                0             0             1     139000
+20            60        101.0    14215            8            5  ...                  0                0             0             1     325300
+21            45         57.0     7449            7            7  ...                  0                0             0             0     139400
+22            20         75.0     9742            8            5  ...                  0                0             0             1     230000
+23           120         44.0     4224            5            7  ...                  0                0             0             1     129900
+24            20          0.0     8246            5            8  ...                  0                0             0             1     154000
+25            20        110.0    14230            8            5  ...                  0                0             0             1     256300
+26            20         60.0     7200            5            7  ...                  0                0             0             1     134800
+27            20         98.0    11478            8            5  ...                  0                0             0             1     306000
+28            20         47.0    16321            5            6  ...                  0                0             0             1     207500
+29            30         60.0     6324            4            6  ...                  0                0             0             1      68500
+...          ...          ...      ...          ...          ...  ...                ...              ...           ...           ...        ...
+1430          60         60.0    21930            5            5  ...                  0                0             0             1     192140
+1431         120          0.0     4928            6            6  ...                  0                0             0             1     143750
+1432          30         60.0    10800            4            6  ...                  0                0             0             1      64500
+1433          60         93.0    10261            6            5  ...                  0                0             0             1     186500
+1434          20         80.0    17400            5            5  ...                  0                0             1             0     160000
+1435          20         80.0     8400            6            9  ...                  0                0             0             1     174000
+1436          20         60.0     9000            4            6  ...                  0                0             0             1     120500
+1437          20         96.0    12444            8            5  ...                  0                0             0             1     394617
+1438          20         90.0     7407            6            7  ...                  0                0             0             1     149700
+1439          60         80.0    11584            7            6  ...                  0                1             0             1     197000
+1440          70         79.0    11526            6            7  ...                  0                0             0             1     191000
+1441         120          0.0     4426            6            5  ...                  0                0             0             1     149300
+1442          60         85.0    11003           10            5  ...                  0                0             0             1     310000
+1443          30          0.0     8854            6            6  ...                  0                0             1             0     121000
+1444          20         63.0     8500            7            5  ...                  0                0             0             1     179600
+1445          85         70.0     8400            6            5  ...                  1                0             0             1     129000
+1446          20          0.0    26142            5            7  ...                  0                0             1             0     157900
+1447          60         80.0    10000            8            5  ...                  0                0             0             1     240000
+1448          50         70.0    11767            4            7  ...                  0                0             0             1     112000
+1449         180         21.0     1533            5            7  ...                  1                0             0             1      92000
+1450          90         60.0     9000            5            5  ...                  0                0             0             1     136000
+1451          20         78.0     9262            8            5  ...                  0                0             0             1     287090
+1452         180         35.0     3675            5            5  ...                  0                1             0             1     145000
+1453          20         90.0    17217            5            5  ...                  0                0             0             1      84500
+1454          20         62.0     7500            7            5  ...                  0                0             0             1     185000
+1455          60         62.0     7917            6            5  ...                  0                0             0             1     175000
+1456          20         85.0    13175            6            6  ...                  0                0             0             1     210000
+1457          70         66.0     9042            7            9  ...                  0                0             0             1     266500
+1458          20         68.0     9717            5            6  ...                  0                0             0             1     142125
+1459          20         75.0     9937            5            6  ...                  0                0             0             1     147500
+
+[1460 rows x 57 columns]
+
+
+
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1460 entries, 0 to 1459
+Data columns (total 57 columns):
+MSSubClass              1460 non-null int64
+LotFrontage             1460 non-null float64
+LotArea                 1460 non-null int64
+OverallQual             1460 non-null int64
+OverallCond             1460 non-null int64
+YearBuilt               1460 non-null int64
+Remodeled               1460 non-null int64
+GrLivArea               1460 non-null int64
+BsmtFullBath            1460 non-null int64
+BsmtHalfBath            1460 non-null int64
+FullBath                1460 non-null int64
+HalfBath                1460 non-null int64
+BedroomAbvGr            1460 non-null int64
+Fireplaces              1460 non-null int64
+GarageArea              1460 non-null int64
+MSZoning_FV             1460 non-null int64
+MSZoning_RH             1460 non-null int64
+MSZoning_RL             1460 non-null int64
+MSZoning_RM             1460 non-null int64
+Neighborhood_Blueste    1460 non-null int64
+Neighborhood_BrDale     1460 non-null int64
+Neighborhood_BrkSide    1460 non-null int64
+Neighborhood_ClearCr    1460 non-null int64
+Neighborhood_CollgCr    1460 non-null int64
+Neighborhood_Crawfor    1460 non-null int64
+Neighborhood_Edwards    1460 non-null int64
+Neighborhood_Gilbert    1460 non-null int64
+Neighborhood_IDOTRR     1460 non-null int64
+Neighborhood_MeadowV    1460 non-null int64
+Neighborhood_Mitchel    1460 non-null int64
+Neighborhood_NAmes      1460 non-null int64
+Neighborhood_NPkVill    1460 non-null int64
+Neighborhood_NWAmes     1460 non-null int64
+Neighborhood_NoRidge    1460 non-null int64
+Neighborhood_NridgHt    1460 non-null int64
+Neighborhood_OldTown    1460 non-null int64
+Neighborhood_SWISU      1460 non-null int64
+Neighborhood_Sawyer     1460 non-null int64
+Neighborhood_SawyerW    1460 non-null int64
+Neighborhood_Somerst    1460 non-null int64
+Neighborhood_StoneBr    1460 non-null int64
+Neighborhood_Timber     1460 non-null int64
+Neighborhood_Veenker    1460 non-null int64
+BldgType_2fmCon         1460 non-null int64
+BldgType_Duplex         1460 non-null int64
+BldgType_Twnhs          1460 non-null int64
+BldgType_TwnhsE         1460 non-null int64
+HouseStyle_1.5Unf       1460 non-null int64
+HouseStyle_1Story       1460 non-null int64
+HouseStyle_2.5Fin       1460 non-null int64
+HouseStyle_2.5Unf       1460 non-null int64
+HouseStyle_2Story       1460 non-null int64
+HouseStyle_SFoyer       1460 non-null int64
+HouseStyle_SLvl         1460 non-null int64
+PavedDrive_P            1460 non-null int64
+PavedDrive_Y            1460 non-null int64
+SalePrice               1460 non-null int64
+dtypes: float64(1), int64(56)
+memory usage: 650.2 KB
+
+
+
+
+
+
+
+
+
+#Split df into training and testing sets, holding out 20% for testing. Use a random_state of 123.
+# Create the training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=123)
+
+
+#Instantiate the XGBRegressor as xg_reg, using a seed of 123. Specify an objective of "reg:linear" and use 10 trees. Note: You don't have to specify booster="gbtree" as this is the default.
+# Instantiate the XGBRegressor: xg_reg
+xg_reg = xgb.XGBRegressor(objective="reg:linear",
+                        n_estimators = 10,
+                        seed = 123)
+
+
+#Fit xg_reg to the training data and predict the labels of the test set. Save the predictions in a variable called preds.
+# Fit the regressor to the training set
+xg_reg.fit(X_train,y_train)
+
+# Predict the labels of the test set: preds
+preds = xg_reg.predict(X_test)
+
+
+#Compute the rmse using np.sqrt() and the mean_squared_error() function from sklearn.metrics, which has been pre-imported.
+# Compute the rmse: rmse
+rmse = np.sqrt(mean_squared_error(y_test, preds))
+print("RMSE: %f" % (rmse))
