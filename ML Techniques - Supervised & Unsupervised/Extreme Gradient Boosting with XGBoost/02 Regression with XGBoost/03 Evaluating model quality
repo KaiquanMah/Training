@@ -1,0 +1,77 @@
+It's now time to begin evaluating model quality.
+Here, you will compare the RMSE and MAE of a cross-validated XGBoost model on the Ames housing data. As in previous exercises, all necessary modules have been pre-loaded and the data is available in the DataFrame df.
+
+
+# Create the DMatrix: housing_dmatrix
+housing_dmatrix = xgb.DMatrix(data=X, label=y)
+
+# Create the parameter dictionary: params
+params = {"objective":"reg:linear", "max_depth":4}
+
+
+#Perform 4-fold cross-validation with 5 boosting rounds and "rmse" as the metric.
+# Perform cross-validation: cv_results
+cv_results = xgb.cv(dtrain=housing_dmatrix, params=params, nfold=4, num_boost_round=5, metrics="rmse", as_pandas=True, seed=123)
+
+# Print cv_results
+print(cv_results)
+
+
+   train-rmse-mean  train-rmse-std  test-rmse-mean  test-rmse-std
+0    141767.535156      429.442896   142980.433594    1193.789595
+1    102832.541015      322.467623   104891.392578    1223.157953
+2     75872.619140      266.472468    79478.937500    1601.344539
+3     57245.650391      273.625907    62411.924804    2220.148314
+4     44401.295899      316.422824    51348.281250    2963.379118
+
+
+# Extract and print final boosting round metric
+print((cv_results["rmse"]).tail(1))
+
+
+4    51348.28125
+Name: test-rmse-mean, dtype: float64
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Create the DMatrix: housing_dmatrix
+housing_dmatrix = xgb.DMatrix(data=X, label=y)
+
+# Create the parameter dictionary: params
+params = {"objective":"reg:linear", "max_depth":4}
+
+# Perform cross-validation: cv_results
+cv_results = xgb.cv(dtrain=housing_dmatrix, params=params, nfold=4, num_boost_round=5, metrics="mae", as_pandas=True, seed=123)
+
+# Print cv_results
+print(cv_results)
+
+
+
+   train-mae-mean  train-mae-std  test-mae-mean  test-mae-std
+0   127343.570313     668.341212  127633.990235   2403.991706
+1    89770.058594     456.950309   90122.496093   2107.910017
+2    63580.791016     263.405561   64278.561524   1887.563581
+3    45633.141601     151.886070   46819.167969   1459.813514
+4    33587.090821      87.001007   35670.651367   1140.608182
+
+
+# Extract and print final boosting round metric
+print((cv_results["test-mae-mean"]).tail(1))
+
+4    35670.651367
+Name: test-mae-mean, dtype: float64
