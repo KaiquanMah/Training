@@ -1,0 +1,69 @@
+Now, instead of attempting to cherry pick the best possible number of boosting rounds, you can very easily have XGBoost automatically select the number of boosting rounds for you within xgb.cv(). This is done using a technique called early stopping.
+Early stopping works by testing the XGBoost model after every boosting round against a hold-out dataset and stopping the creation of additional boosting rounds (thereby finishing training of the model early) if the hold-out metric ("rmse" in our case) does not improve for a given number of rounds. Here you will use the early_stopping_rounds parameter in xgb.cv() with a large possible number of boosting rounds (50). Bear in mind that if the holdout metric continuously improves up through when num_boosting_rounds is reached, then early stopping does not occur.
+Here, the DMatrix and parameter dictionary have been created for you. Your task is to use cross-validation with early stopping. Go for it!
+
+
+# Create your housing DMatrix: housing_dmatrix
+housing_dmatrix = xgb.DMatrix(data=X, label=y)
+
+# Create the parameter dictionary for each tree: params
+params = {"objective":"reg:linear", "max_depth":4}
+
+# Perform cross-validation with early stopping: cv_results
+cv_results = xgb.cv(nfold=3,early_stopping_rounds=10,num_boost_round=50,seed=123,params=params,dtrain=housing_dmatrix,as_pandas=True,metrics="rmse")
+
+# Print cv_results
+print(cv_results)
+
+
+        train-rmse-mean  train-rmse-std  test-rmse-mean  test-rmse-std
+    0     141871.630208      403.632409   142640.645833     705.565658
+    1     103057.028646       73.769561   104907.666667     111.114933
+    2      75975.963541      253.734987    79262.059895     563.766991
+    3      57420.529948      521.653556    61620.134115    1087.689415
+    4      44552.955729      544.169200    50437.561198    1846.448222
+    5      35763.949219      681.798925    43035.660156    2034.469858
+    6      29861.465495      769.571399    38600.881510    2169.800969
+    7      25994.673828      756.522016    36071.819010    2109.797271
+    8      23306.833333      759.237086    34383.184896    1934.546688
+    9      21459.768880      745.624404    33509.139974    1887.375633
+    10     20148.720703      749.612103    32916.806641    1850.893136
+    11     19215.382813      641.387376    32197.833984    1734.458659
+    12     18627.388021      716.257152    31770.853516    1802.155409
+    13     17960.695963      557.043993    31482.781901    1779.124534
+    14     17559.736979      631.412969    31389.990234    1892.319927
+    15     17205.713541      590.173229    31302.882813    1955.165974
+    16     16876.571940      703.631755    31234.058594    1880.705796
+    17     16597.661784      703.676727    31318.348958    1828.861483
+    18     16330.460938      607.273076    31323.633464    1775.909418
+    19     16005.973307      520.471073    31204.136068    1739.077074
+    20     15814.301432      518.604477    31089.861979    1756.021059
+    21     15493.405924      505.616658    31047.996094    1624.673955
+    22     15270.733724      502.019487    31056.916667    1668.043013
+    23     15086.382487      503.912747    31024.984375    1548.985605
+    24     14917.607747      486.206362    30983.684896    1663.128699
+    25     14709.589193      449.667058    30989.476563    1686.667469
+    26     14457.286458      376.787206    30952.112630    1613.171737
+    27     14185.566406      383.102876    31066.902344    1648.534310
+    28     13934.067383      473.465256    31095.639974    1709.224745
+    29     13749.646159      473.671021    31103.888021    1778.879154
+    30     13549.836914      454.898923    30976.086589    1744.515448
+    31     13413.484375      399.603774    30938.469401    1746.052597
+    32     13275.915364      415.408340    30931.000651    1772.468466
+    33     13085.878581      493.792345    30929.055989    1765.539739
+    34     12947.181315      517.790039    30890.631510    1786.509640
+    35     12846.027669      547.732453    30884.494141    1769.728295
+    36     12702.378255      505.524001    30833.541667    1691.002487
+    37     12532.245443      508.298084    30856.688151    1771.446377
+    38     12384.054362      536.225108    30818.016927    1782.784718
+    39     12198.443685      545.165136    30839.392578    1847.326928
+    40     12054.583659      508.841772    30776.965495    1912.780081
+    41     11897.036784      477.177622    30794.701172    1919.675316
+    42     11756.221680      502.992419    30780.954427    1906.819550
+    43     11618.846029      519.838297    30783.755208    1951.260237
+    44     11484.080404      578.428621    30776.730469    1953.445852
+    45     11356.552734      565.368794    30758.544271    1947.455425
+    46     11193.557292      552.298848    30729.972005    1985.699316
+    47     11071.315430      604.089695    30732.664062    1966.998275
+    48     10950.778646      574.862348    30712.240885    1957.751118
+    49     10824.865560      576.666458    30720.854818    1950.511520
