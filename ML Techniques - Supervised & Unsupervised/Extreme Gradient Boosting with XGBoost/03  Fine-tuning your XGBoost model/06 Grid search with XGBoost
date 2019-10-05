@@ -1,0 +1,40 @@
+Now that you've learned how to tune parameters individually with XGBoost, let's take your parameter tuning to the next level by using scikit-learn's GridSearch and RandomizedSearch capabilities with internal cross-validation using the GridSearchCV and RandomizedSearchCV functions. You will use these to find the best model exhaustively from a collection of possible parameter values across multiple parameters simultaneously. Let's get to work, starting with GridSearchCV!
+
+
+
+
+# Create your housing DMatrix: housing_dmatrix
+housing_dmatrix = xgb.DMatrix(data=X, label=y)
+
+# Create the parameter grid: gbm_param_grid
+gbm_param_grid = {
+    'colsample_bytree': [0.3, 0.7],
+    'n_estimators': [50],
+    'max_depth': [2, 5]
+}
+
+# Instantiate an XGBRegressor object called gbm
+gbm = xgb.XGBRegressor()
+
+
+
+#Create a GridSearchCV object called grid_mse, passing in: the parameter grid to param_grid, the XGBRegressor to estimator, "neg_mean_squared_error" to scoring, and 4 to cv. Also specify verbose=1 so you can better understand the output.
+# Perform grid search: grid_mse
+grid_mse = GridSearchCV(param_grid = gbm_param_grid, estimator=gbm, scoring='neg_mean_squared_error', cv=4, verbose=1)
+
+
+
+#Fit the GridSearchCV object to X and y.
+# Fit grid_mse to the data
+grid_mse.fit(X, y)
+
+
+#Print the best parameter values and lowest RMSE, using the .best_params_ and .best_score_ attributes, respectively, of grid_mse.
+# Print the best parameters and lowest RMSE
+print("Best parameters found: ", grid_mse.best_params_)
+print("Lowest RMSE found: ", np.sqrt(np.abs(grid_mse.best_score_)))
+
+
+
+    Best parameters found:  {'colsample_bytree': 0.7, 'max_depth': 5, 'n_estimators': 50}
+    Lowest RMSE found:  29916.562522854438
