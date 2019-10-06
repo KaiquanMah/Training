@@ -1,0 +1,23 @@
+Now that you've seen what steps need to be taken individually to properly process the Ames housing data, let's use the much cleaner and more succinct DictVectorizer approach and put it alongside an XGBoostRegressor inside of a scikit-learn pipeline.
+
+
+
+
+# Import necessary modules
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.pipeline import DictVectorizer
+
+# Fill LotFrontage missing values with 0
+X.LotFrontage = X.LotFrontage.fillna(0)
+
+# Setup the pipeline steps: steps
+steps = [("ohe_onestep", DictVectorizer(sparse=False)),
+         ("xgb_model", xgb.XGBRegressor())]
+
+# Create the pipeline: xgb_pipeline
+xgb_pipeline = Pipeline(steps)
+
+
+#Fit the Pipeline. Don't forget to convert X into a format that DictVectorizer understands by calling the to_dict("records") method on X.
+# Fit the pipeline
+xgb_pipeline.fit(X.to_dict("records"))
