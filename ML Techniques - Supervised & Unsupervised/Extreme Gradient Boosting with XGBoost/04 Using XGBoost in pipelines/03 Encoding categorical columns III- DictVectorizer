@@ -1,0 +1,29 @@
+Alright, one final trick before you dive into pipelines. The two step process you just went through - LabelEncoder followed by OneHotEncoder - can be simplified by using a DictVectorizer.
+Using a DictVectorizer on a DataFrame that has been converted to a dictionary allows you to get label encoding as well as one-hot encoding in one go.
+Your task is to work through this strategy in this exercise!
+
+
+
+# Import DictVectorizer
+from sklearn.feature_extraction import DictVectorizer
+
+#Convert df into a dictionary called df_dict using its .to_dict() method with "records" as the argument.
+# Convert df into a dictionary: df_dict
+df_dict = df.to_dict("records")
+
+#Instantiate a DictVectorizer object called dv with the keyword argument sparse=False.
+# Create the DictVectorizer object: dv
+dv = DictVectorizer(sparse=False)
+
+#Apply the DictVectorizer on df_dict by using its .fit_transform() method.
+# Apply dv on df: df_encoded
+df_encoded = dv.fit_transform(df_dict)
+
+# Print the resulting first five rows
+print(df_encoded[:5,:])
+
+# Print the vocabulary
+print(dv.vocabulary_)
+
+#Fantastic! Besides simplifying the process into one step, DictVectorizer has useful attributes such as vocabulary_ which maps the names of the features to their indices. With the data preprocessed, it's time to move onto pipelines!
+
