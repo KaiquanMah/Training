@@ -1,0 +1,41 @@
+Part 1
+05 Engineering features from strings - tf-idf
+Let's transform the volunteer dataset's title column into a text vector, to use in a prediction task in the next exercise.
+
+
+
+# Take the title text
+title_text = volunteer["title"]
+
+# Create the vectorizer method
+tfidf_vec = TfidfVectorizer()
+
+# Transform the text into tf-idf vectors
+text_tfidf = tfidf_vec.fit_transform(title_text)
+
+
+
+
+
+
+Part 2
+Text classification using tf/idf vectors
+Now that we've encoded the volunteer dataset's title column into tf/idf vectors, let's use those vectors to try to predict the category_desc column.
+
+#Using train_test_split, split the text_tfidf vector, along with your y variable, into training and test sets. Set the stratify parameter equal to y, since the class distribution is uneven. Notice that we have to run the toarray() method on the tf/idf vector, in order to get in it the proper format for scikit-learn.
+# Split the dataset according to the class distribution of category_desc
+y = volunteer["category_desc"]
+X_train, X_test, y_train, y_test = train_test_split(text_tfidf.toarray(), y, stratify=y)
+
+#Use Naive Bayes' fit() method on the X_train and y_train variables.
+# Fit the model to the training data
+nb.fit(X_train, y_train)
+#nb
+#GaussianNB(priors=None)
+
+
+# Print out the model's accuracy
+print(nb.score(X_test, y_test))
+
+<script.py> output:
+    0.567741935483871
