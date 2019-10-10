@@ -1,0 +1,45 @@
+Using PCA
+Let's apply PCA to the wine dataset, to see if we can get an increase in our model's accuracy.
+
+
+
+
+from sklearn.decomposition import PCA
+
+#Set up the PCA object. You'll use PCA on the wine dataset minus its label for Type, stored in the variable wine_X.
+# Set up PCA and the X vector for diminsionality reduction
+pca = PCA()
+wine_X = wine.drop("Type", axis=1)
+
+# Apply PCA to the wine dataset X vector
+transformed_X = pca.fit_transform(wine_X)
+
+#Print out the explained_variance_ratio_ attribute of pca to check how much variance is explained by each component.
+# Look at the percentage of variance explained by the different components
+print(pca.explained_variance_ratio_)
+
+<script.py> output:
+    [9.98091230e-01 1.73591562e-03 9.49589576e-05 5.02173562e-05
+     1.23636847e-05 8.46213034e-06 2.80681456e-06 1.52308053e-06
+     1.12783044e-06 7.21415811e-07 3.78060267e-07 2.12013755e-07
+     8.25392788e-08]
+
+
+
+
+
+
+
+
+
+Training a model with PCA
+Now that we have run PCA on the wine dataset, let's try training a model with it.
+
+# Split the transformed X and the y labels into training and test sets
+X_wine_train, X_wine_test, y_wine_train, y_wine_test = train_test_split(transformed_X, y)
+
+# Fit knn to the training data
+knn.fit(X_wine_train, y_wine_train)
+
+# Score knn on the test data and print it out
+knn.score(X_wine_test, y_wine_test)
