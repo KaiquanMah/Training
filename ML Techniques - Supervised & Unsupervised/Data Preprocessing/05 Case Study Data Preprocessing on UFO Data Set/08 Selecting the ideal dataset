@@ -1,0 +1,70 @@
+Let's get rid of some of the unnecessary features. Because we have an encoded country column, country_enc, keep it and drop other columns related to location: city, country, lat, long, state.
+We have columns related to month and year, so we don't need the date or recorded columns.
+We vectorized desc, so we don't need it anymore. For now we'll keep type.
+We'll keep seconds_log and drop seconds and minutes.
+Let's also get rid of the length_of_time column, which is unnecessary after extracting minutes.
+
+
+
+# Check the correlation between the seconds, seconds_log, and minutes columns
+print(ufo[["seconds", "seconds_log", "minutes"]].corr())
+<script.py> output:
+                  seconds  seconds_log   minutes
+    seconds      1.000000     0.853371  0.980341
+    seconds_log  0.853371     1.000000  0.824493
+    minutes      0.980341     0.824493  1.000000
+    
+
+# Make a list of features to drop
+to_drop = ["city", "country","date", "desc", "lat","length_of_time", "long","minutes","recorded","seconds", "state"]
+
+# Drop those features
+ufo_dropped = ufo.drop(to_drop, axis=1)
+
+#Use the words_to_filter() function we created previously. Pass in vocab, vec.vocabulary_, desc_tfidf, and let's keep the top 4 words as the last parameter.
+# Let's also filter some words out of the text vector we created
+filtered_words = words_to_filter(vocab, vec.vocabulary_, desc_tfidf, 4)
+
+#desc_tfidf - compressed sparse row matrix
+
+
+#vocab
+1183: 'every',
+ 1580: 'hw',
+ 1814: 'lo',
+ 2507: 'rest',
+ 1293: 'flashed',
+ 2516: 'revealed',
+ 121: '35ish',
+ 3328: 'wife',
+ 2681: 'shopping',
+ 446: 'bag',
+ 741: 'ciruclar',
+ 1079: 'dropping',
+ 1291: 'flares',
+ 1423: 'golden',
+ ...}
+
+
+
+
+#vec.vocabulary_
+'been': 497,
+ 'seeing': 2618,
+ 'western': 3302,
+ '6pm': 231,
+ 'every': 1183,
+ 'hw': 1580,
+ 'lo': 1814,
+ 'rest': 2507,
+ 'flashed': 1293,
+ 'revealed': 2516,
+ '35ish': 121,
+ 'wife': 3328,
+ 'shopping': 2681,
+ 'bag': 446,
+ 'ciruclar': 741,
+ 'dropping': 1079,
+ 'flares': 1291,
+ 'golden': 1423,
+ ...}
