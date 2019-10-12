@@ -1,0 +1,82 @@
+Modeling the UFO dataset, part 1
+In this exercise, we're going to build a k-nearest neighbor model to predict which country the UFO sighting took place in. Our X dataset has the log-normalized seconds column, the one-hot encoded type columns, as well as the month and year when the sighting took place. The y labels are the encoded country column, where 1 is us and 0 is ca.
+
+
+# Take a look at the features in the X set of data
+print(X.columns)
+
+Index(['seconds_log', 'changing', 'chevron', 'cigar', 'circle', 'cone',
+       'cross', 'cylinder', 'diamond', 'disk', 'egg', 'fireball', 'flash',
+       'formation', 'light', 'other', 'oval', 'rectangle', 'sphere',
+       'teardrop', 'triangle', 'unknown', 'month', 'year'],
+      dtype='object')
+
+
+y
+1852    0
+1853    0
+1854    0
+1855    1
+1856    1
+1857    1
+1858    1
+1859    1
+1860    1
+1861    1
+1862    1
+1863    1
+1864    1
+1865    1
+Name: country_enc, Length: 1866, dtype: int64
+
+
+
+# Split the X and y sets using train_test_split, setting stratify=y
+train_X, test_X, train_y, test_y = train_test_split(X, y, stratify=y)
+
+# Fit knn to the training sets
+knn.fit(train_X, train_y)
+
+# Print the score of knn on the test sets
+print(knn.score(test_X, test_y))
+  0.8693790149892934
+
+
+
+
+
+
+
+
+Modeling the UFO dataset, part 2
+Finally, let's build a model using the text vector we created, desc_tfidf, using the filtered_words list to create a filtered text vector. Let's see if we can predict the type of the sighting based on the text. We'll use a Naive Bayes model for this.
+
+#On the desc_tfidf vector, filter by passing a list of filtered_words into the index.
+# Use the list of filtered words we created to filter the text vector
+#compressed sparse row matrix
+filtered_text = desc_tfidf[:, list(filtered_words)]
+
+
+1050,
+ 1052,
+ 1053,
+ 1054,
+ 1055,
+ ...}
+
+
+
+# Split the X and y sets using train_test_split, setting stratify=y 
+train_X, test_X, train_y, test_y = train_test_split(filtered_text.toarray(), y, stratify=y )
+
+# Fit nb to the training sets
+nb.fit(train_X, train_y)
+
+# Print the score of nb on the test sets
+print(nb.score(test_X, test_y))
+
+<script.py> output:
+    0.16274089935760172
+    
+As you can see, this model performs very poorly on this text data. This is a clear case where iteration would be necessary to figure out what subset of text improves the model, and if perhaps any of the other features are useful in predicting type.
+
