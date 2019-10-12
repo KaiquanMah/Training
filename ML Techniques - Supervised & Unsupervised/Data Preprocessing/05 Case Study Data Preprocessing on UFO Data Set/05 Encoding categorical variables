@@ -1,0 +1,69 @@
+There are couple of columns in the UFO dataset that need to be encoded before they can be modeled through scikit-learn. You'll do that transformation here, using both binary and one-hot encoding methods.
+
+
+
+# Use Pandas to encode us values as 1 and others as 0
+ufo["country_enc"] = ufo["country"].apply(lambda x: 1 if x == "us" else 0)
+
+0       1
+1       1
+2       0
+3       1
+4       1
+5       1
+...
+1861    1
+1862    1
+1863    1
+1864    1
+1865    1
+Name: country_enc, Length: 1866, dtype: int64
+
+
+
+# Print the number of unique type values
+print(len(ufo["type"].unique()))
+
+array(['triangle', 'light', 'sphere', 'circle', 'other', 'oval',
+       'changing', 'fireball', 'disk', 'unknown', 'rectangle', 'chevron',
+       'diamond', 'formation', 'teardrop', 'egg', 'cylinder', 'cigar',
+       'cross', 'cone', 'flash'], dtype=object)
+
+21
+
+
+
+
+# Create a one-hot encoded set of the type values
+type_set = pd.get_dummies(ufo["type"])
+
+
+      changing  chevron  cigar   ...     teardrop  triangle  unknown
+0            0        0      0   ...            0         1        0
+1            0        0      0   ...            0         0        0
+2            0        0      0   ...            0         0        0
+...
+1861         0        0      0   ...            0         0        1
+1862         0        0      0   ...            0         0        0
+1863         1        0      0   ...            0         0        0
+1864         0        0      0   ...            0         0        0
+1865         0        0      0   ...            0         0        0
+
+[1866 rows x 21 columns]
+
+
+
+# Concatenate this set back to the ufo DataFrame
+ufo = pd.concat([ufo, type_set], axis=1)
+
+                    date   ...   unknown
+0    2002-11-21 05:45:00   ...         0
+1    2012-06-16 23:00:00   ...         0
+...
+1861 2002-08-20 23:10:00   ...         1
+1862 2013-07-04 21:00:00   ...         0
+1863 2008-11-10 00:30:00   ...         0
+1864 1998-06-25 22:18:00   ...         0
+1865 2005-12-10 18:00:00   ...         0
+
+[1866 rows x 35 columns]
