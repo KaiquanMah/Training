@@ -1,0 +1,71 @@
+In these final exercises of this chapter, you'll explore the two datasets you'll use in this course.
+The first is a collection of heartbeat sounds. Hearts normally have a predictable sound pattern as they beat, but some disorders can cause the heart to beat abnormally. This dataset contains a training set with labels for each type of heartbeat, and a testing set with no labels. You'll use the testing set to validate your models.
+As you have labeled data, this dataset is ideal for classification. In fact, it was originally offered as a part of a public Kaggle competition.
+https://www.kaggle.com/kinguistics/heartbeat-sounds
+
+
+
+
+
+import librosa as lr
+from glob import glob
+
+# List all the wav files in the folder
+audio_files = glob(data_dir + '/*.wav')
+
+['./files/normal__201102081321.wav',
+ './files/normal__201102081152.wav',
+ './files/murmur__201108222251.wav',
+ './files/murmur__201108222246.wav',
+ './files/murmur__201108222243.wav',
+ './files/murmur__201108222252.wav',
+ './files/murmur__201108222258.wav',
+ './files/normal__201103090635.wav',
+ './files/normal__201103101140.wav',
+ './files/murmur__201108222245.wav',
+ './files/murmur__201108222238.wav',
+ './files/normal__201101151127.wav',
+ './files/normal__201102270940.wav',
+ './files/murmur__201108222256.wav',
+ './files/murmur__201108222248.wav',
+ './files/murmur__201108222255.wav',
+ './files/normal__201102260502.wav',
+ './files/murmur__201108222242.wav',
+ './files/normal__201102201230.wav',
+ './files/normal__201101070538.wav',
+ './files/murmur__201108222253.wav']
+ 
+ 
+ 
+ 
+# Read in the first audio file, create the time array
+audio, sfreq = lr.load(audio_files[0])
+time = np.arange(0, len(audio)) / sfreq
+
+
+#audio
+array([  1.03745423e-03,   5.50616474e-04,  -5.50097720e-05, ...,
+        -2.12694495e-03,  -1.40691572e-03,  -6.57705532e-04], dtype=float32)
+
+
+#sfreq
+22050
+
+#time
+array([  0.00000000e+00,   4.53514739e-05,   9.07029478e-05, ...,
+         7.88875283e+00,   7.88879819e+00,   7.88884354e+00])
+
+
+
+
+# Plot audio over time
+fig, ax = plt.subplots()
+ax.plot(time, audio)
+ax.set(xlabel='Time (s)', ylabel='Sound Amplitude')
+plt.show()
+
+
+
+
+There are several seconds of heartbeat sounds in here, though note that most of this time is silence. A common procedure in machine learning is to separate the datapoints with lots of stuff happening from the ones that don't.
+
