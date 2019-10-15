@@ -1,0 +1,100 @@
+Now that you've removed some of the noisier fluctuations in the audio, let's see if this improves your ability to classify.
+
+audio_rectified_smooth from the previous exercise is available in your workspace.
+
+
+
+
+# Calculate stats
+means = np.mean(audio_rectified_smooth, axis=0)
+stds = np.std(audio_rectified_smooth, axis=0)
+maxs = np.max(audio_rectified_smooth, axis=0)
+
+
+audio_rectified_smooth
+                0         1         2         3         4         5   \
+time                                                                   
+0.000000       NaN       NaN       NaN       NaN       NaN       NaN   
+0.000454       NaN       NaN       NaN       NaN       NaN       NaN   
+3.999093  0.001114  0.018143  0.016249  
+3.999546  0.001114  0.018479  0.016058  
+[8820 rows x 60 columns]
+
+
+means
+0     0.043530
+1     0.045540
+2     0.051764
+3     0.008038
+4     0.016026
+5     0.059250
+6     0.005192
+7     0.029530
+8     0.041018
+9     0.054278
+10    0.004465
+11    0.003130
+12    0.007795
+13    0.058281
+14    0.057891
+15    0.038369
+16    0.007335
+17    0.000959
+18    0.008691
+19    0.049693
+20    0.001283
+21    0.014056
+22    0.019330
+23    0.065488
+24    0.006858
+25    0.013743
+26    0.001689
+27    0.002998
+28    0.014243
+29    0.036884
+30    0.004070
+31    0.025632
+32    0.001833
+33    0.001247
+34    0.040884
+35    0.013842
+36    0.058309
+37    0.044163
+38    0.016828
+39    0.001223
+40    0.018204
+41    0.067360
+42    0.007533
+43    0.007661
+44    0.036759
+45    0.046987
+46    0.079507
+47    0.030371
+48    0.002438
+49    0.015087
+50    0.083352
+51    0.021322
+52    0.037841
+53    0.017188
+54    0.035019
+55    0.039828
+56    0.099643
+57    0.007147
+58    0.076730
+59    0.049540
+dtype: float64
+
+
+means.shape
+(60,)
+
+
+
+# Create the X and y arrays
+X = np.column_stack([means, stds, maxs])
+y = labels.reshape([-1, 1])
+
+# Fit the model and score on testing data
+from sklearn.model_selection import cross_val_score
+percent_score = cross_val_score(model, X, y, cv=5)
+print(np.mean(percent_score))
