@@ -1,0 +1,48 @@
+In this exercise you'll implement linear regression "from scratch" using scipy.optimize.minimize.
+
+We'll train a model on the Boston housing price data set, which is already loaded into the variables X and y. For simplicity, we won't include an intercept in our regression model.
+
+
+
+
+# The squared error, summed over training examples
+def my_loss(w):
+    s = 0
+    for i in range(y.size):
+        # Get the true and predicted target values for example 'i'
+        y_i_true = y[i]
+        y_i_pred = w@X[i]
+        s = s + (y_i_true-y_i_pred)**2
+    return s
+
+
+
+#y.size
+#506
+
+
+# Returns the w that makes my_loss(w) smallest
+w_fit = minimize(my_loss, X[0]).x
+print(w_fit)
+
+    [-9.16299112e-02  4.86754828e-02 -3.77698794e-03  2.85635998e+00
+     -2.88057050e+00  5.92521269e+00 -7.22470732e-03 -9.67992974e-01
+      1.70448714e-01 -9.38971600e-03 -3.92421893e-01  1.49830571e-02
+     -4.16973012e-01]
+     
+     
+     
+# Compare with scikit-learn's LinearRegression coefficients
+lr = LinearRegression(fit_intercept=False).fit(X,y)
+print(lr.coef_)
+
+
+    [-9.16297843e-02  4.86751203e-02 -3.77930006e-03  2.85636751e+00
+     -2.88077933e+00  5.92521432e+00 -7.22447929e-03 -9.67995240e-01
+      1.70443393e-01 -9.38925373e-03 -3.92425680e-01  1.49832102e-02
+     -4.16972624e-01]
+     
+
+Isn't it cool how you reproduce the weights learned by scikit-learn?
+
+
