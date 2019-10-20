@@ -1,0 +1,37 @@
+In this exercise we'll perform feature selection on the movie review sentiment data set using L1 regularization. The features and targets are already loaded for you in X_train and y_train.
+
+We'll search for the best value of C using scikit-learn's GridSearchCV(), which was covered in the prerequisite course.
+
+
+
+
+# Specify L1 regularization
+lr = LogisticRegression(penalty='l1')
+
+# Instantiate the GridSearchCV object and run the search
+searcher = GridSearchCV(lr, {'C':[0.001, 0.01, 0.1, 1, 10]})
+searcher.fit(X_train, y_train)
+
+# Report the best parameters
+print("Best CV params", searcher.best_params_)
+<script.py> output:
+    Best CV params {'C': 1}
+
+
+# Find the number of nonzero coefficients (selected features)
+best_lr = searcher.best_estimator_
+#LogisticRegression(C=1, class_weight=None, dual=False, fit_intercept=True,
+          intercept_scaling=1, max_iter=100, multi_class='ovr', n_jobs=1,
+          penalty='l1', random_state=None, solver='liblinear', tol=0.0001,
+          verbose=0, warm_start=False)
+
+coefs = best_lr.coef_
+print("Total number of features:", coefs.size)
+print("Number of selected features:", np.count_nonzero(coefs))
+
+
+<script.py> output:
+    Total number of features: 2500
+    Number of selected features: 1220
+    Great job! As you can see, a whole lot of features were discarded here.
+
