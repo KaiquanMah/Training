@@ -1,0 +1,55 @@
+The forward stepwise variable selection procedure starts with an empty set of variables, and adds predictors one by one. In each step, the predictor that has the highest AUC in combination with the current variables is selected.
+
+In this exercise you will learn to implement the forward stepwise variable selection procedure. To this end, you can use the next_best function that has been implemented for you. It can be used as follows:
+next_best(current_variables,candidate_variables,target,basetable)
+where current_variables is the list of variables that is already in the model and candidate_variables the list of variables that can be added next.
+ 
+ 
+ 
+ # Find the candidate variables
+candidate_variables = list(basetable.columns.values)
+
+['target',
+ 'gender_F',
+ 'income_high',
+ 'income_low',
+ 'country_USA',
+ 'country_India',
+ 'country_UK',
+ 'age',
+ 'time_since_last_gift',
+ 'time_since_first_gift',
+ 'max_gift',
+ 'min_gift',
+ 'mean_gift',
+ 'number_gift']
+
+
+candidate_variables.remove("target")
+
+
+
+# Initialize the current variables
+current_variables = []
+
+
+
+# The forward stepwise variable selection procedure
+number_iterations = 5
+for i in range(0, number_iterations):
+    next_variable = next_best(current_variables, candidate_variables, ["target"], basetable)
+    current_variables = current_variables + [next_variable]
+    candidate_variables.remove(next_variable)
+    print("Variable added in step " + str(i+1)  + " is " + next_variable + ".")
+print(current_variables)
+
+
+
+
+<script.py> output:
+    Variable added in step 1 is max_gift.
+    Variable added in step 2 is number_gift.
+    Variable added in step 3 is time_since_last_gift.
+    Variable added in step 4 is mean_gift.
+    Variable added in step 5 is income_high.
+    ['max_gift', 'number_gift', 'time_since_last_gift', 'mean_gift', 'income_high']
