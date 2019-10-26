@@ -1,0 +1,55 @@
+Adding more variables and therefore more complexity to your logistic regression model does not automatically result in more accurate models. In this exercise you can verify whether adding 3 variables to a model leads to a more accurate model.
+
+variables_1 and variables_2 are available in your environment: you can print them to the console to explore what they look like.
+
+
+
+
+# Create appropriate dataframes
+X_1 = basetable[variables_1]
+X_2 = basetable[variables_2]
+y = basetable[["target"]]
+
+# Create the logistic regression model
+logreg = linear_model.LogisticRegression()
+
+# Make predictions using the first set of variables and assign the AUC to auc_1
+logreg.fit(X_1, y)
+predictions_1 = logreg.predict_proba(X_1)[:,1]
+auc_1 = roc_auc_score(y, predictions_1)
+
+# Make predictions using the second set of variables and assign the AUC to auc_2
+logreg.fit(X_2, y)
+predictions_2 = logreg.predict_proba(X_2)[:,1]
+auc_2 = roc_auc_score(y, predictions_2)
+
+# Print auc_1 and auc_2
+print(round(auc_1,2))
+print(round(auc_2,2))
+
+
+
+
+In [1]: variables_1
+Out[1]: ['mean_gift', 'income_low']
+
+In [2]: variables_2
+Out[2]: ['mean_gift', 'income_low', 'gender_F', 'country_India', 'age']
+
+In [4]: predictions_1
+Out[4]: 
+array([0.05652518, 0.04106224, 0.03930873, ..., 0.05871333, 0.12772154,
+       0.01671556])
+
+In [5]: predictions_2
+Out[5]: 
+array([0.0469403 , 0.04216345, 0.031374  , ..., 0.06199359, 0.1175338 ,
+       0.01620884])
+
+
+<script.py> output:
+    0.69
+    0.69
+You can see that the model with 5 variables has the same AUC as the model using only 2 variables. Adding more variables doesn't always increase the AUC.
+
+
