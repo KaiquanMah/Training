@@ -1,0 +1,44 @@
+The forward stepwise variable selection method starts with an empty variable set and proceeds in steps, where in each step the next best variable is added. To implement this procedure, two handy functions have been implemented for you.
+
+The auc function calculates for a given variable set variables the AUC of the model that uses this variable set as predictors. The next_best function calculates which variable should be added in the next step to the variable list.
+
+In this exercise, you will experiment with these functions to better understand their purpose. You will calculate the AUC of a given variable set, calculate which variable should be added next, and verify that this indeed results in an optimal AUC.
+
+
+
+   target  max_gift   mean_gift  min_gift  age  gender_F
+0       0     134.0   84.600000      48.0   75         0
+1       0     101.0   65.285714      24.0   35         1
+2       0     118.0   90.166667      66.0   40         0
+3       0     155.0  116.000000      91.0   47         0
+4       0      99.0   82.400000      69.0   47         0
+
+
+# Calculate the AUC of a model that uses "max_gift", "mean_gift" and "min_gift" as predictors
+auc_current = auc(["max_gift", "mean_gift", "min_gift"], ["target"], basetable)
+print(round(auc_current,4))
+    0.715
+
+
+# Calculate which variable among "age" and "gender_F" should be added to the variables "max_gift", "mean_gift" and "min_gift"
+next_variable = next_best(["max_gift", "mean_gift", "min_gift"], ["age","gender_F"], ["target"], basetable)
+print(next_variable)
+    age
+
+
+
+# Calculate the AUC of a model that uses "max_gift", "mean_gift", "min_gift" and "age" as predictors
+auc_current_age = auc(["max_gift", "mean_gift", "min_gift", "age"], ["target"], basetable)
+print(round(auc_current_age,4))
+    0.7174
+
+
+
+# Calculate the AUC of a model that uses "max_gift", "mean_gift", "min_gift" and "gender_F" as predictors
+auc_current_gender_F = auc(["max_gift", "mean_gift", "min_gift", "gender_F"], ["target"], basetable)
+print(round(auc_current_gender_F,4))
+    0.7162
+
+
+The model that has age as next variable has a better AUC than the model that has gender_F as next variable. Therefore, age is selected as the next best variable.
+
