@@ -1,0 +1,105 @@
+04 Prep Data For Predictor Insight Graph
+Calculating average incidences
+The most important column in the predictor insight graph table is the target incidence column. This column shows the average target value for each group.
+
+
+
+
+# Select the income and target columns
+basetable_income = basetable[["target","income"]]
+
+# Group basetable_income by income
+groups = basetable_income.groupby("income")
+
+# Calculate the target incidence and print the result
+incidence = groups["target"].agg({"Incidence" : np.mean}).reset_index()
+print(incidence)
+        income  Incidence
+    0  average   0.049166
+    1     high   0.061543
+    2      low   0.043118
+You can observe that the higher a donor's income, the more likely he is to donate for the campaign.
+
+
+
+
+
+
+
+
+
+Constructing the predictor insight graph table
+In the previous exercise you learned how to calculate the incidence column of the predictor insight graph table. In this exercise, you will also add the size of the groups, and wrap everything in a function that returns the predictor insight graph table for a given variable.
+
+
+# Function that creates predictor insight graph table
+def create_pig_table(basetable, target, variable):
+  
+    # Create groups for each variable
+    groups = basetable[[target,variable]].groupby(variable)
+    
+    # Calculate size and target incidence for each group
+    pig_table = groups[target].agg({'Incidence' : np.mean, 'Size' : np.size}).reset_index()
+    
+    # Return the predictor insight graph table
+    return pig_table
+
+# Calculate the predictor insight graph table for the variable gender
+pig_table_gender = create_pig_table(basetable, "target", "gender")
+
+# Print the result
+print(pig_table_gender)
+
+      gender   Size  Incidence
+    0      F  50033   0.053844
+    1      M  49967   0.045970
+    
+The predictor insight graph table shows that females are more likely to donate than males
+
+
+
+
+
+
+
+
+
+
+
+
+
+Grouping all predictor insight graph tables
+In the previous exercise, you constructed a function that calculates the predictor insight graph table for a given variable as follows:
+pig_table = create_pig_table(basetable, "target","variable")
+
+If you want to calculate the predictor insight graph table for many variables at once, it is a good idea to store them in a dictionary. You can create a new dictionary using dictionary = {}, add elements with a key using dictionary["key"] = value and retrieve elements using the key print(dictionary["key"]).
+
+# Create the list of variables for our predictor insight graph tables
+variables = ["income","gender","disc_mean_gift","disc_time_since_last_gift"]
+
+# Create an empty dictionary
+pig_tables = {}
+
+# Loop through the variables
+for variable in variables:
+  
+    # Create a predictor insight graph table
+    pig_table = create_pig_table(basetable, "target", variable)
+    
+    # Add the table to the dictionary
+    pig_tables[variable] = pig_table
+
+# Print the predictor insight graph table of the variable "disc_time_since_last_gift"
+print(pig_tables["disc_time_since_last_gift"])
+
+
+      disc_time_since_last_gift   Size  Incidence
+    0              (1050, 2518]  19953   0.023255
+    1                (462, 657]  20069   0.061986
+    2                (657, 833]  19996   0.050810
+    3               (833, 1050]  19971   0.033799
+    4                 [32, 462]  20011   0.079556
+    
+    
+    
+The predictor insight graph table shows that people who donated recently are more likely to donate again.    
