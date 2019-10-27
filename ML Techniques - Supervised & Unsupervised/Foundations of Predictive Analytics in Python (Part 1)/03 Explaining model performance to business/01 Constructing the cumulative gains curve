@@ -1,0 +1,49 @@
+Constructing the cumulative gains curve
+The cumulative gains curve is an evaluation curve that assesses the performance of your model. It shows the percentage of targets reached when considering a certain percentage of your population with the highest probability to be target according to your model.
+
+To construct this curve, you can use the .plot_cumulative_gain() method in the scikitplot module and the matplotlib.pyplot module. As for each model evaluation metric or curve, you need the true target values on the one hand and the predictions on the other hand to construct the cumulative gains curve.
+
+
+# Import the matplotlib.pyplot module 
+import matplotlib.pyplot as plt
+
+# Import the scikitplot module
+import scikitplot as skplt
+
+# Plot the cumulative gains graph
+skplt.metrics.plot_cumulative_gain(targets_test, predictions_test)
+plt.show()
+
+
+
+
+
+A random model
+In this exercise you will reconstruct the cumulative gains curve's baseline, that is, the cumulative gains curve of a random model.
+
+To do so, you need to construct random predictions. The plot_cumulative_gain method requires two values for these predictions: one for the target to be 0 and one for the target to be 1. These values should sum to one, so a valid list of predictions could for instance be [(0.02,0.98),(0.27,0.73),...,(0.09,0.91)].
+
+In Python, you can generate a random value between values a and b as follows:
+import random
+random_value = random.uniform(a,b)
+
+
+
+# Import the modules
+import random
+import matplotlib.pyplot as plt
+import scikitplot as skplt
+
+
+#Construct a list random_predictions that contains random numbers between 0 and 1.
+# Generate random predictions
+random_predictions = [random.uniform(0,1) for i in range(len(targets_test))]
+
+
+#Adjust the list random_predictions such that it contains tuples (r,a) with r the original value of the list and a such that r+a=1.
+# Adjust random predictions
+random_predictions = [(r, 1 - r) for r in random_predictions]
+
+# Plot the cumulative gains graph
+skplt.metrics.plot_cumulative_gain(targets_test, random_predictions)
+plt.show()
