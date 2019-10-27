@@ -1,0 +1,65 @@
+Business case using lift curve
+In the video you learned to implement a method that calculates the profit of a campaign:
+profit = profit(perc_targets, perc_selected, population_size, campaign_cost, campaign_reward)
+
+In this method, perc_targets is the percentage of targets in the group that you select for your campaign, perc_selected the percentage of people that is selected for the campaign, population_size the total population size, campaign_cost the cost of addressing a single person for the campaign, and campaign_reward the reward of addressing a target.
+In this exercise you will learn for a specific case whether it is useful to use a model, by comparing the profit that is made when addressing all donors versus the top 40% of the donors.
+
+
+
+
+# Plot the lift graph
+skplt.metrics.plot_lift_curve(targets_test,predictions_test)
+plt.show()
+
+# Read the lift at 40% (round it up to the upper tenth)
+perc_selected = 0.4
+lift = 1.5
+#read from the chart
+
+
+# Information about the campaign
+population_size, target_incidence, campaign_cost, campaign_reward = 100000, 0.01, 1, 100
+    
+# Profit if all donors are targeted
+profit_all = profit(target_incidence, .4, population_size, campaign_cost, campaign_reward)
+print(profit_all)
+    0.0
+
+
+# Profit if top 40% of donors are targeted
+profit_40 = profit(lift * target_incidence, 0.4, population_size, campaign_cost, campaign_reward)
+print(profit_40)
+    20000.0
+When addressing the entire donor base, you do not make any profit at all. When using the predictive model, you can make 20,000 Euro profit!
+
+
+
+
+
+
+Business case using cumulative gains curve
+The cumulative gains graph can be used to estimate how many donors one should address to make a certain profit. Indeed, the cumulative gains graph shows which percentage of all targets is reached when addressing a certain percentage of the population. If one knows the reward of a campaign, it follows easily how many donors should be targeted to reach a certain profit.
+In this exercise, you will calculate how many donors you should address to obtain a 30 000 Euro profit.
+
+
+# Plot the cumulative gains
+skplt.metrics.plot_cumulative_gain(targets_test, predictions_test)
+plt.show()
+
+# Number of targets you want to reach
+number_targets_toreach = 30000 / 50
+600.0
+#30k profit
+#50 profit per target
+
+perc_targets_toreach = number_targets_toreach / 1000
+0.6
+1000 total # targets
+
+perc_donors = .4
+number_donors_toreach = perc_donors * 10000
+#population size=10000
+
+It looks like you need to address 4,000 donors!
+
