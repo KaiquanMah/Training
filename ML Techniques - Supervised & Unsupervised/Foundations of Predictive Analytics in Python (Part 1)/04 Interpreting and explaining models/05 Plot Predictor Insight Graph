@@ -1,0 +1,101 @@
+Plotting the incidences
+The most important element of the predictor insight graph are the incidence values. For each group in the population with respect to a given variable, the incidence values reflect the percentage of targets in that group. In this exercise, you will write a python function that plots the incidence values of a variable, given the predictor insight graph table.
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# The function to plot a predictor insight graph.
+def plot_incidence(pig_table,variable):
+    
+    # Plot the incidence line
+    pig_table["Incidence"].plot()
+    
+    # Formatting the predictor insight graph
+    plt.xticks(np.arange(len(pig_table)), pig_table[variable])
+    plt.xlim([-0.5, len(pig_table) - 0.5])
+    plt.ylim([0, max(pig_table["Incidence"] * 2)])
+    plt.ylabel("Incidence", rotation=0, rotation_mode="anchor", ha="right")
+    plt.xlabel(variable)
+    
+    # Show the graph
+    plt.show()
+    
+
+
+# Apply the function for the variable "country".
+plot_incidence(pig_table, "country")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Plotting the group sizes
+The predictor insight graph gives information about predictive variables. Each variable divides the population in several groups. The predictor insight graph has a line that shows the average target incidence for each group, and a bar that shows the group sizes. In this exercise, you will learn how to write and apply a function that plots a predictor insight graph, given a predictor insight graph table.
+
+# The function to plot a predictor insight graph
+def plot_pig(pig_table, variable):
+    
+    # Plot formatting
+    plt.ylabel("Size", rotation=0, rotation_mode="anchor", ha="right")
+    
+    # Plot the bars with sizes 
+    pig_table["Size"].plot(kind="bar", width=0.5, color="lightgray", edgecolor="none") 
+    
+    # Plot the incidence line on secondary axis
+    pig_table["Incidence"].plot(secondary_y=True)
+    
+    # Plot formatting
+    plt.xticks(np.arange(len(pig_table)), pig_table[variable])
+    plt.xlim([-0.5, len(pig_table) - 0.5])
+    plt.ylabel("Incidence", rotation=0, rotation_mode="anchor", ha="left")
+    
+    # Show the graph
+    plt.show()
+    
+# Apply the function for the variable "country"
+plot_pig(pig_table, "country")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Putting it all together
+In the previous exercises, you defined a function create_pig_table that, given a basetable and a predictor, creates a predictor insight graph table for this predictor:
+pig_table = create_pig_table(basetable,target,variable)
+
+Next, you wrote a function plot_pig that plots the predictor insight graph based on this predictor insight graph table
+plot_pig(pig_table, variable)
+
+Often, you want to make many predictor insight graphs at once. In this exercise, you will learn how to automatically do this using a for loop.
+
+
+# Variables you want to make predictor insight graph tables for
+variables = ["income","gender","disc_mean_gift","disc_time_since_last_gift"]
+
+# Loop through the variables
+for variable in variables: 
+    
+    # Create the predictor insight graph table
+    pig_table = create_pig_table(basetable, "target", variable)
+    
+    # Plot the predictor insight graph
+    plot_pig(pig_table, variable)
