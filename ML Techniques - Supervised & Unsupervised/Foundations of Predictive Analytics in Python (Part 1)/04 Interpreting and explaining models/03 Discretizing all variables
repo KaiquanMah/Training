@@ -1,0 +1,37 @@
+Instead of discretizing the continuous variables one by one, it is easier to discretize them automatically. To get a list of all the columns in Python, you can use
+variables  = basetable.columns
+Only variables that are continuous should be discretized. You can verify whether variables should be discretized by checking whether they have more than a predefined number of different values.
+
+
+
+
+# Print the columns in the original basetable
+print(basetable.columns)
+Index(['target', 'gender_F', 'gender_M', 'income_average', 'income_low',
+       'income_high', 'country_USA', 'country_India', 'country_UK', 'age',
+       'time_since_last_gift', 'time_since_first_gift', 'max_gift', 'min_gift',
+       'mean_gift', 'median_gift'],
+      dtype='object')
+      
+      
+      
+# Get all the variable names except "target"
+variables = list(basetable.columns.values)
+variables.remove("target")
+
+# Loop through all the variables and discretize in 10 bins if there are more than 5 different values
+for variable in variables:
+    if len(basetable.groupby(variable))>5:
+        new_variable = "disc_" + variable
+        basetable[new_variable] = pd.qcut(basetable[variable], 10)
+        
+# Print the columns in the new basetable
+print(basetable.columns)
+
+    Index(['target', 'gender_F', 'gender_M', 'income_average', 'income_low',
+           'income_high', 'country_USA', 'country_India', 'country_UK', 'age',
+           'time_since_last_gift', 'time_since_first_gift', 'max_gift', 'min_gift',
+           'mean_gift', 'median_gift', 'disc_age', 'disc_time_since_last_gift',
+           'disc_time_since_first_gift', 'disc_max_gift', 'disc_min_gift',
+           'disc_mean_gift', 'disc_median_gift'],
+          dtype='object')
