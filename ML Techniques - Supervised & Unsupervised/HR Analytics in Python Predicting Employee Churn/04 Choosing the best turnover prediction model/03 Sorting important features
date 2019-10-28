@@ -1,0 +1,101 @@
+Sorting important features
+
+Among other things, Decision Trees are very popular because of their interpretability. Many models can provide accurate predictions, but Decision Trees can also quantify the effect of the different features on the target. Here, it can tell you which features have the strongest and weakest impacts on the decision to leave the company. In sklearn, you can get this information by using the feature_importances_ attribute.
+
+In this exercise, you're going to get the quantified importance of each feature, save them in a pandas DataFrame (a Pythonic table), and sort them from the most important to the less important. The model_ best Decision Tree Classifier used in the previous exercises is available in your workspace, as well as the features_test and features_train variables.
+
+pandas has been imported as pd.
+
+
+
+
+# Calculate feature importances
+feature_importances = model_best.feature_importances_
+In [2]: model_best
+Out[2]: 
+DecisionTreeClassifier(class_weight='balanced', criterion='gini', max_depth=8,
+            max_features=None, max_leaf_nodes=None,
+            min_impurity_decrease=0.0, min_impurity_split=None,
+            min_samples_leaf=150, min_samples_split=2,
+            min_weight_fraction_leaf=0.0, presort=False, random_state=42,
+            splitter='best')
+            
+In [4]: feature_importances
+Out[4]: 
+array([4.76342327e-01, 8.44506521e-02, 3.50632822e-02, 3.41873958e-02,
+       3.68211813e-01, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+       0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+       0.00000000e+00, 0.00000000e+00, 2.37853976e-04, 0.00000000e+00,
+       1.50667555e-03])
+       
+
+# Create a list of features: done
+feature_list = list(features)
+
+In [6]: feature_list
+Out[6]: 
+['satisfaction',
+ 'evaluation',
+ 'number_of_projects',
+ 'average_montly_hours',
+ 'time_spend_company',
+ 'work_accident',
+ 'promotion',
+ 'salary',
+ 'IT',
+ 'RandD',
+ 'hr',
+ 'management',
+ 'marketing',
+ 'product_mng',
+ 'sales',
+ 'support',
+ 'technical']
+ 
+ 
+ 
+# Save the results inside a DataFrame using feature_list as an index
+relative_importances = pd.DataFrame(index=feature_list, data=feature_importances, columns=["importance"])
+                      importance
+satisfaction            0.476342
+evaluation              0.084451
+number_of_projects      0.035063
+average_montly_hours    0.034187
+time_spend_company      0.368212
+work_accident           0.000000
+promotion               0.000000
+salary                  0.000000
+IT                      0.000000
+RandD                   0.000000
+hr                      0.000000
+management              0.000000
+marketing               0.000000
+product_mng             0.000000
+sales                   0.000238
+support                 0.000000
+technical               0.001507
+
+
+
+# Sort values to learn most important features
+relative_importances.sort_values(by="importance", ascending=False)
+                      importance
+satisfaction            0.476342
+time_spend_company      0.368212
+evaluation              0.084451
+number_of_projects      0.035063
+average_montly_hours    0.034187
+technical               0.001507
+sales                   0.000238
+promotion               0.000000
+salary                  0.000000
+work_accident           0.000000
+RandD                   0.000000
+hr                      0.000000
+management              0.000000
+marketing               0.000000
+product_mng             0.000000
+support                 0.000000
+IT                      0.000000
+
+It seems that satisfaction is by far the most impactful feature on the decision to leave the company or not.
