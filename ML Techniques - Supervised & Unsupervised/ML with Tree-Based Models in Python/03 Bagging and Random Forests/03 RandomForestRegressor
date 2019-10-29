@@ -1,0 +1,77 @@
+Train an RF regressor
+In the following exercises you'll predict bike rental demand in the Capital Bikeshare program in Washington, D.C using historical weather data from the Bike Sharing Demand dataset available through Kaggle. For this purpose, you will be using the random forests algorithm. As a first step, you'll define a random forests regressor and fit it to the training set.
+
+The dataset is processed for you and split into 80% train and 20% test. The features matrix X_train and the array y_train are available in your workspace.
+https://www.kaggle.com/c/bike-sharing-demand
+
+
+
+
+# Import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
+
+# Instantiate rf
+rf = RandomForestRegressor(n_estimators=25,
+            random_state=2)
+            
+# Fit rf to the training set    
+rf.fit(X_train, y_train) 
+
+
+
+
+
+
+
+
+
+
+Evaluate the RF regressor
+You'll now evaluate the test set RMSE of the random forests regressor rf that you trained in the previous exercise.
+
+The dataset is processed for you and split into 80% train and 20% test. The features matrix X_test, as well as the array y_test are available in your workspace. In addition, we have also loaded the model rf that you trained in the previous exercise.
+
+# Import mean_squared_error as MSE
+from sklearn.metrics import mean_squared_error as MSE
+
+# Predict the test set labels
+y_pred = rf.predict(X_test)
+
+# Evaluate the test set RMSE
+rmse_test = MSE(y_test,y_pred)**(1/2)
+
+# Print rmse_test
+print('Test set RMSE of rf: {:.2f}'.format(rmse_test))
+Test set RMSE of rf: 51.97
+You can try training a single CART on the same dataset. The test set RMSE achieved by rf is significantly smaller than that achieved by a single CART!
+
+
+
+
+
+
+
+
+
+Visualizing features importances
+In this exercise, you'll determine which features were the most predictive according to the random forests regressor rf that you trained in a previous exercise.
+
+For this purpose, you'll draw a horizontal barplot of the feature importance as assessed by rf. Fortunately, this can be done easily thanks to plotting capabilities of pandas.
+
+We have created a pandas.Series object called importances containing the feature names as index and their importances as values. In addition, matplotlib.pyplot is available as plt and pandas as pd.
+
+
+
+# Create a pd.Series of features importances
+importances = pd.Series(data=rf.feature_importances_,
+                        index= X_train.columns)
+
+# Sort importances
+importances_sorted = importances.sort_values()
+
+# Draw a horizontal barplot of importances_sorted
+importances_sorted.plot(kind='barh', color='lightgreen')
+plt.title('Features Importances')
+plt.show()
+Apparently, hr and workingday are the most important features according to rf. The importances of these two features add up to more than 90%!
+
