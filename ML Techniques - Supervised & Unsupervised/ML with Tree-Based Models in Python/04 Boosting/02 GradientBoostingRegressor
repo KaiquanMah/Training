@@ -1,0 +1,258 @@
+Define the GB regressor
+You'll now revisit the Bike Sharing Demand dataset that was introduced in the previous chapter. Recall that your task is to predict the bike rental demand using historical weather data from the Capital Bikeshare program in Washington, D.C.. For this purpose, you'll be using a gradient boosting regressor.
+
+As a first step, you'll start by instantiating a gradient boosting regressor which you will train in the next exercise.
+#https://www.kaggle.com/c/bike-sharing-demand
+
+
+
+# Import GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+
+# Instantiate gb
+gb = GradientBoostingRegressor(max_depth=4, 
+            n_estimators=200,
+            random_state=2)
+
+
+
+
+
+Train the GB regressor
+You'll now train the gradient boosting regressor gb that you instantiated in the previous exercise and predict test set labels.
+
+The dataset is split into 80% train and 20% test. Feature matrices X_train and X_test, as well as the arrays y_train and y_test are available in your workspace. In addition, we have also loaded the model instance gb that you defined in the previous exercise.
+
+# Fit gb to the training set
+gb.fit(X_train, y_train)
+
+# Predict test set labels
+y_pred = gb.predict(X_test)
+
+#Time to evaluate the test set RMSE!
+
+
+In [1]: X_test
+Out[1]: 
+      hr  holiday  workingday  temp   hum  windspeed  instant  mnth  yr  \
+1      1        0           0  0.74  0.70     0.1343    13005     7   1   
+2      2        0           0  0.72  0.74     0.0896    13006     7   1   
+3      3        0           0  0.72  0.84     0.1343    13007     7   1   
+8      8        0           0  0.78  0.62     0.1045    13012     7   1   
+16    16        0           0  0.92  0.33     0.2985    13020     7   1   
+17    17        0           0  0.92  0.26     0.2985    13021     7   1   
+25     1        0           1  0.76  0.58     0.1940    13029     7   1   
+39    15        0           1  0.84  0.36     0.1940    13043     7   1   
+46    22        0           1  0.74  0.51     0.1642    13050     7   1   
+47    23        0           1  0.74  0.51     0.1045    13051     7   1   
+51     3        0           1  0.70  0.65     0.1343    13055     7   1   
+53     5        0           1  0.70  0.61     0.0000    13057     7   1   
+58    10        0           1  0.82  0.43     0.2239    13062     7   1   
+60    12        0           1  0.88  0.28     0.1940    13064     7   1   
+73     1        1           0  0.68  0.74     0.0000    13077     7   1   
+77     5        1           0  0.66  0.69     0.0000    13081     7   1   
+88    16        1           0  0.92  0.35     0.2537    13092     7   1   
+92    20        1           0  0.86  0.47     0.2239    13096     7   1   
+96     0        0           1  0.74  0.51     0.1045    13100     7   1   
+99     3        0           1  0.72  0.54     0.1940    13103     7   1   
+106   10        0           1  0.86  0.44     0.3582    13110     7   1   
+111   15        0           1  0.92  0.33     0.3582    13115     7   1   
+113   17        0           1  0.92  0.35     0.1642    13117     7   1   
+133   13        0           1  0.90  0.27     0.1045    13137     7   1   
+135   15        0           1  0.92  0.29     0.1940    13139     7   1   
+137   17        0           1  0.92  0.29     0.0000    13141     7   1   
+139   19        0           1  0.88  0.35     0.2239    13143     7   1   
+140   20        0           1  0.86  0.39     0.1045    13144     7   1   
+143   23        0           1  0.80  0.63     0.1045    13147     7   1   
+146    2        0           0  0.76  0.72     0.1642    13150     7   1   
+...   ..      ...         ...   ...   ...        ...      ...   ...  ..   
+1329   9        0           0  0.68  0.69     0.2836    14333     8   1   
+1339  19        0           0  0.64  0.78     0.2985    14343     8   1   
+1343  23        0           0  0.62  0.83     0.2537    14347     8   1   
+1346   2        0           0  0.64  0.89     0.2239    14350     8   1   
+1350   6        0           0  0.62  0.88     0.2985    14354     8   1   
+1363  19        0           0  0.64  0.89     0.1642    14367     8   1   
+1378  10        0           1  0.72  0.74     0.1343    14382     8   1   
+1381  13        0           1  0.76  0.57     0.1642    14385     8   1   
+1382  14        0           1  0.80  0.49     0.0896    14386     8   1   
+1389  21        0           1  0.72  0.74     0.1940    14393     8   1   
+1392   0        0           1  0.70  0.84     0.2537    14396     8   1   
+1395   3        0           1  0.66  0.89     0.1343    14399     8   1   
+1399   7        0           1  0.66  0.83     0.1045    14403     8   1   
+1406  14        0           1  0.84  0.38     0.3284    14410     8   1   
+1409  17        0           1  0.80  0.35     0.3881    14413     8   1   
+1418   2        0           1  0.62  0.73     0.1343    14422     8   1   
+1421   5        0           1  0.60  0.73     0.1940    14425     8   1   
+1425   9        0           1  0.70  0.51     0.1940    14429     8   1   
+1428  12        0           1  0.76  0.40     0.0000    14432     8   1   
+1433  17        0           1  0.78  0.35     0.2239    14437     8   1   
+1435  19        0           1  0.70  0.54     0.1940    14439     8   1   
+1445   5        0           1  0.62  0.73     0.0000    14449     8   1   
+1447   7        0           1  0.64  0.73     0.0000    14451     8   1   
+1452  12        0           1  0.76  0.45     0.1343    14456     8   1   
+1454  14        0           1  0.76  0.48     0.1343    14458     8   1   
+1461  21        0           1  0.72  0.66     0.1343    14465     8   1   
+1475  11        0           1  0.86  0.28     0.2985    14479     8   1   
+1482  18        0           1  0.86  0.36     0.2537    14486     8   1   
+1485  21        0           1  0.76  0.58     0.1940    14489     8   1   
+1487  23        0           1  0.74  0.62     0.1045    14491     8   1   
+
+      Clear to partly cloudy  Light Precipitation  Misty  
+1                          1                    0      0  
+2                          1                    0      0  
+3                          1                    0      0  
+8                          1                    0      0  
+16                         1                    0      0  
+17                         1                    0      0  
+25                         0                    0      1  
+39                         1                    0      0  
+46                         1                    0      0  
+47                         1                    0      0  
+51                         1                    0      0  
+53                         1                    0      0  
+58                         1                    0      0  
+60                         1                    0      0  
+73                         1                    0      0  
+77                         1                    0      0  
+88                         1                    0      0  
+92                         1                    0      0  
+96                         1                    0      0  
+99                         1                    0      0  
+106                        1                    0      0  
+111                        1                    0      0  
+113                        1                    0      0  
+133                        1                    0      0  
+135                        1                    0      0  
+137                        1                    0      0  
+139                        1                    0      0  
+140                        1                    0      0  
+143                        1                    0      0  
+146                        1                    0      0  
+...                      ...                  ...    ...  
+1329                       0                    0      1  
+1339                       0                    0      1  
+1343                       0                    0      1  
+1346                       0                    0      1  
+1350                       1                    0      0  
+1363                       0                    0      1  
+1378                       1                    0      0  
+1381                       1                    0      0  
+1382                       1                    0      0  
+1389                       1                    0      0  
+1392                       1                    0      0  
+1395                       1                    0      0  
+1399                       0                    0      1  
+1406                       1                    0      0  
+1409                       1                    0      0  
+1418                       1                    0      0  
+1421                       1                    0      0  
+1425                       1                    0      0  
+1428                       1                    0      0  
+1433                       1                    0      0  
+1435                       1                    0      0  
+1445                       1                    0      0  
+1447                       1                    0      0  
+1452                       1                    0      0  
+1454                       1                    0      0  
+1461                       1                    0      0  
+1475                       1                    0      0  
+1482                       1                    0      0  
+1485                       1                    0      0  
+1487                       1                    0      0  
+
+[298 rows x 12 columns]
+
+In [2]: y_test
+Out[2]: 
+1        93
+2        90
+3        33
+8       142
+16      313
+17      413
+25       17
+39      234
+46      188
+47      102
+51        2
+53       35
+58      209
+60      272
+73      123
+77       19
+88      389
+92      551
+96       88
+99        7
+106     186
+111     254
+113     689
+133     293
+135     285
+137     576
+139     418
+140     336
+143     164
+146      58
+       ... 
+1329    288
+1339    354
+1343    158
+1346    116
+1350     21
+1363    292
+1378    206
+1381    288
+1382    246
+1389    278
+1392     38
+1395      4
+1399    269
+1406    251
+1409    864
+1418      6
+1421     40
+1425    348
+1428    360
+1433    870
+1435    643
+1445     35
+1447    532
+1452    294
+1454    273
+1461    307
+1475    309
+1482    546
+1485    303
+1487    174
+Name: cnt, Length: 298, dtype: int64
+
+
+
+
+
+
+
+
+
+
+
+
+Evaluate the GB regressor
+Now that the test set predictions are available, you can use them to evaluate the test set Root Mean Squared Error (RMSE) of gb.
+
+y_test and predictions y_pred are available in your workspace.
+
+# Import mean_squared_error as MSE
+from sklearn.metrics import mean_squared_error as MSE
+
+# Compute MSE
+mse_test = MSE(y_test,y_pred)
+
+# Compute RMSE
+rmse_test = mse_test**(1/2)
+
+# Print RMSE
+print('Test set RMSE of gb: {:.3f}'.format(rmse_test))
+Test set RMSE of gb: 52.065
+
