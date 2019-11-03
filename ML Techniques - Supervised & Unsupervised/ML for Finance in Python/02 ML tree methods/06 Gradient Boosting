@@ -1,0 +1,79 @@
+A gradient boosting model
+Now we'll fit a gradient boosting (GB) model. It's been said a linear model is like a Toyota Camry, and GB is like a Black Hawk helicopter. GB has potential to outperform random forests, but doesn't always do so. This is called the no free lunch theorem, meaning we should always try lots of different models for each problem.
+
+GB is similar to random forest models, but the difference is that trees are built successively. With each iteration, the next tree fits the residual errors from the previous tree in order to improve the fit.
+For now we won't search our hyperparameters -- they've been searched for you.
+
+#http://blog.kaggle.com/2017/01/23/a-kaggle-master-explains-gradient-boosting/
+#https://en.wikipedia.org/wiki/No_free_lunch_theorem
+
+
+
+from sklearn.ensemble import GradientBoostingRegressor
+
+# Create GB model -- hyperparameters have already been searched for you
+gbr = GradientBoostingRegressor(max_features=4,
+                                learning_rate=0.01,
+                                n_estimators=200,
+                                subsample=0.6,
+                                random_state=42)
+gbr.fit(train_features,train_targets)
+
+print(gbr.score(train_features, train_targets))
+    0.4063115061547039
+print(gbr.score(test_features, test_targets))
+    0.03992305163583343
+    
+In this case the gradient boosting model isn't that much better than a random forest, but you know what they say -- no free lunch!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Gradient boosting feature importances
+As with random forests, we can extract feature importances from gradient boosting models to understand which features are the best predictors. Sometimes it's nice to try different tree-based models and look at the feature importances from all of them. This can help average out any peculiarities that may arise from one particular model.
+
+The feature importances are stored as a numpy array in the .feature_importances_ property of the gradient boosting model. We'll need to get the sorted indices of the feature importances, using np.argsort(), in order to make a nice plot. We want the features from largest to smallest, so we will use Python's indexing to reverse the sorted importances like feat_importances[::-1].
+
+
+
+
+
+
+
+
+
+
+# Extract feature importances from the fitted gradient boosting model
+feature_importances = gbr.feature_importances_
+
+# Get the indices of the largest to smallest feature importances
+sorted_index = np.argsort(feature_importances)[::-1]
+x = range(features.shape[1])
+
+# Create tick labels 
+labels = np.array(feature_names)[sorted_index]
+
+plt.bar(x, feature_importances[sorted_index], tick_label=labels)
+
+# Set the tick lables to be the feature names, according to the sorted feature_idx
+plt.xticks(rotation=90)
+plt.show()
+
+Notice the feature importances are not exactly the same as the random forest model's...but they're close.
+
+
+
+
+
+
