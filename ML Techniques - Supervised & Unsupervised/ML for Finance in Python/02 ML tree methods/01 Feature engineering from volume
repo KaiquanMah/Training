@@ -1,0 +1,96 @@
+We're going to use non-linear models to make more accurate predictions. With linear models, features must be linearly correlated to the target. Other machine learning models can combine features in non-linear ways. For example, what if the price goes up when the moving average of price is going up, and the moving average of volume is going down? The only way to capture those interactions is to either multiply the features, or to use a machine learning algorithm that can handle non-linearity (e.g. random forests).
+
+To incorporate more information that may interact with other features, we can add in weakly-correlated features. First we will add volume data, which we have in the lng_df as the Adj_Volume column.
+
+
+
+
+
+# Create 2 new volume features, 1-day % change and 5-day SMA of the % change
+new_features = ['Adj_Volume_1d_change', 'Adj_Volume_1d_change_SMA']
+feature_names.extend(new_features)
+lng_df['Adj_Volume_1d_change'] = lng_df['Adj_Volume'].pct_change(1)
+lng_df['Adj_Volume_1d_change_SMA'] = talib.SMA(lng_df['Adj_Volume_1d_change'].values,timeperiod=5)
+
+# Plot histogram of volume % change data
+lng_df[new_features].plot(kind='hist', sharex=False, bins=50)
+plt.show()
+
+
+
+
+
+
+In [4]: lng_df['Adj_Volume_1d_change']
+Out[4]: 
+Date
+2016-04-15         NaN
+2016-04-18   -0.197477
+2016-04-19    0.087699
+2016-04-20   -0.340888
+2016-04-21   -0.172603
+2016-04-22    0.363392
+2016-04-25   -0.343180
+2016-04-26    0.302887
+2016-04-27    0.073364
+2016-04-28   -0.122925
+2016-04-29    0.018661
+2016-05-02   -0.103247
+2016-05-03   -0.228772
+2016-05-04    0.785878
+2016-05-05   -0.401531
+2016-05-06    1.002028
+2016-05-09    0.073602
+2016-05-10   -0.413914
+2016-05-11   -0.212330
+2016-05-12    1.956682
+2016-05-13   -0.565902
+2016-05-16   -0.221236
+2016-05-17    0.640733
+2016-05-18    0.103842
+2016-05-19   -0.045741
+2016-05-20   -0.356063
+2016-05-23   -0.356417
+2016-05-24    0.328734
+2016-05-25   -0.282122
+2016-05-26   -0.147963
+                ...   
+2018-02-27    0.870417
+2018-02-28   -0.131084
+2018-03-01    0.307808
+2018-03-02   -0.231646
+2018-03-05    0.232084
+2018-03-06   -0.390295
+2018-03-07    0.022720
+2018-03-08   -0.337270
+2018-03-09    0.114078
+2018-03-12    0.390028
+2018-03-13    0.743638
+2018-03-14   -0.670471
+2018-03-15    1.833375
+2018-03-16   -0.206107
+2018-03-19   -0.540931
+2018-03-20    0.056118
+2018-03-21    0.754458
+2018-03-22   -0.094454
+2018-03-23   -0.285288
+2018-03-26    0.402847
+2018-03-27   -0.048011
+2018-03-28   -0.332842
+2018-03-29    1.166646
+2018-04-02   -0.166348
+2018-04-03   -0.029491
+2018-04-04   -0.185509
+2018-04-05    0.394581
+2018-04-06   -0.307538
+2018-04-09   -0.313745
+2018-04-10    1.849065
+Name: Adj_Volume_1d_change, Length: 500, dtype: float64
+
+
+
+
+
+We can see the moving average of volume changes has a much smaller range than the raw data.
+
+
