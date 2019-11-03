@@ -1,0 +1,147 @@
+Create train and test features
+
+Before we fit our linear model, we want to add a constant to our features, so we have an intercept for our linear model.
+
+We also want to create train and test features. This is so we can fit our model to the train dataset, and evaluate performance on the test dataset. We always want to check performance on data the model has not seen to make sure we're not overfitting, which is memorizing patterns in the training data too exactly.
+
+With a time series like this, we typically want to use the oldest data as our training set, and the newest data as our test set. This is so we can evaluate the performance of the model on the most recent data, which will more realistically simulate predictions on data we haven't seen yet.
+
+
+
+
+
+# Import the statsmodels.api library with the alias sm
+import statsmodels.api as sm
+
+# Add a constant to the features
+linear_features = sm.add_constant(features)
+
+# Create a size for the training set that is 85% of the total number of samples
+train_size = int(0.85 * features.shape[0])
+train_features = linear_features[:train_size]
+train_targets = targets[:train_size]
+test_features = linear_features[train_size:]
+test_targets = targets[train_size:]
+print(linear_features.shape, train_features.shape, test_features.shape)
+(295, 10) (250, 10) (45, 10)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fit a linear model
+We'll now fit a linear model, because they are simple and easy to understand. Once we've fit our model, we can see which predictor variables appear to be meaningfully linearly correlated with the target, as well as their magnitude of effect on the target. Our judgment of whether or not predictors are significant is based on the p-values of coefficients. This is using a t-test to statistically test if the coefficient significantly differs from 0. The p-value is the percent chance that the coefficient for a feature does not differ from zero. Typically, we take a p-value of less than 0.05 to mean the coefficient is significantly different from 0.
+
+
+
+
+
+# Create the linear model and complete the least squares fit
+model = sm.OLS(train_targets, train_features)
+results = model.fit()  # fit the model
+print(results.summary())
+
+# examine pvalues
+# Features with p <= 0.05 are typically considered significantly different from 0
+print(results.pvalues)
+
+# Make predictions from our model for train and test sets
+train_predictions = results.predict(train_features)
+test_predictions = results.predict(test_features)
+
+
+<script.py> output:
+                                 OLS Regression Results                            
+    ===============================================================================
+    Dep. Variable:     5d_close_future_pct   R-squared:                       0.273
+    Model:                             OLS   Adj. R-squared:                  0.246
+    Method:                  Least Squares   F-statistic:                     10.01
+    Date:                 Sun, 03 Nov 2019   Prob (F-statistic):           4.92e-13
+    Time:                         07:41:03   Log-Likelihood:                 536.49
+    No. Observations:                  250   AIC:                            -1053.
+    Df Residuals:                      240   BIC:                            -1018.
+    Df Model:                            9                                         
+    Covariance Type:             nonrobust                                         
+    ================================================================================
+                       coef    std err          t      P>|t|      [0.025      0.975]
+    --------------------------------------------------------------------------------
+    const            6.8197      1.169      5.832      0.000       4.516       9.123
+    5d_close_pct    -0.0944      0.114     -0.830      0.408      -0.319       0.130
+    ma14             0.3473      0.230      1.512      0.132      -0.105       0.800
+    rsi14            0.0261      0.004      6.520      0.000       0.018       0.034
+    ma30             0.2200      0.206      1.067      0.287      -0.186       0.626
+    rsi30           -0.1789      0.025     -7.111      0.000      -0.228      -0.129
+    ma50            -2.0856      0.374     -5.578      0.000      -2.822      -1.349
+    rsi50            0.2410      0.032      7.458      0.000       0.177       0.305
+    ma200            0.5639      0.220      2.567      0.011       0.131       0.997
+    rsi200          -0.1999      0.029     -6.999      0.000      -0.256      -0.144
+    ==============================================================================
+    Omnibus:                        3.594   Durbin-Watson:                   0.560
+    Prob(Omnibus):                  0.166   Jarque-Bera (JB):                2.482
+    Skew:                          -0.038   Prob(JB):                        0.289
+    Kurtosis:                       2.518   Cond. No.                     6.92e+04
+    ==============================================================================
+    
+    Warnings:
+    [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+    [2] The condition number is large, 6.92e+04. This might indicate that there are
+    strong multicollinearity or other numerical problems.
+    const           1.764767e-08
+    5d_close_pct    4.075985e-01
+    ma14            1.317652e-01
+    rsi14           4.119023e-10
+    ma30            2.870964e-01
+    rsi30           1.315491e-11
+    ma50            6.542888e-08
+    rsi50           1.598367e-12
+    ma200           1.087610e-02
+    rsi200          2.559536e-11
+    dtype: float64
+
+
+
+
+
+
+
+
+
+
+
+
+
+Evaluate our results
+Once we have our linear fit and predictions, we want to see how good the predictions are so we can decide if our model is any good or not. Ideally, we want to back-test any type of trading strategy. However, this is a complex and typically time-consuming experience.
+
+A quicker way to understand the performance of our model is looking at regression evaluation metrics like R2, and plotting the predictions versus the actual values of the targets. Perfect predictions would form a straight, diagonal line in such a plot, making it easy for us to eyeball how our predictions are doing in different regions of price changes. We can use matplotlib's .scatter() function to create scatter plots of the predictions and actual values.
+
+
+
+
+
+# Scatter the predictions vs the targets with 80% transparency
+plt.scatter(train_predictions, train_targets, alpha=0.2, color='b', label='train')
+plt.scatter(test_predictions, test_targets, alpha=0.2, color='r', label='test')
+
+# Plot the perfect prediction line
+xmin, xmax = plt.xlim()
+plt.plot(np.arange(xmin, xmax, 0.01), np.arange(xmin, xmax, 0.01), c='k')
+
+# Set the axis labels and show the plot
+plt.xlabel('predictions')
+plt.ylabel('actual')
+plt.legend()  # show the legend
+plt.show()
+
+We can see our predictions are ok, but not very good yet. We need non-linearity! Coming right up...
+
+
