@@ -1,0 +1,40 @@
+Create moving average and RSI features
+We want to add historical data to our machine learning models to make better predictions, but adding lots of historical time steps is tricky. Instead, we can condense information from previous points into a single timestep with indicators.
+
+A moving average is one of the simplest indicators - it's the average of previous data points. This is the function talib.SMA() from the TAlib library.
+
+Another common technical indicator is the relative strength index (RSI). This is defined by:
+
+RSI=100− 100/(1+RS)
+RS=(average gain over n periods)/(average loss over n periods)
+The n periods is set in talib.RSI() as the timeperiod argument.
+
+A common period for RSI is 14, so we'll use that as one setting in our calculations.
+
+
+
+
+
+
+feature_names = ['5d_close_pct']  # a list of the feature names for later
+
+# Create moving averages and rsi for timeperiods of 14, 30, 50, and 200
+for n in [14, 30, 50, 200]:
+
+    # Create the moving average indicator and divide by Adj_Close
+    lng_df['ma' + str(n)] = talib.SMA(lng_df['Adj_Close'].values,
+                              timeperiod=n) / lng_df['Adj_Close']
+    # Create the RSI indicator
+    lng_df['rsi' + str(n)] = talib.RSI(lng_df['Adj_Close'].values, timeperiod=n)
+    
+    # Add rsi and moving average to the feature name list
+    feature_names = feature_names + ['ma' + str(n), 'rsi' + str(n)]
+
+print(feature_names)
+['5d_close_pct', 'ma14', 'rsi14', 'ma30', 'rsi30', 'ma50', 'rsi50', 'ma200', 'rsi200']
+
+
+
+
+Nice job, now we have our indicators!
+
