@@ -1,0 +1,60 @@
+Random forest feature importances
+One useful aspect of tree-based methods is the ability to extract feature importances. This is a quantitative way to measure how much each feature contributes to our predictions. It can help us focus on our best features, possibly enhancing or tuning them, and can also help us get rid of useless features that may be cluttering up our model.
+
+Tree models in sklearn have a .feature_importances_ property that's accessible after fitting the model. This stores the feature importance scores. We need to get the indices of the sorted feature importances using np.argsort() in order to make a nice-looking bar plot of feature importances (sorted from greatest to least importance).
+
+
+
+
+
+# Get feature importances from our random forest model
+importances = rfr.feature_importances_
+In [7]: importances
+Out[7]: 
+array([0.0695739 , 0.08288647, 0.09644671, 0.06226332, 0.0837842 ,
+       0.10138479, 0.1102526 , 0.13628496, 0.12727297, 0.03712604,
+       0.0849352 , 0.00158438, 0.0011701 , 0.00250616, 0.00252819])
+
+
+# Get the index of importances from greatest importance to least
+sorted_index = np.argsort(importances)[::-1]
+x = range(len(importances))
+
+In [8]: sorted_index
+Out[8]: array([ 7,  8,  6,  5,  2, 10,  4,  1,  0,  3,  9, 14, 13, 11, 12])
+
+In [9]: x
+Out[9]: range(0, 15)
+
+
+
+# Create tick labels 
+labels = np.array(feature_names)[sorted_index]
+plt.bar(x, importances[sorted_index], tick_label=labels)
+
+
+In [10]: np.array(feature_names)
+Out[10]: 
+array(['5d_close_pct', 'ma14', 'rsi14', 'ma30', 'rsi30', 'ma50', 'rsi50',
+       'ma200', 'rsi200', 'Adj_Volume_1d_change',
+       'Adj_Volume_1d_change_SMA', 'weekday_1', 'weekday_2', 'weekday_3',
+       'weekday_4'], dtype='<U24')
+
+In [11]: np.array(feature_names)[sorted_index]
+Out[11]: 
+array(['ma200', 'rsi200', 'rsi50', 'ma50', 'rsi14',
+       'Adj_Volume_1d_change_SMA', 'rsi30', 'ma14', '5d_close_pct',
+       'ma30', 'Adj_Volume_1d_change', 'weekday_4', 'weekday_3',
+       'weekday_1', 'weekday_2'], dtype='<U24')
+
+
+
+# Rotate tick labels to vertical
+plt.xticks(rotation=90)
+plt.show()
+
+
+Unsurprisingly, it looks like the days of the week should be thrown out.
+
+
+
