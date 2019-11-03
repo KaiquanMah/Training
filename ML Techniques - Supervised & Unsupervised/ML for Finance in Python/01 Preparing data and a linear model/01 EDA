@@ -1,0 +1,90 @@
+Explore the data with some EDA
+First, let's explore the data. Any time we begin a machine learning (ML) project, we need to first do some exploratory data analysis (EDA) to familiarize ourselves with the data. This includes things like:
+raw data plots
+histograms
+and more...
+
+I typically begin with raw data plots and histograms. This allows us to understand our data's distributions. If it's a normal distribution, we can use things like parametric statistics.
+
+There are two stocks loaded for you into pandas DataFrames: lng_df and spy_df (LNG and SPY). Take a look at them with .head(). We'll use the closing prices and eventually volume as inputs to ML algorithms.
+
+Note: We'll call plt.clf() each time we want to make a new plot, or f = plt.figure().
+
+
+
+
+print(lng_df.head())  # examine the DataFrames
+
+                Adj_Close  Adj_Volume
+    Date                             
+    2016-04-15      37.13   4293775.0
+    2016-04-18      36.90   3445852.0
+    2016-04-19      37.12   3748050.0
+    2016-04-20      37.77   2470384.0
+    2016-04-21      37.21   2043988.0
+                 Adj_Close  Adj_Volume
+
+print(spy_df.head())  # examine the SPY DataFrame
+    Date                              
+    2016-04-15  198.866552  75761600.0
+    2016-04-18  200.263926  75277700.0
+    2016-04-19  200.895603  88316100.0
+    2016-04-20  201.087035  81100300.0
+    2016-04-21  200.005505  85695000.0
+
+
+
+# Plot the Adj_Close columns for SPY and LNG
+spy_df['Adj_Close'].plot(label='SPY', legend=True)
+lng_df['Adj_Close'].plot(label='LNG', legend=True, secondary_y=True)
+plt.show()  # show the plot
+plt.clf()  # clear the plot space
+
+# Histogram of the daily price change percent of Adj_Close for LNG
+lng_df['Adj_Close'].pct_change(1).plot.hist(bins=50)
+plt.xlabel('adjusted close 1-day percent change')
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Correlations
+Correlations are nice to check out before building machine learning models, because we can see which features correlate to the target most strongly. Pearson's correlation coefficient is often used, which only detects linear relationships. It's commonly assumed our data is normally distributed, which we can "eyeball" from histograms. Highly correlated variables have a Pearson correlation coefficient near 1 (positively correlated) or -1 (negatively correlated). A value near 0 means the two variables are not linearly correlated.
+
+If we use the same time periods for previous price changes and future price changes, we can see if the stock price is mean-reverting (bounces around) or trend-following (goes up if it has been going up recently).
+
+
+
+# Create 5-day % changes of Adj_Close for the current day, and 5 days in the future
+lng_df['5d_future_close'] = lng_df['Adj_Close'].shift(-5)
+lng_df['5d_close_future_pct'] = lng_df['5d_future_close'].pct_change(5)
+lng_df['5d_close_pct'] = lng_df['Adj_Close'].pct_change(5)
+
+# Calculate the correlation matrix between the 5d close pecentage changes (current and future)
+corr = lng_df[['5d_close_pct', '5d_close_future_pct']].corr()
+print(corr)
+                         5d_close_pct  5d_close_future_pct
+    5d_close_pct             1.000000            -0.164861
+    5d_close_future_pct     -0.164861             1.000000
+
+# Scatter the current 5-day percent change vs the future 5-day percent change
+plt.scatter(lng_df['5d_close_pct'], lng_df['5d_close_future_pct'])
+plt.show()
+
+
+
+
+We can see the 5-day change is slightly negatively correlated to the change in the last 5 days -- an example of overall mean reversion!
+
+
+
