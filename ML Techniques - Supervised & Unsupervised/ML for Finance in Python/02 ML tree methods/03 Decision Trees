@@ -1,0 +1,108 @@
+Fit a decision tree
+
+Random forests are a go-to model for predictions; they work well out of the box. But we'll first learn the building block of random forests -- decision trees.
+
+Decision trees split the data into groups based on the features. Decision trees start with a root node, and split the data down until we reach leaf nodes.
+
+decision tree
+
+We can use sklearn to fit a decision tree with DecisionTreeRegressor and .fit(features, targets).
+
+Without limiting the tree's depth (or height), it will keep splitting the data until each leaf has 1 sample in it, which is the epitome of overfitting. We'll learn more about overfitting in the coming chapters.
+
+
+
+
+
+from sklearn.tree import DecisionTreeRegressor
+
+# Create a decision tree regression model with default arguments
+decision_tree = DecisionTreeRegressor()
+
+# Fit the model to the training features and targets
+decision_tree.fit(train_features,train_targets)
+
+# Check the score on train and test
+print(decision_tree.score(train_features, train_targets))
+    0.9999958787531624
+A perfect fit! ...on the training data.
+
+
+print(decision_tree.score(test_features, test_targets))
+  -2.129303032663718
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+Try different max depths
+We always want to optimize our machine learning models to make the best predictions possible. We can do this by tuning hyperparameters, which are settings for our models. We will see in more detail how these are useful in future chapters, but for now think of them as knobs we can turn to tune our predictions to be as good as possible.
+
+For regular decision trees, probably the most important hyperparameter is max_depth. This limits the number of splits in a decision tree. Let's find the best value of max_depth based on the R2 score of our model on the test set, which we can obtain using the score() method of our decision tree models.
+
+
+# Loop through a few different max depths and check the performance
+for d in [3,5,10]:
+    # Create the tree and fit it
+    decision_tree = DecisionTreeRegressor(max_depth=d)
+    decision_tree.fit(train_features, train_targets)
+
+    # Print out the scores on train and test
+    print('max_depth=', str(d))
+    print(decision_tree.score(train_features, train_targets))
+    print(decision_tree.score(test_features, test_targets), '\n')
+    
+    max_depth= 3
+    0.313332035717818
+    -0.3070692210378403 
+    
+    max_depth= 5
+    0.5117261722974893
+    -1.0602744418346384 
+    
+    max_depth= 10
+    0.8989880793409756
+    -1.3378328444389878
+
+Remember what value of max_depth got the highest test score for the next exercise!
+
+
+
+
+
+
+
+
+
+
+Check our results
+Once we have an optimized model, we want to check how it is performing in more detail. We already saw the R2 score, but it can be helpful to see the predictions plotted vs actual values. We can use the .predict() method of our decision tree model to get predictions on the train and test sets.
+
+Ideally, we want to see diagonal lines from the lower left to the upper right. However, due to the simplicity of decisions trees, our model is not going to do well on the test set. But it will do well on the train set.
+
+
+
+# Use the best max_depth of 3 from last exercise to fit a decision tree
+decision_tree = DecisionTreeRegressor(max_depth=3)
+decision_tree.fit(train_features, train_targets)
+
+# Predict values for train and test
+train_predictions = decision_tree.predict(train_features)
+test_predictions = decision_tree.predict(test_features)
+
+# Scatter the predictions vs actual values
+plt.scatter(train_predictions, train_targets, label='train')
+plt.scatter(test_predictions,test_targets,label='test')
+plt.show()
+
+The predictions group into lines because our depth is limited.
+
+
