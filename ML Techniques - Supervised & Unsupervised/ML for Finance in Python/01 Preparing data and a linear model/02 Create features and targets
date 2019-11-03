@@ -1,0 +1,148 @@
+We almost have features and targets that are machine-learning ready -- we have features from current price changes (5d_close_pct) and indicators (moving averages and RSI), and we created targets of future price changes (5d_close_future_pct). Now we need to break these up into separate numpy arrays so we can feed them into machine learning algorithms.
+
+Our indicators also cause us to have missing values at the beginning of the DataFrame due to the calculations. We could backfill this data, fill it with a single value, or drop the rows. Dropping the rows is a good choice, so our machine learning algorithms aren't confused by any sort of backfilled or 0-filled data. Pandas has a .dropna() function which we will use to drop any rows with missing values.
+
+
+
+
+
+# Drop all na values
+lng_df = lng_df.dropna()
+
+# Create features and targets
+# use feature_names for features; '5d_close_future_pct' for targets
+features = lng_df[feature_names]
+targets = lng_df['5d_close_future_pct']
+
+In [35]: feature_names
+Out[35]: 
+['5d_close_pct',
+ 'ma14',
+ 'rsi14',
+ 'ma30',
+ 'rsi30',
+ 'ma50',
+ 'rsi50',
+ 'ma200',
+ 'rsi200']
+
+
+In [2]: features
+Out[2]: 
+            5d_close_pct      ma14      rsi14  ...      rsi50     ma200     rsi200
+Date                                           ...                                
+2017-01-31      0.043812  0.950697  62.968946  ...  57.951677  0.839267  53.695377
+2017-02-01     -0.023429  0.967486  60.156019  ...  57.041713  0.850150  53.487663
+2017-02-02     -0.021618  0.932220  66.659314  ...  59.662227  0.812956  54.209475
+2017-02-03      0.007336  0.938976  66.920059  ...  59.774509  0.812490  54.241479
+...                  ...       ...        ...  ...        ...       ...        ...
+2018-03-28     -0.033986  1.017058  42.796606  ...  49.525314  0.936544  52.142361
+2018-03-29      0.027489  0.994387  48.797185  ...  51.130119  0.916875  52.560707
+2018-04-02      0.018843  1.002157  46.687504  ...  50.475091  0.925404  52.376647
+2018-04-03      0.028190  0.983883  51.543070  ...  51.830305  0.909116  52.734657
+[295 rows x 9 columns]
+
+In [4]: targets
+Out[4]: 
+Date
+2017-01-31    0.003358
+2017-02-01    0.019321
+2017-02-02   -0.002838
+2017-02-03   -0.010115
+                ...   
+2018-03-28    0.074761
+2018-03-29    0.017025
+2018-04-02    0.020947
+2018-04-03    0.030567
+Name: 5d_close_future_pct, Length: 295, dtype: float64
+
+In [21]: lng_df.columns
+Out[21]: 
+Index(['Adj_Close', 'Adj_Volume', '5d_future_close', '5d_close_future_pct',
+       '5d_close_pct', 'ma14', 'rsi14', 'ma30', 'rsi30', 'ma50', 'rsi50',
+       'ma200', 'rsi200'],
+      dtype='object')
+
+
+
+
+
+
+
+
+# Create DataFrame from target column and feature columns
+feature_and_target_cols = ['5d_close_future_pct'] + feature_names
+feat_targ_df = lng_df[feature_and_target_cols]
+
+
+
+
+In [37]: feature_and_target_cols
+Out[37]: 
+['5d_close_future_pct',
+ '5d_close_pct',
+ 'ma14',
+ 'rsi14',
+ 'ma30',
+ 'rsi30',
+ 'ma50',
+ 'rsi50',
+ 'ma200',
+ 'rsi200']
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ In [38]: feat_targ_df
+Out[38]: 
+            5d_close_future_pct  5d_close_pct  ...     ma200     rsi200
+Date                                           ...                     
+2017-01-31             0.003358      0.043812  ...  0.839267  53.695377
+2017-02-01             0.019321     -0.023429  ...  0.850150  53.487663
+2017-02-02            -0.002838     -0.021618  ...  0.812956  54.209475
+...
+2017-02-24             0.000843      0.013237  ...  0.862660  53.382837
+2018-03-29             0.017025      0.027489  ...  0.916875  52.560707
+2018-04-02             0.020947      0.018843  ...  0.925404  52.376647
+2018-04-03             0.030567      0.028190  ...  0.909116  52.734657
+
+[295 rows x 10 columns]
+
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Calculate correlation matrix
+corr = feat_targ_df.corr()
+print(corr)
+                         5d_close_future_pct  5d_close_pct  ...     ma200    rsi200
+    5d_close_future_pct             1.000000     -0.047183  ...  0.230860 -0.221029
+    5d_close_pct                   -0.047183      1.000000  ... -0.220690  0.284021
+    ma14                            0.096373     -0.827699  ...  0.346457 -0.416221
+    rsi14                          -0.068888      0.683973  ... -0.551087  0.639057
+    ma30                            0.102744     -0.609573  ...  0.527767 -0.600068
+    rsi30                          -0.106279      0.518748  ... -0.761846  0.834532
+    ma50                            0.113444     -0.475081  ...  0.693863 -0.750857
+    rsi50                          -0.138946      0.426045  ... -0.871883  0.930507
+    ma200                           0.230860     -0.220690  ...  1.000000 -0.976110
+    rsi200                         -0.221029      0.284021  ... -0.976110  1.000000
+    
+    [10 rows x 10 columns]
