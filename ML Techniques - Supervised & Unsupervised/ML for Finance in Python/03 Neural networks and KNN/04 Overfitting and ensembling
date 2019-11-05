@@ -1,0 +1,213 @@
+Combatting overfitting with dropout
+A common problem with neural networks is they tend to overfit to training data. What this means is the scoring metric, like R2 or accuracy, is high for the training set, but low for testing and validation sets, and the model is fitting to noise in the training data.
+
+We can work towards preventing overfitting by using dropout. This randomly drops some neurons during the training phase, which helps prevent the net from fitting noise in the training data. keras has a Dropout layer that we can use to accomplish this. We need to set the dropout rate, or fraction of connections dropped during training time. This is set as a decimal between 0 and 1 in the Dropout() layer.
+
+We're going to go back to the mean squared error loss function for this model.
+
+
+
+
+
+
+from keras.layers import Dropout
+
+# Create model with dropout
+model_3 = Sequential()
+model_3.add(Dense(100, input_dim=scaled_train_features.shape[1], activation='relu'))
+model_3.add(Dropout(0.2))
+model_3.add(Dense(20, activation='relu'))
+model_3.add(Dense(1, activation='linear'))
+
+# Fit model with mean squared error loss function
+model_3.compile(optimizer='adam', loss='mse')
+history = model_3.fit(scaled_train_features, train_targets, epochs=25)
+plt.plot(history.history['loss'])
+plt.title('loss:' + str(round(history.history['loss'][-1], 6)))
+plt.show()
+
+
+
+<script.py> output:
+    Epoch 1/25
+    
+     32/250 [==>...........................] - ETA: 1s - loss: 0.5028
+    250/250 [==============================] - 0s 1ms/step - loss: 0.1775
+    Epoch 2/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0693
+    250/250 [==============================] - 0s 84us/step - loss: 0.0676
+    Epoch 3/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0522
+    250/250 [==============================] - 0s 81us/step - loss: 0.0501
+    Epoch 4/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0446
+    250/250 [==============================] - 0s 88us/step - loss: 0.0381
+    Epoch 5/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0415
+    250/250 [==============================] - 0s 95us/step - loss: 0.0362
+    Epoch 6/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0376
+    250/250 [==============================] - 0s 118us/step - loss: 0.0281
+    Epoch 7/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0379
+    250/250 [==============================] - 0s 87us/step - loss: 0.0355
+    Epoch 8/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0187
+    250/250 [==============================] - 0s 86us/step - loss: 0.0220
+    Epoch 9/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0213
+    250/250 [==============================] - 0s 83us/step - loss: 0.0222
+    Epoch 10/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0242
+    250/250 [==============================] - 0s 95us/step - loss: 0.0185
+    Epoch 11/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0219
+    250/250 [==============================] - 0s 76us/step - loss: 0.0163
+    Epoch 12/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0164
+    250/250 [==============================] - 0s 91us/step - loss: 0.0162
+    Epoch 13/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0153
+    250/250 [==============================] - 0s 103us/step - loss: 0.0148
+    Epoch 14/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0177
+    250/250 [==============================] - 0s 86us/step - loss: 0.0116
+    Epoch 15/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0134
+    250/250 [==============================] - 0s 80us/step - loss: 0.0125
+    Epoch 16/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0084
+    250/250 [==============================] - 0s 81us/step - loss: 0.0113
+    Epoch 17/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0140
+    250/250 [==============================] - 0s 81us/step - loss: 0.0123
+    Epoch 18/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0133
+    250/250 [==============================] - 0s 82us/step - loss: 0.0126
+    Epoch 19/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0110
+    250/250 [==============================] - 0s 93us/step - loss: 0.0118
+    Epoch 20/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0070
+    250/250 [==============================] - 0s 80us/step - loss: 0.0094
+    Epoch 21/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0073
+    250/250 [==============================] - 0s 82us/step - loss: 0.0066
+    Epoch 22/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0075
+    250/250 [==============================] - 0s 108us/step - loss: 0.0084
+    Epoch 23/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0065
+    250/250 [==============================] - 0s 88us/step - loss: 0.0066
+    Epoch 24/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0082
+    250/250 [==============================] - 0s 83us/step - loss: 0.0083
+    Epoch 25/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0099
+    250/250 [==============================] - 0s 84us/step - loss: 0.0074
+
+
+Dropout helps the model generalized a bit better to unseen data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ensembling models
+One approach to improve predictions from machine learning models is ensembling. A basic approach is to average the predictions from multiple models. A more complex approach is to feed predictions of models into another model, which makes final predictions. Both approaches usually improve our overall performance (as long as our individual models are good). If you remember, random forests are also using ensembling of many decision trees.
+
+To ensemble our neural net predictions, we'll make predictions with the 3 models we just created -- the basic model, the model with the custom loss function, and the model with dropout. Then we'll combine the predictions with numpy's .hstack() function, and average them across rows with np.mean(predictions, axis=1).
+
+
+
+
+# Make predictions from the 3 neural net models
+train_pred1 = model_1.predict(scaled_train_features)
+test_pred1 = model_1.predict(scaled_test_features)
+
+train_pred2 = model_2.predict(scaled_train_features)
+test_pred2 = model_2.predict(scaled_test_features)
+
+train_pred3 = model_3.predict(scaled_train_features)
+test_pred3 = model_3.predict(scaled_test_features)
+
+# Horizontally stack predictions and take the average across rows
+train_preds = np.mean(np.hstack((train_pred1, train_pred2, train_pred3)), axis=1)
+test_preds = np.mean(np.hstack((test_pred1, test_pred2, test_pred3)), axis=1)
+print(test_preds[-5:])
+    [0.02058611 0.01522053 0.109104   0.01595709 0.00264436]
+
+#Now let's see how our ensemble predictions perform.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+See how the ensemble performed
+Let's check performance of our ensembled model to see how it's doing. We should see roughly an average of the R2 scores, as well as a scatter plot that is a mix of our previous models' predictions. The bow-tie shape from the custom loss function model should still be a bit visible, but the edges near x=0 should be softer.
+
+
+
+from sklearn.metrics import r2_score
+
+# Evaluate the R^2 scores
+print(r2_score(train_targets, train_preds))
+print(r2_score(test_targets, test_preds))
+
+# Scatter the predictions vs actual -- this one is interesting!
+plt.scatter(train_preds, train_targets, label='train')
+plt.scatter(test_preds, test_targets, label='test')
+plt.legend(); plt.show()
+
+<script.py> output:
+    0.3162163087997293
+    0.049554161469062
+
+
+Our R^2 values are around the average of the 3 models we ensembled. Notice the plot also looks like the bow-tie shape has been softened a bit.
+
