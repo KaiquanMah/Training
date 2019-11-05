@@ -1,0 +1,203 @@
+Custom loss function
+Up to now, we've used the mean squared error as a loss function. This works fine, but with stock price prediction it can be useful to implement a custom loss function. A custom loss function can help improve our model's performance in specific ways we choose. For example, we're going to create a custom loss function with a large penalty for predicting price movements in the wrong direction. This will help our net learn to at least predict price movements in the correct direction.
+
+To do this, we need to write a function that takes arguments of (y_true, y_predicted). We'll also use functionality from the backend keras (using tensorflow) to find cases where the true value and prediction don't match signs, then penalize those cases.
+
+
+
+
+import keras.losses
+import tensorflow as tf
+
+# Create loss function
+def sign_penalty(y_true, y_pred):
+    penalty = 100.
+    loss = tf.where(tf.less(y_true * y_pred, 0), \
+                     penalty * tf.square(y_true - y_pred), \
+                     tf.square(y_true - y_pred))
+
+    return tf.reduce_mean(loss, axis=-1)
+
+keras.losses.sign_penalty = sign_penalty  # enable use of loss with keras
+print(keras.losses.sign_penalty)
+    <function sign_penalty at 0x7f60948838c8>
+
+
+
+
+
+
+
+
+
+Fit neural net with custom loss function
+Now we'll use the custom loss function we just created. This will enable us to alter the model's behavior in useful ways particular to our problem -- it's going to try to force the model to learn how to at least predict price movement direction correctly. All we need to do now is set the loss argument in our .compile() function to our function name, sign_penalty. We'll examine the training loss again to make sure it's flattened out.
+
+# Create the model
+model_2 = Sequential()
+model_2.add(Dense(100, input_dim=scaled_train_features.shape[1], activation='relu'))
+model_2.add(Dense(20, activation='relu'))
+model_2.add(Dense(1, activation='linear'))
+#In [2]: scaled_train_features.shape[1]
+#Out[2]: 11
+
+
+
+# Fit the model with our custom 'sign_penalty' loss function
+model_2.compile(optimizer='adam', loss=sign_penalty)
+history = model_2.fit(scaled_train_features, train_targets, epochs=25)
+plt.plot(history.history['loss'])
+plt.title('loss:' + str(round(history.history['loss'][-1], 6)))
+plt.show()
+
+
+
+<script.py> output:
+    Epoch 1/25
+    
+     32/250 [==>...........................] - ETA: 1s - loss: 2.7796
+    250/250 [==============================] - 0s 1ms/step - loss: 1.5216
+    Epoch 2/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.7719
+    250/250 [==============================] - 0s 75us/step - loss: 0.4990
+    Epoch 3/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.1990
+    250/250 [==============================] - 0s 86us/step - loss: 0.3184
+    Epoch 4/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.2113
+    250/250 [==============================] - 0s 406us/step - loss: 0.2114
+    Epoch 5/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.1262
+    250/250 [==============================] - 0s 219us/step - loss: 0.1517
+    Epoch 6/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0484
+    250/250 [==============================] - 0s 200us/step - loss: 0.1353
+    Epoch 7/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0483
+    250/250 [==============================] - 0s 194us/step - loss: 0.0994
+    Epoch 8/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.1533
+    250/250 [==============================] - 0s 224us/step - loss: 0.0831
+    Epoch 9/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0281
+    250/250 [==============================] - 0s 167us/step - loss: 0.0653
+    Epoch 10/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0781
+    250/250 [==============================] - 0s 148us/step - loss: 0.0627
+    Epoch 11/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0899
+    250/250 [==============================] - 0s 96us/step - loss: 0.0548
+    Epoch 12/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0391
+    250/250 [==============================] - 0s 113us/step - loss: 0.0529
+    Epoch 13/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0279
+    250/250 [==============================] - 0s 122us/step - loss: 0.0471
+    Epoch 14/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0262
+    192/250 [======================>.......] - ETA: 0s - loss: 0.0462
+    250/250 [==============================] - 0s 254us/step - loss: 0.0435
+    Epoch 15/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0433
+    250/250 [==============================] - 0s 174us/step - loss: 0.0418
+    Epoch 16/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0198
+    250/250 [==============================] - 0s 235us/step - loss: 0.0400
+    Epoch 17/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0435
+    250/250 [==============================] - 0s 363us/step - loss: 0.0337
+    Epoch 18/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0625
+    192/250 [======================>.......] - ETA: 0s - loss: 0.0314
+    250/250 [==============================] - 0s 359us/step - loss: 0.0371
+    Epoch 19/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0312
+    250/250 [==============================] - 0s 240us/step - loss: 0.0329
+    Epoch 20/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0105
+    250/250 [==============================] - 0s 152us/step - loss: 0.0347
+    Epoch 21/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0532
+    250/250 [==============================] - 0s 146us/step - loss: 0.0316
+    Epoch 22/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0130
+    250/250 [==============================] - 0s 145us/step - loss: 0.0322
+    Epoch 23/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0152
+    250/250 [==============================] - 0s 140us/step - loss: 0.0266
+    Epoch 24/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0192
+    250/250 [==============================] - 0s 158us/step - loss: 0.0262
+    Epoch 25/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0308
+    250/250 [==============================] - 0s 136us/step - loss: 0.0228
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Visualize the results
+We've fit our model with the custom loss function, and it's time to see how it is performing. We'll check the R2 values again with sklearn's r2_score() function, and we'll create a scatter plot of predictions versus actual values with plt.scatter(). This will yield some interesting results!
+
+
+
+# Evaluate R^2 scores
+train_preds = model_2.predict(scaled_train_features)
+test_preds = model_2.predict(scaled_test_features)
+print(r2_score(train_targets, train_preds))
+print(r2_score(test_targets, test_preds))
+
+<script.py> output:
+    -0.807176904689594
+    -1.0820621510069923
+    
+    
+    
+    
+    
+# Scatter the predictions vs actual -- this one is interesting!
+plt.scatter(train_preds, train_targets, label='train')
+plt.scatter(test_preds, test_targets, label='test')  # plot test set
+plt.legend(); plt.show()
+
+
+
+Notice how the train set actual vs predictions shape has changed to be a bow-tie.
+
