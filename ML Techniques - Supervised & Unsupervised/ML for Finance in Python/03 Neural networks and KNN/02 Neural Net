@@ -1,0 +1,272 @@
+Build and fit a simple neural net
+The next model we will learn how to use is a neural network. Neural nets can capture complex interactions between variables, but are difficult to set up and understand. Recently, they have been beating human experts in many fields, including image recognition and gaming (check out AlphaGo) -- so they have great potential to perform well.
+
+To build our nets we'll use the keras library. This is a high-level API that allows us to quickly make neural nets, yet still exercise a lot of control over the design. The first thing we'll do is create almost the simplest net possible -- a 3-layer net that takes our inputs and predicts a single value. Much like the sklearn models, keras models have a .fit() method that takes arguments of (features, targets).
+
+
+
+
+from keras.models import Sequential
+from keras.layers import Dense
+
+# Create the model
+model_1 = Sequential()
+model_1.add(Dense(100, input_dim=scaled_train_features.shape[1], activation='relu'))
+model_1.add(Dense(20, activation='relu'))
+model_1.add(Dense(1, activation='linear'))
+
+# Fit the model
+model_1.compile(optimizer='adam', loss='mse')
+history = model_1.fit(scaled_train_features, train_targets, epochs=25)
+
+
+
+
+
+
+
+
+
+
+    Epoch 1/25
+    
+     32/250 [==>...........................] - ETA: 1s - loss: 0.0401
+    250/250 [==============================] - 0s 1ms/step - loss: 0.0222
+    Epoch 2/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0116
+    250/250 [==============================] - 0s 97us/step - loss: 0.0073
+    Epoch 3/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0041
+    250/250 [==============================] - 0s 78us/step - loss: 0.0056
+    Epoch 4/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0039
+    250/250 [==============================] - 0s 74us/step - loss: 0.0036
+    Epoch 5/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0024
+    250/250 [==============================] - 0s 72us/step - loss: 0.0029
+    Epoch 6/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0019
+    250/250 [==============================] - 0s 84us/step - loss: 0.0023
+    Epoch 7/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0021
+    250/250 [==============================] - 0s 85us/step - loss: 0.0019
+    Epoch 8/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0016
+    250/250 [==============================] - 0s 71us/step - loss: 0.0017
+    Epoch 9/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0013
+    250/250 [==============================] - 0s 71us/step - loss: 0.0016
+    Epoch 10/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0013
+    250/250 [==============================] - 0s 73us/step - loss: 0.0015
+    Epoch 11/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0018
+    250/250 [==============================] - 0s 84us/step - loss: 0.0013
+    Epoch 12/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0011
+    250/250 [==============================] - 0s 71us/step - loss: 0.0012
+    Epoch 13/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 9.4440e-04
+    250/250 [==============================] - 0s 94us/step - loss: 0.0011
+    Epoch 14/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 9.5303e-04
+    250/250 [==============================] - 0s 102us/step - loss: 0.0010
+    Epoch 15/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 6.0500e-04
+    250/250 [==============================] - 0s 92us/step - loss: 9.6767e-04
+    Epoch 16/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 7.5651e-04
+    250/250 [==============================] - 0s 100us/step - loss: 9.4202e-04
+    Epoch 17/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 7.6787e-04
+    250/250 [==============================] - 0s 71us/step - loss: 8.5056e-04
+    Epoch 18/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 8.9069e-04
+    250/250 [==============================] - 0s 74us/step - loss: 8.1539e-04
+    Epoch 19/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 9.1815e-04
+    250/250 [==============================] - 0s 75us/step - loss: 7.6817e-04
+    Epoch 20/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 5.3067e-04
+    250/250 [==============================] - 0s 74us/step - loss: 8.1225e-04
+    Epoch 21/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 0.0012
+    250/250 [==============================] - 0s 85us/step - loss: 7.8064e-04
+    Epoch 22/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 7.3601e-04
+    250/250 [==============================] - 0s 72us/step - loss: 7.4377e-04
+    Epoch 23/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 5.2129e-04
+    250/250 [==============================] - 0s 73us/step - loss: 7.2662e-04
+    Epoch 24/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 8.1691e-04
+    250/250 [==============================] - 0s 73us/step - loss: 6.9589e-04
+    Epoch 25/25
+    
+     32/250 [==>...........................] - ETA: 0s - loss: 8.1477e-04
+    250/250 [==============================] - 0s 72us/step - loss: 7.3509e-04
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Plot losses
+Once we've fit a model, we usually check the training loss curve to make sure it's flattened out. The history returned from model.fit() is a dictionary that has an entry, 'loss', which is the training loss. We want to ensure this has more or less flattened out at the end of our training.
+
+
+In [1]: history
+Out[1]: <keras.callbacks.History at 0x7f0d7c475ba8>
+
+In [2]: history.history
+Out[2]: 
+{'loss': [0.031199508249759676,
+  0.009813093647360802,
+  0.006404539473354816,
+  0.004926205147057772,
+  0.003434516120702028,
+  0.002610314276069403,
+  0.002175087288953364,
+  0.0016812678519636394,
+  0.0014297048952430487,
+  0.0012946485923603177,
+  0.0011711527039296925,
+  0.0010465557212010026,
+  0.0009367297925055027,
+  0.0008678407184779644,
+  0.0008187955440953373,
+  0.0007650494058616459,
+  0.0007188217677175999,
+  0.0006717553879134356,
+  0.0006206925744190813,
+  0.0005686772943008691,
+  0.0005511356904171407,
+  0.0005388780189678073,
+  0.0005495588365010917,
+  0.0005554942032322288,
+  0.0005209679724648595]}
+
+In [3]: history.history['loss']
+Out[3]: 
+[0.031199508249759676,
+ 0.009813093647360802,
+ 0.006404539473354816,
+ 0.004926205147057772,
+ 0.003434516120702028,
+ 0.002610314276069403,
+ 0.002175087288953364,
+ 0.0016812678519636394,
+ 0.0014297048952430487,
+ 0.0012946485923603177,
+ 0.0011711527039296925,
+ 0.0010465557212010026,
+ 0.0009367297925055027,
+ 0.0008678407184779644,
+ 0.0008187955440953373,
+ 0.0007650494058616459,
+ 0.0007188217677175999,
+ 0.0006717553879134356,
+ 0.0006206925744190813,
+ 0.0005686772943008691,
+ 0.0005511356904171407,
+ 0.0005388780189678073,
+ 0.0005495588365010917,
+ 0.0005554942032322288,
+ 0.0005209679724648595]
+
+
+
+
+# Plot the losses from the fit
+plt.plot(history.history['loss'])
+
+# Use the last loss as the title
+plt.title('loss:' + str(round(history.history['loss'][-1], 6)))
+plt.show()
+We can see our loss has flattened out, so we're good!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Measure performance
+Now that we've fit our neural net, let's check performance to see how well our model is predicting new values. There's not a built-in .score() method like with sklearn models, so we'll use the r2_score() function from sklearn.metrics. This calculates the R2 score given arguments (y_true, y_predicted). We'll also plot our predictions versus actual values again. This will yield some interesting results soon (once we implement our own custom loss function).
+
+from sklearn.metrics import r2_score
+
+# Calculate R^2 score
+train_preds = model_1.predict(scaled_train_features)
+test_preds = model_1.predict(scaled_test_features)
+print(r2_score(train_targets, train_preds))
+print(r2_score(test_targets, test_preds))
+
+# Plot predictions vs actual
+plt.scatter(train_preds, train_targets, label='train')
+plt.scatter(test_preds, test_targets, label='test')
+plt.legend()
+plt.show()
+
+<script.py> output:
+    0.5470892160929604
+    -0.5658127735995366
+
+It doesn't look too much different from our other models at this point.
