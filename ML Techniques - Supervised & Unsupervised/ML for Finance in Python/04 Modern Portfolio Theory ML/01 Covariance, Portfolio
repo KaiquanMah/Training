@@ -1,0 +1,289 @@
+Join stock DataFrames and calculate returns
+Our first step towards calculating modern portfolio theory (MPT) portfolios is to get daily and monthly returns. Eventually we're going to get the best portfolios of each month based on the Sharpe ratio. The easiest way to do this is to put all our stock prices into one DataFrame, then to resample them to the daily and monthly time frames. We need daily price changes to calculate volatility, which we will use as our measure of risk.
+
+# Join 3 stock dataframes together
+full_df = pd.concat([lng_df, spy_df, smlv_df], axis=1).dropna()
+
+# Resample the full dataframe to monthly timeframe
+monthly_df = full_df.resample('BMS').first()
+
+# Calculate daily returns of stocks
+returns_daily = full_df.pct_change().dropna()
+
+# Calculate monthly returns of the stocks
+returns_monthly = monthly_df.pct_change().dropna()
+print(returns_monthly.tail())
+                     LNG       SPY      SMLV
+    Date                                    
+    2018-01-01  0.128300  0.021450 -0.010725
+    2018-02-01  0.057770  0.047662 -0.003823
+    2018-03-01 -0.103353 -0.049293 -0.048131
+    2018-04-02  0.021396 -0.034367  0.009406
+    2018-05-01  0.108322  0.029168  0.027469
+
+
+
+
+
+
+
+
+
+
+
+
+Calculate covariances for volatility
+In MPT, we quantify risk via volatility. The math for calculating portfolio volatility is complex, and it requires daily returns covariances. We'll now loop through each month in the returns_monthly DataFrame, and calculate the covariance of the daily returns.
+
+With pandas datetime indices, we can access the month and year with df.index.month and df.index.year. We'll use this to create a mask for returns_daily that gives us the daily returns for the current month and year in the loop. We then use the mask to subset the DataFrame like this: df[mask]. This gets entries in the returns_daily DataFrame which are in the current month and year in each cycle of the loop. Finally, we'll use pandas' .cov() method to get the covariance of daily returns.
+
+# Daily covariance of stocks (for each monthly period)
+covariances = {}
+rtd_idx = returns_daily.index
+for i in returns_monthly.index:    
+    # Mask daily returns for each month and year, and calculate covariance
+    mask = (rtd_idx.month == i.month) & (rtd_idx.year == i.year)
+    
+    # Use the mask to get daily returns for the current month and year of monthy returns index
+    covariances[i] = returns_daily[mask].cov()
+
+print(covariances[i])
+<script.py> output:
+               LNG       SPY      SMLV
+    LNG   0.000376  0.000057  0.000060
+    SPY   0.000057  0.000043  0.000023
+    SMLV  0.000060  0.000023  0.000025
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+Calculate portfolios
+We'll now generate portfolios to find each month's best one. numpy's random.random() generates random numbers from a uniform distribution, then we normalize them so they sum to 1 using the /= operator. We use these weights to calculate returns and volatility. Returns are sums of weights times individual returns. Volatility is more complex, and involves the covariances of the different stocks.
+# /= operator
+# https://stackoverflow.com/questions/32490721/what-does-the-operator-mean-in-python/32490732#32490732
+
+Finally we'll store the values in dictionaries for later use, with months' dates as keys.
+In this case, we will only generate 10 portfolios for each date so the code will run faster, but in a real-world use-case you'd want to use more like 1000 to 5000 randomly-generated portfolios for a few stocks.
+
+
+
+covariances
+{Timestamp('2013-03-01 00:00:00'):            LNG       SPY      SMLV
+ LNG   0.000291  0.000022  0.000025
+ SPY   0.000022  0.000023  0.000009
+ SMLV  0.000025  0.000009  0.000022,
+ ...
+ Timestamp('2018-04-02 00:00:00'):            LNG       SPY      SMLV
+ LNG   0.000312  0.000143  0.000087
+ SPY   0.000143  0.000116  0.000075
+ SMLV  0.000087  0.000075  0.000060,
+ Timestamp('2018-05-01 00:00:00'):            LNG       SPY      SMLV
+ LNG   0.000376  0.000057  0.000060
+ SPY   0.000057  0.000043  0.000023
+ SMLV  0.000060  0.000023  0.000025}
+
+
+covariances.keys()
+dict_keys([Timestamp('2015-04-01 00:00:00'), 
+...
+Timestamp('2018-02-01 00:00:00'), 
+Timestamp('2017-02-01 00:00:00')])
+
+
+
+
+In [3]: returns_monthly
+Out[3]: 
+                 LNG       SPY      SMLV
+Date                                    
+2013-03-01  0.047006  0.011235  0.000504
+2013-04-01  0.320416  0.030471  0.037543
+...
+2018-03-01 -0.103353 -0.049293 -0.048131
+2018-04-02  0.021396 -0.034367  0.009406
+2018-05-01  0.108322  0.029168  0.027469
+
+[63 rows x 3 columns]
+
+
+
+
+
+
+
+
+
+
+
+
+portfolio_returns, portfolio_volatility, portfolio_weights = {}, {}, {}
+
+
+#Calculate returns by taking the dot product (np.dot(); multiplies element-by-element and sums up two arrays) of weights with the monthly returns for the current date in the loop.
+#Use the .setdefault() method to add an empty list ([]) to the portfolio_weights dictionary for the current date, then append weights to the list.
+
+# Get portfolio performances at each month
+for date in sorted(covariances.keys()):
+    cov = covariances[date]
+    for portfolio in range(10):
+        weights = np.random.random(3)
+        weights /= np.sum(weights) # /= divides weights by their sum to normalize
+        returns = np.dot(weights, returns_monthly.loc[date])
+        volatility = np.sqrt(np.dot(weights.T, np.dot(cov, weights)))
+        portfolio_returns.setdefault(date, []).append(returns)
+        portfolio_volatility.setdefault(date, []).append(volatility)
+        portfolio_weights.setdefault(date, []).append(weights)
+        
+
+#printing from the portfolio_weights dictionary
+#for the last date
+#get the first element which is a list of values
+print(portfolio_weights[date][0])
+<script.py> output:
+    [0.21853859 0.38049315 0.40096826]
+
+
+
+
+
+
+
+
+
+In [2]: portfolio_weights
+Out[2]: 
+{Timestamp('2013-03-01 00:00:00'): [array([0.57585137, 0.23658438, 0.18756425]),
+  array([0.32547255, 0.42474357, 0.24978388]),
+  array([0.45690771, 0.31904099, 0.2240513 ]),
+  array([0.26777669, 0.23435595, 0.49786737]),
+  array([0.48931718, 0.06658292, 0.4440999 ]),
+  array([0.67339102, 0.16651634, 0.16009265]),
+  array([0.31308615, 0.31324884, 0.37366501]),
+  array([0.38877187, 0.33157206, 0.27965607]),
+  array([0.51339399, 0.2295061 , 0.2570999 ]),
+  array([0.19798132, 0.25474928, 0.54726941])],
+  ...
+  Timestamp('2018-04-02 00:00:00'): [array([0.1126891 , 0.12218635, 0.76512455]),
+  array([0.20020854, 0.29746955, 0.50232191]),
+  array([0.27688589, 0.39886148, 0.32425263]),
+  array([0.376118  , 0.20667365, 0.41720835]),
+  array([0.10722354, 0.69136636, 0.2014101 ]),
+  array([0.29522485, 0.37034046, 0.33443468]),
+  array([0.28698945, 0.60736288, 0.10564767]),
+  array([0.43343886, 0.15241248, 0.41414866]),
+  array([0.1863002 , 0.04669786, 0.76700194]),
+  array([0.45744678, 0.0908965 , 0.45165671])],
+ Timestamp('2018-05-01 00:00:00'): [array([0.21853859, 0.38049315, 0.40096826]),
+  array([0.38831387, 0.24236051, 0.36932562]),
+  array([0.33291268, 0.51586924, 0.15121808]),
+  array([0.34454004, 0.44880957, 0.20665039]),
+  array([0.53668499, 0.45129193, 0.01202308]),
+  array([0.42567796, 0.37949276, 0.19482929]),
+  array([0.09395557, 0.36314125, 0.54290318]),
+  array([0.17794876, 0.60671338, 0.21533786]),
+  array([0.18561666, 0.15657024, 0.6578131 ]),
+  array([0.35658402, 0.45401216, 0.18940382])]}
+  
+  
+
+
+
+
+
+In [2]: portfolio_returns
+Out[2]: 
+{Timestamp('2013-03-01 00:00:00'): [0.029821257174550263,
+  0.02019718800238193,
+  0.025174933926844986,
+  0.015470999902074171,
+  0.023972781948993188,
+  0.03360518255439659,
+  0.01842466614482273,
+  0.022140903861915546,
+  0.026840851412340428,
+  0.012444171500672719],
+  ...
+  Timestamp('2018-04-02 00:00:00'): [0.005408286879941455,
+  -0.0012150268100682357,
+  -0.004733896439512522,
+  0.004868518191629333,
+  -0.01957193793975489,
+  -0.003265564777935865,
+  -0.013739479198036086,
+  0.007930962257481855,
+  0.009595232256692857,
+  0.010911551570100899],
+ Timestamp('2018-05-01 00:00:00'): [0.0457850783144141,
+  0.05927723432288015,
+  0.05526274400301808,
+  0.05608887325856595,
+  0.07162870854413206,
+  0.06253134703151492,
+  0.03568259548221231,
+  0.04288776071397346,
+  0.042742608195524945,
+  0.05707151581369797]}
+
+
+
+
+
+In [2]: portfolio_volatility
+Out[2]: 
+{Timestamp('2013-03-01 00:00:00'): [0.010514821820550984,
+  0.006947249843833718,
+  0.00876550986757326,
+  0.006238579536251863,
+  0.009309361945077152,
+  0.011990787017670828,
+  0.006779224608033386,
+  0.007799700385170452,
+  0.009592096567841133,
+  0.005428981844012461],
+  ...
+ Timestamp('2018-03-01 00:00:00'): [0.011875065609736762,
+  0.012241121226208641,
+  0.012233658361751507,
+  0.014349485580004753,
+  0.011779545252577963,
+  0.01216200183597436,
+  0.010792920832793162,
+  0.01011205433832044,
+  0.010990382937710402,
+  0.011404310514886518],
+ Timestamp('2018-04-02 00:00:00'): [0.008599645421395435,
+  0.00974690188463399,
+  0.010742515598016774,
+  0.011051989542749715,
+  0.010361380989985397,
+  0.010814672523119583,
+  0.01157376692540927,
+  0.011460218922883165,
+  0.008904437361264672,
+  0.011516648531866812],
+ Timestamp('2018-05-01 00:00:00'): [0.007418851628947618,
+  0.009722903478944361,
+  0.009100584400871938,
+  0.009203799814740165,
+  0.012071309516638184,
+  0.010342375660241786,
+  0.00593350295378678,
+  0.007187225141109797,
+  0.006877403929461129,
+  0.009380969189152136]}
+
+
+
+
+
