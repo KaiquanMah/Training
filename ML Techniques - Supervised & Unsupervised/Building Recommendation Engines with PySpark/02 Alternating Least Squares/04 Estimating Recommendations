@@ -1,0 +1,96 @@
+Estimating Recommendations
+Use your knowledge of matrix multiplication to determine which movie will have the highest recommendation for User_3. The ratings matrix has been factorized into U and P with ALS.
+
+
+# View left factor matrix
+print(U)
+<script.py> output:
+            U_LF_1  U_LF_2  U_LF_3  U_LF_4
+    User_1    0.80    0.01    0.30     0.8
+    User_2    0.40    0.01    0.06     0.2
+    User_3    0.05    2.10    0.01     2.2
+    User_4    0.30    0.01    0.20     0.2
+    User_5    0.10    1.50    0.90     0.0
+    User_6    0.00    0.03    0.40     0.5
+    User_7    0.01    0.02    0.66     0.4
+    User_8    0.90    0.70    0.00     1.0
+    User_9    1.00    2.00    0.04     0.2
+    
+    
+# View right factor matrix
+print(P)
+<script.py> output:
+            Movie_1  Movie_2  Movie_3  Movie_4
+    P_LF_1      0.5      0.1      0.4     1.10
+    P_LF_2      0.2      2.0      0.0     0.01
+    P_LF_3      0.3      1.9      0.6     0.90
+    P_LF_4      1.0      0.2      1.0     0.89
+    
+    
+
+# Multiply factor matrices
+UP = np.matmul(U,P)
+
+# Convert to pandas DataFrame
+print(pd.DataFrame(UP, columns = P.columns, index = U.index))
+
+
+<script.py> output:
+        Movie_1  Movie_2  Movie_3  Movie_4
+User_1   1.292   0.830   1.300  1.8621
+User_2   0.420   0.214   0.396  0.6721
+User_3   2.648   4.664   2.226  2.0430
+User_4   0.412   0.470   0.440  0.6881
+User_5   0.620   4.720   0.580  0.9350
+User_6   0.626   0.920   0.740  0.8053
+User_7   0.607   1.375   0.800  0.9612
+User_8   1.590   1.690   1.360  1.8870
+User_9   1.112   4.216   0.624  1.3340
+
+
+    
+    
+Did you guess Movie 2? It has the highest predicted rating at 4.664 out of 5.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+RMSE As ALS Alternates
+As you know, ALS will alternate between the two factor matrices, adjusting their values each time to iteratively come closer and closer to approximating the original ratings matrix. This exercise is intended to illustrate this to you.
+
+Matrix T is a ratings matrix, and matrices F1, F2, F3, F4, F5, and F6 are the respective products of ALS after iterating 2, 3, 4, 5, and 6 times respectively. Follow the instructions below to see how the RMSE changes as ALS iterates.
+
+
+# Use getRMSE(preds, actuals) to calculate the RMSE of matrices T and F1.
+getRMSE(F1, T)
+
+# Create list of F2, F3, F4, F5, and F6
+Fs = [F2, F3, F4, F5, F6]
+
+# Calculate RMSE for F2, F3, F4, F5, and F6.
+getRMSEs(Fs, T)
+
+<script.py> output:
+    F1:  2.4791263858912522
+    F2: 0.4389326310548279
+    F3: 0.17555006757053257
+    F4: 0.15154042416388636
+    F5: 0.13191130368008455
+    F6: 0.04533823201006271
+    
+    
+    
+Do you see how the RMSE gets smaller and smaller as ALS continues to iterate?    
