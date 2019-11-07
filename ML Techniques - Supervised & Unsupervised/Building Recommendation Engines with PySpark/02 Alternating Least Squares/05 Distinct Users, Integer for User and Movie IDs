@@ -1,0 +1,173 @@
+Correct format and distinct users
+Take a look at the R dataframe. Notice that it is in conventional or "wide" format with a different movie in each column. Also notice that the User's and movie names are not in integer format. Follow the steps to properly prepare this data for ALS.
+
+In [1]: help(to_long)
+Help on function to_long in module __main__:
+
+to_long(df, by=['User'])
+    Converts traditional or "wide" dataframe into a "row-based" dataframe, also known as a "dense" or "long" dataframe.
+    
+    Parameters:
+      - df: array of columns with column names
+      - by: name of column which serves as
+      
+    Returns: Row-based dataframe with no null values
+    
+    
+    
+    
+    
+
+# Import monotonically_increasing_id and show R
+from pyspark.sql.functions import monotonically_increasing_id
+R.show()
+
++----------------+-----+----+----------+--------+
+|            User|Shrek|Coco|Swing Kids|Sneakers|
++----------------+-----+----+----------+--------+
+|    James Alking|    3|   4|         4|       3|
+|Elvira Marroquin|    4|   5|      null|       2|
+|      Jack Bauer| null|   2|         2|       5|
+|     Julia James|    5|null|         2|       2|
++----------------+-----+----+----------+--------+
+
+
+
+
+
+# Use the to_long() function to convert the dataframe to the "long" format.
+ratings = to_long(R)
+ratings.show()
+
++----------------+----------+------+
+|            User|     Movie|Rating|
++----------------+----------+------+
+|    James Alking|     Shrek|     3|
+|    James Alking|      Coco|     4|
+|    James Alking|Swing Kids|     4|
+|    James Alking|  Sneakers|     3|
+|Elvira Marroquin|     Shrek|     4|
+|Elvira Marroquin|      Coco|     5|
+|Elvira Marroquin|  Sneakers|     2|
+|      Jack Bauer|      Coco|     2|
+|      Jack Bauer|Swing Kids|     2|
+|      Jack Bauer|  Sneakers|     5|
+|     Julia James|     Shrek|     5|
+|     Julia James|Swing Kids|     2|
+|     Julia James|  Sneakers|     2|
++----------------+----------+------+
+
+
+
+
+
+#Create a dataframe called users that contains all the .distinct() users from the dataframe and repartition the dataframe into one partition using the .coalesce(1) method.
+# Get unique users and repartition to 1 partition
+users = ratings.select("User").distinct().coalesce(1)
+
+#DataFrame[User: string]
+
+
+
+# Import monotonically_increasing_id and show R
+from pyspark.sql.functions import monotonically_increasing_id
+R.show()
+
+# Use the to_long() function to convert the dataframe to the "long" format.
+ratings = to_long(R)
+ratings.show()
+
+
+#Create a dataframe called users that contains all the .distinct() users from the dataframe and repartition the dataframe into one partition using the .coalesce(1) method.
+# Get unique users and repartition to 1 partition
+users = ratings.select("User").distinct().coalesce(1)
+
+
+
+#Use the monotonically_increasing_id() method inside of withColumn() to create a new column in the users dataframe that contains a unique integer for each user. Call this column userId. Be sure to call the .persist() method on the final dataframe to ensure the new integer IDs persist.
+# Create a new column of unique integers called "userId" in the users dataframe.
+users = users.withColumn("userId", monotonically_increasing_id()).persist()
+users.show()
+
+    +----------------+------+
+    |            User|userId|
+    +----------------+------+
+    |Elvira Marroquin|     0|
+    |      Jack Bauer|     1|
+    |    James Alking|     2|
+    |     Julia James|     3|
+    +----------------+------+
+    
+Each user now has a unique integer assigned to it.    
+    
+    
+
+
+
+
+
+
+
+Assigning integer id's to movies
+Let's do the same thing to the movies. Then let's join the new user IDs and movie IDs into one dataframe.
+
+# Extract the distinct movie id's
+movies = ratings.select("Movie").distinct() 
+
+# Repartition the data to have only one partition.
+movies = movies.coalesce(1) 
+
+# Create a new column of movieId integers. 
+movies = movies.withColumn("movieId", monotonically_increasing_id()).persist() 
+
+# Join the ratings, users and movies dataframes
+movie_ratings = ratings.join(users, "User", "left").join(movies, "Movie", "left")
+movie_ratings.show()
+
+
+
+    +----------+----------------+------+------+-------+
+    |     Movie|            User|Rating|userId|movieId|
+    +----------+----------------+------+------+-------+
+    |     Shrek|    James Alking|     3|     2|      3|
+    |      Coco|    James Alking|     4|     2|      1|
+    |Swing Kids|    James Alking|     4|     2|      2|
+    |  Sneakers|    James Alking|     3|     2|      0|
+    |     Shrek|Elvira Marroquin|     4|     0|      3|
+    |      Coco|Elvira Marroquin|     5|     0|      1|
+    |  Sneakers|Elvira Marroquin|     2|     0|      0|
+    |      Coco|      Jack Bauer|     2|     1|      1|
+    |Swing Kids|      Jack Bauer|     2|     1|      2|
+    |  Sneakers|      Jack Bauer|     5|     1|      0|
+    |     Shrek|     Julia James|     5|     3|      3|
+    |Swing Kids|     Julia James|     2|     3|      2|
+    |  Sneakers|     Julia James|     2|     3|      0|
+    +----------+----------------+------+------+-------+
+    
+    
+    
+    You now have distinct userId's and movieId's that are integer data types.
+    
+    
+    
+movie_ratings = ratings.join(movies, "Movie", "left").join(users, "User", "left")
+movie_ratings.show()
++----------------+----------+------+-------+------+
+|            User|     Movie|Rating|movieId|userId|
++----------------+----------+------+-------+------+
+|    James Alking|     Shrek|     3|      3|     2|
+|    James Alking|      Coco|     4|      1|     2|
+|    James Alking|Swing Kids|     4|      2|     2|
+|    James Alking|  Sneakers|     3|      0|     2|
+|Elvira Marroquin|     Shrek|     4|      3|     0|
+|Elvira Marroquin|      Coco|     5|      1|     0|
+|Elvira Marroquin|  Sneakers|     2|      0|     0|
+|      Jack Bauer|      Coco|     2|      1|     1|
+|      Jack Bauer|Swing Kids|     2|      2|     1|
+|      Jack Bauer|  Sneakers|     5|      0|     1|
+|     Julia James|     Shrek|     5|      3|     3|
+|     Julia James|Swing Kids|     2|      2|     3|
+|     Julia James|  Sneakers|     2|      0|     3|
++----------------+----------+------+-------+------+
+
+
