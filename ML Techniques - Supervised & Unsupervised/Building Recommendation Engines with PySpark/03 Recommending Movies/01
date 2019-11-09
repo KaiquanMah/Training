@@ -1,0 +1,271 @@
+Viewing the MovieLens Data
+Familiarize yourself with the ratings dataset provided here. Would you consider the data to be implicit or explicit ratings?
+
+
+
+
+# Look at the column names
+print(ratings.columns)
+    ['userId', 'movieId', 'rating', 'timestamp']
+
+
+# Look at the first few rows of data
+print(ratings.show())
+
+
+<script.py> output:
+    +------+-------+------+----------+
+    |userId|movieId|rating| timestamp|
+    +------+-------+------+----------+
+    |     1|     31|   2.5|1260759144|
+    |     1|   1029|   3.0|1260759179|
+    |     1|   1061|   3.0|1260759182|
+    |     1|   1129|   2.0|1260759185|
+    |     1|   1172|   4.0|1260759205|
+    |     1|   1263|   2.0|1260759151|
+    |     1|   1287|   2.0|1260759187|
+    |     1|   1293|   2.0|1260759148|
+    |     1|   1339|   3.5|1260759125|
+    |     1|   1343|   2.0|1260759131|
+    |     1|   1371|   2.5|1260759135|
+    |     1|   1405|   1.0|1260759203|
+    |     1|   1953|   4.0|1260759191|
+    |     1|   2105|   4.0|1260759139|
+    |     1|   2150|   3.0|1260759194|
+    |     1|   2193|   2.0|1260759198|
+    |     1|   2294|   2.0|1260759108|
+    |     1|   2455|   2.5|1260759113|
+    |     1|   2968|   1.0|1260759200|
+    |     1|   3671|   3.0|1260759117|
+    +------+-------+------+----------+
+    only showing top 20 rows
+    
+This dataset includes ratings from the customers. This indicates that these are explicit ratings.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Calculate sparsity
+As you know, ALS works well with sparse datasets. Let's see how much of the ratings matrix is actually empty.
+
+Remember that sparsity is calculated by the number of cells in a matrix that contain a rating divided by the total number of values that matrix could hold given the number of users and items (movies). In other words, dividing the number of ratings present in the matrix by the product of users and movies in the matrix and subtracting that from 1 will give us the sparsity or the percentage of the ratings matrix that is empty.
+
+
+# Count the total number of ratings in the dataset
+numerator = ratings.select("rating").count()
+
+# Count the number of distinct userIds and distinct movieIds
+num_users = ratings.select("userId").distinct().count()
+num_movies = ratings.select("movieId").distinct().count()
+
+# Set the denominator equal to the number of users multiplied by the number of movies
+denominator = num_users * num_movies
+
+# Divide the numerator by the denominator
+sparsity = (1.0 - (numerator *1.0)/denominator)*100
+print("The ratings dataframe is ", "%.2f" % sparsity + "% empty.")
+
+The ratings dataframe is  98.36% empty.
+That's right, this matrix is more than 98% empty. That's a lot of missing data.
+
+
+
+
+
+
+
+
+
+
+
+The GroupBy and Filter Methods
+Now that we know a little more about the dataset, let's look at some general summary metrics of the ratings dataset and see how many ratings the movies have and how many ratings each users has provided.
+
+Two common methods that will be helpful to you as you aggregate summary statistics in Spark are the .filter() and the .groupBy() methods. The .filter() method allows you to filter out any data that doesn't meet your specified criteria.
+
+
+
+# Import the requisite packages
+from pyspark.sql.functions import col
+
+# View the ratings dataset
+ratings.show()
+    +------+-------+------+----------+
+    |userId|movieId|rating| timestamp|
+    +------+-------+------+----------+
+    |     1|     31|   2.5|1260759144|
+    |     1|   1029|   3.0|1260759179|
+    |     1|   1061|   3.0|1260759182|
+    |     1|   1129|   2.0|1260759185|
+    |     1|   1172|   4.0|1260759205|
+    |     1|   1263|   2.0|1260759151|
+    |     1|   1287|   2.0|1260759187|
+    |     1|   1293|   2.0|1260759148|
+    |     1|   1339|   3.5|1260759125|
+    |     1|   1343|   2.0|1260759131|
+    |     1|   1371|   2.5|1260759135|
+    |     1|   1405|   1.0|1260759203|
+    |     1|   1953|   4.0|1260759191|
+    |     1|   2105|   4.0|1260759139|
+    |     1|   2150|   3.0|1260759194|
+    |     1|   2193|   2.0|1260759198|
+    |     1|   2294|   2.0|1260759108|
+    |     1|   2455|   2.5|1260759113|
+    |     1|   2968|   1.0|1260759200|
+    |     1|   3671|   3.0|1260759117|
+    +------+-------+------+----------+
+    only showing top 20 rows
+    
+    
+    
+# Filter to show only userIds less than 100
+ratings.filter(col("userId") < 100).show()
+
+    +------+-------+------+----------+
+    |userId|movieId|rating| timestamp|
+    +------+-------+------+----------+
+    |     1|     31|   2.5|1260759144|
+    |     1|   1029|   3.0|1260759179|
+    |     1|   1061|   3.0|1260759182|
+    |     1|   1129|   2.0|1260759185|
+    |     1|   1172|   4.0|1260759205|
+    |     1|   1263|   2.0|1260759151|
+    |     1|   1287|   2.0|1260759187|
+    |     1|   1293|   2.0|1260759148|
+    |     1|   1339|   3.5|1260759125|
+    |     1|   1343|   2.0|1260759131|
+    |     1|   1371|   2.5|1260759135|
+    |     1|   1405|   1.0|1260759203|
+    |     1|   1953|   4.0|1260759191|
+    |     1|   2105|   4.0|1260759139|
+    |     1|   2150|   3.0|1260759194|
+    |     1|   2193|   2.0|1260759198|
+    |     1|   2294|   2.0|1260759108|
+    |     1|   2455|   2.5|1260759113|
+    |     1|   2968|   1.0|1260759200|
+    |     1|   3671|   3.0|1260759117|
+    +------+-------+------+----------+
+    only showing top 20 rows
+    
+    
+    
+    
+# Group data by userId, count ratings
+ratings.groupBy("userId").count().show()
+    +------+-----+
+    |userId|count|
+    +------+-----+
+    |   296|   20|
+    |   467|   64|
+    |   125|  210|
+    |   451|   52|
+    |   666|   40|
+    |     7|   88|
+    |    51|   31|
+    |   124|   85|
+    |   447|   87|
+    |   591|   30|
+    |   307|   72|
+    |   475|  655|
+    |   574|  342|
+    |   613|   53|
+    |   169|  113|
+    |   205|  206|
+    |   334|   34|
+    |   544|  268|
+    |   577|  279|
+    |   581|   49|
+    +------+-----+
+    only showing top 20 rows
+
+
+Now you know how to groupBy() and filter() pyspark dataframes. In the next exercise we are going to combine these two methods. If you want to apply two filters, you can do so like this: ratings.filter((col('userId') < 100) & (col('userId') > 50)).show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+MovieLens Summary Statistics
+Let's take the groupBy() method a bit further.
+
+Once you've applied the .groupBy() method to a dataframe, you can subsequently run aggregate functions such as .sum(), .avg(), .min() and have the results grouped. This exercise will walk you through how this is done. The min and avg functions have been imported from pyspark.sql.functions for you.
+
+
+# Min num ratings for movies
+print("Movie with the fewest ratings: ")
+ratings.groupBy("movieId").count().select(min("count")).show()
+    
+    Movie with the fewest ratings: 
+    +----------+
+    |min(count)|
+    +----------+
+    |         1|
+    +----------+
+    
+# Avg num ratings per movie
+print("Avg num ratings per movie: ")
+ratings.groupBy("movieId").count().select(avg("count")).show()
+   
+   Avg num ratings per movie: 
+    +------------------+
+    |        avg(count)|
+    +------------------+
+    |11.030664019413193|
+    +------------------+
+   
+# Min num ratings for user
+print("User with the fewest ratings: ")
+ratings.groupBy("userId").count().select(min("count")).show()
+ 
+    User with the fewest ratings: 
+    +----------+
+    |min(count)|
+    +----------+
+    |        20|
+    +----------+
+    
+# Avg num ratings per users
+print("Avg num ratings per user: ")
+ratings.groupBy("userId").count().select(avg("count")).show()
+
+    Avg num ratings per user: 
+    +------------------+
+    |        avg(count)|
+    +------------------+
+    |149.03725782414307|
+    +------------------+
+
+
+
+
+
