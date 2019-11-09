@@ -1,0 +1,227 @@
+Binary Model Performance
+You've already built several ALS models, so we won't do that again. An implicit ALS model has already been fitted to the binary ratings of the MovieLens dataset. Let's look at the binary_test_predictions from this model to see what we can learn.
+
+The ROEM() function has been defined for you. Feel free to run help(ROEM) in the console if you want more details on how to execute it!
+
+
+
+# Import the col function
+from pyspark.sql.functions import col
+
+# Look at the test predictions
+binary_test_predictions.show()
+
+    +------+-------+------+-----------+
+    |userId|movieId|viewed| prediction|
+    +------+-------+------+-----------+
+    |    91|    148|     0|        0.0|
+    |   601|    148|     0|        0.0|
+    |   545|    148|     0|0.060729448|
+    |   505|    148|     0|  0.2972868|
+    |   526|    148|     0|        0.0|
+    |   478|    148|     0|        0.0|
+    |   106|    148|     0|        0.0|
+    |   135|    148|     0|        0.0|
+    |    78|    463|     0|0.050237626|
+    |   259|    463|     0|0.027345931|
+    |   127|    463|     0|0.016793307|
+    |   502|    463|     0|0.019936942|
+    |   441|    463|     0|0.002274946|
+    |   664|    463|     0| 0.15109323|
+    |   418|    463|     0|0.011756073|
+    |   390|    463|     0|  0.3210355|
+    |    32|    463|     0|0.018041197|
+    |    58|    463|     0| 0.24846576|
+    |   311|    463|     1|  1.0126673|
+    |   471|    471|     0|  0.7693843|
+    +------+-------+------+-----------+
+    only showing top 20 rows
+
+
+
+
+
+# Evaluate ROEM on test predictions
+ROEM(binary_test_predictions)
+
+    ROEM: 0.07436376290899886
+
+
+
+# Look at user 42's test predictions
+binary_test_predictions.filter(col("userId") == 42).show()
+
+    
+    +------+-------+------+-----------+
+    |userId|movieId|viewed| prediction|
+    +------+-------+------+-----------+
+    |    42|    858|     0|  0.9915983|
+    |    42|   3703|     0|  0.5134803|
+    |    42|   2606|     0|        0.0|
+    |    42|   6213|     0|0.008813023|
+    |    42|   2342|     0|        0.0|
+    |    42|  58107|     0|0.033887785|
+    |    42|   6953|     0| 0.29286233|
+    |    42|  41716|     0|        0.0|
+    |    42|  49394|     0|0.021620607|
+    |    42|   6509|     0|        0.0|
+    |    42|   3512|     0|        0.0|
+    |    42|   6810|     0|        0.0|
+    |    42|  30749|     0| 0.60764235|
+    |    42|  74282|     0|0.042640854|
+    |    42|   2255|     0|        0.0|
+    |    42|   3891|     0|        0.0|
+    |    42|  31116|     0|        0.0|
+    |    42|   2013|     0|  0.4043246|
+    |    42|   3390|     0|        0.0|
+    |    42|   1488|     0|        0.0|
+    +------+-------+------+-----------+
+    only showing top 20 rows
+
+The model has a pretty low ROEM. Did you notice that the model predicted some high numbers for unseen movies? This indicates that the model is creating recommendations from the movies that users have not seen.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Recommendations From Binary Data
+So you see from the ROEM, these models can still generate meaningful test predictions. Let's look at the actual recommendations now.
+
+The col function from the pyspark.sql.functions class has been imported for you.
+
+
+
+# View user 26's original ratings
+print ("User 26 Original Ratings:")
+original_ratings.filter(col("userId") == 26).show()
+
+# View user 26's recommendations
+print ("User 26 Recommendations:")
+binary_recs.filter(col("userId") == 26).show()
+
+# View user 99's original ratings
+print ("User 99 Original Ratings:")
+original_ratings.filter(col("userId") == 99).show()
+
+# View user 99's recommendations
+print ("User 99 Recommendations:")
+binary_recs.filter(col("userId") == 99).show()
+
+
+
+
+
+
+
+    User 26 Original Ratings:
+    +------+-------+------+--------------------+--------------------+
+    |userId|movieId|rating|               title|              genres|
+    +------+-------+------+--------------------+--------------------+
+    |    26|      1|     5|      ToyStory(1995)|Adventure|Animati...|
+    |    26|   2542|     5|LockStock&TwoSmok...|Comedy|Crime|Thri...|
+    |    26|   2571|     5|     MatrixThe(1999)|Action|Sci-Fi|Thr...|
+    |    26|   4011|     5|        Snatch(2000)|Comedy|Crime|Thri...|
+    |    26|   6016|     5|CityofGod(Cidaded...|Action|Adventure|...|
+    |    26|   8798|     5|    Collateral(2004)|Action|Crime|Dram...|
+    |    26|  27831|     5|     LayerCake(2004)|Crime|Drama|Thriller|
+    |    26|  44191|     5|  VforVendetta(2006)|Action|Sci-Fi|Thr...|
+    |    26|  44195|     5|ThankYouforSmokin...|        Comedy|Drama|
+    |    26|  50872|     5|   Ratatouille(2007)|Animation|Childre...|
+    |    26|  54286|     5|BourneUltimatumTh...|Action|Crime|Thri...|
+    |    26|  58559|     5| DarkKnightThe(2008)|Action|Crime|Dram...|
+    |    26|  59369|     5|         Taken(2008)|Action|Crime|Dram...|
+    |    26|  59784|     5|   KungFuPanda(2008)|Action|Animation|...|
+    |    26|  60684|     5|      Watchmen(2009)|Action|Drama|Myst...|
+    |    26|  65514|     5|         IpMan(2008)|    Action|Drama|War|
+    |    26|     32|     4|TwelveMonkeys(a.k...|Mystery|Sci-Fi|Th...|
+    |    26|     47|     4|Seven(a.k.a.Se7en...|    Mystery|Thriller|
+    |    26|     50|     4|UsualSuspectsThe(...|Crime|Mystery|Thr...|
+    |    26|     69|     4|        Friday(1995)|              Comedy|
+    +------+-------+------+--------------------+--------------------+
+    only showing top 20 rows
+    
+    User 26 Recommendations:
+    +------+-------+----------+--------------------+--------------------+
+    |userId|movieId|prediction|               title|              genres|
+    +------+-------+----------+--------------------+--------------------+
+    |    26|  30707| 1.1401137|Million Dollar Ba...|               Drama|
+    |    26|    293| 1.1154407|Léon: The Profess...|Action|Crime|Dram...|
+    |    26|    111| 1.0985317|  Taxi Driver (1976)|Crime|Drama|Thriller|
+    |    26|  81845| 1.0974996|King's Speech, Th...|               Drama|
+    |    26|   5971| 1.0956558|My Neighbor Totor...|Animation|Childre...|
+    |    26|  70286| 1.0950022|   District 9 (2009)|Mystery|Sci-Fi|Th...|
+    |    26|  48394| 1.0917767|Pan's Labyrinth (...|Drama|Fantasy|Thr...|
+    |    26|  46578| 1.0879191|Little Miss Sunsh...|Adventure|Comedy|...|
+    +------+-------+----------+--------------------+--------------------+
+    
+    
+    
+    
+    
+    
+    User 99 Original Ratings:
+    +------+-------+------+--------------------+--------------------+
+    |userId|movieId|rating|               title|              genres|
+    +------+-------+------+--------------------+--------------------+
+    |    99|    318|     5|ShawshankRedempti...|         Crime|Drama|
+    |    99|    356|     5|   ForrestGump(1994)|Comedy|Drama|Roma...|
+    |    99|    357|     5|FourWeddingsandaF...|      Comedy|Romance|
+    |    99|    509|     5|      PianoThe(1993)|       Drama|Romance|
+    |    99|    595|     5|BeautyandtheBeast...|Animation|Childre...|
+    |    99|    608|     5|         Fargo(1996)|Comedy|Crime|Dram...|
+    |    99|    720|     5|Wallace&Gromit:Th...|Adventure|Animati...|
+    |    99|    903|     5|       Vertigo(1958)|Drama|Mystery|Rom...|
+    |    99|    912|     5|    Casablanca(1942)|       Drama|Romance|
+    |    99|    918|     5|MeetMeinSt.Louis(...|             Musical|
+    |    99|    953|     5|It'saWonderfulLif...|Children|Drama|Fa...|
+    |    99|    969|     5|AfricanQueenThe(1...|Adventure|Comedy|...|
+    |    99|   1028|     5|   MaryPoppins(1964)|Children|Comedy|F...|
+    |    99|   1204|     5|LawrenceofArabia(...| Adventure|Drama|War|
+    |    99|   1233|     5|BootDas(BoatThe)(...|    Action|Drama|War|
+    |    99|   1304|     5|ButchCassidyandth...|      Action|Western|
+    |    99|   1617|     5|L.A.Confidential(...|Crime|Film-Noir|M...|
+    |    99|   1619|     5|SevenYearsinTibet...| Adventure|Drama|War|
+    |    99|   1721|     5|       Titanic(1997)|       Drama|Romance|
+    |    99|   2067|     5| DoctorZhivago(1965)|   Drama|Romance|War|
+    +------+-------+------+--------------------+--------------------+
+    only showing top 20 rows
+    
+    User 99 Recommendations:
+    +------+-------+------------------+--------------------+--------------------+
+    |userId|movieId|        prediction|               title|              genres|
+    +------+-------+------------------+--------------------+--------------------+
+    |    99|   3148|         1.1828514|Cider House Rules...|               Drama|
+    |    99|    111|1.1700658000000002|  Taxi Driver (1976)|Crime|Drama|Thriller|
+    |    99|    920|         1.1438243|Gone with the Win...|   Drama|Romance|War|
+    |    99|    265|         1.1368732|Like Water for Ch...|Drama|Fantasy|Rom...|
+    |    99|   1959|         1.1332427|Out of Africa (1985)|       Drama|Romance|
+    |    99|   1188|         1.1314342|Strictly Ballroom...|      Comedy|Romance|
+    |    99|     34|         1.1144139|         Babe (1995)|      Children|Drama|
+    |    99|    910|         1.1108267|Some Like It Hot ...|        Comedy|Crime|
+    |    99|    589|          1.096542|Terminator 2: Jud...|       Action|Sci-Fi|
+    |    99|   1225|1.0958363000000002|      Amadeus (1984)|               Drama|
+    +------+-------+------------------+--------------------+--------------------+
+
+
+ALS seems to have picked up on the fact that user 26 likes thrillers, crime movies, action and adventure, and that user 99 likes dramas and romances. Do these look like good recommendations to you?
+
+
+
