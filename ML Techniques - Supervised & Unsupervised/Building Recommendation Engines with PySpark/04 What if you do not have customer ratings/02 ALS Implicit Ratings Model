@@ -1,0 +1,191 @@
+Specify ALS Hyperparameters
+You're now going to build your first implicit rating recommendation engine using ALS. To do this, you will first tell Spark what values you want it to try when finding the best model.
+
+Four empty lists are provided below. You will fill them with specific values that Spark can use to build several different ALS models. In the next exercise, you'll tell Spark to build out these models using the lists below.
+
+
+# Complete the lists below
+ranks = [10, 20, 30, 40]
+maxIters = [10, 20, 30, 40]
+regParams = [.05, .1, .15]
+alphas = [20, 40, 60, 80]
+
+
+
+
+
+
+
+
+
+Build Implicit Models
+Now that you have all of your hyperparameter values specified, let's have Spark build enough models to test each combination. To facilitate this, a for loop is provided here. Follow the instructions below to automatically create these ALS models. In subsequent exercises you will run these models on test datasets to see which one performs the best.
+
+The ALS algorithm is already imported for you. The lists you created in the last exercise (ranks, maxIters, regParams, alphas) have been created for you.
+
+#An empty list called model_list is provided here. The for loop will create a model for each combination of hyperparameters it is given and put it into model_list.
+#Complete the for loop by referencing the contents of each list where r represents the elements of the ranks list, mi represents the elements of the maxIters list, rp represents the elements of the regParams list and a represents the elements of the alphas list.
+
+# For loop will automatically create and store ALS models
+for r in ranks:
+    for mi in maxIters:
+        for rp in regParams:
+            for a in alphas:
+                model_list.append(ALS(userCol= "userId", itemCol= "songId", ratingCol= "num_plays", rank = r, maxIter = mi, regParam = rp, alpha = a, coldStartStrategy="drop", nonnegative = True, implicitPrefs = True))
+
+
+#Print len(model_list) as well as model_list to ensure that each model was created. The length should be equal to the product of all the lengths of each hyperparameter list above. You can run the additional validation provided to be sure.
+# Print the model list, and the length of model_list
+print (model_list, "Length of model_list: ", len(model_list))
+
+# Validate
+len(model_list) == (len(ranks)*len(maxIters)*len(regParams)*len(alphas))
+
+
+<script.py> output:
+    [ALS_4ba4b875026f18b5fccf, ALS_425da01c884278554a4c, ALS_42079799d621a895d69b, ALS_47039e9bbc433c1360b8, ALS_4a838f836984f5f09161, ALS_4e18a1d54ff555265cd6, ALS_4940a19b39f1396f21d4, ALS_4a8da90260c9678fe641, ALS_4ffca61762d0f1ad2c79, ALS_4412a95e8fa39b65dbec, ALS_424cbea003309b2b0e1f, ALS_4b75a4be9e459b18cef6, ALS_4430b4b064de364962a7, ALS_430b87c78a3bac6ef38c, ALS_4824ac0e2e0f7f368382, ALS_4c87ae663c0a1b7ef06a, ALS_47e09d19e3c12e467991, ALS_45c5a26d47c030d33767, ALS_4e0cb5102ec6d8700c3b, ALS_4a6f89fc4f13cb88136a, ALS_42618ad8181830b58542, ALS_4ec8948fa83a0d50edcb, ALS_4d1ea3f7fb9ae1f3824a, ALS_4fcbbf8bfb9653162192, ALS_41ada6115474f76d475a, ALS_4087b615f16b221bd2ce, ALS_430e85d9570739a01441, ALS_41848ac409df0a92ac66, ALS_45ea87b45cf983008cc0, ALS_4cefaaf9e30b32baf2ae, ALS_4aa7acd239de4be62b0c, ALS_424da4921520a8e9c585, ALS_441a9a5e93971a4a2c7a, ALS_413ab63eba8e1810cc07, ALS_43818003ca7b817e3aa5, ALS_43fc8e4ab2fcee126fb5, ALS_482397c675d926cadc20, ALS_4391a44e7fbafda6d81f, ALS_4cf1a884b89776f9d551, ALS_400c8d2a774ea9bd8d36, ALS_4504995cc1f85b494a31, ALS_4c14a2472c2a7179bbdc, ALS_4d5a821af2cdc206fae7, ALS_40a6b678af3b1574cb25, ALS_4af28d4400530b1ff3bb, ALS_4d1ea3e4b71e87005f9d, ALS_4430b067f4f5b800544e, ALS_409eb93be9364ad657cd, ALS_49699b5670fc89073617, ALS_44d8ace3d99e3f3cfc2a, ALS_40e9b2fc2d54025c20f6, ALS_41bdbc4bc12bfd58fa9b, ALS_4c8aa2aa436a1bb403fd, ALS_484d91b023d119e5c546, ALS_442c84a2e82c29a5af21, ALS_44eeb6203c3d8b1deade, ALS_4b4a84c81a01c5f37c6b, ALS_4c22821e91ce6036952b, ALS_49eaa934174516929aa5, ALS_4211996a4017dab20488, ALS_4096be1e6bafb2095e17, ALS_4322983ed2c3ab364751, ALS_4938810d53fa19180fbc, ALS_43e3ba67c181b1c06c6d, ALS_454e9408634a85262473, ALS_45f284d08911ecca11dc, ALS_4edba98a567ae4b51924, ALS_4e589dcdee4a1d65f0ff, ALS_42d1b5e68c812282c08f, ALS_43399372b883d49330be, ALS_40178fbfec8480401818, ALS_451ea986e098570aad56, ALS_403eb86e062c8b0dd351, ALS_42e9a9807d05f7fd9994, ALS_411eb0be657d1a98b4be, ALS_40c4bed7874aba9530ea, ALS_456faacec096200f5671, ALS_48e88edb6587af7f02a9, ALS_438da33977bec687d651, ALS_4ebdabd120bb0815630a, ALS_47d9845672c5d52f03f7, ALS_4ce993cd17c44042a7ea, ALS_4a7298bef96882ae4ad6, ALS_4af892a535deaf5e101a, ALS_47e3bdb16ce10b862a50, ALS_4e84829338bcb4cbedb7, ALS_47f0a9e393510e28c9f2, ALS_4b0282f0a8fbca0e192d, ALS_4bec949f3981fb4e898f, ALS_49e28a17c710eb1fb013, ALS_4c09b354bcab56b2c97a, ALS_45f9aeb8fc39e3f6adee, ALS_47aab5a3f73258b6f156, ALS_4f8ba7551a34058faab5, ALS_4d1eb97a29f6abb8dcca, ALS_4d90bff63cc0d3ea159b, ALS_4333901280b3e96eb044, ALS_4122b3fb07e06de26cfc, ALS_426388dc8c385351f1b1, ALS_4063bd9e795bfb39b646, ALS_43e2bfbca77f59133f47, ALS_4b8aafce1172b52fd8b9, ALS_463b95b994de1fd45db7, ALS_4ad78a8bfe4460d8d6c5, ALS_4d7096018f45208c48be, ALS_45ac8dae590ca1ea173d, ALS_4dec94213ccdb5131785, ALS_4c0d85de7960630a31b6, ALS_4a72947b0b8231cf61a5, ALS_4a7c86b43ab104585eca, ALS_4946be2e8ab6977547f2, ALS_45fb82175b89eb957f6e, ALS_4e469caf5b78270b1e20, ALS_480d827b06d5858c05ea, ALS_4d4197b1a93ddd3c50a8, ALS_40629a2b33f242882341, ALS_4ae08985a01bfe551744, ALS_4e6799d9210f8619e22a, ALS_4c52adf55f1821b42609, ALS_4d8bb0000c105c793e97, ALS_4f0784e006d30c63ce64, ALS_4449b6c5976bc719fbd9, ALS_4b1c90796023cdfa3800, ALS_4aa593a7e2c14b23ccd8, ALS_49caa5dfbadde52fb910, ALS_4bc394f8a13c8df513d4, ALS_42008689d2bec54452d2, ALS_467080d82048026a29d0, ALS_4b7aa1b8b874b71a234b, ALS_410d8eb1d151559e3b54, ALS_4c68b3ed5542436d21b0, ALS_4f88b48d9f1f3c1c0307, ALS_48659237f79c21996dc4, ALS_4fc99fefab7f7ce3e369, ALS_48ab8c2b3a897b2e9044, ALS_4e4d87846da947429bfb, ALS_4c7cb081c0af8a44f9fc, ALS_4285aa27ddcf48236896, ALS_41579094ddd9f65b12b7, ALS_4e69bac2a03d28132e95, ALS_4eb9b77e0c66af8b04f9, ALS_4696b6e595fda25a450e, ALS_4e4694d9c99d7e4bc556, ALS_41259f3ff38591defdf0, ALS_4771a0add3a3f4d24b18, ALS_44f49b1d0712127a3b3b, ALS_4201b0f46ee4fe8f3222, ALS_428b834aa8321e7e9034, ALS_4d13b3e28eda39b9e034, ALS_442b8383282a723c8733, ALS_4aaab15d11ab83d67473, ALS_49d9b5ca2ec0bd3115d6, ALS_4988b38cb83f0b8f909a, ALS_4b4dbe903abc38369169, ALS_429ebbe744833ae5bbd5, ALS_449183f56eabb186b0d1, ALS_439f97282957a92a877e, ALS_4fb08037355f9003f172, ALS_4700b4c0c8860b6309da, ALS_419db9dbf204d0cb4d31, ALS_41b999eac1eabfaa1337, ALS_4fe9a4c7ed8cf5aa3889, ALS_4f0ca335e29000096dc3, ALS_49b9b702a7feb82f93d5, ALS_4647bdd78dbbc3e18e49, ALS_41e88a05af3e7eb90b3b, ALS_434a9b90a33ec76d12b1, ALS_4cd98a14f1480025a1ce, ALS_49cab846e76c6da74660, ALS_4c98ae4ac42575346e6c, ALS_4206bb79470faf589be1, ALS_41f487c0996635300df8, ALS_4960b363bfe539d8be5a, ALS_47718013410dffe1c947, ALS_4769bbdd9b33cf48191e, ALS_4877af37a65498073ef8, ALS_4319b31634dffdaee41b, ALS_44ac859ffb7fe46e93fe, ALS_417fabcaa04da68ed552, ALS_4b21a842f55c970b6356, ALS_4b5c9d64fa1718e149c6, ALS_4864a031f17df939e5b4, ALS_494caee2efdc5b270f94, ALS_48819b272587f2eb992f, ALS_4eec94deb2435b2c2dbf, ALS_428eb8c3bdc95e7bfda3, ALS_4ddda298006868afe5c7, ALS_4c27a51d74be26c8ac44, ALS_4dcb94fdd061aa67639c, ALS_4984a7414b32ec953ea4, ALS_41c4821bd085575c532c, ALS_40d5985682ce60266fe5] 
+    Length of model_list:  192
+You've built your first 192 implicit rating models. Now let's see how they performed.
+
+
+In [2]: len(model_list) == (len(ranks)*len(maxIters)*len(regParams)*len(alphas))
+Out[2]: True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Running a Cross-Validated Implicit ALS Model
+Now that we have several ALS models, each with a different set of hyperparameter values, we can train them on a training portion of the msd dataset using cross validation, and then run them on a test set of data and evaluate how well each one performs using the ROEM function discussed earlier. Unfortunately, this takes too much time for this exercise, so it has been done separately. But for your reference you can evaluate your model_list using the following loop (we are using the msd dataset in this case):
+
+
+# Split the data into training and test sets
+(training, test) = msd.randomSplit([0.8, 0.2])
+
+#Building 5 folds within the training set.
+train1, train2, train3, train4, train5 = training.randomSplit([0.2, 0.2, 0.2, 0.2, 0.2], seed = 1)
+fold1 = train2.union(train3).union(train4).union(train5)
+fold2 = train3.union(train4).union(train5).union(train1)
+fold3 = train4.union(train5).union(train1).union(train2)
+fold4 = train5.union(train1).union(train2).union(train3)
+fold5 = train1.union(train2).union(train3).union(train4)
+
+foldlist = [(fold1, train1), (fold2, train2), (fold3, train3), (fold4, train4), (fold5, train5)]
+
+# Empty list to fill with ROEMs from each model
+ROEMS = []
+
+# Loops through all models and all folds
+for model in model_list:
+    for ft_pair in foldlist:
+
+        # Fits model to fold within training data
+        fitted_model = model.fit(ft_pair[0])
+
+        # Generates predictions using fitted_model on respective CV test data
+        predictions = fitted_model.transform(ft_pair[1])
+
+        # Generates and prints a ROEM metric CV test data
+        r = ROEM(predictions)
+        print ("ROEM: ", r)
+
+    # Fits model to all of training data and generates preds for test data
+    v_fitted_model = model.fit(training)
+    v_predictions = v_fitted_model.transform(test)
+    v_ROEM = ROEM(v_predictions)
+
+    # Adds validation ROEM to ROEM list
+    ROEMS.append(v_ROEM)
+    print ("Validation ROEM: ", v_ROEM)
+
+
+
+For purposes of walking you through the steps, the test predictions for 192 models have already been generated, and their ROEM has been calculated. They are found in the ROEMS list provided. Because a list isn't unique to Pyspark, and because numpy works really well with lists, we're going to use numpy here. Follow the instructions below to find the best ROEM and the model that provided it.
+
+
+
+
+# Import numpy
+import numpy
+
+
+#Extract the smallest ROEM from the ROEMS list provided using numpy.argmin(). The .argmin() method will return the index of the lowest value in the list provided. Call the result i and print i.
+# Find the index of the smallest ROEM
+i = numpy.argmin(ROEMS)
+print("Index of smallest ROEM:", i)
+
+# Find ith element of ROEMS
+print("Smallest ROEM: ", ROEMS[i])
+
+<script.py> output:
+    Index of smallest ROEM: 38
+    Smallest ROEM:  0.01980198019801982
+    Looks like Model 38 has the lowest ROEM of 0.019. Next we'll extract the hyperparameters.
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+Extracting Parameters
+You've now tested 192 different models on the msd dataset, and you found the best ROEM and its respective model (model 38).
+
+You now need to extract the hyperparameters. The model_list you created previously is provided here. It contains all 192 models you generated. Use the instructions below to extract the hyperparameters.
+
+
+
+
+# Extract the best_model
+best_model = model_list[38]
+
+# Extract the Rank
+print ("Rank: ", best_model.getRank())
+
+# Extract the MaxIter value
+print ("MaxIter: ", best_model.getMaxIter())
+
+# Extract the RegParam value
+print ("RegParam: ", best_model.getRegParam())
+
+# Extract the Alpha value
+print ("Alpha: ", best_model.getAlpha())
+
+
+
+
+Looks like a low rank, a higher maxIter, a low regParam, and a medium-high alpha is keeping the ROEM low. Because some of these values are on the high and low ends of the values we tried, it would be worth adding some additional values to test in our hyperparameter values, and doing this step again. But for right now, you should understand the process.
+
+
+
+
+
+
+
+
+
