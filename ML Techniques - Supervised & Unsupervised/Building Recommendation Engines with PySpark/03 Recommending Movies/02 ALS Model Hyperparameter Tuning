@@ -1,0 +1,136 @@
+Create test/train splits and build your ALS model
+You already know how to build an ALS model, having done it in the previous chapter. We will do that again, but we'll take some additional steps to fully build out a cross-validated model.
+
+First, let's import the requisite functions and create our train and test data sets in preparation for the cross validation step.
+
+
+
+
+
+# Import the required functions
+from pyspark.ml.evaluation import RegressionEvaluator
+from pyspark.ml.recommendation import ALS
+from pyspark.ml.tuning import ParamGridBuilder, CrossValidator
+
+# Create test and train set
+(train, test) = ratings.randomSplit([0.8, 0.2], seed = 1234)
+
+#Build out the ALS model, telling Spark the names of the columns in the ratings dataframe that correspond to the userCol, itemCol and ratingCol. Set the nonnegative argument to True, the coldStartStrategy to "drop" and let Spark know that these are not implicitPrefs by setting the implicitPrefs argument to False. Call this model als.
+# Create ALS model
+als = ALS(userCol="userId", itemCol="movieId", ratingCol="rating", nonnegative = True, implicitPrefs = False)
+
+# Confirm that a model called "als" was created
+type(als)
+
+
+
+
+
+
+
+Tell Spark how to tune your ALS model
+Now we'll need to create a ParamGrid to tell Spark what hyperparameters we want it to tune, how to tune them, and then build out an evaluator so Spark can know how to measure the algorithm's performance.
+
+
+# Import the requisite items
+from pyspark.ml.evaluation import RegressionEvaluator
+from pyspark.ml.tuning import ParamGridBuilder, CrossValidator
+
+# Add hyperparameters and their respective values to param_grid
+param_grid = ParamGridBuilder() \
+            .addGrid(als.rank, [10, 50, 100, 150]) \
+            .addGrid(als.maxIter, [5, 50, 100, 200]) \
+            .addGrid(als.regParam, [.01, .05, .1, .15]) \
+            .build()
+           
+
+#Create a RegressionEvaluator called evaluator. Set the metricName to "rmse", set the labelCol to "rating", and tell Spark that when it generates predictions to call the predictionCol "prediction".
+# Define evaluator as RMSE and print length of evaluator
+evaluato = RegressionEvaluator(metricName="rmse", labelCol="rating", predictionCol="prediction") 
+print ("Num models to be tested: ", len(param_grid))
+
+
+
+
+
+
+
+
+
+
+Build your cross validation pipeline
+Now that we have our data, our train/test splits, our model, and our hyperparameter values, let's tell Spark how to cross validate our model so it can find the best combination of hyperparameters and return it to us.
+
+
+# Build cross validation using CrossValidator
+cv = CrossValidator(estimator=als, estimatorParamMaps=param_grid, evaluator=evaluator, numFolds=5)
+
+# Confirm cv was built
+print(cv)
+CrossValidator_443fabf715fac314de7e
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Best Model and Best Model Parameters
+Now that we have our cross validator, cv, built out, we can tell Spark to take our data, fit the ALS algorithm to it, and try the different combinations of hyperparameter values from our param_grid so that it can identify what values provide the smallest RMSE. Unfortunately, this takes too long to complete here, but for your reference, this is how it is done:
+
+#Fit cross validator to the 'train' dataset
+model = cv.fit(train)
+#Extract best model from the cv model above
+best_model = model.bestModel
+
+This code has been run separately, and the best_model has been identified and saved for you to use. Use the commands given to extract the parameters of the model.
+
+
+
+
+
+#Print type(best_model) to confirm that the model ALS built from our hyperparameter options is indeed completed. A print statement is needed here in order to work with subsequent print statements.
+# Print best_model
+print(type(best_model))
+    <class 'pyspark.ml.recommendation.ALS'>
+
+# Complete the code below to extract the ALS model parameters
+print("**Best Model**")
+    **Best Model**
+
+# Print "Rank"
+print("  Rank:", best_model.getRank())
+      Rank: 50
+
+# Print "MaxIter"
+print("  MaxIter:", best_model.getMaxIter())
+      MaxIter: 100
+
+# Print "RegParam"
+print("  RegParam:", best_model.getRegParam())
+      RegParam: 0.1
+
+
+
+ If you'll notice, the best hyperparameter values were all in the middle of the ranges we provided. If they were on the low or high end, we would simply adjust our ranges accordingly. Given that they were in the middle, we could tune even further by narrowing our range to get even more precise hyperparameter values.
+ 
+ 
+ 
