@@ -1,0 +1,98 @@
+Creating a deep learning network
+A deep convolutional neural network is a network that has more than one layer. Each layer in a deep network receives its input from the preceding layer, with the very first layer receiving its input from the images used as training or test data.
+
+Here, you will create a network that has two convolutional layers.
+
+
+
+from keras.models import Sequential
+from keras.layers import Dense, Conv2D, Flatten
+
+model = Sequential()
+
+# Add a convolutional layer (15 units)
+model.add(Conv2D(15,
+                kernel_size=2,
+                activation='relu',
+                input_shape=(img_rows,img_cols,1)))
+
+
+# Add another convolutional layer (5 units)
+model.add(Conv2D(5,
+                kernel_size=2,
+                activation='relu'))
+
+# Flatten and feed to output layer
+model.add(Flatten())
+model.add(Dense(3, activation='softmax'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Train a deep CNN to classify clothing images
+Training a deep learning model is very similar to training a single layer network. Once the model is constructed (as you have done in the previous exercise), the model needs to be compiled with the right set of parameters. Then, the model is fit by providing it with training data, as well as training labels. After training is done, the model can be evaluated on test data.
+
+The model you built in the previous exercise is available in your workspace.
+
+
+
+
+# Compile model
+model.compile(optimizer='adam', 
+              loss='categorical_crossentropy', 
+              metrics=['accuracy'])
+
+# Fit the model to training data 
+model.fit(train_data, train_labels, 
+          validation_split=0.2, 
+          epochs=3, batch_size=10)
+
+# Evaluate the model on test data
+model.evaluate(test_data, test_labels, batch_size=10)
+
+
+    Train on 40 samples, validate on 10 samples
+    Epoch 1/3
+    
+    10/40 [======>.......................] - ETA: 0s - loss: 1.0957 - acc: 0.4000
+    40/40 [==============================] - 0s 7ms/step - loss: 1.0863 - acc: 0.5750 - val_loss: 1.0643 - val_acc: 0.7000
+    Epoch 2/3
+    
+    10/40 [======>.......................] - ETA: 0s - loss: 1.0675 - acc: 0.7000
+    40/40 [==============================] - 0s 990us/step - loss: 1.0392 - acc: 0.8500 - val_loss: 0.9925 - val_acc: 1.0000
+    Epoch 3/3
+    
+    10/40 [======>.......................] - ETA: 0s - loss: 1.0039 - acc: 1.0000
+    40/40 [==============================] - 0s 675us/step - loss: 0.9578 - acc: 0.9750 - val_loss: 0.8860 - val_acc: 1.0000
+
+
+
+
+
+
+
+
+
+
+
+What is special about a deep network?
+Networks with more convolution layers are called "deep" networks, and they may have more power to fit complex data, because of their ability to create hierarchical representations of the data that they fit.
+
+What is a major difference between a deep CNN and a CNN with only one convolutional layer?
+
+A deep network requires more data and more computation to fit.
+
+
+
