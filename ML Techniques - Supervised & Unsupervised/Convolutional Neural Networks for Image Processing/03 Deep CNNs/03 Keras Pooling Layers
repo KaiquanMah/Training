@@ -1,0 +1,166 @@
+Write your own pooling operation
+As we have seen before, CNNs can have a lot of parameters. Pooling layers are often added between the convolutional layers of a neural network to summarize their outputs in a condensed manner, and reduce the number of parameters in the next layer in the network. This can help us if we want to train the network more rapidly, or if we don't have enough data to learn a very large number of parameters.
+
+A pooling layer can be described as a particular kind of convolution. For every window in the input it finds the maximal pixel value and passes only this pixel through. In this exercise, you will write your own max pooling operation, based on the code that you previously used to write a two-dimensional convolution operation.
+
+
+
+
+
+# Result placeholder
+result = np.zeros((im.shape[0]//2, im.shape[1]//2))
+
+# Pooling operation
+for ii in range(result.shape[0]):
+    for jj in range(result.shape[1]):
+        result[ii, jj] = np.max(im[ii*2:ii*2+2, jj*2:jj*2+2])
+        
+        
+array([[0.6026144 , 0.61830068, 0.61830068, ..., 0.88758165, 0.8640523 ,
+        0.81699347],
+       [0.63529414, 0.61830068, 0.65098041, ..., 0.81307191, 0.78823525,
+        0.76601309],
+       [0.63529414, 0.64444447, 0.65098041, ..., 0.64967322, 0.64967322,
+        0.62875819],
+       ...,
+       [0.53725493, 0.43529415, 0.43529415, ..., 0.47450981, 0.47450981,
+        0.35555556],
+       [0.26274511, 0.43529415, 0.43529415, ..., 0.36470589, 0.27973858,
+        0.21176471],
+       [0.22222222, 0.22222222, 0.14509805, ..., 0.30718955, 0.32941177,
+        0.36601308]])
+        
+The resulting image is smaller, but retains the salient features in every location
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+Keras pooling layers
+Keras implements a pooling operation as a layer that can be added to CNNs between other layers. In this exercise, you will construct a convolutional neural network similar to the one you have constructed before:
+
+Convolution => Convolution => Flatten => Dense
+
+However, you will also add a pooling layer. The architecture will add a single max-pooling layer between the convolutional layer and the dense layer with a pooling of 2x2:
+
+Convolution => Max pooling => Convolution => Flatten => Dense
+
+A Sequential model along with Dense, Conv2D, Flatten, and MaxPool2D objects are available in your workspace.
+
+
+
+# Add a convolutional layer
+model.add(Conv2D(15, kernel_size=2, activation='relu', 
+                 input_shape=(img_rows, img_cols, 1)))
+
+#Add a maximum pooling operation (pooling over windows of size 2x2).
+# Add a pooling operation
+model.add(MaxPool2D(2))
+
+# Add another convolutional layer
+model.add(Conv2D(5, kernel_size=2, activation='relu'))
+
+# Flatten and feed to output layer
+model.add(Flatten())
+model.add(Dense(3, activation='softmax'))
+model.summary()
+
+
+
+
+    Model: "sequential_1"
+    _________________________________________________________________
+    Layer (type)                 Output Shape              Param #   
+    =================================================================
+    conv2d_1 (Conv2D)            (None, 27, 27, 15)        75        
+    _________________________________________________________________
+    max_pooling2d_1 (MaxPooling2 (None, 13, 13, 15)        0         
+    _________________________________________________________________
+    conv2d_2 (Conv2D)            (None, 12, 12, 5)         305       
+    _________________________________________________________________
+    flatten_1 (Flatten)          (None, 720)               0         
+    _________________________________________________________________
+    dense_1 (Dense)              (None, 3)                 2163      
+    =================================================================
+    Total params: 2,543
+    Trainable params: 2,543
+    Non-trainable params: 0
+    _________________________________________________________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Train a deep CNN with pooling to classify images
+Training a CNN with pooling layers is very similar to training of the deep networks that y have seen before. Once the network is constructed (as you did in the previous exercise), the model needs to be appropriately compiled, and then training data needs to be provided, together with the other arguments that control the fitting procedure.
+
+The following model from the previous exercise is available in your workspace:
+
+Convolution => Max pooling => Convolution => Flatten => Dense
+
+
+
+
+
+# Compile the model
+model.compile(optimizer='adam',
+            loss='categorical_crossentropy',
+            metrics=['accuracy'])
+
+# Fit to training data
+model.fit(train_data,train_labels,epochs=3,batch_size=10,validation_split=0.2)
+
+# Evaluate on test data 
+model.evaluate(test_data,test_labels,batch_size=10)
+
+    Train on 40 samples, validate on 10 samples
+    Epoch 1/3
+    
+    10/40 [======>.......................] - ETA: 0s - loss: 1.0914 - acc: 0.7000
+    40/40 [==============================] - 0s 8ms/step - loss: 1.0740 - acc: 0.7250 - val_loss: 1.0678 - val_acc: 0.8000
+    Epoch 2/3
+    
+    10/40 [======>.......................] - ETA: 0s - loss: 1.0670 - acc: 0.7000
+    40/40 [==============================] - 0s 518us/step - loss: 1.0519 - acc: 0.8250 - val_loss: 1.0366 - val_acc: 0.9000
+    Epoch 3/3
+    
+    10/40 [======>.......................] - ETA: 0s - loss: 1.0318 - acc: 1.0000
+    40/40 [==============================] - 0s 507us/step - loss: 1.0176 - acc: 0.9250 - val_loss: 0.9918 - val_acc: 0.9000
+    
+    10/10 [==============================] - 0s 189us/step
+    
+    This model is very accurate!
+
+
+    
+    
+    
+
+
+
+
+
+
