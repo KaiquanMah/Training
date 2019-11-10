@@ -1,0 +1,124 @@
+Using one-hot encoding to represent images
+Neural networks expect the labels of classes in a dataset to be organized in a one-hot encoded manner: each row in the array contains zeros in all columns, except the column corresponding to a unique label, which is set to 1.
+
+The fashion dataset contains three categories:
+Shirts
+Dresses
+Shoes
+In this exercise, you will create a one-hot encoding of a small sample of these labels.
+
+
+# The number of image categories
+n_categories = 3
+
+# The unique values of categories in the data
+categories = np.array(["shirt", "dress", "shoe"])
+
+
+
+
+
+In [4]: labels
+Out[4]: ['shoe', 'shirt', 'shoe', 'shirt', 'dress', 'dress', 'dress']
+
+In [5]: len(labels)
+Out[5]: 7
+
+# Initialize ohe_labels as all zeros
+#labels are the actual labels provided
+ohe_labels = np.zeros((len(labels), n_categories))
+
+
+
+In [3]: ohe_labels
+Out[3]: 
+array([[0., 0., 0.],
+       [0., 0., 0.],
+       [0., 0., 0.],
+       [0., 0., 0.],
+       [0., 0., 0.],
+       [0., 0., 0.],
+       [0., 0., 0.]])
+       
+       
+       
+       
+       
+       
+
+# Loop over the labels
+# ii is for each set of [0, 0, 0]
+# in the array of [[0,0,0],
+#                   ...,
+#                   [0,0,0]]
+
+#jj is the position of the category in each set of [0,0,0]
+for ii in range(len(labels)):
+    # Find the location of this label in the categories variable
+    jj = np.where(categories == labels[ii])
+    print (ii,jj)
+    # Set the corresponding zero to one
+    ohe_labels[ii,jj] = 1
+
+
+
+<script.py> output:
+    0 (array([2]),)
+    1 (array([0]),)
+    2 (array([2]),)
+    3 (array([0]),)
+    4 (array([1]),)
+    5 (array([1]),)
+    6 (array([1]),)
+
+
+
+In [11]: ohe_labels
+Out[11]: 
+array([[0., 0., 1.],
+       [1., 0., 0.],
+       [0., 0., 1.],
+       [1., 0., 0.],
+       [0., 1., 0.],
+       [0., 1., 0.],
+       [0., 1., 0.]])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Evaluating a classifier
+To evaluate a classifier, we need to test it on images that were not used during training. This is called "cross-validation": a prediction of the class (e.g., t-shirt, dress or shoe) is made from each of the test images, and these predictions are compared with the true labels of these images.
+
+The results of cross-validation are provided as one-hot encoded arrays: test_labels and predictions.
+
+
+
+
+
+
+# Calculate the number of correct predictions
+number_correct = np.sum(test_labels*predictions)
+print(number_correct)
+    6.0
+    
+# Calculate the proportion of correct predictions
+proportion_correct = number_correct/len(test_labels)
+print(proportion_correct)
+    0.75
+
+
+
+
+
