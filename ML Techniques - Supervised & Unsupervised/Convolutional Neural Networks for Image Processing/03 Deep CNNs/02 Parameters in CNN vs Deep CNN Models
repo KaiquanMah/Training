@@ -1,0 +1,101 @@
+How many parameters in a CNN?
+We need to know how many parameters a CNN has, so we can adjust the model architecture, to reduce this number or shift parameters from one part of the network to another. How many parameters would a network have if its inputs are images with 28-by-28 pixels, there is one convolutional layer with 10 units kernels of 3-by-3 pixels, using zero padding (input has the same size as the output), and one densely connected layer with 2 units?
+
+ 
+ 
+1. input image 28x28
+2. Conv2D layer with 10 kernel units, kernel_size=3 i.e. 3x3 pixels, zero padding
+Kernel pixels (3x3)
+X Kernel units 10
++Kernel Unit bias terms 10
+-----------------------------
+9X10 + 10 = 90 + 10 = 100 params
+
+3. one densely connected layer with 2 units
+Input pixels (28 x 28)
+X Feature maps 10
+X Units 2
++ Bias Terms for Units 2
+---------------------------
+784X10X2 + 2 = 15,682 params
+
+Total number of parameters = 100 + 15,682 = 15, 782
+
+
+
+
+
+
+How many parameters in a deep CNN?
+In this exercise, you will use Keras to calculate the total number of parameters along with the number of parameters in each layer of the network.
+
+We have already provided code that builds a deep CNN for you.
+
+# CNN model
+model = Sequential()
+model.add(Conv2D(10, kernel_size=2, activation='relu', 
+                 input_shape=(28, 28, 1)))
+model.add(Conv2D(10, kernel_size=2, activation='relu'))
+model.add(Flatten())
+model.add(Dense(3, activation='softmax'))
+
+# Summarize the model 
+model.summary()
+
+
+
+
+
+#model.add(Conv2D(10, kernel_size=2, activation='relu', 
+                 input_shape=(28, 28, 1)))
+Kernel pixels (2x2)
+X Kernel units 10
++Kernel Unit bias terms 10
+-----------------------------
+4X10 + 10 = 40 + 10 = 50 params
+
+
+
+#model.add(Conv2D(10, kernel_size=2, activation='relu'))
+Kernel pixels (2x2)
+X feature maps from previous layer 10
+X Kernel units 10
++Kernel Unit bias terms 10
+-----------------------------
+4 X10 X10 + 10 = 400 + 10 = 410 params
+
+
+#model.add(Flatten())
+0 params
+
+#model.add(Dense(3, activation='softmax'))
+(Input pixels 28 - Kernel size 2) x (Input pixels 28 - Kernel size 2)
+X Feature maps 10
+X Units 3
++ Bias Terms for Units 3
+---------------------------
+676 X10 X3 + 3 = 20,283
+
+Total number of parameters = 50 + 410 + 20,283 = 20,743 params
+
+
+
+
+
+
+    Model: "sequential_1"
+    _________________________________________________________________
+    Layer (type)                 Output Shape              Param #   
+    =================================================================
+    conv2d_1 (Conv2D)            (None, 27, 27, 10)        50        
+    _________________________________________________________________
+    conv2d_2 (Conv2D)            (None, 26, 26, 10)        410       
+    _________________________________________________________________
+    flatten_1 (Flatten)          (None, 6760)              0         
+    _________________________________________________________________
+    dense_1 (Dense)              (None, 3)                 20283     
+    =================================================================
+    Total params: 20,743
+    Trainable params: 20,743
+    Non-trainable params: 0
+    _________________________________________________________________
