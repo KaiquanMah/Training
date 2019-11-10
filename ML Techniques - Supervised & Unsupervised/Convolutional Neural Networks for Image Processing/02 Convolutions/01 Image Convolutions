@@ -1,0 +1,122 @@
+One dimensional convolutions
+A convolution of an one-dimensional array with a kernel comprises of taking the kernel, sliding it along the array, multiplying it with the items in the array that overlap with the kernel in that location and summing this product.
+
+
+
+array = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+kernel = np.array([1, -1, 0])
+conv = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+# Output array
+for ii in range(8):
+    conv[ii] = (kernel * array[ii:ii+3]).sum()
+
+# Print conv
+print(conv)
+    [ 1 -1  1 -1  1 -1  1 -1  0  0]
+
+Notice that we've only multiplied the kernel with eight different positions
+
+
+
+
+
+
+Image convolutions
+The convolution of an image with a kernel summarizes a part of the image as the sum of the multiplication of that part of the image with the kernel. In this exercise, you will write the code that executes a convolution of an image with a kernel using Numpy. Given a black and white image that is stored in the variable im, write the operations inside the loop that would execute the convolution with the provided kernel.
+
+In [1]: im
+Out[1]: 
+array([[0.5764706 , 0.5882353 , 0.551634  , ..., 0.475817  , 0.6810458 ,
+        0.60784316],
+       [0.32941177, 0.6026144 , 0.6183007 , ..., 0.6836602 , 0.57254905,
+        0.44836602],
+       [0.63529414, 0.5424837 , 0.6143791 , ..., 0.4143791 , 0.37124184,
+        0.34248367],
+       ...,
+       [0.16470589, 0.16209151, 0.4       , ..., 0.16862746, 0.11111111,
+        0.13594772],
+       [0.44836602, 0.3764706 , 0.37777779, ..., 0.04705882, 0.05751634,
+        0.05359477],
+       [0.30980393, 0.25882354, 0.3620915 , ..., 0.05359477, 0.07058824,
+        0.03398693]], dtype=float32)
+
+In [4]: im.shape
+Out[4]: (159, 240)
+
+
+
+
+kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+result = np.zeros(im.shape)
+
+# Output array
+for ii in range(im.shape[0] - 3):
+    for jj in range(im.shape[1] - 3):
+        result[ii, jj] = (im[ii:ii+3, jj:jj+3] * kernel).sum()
+
+# Print result
+print(result)
+
+    [[2.68104586 2.95947725 2.84313735 ... 0.         0.         0.        ]
+     [3.01830077 3.07058835 3.05098051 ... 0.         0.         0.        ]
+     [2.95163405 3.09934652 3.20261449 ... 0.         0.         0.        ]
+     ...
+     [0.         0.         0.         ... 0.         0.         0.        ]
+     [0.         0.         0.         ... 0.         0.         0.        ]
+     [0.         0.         0.         ... 0.         0.         0.        ]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Defining image convolution kernels
+In the previous exercise, you wrote code that performs a convolution given an image and a kernel. This code is now stored in a function called convolution() that takes two inputs: image and kernel and produces the convolved image. In this exercise, you will be asked to define the kernel that finds a particular feature in the image.
+
+For example, the following kernel finds a vertical line in images:
+
+np.array([[-1, 1, -1], 
+          [-1, 1, -1], 
+          [-1, 1, -1]])
+
+
+
+Define a kernel that finds horizontal lines in images.
+kernel = np.array([[-1, -1, -1], 
+                   [1, 1, 1],
+                   [-1, -1, -1]])
+
+
+
+
+Define a kernel that finds a light spot surrounded by dark pixels.
+
+kernel = np.array([[-1, -1, -1], 
+                   [-1, 1, -1],
+                   [-1, -1, -1]])
+                   
+                   
+Define a kernel that finds a dark spot surrounded by bright pixels.
+
+kernel = np.array([[1, 1, 1], 
+                   [1, -1, 1],
+                   [1, 1, 1]])
+                   
+                   
+                   
+                   
+
