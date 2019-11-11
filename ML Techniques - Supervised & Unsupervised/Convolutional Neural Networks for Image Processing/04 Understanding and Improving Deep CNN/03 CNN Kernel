@@ -1,0 +1,72 @@
+Extracting a kernel from a trained network
+One way to interpret models is to examine the properties of the kernels in the convolutional layers. In this exercise, you will extract one of the kernels from a convolutional neural network with weights that you saved in a hdf5 file.
+
+
+
+
+# Load the weights into the model
+model.load_weights('weights.hdf5')
+
+# Get the first convolutional layer from the model
+c1 = model.layers[0]
+
+# Get the weights of the first convolutional layer
+weights1 = c1.get_weights()
+
+# Pull out the first channel of the first kernel in the first layer
+kernel = weights1[0][...,0, 0]
+print(kernel)
+
+[[ 0.03504268  0.4328133 ]
+ [-0.17416623  0.4680562 ]]
+
+You can extract the weights from other layers too.
+
+
+
+
+
+
+
+
+Shape of the weights
+A Keras neural network stores its layers in a list called model.layers. For the convolutional layers, you can get the weights using the .get_weights() method. This returns a list, and the first item in this list is an array representing the weights of the convolutional kernels. If the shape of this array is (2, 2, 1, 5), what does the first number (2) represent?
+
+The kernel size is 2 by 2.
+That's correct, each of the 2s in this shape is one of the dimensions of the kernel.
+
+
+
+
+
+
+
+
+
+
+
+
+Visualizing kernel responses
+One of the ways to interpret the weights of a neural network is to see how the kernels stored in these weights "see" the world. That is, what properties of an image are emphasized by this kernel. In this exercise, we will do that by convolving an image with the kernel and visualizing the result. Given images in the test_data variable, a function called extract_kernel() that extracts a kernel from the provided network, and the function called convolution() that we defined in the first chapter, extract the kernel, load the data from a file and visualize it with matplotlib.
+
+A deep CNN model, a function convolution(), along with the kernel you extracted in an earlier exercise is available in your workspace.
+
+Ready to take your deep learning to the next level? Check out Advanced Deep Learning with Keras in Python to see how the Keras functional API lets you build domain knowledge to solve new types of problems.
+
+
+
+import matplotlib.pyplot as plt
+
+# Convolve with the fourth image in test_data
+out = convolution(test_data[3, :, :, 0], kernel)
+
+# Visualize the result
+plt.imshow(out)
+plt.show()
+
+That's nice. You can keep going and visualize the kernel responses for all the kernels in this layer!
+
+
+
+
+
