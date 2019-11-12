@@ -1,0 +1,204 @@
+EDA: finals versus semifinals
+First, you will get an understanding of how athletes' performance changes from the semifinals to the finals by computing the fractional improvement from the semifinals to finals and plotting an ECDF of all of these values.
+
+The arrays final_times and semi_times contain the swim times of the respective rounds. The arrays are aligned such that final_times[i] and semi_times[i] are for the same swimmer/event. If you are interested in the strokes/events, you can check out the data frame df in your namespace, which has more detailed information, but is not used in the analysis.
+
+# Compute fractional difference in time between finals and semis
+f = (semi_times - final_times) / semi_times
+
+# Generate x and y values for the ECDF: x, y
+x, y = dcst.ecdf(f)
+
+# Make a plot of the ECDF
+_ = plt.plot(x, y, marker='.', linestyle='none')
+
+# Label axes and show plot
+_ = plt.xlabel('f')
+_ = plt.ylabel('ECDF')
+plt.show()
+
+The median of the ECDF is juuuust above zero. But at first glance, it does not look like there is much of any difference between semifinals and finals. We'll check this carefully in the next exercises.
+
+
+
+
+In [3]: df
+Out[3]: 
+    athleteid  stroke  distance  final_swimtime    lastname  semi_swimtime
+0      100537    FREE       100           52.52    CAMPBELL          53.00
+1      100537    FREE        50           24.12    CAMPBELL          24.32
+2      100631    FREE       100           52.82    CAMPBELL          52.84
+3      100631    FREE        50           24.36    CAMPBELL          24.22
+4      100650     FLY       100           57.67      MCKEON          57.59
+..        ...     ...       ...             ...         ...            ...
+91     105595    BACK       200          126.34    FRANKLIN         127.79
+92     105607  BREAST        50           30.20       HARDY          30.25
+93     105640     FLY       200          126.95  MCLAUGHLIN         127.52
+94     105676    BACK       100           59.99       BAKER          59.63
+95     105686     FLY       200          126.40       ADAMS         127.57
+
+[96 rows x 6 columns]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Parameter estimates of difference between finals and semifinals
+Compute the mean fractional improvement from the semifinals to finals, along with a 95% confidence interval of the mean. The Numpy array f that you computed in the last exercise is in your namespace.
+
+
+
+# Mean fractional time difference: f_mean
+f_mean = np.mean(f)
+
+# Get bootstrap reps of mean: bs_reps
+bs_reps = dcst.draw_bs_reps(f, np.mean, size = 10000)
+
+# Compute confidence intervals: conf_int
+conf_int = np.percentile(bs_reps, [2.5,97.5])
+
+# Report
+print("""
+mean frac. diff.: {0:.5f}
+95% conf int of mean frac. diff.: [{1:.5f}, {2:.5f}]""".format(f_mean, *conf_int))
+
+<script.py> output:
+    
+    mean frac. diff.: 0.00040
+    95% conf int of mean frac. diff.: [-0.00092, 0.00176]
+It looks like the mean finals time is juuuust faster than the mean semifinal time, and they very well may be the same. We'll test this hypothesis next.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+How to do the permutation test
+Based on our EDA and parameter estimates, it is tough to discern improvement from the semifinals to finals. In the next exercise, you will test the hypothesis that there is no difference in performance between the semifinals and finals. A permutation test is fitting for this. We will use the mean value of f as the test statistic. Which of the following simulates getting the test statistic under the null hypothesis?
+
+Strategy 1
+Take an array of semifinal times and an array of final times for each swimmer for each stroke/distance pair.
+Go through each array, and for each index, swap the entry in the respective final and semifinal array with a 50% probability.
+Use the resulting final and semifinal arrays to compute f and then the mean of f.
+#this works
+
+Strategy 2
+Take an array of semifinal times and an array of final times for each swimmer for each stroke/distance pair and concatenate them, giving a total of 96 entries.
+Scramble the concatenated array using the np.permutation() function. Assign the first 48 entries in the scrambled array to be "semifinal" and the last 48 entries to be "final."
+Compute f from these new semifinal and final arrays, and then compute the mean of f.
+#This will not work because you are not maintaining the same swimmer for the semifinals and finals. This is actually the same procedure as choice (4).
+
+Strategy 3
+Take the array f we used in the last exercise.
+Multiply each entry of f by either 1 or -1 with equal probability.
+Compute the mean of this new array to get the test statistic.
+#This does not work for the form of f that we have chosen. However, it would work if we had f = (semi time - final time) / (average of semi time and final time). But, we chose f to be a fractional improvement, not a fractional difference.
+
+
+Strategy 4
+Define a function with signature compute_f(semi_times, final_times) to compute f from inputted swim time arrays.
+Draw a permutation replicate using dcst.draw_perm_reps(semi_times, final_times, compute_f).
+
+
+
+
+
+
+
+Generating permutation samples
+As you worked out in the last exercise, we need to generate a permutation sample by randomly swapping corresponding entries in the semi_times and final_times array. Write a function with signature swap_random(a, b) that returns arrays where random indices have the entries in a and b swapped.
+
+
+#Define a function with signature swap_random(a, b) that does the following.
+#Create an array swap_inds the same length as the input arrays where each entry is True with 50/50 probability. Hint: Use np.random.random() with the size=len(a) keyword argument. Each entry in the result that is less than 0.5 should be True.
+#Make copies of a and b, called a_out and b_out, respectively using np.copy().
+#Use Boolean indexing with the swap_inds array to swap the appropriate entries of b into a_out and of a into b_out.
+
+
+
+def swap_random(a, b):
+    """Randomly swap entries in two arrays."""
+    # Indices to swap
+    swap_inds = np.random.random(size=len(a)) < 0.5
+    
+    # Make copies of arrays a and b for output
+    a_out = np.copy(a)
+    b_out = np.copy(b)
+    
+    # Swap values
+    a_out[swap_inds] = b[swap_inds]
+    b_out[swap_inds] = a[swap_inds]
+
+    return a_out, b_out
+    
+    
+Now you have this function in hand to do the permutation test.    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+Hypothesis test: Do women swim the same way in semis and finals?
+Test the hypothesis that performance in the finals and semifinals are identical using the mean of the fractional improvement as your test statistic. The test statistic under the null hypothesis is considered to be at least as extreme as what was observed if it is greater than or equal to f_mean, which is already in your namespace.
+
+The semifinal and final times are contained in the numpy arrays semi_times and final_times.
+
+
+
+
+
+#Set up an empty array to contain 1000 permutation replicates using np.empty(). Call this array perm_reps.
+# Set up array of permutation replicates
+perm_reps = np.empty(1000)
+
+for i in range(1000):
+    # Generate a permutation sample
+    semi_perm, final_perm = swap_random(semi_times, final_times)
+    
+    # Compute f from the permutation sample
+    f = (semi_perm - final_perm) / semi_perm
+    
+    # Compute and store permutation replicate
+    perm_reps[i] = np.mean(f)
+
+# Compute and print p-value
+print('p =', np.sum(perm_reps >= f_mean) / 1000)
+    p = 0.266
+The p-value is large, about 0.27, which suggests that the results of the 2015 World Championships are consistent with there being no difference in performance between the finals and semifinals.
+
+
+
+
+
