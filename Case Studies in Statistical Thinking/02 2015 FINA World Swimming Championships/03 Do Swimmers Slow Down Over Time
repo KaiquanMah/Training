@@ -1,0 +1,118 @@
+EDA: Plot all your data
+To get a graphical overview of a data set, it is often useful to plot all of your data. In this exercise, plot all of the splits for all female swimmers in the 800 meter heats. The data are available in a Numpy arrays split_number and splits. The arrays are organized such that splits[i,j] is the split time for swimmer i for split_number[j].
+
+
+
+
+# Plot the splits for each swimmer
+for splitset in splits:
+    _ = plt.plot(split_number, splitset, linewidth=1, color='lightgray')
+
+
+#Compute the mean split times for each distance. You can do this using the np.mean() function with the axis=0 keyword argument. This tells np.mean() to compute the means over rows, which will give the mean split time for each split number.
+# Compute the mean split times
+mean_splits = np.mean(splits,axis=0)
+
+# Plot the mean split times
+_ = plt.plot(split_number, mean_splits, marker='.', linewidth=3, markersize=12)
+
+# Label axes and show plot
+_ = plt.xlabel('split number')
+_ = plt.ylabel('split time (s)')
+plt.show()
+
+You can see that there is wide variability in the splits among the swimmers, and what appears to be a slight trend toward slower split times.
+
+
+
+
+
+
+
+
+
+
+
+Linear regression of average split time
+We will assume that the swimmers slow down in a linear fashion over the course of the 800 m event. The slowdown per split is then the slope of the mean split time versus split number plot. Perform a linear regression to estimate the slowdown per split and compute a pairs bootstrap 95% confidence interval on the slowdown. Also show a plot of the best fit line.
+
+Note: We can compute error bars for the mean split times and use those in the regression analysis, but we will not take those into account here, as that is beyond the scope of this course.
+
+
+
+# Perform regression
+slowdown, split_3 = np.polyfit(split_number,mean_splits,deg=1)
+
+#Use dcst.draw_bs_pairs_linreg() to compute 10,000 pairs bootstrap replicates of the slowdown per split. Store the result in bs_reps. 
+#The bootstrap replicates of the intercept are not relevant for this analysis, so you can store them in the throwaway variable _.
+# Compute pairs bootstrap
+bs_reps, _ = dcst.draw_bs_pairs_linreg(split_number,mean_splits,size=10000)
+
+# Compute confidence interval
+conf_int = np.percentile(bs_reps,[2.5,97.5])
+
+# Plot the data with regressions line
+_ = plt.plot(split_number, mean_splits, marker='.', linestyle='none')
+_ = plt.plot(split_number, slowdown * split_number + split_3, '-')
+
+
+# Label axes and show plot
+_ = plt.xlabel('split number')
+_ = plt.ylabel('split time (s)')
+plt.show()
+
+# Print the slowdown per split
+print("""
+mean slowdown: {0:.3f} sec./split
+95% conf int of mean slowdown: [{1:.3f}, {2:.3f}] sec./split""".format(
+    slowdown, *conf_int))
+
+
+
+
+There is a small (about 6 hundreths of a second), but discernible, slowdown per split. We'll do a hypothesis test next.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hypothesis test: are they slowing down?
+Now we will test the null hypothesis that the swimmer's split time is not at all correlated with the distance they are at in the swim. We will use the Pearson correlation coefficient (computed using dcst.pearson_r()) as the test statistic.
+
+
+
+# Observed correlation
+rho = dcst.pearson_r(split_number,mean_splits)
+
+#Using np.empty(), initialize the array of 10,000 permutation replicates of the Pearson correlation, naming it perm_reps_rho.
+# Initialize permutation reps
+perm_reps_rho = np.empty(10000)
+
+# Make permutation reps
+for i in range(10000):
+    # Scramble the split number array
+    scrambled_split_number = np.random.permutation(split_number)
+    
+    # Compute the Pearson correlation coefficient
+    perm_reps_rho[i] = dcst.pearson_r(scrambled_split_number,mean_splits)
+    
+# Compute and print p-value
+p_val = np.sum(perm_reps_rho >= rho) / len(perm_reps_rho)
+print('p =', p_val)
+    p = 0.0
+The tiny effect is very real! With 10,000 replicates, we never got a correlation as big as observed under the hypothesis that the swimmers do not change speed as the race progresses. In fact, I did the test with a million replicates, and still never got a single replicate as big as the observed Pearson correlation coefficient.
+
+
+
+
+
