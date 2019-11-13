@@ -1,0 +1,138 @@
+Parkfield earthquake magnitudes
+As usual, you will start with EDA and plot the ECDF of the magnitudes of earthquakes detected in the Parkfield region from 1950 to 2016. The magnitudes of all earthquakes in the region from the ANSS ComCat are stored in the Numpy array mags.
+
+When you do it this time, though, take a shortcut in generating the ECDF. You may recall that putting an asterisk before an argument in a function splits what follows into separate arguments. Since dcst.ecdf() returns two values, we can pass them as the x, y positional arguments to plt.plot() as plt.plot(*dcst.ecdf(data_you_want_to_plot)).
+
+You will use this shortcut in this exercise and going forward.
+In [1]: mags
+Out[1]: array([3.67, 3.61, 3.95, ..., 0.61, 0.33, 0.7 ])
+
+
+# Make the plot
+plt.plot(*dcst.ecdf(mags), marker='.', linestyle='none')
+
+# Label axes and show plot
+plt.xlabel('magnitude')
+plt.ylabel('ECDF')
+plt.show()
+
+Note the distinctive roll-off at magnitudes below 1.0.
+
+
+
+
+
+
+
+
+
+
+
+Computing the b-value
+The b-value is a common metric for the seismicity of a region. You can imagine you would like to calculate it often when working with earthquake data. For tasks like this that you will do often, it is best to write a function! So, write a function with signature b_value(mags, mt, perc=[2.5, 97.5], n_reps=None) that returns the b-value and (optionally, if n_reps is not None) its confidence interval for a set of magnitudes, mags. The completeness threshold is given by mt. The perc keyword argument gives the percentiles for the lower and upper bounds of the confidence interval, and n_reps is the number of bootstrap replicates to use in computing the confidence interval.
+
+
+#Define a function with signature b_value(mags, mt, perc=[2.5, 97.5], n_reps=None) that does the following:
+#Slice magnitudes out of mags at and above the completeness threshold mt using Boolean indexing. Store the result in the variable m.
+#Compute the best estimate of the b-value. Remember, the best estimate for the b-value is b = (m - mt)·ln(10). Store the result in the variable b.
+#if n_reps is not None, do the following.
+#Draw n_reps bootstrap replicates of the mean of m. Store the result in the variable m_bs_reps.
+#Convert the bootstrap replicates of the mean of m to replicates of the b-value. Store the result in b_bs_reps.
+#Compute the confidence interval from the bootstrap replicates of the b-value. Store the result in conf_int.
+#Return b and conf_int, or just b if n_reps is None.
+
+
+def b_value(mags, mt, perc=[2.5, 97.5], n_reps=None):
+    """Compute the b-value and optionally its confidence interval."""
+    # Extract magnitudes above completeness threshold: m
+    m = mags[mags >= mt]
+
+    # Compute b-value: b
+    b = (np.mean(m) - mt) * np.log(10)
+
+    # Draw bootstrap replicates
+    if n_reps is None:
+        return b
+    else:
+        m_bs_reps = dcst.draw_bs_reps(m, np.mean, size=n_reps)
+
+        # Compute b-value from replicates: b_bs_reps
+        b_bs_reps = (m_bs_reps - mt) * np.log(10)
+
+        # Compute confidence interval: conf_int
+        conf_int = np.percentile(b_bs_reps, perc)
+    
+        return b, conf_int
+        
+You now have a very handy function for computing b-values. You'll use it in this and the next chapter.
+
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The b-value for Parkfield
+The ECDF is effective at exposing roll-off, as you could see below magnitude 1. Because there are plenty of earthquakes above magnitude 3, you can use mt = 3 as your completeness threshold. With this completeness threshold, compute the b-value for the Parkfield region from 1950 to 2016, along with the 95% confidence interval. Print the results to the screen. The variable mags with all the magnitudes is in your namespace.
+
+Overlay the theoretical Exponential CDF to verify that the Parkfield region follows the Gutenberg-Richter Law.
+
+
+
+
+# Compute b-value and 95% confidence interval
+b, conf_int = b_value(mags, mt, perc=[2.5, 97.5], n_reps=10000)
+
+
+#Use np.random.exponential() to draw 100,000 samples from the theoretical distribution. Hint: The mean for the distribution is b/np.log(10), and you need to add mt to your samples to appropriately handle the location parameter. Store the result in m_theor.
+# Generate samples to for theoretical ECDF
+m_theor = np.random.exponential(b/np.log(10), size=100000) + mt
+
+# Plot the theoretical CDF
+_ = plt.plot(*dcst.ecdf(m_theor))
+
+# Plot the ECDF (slicing mags >= mt)
+_ = plt.plot(*dcst.ecdf(mags[mags >= mt]), marker='.', linestyle='none')
+
+# Pretty up and show the plot
+_ = plt.xlabel('magnitude')
+_ = plt.ylabel('ECDF')
+_ = plt.xlim(2.8, 6.2)
+plt.show()
+
+# Report the results
+print("""
+b-value: {0:.2f}
+95% conf int: [{1:.2f}, {2:.2f}]""".format(b, *conf_int))
+    
+    b-value: 1.08
+    95% conf int: [0.94, 1.24]
+
+Parkfield seems to follow the Gutenberg-Richter law very well. The b-value of about 1 is typical for regions along fault zones.
+
+
+
+
+
+
+
+
+
