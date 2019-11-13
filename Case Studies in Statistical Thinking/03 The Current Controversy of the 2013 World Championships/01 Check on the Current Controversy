@@ -1,0 +1,200 @@
+#https://qz.com/761280/researchers-believe-certain-lanes-in-the-olympic-pool-may-have-given-some-swimmers-an-advantage/
+#https://www.washingtonpost.com/news/wonk/wp/2016/09/01/these-charts-clearly-show-how-some-olympic-swimmers-may-have-gotten-an-unfair-advantage/
+#https://swimswam.com/rio-olympic-test-event-showed-same-pool-bias-2-0/
+#https://swimswam.com/problem-rio-pool/
+#https://www.ncbi.nlm.nih.gov/pubmed/25003776
+
+
+
+
+
+
+A metric for improvement
+In your first analysis, you will investigate how times of swimmers in 50 m events change as they move between low numbered lanes (1-3) to high numbered lanes (6-8) in the semifinals and finals. We showed in the previous chapter that there is little difference between semifinal and final performance, so you will neglect any differences due to it being the final versus the semifinal.
+
+You want to use as much data as you can, so use all four strokes for both the men's and women's competitions. As such, what would be a good metric for improvement from one round to the next for an individual swimmer, where ta is the swim time in a low numbered lane and tb is the swim time in a high numbered lane?
+
+
+The fractional improvement of swim time, (ta - tb) / ta.
+This is a good metric; it is the fractional improvement, and therefore independent of the basal speed (which is itself dependent on stroke and gender).
+
+
+
+
+
+
+
+
+ECDF of improvement from low to high lanes
+Now that you have a metric for improvement going from low- to high-numbered lanes, plot an ECDF of this metric. I have put together the swim times of all swimmers who swam a 50 m semifinal in a high numbered lane and the final in a low numbered lane, and vice versa. The swim times are stored in the Numpy arrays swimtime_high_lanes and swimtime_low_lanes. Entry i in the respective arrays are for the same swimmer in the same event.
+
+
+# Compute the fractional improvement of being in high lane: f
+f = (swimtime_low_lanes - swimtime_high_lanes) / swimtime_low_lanes
+In [1]: f
+Out[1]: 
+array([ 0.00162206,  0.01632302,  0.00551471,  0.00761523,  0.06277056,
+        0.00486618,  0.00191058,  0.00787683,  0.00856531, -0.00784998,
+        0.01413589,  0.01094246,  0.01630867,  0.00952759,  0.01072386,
+        0.02235707,  0.01457726,  0.00823799,  0.01164483,  0.01402479,
+        0.01057958,  0.01076658, -0.00429646, -0.01073763,  0.01008471,
+        0.01511716])
+
+
+
+# Make x and y values for ECDF: x, y
+x, y = dcst.ecdf(f)
+
+# Plot the ECDFs as dots
+_ = plt.plot(x,y,marker='.',linestyle='none')
+
+# Label the axes and show the plot
+plt.xlabel('f')
+plt.ylabel('ECDF')
+plt.show()
+
+Oooo, this is starting to paint a picture of lane bias. The ECDF demonstrates that all but three of the 26 swimmers swam faster in the high numbered lanes.
+
+
+
+
+
+
+
+
+
+
+
+Estimation of mean improvement
+You will now estimate how big this current effect is. Compute the mean fractional improvement for being in a high-numbered lane versus a low-numbered lane, along with a 95% confidence interval of the mean.
+
+
+# Compute the mean difference: f_mean
+f_mean = np.mean(f)
+
+# Draw 10,000 bootstrap replicates: bs_reps
+bs_reps = dcst.draw_bs_reps(f, np.mean, size=10000)
+
+# Compute 95% confidence interval: conf_int
+conf_int = np.percentile(bs_reps, [2.5, 97.5])
+
+# Print the result
+print("""
+mean frac. diff.: {0:.5f}
+95% conf int of mean frac. diff.: [{1:.5f}, {2:.5f}]""".format(f_mean, *conf_int))
+
+    mean frac. diff.: 0.01051
+    95% conf int of mean frac. diff.: [0.00612, 0.01591]
+
+You're getting to be a pro! And it sure looks like swimmers are faster in lanes 6-8.
+
+
+
+
+
+
+
+
+
+
+
+How should we test the hypothesis?
+You are interested in the presence of lane bias toward higher lanes, presumably due to a slight current in the pool. A natural null hypothesis to test, then, is that the mean fractional improvement going from low to high lane numbers is zero. Which of the following is a good way to simulate this null hypothesis?
+
+As a reminder, the arrays swimtime_low_lanes and swimtime_high_lanes contain the swim times for lanes 1-3 and 6-8, respectively, and we define the fractional improvement as f = (swimtime_low_lanes - swimtime_high_lanes) / swimtime_low_lanes.
+
+#not - Randomly swap swimtime_low_lanes[i] and swimtime_high_lanes[i] with probability 0.5. From these randomly swapped arrays, compute the fractional improvement. The test statistic is the mean of this new f array.
+#This is simulating a different hypothesis, that whether a swimmer is in a high-numbered lane or a low-numbered lane has no bearing on the swim time. This is a perfectly reasonable hypothesis to test, but it is not the one we are testing here.
+
+#not - Scramble the entries in the swimtime_high_lanes, and recompute f from the scrambled array and the swimtime_low_lanes array. The test statistic is the mean of this new f array.
+#If you scramble one of the arrays of swim times, you are then comparing a swim of a high lane number and a swim of a low lane number for a different swimmer for a different stroke.
+
+#not - Shift the swimtime_low_lanes and swimtime_high_lanes arrays by adding a constant value to each so that the shifted arrays have the same mean. Compute the fractional improvement, f_shift, from these shifted arrays. Then, take a bootstrap replicate of the mean from f_shift.
+#This is not correct, but the difference is subtle. If you do this, you are simulating the hypothesis that averaging over all swimmers and strokes, the average swim time in high lanes is equal to that in low lanes. This is not the same as testing that the average fractional improvement is zero. We definitely want to test that the average fractional difference is zero because we want to normalize out differences in speed across strokes and gender.
+
+#yes - Subtract the mean of f from f to generate f_shift. Then, take bootstrap replicate of the mean from this f_shift.
+
+
+
+
+
+
+
+
+
+
+Hypothesis test: Does lane assignment affect performance?
+Perform a bootstrap hypothesis test of the null hypothesis that the mean fractional improvement going from low-numbered lanes to high-numbered lanes is zero. Take the fractional improvement as your test statistic, and "at least as extreme as" to mean that the test statistic under the null hypothesis is greater than or equal to what was observed.
+
+# Shift f: f_shift
+f_shift = f - f_mean
+
+# Draw 100,000 bootstrap replicates of the mean: bs_reps
+bs_reps = dcst.draw_bs_reps(f_shift, np.mean, size=100000)
+
+# Compute and report the p-value
+p_val = np.sum(bs_reps >= f_mean) / 100000
+print('p =', p_val)
+
+    p = 0.00033
+A p-value of 0.0003 is quite small and suggests that the mean fractional improvment is greater than zero. For fun, I tested the more restrictive hypothesis that lane number has no bearing at all on performance (item (1) in the previous MCQ), and I got an even smaller p-value of about 0.00001. You can perform that test, too, for practice if you like.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Did the 2015 event have this problem?
+You would like to know if this is a typical problem with pools in competitive swimming. To address this question, perform a similar analysis for the results of the 2015 FINA World Championships. That is, compute the mean fractional improvement for going from lanes 1-3 to lanes 6-8 for the 2015 competition, along with a 95% confidence interval on the mean. Also test the hypothesis that the mean fractional improvement is zero.
+
+The arrays swimtime_low_lanes_15 and swimtime_high_lanes_15 have the pertinent data.
+
+
+# Compute f and its mean
+f = (swimtime_low_lanes_15 - swimtime_high_lanes_15) / swimtime_low_lanes_15
+f_mean = np.mean(f)
+
+# Draw 10,000 bootstrap replicates
+bs_reps = dcst.draw_bs_reps(f, np.mean, size=10000)
+
+# Compute 95% confidence interval
+conf_int = np.percentile(bs_reps, [2.5, 97.5])
+
+# Shift f
+f_shift = f - f_mean
+
+# Draw 100,000 bootstrap replicates of the mean
+bs_reps = dcst.draw_bs_reps(f_shift, np.mean, size=100000)
+
+# Compute the p-value
+p_val = np.sum(bs_reps >= f_mean) / 100000
+
+# Print the results
+print("""
+mean frac. diff.: {0:.5f}
+95% conf int of mean frac. diff.: [{1:.5f}, {2:.5f}]
+p-value: {3:.5f}""".format(f_mean, *conf_int, p_val))
+
+    mean frac. diff.: 0.00079
+    95% conf int of mean frac. diff.: [-0.00198, 0.00341]
+    p-value: 0.28179
+Both the confidence interval and the p-value suggest that there was no lane bias in 2015.
+
+
+
+
+
+
+
+
+
+
+
+
