@@ -1,0 +1,122 @@
+Which splits should we consider?
+As you proceed to quantitatively analyze the zigzag effect in the 1500 m, which splits should you include in our analysis? For reference, the plot of the zigzag effect from the video is shown to the right.
+
+You should include all splits except the first two and the last two. You should neglect the last two because swimmers stop pacing themselves and "kick" for the final stretch. The first two are different because they involve jumping off the starting blocks and more underwater swimming than others.
+Yes! You want to use splits where the swimmers are swimming as consistently as they can.
+
+
+
+
+
+
+EDA: mean differences between odd and even splits
+To investigate the differences between odd and even splits, you first need to define a difference metric. In previous exercises, you investigated the improvement of moving from a low-numbered lane to a high-numbered lane, defining f = (ta - tb) / ta. There, the ta in the denominator served as our reference time for improvement. Here, you are considering both improvement and decline in performance depending on the direction of swimming, so you want the reference to be an average. So, we will define the fractional difference as f = 2(ta - tb) / (ta + tb).
+
+Your task here is to plot the mean fractional difference between odd and even splits versus lane number. I have already calculated the mean fractional differences for the 2013 and 2015 Worlds for you, and they are stored in f_13 and f_15. The corresponding lane numbers are in the array lanes.
+
+# Plot the the fractional difference for 2013 and 2015
+_ = plt.plot(lanes, f_13, marker='.', markersize=12, linestyle='none')
+_ = plt.plot(lanes, f_15, marker='.', markersize=12, linestyle='none')
+
+
+# Add a legend
+_ = plt.legend((2013, 2015))
+
+# Label axes and show plot
+plt.xlabel('lane')
+plt.ylabel('frac. diff. (odd - even)')
+plt.show()
+
+EDA has exposed a strong slope in 2013 compared to 2015!
+
+
+
+
+
+
+
+
+
+How does the current effect depend on lane position?
+To quantify the effect of lane number on performance, perform a linear regression on the f_13 versus lanes data. Do a pairs bootstrap calculation to get a 95% confidence interval. Finally, make a plot of the regression. The arrays lanes and f_13 are in your namespace.
+
+Note that we could compute error bars on the mean fractional differences and use them in the regression, but that is beyond the scope of this course.
+
+
+
+# Compute the slope and intercept of the frac diff/lane curve
+slope, intercept = np.polyfit(lanes,f_13, deg=1)
+
+# Compute bootstrap replicates
+bs_reps_slope, bs_reps_int = dcst.draw_bs_pairs_linreg(lanes,f_13, size=10000)
+
+# Compute 95% confidence interval of slope
+conf_int = np.percentile(bs_reps_slope, [2.5, 97.5])
+
+# Print slope and confidence interval
+print("""
+slope: {0:.5f} per lane
+95% conf int: [{1:.5f}, {2:.5f}] per lane""".format(slope, *conf_int))
+
+# x-values for plotting regression lines
+x = np.array([1,8])
+
+# Plot 100 bootstrap replicate lines
+for i in range(100):
+    _ = plt.plot(x, bs_reps_slope[i] * x + bs_reps_int[i], 
+                 color='red', alpha=0.2, linewidth=0.5)
+   
+# Update the plot
+plt.draw()
+plt.show()
+
+    slope: 0.00447 per lane
+    95% conf int: [0.00394, 0.00501] per lane
+The slope is a fractional difference of about 0.4% per lane. This is quite a substantial difference at this elite level of swimming where races can be decided by tiny differences.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hypothesis test: can this be by chance?
+The EDA and linear regression analysis is pretty conclusive. Nonetheless, you will top off the analysis of the zigzag effect by testing the hypothesis that lane assignment has nothing to do with the mean fractional difference between even and odd lanes using a permutation test. You will use the Pearson correlation coefficient, which you can compute with dcst.pearson_r() as the test statistic. The variables lanes and f_13 are already in your namespace.
+
+
+
+# Compute observed correlation: rho
+rho = dcst.pearson_r(lanes,f_13)
+
+# Initialize permutation reps: perm_reps_rho
+perm_reps_rho = np.empty(10000)
+
+# Make permutation reps
+for i in range(10000):
+    # Scramble the lanes array: scrambled_lanes
+    scrambled_lanes = np.random.permutation(lanes)
+    
+    # Compute the Pearson correlation coefficient
+    perm_reps_rho[i] = dcst.pearson_r(scrambled_lanes,f_13)
+    
+# Compute and print p-value
+p_val = np.sum(perm_reps_rho >= rho) / 10000
+print('p =', p_val)
+    p = 0.0
+The p-value is very small, as you would expect from the confidence interval of the last exercise.
+
+
+
+
+
+
+
+
