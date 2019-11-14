@@ -1,0 +1,131 @@
+Interearthquake time estimates for Parkfield
+In this exercise, you will first compute the best estimates for the parameters for the Exponential and Gaussian models for interearthquake times. You will then plot the theoretical CDFs for the respective models along with the formal ECDF of the actual Parkfield interearthquake times.
+
+
+In [1]: time_gap
+Out[1]: 
+array([24.06570842, 20.07665982, 21.01848049, 12.24640657, 32.05475702,
+       38.2532512 ])
+      
+      
+# Compute the mean time gap: mean_time_gap
+mean_time_gap = np.mean(time_gap)
+
+# Standard deviation of the time gap: std_time_gap
+std_time_gap = np.std(time_gap)
+
+In [3]: mean_time_gap
+Out[3]: 24.619210586356377
+
+In [4]: std_time_gap
+Out[4]: 8.447554701479987
+
+
+
+#Use np.random.exponential() to draw 10,000 samples out of an Exponential distribution with the appropriate mean. Store them in the variable time_gap_exp.
+# Generate theoretical Exponential distribution of timings: time_gap_exp
+time_gap_exp = np.random.exponential(scale=mean_time_gap, size=10000)
+
+
+In [5]: time_gap_exp
+Out[5]: 
+array([ 29.35279898,   8.29833534,   6.33413095, ..., 103.63247328,
+         6.13783   ,  23.39068123])
+
+#Use np.random.normal() to draw 10,000 samples out of a Normal distribution with the appropriate mean and standard deviation. Store them in the variable time_gap_norm.
+# Generate theoretical Normal distribution of timings: time_gap_norm
+time_gap_norm = np.random.normal(loc=mean_time_gap, scale=std_time_gap, size=10000)
+
+In [6]: time_gap_norm
+Out[6]: 
+array([32.71535461, 28.50642982, 20.79430815, ..., 16.30988465,
+       18.8478086 , 10.93738126])
+
+# Plot theoretical CDFs
+_ = plt.plot(*dcst.ecdf(time_gap_exp))
+_ = plt.plot(*dcst.ecdf(time_gap_norm))
+
+# Plot Parkfield ECDF
+_ = plt.plot(*dcst.ecdf(time_gap, formal=True, min_x=-10, max_x=50))
+
+# Add legend
+_ = plt.legend(('Exp.', 'Norm.'), loc='upper left')
+
+# Label axes, set limits and show plot
+_ = plt.xlabel('time gap (years)')
+_ = plt.ylabel('ECDF')
+_ = plt.xlim(-10, 50)
+plt.show()       
+       
+By eye, the Gaussian model seems to describe the observed data best. We will investigate the consequences of this in the next exercise, and see if we can reject the Exponential model in coming exercises.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+When will the next big Parkfield quake be?
+The last big earthquake in the Parkfield region was on the evening of September 27, 2004 local time. Your task is to get an estimate as to when the next Parkfield quake will be, assuming the Exponential model and also the Gaussian model. In both cases, the best estimate is given by the mean time gap, which you computed in the last exercise to be 24.62 years, meaning that the next earthquake would be in 2029. Compute 95% confidence intervals on when the next earthquake will be assuming an Exponential distribution parametrized by mean_time_gap you computed in the last exercise. Do the same assuming a Normal distribution parametrized by mean_time_gap and std_time_gap.
+
+In [1]: today
+Out[1]: 2019.8696706414898
+
+In [2]: last_quake
+Out[2]: 2004.74
+
+In [5]: exp_samples
+Out[5]: 
+array([11.55300993, 74.1068134 , 32.41723952, ..., 72.18272429,
+       12.47326603,  6.02682989])
+
+In [6]: norm_samples
+Out[6]: 
+array([12.05041746, 15.11413944, 27.9037796 , ..., 33.02045677,
+       18.72848015, 22.07788804])
+
+
+
+
+#Draw 100,000 sample from an Exponential distribution with a mean given by mean_time_gap. Store the result in exp_samples.
+# Draw samples from the Exponential distribution: exp_samples
+exp_samples = np.random.exponential(scale=mean_time_gap, size=100000)
+
+#Draw 100,000 sample from a Normal distribution with a mean given by mean_time_gap and standard deviation given by std_time_gap. Store the result in norm_samples.
+# Draw samples from the Normal distribution: norm_samples
+norm_samples = np.random.normal(loc=mean_time_gap, scale=std_time_gap, size=100000)
+
+# No earthquake as of today, so only keep samples that are long enough
+exp_samples = exp_samples[exp_samples > today - last_quake]
+norm_samples = norm_samples[norm_samples > today - last_quake]
+
+# Compute the confidence intervals with medians
+conf_int_exp = np.percentile(exp_samples, [2.5, 50, 97.5]) + last_quake
+conf_int_norm = np.percentile(norm_samples, [2.5, 50, 97.5]) + last_quake
+
+# Print the results
+print('Exponential:', conf_int_exp)
+print('     Normal:', conf_int_norm)
+
+<script.py> output:
+    Exponential: [2020.4886621  2036.83727353 2110.24327976]
+         Normal: [2020.69854544 2030.73991258 2046.47688128]
+
+The models given decidedly different predictions. The Gaussian model says the next earthquake is almost sure to be in the next few decades, but the Exponential model says we may very well have to wait longer.       
+       
+       
+       
