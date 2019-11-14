@@ -1,0 +1,271 @@
+EDA: Comparing magnitudes before and after 2010
+Make an ECDF of earthquake magnitudes from 1980 through 2009. On the same plot, show an ECDF of magnitudes of earthquakes from 2010 through mid-2017. The time of the earthquakes, as decimal years, are stored in the Numpy array time and the magnitudes in the Numpy array mags.
+
+In [1]: mags
+Out[1]: array([3. , 3.5, 3. , ..., 3.1, 2.1, 2.5])
+
+In [2]: time
+Out[2]: 
+array([1980.83720557, 1981.52570277, 1982.33514999, ..., 2017.4972421 ,
+       2017.49814877, 2017.49845266])
+       
+       
+       
+       
+#Use Boolean indexing to slice out the magnitudes of all earthquakes before 2010 and store the result in mags_pre. Similarly, generate a numpy array mags_post that has all magnitudes of earthquakes in and after 2010.
+# Get magnitudes before and after 2010
+mags_pre = mags[time < 2010]
+mags_post = mags[time >= 2010]
+
+
+#Use plt.plot() with a *dcst.ecdf(____) argument to make ECDFs for pre- and post- 2010 earthquake magnitudes. Remember to specify arguments for the marker and linestyle parameters.
+# Generate ECDFs
+plt.plot(*dcst.ecdf(mags_pre), marker='.',linestyle='none')
+plt.plot(*dcst.ecdf(mags_post), marker='.',linestyle='none')
+
+# Label axes and show plot
+_ = plt.xlabel('magnitude')
+_ = plt.ylabel('ECDF')
+plt.legend(('1980 though 2009', '2010 through mid-2017'), loc='upper left')
+plt.show()
+
+Both curves seem to follow the Gutenberg-Richter Law, but with different completeness thresholds, probably due to improvements in sensing capabilities in more recent years.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Quantification of the b-values
+Based on the plot you generated in the previous exercise, you can safely use a completeness threshold of mt = 3. Using this threshold, compute b-values for the period between 1980 and 2009 and for 2010 through mid-2017. The function b_value() you wrote last chapter, which computes the b-value and confidence interval from a set of magnitudes and completeness threshold, is available in your namespace, as are the numpy arrays mags_pre and mags_post from the last exercise, and mt.
+
+In [2]: mags_pre
+Out[2]: 
+array([3. , 3.5, 3. , 2.7, 2.6, 3.2, 2.6, 2.9, 2.9, 2. , 2.7, 1.8, 2.3,
+       1.6, 1.7, 2.2, 2.2, 2. , 1.3, 1.5, 2.3, 2.3, 2.1, 2.6, 1.7, 1.8,
+       1.9, 1.8, 2.4, 1.6, 2.8, 1.6, 1.7, 1.9, 2.3, 2.3, 3.1, 1.7, 2.1,
+       1.9, 2.8, 2.1, 1.7, 1.5, 1.6, 2.9, 1.9, 1.5, 1.9, 1.7, 2.6, 2. ,
+       3.7, 2.5, 2.1, 1.9, 1.4, 2.3, 2.3, 1.7, 2.1, 1.8, 2.1, 2.3, 1.7,
+       0.9, 1.9, 1.9, 1.6, 2.1, 2.4, 2. , 2.1, 1.4, 2.7, 3.1, 2.5, 2.5,
+       3.9, 3. , 1.9, 2.2, 2.7, 2.2, 2.2, 2.9, 2.8, 2. , 1.8, 2.2, 2.3,
+       1.8, 2.6, 3.6, 3.1, 2. , 2.7, 3. , 2.8, 4.2, 2.8, 3. , 3. , 4.1,
+       2.9, 2.5, 2.5, 4.5, 3.9, 3.2, 3.5, 3. , 2.6, 2.6, 3.8, 2.2, 3.3,
+       3.4, 2.4, 2.4, 2.9, 3.5, 2.9, 2.8, 3. , 3. , 2.8, 2.5, 3. , 3. ,
+       2.2, 2.9, 2.6, 3.5, 2.9, 2.6, 2.7, 2.5, 2.8, 2.8, 3.2, 1.8, 2.6,
+       2.7, 2.5, 2.3, 2.4, 2.5, 2.5, 3.1, 2.9, 2.7, 2.8, 3.1, 2.7, 3.4,
+       2.4, 3.1, 3.2, 3.3, 3.4, 2.7, 2.5, 2.4, 2. , 2.2, 2.2, 3.4, 2.8,
+       3.7, 3.4, 2.2, 3.3, 1.8, 2.3, 3.4, 2.5, 2.8, 2.5, 2.6, 2.4, 2.7,
+       2.7, 3.5, 2.4, 2.3, 2.3, 3. , 2.7, 3.1, 3. , 3.1, 2.6, 2.1, 3. ,
+       3.5, 2.8, 3.1, 3.6, 2.4, 2.1, 2.8, 3.1, 2. , 2.4])
+
+In [3]: mags_post
+Out[3]: array([2.8, 2.8, 3.3, ..., 3.1, 2.1, 2.5])
+
+
+
+
+
+
+#Compute the b-value and 95% confidence interval for earthquakes from 1980 through 2009 using 10,000 bootstrap replicates.
+# Compute b-value and confidence interval for pre-2010
+b_pre, conf_int_pre = b_value(mags_pre, mt, perc=[2.5, 97.5], n_reps=10000)
+
+
+#Compute the b-value and 95% confidence interval for earthquakes from 2010 through mid-2017 using 10,000 bootstrap replicates.
+# Compute b-value and confidence interval for post-2010
+b_post, conf_int_post = b_value(mags_post, mt, perc=[2.5, 97.5], n_reps=10000)
+
+# Report the results
+print("""
+1980 through 2009
+b-value: {0:.2f}
+95% conf int: [{1:.2f}, {2:.2f}]
+
+2010 through mid-2017
+b-value: {3:.2f}
+95% conf int: [{4:.2f}, {5:.2f}]
+""".format(b_pre, *conf_int_pre, b_post, *conf_int_post))
+
+<script.py> output:
+    
+    1980 through 2009
+    b-value: 0.74
+    95% conf int: [0.54, 0.96]
+    
+    2010 through mid-2017
+    b-value: 0.62
+    95% conf int: [0.60, 0.65]
+
+The confidence interval for the b-value for recent earthquakes is tighter than for earlier ones because there are many more recent ones. Still, the confidence intervals overlap, and we can perform a hypothesis test to see if we might get these results if the b-values are actually the same.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+How should we do a hypothesis test on differences of the b-value?
+We wish to test the hypothesis that the b-value in Oklahoma from 1980 through 2009 is the same as that from 2010 through mid-2017. Which of the first five statements is false? If none of them are false, select the last choice.
+
+#You should only include earthquakes that have magnitudes above the completeness threshold. A value of 3 is reasonable.
+#This is true because below the completeness threshold, we are not comparing earthquakes before and after 2010, but observed earthquakes before and after 2010. We do not have a complete data set below the completeness threshold.
+
+
+#You should perform a permutation test because asserting a null hypothesis that the b-values are the same implicitly assumes that the magnitudes are identically distributed, specifically Exponentially, by the Gutenberg-Richter Law.
+#This is true. We really are assuming the Gutenberg-Richter law holds, in part because we are only considering earthquakes above the completeness threshold. We are using a model (the G-R law) to deal with missing data. So, since both sets of quakes follow the same statistical model, and that model has a single parameter, a permutation test is appropriate.
+
+
+#A reasonable test statistic is the difference between the mean post-2010 magnitude and the mean pre-2010 magnitude.
+#This is true. You may be thinking that the mean values are not the b-values, and that you should be using the difference in b-value as your test statistic. However, the difference in mean magnitude is directly proportional to the difference in b-value, so the result of the hypothesis test will be identical if we use b-values of mean magnitudes.
+
+
+#You do not need to worry about the fact that there were far fewer earthquakes before 2010 than there were after. That is to say, there are fewer earthquakes before 2010, but sufficiently many to do a permutation test.
+#This is true. Even though they have different numbers of earthquakes, you are only interested in summary statistics about their magnitude. There were 53 earthquakes between 1980 and 2009 with magnitude 3 or greater, so we have enough to compute a reliable mean.
+
+
+#You do not need to worry about the fact that the two time intervals are of different length.
+#Provided the time interval is long enough, the b-value is independent of the time interval, just like the mean of Exponentially distributed values is independent of how many there are, provided there are not too few.
+
+#None of the above statements are false.
+#Correct! For instructional purposes, here are reasons why each is true: Option 1 is true because below the completeness threshold, we are not comparing earthquakes before and after 2010, but observed earthquakes before and after 2010. We do not have a complete data set below the completeness threshold. Option 2 is true because we really are assuming the Gutenberg-Richter law holds, in part because we are only considering earthquakes above the completeness threshold. We are using a model (the G-R law) to deal with missing data. So, since both sets of quakes follow the same statistical model, and that model has a single parameter, a permutation test is appropriate. Option 3 is true, even though you may be thinking that the mean values are not the b-values, and that you should be using the difference in b-value as your test statistic. However, the difference in mean magnitude is directly proportional to the difference in b-value, so the result of the hypothesis test will be identical if we use b-values of mean magnitudes. Option 4 is true because even though they have different numbers of earthquakes, you are only interested in summary statistics about their magnitude. There were 53 earthquakes between 1980 and 2009 with magnitude 3 or greater, so we have enough to compute a reliable mean. Option 5 is true because, provided the time interval is long enough, the b-value is independent of the time interval, just like the mean of Exponentially distributed values is independent of how many there are, provided there are not too few.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hypothesis test: are the b-values different?
+Perform the hypothesis test sketched out on the previous exercise. The variables mags_pre and mags_post are already loaded into your namespace, as is mt = 3.
+
+
+#Slice out the magnitudes of earthquakes before 2010 that have a magnitude above (or equal) the completeness threshold and overwrite mags_pre with the result. Do the same for mags_post.
+# Only magnitudes above completeness threshold
+mags_pre = mags_pre[mags_pre >= mt]
+mags_post = mags_post[mags_post >= mt]
+
+
+
+#Compute the observed difference in mean magnitudes, subtracting the magnitudes of pre-2010 earthquakes from those of post-2010 earthquakes.
+# Observed difference in mean magnitudes: diff_obs
+diff_obs = np.mean(mags_post) - np.mean(mags_pre)
+
+
+
+#Generate 10,000 permutation replicates using dcst.draw_perm_reps(). Use dcst.diff_of_means as the argument for func.
+# Generate permutation replicates: perm_reps
+perm_reps = dcst.draw_perm_reps(mags_post, mags_pre, dcst.diff_of_means, size=10000)
+
+
+
+#Compute and print the p-value taking "at least as extreme as" to mean that the test statistic is smaller than what was observed.
+# Compute and print p-value
+p_val = np.sum(perm_reps < diff_obs) / 10000
+print('p =', p_val)
+<script.py> output:
+    p = 0.0993
+    
+    A p-value around 0.1 suggests that the observed magnitudes are commensurate with there being no change in b-value after wastewater injection began.
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+What can you conclude from this analysis?
+All but one of the following constitute reasonable conclusions from our analysis of earthquakes. Which one does not?
+
+Parkfield 1950 through 2009
+b-value: 1.08
+95% conf int: [0.94, 1.23]
+
+
+Oklahoma 1980 through 2009
+b-value: 0.74
+95% conf int: [0.54, 0.97]
+
+mean time gap: 204.61 days
+95% conf int: [138.45, 276.83] days
+
+
+Oklahoma 2010 through mid-2017
+b-value: 0.62
+95% conf int: [0.60, 0.65]
+
+mean time gap: 1.12 days
+95% conf int: [0.97, 1.30] days
+
+
+Oklahoma: p-value for difference in b-value : 0.10
+
+
+
+#The seismicity, as measured by the b-value, is comparable before and after wastewater injection.
+#This is true. The confidence intervals of the b-values overlap, largely because we don't have so many earthquakes prior to 2010, and the p-value is about 0.1, suggesting we should not reject the null hypothesis that the b-value has not changed.
+
+#Earthquakes are over 100 times more frequent in Oklahoma after widespread wastewater injection began.
+#This is true. The time gap after 2010 is at least 100 times shorter after 2010, even taking the extremes of the confidence intervals for the time gap.
+
+#Oklahoma has a smaller b-value than the Parkfield region, so the Parkfield region has more earthquakes.
+#"Correct! One cannot conclude information about frequency of earthquakes from the b-value alone. It is also true that from 2010-mid 2017, Oklahoma had twice as many earthquakes of magnitude 3 and higher than the entire state of California!
+
+
+#Oklahoma has a b-value smaller than the Parkfield region, so a randomly selected earthquake above magnitude 3 in Oklahoma more likely than not has a smaller magnitude than one above magnitude 3 randomly selected from the Parkfield region.
+#This is true. The smaller the b-value, the smaller the mean magnitude, which means that, given the earthquake magnitudes are exponentially distributed, the less likely you are to get a bigger earthquake. You can test this out with some hacker stats by making draws out of an Exponential distribution.
+#so b-value tells us information about magnitude, not frequency of earthquakes
+
+
