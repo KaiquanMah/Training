@@ -1,0 +1,131 @@
+Computing the K-S statistic
+Write a function to compute the Kolmogorov-Smirnov statistic from two datasets, data1 and data2, in which data2 consists of samples from the theoretical distribution you are comparing your data to. Note that this means we are using hacker stats to compute the K-S statistic for a dataset and a theoretical distribution, not the K-S statistic for two empirical datasets. Conveniently, the function you just selected for computing values of the formal ECDF is given as dcst.ecdf_formal().
+
+
+def ks_stat(data1, data2):
+    #Compute the values of the convex corners of the formal ECDF for data1 using dcst.ecdf(). Store the results in the variables x and y.
+    # Compute ECDF from data: x, y
+    x, y = dcst.ecdf(data1)
+    
+    #Use dcst.ecdf_formal() to compute the values of the theoretical CDF, determined from data2, at the convex corners x. Store the result in the variable cdf.
+    # Compute corresponding values of the target CDF
+    cdf = dcst.ecdf_formal(x, data2)
+
+    #Compute the distances between the concave corners of the formal ECDF and the theoretical CDF. Store the result as D_top.
+    # Compute distances between concave corners and CDF
+    D_top = y - cdf
+
+    #Compute the distance between the convex corners of the formal ECDF and the theoretical CDF. Note that you will need to subtract 1/len(data1) from y to get the y-value at the convex corner. Store the result in D_bottom.
+    # Compute distance between convex corners and CDF
+    D_bottom = cdf - y + 1/len(data1)
+
+    #Return the K-S statistic as the maximum of all entries in D_top and D_bottom. You can pass D_top and D_bottom together as a tuple to np.max() to do this.
+    return np.max((D_top, D_bottom))
+    
+    
+    
+You now have another useful function in your tool box. We have kindly put it in the dcst module for your future use.    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+Drawing K-S replicates
+Now, you need a function to draw Kolmogorov-Smirnov replicates out of a target distribution, f. Construct a function with signature draw_ks_reps(n, f, args=(), size=10000, n_reps=10000) to do so. Here, n is the number of data points, and f is the function you will use to generate samples from the target CDF. For example, to test against an Exponential distribution, you would pass np.random.exponential as f. This function usually takes arguments, which must be passed as a tuple. So, if you wanted to take samples from an Exponential distribution with mean x_mean, you would use the args=(x_mean,) keyword. The keyword arguments size and n_reps respectively represent the number of samples to take from the target distribution and the number of replicates to draw.
+
+def draw_ks_reps(n, f, args=(), size=10000, n_reps=10000):
+    
+    
+    
+    #Generate size samples from the target distribution f. Remember, to pass the args into the sampling function, you should use the f(*args, size=size) construction. Store the result as x_f.
+    # Generate samples from target distribution
+    x_f = f(*args, size=size)
+    
+    #Initialize the replicates array, reps, as an empty array with n_reps entries.
+    # Initialize K-S replicates
+    reps = np.empty(n_reps)
+    
+    # Draw replicates
+    for i in range(n_reps):
+        
+        #Draw n samples from f. Again, use *args in your function call. Store the result in the variable x_samp.
+        # Draw samples for comparison
+        x_samp = f(*args, size=n)
+        
+        # Compute K-S statistic
+        reps[i] = dcst.ks_stat(x_samp, x_f)
+
+    return reps
+    
+And now you have yet another valuable tool (which we have again conveniently put in dcst.draw_ks_reps())! This will allow you to draw K-S replicates for use in K-S tests for arbitrary continuous distributions. You'll put it to use in the next exercise.
+
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The K-S test for Exponentiality
+Test the null hypothesis that the interearthquake times of the Parkfield sequence are Exponentially distributed. That is, earthquakes happen at random with no memory of when the last one was. Note: This calculation is computationally intensive (you will draw more than 108 random numbers), so it will take about 10 seconds to complete.
+
+#Draw 10,000 replicates from the Exponential distribution using np.random.exponential(). The mean time gap between earthquakes is stored as mean_time_gap, which you computed in a previous exercise. Store the result in x_f.
+# Draw target distribution: x_f
+x_f = np.random.exponential(scale=mean_time_gap, size=10000)
+
+
+#Use these samples, x_f, along with the actual time gaps, stored in time_gap, to compute the Kolmogorov-Smirnov statistic using dcst.ks_stat().
+# Compute K-S stat: d
+d = dcst.ks_stat(x_f, time_gap)
+
+
+#Use the function you wrote in the last exercise, now conveniently stored as dcst.draw_ks_reps() to draw 10,000 K-S replicates from the Exponential distribution. Use the size=10000 keyword argument for drawing out of the target Exponential distribution. Store the replicates as reps.
+# Draw K-S replicates: reps
+reps = dcst.draw_ks_reps(len(time_gap), np.random.exponential, 
+                         args=(mean_time_gap,), size=10000, n_reps=10000)
+
+
+
+#Compute and print the p-value. Remember that "at least as extreme as" is defined in this case as the test statistic under the null hypothesis being greater than or equal to what was observed.
+# Compute and print p-value
+p_val = np.sum(reps >= d) / 10000
+print('p =', p_val)
+
+<script.py> output:
+    p = 0.2199
+That's a p-value above 0.2. This means that the Parkfield sequence is not outside the realm of possibility if earthquakes there are a Poisson process. This does not mean that they are generated by a Poisson process, but that the observed sequence is not incongruous with that model. The upshot is that it is really hard to say when the next Parkfield quake will be.
+    
+    
+    
