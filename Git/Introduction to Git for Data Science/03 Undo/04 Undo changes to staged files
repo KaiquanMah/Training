@@ -1,0 +1,55 @@
+How can I undo changes to staged files?
+At the start of this chapter you saw that git reset will unstage files that you previously staged using git add. By combining git reset with git checkout, you can undo changes to a file that you staged changes to. The syntax is as follows.
+
+git reset HEAD path/to/file
+git checkout -- path/to/file
+(You may be wondering why there are two commands for re-setting changes. The answer is that unstaging a file and undoing changes are both special cases of more powerful Git operations that you have not yet seen.)
+
+
+
+Use git reset to unstage the file data/northern.csv (and only that file).
+Use git checkout -- to undo the changes since the last commit for data/northern.csv.
+
+
+
+
+$ cd dental
+$ git add data/*.csv
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   data/eastern.csv
+        modified:   data/northern.csv
+
+
+
+$ git reset HEAD data/northern.csv
+Unstaged changes after reset:
+M       data/northern.csv
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   data/eastern.csv
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   data/northern.csv
+
+
+
+
+
+$ git checkout -- data/northern.csv
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   data/eastern.csv
+
