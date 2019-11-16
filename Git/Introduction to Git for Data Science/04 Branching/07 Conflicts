@@ -1,0 +1,62 @@
+What are conflicts?
+
+Sometimes the changes in two branches will conflict with each other: for example, bug fixes might touch the same lines of code, or analyses in two different branches may both append new (and different) records to a summary data file. In this case, Git relies on you to reconcile the conflicting changes.
+
+
+
+The file todo.txt initially contains these two lines:
+
+A) Write report.
+B) Submit report.
+
+
+
+You create a branch called update and modify the file to be:
+
+A) Write report.
+B) Submit final version.
+C) Submit expenses.
+
+
+You then switch back to the master branch and delete the first line, so that the file contains:
+
+B) Submit report.
+
+
+When you try to merge update and master, what conflicts does Git report? You can use git diff master..update to view the difference between the two branches.
+
+
+$ git branch
+  alter-report-title
+* master
+  summary-statistics
+  update
+$ ls
+bin  data  report.txt  results  todo.txt
+
+
+
+
+$ git merge update master
+Auto-merging todo.txt
+CONFLICT (content): Merge conflict in todo.txt
+Automatic merge failed; fix conflicts and then commit the result.
+
+
+$ git diff master..update
+diff --git a/todo.txt b/todo.txt
+index 25f97a3..abdcaad 100644
+--- a/todo.txt
++++ b/todo.txt
+@@ -1 +1,3 @@
+-B) Submit report.
++A) Write report.
++B) Submit final version.
++C) Submit expenses.
+
+
+
+#Just line B, since it is the only one to change in both branches.
+#Correct: Git can merge the deletion of line A and the addition of line C automatically.
+
+
