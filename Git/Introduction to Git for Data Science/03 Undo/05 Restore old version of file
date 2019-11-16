@@ -1,0 +1,149 @@
+How do I restore an old version of a file?
+You previously saw how to use git checkout to undo the changes that you made since the last commit. This command can also be used to go back even further into a file's history and restore versions of that file from a commit. In this way, you can think of committing as saving your work, and checking out as loading that saved version.
+
+The syntax for restoring an old version takes two arguments: the hash that identifies the version you want to restore, and the name of the file.
+
+
+For example, if git log shows this:
+
+commit ab8883e8a6bfa873d44616a0f356125dbaccd9ea
+Author: Author: Rep Loop <repl@datacamp.com>
+Date:   Thu Oct 19 09:37:48 2017 -0400
+
+    Adding graph to show latest quarterly results.
+
+commit 2242bd761bbeafb9fc82e33aa5dad966adfe5409
+Author: Author: Rep Loop <repl@datacamp.com>
+Date:   Thu Oct 16 09:17:37 2017 -0400
+
+    Modifying the bibliography format.
+    
+    
+    
+then git checkout 2242bd report.txt 
+would replace the current version of report.txt with the version that was committed on October 16. 
+Notice that this is the same syntax that you used to undo the unstaged changes, except -- has been replaced by a hash.
+
+Restoring a file doesn't erase any of the repository's history. Instead, the act of restoring the file is saved as another commit, because you might later want to undo your undoing.
+
+One more thing: there's another feature of git log that will come in handy here. 
+Passing - followed by a number restricts the output to that many commits. 
+For example, git log -3 report.txt 
+shows you the last three commits involving report.txt.
+
+
+
+
+
+
+
+
+The current contents of data/western.csv are shown in the terminal. Use git log -2 to list the last two changes to that file.
+Use git checkout with the first few characters of a hash to restore the version of data/western.csv that has the commit message "Adding fresh data for southern and western regions.".
+Use cat data/western.csv to display the updated contents.
+Commit the restored version of data/western.csv, and be sure to include a message.
+
+
+
+
+
+
+$ cd dental
+$ cat data/western.csv
+Date,Tooth2017-01-03,bicuspid
+2017-01-05,incisor
+2017-01-21,wisdom
+2017-02-05,molar
+2017-02-17,incisor
+2017-02-25,bicuspid
+2017-03-12,incisor
+2017-03-25,molar
+2017-03-26,incisor
+2017-04-04,canine
+2017-04-18,canine
+2017-04-26,canine
+2017-04-26,molar
+2017-04-26,wisdom
+2017-04-27,canine
+2017-05-08,molar
+2017-05-13,bicuspid
+2017-05-14,wisdom
+2017-06-17,canine
+2017-07-01,incisor
+2017-07-17,canine
+2017-08-10,incisor
+2017-08-11,bicuspid
+2017-08-11,wisdom
+2017-08-13,canine
+2017-10-05,molar
+2017-10-06,incisor
+2017-10-07,incisor
+2017-10-15,molar
+2017-10-17,bicuspid
+2017-10-18,bicuspid
+
+
+
+$ git status
+On branch master
+nothing to commit, working directory clean
+$ git log -2 data/western.csv
+commit e57600b3cb171f0782ad1357e8b2ca6202850566
+Author: Rep Loop <repl@datacamp.com>
+Date:   Mon Oct 7 19:38:49 2019 +0000
+
+    Adding fresh data for western region.
+
+commit 56d0ec1357d5ef5ec6e04e2f2af29fc69c3c1489
+Author: Rep Loop <repl@datacamp.com>
+Date:   Mon Oct 7 19:38:49 2019 +0000
+
+    Adding fresh data for southern and western regions.
+    
+    
+    
+$ git checkout 56d0ec1357 data/western.csv
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   data/western.csv
+
+
+
+
+$ cat data/western.csv
+Date,Tooth
+2017-01-03,bicuspid
+2017-01-05,incisor
+2017-01-21,wisdom
+2017-02-05,molar
+2017-02-17,incisor
+2017-02-25,bicuspid
+2017-03-12,incisor
+2017-03-25,molar
+2017-03-26,incisor
+2017-04-04,canine
+2017-04-18,canine
+2017-04-26,canine
+2017-04-26,molar
+2017-04-26,wisdom
+2017-04-27,canine
+2017-05-08,molar
+2017-05-13,bicuspid
+2017-05-14,wisdom
+2017-06-17,canine
+2017-07-01,incisor
+2017-07-17,canine
+2017-08-10,incisor
+2017-08-11,bicuspid
+2017-08-11,wisdom
+2017-08-13,canine
+2017-10-05,molar
+2017-10-06,incisor
+2017-10-07,incisor
+
+$ git commit -m "restored file"
+[master f1ef066] restored file
+ 1 file changed, 3 deletions(-)
