@@ -1,0 +1,73 @@
+What expression asserts that the distinct Nobel Prize categories catalogued by the "prizes" collection are the same as those catalogued by the "laureates"? Remember to explore example documents in the console via e.g. db.prizes.find_one() and db.laureates.find_one().
+
+
+In [1]: db.prizes.find_one({})
+Out[1]: 
+{'_id': ObjectId('5bc56145f35b634065ba1997'),
+ 'category': 'chemistry',
+ 'laureates': [{'firstname': 'Frances H.',
+   'id': '963',
+   'motivation': '"for the directed evolution of enzymes"',
+   'share': '2',
+   'surname': 'Arnold'},
+  {'firstname': 'George P.',
+   'id': '964',
+   'motivation': '"for the phage display of peptides and antibodies"',
+   'share': '4',
+   'surname': 'Smith'},
+  {'firstname': 'Sir Gregory P.',
+   'id': '965',
+   'motivation': '"for the phage display of peptides and antibodies"',
+   'share': '4',
+   'surname': 'Winter'}],
+ 'year': '2018'}
+
+
+
+
+In [2]: db.laureates.find_one({})
+Out[2]: 
+{'_id': ObjectId('5bc56154f35b634065ba1be5'),
+ 'born': '1853-07-18',
+ 'bornCity': 'Arnhem',
+ 'bornCountry': 'the Netherlands',
+ 'bornCountryCode': 'NL',
+ 'died': '1928-02-04',
+ 'diedCountry': 'the Netherlands',
+ 'diedCountryCode': 'NL',
+ 'firstname': 'Hendrik Antoon',
+ 'gender': 'male',
+ 'id': '2',
+ 'prizes': [{'affiliations': [{'city': 'Leiden',
+     'country': 'the Netherlands',
+     'name': 'Leiden University'}],
+   'category': 'physics',
+   'motivation': '"in recognition of the extraordinary service they rendered by their researches into the influence of magnetism upon radiation phenomena"',
+   'share': '2',
+   'year': '1902'}],
+ 'surname': 'Lorentz'}
+
+
+
+
+
+In [5]: db.prizes.distinct("category") 
+Out[5]: ['chemistry', 'medicine', 'literature', 'peace', 'economics', 'physics']
+
+In [6]: db.laureates.distinct("prizes.category")
+Out[6]: ['physics', 'chemistry', 'peace', 'medicine', 'literature', 'economics']
+
+
+In [7]: set(db.prizes.distinct("category"))
+Out[7]: {'chemistry', 'economics', 'literature', 'medicine', 'peace', 'physics'}
+
+In [8]: set(db.laureates.distinct("prizes.category"))
+Out[8]: {'chemistry', 'economics', 'literature', 'medicine', 'peace', 'physics'}
+
+
+#NOT assert db.prizes.distinct("category") == db.laureates.distinct("prizes.category")
+#Although <collection>.distinct returns unique values, they are returned as a list and not guaranteed to be sorted in any way.
+
+#YES assert set(db.prizes.distinct("category")) == set(db.laureates.distinct("prizes.category"))
+#Correct! Converting the lists returned by <collection>.distinct to sets ensures that a check for equality is reliable.
+
