@@ -1,0 +1,46 @@
+What happens if I try to pull when I have unsaved changes?
+Just as Git stops you from switching branches when you have unsaved work, 
+it also stops you from pulling in changes from a remote repository when doing so might overwrite things you have done locally. 
+
+The fix is simple: 
+either commit your local changes or 
+revert them, and then try to pull again.
+
+1. You are in the dental repository, which was cloned from a remote called origin. Use git pull to bring in changes from that repository.
+$ cd dental
+$ git remote -v
+origin  /home/thunk/repo (fetch)
+origin  /home/thunk/repo (push)
+
+$ git pull origin /home/thunk/repo
+fatal: Invalid refspec '/home/thunk/repo'
+
+$ git status
+On branch master
+Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   report.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+
+
+
+
+2. Discard the changes in your repository.
+$ git checkout -- .
+$ git status
+On branch master
+Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+nothing to commit, working directory clean
+
+
+
+
+3. Re-try the git pull.
+$ git pull origin /home/thunk/repo
