@@ -1,0 +1,71 @@
+What happens if my push conflicts with someone else's work?
+Overwriting your own work by accident is bad; overwriting someone else's is worse.
+
+To prevent this happening, Git does not allow you to push changes to a remote repository unless you have merged the contents of the remote repository into your own work.
+
+In this exercise, you have made and committed changes to the dental repository locally and want to push your changes to a remote repository.
+
+
+1. Use git push to push those changes to the remote repository origin, specifying the master branch.
+$ cd dental$ git add data/northern.csv
+$ git commit -m "Adding a record"
+[master 718051d] Adding a record
+ 1 file changed, 1 insertion(+)
+$ git status
+On branch master
+Your branch and 'origin/master' have diverged,
+and have 1 and 1 different commit each, respectively.
+  (use "git pull" to merge the remote branch into yours)
+nothing to commit, working directory clean
+
+
+$ git push origin master
+To /home/thunk/repo
+ ! [rejected]        master -> master (non-fast-forward)
+error: failed to push some refs to '/home/thunk/repo'
+hint: Updates were rejected because the tip of your current branchis behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+
+
+
+
+2. In order to prevent you overwriting remote work, Git has refused to execute your push. Use git pull to bring your repository up to date with origin. It will open up an editor that you can exit with Ctrl+X.
+$ git remote -v
+origin  /home/thunk/repo (fetch)
+origin  /home/thunk/repo (push)
+
+
+$ git pull --no-edit origin master
+From /home/thunk/repo
+ * branch            master     -> FETCH_HEAD
+Merge made by the 'recursive' strategy.
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+nothing to commit, working directory clean
+
+
+
+
+
+
+
+3. Now that you have merged the remote repository's state into your local repository, try the push again.
+
+$ git push origin master
+Counting objects: 2, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (2/2), 327 bytes | 0 bytes/s, done.
+Total 2 (delta 1), reused 0 (delta 0)
+To /home/thunk/repo
+   7f2ab03..a943719  master -> master
+
+$ git status
+On branch master
+Your branch is up-to-date with 'origin/master'.
+nothing to commit, working directory clean
