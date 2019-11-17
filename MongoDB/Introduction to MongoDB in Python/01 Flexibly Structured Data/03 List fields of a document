@@ -1,0 +1,111 @@
+List fields of a document
+The .find_one() method of a collection can be used to retrieve a single document. This method accepts an optional filter argument that specifies the pattern that the document must match. You will learn more about filters in the nest lesson, but for now, you can specify no filter or an empty document filter ({}), in which case MongoDb will return the document that is first in the internal order of the collection.
+
+This method is useful when you want to learn the structure of documents in the collection.
+
+In Python, the returned document takes the form of a dictionary:
+    sample_doc = {'id' : 12345, 'name':'Donny Winston', 'instructor': True}
+
+The keys of the dictionary are the (root-level) "fields" of the document, e.g. 'id', 'name','instructor'.
+
+
+
+
+1. Connect to the nobel database.
+# Connect to the "nobel" database
+db = client.nobel
+
+
+
+
+2. Fetch one document from each of the prizes and laureates collections, and then take a look at the output in the console to see the format and type of the documents in Python.
+
+# Connect to the "nobel" database
+db = client.nobel
+
+# Retrieve sample prize and laureate documents
+prize = db.prizes.find_one({})
+laureate = db.laureates.find_one({})
+
+# Print the sample prize and laureate documents
+print(prize)
+print(laureate)
+print(type(laureate))
+print(type(prize))
+
+
+In [2]: print(prize)
+{'laureates': [{'share': '2', 
+                'surname': 'Arnold', 
+                'firstname': 'Frances H.', 
+                'id': '963', 
+                'motivation': '"for the directed evolution of enzymes"'}, 
+                {'share': '4', 
+                'surname': 'Smith', 
+                'firstname': 'George P.', 
+                'id': '964', 
+                'motivation': '"for the phage display of peptides and antibodies"'}, 
+                {'share': '4', 
+                'surname': 'Winter', 
+                'firstname': 'Sir Gregory P.', 
+                'id': '965', 
+                'motivation': '"for the phage display of peptides and antibodies"'}], 
+                '_id': ObjectId('5bc56145f35b634065ba1997'), 
+                'category': 'chemistry', 
+                'year': '2018'}
+
+In [3]: print(laureate)
+{'born': '1853-07-18', 
+'bornCity': 'Arnhem', 
+'bornCountry': 'the Netherlands', '
+bornCountryCode': 'NL', 
+'_id': ObjectId('5bc56154f35b634065ba1be5'), 
+'surname': 'Lorentz', 'id': '2', 
+'firstname': 'Hendrik Antoon', 
+'gender': 'male', 
+'prizes': [{'affiliations': [{'country': 'the Netherlands', 
+                              'city': 'Leiden', 
+                              'name': 'Leiden University'}], 
+                              'share': '2', 
+                              'category': 'physics', 
+                              'year': '1902', 
+                              'motivation': '"in recognition of the extraordinary service they rendered by their researches into the influence of magnetism upon radiation phenomena"'}], 
+                            'died': '1928-02-04', 
+                            'diedCountry': 'the Netherlands', 
+                            'diedCountryCode': 'NL'}
+
+In [4]: print(type(laureate))
+<class 'dict'>
+
+In [5]: print(type(prize))
+<class 'dict'>
+
+
+
+
+
+
+
+3. Since prize and laureate are dictionaries, you can use the .keys() method to return the keys (i.e. the field names). But it's often more convenient to work with lists of fields.
+
+Use the list() constructor to save a list of the fields present in the prize and laureate documents.
+
+
+
+# Get the fields present in each type of document
+prize_fields = list(prize.keys())
+laureate_fields = list(laureate.keys())
+
+print(prize_fields)
+['laureates', '_id', 'category', 'year']
+
+
+
+print(laureate_fields)
+['born', 'bornCity', 'bornCountry', 'bornCountryCode', '_id', 'surname', 'id', 'firstname', 'gender', 'prizes', 'died', 'diedCountry', 'diedCountryCode']
+
+
+
+#Notice that the prize documents contains a laureates field that stores the information on all the laureates sharing the prize, and the laureate document contains a prizes field, that stores the info on all the prizes they won.
+
+
