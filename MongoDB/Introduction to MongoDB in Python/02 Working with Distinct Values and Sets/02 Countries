@@ -1,0 +1,280 @@
+Never from there, but sometimes there at last
+There are some recorded countries of death ("diedCountry") that do not appear as a country of birth ("bornCountry") for laureates. One such country is "East Germany".
+Return a set of all such countries as countries.
+
+In [1]: db.laureates.find_one({})
+ERROR! Session/line number was not unique in database. History logging moved to new session 5
+Out[1]: 
+{'_id': ObjectId('5bc56154f35b634065ba1be5'),
+ 'born': '1853-07-18',
+ 'bornCity': 'Arnhem',
+ 'bornCountry': 'the Netherlands',
+ 'bornCountryCode': 'NL',
+ 'died': '1928-02-04',
+ 'diedCountry': 'the Netherlands',
+ 'diedCountryCode': 'NL',
+ 'firstname': 'Hendrik Antoon',
+ 'gender': 'male',
+ 'id': '2',
+ 'prizes': [{'affiliations': [{'city': 'Leiden',
+     'country': 'the Netherlands',
+     'name': 'Leiden University'}],
+   'category': 'physics',
+   'motivation': '"in recognition of the extraordinary service they rendered by their researches into the influence of magnetism upon radiation phenomena"',
+   'share': '2',
+   'year': '1902'}],
+ 'surname': 'Lorentz'}
+ 
+ 
+ 
+In [3]: set(db.laureates.distinct("diedCountry"))
+Out[3]: 
+{'Argentina',
+ 'Australia',
+ 'Austria',
+ 'Barbados',
+ 'Belgium',
+ 'Canada',
+ 'Chile',
+ 'China',
+ 'Czechoslovakia',
+ 'Denmark',
+ 'East Germany',
+ 'Egypt',
+ 'Finland',
+ 'France',
+ 'Gabon',
+ 'Germany',
+ 'Germany (now Poland)',
+ 'Greece',
+ 'Hungary',
+ 'Iceland',
+ 'India',
+ 'Ireland',
+ 'Israel',
+ 'Italy',
+ 'Jamaica',
+ 'Japan',
+ 'Kenya',
+ 'Mexico',
+ 'Northern Ireland',
+ 'Northern Rhodesia (now Zambia)',
+ 'Norway',
+ 'Philippines',
+ 'Poland',
+ 'Portugal',
+ 'Puerto Rico',
+ 'Romania',
+ 'Russia',
+ 'Saint Lucia',
+ 'Scotland',
+ 'South Africa',
+ 'Spain',
+ 'Sweden',
+ 'Switzerland',
+ 'Tunisia',
+ 'USA',
+ 'USSR',
+ 'USSR (now Russia)',
+ 'United Kingdom',
+ 'Vietnam',
+ 'West Germany (now Germany)',
+ 'Yugoslavia (now Serbia)',
+ 'the Netherlands'}
+
+In [4]: set(db.laureates.distinct("bornCountry"))
+Out[4]: 
+{'Argentina',
+ 'Australia',
+ 'Austria',
+ 'Austria-Hungary (now Austria)',
+ 'Austria-Hungary (now Bosnia and Herzegovina)',
+ 'Austria-Hungary (now Croatia)',
+ 'Austria-Hungary (now Czech Republic)',
+ 'Austria-Hungary (now Hungary)',
+ 'Austria-Hungary (now Poland)',
+ 'Austria-Hungary (now Slovenia)',
+ 'Austria-Hungary (now Ukraine)',
+ 'Austrian Empire (now Austria)',
+ 'Austrian Empire (now Czech Republic)',
+ 'Austrian Empire (now Italy)',
+ 'Bavaria (now Germany)',
+ 'Belgium',
+ 'Bosnia (now Bosnia and Herzegovina)',
+ 'Brazil',
+ 'British India (now Bangladesh)',
+ 'British India (now India)',
+ 'British Mandate of Palestine (now Israel)',
+ 'British Protectorate of Palestine (now Israel)',
+ 'British West Indies (now Saint Lucia)',
+ 'Bulgaria',
+ 'Burma (now Myanmar)',
+ 'Canada',
+ 'Chile',
+ 'China',
+ 'Colombia',
+ 'Costa Rica',
+ 'Crete (now Greece)',
+ 'Cyprus',
+ 'Czechoslovakia (now Czech Republic)',
+ 'Denmark',
+ 'East Friesland (now Germany)',
+ 'East Timor',
+ 'Egypt',
+ 'Faroe Islands (Denmark)',
+ 'Finland',
+ 'France',
+ 'Free City of Danzig (now Poland)',
+ 'French Algeria (now Algeria)',
+ 'German-occupied Poland (now Poland)',
+ 'Germany',
+ 'Germany (now France)',
+ 'Germany (now Poland)',
+ 'Germany (now Russia)',
+ 'Gold Coast (now Ghana)',
+ 'Guadeloupe Island',
+ 'Guatemala',
+ 'Hesse-Kassel (now Germany)',
+ 'Hungary',
+ 'Hungary (now Slovakia)',
+ 'Iceland',
+ 'India',
+ 'India (now Pakistan)',
+ 'Iran',
+ 'Ireland',
+ 'Italy',
+ 'Japan',
+ 'Java, Dutch East Indies (now Indonesia)',
+ 'Kenya',
+ 'Korea (now South Korea)',
+ 'Liberia',
+ 'Lithuania',
+ 'Luxembourg',
+ 'Madagascar',
+ 'Mecklenburg (now Germany)',
+ 'Mexico',
+ 'Morocco',
+ 'New Zealand',
+ 'Nigeria',
+ 'Northern Ireland',
+ 'Norway',
+ 'Ottoman Empire (now Republic of Macedonia)',
+ 'Ottoman Empire (now Turkey)',
+ 'Pakistan',
+ 'Persia (now Iran)',
+ 'Peru',
+ 'Poland',
+ 'Poland (now Belarus)',
+ 'Poland (now Lithuania)',
+ 'Poland (now Ukraine)',
+ 'Portugal',
+ 'Prussia (now Germany)',
+ 'Prussia (now Poland)',
+ 'Prussia (now Russia)',
+ 'Romania',
+ 'Russia',
+ 'Russian Empire (now Azerbaijan)',
+ 'Russian Empire (now Belarus)',
+ 'Russian Empire (now Finland)',
+ 'Russian Empire (now Latvia)',
+ 'Russian Empire (now Lithuania)',
+ 'Russian Empire (now Poland)',
+ 'Russian Empire (now Russia)',
+ 'Russian Empire (now Ukraine)',
+ 'Saint Lucia',
+ 'Schleswig (now Germany)',
+ 'Scotland',
+ 'South Africa',
+ 'Southern Rhodesia (now Zimbabwe)',
+ 'Spain',
+ 'Sweden',
+ 'Switzerland',
+ 'Taiwan',
+ "Tibet (now People's Republic of China)",
+ 'Turkey',
+ 'Tuscany (now Italy)',
+ 'USA',
+ 'USSR (now Belarus)',
+ 'USSR (now Russia)',
+ 'Ukraine',
+ 'United Kingdom',
+ 'Venezuela',
+ 'Vietnam',
+ 'W&uuml;rttemberg (now Germany)',
+ 'West Germany (now Germany)',
+ 'Yemen',
+ 'the Netherlands'}
+
+
+
+
+ # Countries recorded as countries of death but not as countries of birth
+countries = set(db.laureates.distinct("diedCountry")) - set(db.laureates.distinct("bornCountry"))
+print(countries)
+
+    {'Gabon', 'Barbados', 'Czechoslovakia', 'Israel', 'Greece', 'USSR', 'Tunisia', 'Yugoslavia (now Serbia)', 'Puerto Rico', 'East Germany', 'Northern Rhodesia (now Zambia)', 'Jamaica', 'Philippines'}
+    
+    #Well done! Some of these countries are likely to remain in this set, as they no longer exist!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Countries of affiliation
+We saw in the last exercise that countries can be associated with a laureate as their country of birth and as their country of death. For each prize a laureate received, they may also have been affiliated with an institution at the time, located in a country.
+Determine the number of distinct countries recorded as part of an affiliation for laureates' prizes. Save this as count.
+
+# The number of distinct countries of laureate affiliation for prizes
+count = len(db.laureates.distinct("prizes.affiliations.country"))
+print(count)
+  29
+  This number is less than the number of distinct countries of death, and far less than the number of distinct countries of birth.
+
+
+
+
+
+In [2]: set(db.laureates.distinct("prizes.affiliations.country"))
+Out[2]: 
+{'Alsace (then Germany, now France)',
+ 'Argentina',
+ 'Australia',
+ 'Austria',
+ 'Belgium',
+ 'Canada',
+ 'China',
+ 'Czechoslovakia',
+ 'Denmark',
+ 'Federal Republic of Germany',
+ 'Finland',
+ 'France',
+ 'Germany',
+ 'Hungary',
+ 'India',
+ 'Ireland',
+ 'Israel',
+ 'Italy',
+ 'Japan',
+ 'Norway',
+ 'Portugal',
+ 'Russia',
+ 'Spain',
+ 'Sweden',
+ 'Switzerland',
+ 'USA',
+ 'USSR',
+ 'United Kingdom',
+ 'the Netherlands'}
