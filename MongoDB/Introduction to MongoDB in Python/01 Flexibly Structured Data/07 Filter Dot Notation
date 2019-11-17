@@ -1,0 +1,94 @@
+Choosing tools
+We saw from his laureate document that Walter Kohn's country of birth was "Austria" and that his prize affiliation country was "USA". If we want to count the number of laureates born in Austria with a prize affiliation country that is not also Austria, what MongoDB concepts/tools should we use?
+
+(The nobel database is available in the console as db, and the Walter's Kohn document is available to you as doc. Feel free to examine the structure of the document doc in the console, and play around with database queries!)
+
+#dot notation and the $ne operator
+
+
+
+
+
+
+
+
+Starting our ascent
+Throughout this course, we will gradually build up a set of tools to examine the proportion of Nobel prizes that were awarded to immigrants. In this exercise, you will answer a limited but related question using tools we have introduced so far.
+
+We saw from his laureate document that Walter Kohn's country of birth was "Austria" and that his prize affiliation country was "USA". Count the number of laureates born in Austria with a prize affiliation country that is not also Austria.
+
+# Filter for laureates born in Austria with non-Austria prize affiliation
+criteria = {"bornCountry": "Austria", 
+              "prizes.affiliations.country": {"$ne": "Austria"}}
+
+# Count the number of such laureates
+count = db.laureates.count_documents(criteria)
+print(count)
+    10
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Our 'born' approximation, and a special laureate
+We saw earlier that the laureates collection encodes uncertainty about birthdate in a special way. When a birthdate is unknown, the "born" field has the value "0000-00-00". Thus,
+
+db.laureates.count_documents({"born": "0000-00-00"})
+counts the number of such laureates. Or does it?
+
+We also saw that the total number of laureate prizes is more than the number of laureates -- some were awarded more than one prize. There is one in particular with a whopping three prizes, and this laureate holds key information to aid our quest to determine the proportion of prizes awarded to immigrants.
+
+
+1. Use a filter document (criteria) to count the documents that don't have a "born" field.
+# Filter for documents without a "born" field
+criteria = { "born": {"$exists": False}}
+
+# Save count
+count = db.laureates.count_documents(criteria)
+print(count)
+  0
+
+2. Use a filter document (criteria) to find a document for a laureate with at least three elements in its "prizes". Remember about the zero-based indexing!
+# Filter for laureates with at least three prizes
+criteria = {"prizes.2": {"$exists": True}}
+
+
+# Find one laureate with at least three prizes
+doc = db.laureates.find_one(criteria)
+
+# Print the document
+print(doc)
+
+   {'died': '0000-00-00', 
+   'id': '482', 
+   'firstname': 'Comité international de la Croix Rouge (International Committee of the Red Cross)', 
+   'gender': 'org', 
+   'born': '0000-00-00', 
+   '_id': ObjectId('5bc56154f35b634065ba1dbf'), 
+   'prizes': [{'category': 'peace', 
+                'share': '1', 
+                'affiliations': [[]], 
+                'year': '1917'}, 
+              {'category': 'peace', 
+              'share': '1', 
+              'affiliations': [[]], 
+              'year': '1944'}, 
+              {'category': 'peace', 
+              'share': '2', 
+              'affiliations': [[]], 
+              'year': '1963'}]
+     }
+
+
+
+#Take a look at the document in the counsole. What about this laureate presents a challenge to our goal of partitioning laureates into immigrant and non-immigrant Prize recipients?
