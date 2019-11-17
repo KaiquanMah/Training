@@ -1,0 +1,41 @@
+Born here, went there
+In which countries have USA-born laureates had affiliations for their prizes?
+
+In [1]: db.laureates.distinct("prizes.affiliations.country",{"bornCountry": "USA"})
+Out[1]: ['USA', 'Denmark', 'United Kingdom', 'Australia']
+
+#Australia, Denmark, United Kingdom, USA
+
+
+
+
+
+
+
+
+
+
+Triple plays (mostly) all around
+Prizes can be shared, even by more than two laureates. In fact, all prize categories but one – literature – have had prizes shared by three or more laureates.
+
+
+# Save a filter for prize documents with three or more laureates
+criteria = {"laureates.2": {"$exists": True}}
+
+# Save the set of distinct prize categories in documents satisfying the criteria
+triple_play_categories = set(db.prizes.distinct("category", criteria))
+
+# Confirm literature as the only category not satisfying the criteria.
+assert set(db.prizes.distinct("category")) - triple_play_categories == {"literature"}
+
+In [12]: triple_play_categories
+Out[12]: {'chemistry', 'economics', 'medicine', 'peace', 'physics'}
+
+In [13]: set(db.prizes.distinct("category"))
+Out[13]: {'chemistry', 'economics', 'literature', 'medicine', 'peace', 'physics'}
+
+
+
+
+
+
