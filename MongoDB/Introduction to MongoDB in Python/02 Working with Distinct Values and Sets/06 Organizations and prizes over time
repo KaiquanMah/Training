@@ -1,0 +1,26 @@
+Organizations and prizes over time
+How many organizations won prizes before 1945 versus in or after 1945?
+
+# Save a filter for organization laureates with prizes won before 1945
+before = {
+    "gender": "org",
+    "prizes.year": {"$lt": "1945"},
+    }
+
+# Save a filter for organization laureates with prizes won in or after 1945
+in_or_after = {
+    "gender": "org",
+    "prizes.year": {"$gte": "1945"},
+    }
+
+
+
+
+n_before = db.laureates.count_documents(before)
+n_in_or_after = db.laureates.count_documents(in_or_after)
+ratio = n_in_or_after / (n_in_or_after + n_before)
+print(ratio)
+    0.84
+
+
+Even though fewer than two thirds of Nobel prizes were awarded in 1945 and later, over 80% of organizations won prizes then.
