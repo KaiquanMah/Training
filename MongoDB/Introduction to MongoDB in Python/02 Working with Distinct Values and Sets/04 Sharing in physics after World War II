@@ -1,0 +1,30 @@
+Sharing in physics after World War II
+What is the approximate ratio of the number of laureates who won an unshared ({"share": "1"}) prize in physics after World War II ({"year": {"$gte": "1945"}}) to the number of laureates who won a shared prize in physics after World War II?
+
+In [1]: db.laureates.count_documents({"prizes":
+                                                {"$elemMatch":
+                                                              {"category":"physics",
+                                                              "share": "1",
+                                                              "year": {"$gte": "1945"}}
+                                                 }
+                                     })
+Out[1]: 18
+
+
+
+
+In [3]: db.laureates.count_documents({"prizes":
+                                                {"$elemMatch":
+                                                              {"category":"physics",
+                                                              "share": {"$ne": "1"},
+                                                              "year": {"$gte": "1945"}}
+                                                 }
+                                     })
+
+Out[3]: 143
+
+
+
+#0.13
+Out[4]: 0.1258741258741259
+#There has been significant sharing of physics prizes since World War II
