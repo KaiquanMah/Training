@@ -1,0 +1,270 @@
+What the sort?
+This block prints out the first five projections of a sorted query. What "sort" argument fills the blank?
+
+docs = list(db.laureates.find(
+    {"born": {"$gte": "1900"}, "prizes.year": {"$gte": "1954"}},
+    {"born": 1, "prizes.year": 1, "_id": 0},
+    sort=____))
+
+
+for doc in docs[:5]:
+    print(doc)
+{'born': '1916-08-25', 'prizes': [{'year': '1954'}]}
+{'born': '1915-06-15', 'prizes': [{'year': '1954'}]}
+{'born': '1901-02-28', 'prizes': [{'year': '1954'}, {'year': '1962'}]}
+{'born': '1913-07-12', 'prizes': [{'year': '1955'}]}
+{'born': '1911-01-26', 'prizes': [{'year': '1955'}]}
+
+
+
+#YES [("prizes.year", 1), ("born", -1)]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sorting together: MongoDB + Python
+In this exercise you'll explore the prizes in the physics category.You will use Python to sort laureates for one prize by last name, and then MongoDB to sort prizes by year:
+
+1901: Röntgen
+1902: Lorentz and Zeeman
+1903: Becquerel and Curie and Curie, née Sklodowska
+
+You'll start by writing a function that takes a prize document as an argument, extracts all the laureates from that document, arranges them in alphabetical order, and returns a string containing the last names separated by " and ".
+
+The Nobel database is again available to you as db. We also pre-loaded a sample document sample_doc so you can test your laureate-extracting function.
+
+(Remember that you can always type help(function_name) in console to get a refresher on functions you might be less familiar with, e.g. help(sorted)!)
+
+
+
+
+
+
+In [2]: db.prizes.find_one({})
+Out[2]: 
+{'_id': ObjectId('5bc56145f35b634065ba1997'),
+ 'category': 'chemistry',
+ 'laureates': [{'firstname': 'Frances H.',
+   'id': '963',
+   'motivation': '"for the directed evolution of enzymes"',
+   'share': '2',
+   'surname': 'Arnold'},
+  {'firstname': 'George P.',
+   'id': '964',
+   'motivation': '"for the phage display of peptides and antibodies"',
+   'share': '4',
+   'surname': 'Smith'},
+  {'firstname': 'Sir Gregory P.',
+   'id': '965',
+   'motivation': '"for the phage display of peptides and antibodies"',
+   'share': '4',
+   'surname': 'Winter'}],
+ 'year': '2018'}
+ 
+ 
+ 
+In [4]: sample_prize
+Out[4]: 
+{'_id': ObjectId('5bc56145f35b634065ba1bd5'),
+ 'category': 'physics',
+ 'laureates': [{'firstname': 'Antoine Henri',
+   'id': '4',
+   'motivation': '"in recognition of the extraordinary services he has rendered by his discovery of spontaneous radioactivity"',
+   'share': '2',
+   'surname': 'Becquerel'},
+  {'firstname': 'Pierre',
+   'id': '5',
+   'motivation': '"in recognition of the extraordinary services they have rendered by their joint researches on the radiation phenomena discovered by Professor Henri Becquerel"',
+   'share': '4',
+   'surname': 'Curie'},
+  {'firstname': 'Marie',
+   'id': '6',
+   'motivation': '"in recognition of the extraordinary services they have rendered by their joint researches on the radiation phenomena discovered by Professor Henri Becquerel"',
+   'share': '4',
+   'surname': 'Curie, née Sklodowska'}],
+ 'year': '1903'}
+
+
+
+
+
+
+
+
+
+1. Complete the definition of all_laureates(prize). Within the body of the function:
+Sort the "laureates" list of the prize document according to the "surname" key.
+For each of the laureates in the sorted list, extract the "surname" field.
+
+
+from operator import itemgetter
+
+def all_laureates(prize):  
+  # sort the laureates by surname
+  sorted_laureates = sorted(prize["laureates"], key=itemgetter("surname"))
+  
+  # extract surnames
+  surnames = [laureate["surname"] for laureate in sorted_laureates]
+  
+  # concatenate surnames separated with " and " 
+  all_names = " and ".join(surnames)
+  
+  return all_names
+
+# test the function on a sample doc
+print(all_laureates(sample_prize))
+<script.py> output:
+    Becquerel and Curie and Curie, née Sklodowska
+
+
+
+
+
+2.  Find the documents for the prizes in the physics category, sort them in chronological order (by "year", ascending), and only fetch the "year", "laureates.firstname", and "laureates.surname" fields.
+
+# find physics prizes, project year and first and last name, and sort by year
+docs = db.prizes.find(
+           filter= {"category":"physics"}, 
+           projection= ["year", "laureates.firstname", "laureates.surname"], 
+           sort= [("year", 1)])
+           
+
+
+
+
+3. Now that you have the prizes, and the function to extract laureates from a prize, print the year and the names of the laureates (use your all_laureates() function) for each prize document.
+
+# print the year and laureate names (from all_laureates)
+for doc in docs:
+  print("{year}: {names}".format(year=doc["year"], names=all_laureates(doc)))
+  
+  
+<script.py> output:
+    1901: Röntgen
+    1902: Lorentz and Zeeman
+    1903: Becquerel and Curie and Curie, née Sklodowska
+    1904: (John William Strutt)
+    1905: von Lenard
+    1906: Thomson
+    1907: Michelson
+    1908: Lippmann
+    1909: Braun and Marconi
+    1910: van der Waals
+    1911: Wien
+    1912: Dalén
+    1913: Kamerlingh Onnes
+    1914: von Laue
+    1915: Bragg and Bragg
+    1917: Barkla
+    1918: Planck
+    1919: Stark
+    1920: Guillaume
+    1921: Einstein
+    1922: Bohr
+    1923: Millikan
+    1924: Siegbahn
+    1925: Franck and Hertz
+    1926: Perrin
+    1927: Compton and Wilson
+    1928: Richardson
+    1929: de Broglie
+    1930: Raman
+    1932: Heisenberg
+    1933: Dirac and Schrödinger
+    1935: Chadwick
+    1936: Anderson and Hess
+    1937: Davisson and Thomson
+    1938: Fermi
+    1939: Lawrence
+    1943: Stern
+    1944: Rabi
+    1945: Pauli
+    1946: Bridgman
+    1947: Appleton
+    1948: Blackett
+    1949: Yukawa
+    1950: Powell
+    1951: Cockcroft and Walton
+    1952: Bloch and Purcell
+    1953: Zernike
+    1954: Born and Bothe
+    1955: Kusch and Lamb
+    1956: Bardeen and Brattain and Shockley
+    1957: Lee and Yang
+    1958: Cherenkov and Frank and Tamm
+    1959: Chamberlain and Segrè
+    1960: Glaser
+    1961: Hofstadter and Mössbauer
+    1962: Landau
+    1963: Goeppert Mayer and Jensen and Wigner
+    1964: Basov and Prokhorov and Townes
+    1965: Feynman and Schwinger and Tomonaga
+    1966: Kastler
+    1967: Bethe
+    1968: Alvarez
+    1969: Gell-Mann
+    1970: Alfvén and Néel
+    1971: Gabor
+    1972: Bardeen and Cooper and Schrieffer
+    1973: Esaki and Giaever and Josephson
+    1974: Hewish and Ryle
+    1975: Bohr and Mottelson and Rainwater
+    1976: Richter and Ting
+    1977: Anderson and Mott and van Vleck
+    1978: Kapitsa and Penzias and Wilson
+    1979: Glashow and Salam and Weinberg
+    1980: Cronin and Fitch
+    1981: Bloembergen and Schawlow and Siegbahn
+    1982: Wilson
+    1983: Chandrasekhar and Fowler
+    1984: Rubbia and van der Meer
+    1985: von Klitzing
+    1986: Binnig and Rohrer and Ruska
+    1987: Bednorz and Müller
+    1988: Lederman and Schwartz and Steinberger
+    1989: Dehmelt and Paul and Ramsey
+    1990: Friedman and Kendall and Taylor
+    1991: de Gennes
+    1992: Charpak
+    1993: Hulse and Taylor Jr.
+    1994: Brockhouse and Shull
+    1995: Perl and Reines
+    1996: Lee and Osheroff and Richardson
+    1997: Chu and Cohen-Tannoudji and Phillips
+    1998: Laughlin and Störmer and Tsui
+    1999: 't Hooft and Veltman
+    2000: Alferov and Kilby and Kroemer
+    2001: Cornell and Ketterle and Wieman
+    2002: Davis Jr. and Giacconi and Koshiba
+    2003: Abrikosov and Ginzburg and Leggett
+    2004: Gross and Politzer and Wilczek
+    2005: Glauber and Hall and Hänsch
+    2006: Mather and Smoot
+    2007: Fert and Grünberg
+    2008: Kobayashi and Maskawa and Nambu
+    2009: Boyle and Kao and Smith
+    2010: Geim and Novoselov
+    2011: Perlmutter and Riess and Schmidt
+    2012: Haroche and Wineland
+    2013: Englert and Higgs
+    2014: Akasaki and Amano and Nakamura
+    2015: Kajita and McDonald
+    2016: Haldane and Kosterlitz and Thouless
+    2017: Barish and Thorne and Weiss
+    2018: Ashkin and Mourou and Strickland  
