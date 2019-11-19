@@ -1,0 +1,118 @@
+Doing our share of data validation
+In our Nobel prizes collection, each document has an array of laureate subdocuments "laureates", each containing information such as the prize share for a laureate:
+
+{'_id': ObjectId('5bc56145f35b634065ba1997'),
+ 'category': 'chemistry',
+ 'laureates': [{'firstname': 'Frances H.',
+   'id': '963',
+   'motivation': '"for the directed evolution of enzymes"',
+   'share': '2',
+   'surname': 'Arnold'},
+  {'firstname': 'George P.',
+   'id': '964',
+   'motivation': '"for the phage display of peptides and antibodies"',
+   'share': '4',
+   'surname': 'Smith'},
+ {...
+
+
+Each "laureates.share" value appears to be the reciprocal of a laureate's fractional share of that prize, encoded as a string. For example, a laureate "share" of "4" means that this laureate received a 14 share of the prize. Let's check that for each prize, all the shares of all the laureates add up to 1!
+
+Notice the quotes around the values in the "share" field: these values are actually given as strings! You'll have to convert then to numbers before you find the reciprocals and add up the shares.
+
+
+
+#wrong ans
+# Save documents, projecting out laureates share
+#prizes = db.prizes.find({}, projection=["laureates.share"])
+#prizes = db.prizes.find({}, projection={"laureates.share":1,
+                                        "_id": 0})
+#wrong ans
+# Iterate over prizes
+for prize in prizes:
+    # Initialize the variable total_share to 0.
+    total_share = 0
+    
+    # Iterate over laureates for the prize
+    for laureate in laureates["share"]:
+        # add the share of the laureate to total_share
+        total_share += 1 / float(laureate)
+        
+    # Print the total share    
+    print(total_share)     
+    
+    
+
+
+
+
+In [4]: list(prizes)
+Out[4]: 
+[{'_id': ObjectId('5bc56145f35b634065ba199d'),
+  'laureates': [{'share': '3'}, {'share': '3'}, {'share': '3'}]},
+ {'_id': ObjectId('5bc56145f35b634065ba199e'), 'laureates': [{'share': '1'}]},
+ {'_id': ObjectId('5bc56145f35b634065ba199f'), 'laureates': [{'share': '1'}]},
+ {'_id': ObjectId('5bc56145f35b634065ba19a0'), 'laureates': [{'share': '1'}]},
+ {'_id': ObjectId('5bc56145f35b634065ba199d'),
+ 'laureates': [{'share': '3'}, {'share': '3'}, {'share': '3'}]}
+ ...
+ ]
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ #right ans
+ ## Save documents, projecting out laureates share
+prizes = db.prizes.find({}, ["laureates.share"])
+
+
+
+# Iterate over prizes
+for prize in prizes:
+    # Initialize total share
+    total_share = 0
+    
+    # Iterate over laureates for the prize
+    for laureate in prize["laureates"]:
+        # convert the laureate's share to float and add the reciprocal to total_share
+        total_share += 1 / float(laureate["share"])
+    
+    #{'_id': ObjectId('5bc56145f35b634065ba199d'),
+    #          'laureates': [{'share': '3'}, 
+    #                        {'share': '3'}, 
+    #                        {'share': '3'}]}
+    
+    #laureate is each {'share': '3'}
+    #laureate["share"] retrieves the value 3
+    
+    
+    
+    # Print the total share    
+    print(total_share)    
+    
+    
+    1.0
+    1.0
+    1.0
+    1.0
+    1.0
+    1.0
+ 
+
