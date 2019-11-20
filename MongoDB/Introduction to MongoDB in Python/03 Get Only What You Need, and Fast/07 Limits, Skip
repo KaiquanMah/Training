@@ -1,0 +1,194 @@
+Setting a new limit?
+How many documents does the following expression return?
+
+list(db.prizes.find({"category": "economics"},
+                    {"year": 1, "_id": 0})
+     .sort("year")
+     .limit(3)
+     .limit(5))
+
+
+
+
+#YES 5: the second call to limit overrides the first
+#You can think of the query parameters as being updated like a dictionary in Python: 
+d = {'limit': 3}; d.update({'limit': 5}); 
+print(d) will print "{'limit': 5}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The first five prizes with quarter shares
+Find the first five prizes with one or more laureates sharing 1/4 of the prize. Project our prize category, year, and laureates' motivations.
+
+
+from pprint import pprint
+
+# Fetch prizes with quarter-share laureate(s)
+filter_ = {"laureates.share": "4"}
+
+# Save the list of field names
+projection = ["category", "year", "laureates.motivation"]
+
+
+#Save to cursor a cursor that will yield prizes, sorted by ascending year. Limit this to five prizes, and sort using the most concise specification.
+# Save a cursor to yield the first five prizes
+cursor = db.prizes.find(filter_, projection).sort("year").limit(5)
+pprint(list(cursor))
+
+
+
+
+<script.py> output:
+    [{'_id': ObjectId('5bc56145f35b634065ba1bd5'),
+      'category': 'physics',
+      'laureates': [{'motivation': '"in recognition of the extraordinary services '
+                                   'he has rendered by his discovery of '
+                                   'spontaneous radioactivity"'},
+                    {'motivation': '"in recognition of the extraordinary services '
+                                   'they have rendered by their joint researches '
+                                   'on the radiation phenomena discovered by '
+                                   'Professor Henri Becquerel"'},
+                    {'motivation': '"in recognition of the extraordinary services '
+                                   'they have rendered by their joint researches '
+                                   'on the radiation phenomena discovered by '
+                                   'Professor Henri Becquerel"'}],
+      'year': '1903'},
+     {'_id': ObjectId('5bc56145f35b634065ba1b2a'),
+      'category': 'chemistry',
+      'laureates': [{'motivation': '"for his discovery that enzymes can be '
+                                   'crystallized"'},
+                    {'motivation': '"for their preparation of enzymes and virus '
+                                   'proteins in a pure form"'},
+                    {'motivation': '"for their preparation of enzymes and virus '
+                                   'proteins in a pure form"'}],
+      'year': '1946'},
+     {'_id': ObjectId('5bc56145f35b634065ba1b26'),
+      'category': 'medicine',
+      'laureates': [{'motivation': '"for their discovery of the course of the '
+                                   'catalytic conversion of glycogen"'},
+                    {'motivation': '"for their discovery of the course of the '
+                                   'catalytic conversion of glycogen"'},
+                    {'motivation': '"for his discovery of the part played by the '
+                                   'hormone of the anterior pituitary lobe in the '
+                                   'metabolism of sugar"'}],
+      'year': '1947'},
+     {'_id': ObjectId('5bc56145f35b634065ba1af2'),
+      'category': 'medicine',
+      'laureates': [{'motivation': '"for their discovery that genes act by '
+                                   'regulating definite chemical events"'},
+                    {'motivation': '"for their discovery that genes act by '
+                                   'regulating definite chemical events"'},
+                    {'motivation': '"for his discoveries concerning genetic '
+                                   'recombination and the organization of the '
+                                   'genetic material of bacteria"'}],
+      'year': '1958'},
+     {'_id': ObjectId('5bc56145f35b634065ba1ad7'),
+      'category': 'physics',
+      'laureates': [{'motivation': '"for his contributions to the theory of the '
+                                   'atomic nucleus and the elementary particles, '
+                                   'particularly through the discovery and '
+                                   'application of fundamental symmetry '
+                                   'principles"'},
+                    {'motivation': '"for their discoveries concerning nuclear '
+                                   'shell structure"'},
+                    {'motivation': '"for their discoveries concerning nuclear '
+                                   'shell structure"'}],
+      'year': '1963'}]
+      
+#old comment
+#For all of these prizes, there were two laureates with quarter shares for their work together, and there was a third laureate with a half share for separate work (as evidenced by the motivation fields)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pages of particle-prized people
+You and a friend want to set up a website that gives information on Nobel laureates with awards relating to particle phenomena. You want to present these laureates one page at a time, with three laureates per page. You decide to order the laureates chronologically by award year. When there is a "tie" in ordering (i.e. two laureates were awarded prizes in the same year), you want to order them alphabetically by surname.
+
+from pprint import pprint
+
+
+
+#Complete the function get_particle_laureates that, given page_number and page_size, retrieves a given page of prize data on laureates who have the word "particle" (use $regex) in their prize motivations ("prizes.motivation"). Sort laureates first by ascending "prizes.year" and next by ascending "surname".
+# Write a function to retrieve a page of data
+def get_particle_laureates(page_number=1, page_size=3):
+    if page_number < 1 or not isinstance(page_number, int):
+        raise ValueError("Pages are natural numbers (starting from 1).")
+    particle_laureates = list(
+        db.laureates.find(
+            {"prizes.motivation": {"$regex": "particle"}},
+            ["firstname", "surname", "prizes"])
+        .sort([("prizes.year", 1), ("surname", 1)])
+        .skip(page_size * (page_number - 1))
+        .limit(page_size))
+    return particle_laureates
+
+# Collect and save the first nine pages
+pages = [get_particle_laureates(page_number=page) for page in range(1,9)]
+pprint(pages[0])
+
+
+
+
+<script.py> output:
+    [{'_id': ObjectId('5bc56154f35b634065ba1c04'),
+      'firstname': 'Charles Thomson Rees',
+      'prizes': [{'affiliations': [{'city': 'Cambridge',
+                                    'country': 'United Kingdom',
+                                    'name': 'University of Cambridge'}],
+                  'category': 'physics',
+                  'motivation': '"for his method of making the paths of '
+                                'electrically charged particles visible by '
+                                'condensation of vapour"',
+                  'share': '2',
+                  'year': '1927'}],
+      'surname': 'Wilson'},
+     {'_id': ObjectId('5bc56154f35b634065ba1c1a'),
+      'firstname': 'Sir John Douglas',
+      'prizes': [{'affiliations': [{'city': 'Harwell, Berkshire',
+                                    'country': 'United Kingdom',
+                                    'name': 'Atomic Energy Research '
+                                            'Establishment'}],
+                  'category': 'physics',
+                  'motivation': '"for their pioneer work on the transmutation of '
+                                'atomic nuclei by artificially accelerated atomic '
+                                'particles"',
+                  'share': '2',
+                  'year': '1951'}],
+      'surname': 'Cockcroft'},
+     {'_id': ObjectId('5bc56154f35b634065ba1c1b'),
+      'firstname': 'Ernest Thomas Sinton',
+      'prizes': [{'affiliations': [{'city': 'Dublin',
+                                    'country': 'Ireland',
+                                    'name': 'Trinity College'}],
+                  'category': 'physics',
+                  'motivation': '"for their pioneer work on the transmutation of '
+                                'atomic nuclei by artificially accelerated atomic '
+                                'particles"',
+                  'share': '2',
+                  'year': '1951'}],
+      'surname': 'Walton'}]
+
+#Particles may be small, but discoveries related to them have made quite an impact!
