@@ -1,0 +1,551 @@
+Sequencing stages
+Here is a cursor, followed by four aggregation pipeline stages:
+
+cursor = (db.laureates.find(
+    projection={"firstname": 1, "prizes.year": 1, "_id": 0},
+    filter={"gender": "org"})
+    .limit(3)
+    .sort("prizes.year", -1))
+
+project_stage = {"$project": {"firstname": 1, "prizes.year": 1, "_id": 0}}
+match_stage = {"$match": {"gender": "org"}}
+limit_stage = {"$limit": 3}
+sort_stage = {"$sort": {"prizes.year": -1}}
+
+
+What sequence pipeline of the above four stages can produce a cursor db.laureates.aggregate(pipeline) equivalent to cursor above?
+
+#YES [match_stage, project_stage, sort_stage, limit_stage]
+#Note that you may need to put a $sort stage before a $project stage if you are sorting on a field left out in that projection (not the case in this exercise).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Aggregating a few individuals' country data
+The following query cursor yields birth-country and prize-affiliation-country information for three non-organization laureates:
+
+cursor = (db.laureates.find(
+    {"gender": {"$ne": "org"}},
+    ["bornCountry", "prizes.affiliations.country"]
+).limit(3))
+
+
+#Translate the above cursor cursor to an equivalent aggregation cursor, saving the pipeline stages to pipeline. Recall that the find collection method's "filter" parameter maps to the "$match" aggregation stage, its "projection" parameter maps to the "$project" stage, and the "limit" parameter (or cursor method) maps to the "$limit" stage.
+# Translate cursor to aggregation pipeline
+pipeline = [
+    {"$match": {"gender": {"$ne": "org"}}},
+    {"$project": {"bornCountry": 1, "prizes.affiliations.country": 1}},
+    {"$limit": 3}
+]
+
+for doc in db.laureates.aggregate(pipeline):
+    print("{bornCountry}: {prizes}".format(**doc))
+    
+    
+<script.py> output:
+    the Netherlands: [{'affiliations': [{'country': 'the Netherlands'}]}]
+    United Kingdom: [{'affiliations': [{'country': 'United Kingdom'}]}]
+    Hungary (now Slovakia): [{'affiliations': [{'country': 'Germany'}]}]
+    
+    
+#Note that the specification(s) of a '$project' stage must be in the form of a dictionary, whereas they can be passed as a list to <collection>.find    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Passing the aggregation baton to Python
+Construct an aggregation pipeline to collect, in reverse chronological order (i.e., descending year), prize documents for all original categories (that is, $in categories awarded in 1901). Project only the prize year and category (including document _id is fine).
+
+The aggregation cursor will be fed to Python's itertools.groupby function to group prizes by year. For each year that at least one of the original prize categories was missing, a line with all missing categories for that year will be printed.
+
+
+from collections import OrderedDict
+from itertools import groupby
+from operator import itemgetter
+
+original_categories = set(db.prizes.distinct("category", {"year": "1901"}))
+
+In [2]: original_categories
+Out[2]: {'chemistry', 'literature', 'medicine', 'peace', 'physics'}
+
+
+
+#Save to pipeline an aggregation pipeline to collect prize documents as detailed above. Use Python's collections.OrderedDict to specify any sorting.
+# Save an pipeline to collect original-category prizes
+pipeline = [
+    {"$match": {"category": {"$in": sorted(original_categories)}}},
+    {"$project": {"year": 1, "category": 1}},
+    {"$sort": OrderedDict([("year", -1)])}
+]
+
+
+cursor = db.prizes.aggregate(pipeline)
+
+
+for key, group in groupby(cursor, key=itemgetter("year")):
+    print(key)
+    print(group)
+    
+    missing = original_categories - {doc["category"] for doc in group}
+    print(missing)
+    
+    if missing:
+        print("{year}: {missing}".format(year=key, missing=", ".join(sorted(missing))))
+        
+
+
+
+
+
+
+#We will learn in the next lesson how Mongo can do grouping for us in a $group stage.
+
+<script.py> output:
+    2018
+    <itertools._grouper object at 0x7fc1ec966e80>
+    {'literature'}
+    2018: literature
+    
+    2017
+    <itertools._grouper object at 0x7fc1ec966f60>
+    set()
+    
+    2016
+    <itertools._grouper object at 0x7fc1ec968748>
+    set()
+    
+    2015
+    <itertools._grouper object at 0x7fc1ec968b00>
+    set()
+    
+    2014
+    <itertools._grouper object at 0x7fc1ec968dd8>
+    set()
+    2013
+    <itertools._grouper object at 0x7fc1ec976358>
+    set()
+    2012
+    <itertools._grouper object at 0x7fc1ec976710>
+    set()
+    2011
+    <itertools._grouper object at 0x7fc1ec976ac8>
+    set()
+    2010
+    <itertools._grouper object at 0x7fc1ec976e80>
+    set()
+    2009
+    <itertools._grouper object at 0x7fc1ec978240>
+    set()
+    2008
+    <itertools._grouper object at 0x7fc1ec978630>
+    set()
+    2007
+    <itertools._grouper object at 0x7fc1ec9789e8>
+    set()
+    2006
+    <itertools._grouper object at 0x7fc1ec978da0>
+    set()
+    2005
+    <itertools._grouper object at 0x7fc1ec97b198>
+    set()
+    2004
+    <itertools._grouper object at 0x7fc1ec97b4a8>
+    set()
+    2003
+    <itertools._grouper object at 0x7fc1ec97b630>
+    set()
+    2002
+    <itertools._grouper object at 0x7fc1ec97bcc0>
+    set()
+    2001
+    <itertools._grouper object at 0x7fc1ec97bfd0>
+    set()
+    2000
+    <itertools._grouper object at 0x7fc1ec97bf98>
+    set()
+    1999
+    <itertools._grouper object at 0x7fc1ec97bf60>
+    set()
+    1998
+    <itertools._grouper object at 0x7fc1ec97bf28>
+    set()
+    1997
+    <itertools._grouper object at 0x7fc1ec97dd68>
+    set()
+    1996
+    <itertools._grouper object at 0x7fc1ec97dcf8>
+    set()
+    1995
+    <itertools._grouper object at 0x7fc1ec966e48>
+    set()
+    1994
+    <itertools._grouper object at 0x7fc1ec978ef0>
+    set()
+    1993
+    <itertools._grouper object at 0x7fc1ec978a20>
+    set()
+    1992
+    <itertools._grouper object at 0x7fc1ec978940>
+    set()
+    1991
+    <itertools._grouper object at 0x7fc1ec978160>
+    set()
+    1990
+    <itertools._grouper object at 0x7fc1ec976d68>
+    set()
+    1989
+    <itertools._grouper object at 0x7fc1ec976940>
+    set()
+    1988
+    <itertools._grouper object at 0x7fc1ec976518>
+    set()
+    1987
+    <itertools._grouper object at 0x7fc1ec9760b8>
+    set()
+    1986
+    <itertools._grouper object at 0x7fc1ec968c18>
+    set()
+    1985
+    <itertools._grouper object at 0x7fc1ec968828>
+    set()
+    1984
+    <itertools._grouper object at 0x7fc1ec968438>
+    set()
+    1983
+    <itertools._grouper object at 0x7fc1ec968198>
+    set()
+    1982
+    <itertools._grouper object at 0x7fc1ec968048>
+    set()
+    1981
+    <itertools._grouper object at 0x7fc1ec9680f0>
+    set()
+    1980
+    <itertools._grouper object at 0x7fc1ec968160>
+    set()
+    1979
+    <itertools._grouper object at 0x7fc1ec982198>
+    set()
+    1978
+    <itertools._grouper object at 0x7fc1ec982588>
+    set()
+    1977
+    <itertools._grouper object at 0x7fc1ec982898>
+    set()
+    1976
+    <itertools._grouper object at 0x7fc1ec982cf8>
+    set()
+    1975
+    <itertools._grouper object at 0x7fc1ec9840b8>
+    set()
+    1974
+    <itertools._grouper object at 0x7fc1ec9844a8>
+    set()
+    1973
+    <itertools._grouper object at 0x7fc1ec984860>
+    set()
+    1972
+    <itertools._grouper object at 0x7fc1ec984ac8>
+    {'peace'}
+    1972: peace
+    1971
+    <itertools._grouper object at 0x7fc1ec984ef0>
+    set()
+    1970
+    <itertools._grouper object at 0x7fc1ec9872b0>
+    set()
+    1969
+    <itertools._grouper object at 0x7fc1ec9876a0>
+    set()
+    1968
+    <itertools._grouper object at 0x7fc1ec987a58>
+    set()
+    1967
+    <itertools._grouper object at 0x7fc1ec987e10>
+    {'peace'}
+    1967: peace
+    1966
+    <itertools._grouper object at 0x7fc1ec9890f0>
+    {'peace'}
+    1966: peace
+    1965
+    <itertools._grouper object at 0x7fc1ec989400>
+    set()
+    1964
+    <itertools._grouper object at 0x7fc1ec9897b8>
+    set()
+    1963
+    <itertools._grouper object at 0x7fc1ec989ac8>
+    set()
+    1962
+    <itertools._grouper object at 0x7fc1ec989da0>
+    set()
+    1961
+    <itertools._grouper object at 0x7fc1ec04f1d0>
+    set()
+    1960
+    <itertools._grouper object at 0x7fc1ec04f6d8>
+    set()
+    1959
+    <itertools._grouper object at 0x7fc1ec04fa90>
+    set()
+    1958
+    <itertools._grouper object at 0x7fc1ec04fe48>
+    set()
+    1957
+    <itertools._grouper object at 0x7fc1ec050208>
+    set()
+    1956
+    <itertools._grouper object at 0x7fc1ec0505f8>
+    {'peace'}
+    1956: peace
+    1955
+    <itertools._grouper object at 0x7fc1ec0508d0>
+    {'peace'}
+    1955: peace
+    1954
+    <itertools._grouper object at 0x7fc1ec050ba8>
+    set()
+    1953
+    <itertools._grouper object at 0x7fc1ec050f60>
+    set()
+    1952
+    <itertools._grouper object at 0x7fc1ec053358>
+    set()
+    1951
+    <itertools._grouper object at 0x7fc1ec053710>
+    set()
+    1950
+    <itertools._grouper object at 0x7fc1ec053ac8>
+    set()
+    1949
+    <itertools._grouper object at 0x7fc1ec053e80>
+    set()
+    1948
+    <itertools._grouper object at 0x7fc1ec055240>
+    {'peace'}
+    1948: peace
+    1947
+    <itertools._grouper object at 0x7fc1ec055550>
+    set()
+    1946
+    <itertools._grouper object at 0x7fc1ec055908>
+    set()
+    1945
+    <itertools._grouper object at 0x7fc1ec055cc0>
+    set()
+    1944
+    <itertools._grouper object at 0x7fc1ec058080>
+    set()
+    1943
+    <itertools._grouper object at 0x7fc1ec0582e8>
+    {'peace', 'literature'}
+    1943: literature, peace
+    1939
+    <itertools._grouper object at 0x7fc1ec0586a0>
+    {'peace'}
+    1939: peace
+    1938
+    <itertools._grouper object at 0x7fc1ec058978>
+    set()
+    1937
+    <itertools._grouper object at 0x7fc1ec058d30>
+    set()
+    1936
+    <itertools._grouper object at 0x7fc1ec05a0f0>
+    set()
+    1935
+    <itertools._grouper object at 0x7fc1ec05a4e0>
+    {'literature'}
+    1935: literature
+    1934
+    <itertools._grouper object at 0x7fc1ec05a5c0>
+    {'physics'}
+    1934: physics
+    1933
+    <itertools._grouper object at 0x7fc1ec05aac8>
+    {'chemistry'}
+    1933: chemistry
+    1932
+    <itertools._grouper object at 0x7fc1ec05aba8>
+    {'peace'}
+    1932: peace
+    1931
+    <itertools._grouper object at 0x7fc1ec05d0b8>
+    {'physics'}
+    1931: physics
+    1930
+    <itertools._grouper object at 0x7fc1ec05d3c8>
+    set()
+    1929
+    <itertools._grouper object at 0x7fc1ec05d630>
+    set()
+    1928
+    <itertools._grouper object at 0x7fc1ec05da58>
+    {'peace'}
+    1928: peace
+    1927
+    <itertools._grouper object at 0x7fc1ec05de10>
+    set()
+    1926
+    <itertools._grouper object at 0x7fc1ec05f128>
+    set()
+    1925
+    <itertools._grouper object at 0x7fc1ec05f5c0>
+    {'medicine'}
+    1925: medicine
+    1924
+    <itertools._grouper object at 0x7fc1ec05f6a0>
+    {'chemistry', 'peace'}
+    1924: chemistry, peace
+    1923
+    <itertools._grouper object at 0x7fc1ec05f9b0>
+    {'peace'}
+    1923: peace
+    1922
+    <itertools._grouper object at 0x7fc1ec05fdd8>
+    set()
+    1921
+    <itertools._grouper object at 0x7fc1ec062198>
+    {'medicine'}
+    1921: medicine
+    1920
+    <itertools._grouper object at 0x7fc1ec0622b0>
+    set()
+    1919
+    <itertools._grouper object at 0x7fc1ec062898>
+    {'chemistry'}
+    1919: chemistry
+    1918
+    <itertools._grouper object at 0x7fc1ec062a58>
+    {'literature', 'peace', 'medicine'}
+    1918: literature, medicine, peace
+    1917
+    <itertools._grouper object at 0x7fc1ec062c88>
+    {'chemistry', 'medicine'}
+    1917: chemistry, medicine
+    1916
+    <itertools._grouper object at 0x7fc1ec062e10>
+    {'chemistry', 'peace', 'physics', 'medicine'}
+    1916: chemistry, medicine, peace, physics
+    1915
+    <itertools._grouper object at 0x7fc1ec064048>
+    {'peace', 'medicine'}
+    1915: medicine, peace
+    1914
+    <itertools._grouper object at 0x7fc1ec0642b0>
+    {'peace', 'literature'}
+    1914: literature, peace
+    1913
+    <itertools._grouper object at 0x7fc1ec0644e0>
+    set()
+    1912
+    <itertools._grouper object at 0x7fc1ec0647f0>
+    set()
+    1911
+    <itertools._grouper object at 0x7fc1ec064c50>
+    set()
+    1910
+    <itertools._grouper object at 0x7fc1ec064d30>
+    set()
+    1909
+    <itertools._grouper object at 0x7fc1ec066400>
+    set()
+    1908
+    <itertools._grouper object at 0x7fc1ec0667b8>
+    set()
+    1907
+    <itertools._grouper object at 0x7fc1ec066b70>
+    set()
+    1906
+    <itertools._grouper object at 0x7fc1ec066f28>
+    set()
+    1905
+    <itertools._grouper object at 0x7fc1ec068320>
+    set()
+    1904
+    <itertools._grouper object at 0x7fc1ec0686d8>
+    set()
+    1903
+    <itertools._grouper object at 0x7fc1ec068a90>
+    set()
+    1902
+    <itertools._grouper object at 0x7fc1ec068e48>
+    set()
+    1901
+    <itertools._grouper object at 0x7fc1ec068fd0>
+    set()
+
+
+
+
+
+
+#without the intermediate print statements to visualise the variables
+<script.py> output:
+    2018: literature
+    1972: peace
+    1967: peace
+    1966: peace
+    1956: peace
+    1955: peace
+    1948: peace
+    1943: literature, peace
+    1939: peace
+    1935: literature
+    1934: physics
+    1933: chemistry
+    1932: peace
+    1931: physics
+    1928: peace
+    1925: medicine
+    1924: chemistry, peace
+    1923: peace
+    1921: medicine
+    1919: chemistry
+    1918: literature, medicine, peace
+    1917: chemistry, medicine
+    1916: chemistry, medicine, peace, physics
+    1915: medicine, peace
+    1914: literature, peace
