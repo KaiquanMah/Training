@@ -1,0 +1,129 @@
+#Some references
+#https://guide.freecodecamp.org/c/ternary-operator/
+#https://docs.mongodb.com/manual/reference/operator/aggregation/arrayElemAt/
+#https://docs.mongodb.com/manual/reference/operator/aggregation/dateFromString/
+#https://docs.mongodb.com/manual/reference/operator/aggregation/count/
+
+
+
+
+Part 1
+How many prizes were awarded to immigrants?
+How many prizes were awarded to people who had no affiliation in their country of birth at the time of the award?
+
+
+#wrong ans
+db.laureates.find_one({})
+
+pipeline = [
+    #In your aggregation pipeline pipeline, use the "gender" field to limit results to people (that is, not organizations).
+    # Limit results to people; project needed fields; unwind prizes
+    {"$match": {"gender": {"$ne": "org"}}},
+    {"$project": {"bornCountry": 1, "prizes": 1}},
+    {"$unwind": "$prizes"},
+  
+    
+    #Count prizes for which the laureate's "bornCountry" is not also the "country" of any of their affiliations for the prize.
+    # Count prizes with no country-of-birth affiliation
+    {"$addFields": {"bornCountryInAffiliations": {"bornCountry": {"$in": ["$prizes.affiliations.country"]}}}},
+    {"awardedElsewhere": {"$bornCountryInAffiliations": False}},
+    {"$count": "awardedElsewhere"}
+]
+
+print(list(db.laureates.aggregate(pipeline)))
+
+
+
+
+
+#right ans
+pipeline = [
+    # Limit results to people; project needed fields; unwind prizes
+    {"$match": {"gender": {"$ne": "org"}}},
+    {"$project": {"bornCountry": 1, "prizes.affiliations.country": 1}},
+    {"$unwind": "$prizes"},
+  
+    # Count prizes with no country-of-birth affiliation
+    {"$addFields": {"bornCountryInAffiliations": {"$in": ["$bornCountry", "$prizes.affiliations.country"]}}},
+    {"$match": {"bornCountryInAffiliations": False}},
+    {"$count": "awardedElsewhere"},
+]
+
+print(list(db.laureates.aggregate(pipeline)))
+
+
+<script.py> output:
+    [{'awardedElsewhere': 478}]
+    
+
+#Note that because we ended up using only the "bornCountryInAffiliations" field after the $addFields stage, we could refactor that stage to be a $project stage instead.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 2
+Refinement: filter out "unaffiliated" people
+In the previous exercise, we counted prizes awarded to people without an affiliation in their "bornCountry". However, hundreds of prizes were awarded to people without recorded affiliations; sure, their "bornCountry" is technically not the "country" of any of their affiliations, but there are no "country" values to compare against!
+
+
+pipeline = [
+    {"$match": {"gender": {"$ne": "org"}}},
+    {"$project": {"bornCountry": 1, "prizes.affiliations.country": 1}},
+    {"$unwind": "$prizes"},
+    {"$addFields": {"bornCountryInAffiliations": {"$in": ["$bornCountry", "$prizes.affiliations.country"]}}},
+    {"$match": {"bornCountryInAffiliations": False}},
+    {"$count": "awardedElsewhere"},
+]
+
+
+
+#Construct a stage added_stage that filters for laureate "prizes.affiliations.country" values that are non-empty, that is, are $in a list of the distinct values that the field takes in the collection.
+# Construct the additional filter stage
+added_stage = {"$match": {"prizes.affiliations.country": 
+                            {"$in": db.laureates.distinct("prizes.affiliations.country")}
+                         }
+    
+              }
+
+
+
+
+#Insert this stage into the pipeline so that it filters out single prizes (not arrays) and precedes any test for membership in an array of countries. Recall that the first parameter to <list>.insert is the (zero-based) index for insertion.
+# Insert this stage into the pipeline
+pipeline.insert(3, added_stage)
+print(list(db.laureates.aggregate(pipeline)))
+
+
+
+<script.py> output:
+    [{'awardedElsewhere': 252}]
+
+#Note that further refinements are possible. For example, substring matching could mark certain countries as equivalent. When it comes to assumptions, explicit is better than implicit (import this).
+
+
