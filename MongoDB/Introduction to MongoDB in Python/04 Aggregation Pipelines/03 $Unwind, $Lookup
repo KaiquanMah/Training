@@ -1,0 +1,149 @@
+Embedding aggregation expressions
+The $expr operator allows embedding of aggregation expressions in a normal query (or in a $match stage). Which of the following expressions counts the number of laureate documents with string-valued bornCountries when passed to db.laureates.count_documents?
+
+You can assume (and check!) that the following is true:
+assert all(isinstance(v, str) for v in db.laureates.distinct("bornCountry"))
+
+#YES {"bornCountry": {"$in": db.laureates.distinct("bornCountry")}}
+#YES {"$expr": {"$in": ["$bornCountry", db.laureates.distinct("bornCountry")]}}
+#YES {"$expr": {"$eq": [{"$type": "$bornCountry"}, "string"]}}
+#YES {"bornCountry": {"$type": "string"}}
+
+901
+#Though aggregation expressions different in syntax, they often correspond to familiar query expressions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Here and elsewhere
+What proportion of laureates won a prize while affiliated with an institution in their country of birth? Build an aggregation pipeline to get the count of laureates who either did or did not win a prize with an affiliation country that is a substring of their country of birth -- for example, the prize affiliation country "Germany" should match the country of birth "Prussia (now Germany)".
+
+#https://docs.mongodb.com/manual/reference/operator/aggregation/unwind/
+#$exists #https://stackoverflow.com/questions/4057196/how-do-you-query-for-is-not-null-in-mongo
+#https://docs.mongodb.com/manual/reference/operator/aggregation/indexOfBytes/
+
+key_ac = "prizes.affiliations.country"
+key_bc = "bornCountry"
+
+pipeline = [
+    {"$project": {key_bc: 1, key_ac: 1}},
+
+    
+    #Use $unwind stages to ensure a single prize affiliation country per pipeline document.
+    # Ensure a single prize affiliation country per pipeline document
+    {"$unwind": "$prizes"},
+    {"$unwind": "$prizes.affiliations"},
+
+    
+    
+    #Filter out prize-affiliation-country values that are "empty": null, not present, etc.
+    # Ensure values in the list of distinct values (so not empty)
+    {"$match": {key_ac: {"$in": db.laureates.distinct(key_ac)
+    }}},
+    {"$project": {"affilCountrySameAsBorn": {
+        "$gte": [{"$indexOfBytes": ["$"+key_ac, "$"+key_bc]}, 0]}}},
+
+    # Count by "$affilCountrySameAsBorn" value (True or False)
+    {"$group": {"_id": "$affilCountrySameAsBorn",
+                "count": {"$sum": 1}}},
+]
+
+
+
+for doc in db.laureates.aggregate(pipeline):
+    print(doc)
+
+<script.py> output:
+    {'count': 261, '_id': False}
+    {'count': 477, '_id': True}
+
+#Over a third of leaureates have no detected affiliation in their recorded country of birth.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Countries of birth by prize category
+Some prize categories have laureates hailing from a greater number of countries than do other categories. You will build an aggregation pipeline for the prizes collection to collect these numbers, using a $lookup stage to obtain laureate countries of birth.
+
+
+
+
+pipeline = [
+    #$unwind the laureates array field to output one pipeline document for each array element.
+    # Unwind the laureates array
+    {"$unwind": "$laureates"},
+    {"$lookup": {
+        "from": "laureates", "foreignField": "id",
+        "localField": "laureates.id", "as": "laureate_bios"}},
+
+    
+    #After pulling in laureate bios with a $lookup stage, unwind the new laureate_bios array field (each laureate has only a single biography document).
+    # Unwind the new laureate_bios array
+    {"$unwind": "$laureate_bios"},
+    {"$project": {"category": 1,
+                  "bornCountry": "$laureate_bios.bornCountry"}},
+
+    
+    
+    #Collect the set of bornCountries associated with each prize category.
+    # Collect bornCountry values associated with each prize category
+    {"$group": {"_id": "$category",
+                "bornCountries": {"$addToSet": "$bornCountry"}}},
+
+    # Project out the size of each category's (set of) bornCountries
+    {"$project": {"category": 1,
+                  "nBornCountries": {"$size": "$bornCountries"}}},
+    {"$sort": {"nBornCountries": -1}},
+]
+
+
+for doc in db.prizes.aggregate(pipeline): 
+    print(doc)
+    
+    
+<script.py> output:
+    {'_id': 'literature', 'nBornCountries': 55}
+    {'_id': 'peace', 'nBornCountries': 50}
+    {'_id': 'chemistry', 'nBornCountries': 48}
+    {'_id': 'physics', 'nBornCountries': 44}
+    {'_id': 'medicine', 'nBornCountries': 44}
+    {'_id': 'economics', 'nBornCountries': 21}    
+    
+#It seems that economics laureates hail from the smallest number of countries than any other category, and literature laureates hail from the largest.
+
+
+
+
