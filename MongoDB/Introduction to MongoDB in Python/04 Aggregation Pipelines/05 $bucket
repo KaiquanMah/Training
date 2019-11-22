@@ -1,0 +1,741 @@
+"...it's the life in your years"
+For the pipeline we developed in the last slide deck, I want you to replace the last ($bucket) stage with one such that, given the documents docs collected, we can get the following output:
+
+from operator import itemgetter
+
+print(max(docs, key=itemgetter("years")))
+print(min(docs, key=itemgetter("years")))
+{'firstname': 'Rita', 'surname': 'Levi-Montalcini', 'years': 103.0}
+{'firstname': 'Martin Luther', 'surname': 'King Jr.', 'years': 39.0}
+
+
+You may assume that any earlier $project stage has been replaced by an equivalent $addFields stage.
+
+
+#NOT {"$addFields": {"firstname": 1, "surname": 1}}
+#This resets the "firstname" and "surname" fields to have values of 1 (!) and includes all other document fields in the output.
+
+
+#YES {"$project": {"years": 1, "firstname": 1, "surname": 1, "_id": 0}}
+#Solid! You projected the three needed fields are explicitly excluded the _id field. Poor Martin.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Number of laureates who lived in various "year" categories
+#without $bucket
+docs = list(db.laureates.aggregate([
+    {"$match": {"died": {"$gt": "1700"}, "born": {"$gt": "1700"}}},
+    {"$addFields": {"bornArray": {"$split": ["$born", "-"]},
+        "diedArray": {"$split": ["$died", "-"]}}},
+    {"$addFields": {"born": {"$cond": [
+    {"$in": ["00", "$bornArray"]},
+    {"$concat": [{"$arrayElemAt": ["$bornArray", 0]}, "-01-01"]},
+        "$born"
+        ]}}},
+    {"$project": {"died": {"$dateFromString": {"dateString": "$died"}},
+        "born": {"$dateFromString": {"dateString": "$born"}},
+        "_id": 0}},
+]))
+
+for doc in docs:
+  print(doc)
+
+
+
+{'born': datetime.datetime(1853, 7, 18, 0, 0), 'died': datetime.datetime(1928, 2, 4, 0, 0)}
+{'born': datetime.datetime(1842, 11, 12, 0, 0), 'died': datetime.datetime(1919, 6, 30, 0, 0)}
+{'born': datetime.datetime(1862, 6, 7, 0, 0), 'died': datetime.datetime(1947, 5, 20, 0, 0)}
+{'born': datetime.datetime(1852, 12, 19, 0, 0), 'died': datetime.datetime(1931, 5, 9, 0, 0)}
+{'born': datetime.datetime(1874, 4, 25, 0, 0), 'died': datetime.datetime(1937, 7, 20, 0, 0)}
+{'born': datetime.datetime(1864, 1, 13, 0, 0), 'died': datetime.datetime(1928, 8, 30, 0, 0)}
+{'born': datetime.datetime(1869, 11, 30, 0, 0), 'died': datetime.datetime(1937, 12, 9, 0, 0)}
+{'born': datetime.datetime(1879, 10, 9, 0, 0), 'died': datetime.datetime(1960, 4, 23, 0, 0)}
+{'born': datetime.datetime(1862, 7, 2, 0, 0), 'died': datetime.datetime(1942, 3, 12, 0, 0)}
+{'born': datetime.datetime(1877, 6, 7, 0, 0), 'died': datetime.datetime(1944, 10, 23, 0, 0)}
+{'born': datetime.datetime(1858, 4, 23, 0, 0), 'died': datetime.datetime(1947, 10, 4, 0, 0)}
+{'born': datetime.datetime(1874, 4, 15, 0, 0), 'died': datetime.datetime(1957, 6, 21, 0, 0)}
+{'born': datetime.datetime(1861, 2, 15, 0, 0), 'died': datetime.datetime(1938, 6, 13, 0, 0)}
+{'born': datetime.datetime(1879, 3, 14, 0, 0), 'died': datetime.datetime(1955, 4, 18, 0, 0)}
+{'born': datetime.datetime(1885, 10, 7, 0, 0), 'died': datetime.datetime(1962, 11, 18, 0, 0)}
+{'born': datetime.datetime(1868, 3, 22, 0, 0), 'died': datetime.datetime(1953, 12, 19, 0, 0)}
+{'born': datetime.datetime(1886, 12, 3, 0, 0), 'died': datetime.datetime(1978, 9, 26, 0, 0)}
+{'born': datetime.datetime(1882, 8, 26, 0, 0), 'died': datetime.datetime(1964, 5, 21, 0, 0)}
+{'born': datetime.datetime(1887, 7, 22, 0, 0), 'died': datetime.datetime(1975, 10, 30, 0, 0)}
+{'born': datetime.datetime(1870, 9, 30, 0, 0), 'died': datetime.datetime(1942, 4, 17, 0, 0)}
+{'born': datetime.datetime(1892, 9, 10, 0, 0), 'died': datetime.datetime(1962, 3, 15, 0, 0)}
+{'born': datetime.datetime(1869, 2, 14, 0, 0), 'died': datetime.datetime(1959, 11, 15, 0, 0)}
+{'born': datetime.datetime(1879, 4, 26, 0, 0), 'died': datetime.datetime(1959, 2, 15, 0, 0)}
+{'born': datetime.datetime(1892, 8, 15, 0, 0), 'died': datetime.datetime(1987, 3, 19, 0, 0)}
+{'born': datetime.datetime(1888, 11, 7, 0, 0), 'died': datetime.datetime(1970, 11, 21, 0, 0)}
+{'born': datetime.datetime(1901, 12, 5, 0, 0), 'died': datetime.datetime(1976, 2, 1, 0, 0)}
+{'born': datetime.datetime(1887, 8, 12, 0, 0), 'died': datetime.datetime(1961, 1, 4, 0, 0)}
+{'born': datetime.datetime(1902, 8, 8, 0, 0), 'died': datetime.datetime(1984, 10, 20, 0, 0)}
+{'born': datetime.datetime(1883, 6, 24, 0, 0), 'died': datetime.datetime(1964, 12, 17, 0, 0)}
+{'born': datetime.datetime(1905, 9, 3, 0, 0), 'died': datetime.datetime(1991, 1, 11, 0, 0)}
+{'born': datetime.datetime(1881, 10, 22, 0, 0), 'died': datetime.datetime(1958, 2, 1, 0, 0)}
+{'born': datetime.datetime(1892, 5, 3, 0, 0), 'died': datetime.datetime(1975, 9, 10, 0, 0)}
+{'born': datetime.datetime(1901, 9, 29, 0, 0), 'died': datetime.datetime(1954, 11, 28, 0, 0)}
+{'born': datetime.datetime(1901, 8, 8, 0, 0), 'died': datetime.datetime(1958, 8, 27, 0, 0)}
+{'born': datetime.datetime(1888, 2, 17, 0, 0), 'died': datetime.datetime(1969, 8, 17, 0, 0)}
+{'born': datetime.datetime(1898, 7, 29, 0, 0), 'died': datetime.datetime(1988, 1, 11, 0, 0)}
+{'born': datetime.datetime(1900, 4, 25, 0, 0), 'died': datetime.datetime(1958, 12, 15, 0, 0)}
+{'born': datetime.datetime(1882, 4, 21, 0, 0), 'died': datetime.datetime(1961, 8, 20, 0, 0)}
+{'born': datetime.datetime(1892, 9, 6, 0, 0), 'died': datetime.datetime(1965, 4, 21, 0, 0)}
+{'born': datetime.datetime(1897, 11, 18, 0, 0), 'died': datetime.datetime(1974, 7, 13, 0, 0)}
+{'born': datetime.datetime(1907, 1, 23, 0, 0), 'died': datetime.datetime(1981, 9, 8, 0, 0)}
+{'born': datetime.datetime(1903, 12, 5, 0, 0), 'died': datetime.datetime(1969, 8, 9, 0, 0)}
+{'born': datetime.datetime(1897, 5, 27, 0, 0), 'died': datetime.datetime(1967, 9, 18, 0, 0)}
+{'born': datetime.datetime(1903, 10, 6, 0, 0), 'died': datetime.datetime(1995, 6, 25, 0, 0)}
+{'born': datetime.datetime(1912, 8, 30, 0, 0), 'died': datetime.datetime(1997, 3, 7, 0, 0)}
+{'born': datetime.datetime(1888, 7, 16, 0, 0), 'died': datetime.datetime(1966, 3, 10, 0, 0)}
+{'born': datetime.datetime(1882, 12, 11, 0, 0), 'died': datetime.datetime(1970, 1, 5, 0, 0)}
+{'born': datetime.datetime(1891, 1, 8, 0, 0), 'died': datetime.datetime(1957, 2, 8, 0, 0)}
+{'born': datetime.datetime(1913, 7, 12, 0, 0), 'died': datetime.datetime(2008, 5, 15, 0, 0)}
+{'born': datetime.datetime(1911, 1, 26, 0, 0), 'died': datetime.datetime(1993, 3, 20, 0, 0)}
+{'born': datetime.datetime(1910, 2, 13, 0, 0), 'died': datetime.datetime(1989, 8, 12, 0, 0)}
+{'born': datetime.datetime(1908, 5, 23, 0, 0), 'died': datetime.datetime(1991, 1, 30, 0, 0)}
+{'born': datetime.datetime(1902, 2, 10, 0, 0), 'died': datetime.datetime(1987, 10, 13, 0, 0)}
+{'born': datetime.datetime(1904, 7, 28, 0, 0), 'died': datetime.datetime(1990, 1, 6, 0, 0)}
+{'born': datetime.datetime(1895, 7, 8, 0, 0), 'died': datetime.datetime(1971, 4, 12, 0, 0)}
+{'born': datetime.datetime(1905, 2, 1, 0, 0), 'died': datetime.datetime(1989, 4, 22, 0, 0)}
+{'born': datetime.datetime(1920, 7, 10, 0, 0), 'died': datetime.datetime(2006, 2, 28, 0, 0)}
+{'born': datetime.datetime(1926, 9, 21, 0, 0), 'died': datetime.datetime(2013, 2, 28, 0, 0)}
+{'born': datetime.datetime(1915, 2, 5, 0, 0), 'died': datetime.datetime(1990, 11, 17, 0, 0)}
+{'born': datetime.datetime(1908, 1, 22, 0, 0), 'died': datetime.datetime(1968, 4, 1, 0, 0)}
+{'born': datetime.datetime(1915, 7, 28, 0, 0), 'died': datetime.datetime(2015, 1, 27, 0, 0)}
+{'born': datetime.datetime(1918, 2, 12, 0, 0), 'died': datetime.datetime(1994, 7, 16, 0, 0)}
+{'born': datetime.datetime(1845, 3, 27, 0, 0), 'died': datetime.datetime(1923, 2, 10, 0, 0)}
+{'born': datetime.datetime(1865, 5, 25, 0, 0), 'died': datetime.datetime(1943, 10, 9, 0, 0)}
+{'born': datetime.datetime(1852, 12, 15, 0, 0), 'died': datetime.datetime(1908, 8, 25, 0, 0)}
+{'born': datetime.datetime(1859, 5, 15, 0, 0), 'died': datetime.datetime(1906, 4, 19, 0, 0)}
+{'born': datetime.datetime(1867, 11, 7, 0, 0), 'died': datetime.datetime(1934, 7, 4, 0, 0)}
+{'born': datetime.datetime(1856, 12, 18, 0, 0), 'died': datetime.datetime(1940, 8, 30, 0, 0)}
+{'born': datetime.datetime(1845, 8, 16, 0, 0), 'died': datetime.datetime(1921, 7, 13, 0, 0)}
+{'born': datetime.datetime(1850, 6, 6, 0, 0), 'died': datetime.datetime(1918, 4, 20, 0, 0)}
+{'born': datetime.datetime(1837, 11, 23, 0, 0), 'died': datetime.datetime(1923, 3, 8, 0, 0)}
+{'born': datetime.datetime(1853, 9, 21, 0, 0), 'died': datetime.datetime(1926, 2, 21, 0, 0)}
+{'born': datetime.datetime(1890, 3, 31, 0, 0), 'died': datetime.datetime(1971, 7, 1, 0, 0)}
+{'born': datetime.datetime(1891, 10, 20, 0, 0), 'died': datetime.datetime(1974, 7, 24, 0, 0)}
+{'born': datetime.datetime(1905, 10, 23, 0, 0), 'died': datetime.datetime(1983, 9, 10, 0, 0)}
+{'born': datetime.datetime(1929, 1, 31, 0, 0), 'died': datetime.datetime(2011, 9, 14, 0, 0)}
+{'born': datetime.datetime(1902, 11, 17, 0, 0), 'died': datetime.datetime(1995, 1, 1, 0, 0)}
+{'born': datetime.datetime(1906, 6, 28, 0, 0), 'died': datetime.datetime(1972, 2, 20, 0, 0)}
+{'born': datetime.datetime(1907, 6, 25, 0, 0), 'died': datetime.datetime(1973, 2, 11, 0, 0)}
+{'born': datetime.datetime(1922, 12, 14, 0, 0), 'died': datetime.datetime(2001, 7, 1, 0, 0)}
+{'born': datetime.datetime(1916, 7, 11, 0, 0), 'died': datetime.datetime(2002, 1, 8, 0, 0)}
+{'born': datetime.datetime(1906, 3, 31, 0, 0), 'died': datetime.datetime(1979, 7, 8, 0, 0)}
+{'born': datetime.datetime(1918, 5, 11, 0, 0), 'died': datetime.datetime(1988, 2, 15, 0, 0)}
+{'born': datetime.datetime(1906, 7, 2, 0, 0), 'died': datetime.datetime(2005, 3, 6, 0, 0)}
+{'born': datetime.datetime(1911, 6, 13, 0, 0), 'died': datetime.datetime(1988, 9, 1, 0, 0)}
+{'born': datetime.datetime(1900, 6, 5, 0, 0), 'died': datetime.datetime(1979, 2, 8, 0, 0)}
+{'born': datetime.datetime(1918, 9, 27, 0, 0), 'died': datetime.datetime(1984, 10, 14, 0, 0)}
+{'born': datetime.datetime(1922, 6, 19, 0, 0), 'died': datetime.datetime(2009, 9, 8, 0, 0)}
+{'born': datetime.datetime(1917, 12, 9, 0, 0), 'died': datetime.datetime(1986, 3, 31, 0, 0)}
+{'born': datetime.datetime(1931, 3, 22, 0, 0), 'died': datetime.datetime(2018, 7, 18, 0, 0)}
+{'born': datetime.datetime(1905, 9, 30, 0, 0), 'died': datetime.datetime(1996, 8, 8, 0, 0)}
+{'born': datetime.datetime(1899, 3, 13, 0, 0), 'died': datetime.datetime(1980, 10, 27, 0, 0)}
+{'born': datetime.datetime(1894, 7, 9, 0, 0), 'died': datetime.datetime(1984, 4, 8, 0, 0)}
+{'born': datetime.datetime(1926, 1, 29, 0, 0), 'died': datetime.datetime(1996, 11, 21, 0, 0)}
+{'born': datetime.datetime(1923, 3, 10, 0, 0), 'died': datetime.datetime(2015, 2, 5, 0, 0)}
+{'born': datetime.datetime(1920, 3, 11, 0, 0), 'died': datetime.datetime(2017, 9, 5, 0, 0)}
+{'born': datetime.datetime(1921, 5, 5, 0, 0), 'died': datetime.datetime(1999, 4, 28, 0, 0)}
+{'born': datetime.datetime(1918, 4, 20, 0, 0), 'died': datetime.datetime(2007, 7, 20, 0, 0)}
+{'born': datetime.datetime(1936, 6, 8, 0, 0), 'died': datetime.datetime(2013, 6, 15, 0, 0)}
+{'born': datetime.datetime(1910, 10, 19, 0, 0), 'died': datetime.datetime(1995, 8, 21, 0, 0)}
+{'born': datetime.datetime(1911, 8, 9, 0, 0), 'died': datetime.datetime(1995, 3, 14, 0, 0)}
+{'born': datetime.datetime(1925, 11, 24, 0, 0), 'died': datetime.datetime(2011, 3, 4, 0, 0)}
+{'born': datetime.datetime(1933, 6, 6, 0, 0), 'died': datetime.datetime(2013, 5, 16, 0, 0)}
+{'born': datetime.datetime(1922, 7, 15, 0, 0), 'died': datetime.datetime(2018, 10, 3, 0, 0)}
+{'born': datetime.datetime(1932, 11, 2, 0, 0), 'died': datetime.datetime(2006, 8, 28, 0, 0)}
+{'born': datetime.datetime(1918, 3, 16, 0, 0), 'died': datetime.datetime(1998, 8, 26, 0, 0)}
+{'born': datetime.datetime(1902, 5, 3, 0, 0), 'died': datetime.datetime(1984, 1, 7, 0, 0)}
+{'born': datetime.datetime(1908, 5, 30, 0, 0), 'died': datetime.datetime(1995, 4, 2, 0, 0)}
+{'born': datetime.datetime(1904, 11, 22, 0, 0), 'died': datetime.datetime(2000, 11, 17, 0, 0)}
+{'born': datetime.datetime(1931, 9, 29, 0, 0), 'died': datetime.datetime(2016, 8, 25, 0, 0)}
+{'born': datetime.datetime(1906, 12, 25, 0, 0), 'died': datetime.datetime(1988, 5, 27, 0, 0)}
+{'born': datetime.datetime(1915, 8, 27, 0, 0), 'died': datetime.datetime(2011, 11, 4, 0, 0)}
+{'born': datetime.datetime(1922, 9, 9, 0, 0), 'died': datetime.datetime(2017, 3, 7, 0, 0)}
+{'born': datetime.datetime(1913, 8, 10, 0, 0), 'died': datetime.datetime(1993, 12, 7, 0, 0)}
+{'born': datetime.datetime(1926, 12, 9, 0, 0), 'died': datetime.datetime(1999, 2, 15, 0, 0)}
+{'born': datetime.datetime(1929, 11, 2, 0, 0), 'died': datetime.datetime(2018, 2, 22, 0, 0)}
+{'born': datetime.datetime(1932, 10, 24, 0, 0), 'died': datetime.datetime(2007, 5, 18, 0, 0)}
+{'born': datetime.datetime(1924, 8, 1, 0, 0), 'died': datetime.datetime(2010, 9, 29, 0, 0)}
+{'born': datetime.datetime(1918, 7, 15, 0, 0), 'died': datetime.datetime(2003, 10, 13, 0, 0)}
+{'born': datetime.datetime(1915, 9, 23, 0, 0), 'died': datetime.datetime(2001, 3, 31, 0, 0)}
+{'born': datetime.datetime(1927, 6, 24, 0, 0), 'died': datetime.datetime(2014, 9, 30, 0, 0)}
+{'born': datetime.datetime(1852, 8, 30, 0, 0), 'died': datetime.datetime(1911, 3, 1, 0, 0)}
+{'born': datetime.datetime(1859, 2, 19, 0, 0), 'died': datetime.datetime(1927, 10, 2, 0, 0)}
+{'born': datetime.datetime(1854, 11, 5, 0, 0), 'died': datetime.datetime(1941, 8, 14, 0, 0)}
+{'born': datetime.datetime(1864, 6, 25, 0, 0), 'died': datetime.datetime(1941, 11, 18, 0, 0)}
+{'born': datetime.datetime(1877, 9, 2, 0, 0), 'died': datetime.datetime(1956, 9, 22, 0, 0)}
+{'born': datetime.datetime(1869, 9, 3, 0, 0), 'died': datetime.datetime(1930, 12, 13, 0, 0)}
+{'born': datetime.datetime(1865, 4, 1, 0, 0), 'died': datetime.datetime(1929, 9, 24, 0, 0)}
+{'born': datetime.datetime(1877, 6, 4, 0, 0), 'died': datetime.datetime(1957, 8, 5, 0, 0)}
+{'born': datetime.datetime(1881, 1, 31, 0, 0), 'died': datetime.datetime(1957, 8, 16, 0, 0)}
+{'born': datetime.datetime(1893, 4, 29, 0, 0), 'died': datetime.datetime(1981, 1, 5, 0, 0)}
+{'born': datetime.datetime(1900, 3, 19, 0, 0), 'died': datetime.datetime(1958, 8, 14, 0, 0)}
+{'born': datetime.datetime(1897, 9, 12, 0, 0), 'died': datetime.datetime(1956, 3, 17, 0, 0)}
+{'born': datetime.datetime(1904, 8, 16, 0, 0), 'died': datetime.datetime(1971, 6, 15, 0, 0)}
+{'born': datetime.datetime(1886, 9, 13, 0, 0), 'died': datetime.datetime(1975, 2, 8, 0, 0)}
+{'born': datetime.datetime(1902, 8, 10, 0, 0), 'died': datetime.datetime(1971, 10, 29, 0, 0)}
+{'born': datetime.datetime(1876, 1, 23, 0, 0), 'died': datetime.datetime(1954, 3, 7, 0, 0)}
+{'born': datetime.datetime(1902, 7, 10, 0, 0), 'died': datetime.datetime(1958, 6, 20, 0, 0)}
+{'born': datetime.datetime(1907, 9, 18, 0, 0), 'died': datetime.datetime(1991, 9, 7, 0, 0)}
+{'born': datetime.datetime(1912, 4, 19, 0, 0), 'died': datetime.datetime(1999, 2, 25, 0, 0)}
+{'born': datetime.datetime(1914, 10, 28, 0, 0), 'died': datetime.datetime(1994, 8, 18, 0, 0)}
+{'born': datetime.datetime(1881, 3, 23, 0, 0), 'died': datetime.datetime(1965, 9, 8, 0, 0)}
+{'born': datetime.datetime(1901, 2, 28, 0, 0), 'died': datetime.datetime(1994, 8, 19, 0, 0)}
+{'born': datetime.datetime(1901, 5, 18, 0, 0), 'died': datetime.datetime(1978, 12, 11, 0, 0)}
+{'born': datetime.datetime(1897, 5, 19, 0, 0), 'died': datetime.datetime(1967, 10, 9, 0, 0)}
+{'born': datetime.datetime(1896, 4, 3, 0, 0), 'died': datetime.datetime(1986, 9, 25, 0, 0)}
+{'born': datetime.datetime(1907, 10, 2, 0, 0), 'died': datetime.datetime(1997, 1, 10, 0, 0)}
+{'born': datetime.datetime(1918, 8, 13, 0, 0), 'died': datetime.datetime(2013, 11, 19, 0, 0)}
+{'born': datetime.datetime(1890, 12, 20, 0, 0), 'died': datetime.datetime(1967, 3, 27, 0, 0)}
+{'born': datetime.datetime(1908, 12, 17, 0, 0), 'died': datetime.datetime(1980, 9, 8, 0, 0)}
+{'born': datetime.datetime(1911, 4, 8, 0, 0), 'died': datetime.datetime(1997, 1, 8, 0, 0)}
+{'born': datetime.datetime(1914, 5, 19, 0, 0), 'died': datetime.datetime(2002, 2, 6, 0, 0)}
+{'born': datetime.datetime(1898, 11, 26, 0, 0), 'died': datetime.datetime(1973, 8, 12, 0, 0)}
+{'born': datetime.datetime(1903, 2, 26, 0, 0), 'died': datetime.datetime(1979, 5, 2, 0, 0)}
+{'born': datetime.datetime(1910, 5, 12, 0, 0), 'died': datetime.datetime(1994, 7, 29, 0, 0)}
+{'born': datetime.datetime(1917, 4, 10, 0, 0), 'died': datetime.datetime(1979, 7, 8, 0, 0)}
+{'born': datetime.datetime(1896, 6, 7, 0, 0), 'died': datetime.datetime(1986, 10, 31, 0, 0)}
+{'born': datetime.datetime(1897, 11, 9, 0, 0), 'died': datetime.datetime(1978, 6, 7, 0, 0)}
+{'born': datetime.datetime(1920, 12, 6, 0, 0), 'died': datetime.datetime(2002, 8, 31, 0, 0)}
+{'born': datetime.datetime(1903, 11, 27, 0, 0), 'died': datetime.datetime(1976, 10, 5, 0, 0)}
+{'born': datetime.datetime(1918, 9, 8, 0, 0), 'died': datetime.datetime(1998, 3, 16, 0, 0)}
+{'born': datetime.datetime(1937, 6, 26, 0, 0), 'died': datetime.datetime(2013, 2, 19, 0, 0)}
+{'born': datetime.datetime(1852, 10, 9, 0, 0), 'died': datetime.datetime(1919, 7, 15, 0, 0)}
+{'born': datetime.datetime(1852, 10, 2, 0, 0), 'died': datetime.datetime(1916, 7, 23, 0, 0)}
+{'born': datetime.datetime(1835, 10, 31, 0, 0), 'died': datetime.datetime(1917, 8, 20, 0, 0)}
+{'born': datetime.datetime(1852, 9, 28, 0, 0), 'died': datetime.datetime(1907, 2, 20, 0, 0)}
+{'born': datetime.datetime(1860, 5, 20, 0, 0), 'died': datetime.datetime(1917, 8, 13, 0, 0)}
+{'born': datetime.datetime(1871, 8, 30, 0, 0), 'died': datetime.datetime(1937, 10, 19, 0, 0)}
+{'born': datetime.datetime(1853, 9, 2, 0, 0), 'died': datetime.datetime(1932, 4, 4, 0, 0)}
+{'born': datetime.datetime(1847, 3, 27, 0, 0), 'died': datetime.datetime(1931, 2, 26, 0, 0)}
+{'born': datetime.datetime(1871, 5, 6, 0, 0), 'died': datetime.datetime(1935, 12, 13, 0, 0)}
+{'born': datetime.datetime(1866, 12, 12, 0, 0), 'died': datetime.datetime(1919, 11, 15, 0, 0)}
+{'born': datetime.datetime(1868, 1, 31, 0, 0), 'died': datetime.datetime(1928, 4, 2, 0, 0)}
+{'born': datetime.datetime(1872, 8, 13, 0, 0), 'died': datetime.datetime(1942, 8, 3, 0, 0)}
+{'born': datetime.datetime(1868, 12, 9, 0, 0), 'died': datetime.datetime(1934, 1, 29, 0, 0)}
+{'born': datetime.datetime(1877, 9, 1, 0, 0), 'died': datetime.datetime(1945, 11, 20, 0, 0)}
+{'born': datetime.datetime(1884, 8, 30, 0, 0), 'died': datetime.datetime(1971, 2, 25, 0, 0)}
+{'born': datetime.datetime(1876, 12, 25, 0, 0), 'died': datetime.datetime(1959, 6, 9, 0, 0)}
+{'born': datetime.datetime(1865, 10, 12, 0, 0), 'died': datetime.datetime(1940, 6, 17, 0, 0)}
+{'born': datetime.datetime(1873, 2, 15, 0, 0), 'died': datetime.datetime(1964, 11, 6, 0, 0)}
+{'born': datetime.datetime(1881, 7, 27, 0, 0), 'died': datetime.datetime(1945, 3, 31, 0, 0)}
+{'born': datetime.datetime(1874, 8, 27, 0, 0), 'died': datetime.datetime(1940, 4, 26, 0, 0)}
+{'born': datetime.datetime(1884, 10, 11, 0, 0), 'died': datetime.datetime(1949, 3, 30, 0, 0)}
+{'born': datetime.datetime(1884, 3, 24, 0, 0), 'died': datetime.datetime(1966, 11, 2, 0, 0)}
+{'born': datetime.datetime(1883, 3, 19, 0, 0), 'died': datetime.datetime(1950, 3, 19, 0, 0)}
+{'born': datetime.datetime(1889, 4, 21, 0, 0), 'died': datetime.datetime(1971, 6, 18, 0, 0)}
+{'born': datetime.datetime(1900, 12, 3, 0, 0), 'died': datetime.datetime(1967, 7, 31, 0, 0)}
+{'born': datetime.datetime(1903, 3, 24, 0, 0), 'died': datetime.datetime(1995, 1, 18, 0, 0)}
+{'born': datetime.datetime(1887, 9, 13, 0, 0), 'died': datetime.datetime(1976, 9, 26, 0, 0)}
+{'born': datetime.datetime(1885, 8, 1, 0, 0), 'died': datetime.datetime(1966, 7, 5, 0, 0)}
+{'born': datetime.datetime(1879, 3, 8, 0, 0), 'died': datetime.datetime(1968, 7, 28, 0, 0)}
+{'born': datetime.datetime(1895, 1, 15, 0, 0), 'died': datetime.datetime(1973, 11, 11, 0, 0)}
+{'born': datetime.datetime(1887, 11, 19, 0, 0), 'died': datetime.datetime(1955, 8, 12, 0, 0)}
+{'born': datetime.datetime(1891, 7, 5, 0, 0), 'died': datetime.datetime(1987, 5, 27, 0, 0)}
+{'born': datetime.datetime(1895, 5, 12, 0, 0), 'died': datetime.datetime(1982, 3, 28, 0, 0)}
+{'born': datetime.datetime(1910, 3, 1, 0, 0), 'died': datetime.datetime(2002, 7, 28, 0, 0)}
+{'born': datetime.datetime(1917, 3, 24, 0, 0), 'died': datetime.datetime(1997, 8, 23, 0, 0)}
+{'born': datetime.datetime(1916, 3, 26, 0, 0), 'died': datetime.datetime(1995, 5, 14, 0, 0)}
+{'born': datetime.datetime(1913, 9, 4, 0, 0), 'died': datetime.datetime(1982, 8, 23, 0, 0)}
+{'born': datetime.datetime(1910, 6, 19, 0, 0), 'died': datetime.datetime(1985, 9, 8, 0, 0)}
+{'born': datetime.datetime(1906, 7, 23, 0, 0), 'died': datetime.datetime(1998, 1, 7, 0, 0)}
+{'born': datetime.datetime(1917, 1, 25, 0, 0), 'died': datetime.datetime(2003, 5, 28, 0, 0)}
+{'born': datetime.datetime(1912, 5, 22, 0, 0), 'died': datetime.datetime(2004, 12, 19, 0, 0)}
+{'born': datetime.datetime(1897, 6, 16, 0, 0), 'died': datetime.datetime(1987, 8, 26, 0, 0)}
+{'born': datetime.datetime(1918, 10, 4, 0, 0), 'died': datetime.datetime(1998, 1, 9, 0, 0)}
+{'born': datetime.datetime(1932, 4, 26, 0, 0), 'died': datetime.datetime(2000, 10, 4, 0, 0)}
+{'born': datetime.datetime(1927, 5, 22, 0, 0), 'died': datetime.datetime(2017, 3, 8, 0, 0)}
+{'born': datetime.datetime(1927, 6, 28, 0, 0), 'died': datetime.datetime(2012, 3, 10, 0, 0)}
+{'born': datetime.datetime(1939, 10, 7, 0, 0), 'died': datetime.datetime(2016, 4, 30, 0, 0)}
+{'born': datetime.datetime(1918, 7, 31, 0, 0), 'died': datetime.datetime(2018, 6, 2, 0, 0)}
+{'born': datetime.datetime(1918, 10, 8, 0, 0), 'died': datetime.datetime(2018, 5, 28, 0, 0)}
+{'born': datetime.datetime(1897, 5, 17, 0, 0), 'died': datetime.datetime(1981, 5, 11, 0, 0)}
+{'born': datetime.datetime(1906, 9, 6, 0, 0), 'died': datetime.datetime(1987, 12, 2, 0, 0)}
+{'born': datetime.datetime(1904, 12, 25, 0, 0), 'died': datetime.datetime(1999, 3, 3, 0, 0)}
+{'born': datetime.datetime(1911, 6, 25, 0, 0), 'died': datetime.datetime(1980, 2, 2, 0, 0)}
+{'born': datetime.datetime(1918, 11, 10, 0, 0), 'died': datetime.datetime(2007, 7, 23, 0, 0)}
+{'born': datetime.datetime(1921, 7, 14, 0, 0), 'died': datetime.datetime(1996, 9, 26, 0, 0)}
+{'born': datetime.datetime(1917, 9, 7, 0, 0), 'died': datetime.datetime(2013, 12, 8, 0, 0)}
+{'born': datetime.datetime(1919, 12, 9, 0, 0), 'died': datetime.datetime(2011, 4, 14, 0, 0)}
+{'born': datetime.datetime(1920, 9, 29, 0, 0), 'died': datetime.datetime(1992, 4, 10, 0, 0)}
+{'born': datetime.datetime(1915, 11, 30, 0, 0), 'died': datetime.datetime(2005, 11, 16, 0, 0)}
+{'born': datetime.datetime(1921, 7, 15, 0, 0), 'died': datetime.datetime(2006, 5, 14, 0, 0)}
+{'born': datetime.datetime(1917, 2, 14, 0, 0), 'died': datetime.datetime(2011, 10, 23, 0, 0)}
+{'born': datetime.datetime(1918, 6, 18, 0, 0), 'died': datetime.datetime(2013, 6, 6, 0, 0)}
+{'born': datetime.datetime(1919, 4, 22, 0, 0), 'died': datetime.datetime(2001, 6, 17, 0, 0)}
+{'born': datetime.datetime(1904, 10, 3, 0, 0), 'died': datetime.datetime(1989, 10, 26, 0, 0)}
+{'born': datetime.datetime(1943, 6, 6, 0, 0), 'died': datetime.datetime(2005, 10, 28, 0, 0)}
+{'born': datetime.datetime(1923, 3, 9, 0, 0), 'died': datetime.datetime(2016, 4, 19, 0, 0)}
+{'born': datetime.datetime(1946, 2, 26, 0, 0), 'died': datetime.datetime(2016, 8, 2, 0, 0)}
+{'born': datetime.datetime(1854, 3, 15, 0, 0), 'died': datetime.datetime(1917, 3, 31, 0, 0)}
+{'born': datetime.datetime(1857, 5, 13, 0, 0), 'died': datetime.datetime(1932, 9, 16, 0, 0)}
+{'born': datetime.datetime(1860, 12, 15, 0, 0), 'died': datetime.datetime(1904, 9, 24, 0, 0)}
+{'born': datetime.datetime(1849, 9, 14, 0, 0), 'died': datetime.datetime(1936, 2, 27, 0, 0)}
+{'born': datetime.datetime(1843, 7, 7, 0, 0), 'died': datetime.datetime(1926, 1, 21, 0, 0)}
+{'born': datetime.datetime(1845, 6, 18, 0, 0), 'died': datetime.datetime(1922, 5, 18, 0, 0)}
+{'born': datetime.datetime(1853, 9, 16, 0, 0), 'died': datetime.datetime(1927, 7, 5, 0, 0)}
+{'born': datetime.datetime(1862, 6, 5, 0, 0), 'died': datetime.datetime(1930, 7, 28, 0, 0)}
+{'born': datetime.datetime(1873, 6, 28, 0, 0), 'died': datetime.datetime(1944, 11, 5, 0, 0)}
+{'born': datetime.datetime(1850, 8, 26, 0, 0), 'died': datetime.datetime(1935, 12, 4, 0, 0)}
+{'born': datetime.datetime(1892, 2, 6, 0, 0), 'died': datetime.datetime(1987, 10, 9, 0, 0)}
+{'born': datetime.datetime(1869, 6, 27, 0, 0), 'died': datetime.datetime(1941, 9, 12, 0, 0)}
+{'born': datetime.datetime(1875, 6, 9, 0, 0), 'died': datetime.datetime(1968, 7, 23, 0, 0)}
+{'born': datetime.datetime(1873, 6, 3, 0, 0), 'died': datetime.datetime(1961, 12, 25, 0, 0)}
+{'born': datetime.datetime(1893, 9, 16, 0, 0), 'died': datetime.datetime(1986, 10, 22, 0, 0)}
+{'born': datetime.datetime(1895, 2, 21, 0, 0), 'died': datetime.datetime(1976, 4, 17, 0, 0)}
+{'born': datetime.datetime(1893, 11, 13, 0, 0), 'died': datetime.datetime(1986, 10, 23, 0, 0)}
+{'born': datetime.datetime(1881, 8, 6, 0, 0), 'died': datetime.datetime(1955, 3, 11, 0, 0)}
+{'born': datetime.datetime(1890, 12, 21, 0, 0), 'died': datetime.datetime(1967, 4, 5, 0, 0)}
+{'born': datetime.datetime(1896, 8, 15, 0, 0), 'died': datetime.datetime(1957, 10, 26, 0, 0)}
+{'born': datetime.datetime(1888, 7, 22, 0, 0), 'died': datetime.datetime(1973, 8, 16, 0, 0)}
+{'born': datetime.datetime(1900, 8, 25, 0, 0), 'died': datetime.datetime(1981, 11, 22, 0, 0)}
+{'born': datetime.datetime(1899, 6, 12, 0, 0), 'died': datetime.datetime(1986, 7, 24, 0, 0)}
+{'born': datetime.datetime(1895, 10, 30, 0, 0), 'died': datetime.datetime(1973, 2, 23, 0, 0)}
+{'born': datetime.datetime(1907, 3, 23, 0, 0), 'died': datetime.datetime(1992, 4, 8, 0, 0)}
+{'born': datetime.datetime(1929, 7, 1, 0, 0), 'died': datetime.datetime(2014, 5, 17, 0, 0)}
+{'born': datetime.datetime(1917, 10, 8, 0, 0), 'died': datetime.datetime(1985, 9, 6, 0, 0)}
+{'born': datetime.datetime(1903, 11, 7, 0, 0), 'died': datetime.datetime(1989, 2, 27, 0, 0)}
+{'born': datetime.datetime(1907, 4, 15, 0, 0), 'died': datetime.datetime(1988, 12, 21, 0, 0)}
+{'born': datetime.datetime(1898, 8, 24, 0, 0), 'died': datetime.datetime(1983, 5, 22, 0, 0)}
+{'born': datetime.datetime(1917, 10, 2, 0, 0), 'died': datetime.datetime(2013, 5, 4, 0, 0)}
+{'born': datetime.datetime(1912, 11, 19, 0, 0), 'died': datetime.datetime(2008, 10, 7, 0, 0)}
+{'born': datetime.datetime(1914, 2, 22, 0, 0), 'died': datetime.datetime(2012, 2, 19, 0, 0)}
+{'born': datetime.datetime(1925, 10, 31, 0, 0), 'died': datetime.datetime(2004, 3, 15, 0, 0)}
+{'born': datetime.datetime(1843, 12, 11, 0, 0), 'died': datetime.datetime(1910, 5, 27, 0, 0)}
+{'born': datetime.datetime(1852, 5, 1, 0, 0), 'died': datetime.datetime(1934, 10, 17, 0, 0)}
+{'born': datetime.datetime(1845, 5, 15, 0, 0), 'died': datetime.datetime(1916, 7, 15, 0, 0)}
+{'born': datetime.datetime(1854, 3, 14, 0, 0), 'died': datetime.datetime(1915, 8, 20, 0, 0)}
+{'born': datetime.datetime(1841, 8, 25, 0, 0), 'died': datetime.datetime(1917, 7, 27, 0, 0)}
+{'born': datetime.datetime(1876, 4, 22, 0, 0), 'died': datetime.datetime(1936, 4, 8, 0, 0)}
+{'born': datetime.datetime(1870, 6, 13, 0, 0), 'died': datetime.datetime(1961, 4, 6, 0, 0)}
+{'born': datetime.datetime(1874, 11, 15, 0, 0), 'died': datetime.datetime(1949, 9, 13, 0, 0)}
+{'born': datetime.datetime(1886, 9, 26, 0, 0), 'died': datetime.datetime(1977, 6, 3, 0, 0)}
+{'born': datetime.datetime(1884, 4, 12, 0, 0), 'died': datetime.datetime(1951, 10, 6, 0, 0)}
+{'born': datetime.datetime(1891, 11, 14, 0, 0), 'died': datetime.datetime(1941, 2, 21, 0, 0)}
+{'born': datetime.datetime(1876, 9, 6, 0, 0), 'died': datetime.datetime(1935, 3, 16, 0, 0)}
+{'born': datetime.datetime(1860, 5, 21, 0, 0), 'died': datetime.datetime(1927, 9, 29, 0, 0)}
+{'born': datetime.datetime(1867, 4, 23, 0, 0), 'died': datetime.datetime(1928, 1, 30, 0, 0)}
+{'born': datetime.datetime(1857, 3, 7, 0, 0), 'died': datetime.datetime(1940, 9, 27, 0, 0)}
+{'born': datetime.datetime(1866, 9, 21, 0, 0), 'died': datetime.datetime(1936, 2, 28, 0, 0)}
+{'born': datetime.datetime(1858, 8, 11, 0, 0), 'died': datetime.datetime(1930, 11, 5, 0, 0)}
+{'born': datetime.datetime(1861, 6, 20, 0, 0), 'died': datetime.datetime(1947, 5, 16, 0, 0)}
+{'born': datetime.datetime(1868, 6, 14, 0, 0), 'died': datetime.datetime(1943, 6, 26, 0, 0)}
+{'born': datetime.datetime(1883, 10, 8, 0, 0), 'died': datetime.datetime(1970, 8, 1, 0, 0)}
+{'born': datetime.datetime(1857, 11, 27, 0, 0), 'died': datetime.datetime(1952, 3, 4, 0, 0)}
+{'born': datetime.datetime(1889, 11, 30, 0, 0), 'died': datetime.datetime(1977, 8, 8, 0, 0)}
+{'born': datetime.datetime(1866, 9, 25, 0, 0), 'died': datetime.datetime(1945, 12, 4, 0, 0)}
+{'born': datetime.datetime(1878, 8, 28, 0, 0), 'died': datetime.datetime(1976, 2, 1, 0, 0)}
+{'born': datetime.datetime(1885, 12, 2, 0, 0), 'died': datetime.datetime(1950, 2, 25, 0, 0)}
+{'born': datetime.datetime(1892, 3, 28, 0, 0), 'died': datetime.datetime(1968, 7, 18, 0, 0)}
+{'born': datetime.datetime(1895, 10, 30, 0, 0), 'died': datetime.datetime(1964, 4, 24, 0, 0)}
+{'born': datetime.datetime(1874, 1, 5, 0, 0), 'died': datetime.datetime(1965, 12, 5, 0, 0)}
+{'born': datetime.datetime(1888, 7, 5, 0, 0), 'died': datetime.datetime(1963, 5, 11, 0, 0)}
+{'born': datetime.datetime(1906, 6, 19, 0, 0), 'died': datetime.datetime(1979, 8, 12, 0, 0)}
+{'born': datetime.datetime(1898, 9, 24, 0, 0), 'died': datetime.datetime(1968, 2, 21, 0, 0)}
+{'born': datetime.datetime(1896, 12, 5, 0, 0), 'died': datetime.datetime(1984, 10, 20, 0, 0)}
+{'born': datetime.datetime(1887, 4, 10, 0, 0), 'died': datetime.datetime(1971, 9, 21, 0, 0)}
+{'born': datetime.datetime(1899, 1, 12, 0, 0), 'died': datetime.datetime(1965, 10, 12, 0, 0)}
+{'born': datetime.datetime(1881, 3, 17, 0, 0), 'died': datetime.datetime(1973, 8, 12, 0, 0)}
+{'born': datetime.datetime(1874, 11, 29, 0, 0), 'died': datetime.datetime(1955, 12, 13, 0, 0)}
+{'born': datetime.datetime(1886, 3, 8, 0, 0), 'died': datetime.datetime(1972, 5, 4, 0, 0)}
+{'born': datetime.datetime(1897, 7, 20, 0, 0), 'died': datetime.datetime(1996, 8, 1, 0, 0)}
+{'born': datetime.datetime(1896, 2, 28, 0, 0), 'died': datetime.datetime(1965, 3, 30, 0, 0)}
+{'born': datetime.datetime(1899, 1, 30, 0, 0), 'died': datetime.datetime(1972, 8, 11, 0, 0)}
+{'born': datetime.datetime(1897, 2, 10, 0, 0), 'died': datetime.datetime(1985, 9, 8, 0, 0)}
+{'born': datetime.datetime(1915, 6, 15, 0, 0), 'died': datetime.datetime(2008, 8, 23, 0, 0)}
+{'born': datetime.datetime(1916, 8, 25, 0, 0), 'died': datetime.datetime(2003, 8, 4, 0, 0)}
+{'born': datetime.datetime(1903, 7, 6, 0, 0), 'died': datetime.datetime(1982, 8, 15, 0, 0)}
+{'born': datetime.datetime(1895, 9, 24, 0, 0), 'died': datetime.datetime(1988, 2, 19, 0, 0)}
+{'born': datetime.datetime(1904, 8, 29, 0, 0), 'died': datetime.datetime(1979, 6, 1, 0, 0)}
+{'born': datetime.datetime(1903, 10, 22, 0, 0), 'died': datetime.datetime(1989, 6, 9, 0, 0)}
+{'born': datetime.datetime(1909, 12, 14, 0, 0), 'died': datetime.datetime(1975, 11, 5, 0, 0)}
+{'born': datetime.datetime(1925, 5, 23, 0, 0), 'died': datetime.datetime(2008, 2, 2, 0, 0)}
+{'born': datetime.datetime(1905, 9, 24, 0, 0), 'died': datetime.datetime(1993, 11, 1, 0, 0)}
+{'born': datetime.datetime(1918, 3, 3, 0, 0), 'died': datetime.datetime(2007, 10, 26, 0, 0)}
+{'born': datetime.datetime(1899, 9, 3, 0, 0), 'died': datetime.datetime(1985, 8, 31, 0, 0)}
+{'born': datetime.datetime(1915, 2, 28, 0, 0), 'died': datetime.datetime(1987, 10, 2, 0, 0)}
+{'born': datetime.datetime(1899, 6, 3, 0, 0), 'died': datetime.datetime(1972, 6, 13, 0, 0)}
+{'born': datetime.datetime(1916, 6, 8, 0, 0), 'died': datetime.datetime(2004, 7, 28, 0, 0)}
+{'born': datetime.datetime(1916, 12, 15, 0, 0), 'died': datetime.datetime(2004, 10, 5, 0, 0)}
+{'born': datetime.datetime(1903, 1, 27, 0, 0), 'died': datetime.datetime(1997, 5, 2, 0, 0)}
+{'born': datetime.datetime(1914, 2, 5, 0, 0), 'died': datetime.datetime(1998, 12, 20, 0, 0)}
+{'born': datetime.datetime(1917, 11, 22, 0, 0), 'died': datetime.datetime(2012, 5, 30, 0, 0)}
+{'born': datetime.datetime(1912, 1, 21, 0, 0), 'died': datetime.datetime(2000, 10, 15, 0, 0)}
+{'born': datetime.datetime(1911, 4, 6, 0, 0), 'died': datetime.datetime(1979, 8, 6, 0, 0)}
+{'born': datetime.datetime(1920, 6, 17, 0, 0), 'died': datetime.datetime(2013, 4, 19, 0, 0)}
+{'born': datetime.datetime(1934, 12, 10, 0, 0), 'died': datetime.datetime(1994, 2, 9, 0, 0)}
+{'born': datetime.datetime(1925, 7, 28, 0, 0), 'died': datetime.datetime(2011, 4, 5, 0, 0)}
+{'born': datetime.datetime(1923, 9, 9, 0, 0), 'died': datetime.datetime(2008, 12, 12, 0, 0)}
+{'born': datetime.datetime(1920, 10, 29, 0, 0), 'died': datetime.datetime(2011, 8, 2, 0, 0)}
+{'born': datetime.datetime(1916, 10, 19, 0, 0), 'died': datetime.datetime(2009, 6, 6, 0, 0)}
+{'born': datetime.datetime(1903, 12, 19, 0, 0), 'died': datetime.datetime(1996, 6, 6, 0, 0)}
+{'born': datetime.datetime(1913, 8, 20, 0, 0), 'died': datetime.datetime(1994, 4, 17, 0, 0)}
+{'born': datetime.datetime(1926, 2, 27, 0, 0), 'died': datetime.datetime(2013, 9, 22, 0, 0)}
+{'born': datetime.datetime(1927, 3, 29, 0, 0), 'died': datetime.datetime(2004, 11, 19, 0, 0)}
+{'born': datetime.datetime(1902, 6, 16, 0, 0), 'died': datetime.datetime(1992, 9, 2, 0, 0)}
+{'born': datetime.datetime(1911, 12, 23, 0, 0), 'died': datetime.datetime(1994, 10, 7, 0, 0)}
+{'born': datetime.datetime(1946, 4, 17, 0, 0), 'died': datetime.datetime(1995, 3, 1, 0, 0)}
+{'born': datetime.datetime(1927, 10, 8, 0, 0), 'died': datetime.datetime(2002, 3, 24, 0, 0)}
+{'born': datetime.datetime(1909, 4, 22, 0, 0), 'died': datetime.datetime(2012, 12, 30, 0, 0)}
+{'born': datetime.datetime(1924, 6, 14, 0, 0), 'died': datetime.datetime(2010, 3, 21, 0, 0)}
+{'born': datetime.datetime(1918, 1, 23, 0, 0), 'died': datetime.datetime(1999, 2, 21, 0, 0)}
+{'born': datetime.datetime(1905, 4, 18, 0, 0), 'died': datetime.datetime(1998, 2, 27, 0, 0)}
+{'born': datetime.datetime(1919, 4, 1, 0, 0), 'died': datetime.datetime(2012, 11, 26, 0, 0)}
+{'born': datetime.datetime(1920, 3, 15, 0, 0), 'died': datetime.datetime(2012, 10, 20, 0, 0)}
+{'born': datetime.datetime(1828, 5, 8, 0, 0), 'died': datetime.datetime(1910, 10, 30, 0, 0)}
+{'born': datetime.datetime(1822, 5, 20, 0, 0), 'died': datetime.datetime(1912, 6, 12, 0, 0)}
+{'born': datetime.datetime(1833, 2, 19, 0, 0), 'died': datetime.datetime(1906, 12, 7, 0, 0)}
+{'born': datetime.datetime(1833, 9, 20, 0, 0), 'died': datetime.datetime(1918, 2, 10, 0, 0)}
+{'born': datetime.datetime(1844, 10, 27, 0, 0), 'died': datetime.datetime(1916, 2, 20, 0, 0)}
+{'born': datetime.datetime(1829, 7, 26, 0, 0), 'died': datetime.datetime(1912, 10, 6, 0, 0)}
+{'born': datetime.datetime(1864, 11, 11, 0, 0), 'died': datetime.datetime(1921, 5, 5, 0, 0)}
+{'born': datetime.datetime(1854, 4, 22, 0, 0), 'died': datetime.datetime(1943, 5, 14, 0, 0)}
+{'born': datetime.datetime(1856, 12, 28, 0, 0), 'died': datetime.datetime(1924, 2, 3, 0, 0)}
+{'born': datetime.datetime(1851, 5, 21, 0, 0), 'died': datetime.datetime(1925, 9, 29, 0, 0)}
+{'born': datetime.datetime(1860, 11, 23, 0, 0), 'died': datetime.datetime(1925, 2, 24, 0, 0)}
+{'born': datetime.datetime(1869, 9, 17, 0, 0), 'died': datetime.datetime(1938, 12, 11, 0, 0)}
+{'born': datetime.datetime(1861, 10, 10, 0, 0), 'died': datetime.datetime(1930, 5, 13, 0, 0)}
+{'born': datetime.datetime(1863, 10, 16, 0, 0), 'died': datetime.datetime(1937, 3, 16, 0, 0)}
+{'born': datetime.datetime(1865, 8, 27, 0, 0), 'died': datetime.datetime(1951, 4, 23, 0, 0)}
+{'born': datetime.datetime(1862, 3, 28, 0, 0), 'died': datetime.datetime(1932, 3, 7, 0, 0)}
+{'born': datetime.datetime(1878, 5, 10, 0, 0), 'died': datetime.datetime(1929, 10, 3, 0, 0)}
+{'born': datetime.datetime(1841, 12, 20, 0, 0), 'died': datetime.datetime(1932, 2, 16, 0, 0)}
+{'born': datetime.datetime(1858, 3, 23, 0, 0), 'died': datetime.datetime(1941, 3, 4, 0, 0)}
+{'born': datetime.datetime(1856, 12, 22, 0, 0), 'died': datetime.datetime(1937, 12, 21, 0, 0)}
+{'born': datetime.datetime(1866, 1, 15, 0, 0), 'died': datetime.datetime(1931, 7, 12, 0, 0)}
+{'born': datetime.datetime(1860, 9, 6, 0, 0), 'died': datetime.datetime(1935, 5, 21, 0, 0)}
+{'born': datetime.datetime(1862, 4, 2, 0, 0), 'died': datetime.datetime(1947, 12, 7, 0, 0)}
+{'born': datetime.datetime(1872, 12, 26, 0, 0), 'died': datetime.datetime(1967, 10, 7, 0, 0)}
+{'born': datetime.datetime(1863, 9, 13, 0, 0), 'died': datetime.datetime(1935, 10, 20, 0, 0)}
+{'born': datetime.datetime(1889, 10, 3, 0, 0), 'died': datetime.datetime(1938, 5, 4, 0, 0)}
+{'born': datetime.datetime(1878, 11, 1, 0, 0), 'died': datetime.datetime(1959, 5, 5, 0, 0)}
+{'born': datetime.datetime(1864, 9, 14, 0, 0), 'died': datetime.datetime(1958, 11, 24, 0, 0)}
+{'born': datetime.datetime(1871, 10, 2, 0, 0), 'died': datetime.datetime(1955, 7, 23, 0, 0)}
+{'born': datetime.datetime(1867, 1, 8, 0, 0), 'died': datetime.datetime(1961, 1, 9, 0, 0)}
+{'born': datetime.datetime(1902, 5, 8, 0, 0), 'died': datetime.datetime(1994, 9, 30, 0, 0)}
+{'born': datetime.datetime(1910, 2, 9, 0, 0), 'died': datetime.datetime(1976, 5, 31, 0, 0)}
+{'born': datetime.datetime(1879, 10, 5, 0, 0), 'died': datetime.datetime(1970, 2, 16, 0, 0)}
+{'born': datetime.datetime(1901, 9, 22, 0, 0), 'died': datetime.datetime(1997, 1, 12, 0, 0)}
+{'born': datetime.datetime(1900, 10, 30, 0, 0), 'died': datetime.datetime(1991, 3, 12, 0, 0)}
+{'born': datetime.datetime(1903, 12, 22, 0, 0), 'died': datetime.datetime(1983, 3, 17, 0, 0)}
+{'born': datetime.datetime(1906, 11, 18, 0, 0), 'died': datetime.datetime(1997, 4, 12, 0, 0)}
+{'born': datetime.datetime(1922, 1, 28, 0, 0), 'died': datetime.datetime(1993, 2, 11, 0, 0)}
+{'born': datetime.datetime(1922, 1, 9, 0, 0), 'died': datetime.datetime(2011, 11, 9, 0, 0)}
+{'born': datetime.datetime(1927, 4, 10, 0, 0), 'died': datetime.datetime(2010, 1, 15, 0, 0)}
+{'born': datetime.datetime(1906, 9, 4, 0, 0), 'died': datetime.datetime(1981, 3, 9, 0, 0)}
+{'born': datetime.datetime(1908, 12, 4, 0, 0), 'died': datetime.datetime(1997, 5, 22, 0, 0)}
+{'born': datetime.datetime(1912, 8, 13, 0, 0), 'died': datetime.datetime(1991, 2, 6, 0, 0)}
+{'born': datetime.datetime(1911, 3, 26, 0, 0), 'died': datetime.datetime(2003, 4, 20, 0, 0)}
+{'born': datetime.datetime(1905, 2, 7, 0, 0), 'died': datetime.datetime(1983, 3, 9, 0, 0)}
+{'born': datetime.datetime(1912, 5, 30, 0, 0), 'died': datetime.datetime(2004, 12, 29, 0, 0)}
+{'born': datetime.datetime(1915, 11, 19, 0, 0), 'died': datetime.datetime(1974, 3, 9, 0, 0)}
+{'born': datetime.datetime(1886, 11, 20, 0, 0), 'died': datetime.datetime(1982, 6, 12, 0, 0)}
+{'born': datetime.datetime(1921, 7, 19, 0, 0), 'died': datetime.datetime(2011, 5, 30, 0, 0)}
+{'born': datetime.datetime(1928, 10, 30, 0, 0), 'died': datetime.datetime(1999, 11, 16, 0, 0)}
+{'born': datetime.datetime(1924, 2, 23, 0, 0), 'died': datetime.datetime(1998, 5, 7, 0, 0)}
+{'born': datetime.datetime(1919, 8, 28, 0, 0), 'died': datetime.datetime(2004, 8, 12, 0, 0)}
+{'born': datetime.datetime(1916, 1, 10, 0, 0), 'died': datetime.datetime(2004, 8, 15, 0, 0)}
+{'born': datetime.datetime(1918, 6, 6, 0, 0), 'died': datetime.datetime(2009, 12, 21, 0, 0)}
+{'born': datetime.datetime(1941, 7, 1, 0, 0), 'died': datetime.datetime(2015, 12, 23, 0, 0)}
+{'born': datetime.datetime(1925, 12, 1, 0, 0), 'died': datetime.datetime(1998, 12, 7, 0, 0)}
+{'born': datetime.datetime(1918, 5, 20, 0, 0), 'died': datetime.datetime(2004, 7, 21, 0, 0)}
+{'born': datetime.datetime(1916, 6, 4, 0, 0), 'died': datetime.datetime(2009, 5, 19, 0, 0)}
+{'born': datetime.datetime(1936, 5, 21, 0, 0), 'died': datetime.datetime(2018, 2, 18, 0, 0)}
+{'born': datetime.datetime(1843, 5, 21, 0, 0), 'died': datetime.datetime(1914, 3, 16, 0, 0)}
+{'born': datetime.datetime(1828, 3, 18, 0, 0), 'died': datetime.datetime(1908, 7, 22, 0, 0)}
+{'born': datetime.datetime(1843, 6, 9, 0, 0), 'died': datetime.datetime(1914, 6, 21, 0, 0)}
+{'born': datetime.datetime(1858, 10, 27, 0, 0), 'died': datetime.datetime(1919, 1, 6, 0, 0)}
+{'born': datetime.datetime(1843, 5, 21, 0, 0), 'died': datetime.datetime(1918, 2, 8, 0, 0)}
+{'born': datetime.datetime(1837, 4, 21, 0, 0), 'died': datetime.datetime(1922, 1, 22, 0, 0)}
+{'born': datetime.datetime(1852, 11, 22, 0, 0), 'died': datetime.datetime(1924, 5, 15, 0, 0)}
+{'born': datetime.datetime(1838, 4, 28, 0, 0), 'died': datetime.datetime(1913, 7, 29, 0, 0)}
+{'born': datetime.datetime(1845, 2, 15, 0, 0), 'died': datetime.datetime(1937, 2, 7, 0, 0)}
+{'born': datetime.datetime(1880, 12, 31, 0, 0), 'died': datetime.datetime(1959, 10, 16, 0, 0)}
+{'born': datetime.datetime(1897, 4, 23, 0, 0), 'died': datetime.datetime(1972, 12, 27, 0, 0)}
+{'born': datetime.datetime(1887, 10, 5, 0, 0), 'died': datetime.datetime(1976, 2, 20, 0, 0)}
+{'born': datetime.datetime(1928, 9, 30, 0, 0), 'died': datetime.datetime(2016, 7, 2, 0, 0)}
+{'born': datetime.datetime(1918, 7, 18, 0, 0), 'died': datetime.datetime(2013, 12, 5, 0, 0)}
+{'born': datetime.datetime(1929, 8, 24, 0, 0), 'died': datetime.datetime(2004, 11, 11, 0, 0)}
+{'born': datetime.datetime(1865, 5, 25, 0, 0), 'died': datetime.datetime(1955, 1, 31, 0, 0)}
+{'born': datetime.datetime(1880, 9, 23, 0, 0), 'died': datetime.datetime(1971, 6, 25, 0, 0)}
+{'born': datetime.datetime(1904, 8, 7, 0, 0), 'died': datetime.datetime(1971, 12, 9, 0, 0)}
+{'born': datetime.datetime(1879, 7, 1, 0, 0), 'died': datetime.datetime(1954, 4, 28, 0, 0)}
+{'born': datetime.datetime(1875, 1, 14, 0, 0), 'died': datetime.datetime(1965, 9, 4, 0, 0)}
+{'born': datetime.datetime(1910, 2, 10, 0, 0), 'died': datetime.datetime(1969, 1, 30, 0, 0)}
+{'born': datetime.datetime(1889, 11, 1, 0, 0), 'died': datetime.datetime(1982, 10, 8, 0, 0)}
+{'born': datetime.datetime(1898, 1, 1, 0, 0), 'died': datetime.datetime(1967, 7, 21, 0, 0)}
+{'born': datetime.datetime(1905, 7, 29, 0, 0), 'died': datetime.datetime(1961, 9, 18, 0, 0)}
+{'born': datetime.datetime(1929, 1, 15, 0, 0), 'died': datetime.datetime(1968, 4, 4, 0, 0)}
+{'born': datetime.datetime(1914, 3, 25, 0, 0), 'died': datetime.datetime(2009, 9, 12, 0, 0)}
+{'born': datetime.datetime(1913, 12, 18, 0, 0), 'died': datetime.datetime(1992, 10, 8, 0, 0)}
+{'born': datetime.datetime(1911, 10, 14, 0, 0), 'died': datetime.datetime(1990, 10, 13, 0, 0)}
+{'born': datetime.datetime(1904, 1, 26, 0, 0), 'died': datetime.datetime(1988, 1, 15, 0, 0)}
+{'born': datetime.datetime(1901, 3, 27, 0, 0), 'died': datetime.datetime(1975, 6, 3, 0, 0)}
+{'born': datetime.datetime(1921, 5, 21, 0, 0), 'died': datetime.datetime(1989, 12, 14, 0, 0)}
+{'born': datetime.datetime(1918, 12, 25, 0, 0), 'died': datetime.datetime(1981, 10, 6, 0, 0)}
+{'born': datetime.datetime(1913, 8, 16, 0, 0), 'died': datetime.datetime(1992, 3, 9, 0, 0)}
+{'born': datetime.datetime(1910, 8, 26, 0, 0), 'died': datetime.datetime(1997, 9, 5, 0, 0)}
+{'born': datetime.datetime(1902, 1, 31, 0, 0), 'died': datetime.datetime(1986, 2, 1, 0, 0)}
+{'born': datetime.datetime(1911, 3, 20, 0, 0), 'died': datetime.datetime(1991, 9, 2, 0, 0)}
+{'born': datetime.datetime(1908, 11, 4, 0, 0), 'died': datetime.datetime(2005, 8, 31, 0, 0)}
+{'born': datetime.datetime(1839, 3, 16, 0, 0), 'died': datetime.datetime(1907, 9, 7, 0, 0)}
+{'born': datetime.datetime(1830, 9, 8, 0, 0), 'died': datetime.datetime(1914, 3, 25, 0, 0)}
+{'born': datetime.datetime(1832, 4, 19, 0, 0), 'died': datetime.datetime(1916, 9, 4, 0, 0)}
+{'born': datetime.datetime(1846, 5, 5, 0, 0), 'died': datetime.datetime(1916, 11, 15, 0, 0)}
+{'born': datetime.datetime(1865, 12, 30, 0, 0), 'died': datetime.datetime(1936, 1, 18, 0, 0)}
+{'born': datetime.datetime(1858, 11, 20, 0, 0), 'died': datetime.datetime(1940, 3, 16, 0, 0)}
+{'born': datetime.datetime(1830, 3, 15, 0, 0), 'died': datetime.datetime(1914, 4, 2, 0, 0)}
+{'born': datetime.datetime(1862, 8, 29, 0, 0), 'died': datetime.datetime(1949, 5, 6, 0, 0)}
+{'born': datetime.datetime(1862, 11, 15, 0, 0), 'died': datetime.datetime(1946, 6, 6, 0, 0)}
+{'born': datetime.datetime(1861, 5, 7, 0, 0), 'died': datetime.datetime(1941, 8, 7, 0, 0)}
+{'born': datetime.datetime(1866, 1, 29, 0, 0), 'died': datetime.datetime(1944, 12, 30, 0, 0)}
+{'born': datetime.datetime(1859, 7, 6, 0, 0), 'died': datetime.datetime(1940, 5, 20, 0, 0)}
+{'born': datetime.datetime(1857, 7, 24, 0, 0), 'died': datetime.datetime(1943, 8, 21, 0, 0)}
+{'born': datetime.datetime(1866, 8, 12, 0, 0), 'died': datetime.datetime(1954, 7, 14, 0, 0)}
+{'born': datetime.datetime(1856, 7, 26, 0, 0), 'died': datetime.datetime(1950, 11, 2, 0, 0)}
+{'born': datetime.datetime(1859, 10, 18, 0, 0), 'died': datetime.datetime(1941, 1, 4, 0, 0)}
+{'born': datetime.datetime(1875, 6, 6, 0, 0), 'died': datetime.datetime(1955, 8, 12, 0, 0)}
+{'born': datetime.datetime(1864, 7, 20, 0, 0), 'died': datetime.datetime(1931, 4, 8, 0, 0)}
+{'born': datetime.datetime(1870, 10, 22, 0, 0), 'died': datetime.datetime(1953, 11, 8, 0, 0)}
+{'born': datetime.datetime(1888, 10, 16, 0, 0), 'died': datetime.datetime(1953, 11, 27, 0, 0)}
+{'born': datetime.datetime(1885, 10, 11, 0, 0), 'died': datetime.datetime(1970, 9, 1, 0, 0)}
+{'born': datetime.datetime(1902, 4, 23, 0, 0), 'died': datetime.datetime(1998, 2, 8, 0, 0)}
+{'born': datetime.datetime(1881, 12, 24, 0, 0), 'died': datetime.datetime(1958, 5, 29, 0, 0)}
+{'born': datetime.datetime(1890, 2, 10, 0, 0), 'died': datetime.datetime(1960, 5, 30, 0, 0)}
+{'born': datetime.datetime(1887, 5, 31, 0, 0), 'died': datetime.datetime(1975, 9, 20, 0, 0)}
+{'born': datetime.datetime(1902, 2, 27, 0, 0), 'died': datetime.datetime(1968, 12, 20, 0, 0)}
+{'born': datetime.datetime(1923, 8, 16, 0, 0), 'died': datetime.datetime(2016, 9, 28, 0, 0)}
+{'born': datetime.datetime(1922, 3, 1, 0, 0), 'died': datetime.datetime(1995, 11, 4, 0, 0)}
+{'born': datetime.datetime(1817, 11, 30, 0, 0), 'died': datetime.datetime(1903, 11, 1, 0, 0)}
+{'born': datetime.datetime(1832, 12, 8, 0, 0), 'died': datetime.datetime(1910, 4, 26, 0, 0)}
+{'born': datetime.datetime(1835, 7, 27, 0, 0), 'died': datetime.datetime(1907, 2, 16, 0, 0)}
+{'born': datetime.datetime(1846, 1, 5, 0, 0), 'died': datetime.datetime(1926, 9, 14, 0, 0)}
+{'born': datetime.datetime(1857, 6, 2, 0, 0), 'died': datetime.datetime(1919, 10, 11, 0, 0)}
+{'born': datetime.datetime(1845, 4, 24, 0, 0), 'died': datetime.datetime(1924, 12, 29, 0, 0)}
+{'born': datetime.datetime(1859, 8, 4, 0, 0), 'died': datetime.datetime(1952, 2, 19, 0, 0)}
+{'born': datetime.datetime(1844, 4, 16, 0, 0), 'died': datetime.datetime(1924, 10, 12, 0, 0)}
+{'born': datetime.datetime(1865, 6, 13, 0, 0), 'died': datetime.datetime(1939, 1, 28, 0, 0)}
+{'born': datetime.datetime(1867, 5, 7, 0, 0), 'died': datetime.datetime(1925, 12, 5, 0, 0)}
+{'born': datetime.datetime(1871, 9, 27, 0, 0), 'died': datetime.datetime(1936, 8, 15, 0, 0)}
+{'born': datetime.datetime(1882, 5, 20, 0, 0), 'died': datetime.datetime(1949, 6, 10, 0, 0)}
+{'born': datetime.datetime(1885, 2, 7, 0, 0), 'died': datetime.datetime(1951, 1, 10, 0, 0)}
+{'born': datetime.datetime(1867, 8, 14, 0, 0), 'died': datetime.datetime(1933, 1, 31, 0, 0)}
+{'born': datetime.datetime(1867, 6, 28, 0, 0), 'died': datetime.datetime(1936, 12, 10, 0, 0)}
+{'born': datetime.datetime(1881, 3, 23, 0, 0), 'died': datetime.datetime(1958, 8, 22, 0, 0)}
+{'born': datetime.datetime(1892, 6, 26, 0, 0), 'died': datetime.datetime(1973, 3, 6, 0, 0)}
+{'born': datetime.datetime(1888, 9, 16, 0, 0), 'died': datetime.datetime(1964, 6, 3, 0, 0)}
+{'born': datetime.datetime(1873, 1, 20, 0, 0), 'died': datetime.datetime(1950, 11, 25, 0, 0)}
+{'born': datetime.datetime(1889, 4, 7, 0, 0), 'died': datetime.datetime(1957, 1, 10, 0, 0)}
+{'born': datetime.datetime(1877, 7, 2, 0, 0), 'died': datetime.datetime(1962, 8, 9, 0, 0)}
+{'born': datetime.datetime(1869, 11, 22, 0, 0), 'died': datetime.datetime(1951, 2, 19, 0, 0)}
+{'born': datetime.datetime(1888, 9, 26, 0, 0), 'died': datetime.datetime(1965, 1, 4, 0, 0)}
+{'born': datetime.datetime(1897, 9, 25, 0, 0), 'died': datetime.datetime(1962, 7, 6, 0, 0)}
+{'born': datetime.datetime(1872, 5, 18, 0, 0), 'died': datetime.datetime(1970, 2, 2, 0, 0)}
+{'born': datetime.datetime(1891, 5, 23, 0, 0), 'died': datetime.datetime(1974, 7, 11, 0, 0)}
+{'born': datetime.datetime(1874, 11, 30, 0, 0), 'died': datetime.datetime(1965, 1, 24, 0, 0)}
+{'born': datetime.datetime(1899, 7, 21, 0, 0), 'died': datetime.datetime(1961, 7, 2, 0, 0)}
+{'born': datetime.datetime(1913, 11, 7, 0, 0), 'died': datetime.datetime(1960, 1, 4, 0, 0)}
+{'born': datetime.datetime(1901, 8, 20, 0, 0), 'died': datetime.datetime(1968, 6, 14, 0, 0)}
+{'born': datetime.datetime(1892, 10, 10, 0, 0), 'died': datetime.datetime(1975, 3, 13, 0, 0)}
+{'born': datetime.datetime(1900, 3, 13, 0, 0), 'died': datetime.datetime(1971, 9, 20, 0, 0)}
+{'born': datetime.datetime(1905, 6, 21, 0, 0), 'died': datetime.datetime(1980, 4, 15, 0, 0)}
+{'born': datetime.datetime(1905, 5, 24, 0, 0), 'died': datetime.datetime(1984, 2, 21, 0, 0)}
+{'born': datetime.datetime(1891, 12, 10, 0, 0), 'died': datetime.datetime(1970, 5, 12, 0, 0)}
+{'born': datetime.datetime(1899, 6, 11, 0, 0), 'died': datetime.datetime(1972, 4, 16, 0, 0)}
+{'born': datetime.datetime(1918, 12, 11, 0, 0), 'died': datetime.datetime(2008, 8, 3, 0, 0)}
+{'born': datetime.datetime(1904, 7, 12, 0, 0), 'died': datetime.datetime(1973, 9, 23, 0, 0)}
+{'born': datetime.datetime(1917, 12, 21, 0, 0), 'died': datetime.datetime(1985, 7, 16, 0, 0)}
+{'born': datetime.datetime(1912, 5, 28, 0, 0), 'died': datetime.datetime(1990, 9, 30, 0, 0)}
+{'born': datetime.datetime(1900, 7, 29, 0, 0), 'died': datetime.datetime(1976, 8, 25, 0, 0)}
+{'born': datetime.datetime(1904, 5, 6, 0, 0), 'died': datetime.datetime(1978, 2, 11, 0, 0)}
+{'born': datetime.datetime(1896, 10, 12, 0, 0), 'died': datetime.datetime(1981, 9, 12, 0, 0)}
+{'born': datetime.datetime(1915, 6, 10, 0, 0), 'died': datetime.datetime(2005, 4, 5, 0, 0)}
+{'born': datetime.datetime(1898, 4, 26, 0, 0), 'died': datetime.datetime(1984, 12, 14, 0, 0)}
+{'born': datetime.datetime(1904, 7, 14, 0, 0), 'died': datetime.datetime(1991, 7, 24, 0, 0)}
+{'born': datetime.datetime(1911, 11, 2, 0, 0), 'died': datetime.datetime(1996, 3, 18, 0, 0)}
+{'born': datetime.datetime(1911, 6, 30, 0, 0), 'died': datetime.datetime(2004, 8, 14, 0, 0)}
+{'born': datetime.datetime(1905, 7, 25, 0, 0), 'died': datetime.datetime(1994, 8, 14, 0, 0)}
+{'born': datetime.datetime(1927, 3, 6, 0, 0), 'died': datetime.datetime(2014, 4, 17, 0, 0)}
+{'born': datetime.datetime(1911, 9, 19, 0, 0), 'died': datetime.datetime(1993, 6, 19, 0, 0)}
+{'born': datetime.datetime(1901, 9, 23, 0, 0), 'died': datetime.datetime(1986, 1, 10, 0, 0)}
+{'born': datetime.datetime(1913, 10, 10, 0, 0), 'died': datetime.datetime(2005, 7, 6, 0, 0)}
+{'born': datetime.datetime(1940, 5, 24, 0, 0), 'died': datetime.datetime(1996, 1, 28, 0, 0)}
+{'born': datetime.datetime(1911, 12, 11, 0, 0), 'died': datetime.datetime(2006, 8, 30, 0, 0)}
+{'born': datetime.datetime(1888, 7, 17, 0, 0), 'died': datetime.datetime(1970, 2, 17, 0, 0)}
+{'born': datetime.datetime(1899, 10, 19, 0, 0), 'died': datetime.datetime(1974, 6, 9, 0, 0)}
+{'born': datetime.datetime(1906, 4, 13, 0, 0), 'died': datetime.datetime(1989, 12, 22, 0, 0)}
+{'born': datetime.datetime(1906, 8, 5, 0, 0), 'died': datetime.datetime(1999, 2, 5, 0, 0)}
+{'born': datetime.datetime(1898, 12, 6, 0, 0), 'died': datetime.datetime(1987, 5, 17, 0, 0)}
+{'born': datetime.datetime(1899, 5, 8, 0, 0), 'died': datetime.datetime(1992, 3, 23, 0, 0)}
+{'born': datetime.datetime(1912, 1, 19, 0, 0), 'died': datetime.datetime(1986, 4, 7, 0, 0)}
+{'born': datetime.datetime(1910, 8, 28, 0, 0), 'died': datetime.datetime(1985, 2, 26, 0, 0)}
+{'born': datetime.datetime(1911, 5, 31, 0, 0), 'died': datetime.datetime(2010, 10, 9, 0, 0)}
+{'born': datetime.datetime(1923, 5, 16, 0, 0), 'died': datetime.datetime(2000, 6, 3, 0, 0)}
+{'born': datetime.datetime(1910, 12, 29, 0, 0), 'died': datetime.datetime(2013, 9, 2, 0, 0)}
+{'born': datetime.datetime(1930, 12, 2, 0, 0), 'died': datetime.datetime(2014, 5, 3, 0, 0)}
+{'born': datetime.datetime(1927, 7, 1, 0, 0), 'died': datetime.datetime(2013, 6, 11, 0, 0)}
+{'born': datetime.datetime(1920, 11, 5, 0, 0), 'died': datetime.datetime(2015, 11, 23, 0, 0)}
+{'born': datetime.datetime(1920, 5, 29, 0, 0), 'died': datetime.datetime(2000, 8, 9, 0, 0)}
+{'born': datetime.datetime(1928, 6, 13, 0, 0), 'died': datetime.datetime(2015, 5, 23, 0, 0)}
+{'born': datetime.datetime(1930, 10, 5, 0, 0), 'died': datetime.datetime(2016, 8, 23, 0, 0)}
+{'born': datetime.datetime(1936, 7, 5, 0, 0), 'died': datetime.datetime(2018, 8, 29, 0, 0)}
+{'born': datetime.datetime(1914, 6, 21, 0, 0), 'died': datetime.datetime(1996, 10, 11, 0, 0)}
+{'born': datetime.datetime(1908, 10, 23, 0, 0), 'died': datetime.datetime(1990, 6, 22, 0, 0)}
+{'born': datetime.datetime(1923, 1, 25, 0, 0), 'died': datetime.datetime(2018, 6, 29, 0, 0)}
+{'born': datetime.datetime(1925, 12, 3, 0, 0), 'died': datetime.datetime(2009, 8, 18, 0, 0)}
+{'born': datetime.datetime(1923, 11, 8, 0, 0), 'died': datetime.datetime(2005, 6, 20, 0, 0)}
+{'born': datetime.datetime(1927, 4, 14, 0, 0), 'died': datetime.datetime(2007, 2, 7, 0, 0)}
+{'born': datetime.datetime(1917, 6, 1, 0, 0), 'died': datetime.datetime(2012, 6, 13, 0, 0)}
+{'born': datetime.datetime(1929, 5, 6, 0, 0), 'died': datetime.datetime(2007, 3, 27, 0, 0)}
+{'born': datetime.datetime(1928, 6, 25, 0, 0), 'died': datetime.datetime(2017, 3, 29, 0, 0)}
+{'born': datetime.datetime(1934, 9, 4, 0, 0), 'died': datetime.datetime(2009, 5, 27, 0, 0)}
+{'born': datetime.datetime(1925, 6, 23, 0, 0), 'died': datetime.datetime(2017, 1, 10, 0, 0)}
+{'born': datetime.datetime(1919, 10, 22, 0, 0), 'died': datetime.datetime(2013, 11, 17, 0, 0)}
+{'born': datetime.datetime(1917, 8, 21, 0, 0), 'died': datetime.datetime(2008, 6, 24, 0, 0)}
+{'born': datetime.datetime(1952, 2, 1, 0, 0), 'died': datetime.datetime(2016, 8, 24, 0, 0)}
+{'born': datetime.datetime(1923, 6, 2, 0, 0), 'died': datetime.datetime(2016, 3, 12, 0, 0)}
+{'born': datetime.datetime(1916, 5, 11, 0, 0), 'died': datetime.datetime(2002, 1, 17, 0, 0)}
+{'born': datetime.datetime(1914, 3, 31, 0, 0), 'died': datetime.datetime(1998, 4, 19, 0, 0)}
+{'born': datetime.datetime(1923, 11, 20, 0, 0), 'died': datetime.datetime(2014, 7, 13, 0, 0)}
+{'born': datetime.datetime(1930, 1, 23, 0, 0), 'died': datetime.datetime(2017, 3, 17, 0, 0)}
+{'born': datetime.datetime(1939, 4, 13, 0, 0), 'died': datetime.datetime(2013, 8, 30, 0, 0)}
+{'born': datetime.datetime(1923, 7, 2, 0, 0), 'died': datetime.datetime(2012, 2, 1, 0, 0)}
+{'born': datetime.datetime(1926, 3, 24, 0, 0), 'died': datetime.datetime(2016, 10, 13, 0, 0)}
+{'born': datetime.datetime(1922, 11, 16, 0, 0), 'died': datetime.datetime(2010, 6, 18, 0, 0)}
+{'born': datetime.datetime(1927, 10, 16, 0, 0), 'died': datetime.datetime(2015, 4, 13, 0, 0)}
+{'born': datetime.datetime(1895, 3, 3, 0, 0), 'died': datetime.datetime(1973, 1, 31, 0, 0)}
+{'born': datetime.datetime(1903, 4, 12, 0, 0), 'died': datetime.datetime(1994, 6, 9, 0, 0)}
+{'born': datetime.datetime(1915, 5, 15, 0, 0), 'died': datetime.datetime(2009, 12, 13, 0, 0)}
+{'born': datetime.datetime(1901, 4, 30, 0, 0), 'died': datetime.datetime(1985, 7, 8, 0, 0)}
+{'born': datetime.datetime(1904, 4, 8, 0, 0), 'died': datetime.datetime(1989, 5, 20, 0, 0)}
+{'born': datetime.datetime(1921, 8, 23, 0, 0), 'died': datetime.datetime(2017, 2, 21, 0, 0)}
+{'born': datetime.datetime(1912, 7, 31, 0, 0), 'died': datetime.datetime(2006, 11, 16, 0, 0)}
+{'born': datetime.datetime(1899, 4, 23, 0, 0), 'died': datetime.datetime(1979, 8, 3, 0, 0)}
+{'born': datetime.datetime(1907, 6, 23, 0, 0), 'died': datetime.datetime(1995, 12, 22, 0, 0)}
+{'born': datetime.datetime(1916, 6, 15, 0, 0), 'died': datetime.datetime(2001, 2, 9, 0, 0)}
+{'born': datetime.datetime(1902, 4, 30, 0, 0), 'died': datetime.datetime(1998, 2, 26, 0, 0)}
+{'born': datetime.datetime(1915, 1, 23, 0, 0), 'died': datetime.datetime(1991, 6, 15, 0, 0)}
+{'born': datetime.datetime(1920, 9, 14, 0, 0), 'died': datetime.datetime(2013, 10, 20, 0, 0)}
+{'born': datetime.datetime(1918, 3, 5, 0, 0), 'died': datetime.datetime(2002, 3, 11, 0, 0)}
+{'born': datetime.datetime(1911, 1, 17, 0, 0), 'died': datetime.datetime(1991, 12, 1, 0, 0)}
+{'born': datetime.datetime(1921, 7, 4, 0, 0), 'died': datetime.datetime(2004, 12, 31, 0, 0)}
+{'born': datetime.datetime(1913, 8, 30, 0, 0), 'died': datetime.datetime(1991, 12, 6, 0, 0)}
+{'born': datetime.datetime(1918, 6, 18, 0, 0), 'died': datetime.datetime(2003, 9, 25, 0, 0)}
+{'born': datetime.datetime(1919, 10, 3, 0, 0), 'died': datetime.datetime(2013, 1, 9, 0, 0)}
+{'born': datetime.datetime(1911, 12, 13, 0, 0), 'died': datetime.datetime(1999, 7, 26, 0, 0)}
+{'born': datetime.datetime(1932, 8, 17, 0, 0), 'died': datetime.datetime(2018, 8, 11, 0, 0)}
+{'born': datetime.datetime(1942, 3, 27, 0, 0), 'died': datetime.datetime(2018, 3, 6, 0, 0)}
+{'born': datetime.datetime(1914, 10, 14, 0, 0), 'died': datetime.datetime(2006, 5, 31, 0, 0)}
+{'born': datetime.datetime(1917, 6, 15, 0, 0), 'died': datetime.datetime(2010, 12, 10, 0, 0)}
+{'born': datetime.datetime(1929, 11, 9, 0, 0), 'died': datetime.datetime(2016, 3, 31, 0, 0)}
+{'born': datetime.datetime(1933, 10, 9, 0, 0), 'died': datetime.datetime(2017, 2, 8, 0, 0)}
+{'born': datetime.datetime(1916, 10, 4, 0, 0), 'died': datetime.datetime(2009, 11, 8, 0, 0)}
+{'born': datetime.datetime(1926, 7, 16, 0, 0), 'died': datetime.datetime(2015, 6, 3, 0, 0)}
+{'born': datetime.datetime(1940, 4, 1, 0, 0), 'died': datetime.datetime(2011, 9, 25, 0, 0)}
+{'born': datetime.datetime(1930, 10, 10, 0, 0), 'died': datetime.datetime(2015, 1, 27, 0, 0)}
+{'born': datetime.datetime(1921, 4, 14, 0, 0), 'died': datetime.datetime(2016, 12, 13, 0, 0)}
+{'born': datetime.datetime(1930, 10, 10, 0, 0), 'died': datetime.datetime(2008, 12, 24, 0, 0)}
+{'born': datetime.datetime(1939, 5, 18, 0, 0), 'died': datetime.datetime(2018, 4, 9, 0, 0)}
+{'born': datetime.datetime(1921, 1, 18, 0, 0), 'died': datetime.datetime(2015, 7, 5, 0, 0)}
+{'born': datetime.datetime(1924, 8, 19, 0, 0), 'died': datetime.datetime(2011, 5, 7, 0, 0)}
+{'born': datetime.datetime(1933, 8, 7, 0, 0), 'died': datetime.datetime(2012, 6, 12, 0, 0)}
+{'born': datetime.datetime(1925, 9, 27, 0, 0), 'died': datetime.datetime(2013, 4, 10, 0, 0)}
+{'born': datetime.datetime(1931, 8, 15, 0, 0), 'died': datetime.datetime(2015, 10, 9, 0, 0)}
+{'born': datetime.datetime(1955, 12, 28, 0, 0), 'died': datetime.datetime(2017, 7, 13, 0, 0)}
+{'born': datetime.datetime(1939, 2, 2, 0, 0), 'died': datetime.datetime(2014, 1, 9, 0, 0)}
+{'born': datetime.datetime(1943, 1, 14, 0, 0), 'died': datetime.datetime(2011, 9, 30, 0, 0)}
+{'born': datetime.datetime(1931, 4, 15, 0, 0), 'died': datetime.datetime(2015, 3, 26, 0, 0)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#with $bucket
+
+docs = list(db.laureates.aggregate([
+    {"$match": {"died": {"$gt": "1700"}, "born": {"$gt": "1700"}}},
+    {"$addFields": {"bornArray": {"$split": ["$born", "-"]},
+        "diedArray": {"$split": ["$died", "-"]}}},
+    {"$addFields": {"born": {"$cond": [
+    {"$in": ["00", "$bornArray"]},
+    {"$concat": [{"$arrayElemAt": ["$bornArray", 0]}, "-01-01"]},
+        "$born"
+        ]}}},
+    {"$project": {"died": {"$dateFromString": {"dateString": "$died"}},
+        "born": {"$dateFromString": {"dateString": "$born"}},
+        "_id": 0}},
+    {"$project": {"years": {"$floor": {"$divide": [
+        {"$subtract": ["$died", "$born"]},
+            31557600000 # 1000 * 60 * 60 * 24 * 365.25
+    ]}}}},
+    {"$bucket": {"groupBy": "$years",
+        "boundaries": list(range(30, 120, 10))}}
+]))
+
+for doc in docs:
+  print(doc)
+
+
+{'count': 1, '_id': 30}
+{'count': 6, '_id': 40}
+{'count': 21, '_id': 50}
+{'count': 87, '_id': 60}
+{'count': 154, '_id': 70}
+{'count': 221, '_id': 80}
+{'count': 115, '_id': 90}
+{'count': 2, '_id': 100}
+
+#2 laureates lived past 100 years old.
+
+
