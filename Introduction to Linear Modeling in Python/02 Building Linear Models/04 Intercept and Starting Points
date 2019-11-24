@@ -1,0 +1,278 @@
+In this exercise, you will see the intercept and slope parameters in the context of modeling measurements taken of the volume of a solution contained in a large glass jug. The solution is composed of water, grains, sugars, and yeast. The total mass of both the solution and the glass container was also recorded, but the empty container mass was not noted.
+
+Your job is to use the preloaded pandas DataFrame df, with data columns volumes and masses, to build a linear model that relates the masses (y-data) to the volumes (x-data). The slope will be an estimate of the density (change in mass / change in volume) of the solution, and the intercept will be an estimate of the empty container weight (mass when volume=0).
+
+
+
+
+In [2]: df.volumes
+Out[2]: 
+0       2.0
+1       2.1
+2       2.2
+3       2.3
+4       2.4
+5       2.5
+6       2.6
+7       2.7
+8       2.8
+9       2.9
+10      3.0
+11      3.1
+12      3.2
+13      3.3
+14      3.4
+15      3.5
+16      3.6
+17      3.7
+18      3.8
+19      3.9
+20      4.0
+21      4.1
+22      4.2
+23      4.3
+24      4.4
+25      4.5
+26      4.6
+27      4.7
+28      4.8
+29      4.9
+       ... 
+71      9.1
+72      9.2
+73      9.3
+74      9.4
+75      9.5
+76      9.6
+77      9.7
+78      9.8
+79      9.9
+80     10.0
+81     10.1
+82     10.2
+83     10.3
+84     10.4
+85     10.5
+86     10.6
+87     10.7
+88     10.8
+89     10.9
+90     11.0
+91     11.1
+92     11.2
+93     11.3
+94     11.4
+95     11.5
+96     11.6
+97     11.7
+98     11.8
+99     11.9
+100    12.0
+Name: volumes, Length: 101, dtype: float64
+
+
+
+In [3]: df.masses
+Out[3]: 
+0       7.812435
+1       7.698824
+2       7.817183
+3       7.872703
+4       8.176541
+5       7.969846
+6       8.484481
+7       8.343879
+8       8.561904
+9       8.615063
+10      8.896211
+11      8.653986
+12      8.937758
+13      9.041595
+14      9.303377
+15      9.190011
+16      9.392757
+17      9.432214
+18      9.634221
+19      9.798282
+20      9.739938
+21     10.074472
+22     10.160159
+23     10.230249
+24     10.380086
+25     10.331627
+26     10.497711
+27     10.526423
+28     10.703211
+29     10.893036
+         ...    
+71     15.409553
+72     15.586004
+73     15.767617
+74     15.821563
+75     15.697780
+76     15.979380
+77     16.202797
+78     16.253009
+79     16.416201
+80     16.427767
+81     16.539924
+82     16.688656
+83     16.821005
+84     16.909830
+85     17.011901
+86     17.042934
+87     17.257756
+88     17.342182
+89     17.552948
+90     17.669892
+91     17.678516
+92     17.732472
+93     17.816127
+94     18.032349
+95     18.107734
+96     18.175615
+97     18.324360
+98     18.368000
+99     18.609803
+100    18.605287
+Name: masses, Length: 101, dtype: float64
+
+
+
+
+In [4]: df
+Out[4]: 
+        masses  volumes
+0     7.812435      2.0
+1     7.698824      2.1
+2     7.817183      2.2
+3     7.872703      2.3
+4     8.176541      2.4
+5     7.969846      2.5
+6     8.484481      2.6
+7     8.343879      2.7
+8     8.561904      2.8
+9     8.615063      2.9
+10    8.896211      3.0
+11    8.653986      3.1
+12    8.937758      3.2
+13    9.041595      3.3
+14    9.303377      3.4
+15    9.190011      3.5
+16    9.392757      3.6
+17    9.432214      3.7
+18    9.634221      3.8
+19    9.798282      3.9
+20    9.739938      4.0
+21   10.074472      4.1
+22   10.160159      4.2
+23   10.230249      4.3
+24   10.380086      4.4
+25   10.331627      4.5
+26   10.497711      4.6
+27   10.526423      4.7
+28   10.703211      4.8
+29   10.893036      4.9
+..         ...      ...
+71   15.409553      9.1
+72   15.586004      9.2
+73   15.767617      9.3
+74   15.821563      9.4
+75   15.697780      9.5
+76   15.979380      9.6
+77   16.202797      9.7
+78   16.253009      9.8
+79   16.416201      9.9
+80   16.427767     10.0
+81   16.539924     10.1
+82   16.688656     10.2
+83   16.821005     10.3
+84   16.909830     10.4
+85   17.011901     10.5
+86   17.042934     10.6
+87   17.257756     10.7
+88   17.342182     10.8
+89   17.552948     10.9
+90   17.669892     11.0
+91   17.678516     11.1
+92   17.732472     11.2
+93   17.816127     11.3
+94   18.032349     11.4
+95   18.107734     11.5
+96   18.175615     11.6
+97   18.324360     11.7
+98   18.368000     11.8
+99   18.609803     11.9
+100  18.605287     12.0
+
+[101 rows x 2 columns]
+
+
+
+
+# Import ols from statsmodels, and fit a model to the data
+from statsmodels.formula.api import ols
+model_fit = ols(formula="masses ~ volumes", data=df)
+model_fit = model_fit.fit()
+
+
+
+# Extract the model parameter values, and assign them to a0, a1
+a0 = model_fit.params['Intercept']
+a1 = model_fit.params['volumes']
+
+In [6]: model_fit.params
+Out[6]: 
+Intercept    5.434920
+volumes      1.102948
+dtype: float64
+
+In [7]: model_fit.params[0]
+Out[7]: 5.4349204524026939
+
+In [8]: model_fit.params[1]
+Out[8]: 1.1029478783191027
+
+
+
+# Print model parameter values with meaningful names, and compare to summary()
+print( "container_mass   = {:0.4f}".format(a0) )
+print( "solution_density = {:0.4f}".format(a1) )
+print( model_fit.summary() )
+
+
+
+
+<script.py> output:
+    container_mass   = 5.4349
+    solution_density = 1.1029
+                                OLS Regression Results                            
+    ==============================================================================
+    Dep. Variable:                 masses   R-squared:                       0.999
+    Model:                            OLS   Adj. R-squared:                  0.999
+    Method:                 Least Squares   F-statistic:                 1.328e+05
+    Date:                Sun, 24 Nov 2019   Prob (F-statistic):          1.19e-156
+    Time:                        12:46:19   Log-Likelihood:                 102.39
+    No. Observations:                 101   AIC:                            -200.8
+    Df Residuals:                      99   BIC:                            -195.5
+    Df Model:                           1                                         
+    Covariance Type:            nonrobust                                         
+    ==============================================================================
+                     coef    std err          t      P>|t|      [0.025      0.975]
+    ------------------------------------------------------------------------------
+    Intercept      5.4349      0.023    236.805      0.000       5.389       5.480
+    volumes        1.1029      0.003    364.408      0.000       1.097       1.109
+    ==============================================================================
+    Omnibus:                        0.319   Durbin-Watson:                   2.072
+    Prob(Omnibus):                  0.852   Jarque-Bera (JB):                0.169
+    Skew:                           0.100   Prob(JB):                        0.919
+    Kurtosis:                       3.019   Cond. No.                         20.0
+    ==============================================================================
+    
+    Warnings:
+    [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+
+
+You deserve a cold beverage for all that work! Did you find the model parameter values for intercept and slope in the .summary()? Which one is the empty container mass? Which one is the solution density? Don't worry about everything in the summary output at first glance. We'll see more of it later. For now, it's good enough to try to find the slope and intercept values.
+
