@@ -1,0 +1,35 @@
+Least-Squares with `numpy`
+The formulae below are the result of working through the calculus discussed in the introduction. In this exercise, we'll trust that the calculus correct, and implement these formulae in code using numpy.
+
+a1=covariance(x,y)/variance(x)
+a0=mean(y)−a1*mean(x)
+
+
+# prepare the means and deviations of the two variables
+x_mean = np.mean(x)
+y_mean = np.mean(y)
+x_dev = x - x_mean
+y_dev = y - y_mean
+
+# Complete least-squares formulae to find the optimal a0, a1
+a1 = np.sum(x_dev * y_dev) / np.sum( np.square(x_dev) )
+a0 = y_mean - (a1 * x_mean)
+
+# Use the those optimal model parameters a0, a1 to build a model
+y_model = model(x, a0, a1)
+
+# plot to verify that the resulting y_model best fits the data y
+fig, rss = compute_rss_and_plot_fit(a0, a1)
+
+
+
+Notice that the optimal slope a1, according to least-squares, is a ratio of the covariance to the variance. Also, note that the values of the parameters obtained here are NOT exactly the ones used to generate the pre-loaded data (a1=25 and a0=150), but they are close to those. Least-squares does not guarantee zero error; there is no perfect solution, but in this case, least-squares is the best we can do.
+
+In [2]: a1
+Out[2]: 24.473226782687401
+
+In [3]: a0
+Out[3]: 152.12363846300201
+
+In [4]: rss
+Out[4]: 14385.600311582735
