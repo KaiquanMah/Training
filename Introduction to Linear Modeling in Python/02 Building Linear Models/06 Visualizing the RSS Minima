@@ -1,0 +1,68 @@
+Visualizing the RSS Minima
+In this exercise you will compute and visualize how RSS varies for different values of model parameters. Start by holding the intercept constant, but vary the slope: and for each slope value, you'll compute the model values, and the resulting RSS. Once you have an array of RSS values, you will determine minimal RSS value, in code, and from that minimum, determine the slope that resulted in that minimal RSS.
+
+Use pre-loaded data arrays x_data, y_data, and empty container rss_list to get started.
+
+
+
+
+
+# Loop over all trial values in a1_array, computing rss for each
+a1_array = np.linspace(15, 35, 101)
+for a1_trial in a1_array:
+    y_model = model(x_data, a0=150, a1=a1_trial)
+    rss_value = compute_rss(y_data, y_model)
+    rss_list.append(rss_value)
+
+
+#Convert rss_list to a np.array(), then use np.min() to find the minimum value in rss_array.
+# Find the minimum RSS and the a1 value from whence it came
+rss_array = np.array(rss_list)
+best_rss = np.min(rss_array) 
+best_a1 = a1_array[np.where(rss_array==best_rss)]
+print('The minimum RSS = {}, came from a1 = {}'.format(best_rss, best_a1))
+
+# Plot your rss and a1 values to confirm answer
+fig = plot_rss_vs_a1(a1_array, rss_array)
+
+
+
+
+
+
+In [2]: rss_array
+Out[2]: 
+array([ 83094.92922156,  80315.62031949,  77593.71141741,  74929.20251533,
+        72322.09361325,  69772.38471118,  67280.0758091 ,  64845.16690702,
+        62467.65800494,  60147.54910287,  57884.84020079,  55679.53129871,
+        53531.62239663,  51441.11349456,  49408.00459248,  47432.2956904 ,
+        45513.98678832,  43653.07788625,  41849.56898417,  40103.46008209,
+        38414.75118002,  36783.44227794,  35209.53337586,  33693.02447378,
+        32233.91557171,  30832.20666963,  29487.89776755,  28200.98886547,
+        26971.4799634 ,  25799.37106132,  24684.66215924,  23627.35325716,
+        22627.44435509,  21684.93545301,  20799.82655093,  19972.11764885,
+        19201.80874678,  18488.8998447 ,  17833.39094262,  17235.28204055,
+        16694.57313847,  16211.26423639,  15785.35533431,  15416.84643224,
+        15105.73753016,  14852.02862808,  14655.719726  ,  14516.81082393,
+        14435.30192185,  14411.19301977,  14444.48411769,  14535.17521562,
+        14683.26631354,  14888.75741146,  15151.64850939,  15471.93960731,
+        15849.63070523,  16284.72180315,  16777.21290108,  17327.103999  ,
+        17934.39509692,  18599.08619484,  19321.17729277,  20100.66839069,
+        20937.55948861,  21831.85058653,  22783.54168446,  23792.63278238,
+        24859.1238803 ,  25983.01497822,  27164.30607615,  28402.99717407,
+        29699.08827199,  31052.57936992,  32463.47046784,  33931.76156576,
+        35457.45266368,  37040.54376161,  38681.03485953,  40378.92595745,
+        42134.21705537,  43946.9081533 ,  45816.99925122,  47744.49034914,
+        49729.38144706,  51771.67254499,  53871.36364291,  56028.45474083,
+        58242.94583875,  60514.83693668,  62844.1280346 ,  65230.81913252,
+        67674.91023045,  70176.40132837,  72735.29242629,  75351.58352421,
+        78025.27462214,  80756.36572006,  83544.85681798,  86390.7479159 ,
+        89294.03901383])
+
+<script.py> output:
+    The minimum RSS = 14411.193019771845, came from a1 = [ 24.8]
+    
+The best slope is the one out of an array of slopes than yielded the minimum RSS value out of an array of RSS values. Python tip: notice that we started with rss_list to make it easy to .append() but then later converted to numpy.array() to gain access to all the numpy methods.
+    
+    
+    
