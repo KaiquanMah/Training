@@ -1,0 +1,57 @@
+Residual Sum of Squares
+In a previous exercise, we saw that the altitude along a hiking trail was roughly fit by a linear model, and we introduced the concept of differences between the model and the data as a measure of model goodness.
+
+In this exercise, you'll work with the same measured data, and quantifying how well a model fits it by computing the sum of the square of the "differences", also called "residuals".
+
+# Load the data
+x_data, y_data = load_data()
+
+#Call the pre-defined model(), passing in x_dataand specific values a0, a1.
+# Model the data with specified values for parameters a0, a1
+y_model = model(x_data, a0=150, a1=25)
+
+# Compute the RSS value for this parameterization of the model
+rss = np.sum(np.square(y_data - y_model))
+print("RSS = {}".format(rss))
+
+<script.py> output:
+    RSS = 14444.484117694472
+The value we compute for RSS is not meaningful by itself, but later it becomes meaningful in context when we compare it to other values of RSS computed for other parameterizations of the model. More on that next! Some notes about code style; notice you could have done the RSS calculation in a single line of python code, but writing functions than can be re-used is good practice. Notice also that we could have defined a parameter dictionary dict(a0=150, a1=25) and passed it into the model as model(x, **parameters) which would make it easier to pass around all the parameters together if we needed them for other functions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minimizing the Residuals
+In this exercise, you will complete a function to visually compare model and data, and compute and print the RSS. You will call it more than once to see how RSS changes when you change values for a0 and a1. We'll see that the values for the parameters we found earlier are the ones needed to minimize the RSS.
+
+
+# Complete function to load data, build model, compute RSS, and plot
+def compute_rss_and_plot_fit(a0, a1):
+    xd, yd = load_data()
+    ym = model(xd, a0, a1)
+    residuals = ym - yd
+    rss = np.sum(np.square(residuals))
+    summary = "Parameters a0={}, a1={} yield RSS={:0.2f}".format(a0, a1, rss)
+    fig = plot_data_with_model(xd, yd, ym, summary)
+    return rss, summary
+
+# Chose model parameter values and pass them into RSS function
+rss, summary = compute_rss_and_plot_fit(a0=150, a1=25)
+print(summary)
+
+Parameters a0=150, a1=125 yield RSS=7220440.03
+Parameters a0=150, a1=50 yield RSS=470630.87
+Parameters a0=150, a1=25 yield RSS=14444.48
+
+As stated earlier, the significance of RSS is in context of other values. More specifically, the minimum RSS is of value in identifying the specific set of parameter values for our model which yield the smallest residuals in an overall sense.
