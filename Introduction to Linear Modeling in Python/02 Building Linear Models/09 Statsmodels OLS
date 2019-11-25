@@ -1,0 +1,108 @@
+Least-Squares with `statsmodels`
+Several python libraries provide convenient abstracted interfaces so that you need not always be so explicit in handling the machinery of optimization of the model.
+
+As an example, in this exercise, you will use the statsmodels library in a more high-level, generalized work-flow for building a model using least-squares optimization (minimization of RSS).
+
+To help get you started, we've pre-loaded the data from x_data, y_data = load_data() and stored it in a pandas DataFrame with column names x_column and y_column using df = pd.DataFrame(dict(x_column=x_data, y_column=y_data))
+
+
+In [3]: df['x_column']
+Out[3]: 
+0      0.0
+1      0.5
+2      1.0
+3      1.5
+4      2.0
+5      2.5
+6      3.0
+7      3.5
+8      4.0
+9      4.5
+10     5.0
+11     5.5
+12     6.0
+13     6.5
+14     7.0
+15     7.5
+16     8.0
+17     8.5
+18     9.0
+19     9.5
+20    10.0
+Name: x_column, dtype: float64
+
+In [4]: df['y_column']
+Out[4]: 
+0     161.785879
+1     132.725608
+2     210.817674
+3     179.683703
+4     181.985282
+5     234.679074
+6     246.489710
+7     221.586912
+8     250.392409
+9     206.432876
+10    303.750893
+11    312.298651
+12    323.833103
+13    261.968629
+14    316.648066
+15    337.552959
+16    360.136335
+17    369.727299
+18    408.028955
+19    348.827361
+20    394.933842
+Name: y_column, dtype: float64
+
+
+In [5]: help(plot_data_with_model)
+Help on function plot_data_with_model in module __main__:
+
+plot_data_with_model(x, y, ym)
+
+In [6]: help(compute_rss_and_plot_fit)
+Help on function compute_rss_and_plot_fit in module __main__:
+
+compute_rss_and_plot_fit(a0=150, a1=25.0)
+
+
+
+
+
+
+
+
+
+# Pass data and `formula` into ols(), use and `.fit()` the model to the data
+model_fit = ols(formula="y_column ~ x_column", data=df).fit()
+
+
+# Use .predict(df) to get y_model values, then over-plot y_data with y_model
+y_model = model_fit.predict(df)
+fig = plot_data_with_model(x_data, y_data, y_model)
+
+# Extract the a0, a1 values from model_fit.params
+a0 = model_fit.params['Intercept']
+a1 = model_fit.params['x_column']
+
+# Visually verify that these parameters a0, a1 give the minimum RSS
+fig, rss = compute_rss_and_plot_fit(a0, a1)
+
+
+
+
+In [8]: a0
+Out[8]: 152.12363846300201
+
+In [9]: a1
+Out[9]: 24.473226782687401
+
+In [10]: rss
+Out[10]: 14385.600311582735
+Note that the params container always uses 'Intercept' for the a0 key, but all higher order terms will have keys that match the column name from the pandas DataFrame that you passed into ols(). Python style tip: notice that we used 'method chaining', which looks like this: ols().fit(). Since the object returned by ols() has a method .fit(), this can be a conveniently shorter way to express calculations in python rather than using multiple lines.
+
+
+
+
