@@ -1,1 +1,105 @@
+Linear Model in Anthropology
+If you found part of a skeleton, from an adult human that lived thousands of years ago, how could you estimate the height of the person that it came from? This exercise is in part inspired by the work of forensic anthropologist Mildred Trotter, who built a regression model for the calculation of stature estimates from human "long bones" or femurs that is commonly used today.
+
+In this exercise, you'll use data from many living people, and the python library scikit-learn, to build a linear model relating the length of the femur (thigh bone) to the "stature" (overall height) of the person. Then, you'll apply your model to make a prediction about the height of your ancient ancestor.
+
+
+
+# import the sklearn class LinearRegression and initialize the model
+from sklearn.linear_model import LinearRegression
+model = LinearRegression(fit_intercept=False)
+
+
+
+In [1]: legs
+Out[1]: 
+array([ 35. ,  36.5,  38. ,  39.5,  41. ,  42.5,  44. ,  45.5,  47. ,
+        48.5,  50. ,  51.5,  53. ,  54.5,  56. ,  57.5,  59. ,  60.5,
+        62. ,  63.5,  65. ])
+
+In [2]: heights
+Out[2]: 
+array([ 145.75166215,  154.81989548,  147.45149903,  154.53270424,
+        166.17450311,  171.45325818,  149.44608871,  164.73275841,
+        168.82025028,  171.32607675,  182.07638078,  188.37513159,
+        188.08738789,  196.95181717,  192.85162151,  201.60765816,
+        210.66135402,  202.06143758,  215.72224422,  207.04958807,
+        215.8394592 ])
+
+In [3]: legs.shape
+Out[3]: (21,)
+
+In [4]: heights.shape
+Out[4]: (21,)
+
+# Prepare the measured data arrays and fit the model to them
+legs = legs.reshape(len(legs),1)
+heights = heights.reshape(len(heights),1)
+model.fit(legs, heights)
+
+In [4]: legs
+Out[4]: 
+array([[ 35. ],
+       [ 36.5],
+       [ 38. ],
+       [ 39.5],
+       [ 41. ],
+       [ 42.5],
+       [ 44. ],
+       [ 45.5],
+       [ 47. ],
+       [ 48.5],
+       [ 50. ],
+       [ 51.5],
+       [ 53. ],
+       [ 54.5],
+       [ 56. ],
+       [ 57.5],
+       [ 59. ],
+       [ 60.5],
+       [ 62. ],
+       [ 63.5],
+       [ 65. ]])
+
+In [5]: heights
+Out[5]: 
+array([[ 145.75166215],
+       [ 154.81989548],
+       [ 147.45149903],
+       [ 154.53270424],
+       [ 166.17450311],
+       [ 171.45325818],
+       [ 149.44608871],
+       [ 164.73275841],
+       [ 168.82025028],
+       [ 171.32607675],
+       [ 182.07638078],
+       [ 188.37513159],
+       [ 188.08738789],
+       [ 196.95181717],
+       [ 192.85162151],
+       [ 201.60765816],
+       [ 210.66135402],
+       [ 202.06143758],
+       [ 215.72224422],
+       [ 207.04958807],
+       [ 215.8394592 ]])
+
+
+In [7]: legs.shape
+Out[7]: (21, 1)
+
+In [8]: heights.shape
+Out[8]: (21, 1)
+
+
+# Use the fitted model to make a prediction for the found femur
+fossil_leg = 50.7
+fossil_height = model.predict(fossil_leg)
+print("Predicted fossil height = {:0.2f} cm".format(fossil_height[0,0]))
+
+Predicted fossil height = 181.34 cm
+Notice that we used the pre-loaded data to fit or "train" the model, and then applied that model to make a prediction about newly collected data that was not part of the data used to fit the model. Also notice that model.predict() returns the answer as an array of shape = (1,1), so we had to index into it with the [0,0] syntax when printing. This is an artifact of our overly simplified use of sklearn here: the details of this are beyond the scope of the current course, but relate to the number of samples and features that one might use in a more sophisticated, generalized model.
+
+
 
