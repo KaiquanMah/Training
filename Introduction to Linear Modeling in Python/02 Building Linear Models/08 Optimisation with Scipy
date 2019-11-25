@@ -1,0 +1,75 @@
+Optimisation with Scipy
+It is possible to write a numpy implementation of the analytic solution to find the minimal RSS value. But for more complex models, finding analytic formulae is not possible, and so we turn to other methods.
+
+In this exercise you will use scipy.optimize to employ a more general approach to solve the same optimization problem.
+
+In so doing, you will see additional return values from the method that tell answer us "how good is best". Here we will use the same measured data and parameters as seen in the last exercise for ease of comparison of the new scipy approach.
+
+
+
+
+
+# Define a model function needed as input to scipy
+def model_func(x, a0, a1):
+    return a0 + (a1*x)
+
+# Load the measured data you want to model
+x_data, y_data  = load_data()
+
+# call curve_fit, passing in the model function and data; then unpack the results
+param_opt, param_cov = optimize.curve_fit(model_func, x_data, y_data)
+a0 = param_opt[0]  # a0 is the intercept in y = a0 + a1*x
+a1 = param_opt[1]  # a1 is the slope     in y = a0 + a1*x
+
+# test that these parameters result in a model that fits the data
+fig, rss = compute_rss_and_plot_fit(a0, a1)
+
+
+In [2]: x_data
+Out[2]: 
+array([  0. ,   0.5,   1. ,   1.5,   2. ,   2.5,   3. ,   3.5,   4. ,
+         4.5,   5. ,   5.5,   6. ,   6.5,   7. ,   7.5,   8. ,   8.5,
+         9. ,   9.5,  10. ])
+
+In [3]: y_data
+Out[3]: 
+array([ 161.78587909,  132.72560763,  210.81767421,  179.6837026 ,
+        181.98528167,  234.67907351,  246.48971034,  221.58691239,
+        250.3924093 ,  206.43287615,  303.75089312,  312.29865056,
+        323.8331032 ,  261.9686295 ,  316.64806585,  337.55295912,
+        360.13633529,  369.72729852,  408.0289548 ,  348.82736117,
+        394.93384188])
+
+In [4]: load_data()
+Out[4]: 
+(array([  0. ,   0.5,   1. ,   1.5,   2. ,   2.5,   3. ,   3.5,   4. ,
+          4.5,   5. ,   5.5,   6. ,   6.5,   7. ,   7.5,   8. ,   8.5,
+          9. ,   9.5,  10. ]),
+ array([ 161.78587909,  132.72560763,  210.81767421,  179.6837026 ,
+         181.98528167,  234.67907351,  246.48971034,  221.58691239,
+         250.3924093 ,  206.43287615,  303.75089312,  312.29865056,
+         323.8331032 ,  261.9686295 ,  316.64806585,  337.55295912,
+         360.13633529,  369.72729852,  408.0289548 ,  348.82736117,
+         394.93384188]))
+         
+         
+In [5]: param_opt
+Out[5]: array([ 152.12363846,   24.47322678])
+
+In [7]: a0
+Out[7]: 152.1236384633315
+
+In [8]: a1
+Out[8]: 24.473226782738607
+
+
+In [6]: param_cov
+Out[6]: 
+array([[ 134.38359846,  -19.6658924 ],
+       [ -19.6658924 ,    3.93317847]])
+
+
+In [9]: rss
+Out[9]: 14385.600311582728
+
+
