@@ -1,0 +1,38 @@
+Variation Around the Trend
+The data need not be perfectly linear, and there may be some random variation or "spread" in the measurements, and that does translate into variation of the model parameters. This variation is in the parameter is quantified by "standard error", and interpreted as "uncertainty" in the estimate of the model parameter.
+
+In this exercise, you will use ols from statsmodels to build a model and extract the standard error for each parameter of that model.
+
+
+
+
+# Store x_data and y_data, as times and distances, in df, and use ols() to fit a model to it.
+df = pd.DataFrame(dict(times=x_data, distances=y_data))
+model_fit = ols(formula="distances ~ times", data=df).fit()
+
+# Extact the model parameters and their uncertainties
+a0 = model_fit.params['Intercept']
+e0 = model_fit.bse['Intercept']
+
+a1 = model_fit.params['times']
+e1 = model_fit.bse['times']
+
+# Print the results with more meaningful names
+print('Estimate    of the intercept = {:0.2f}'.format(a0))
+print('Uncertainty of the intercept = {:0.2f}'.format(e0))
+
+print('Estimate    of the slope = {:0.2f}'.format(a1))
+print('Uncertainty of the slope = {:0.2f}'.format(e1))
+
+
+
+<script.py> output:
+    Estimate    of the intercept = -0.81
+    Uncertainty of the intercept = 1.29
+    Estimate    of the slope = 50.78
+    Uncertainty of the slope = 1.11
+
+
+
+The size of the parameters standard error only makes sense in comparison to the parameter value itself. In fact the units are the same! So a1 and e1 both have units of velocity (meters/second), and a0 and e0 both have units of distance (meters).
+
