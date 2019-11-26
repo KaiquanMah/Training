@@ -1,0 +1,64 @@
+Variation in Two Parts
+Given two data sets of distance-versus-time data, one with very small velocity and one with large velocity. Notice that both may have the same standard error of slope, but different R-squared for the model overall, depending on the size of the slope ("effect size") as compared to the standard error ("uncertainty").
+
+If we plot both data sets as scatter plots on the same axes, the contrast is clear. Variation due to the slope is different than variation due to the random scatter about the trend line. In this exercise, your goal is to compute the standard error and R-squared for two data sets and compare.
+
+
+
+In [2]: df
+Out[2]: 
+    distances1  distances2     times
+0    16.243454   16.243454  0.000000
+1    -1.950897   -5.284231  0.083333
+2     3.051616   -3.615051  0.166667
+3     1.770314   -8.229686  0.250000
+4    25.320743   11.987410  0.333333
+5    -2.182054  -18.848720  0.416667
+6    42.448118   22.448118  0.500000
+7    21.554598   -1.778736  0.583333
+8    36.523724    9.857058  0.666667
+9    35.006296    5.006296  0.750000
+10   56.287746   22.954413  0.833333
+11   25.231926  -11.434740  0.916667
+12   46.775828    6.775828  1.000000
+13   50.326123    6.992790  1.083333
+14   69.671028   23.004361  1.166667
+15   51.501087    1.501087  1.250000
+16   64.942385   11.609051  1.333333
+17   62.054749    5.388082  1.416667
+18   75.422137   15.422137  1.500000
+19   84.994819   21.661485  1.583333
+20   72.327142    5.660475  1.666667
+21   98.947237   28.947237  1.750000
+22  100.682574   27.349241  1.833333
+23  100.858277   24.191610  1.916667
+24  109.008559   29.008559  2.000000
+
+
+
+
+
+
+
+# Build and fit two models, for columns distances1 and distances2 in df
+model_1 = ols(formula="distances1 ~ times", data=df).fit()
+model_2 = ols(formula="distances2 ~ times", data=df).fit()
+
+# Extract R-squared for each model, and the standard error for each slope
+se_1 = model_1.bse['times']
+se_2 = model_2.bse['times']
+rsquared_1 = model_1.rsquared
+rsquared_2 = model_2.rsquared
+
+# Print the results
+print('Model 1: SE = {:0.3f}, R-squared = {:0.3f}'.format(se_1, rsquared_1))
+print('Model 2: SE = {:0.3f}, R-squared = {:0.3f}'.format(se_2, rsquared_2))
+
+
+<script.py> output:
+    Model 1: SE = 3.694, R-squared = 0.898
+    Model 2: SE = 3.694, R-squared = 0.335
+    
+    
+Notice that the standard error is the same for both models, but the r-squared changes. The uncertainty in the estimates of the model parameters is indepedent from R-squred because that uncertainty is being driven not by the linear trend, but by the inherent randomness in the data. This serves as a transition into looking at statistical inference in linear models.    
+
