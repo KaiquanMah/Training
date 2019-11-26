@@ -1,0 +1,67 @@
+Extrapolation: Going Over the Edge
+In this exercise, we consider the perils of extrapolation. Shown here is the profile of a hiking trail on a mountain. One portion of the trail, marked in black, looks linear, and was used to build a model. But we see that the best fit line, shown in red, does not fit outside the original "domain", as it extends into this new outside data, marked in blue.
+
+If we want use the model to make predictions for the altitude, but still be accurate to within some tolerance, what are the smallest and largest values of independent variable x that we can allow ourselves to apply the model to?"
+
+Here, use the preloaded x_data, y_data, y_model, and plot_data_model_tolerance() to complete your solution.
+
+
+
+In [2]: x_good
+Out[2]: 
+array([ -5. ,  -4.5,  -4. ,  -3.5,  -3. ,  -2.5,  -2. ,  -1.5,  -1. ,
+        -0.5,   0. ,   0.5,   1. ,   1.5,   2. ,   2.5,   3. ,   3.5,
+         4. ,   4.5,   5. ,   5.5,   6. ,   6.5,   7. ,   7.5,   8. ,
+         8.5,   9. ,   9.5,  10. ,  10.5,  11. ,  11.5,  12. ])
+
+In [3]: residuals
+Out[3]: 
+array([  1.73338852e+02,   1.79028548e+02,   1.16875560e+02,
+         1.65569805e+02,   1.27571080e+02,   1.37205129e+02,
+         1.31707230e+02,   1.40760350e+02,   1.17881715e+02,
+         1.24150220e+02,   5.76047481e+01,   4.93256680e+01,
+         7.24770450e+01,   5.19189388e+01,   5.26345123e+01,
+         5.57255083e+01,   3.66121744e+01,   4.22684577e+01,
+         5.73914701e+01,   1.49809083e+01,   1.17858791e+01,
+         2.97743924e+01,   3.58176742e+01,   7.81629740e+00,
+         1.80147183e+01,   2.21790735e+01,   2.14897103e+01,
+         1.59130876e+01,   3.92409303e-01,   5.60671239e+01,
+         2.87508931e+01,   2.47986506e+01,   2.38331032e+01,
+         5.05313705e+01,   8.35193415e+00,   5.29591171e-02,
+         1.01363353e+01,   7.22729852e+00,   3.30289548e+01,
+         3.86726388e+01,   5.06615812e+00,   4.64653917e+01,
+         5.02306237e+01,   6.62301853e+01,   7.21123693e+01,
+         1.41798790e+02,   1.38177306e+02,   2.25491839e+02,
+         2.09643872e+02,   2.03591928e+02,   2.65012164e+02,
+         2.71630217e+02,   2.78876694e+02,   3.03917702e+02,
+         3.33473226e+02,   3.83118447e+02,   4.01948334e+02,
+         4.38136028e+02,   4.34024290e+02,   4.20292145e+02,
+         5.03161168e+02])
+         
+         
+         
+         
+         
+         
+         
+         
+
+
+
+# Compute the residuals, "data - model", and determine where [residuals < tolerance]
+residuals = np.abs(y_data - y_model)
+tolerance = 100
+x_good = x_data[residuals < tolerance]
+
+# Find the min and max of the "good" values, and plot y_data, y_model, and the tolerance range
+print('Minimum good x value = {}'.format(np.min(x_good)))
+print('Maximum good x value = {}'.format(np.max(x_good)))
+fig = plot_data_model_tolerance(x_data, y_data, y_model, tolerance)
+
+
+<script.py> output:
+    Minimum good x value = -5.0
+    Maximum good x value = 12.0
+    
+    
+Notice the range of good values, which extends a little out into the new data, is marked in green on the plot. By comparing the residuals to a tolerance threshold, we can quantify how far out out extrapolation can go before the difference between model and data gets too large.    
