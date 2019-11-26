@@ -1,0 +1,76 @@
+Linear Model in Cosmology
+Less than 100 years ago, the universe appeared to be composed of a single static galaxy, containing perhaps a million stars. Today we have observations of hundreds of billions of galaxies, each with hundreds of billions of stars, all moving.
+
+The beginnings of the modern physical science of cosmology came with the publication in 1929 by Edwin Hubble that included use of a linear model.
+
+In this exercise, you will build a model whose slope will give Hubble's Constant, which describes the velocity of galaxies as a linear function of distance from Earth.
+#http://www.pnas.org/content/15/3/168
+
+
+
+    distances     names  velocities
+0       0.032       SMC         170
+1       0.034       LMC         290
+2       0.275   NGC-221        -185
+3       0.275   NGC-224        -220
+4       0.263   NGC-598         -70
+5       1.100  NGC-1055         450
+6       1.000  NGC-1068         920
+7       0.900  NGC-3031         -30
+8       0.900  NGC-3627         650
+9       1.700  NGC-4151         960
+10      0.800  NGC-4214         300
+11      1.400  NGC-4258         500
+12      2.000  NGC-4382         500
+13      0.630  NGC-4449         200
+14      2.000  NGC-4472         850
+15      2.000  NGC-4486         800
+16      2.000  NGC-4649        1090
+17      0.500  NGC-4736         290
+18      0.900  NGC-4826         150
+19      0.500  NGC-5194         270
+20      0.900  NGC-5236         500
+21      0.450  NGC-5357         200
+22      0.214  NGC-6822        -130
+23      1.100  NGC-7331         500
+
+
+
+In [5]: model_fit.params
+Out[5]: 
+Intercept    -40.783649
+distances    454.158441
+dtype: float64
+
+In [6]: model_fit.bse
+Out[6]: 
+Intercept    83.438870
+distances    75.237105
+dtype: float64
+
+
+
+
+
+
+# Fit the model, based on the form of the formula
+model_fit = ols(formula="velocities ~ distances", data=df).fit()
+
+# Extract the model parameters and associated "errors" or uncertainties
+a0 = model_fit.params['Intercept']
+a1 = model_fit.params['distances']
+e0 = model_fit.bse['Intercept']
+e1 = model_fit.bse['distances']
+
+# Print the results
+print('For slope a1={:.02f}, the uncertainty in a1 is {:.02f}'.format(a1, e1))
+print('For intercept a0={:.02f}, the uncertainty in a0 is {:.02f}'.format(a0, e0))
+
+
+
+<script.py> output:
+    For slope a1=454.16, the uncertainty in a1 is 75.24
+    For intercept a0=-40.78, the uncertainty in a0 is 83.44
+
+Correct! Later in the course, we will spend more time with model uncertainty, and exploring how to compute it ourselves. Notice the ~ in the formula means "similar to" and is interpreted by statsmodels to mean that y ~ x have a linear relationship. More recently, observed astrophysical data extend the veritical scale of measured data out further by almost a factor of 50. Using this new data to model gives a very different value for the slope, Hubble's Constant, of about 72. Modeling with new data revealed a different slope, and this has big implications in the physics of the Universe.
+
