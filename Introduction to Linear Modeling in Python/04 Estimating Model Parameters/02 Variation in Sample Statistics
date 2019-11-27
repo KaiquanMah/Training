@@ -1,0 +1,51 @@
+Variation in Sample Statistics
+If we create one sample of size=1000 by drawing that many points from a population. Then compute a sample statistic, such as the mean, a single value that summarizes the sample itself.
+
+If you repeat that sampling process num_samples=100 times, you get 100 samples. Computing the sample statistic, like the mean, for each of the different samples, will result in a distribution of values of the mean. The goal then is to compute the mean of the means and standard deviation of the means.
+
+Here you will use the preloaded population, num_samples, and num_pts, and note that the means and deviations arrays have been initialized to zero to give you containers to use for the for loop.
+
+
+
+
+In [1]: population
+Out[1]: 
+array([ 104.96714153,   98.61735699,  106.47688538, ...,   98.87020253,
+        114.69142371,  104.76430255])
+
+In [2]: num_samples
+Out[2]: 100
+
+In [3]: num_pts
+Out[3]: 1000
+
+
+
+
+
+
+
+
+# Initialize two arrays of zeros to be used as containers
+means = np.zeros(num_samples)
+stdevs = np.zeros(num_samples)
+
+# For each iteration, compute and store the sample mean and sample stdev
+for ns in range(num_samples):
+    sample = np.random.choice(population, num_pts)
+    means[ns] = sample.mean()
+    stdevs[ns] = sample.std()
+
+# Compute and print the mean() and std() for the sample statistic distributions
+print("Means:  center={:>6.2f}, spread={:>6.2f}".format(means.mean(), means.std()))
+print("Stdevs: center={:>6.2f}, spread={:>6.2f}".format(stdevs.mean(), stdevs.std()))
+
+
+
+
+<script.py> output:
+    Means:  center=100.00, spread=  0.33
+    Stdevs: center= 10.01, spread=  0.22
+
+If we only took one sample, instead of 100, there could be only a single mean and the standard deviation of that single value is zero. But each sample is different because of the randomness of the draws. The mean of the means is our estimate for the population mean, the stdev of the means is our measure of the uncertainty in our estimate of the population mean. This is the same concept as the standard error of the slope seen in linear regression.
+
