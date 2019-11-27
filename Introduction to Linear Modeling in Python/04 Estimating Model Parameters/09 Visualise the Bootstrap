@@ -1,0 +1,31 @@
+Visualise the Bootstrap
+Continuing where we left off earlier in this lesson, let's visualize the bootstrap distribution of speeds estimated using bootstrap resampling, where we computed a least-squares fit to the slope for every sample to test the variation or uncertainty in our slope estimation.
+
+To get you started, we've preloaded a function compute_resample_speeds(distances, times) to do the computation of generate the speed sample distribution.
+
+
+
+
+# Create the bootstrap distribution of speeds
+resample_speeds = compute_resample_speeds(distances, times)
+speed_estimate = np.mean(resample_speeds)
+percentiles = np.percentile(resample_speeds, [5, 95])
+
+# Plot the histogram with the estimate and confidence interval
+fig, axis = plt.subplots()
+hist_bin_edges = np.linspace(0.0, 4.0, 21)
+axis.hist(resample_speeds, hist_bin_edges, color='green', alpha=0.35, rwidth=0.8)
+
+#line along the mean
+axis.axvline(speed_estimate, label='Estimate', color='black')
+
+#line along 5th percentile
+axis.axvline(percentiles[0], label=' 5th', color='blue')
+
+#line along 95th percentile
+axis.axvline(percentiles[1], label='95th', color='blue')
+
+axis.legend()
+plt.show()
+
+Notice that vertical lines marking the 5th (left) and 95th (right) percentiles mark the extent of the confidence interval, while the speed estimate (center line) is the mean of the distribution and falls between them. Note the speed estimate is the mean, not the median, which would be 50% percentile.
