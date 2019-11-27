@@ -1,0 +1,88 @@
+Maximizing Likelihood, Part 2
+In Part 1, you computed a single log-likelihood for a single mu. In this Part 2, you will apply the predefined function compute_loglikelihood() to compute an array of log-likelihood values, one for each element in an array of possible mu values.
+
+The goal then is to determine which single mu guess leads to the single maximum value of the loglikelihood array.
+
+To get started, use the preloaded data sample_distances, sample_mean, sample_stdev and a helper function compute_loglikelihood().
+
+
+In [3]: mu_guesses
+Out[3]: 
+array([ 26468.41823677,  26477.41772032,  26486.41720386,  26495.41668741,
+        26504.41617096,  26513.4156545 ,  26522.41513805,  26531.41462159,
+        26540.41410514,  26549.41358868,  26558.41307223,  26567.41255578,
+        26576.41203932,  26585.41152287,  26594.41100641,  26603.41048996,
+        26612.4099735 ,  26621.40945705,  26630.4089406 ,  26639.40842414,
+        26648.40790769,  26657.40739123,  26666.40687478,  26675.40635832,
+        26684.40584187,  26693.40532542,  26702.40480896,  26711.40429251,
+        26720.40377605,  26729.4032596 ,  26738.40274314,  26747.40222669,
+        26756.40171024,  26765.40119378,  26774.40067733,  26783.40016087,
+        26792.39964442,  26801.39912796,  26810.39861151,  26819.39809506,
+        26828.3975786 ,  26837.39706215,  26846.39654569,  26855.39602924,
+        26864.39551278,  26873.39499633,  26882.39447988,  26891.39396342,
+        26900.39344697,  26909.39293051,  26918.39241406,  26927.3918976 ,
+        26936.39138115,  26945.3908647 ,  26954.39034824,  26963.38983179,
+        26972.38931533,  26981.38879888,  26990.38828242,  26999.38776597,
+        27008.38724952,  27017.38673306,  27026.38621661,  27035.38570015,
+        27044.3851837 ,  27053.38466724,  27062.38415079,  27071.38363434,
+        27080.38311788,  27089.38260143,  27098.38208497,  27107.38156852,
+        27116.38105206,  27125.38053561,  27134.38001916,  27143.3795027 ,
+        27152.37898625,  27161.37846979,  27170.37795334,  27179.37743688,
+        27188.37692043,  27197.37640397,  27206.37588752,  27215.37537107,
+        27224.37485461,  27233.37433816,  27242.3738217 ,  27251.37330525,
+        27260.37278879,  27269.37227234,  27278.37175589,  27287.37123943,
+        27296.37072298,  27305.37020652,  27314.36969007,  27323.36917361,
+        27332.36865716,  27341.36814071,  27350.36762425,  27359.3671078 ,
+        27368.36659134])
+
+In [4]: sample_mean
+Out[4]: 26918.392414058031
+
+In [5]: sample_stdev
+Out[5]: 224.9870886426813
+
+In [6]: low_guess
+Out[6]: 26468.418236772668
+
+In [7]: high_guess
+Out[7]: 27368.366591343394
+
+
+
+
+
+
+
+# Create an array of mu guesses, centered on sample_mean, spread out +/- by sample_stdev
+low_guess = sample_mean - 2*sample_stdev
+high_guess = sample_mean + 2*sample_stdev
+mu_guesses = np.linspace(low_guess, high_guess, 101)
+
+# Compute the loglikelihood for each model created from each guess value
+loglikelihoods = np.zeros(len(mu_guesses))
+for n, mu_guess in enumerate(mu_guesses):
+    loglikelihoods[n] = compute_loglikelihood(sample_distances, mu=mu_guess, sigma=sample_stdev)
+
+# Find the best guess by using logical indexing, the print and plot the result
+best_mu = mu_guesses[loglikelihoods==np.max(loglikelihoods)]
+print('Maximum loglikelihood found for best mu guess={}'.format(best_mu))
+fig = plot_loglikelihoods(mu_guesses, loglikelihoods)
+
+
+
+
+In [12]: max(loglikelihoods)
+Out[12]: -6834.9815499522738
+
+In [10]: best_mu
+Maximum loglikelihood found for best mu guess=[ 26918.39241406]
+Out[10]: array([ 26918.39241406])
+
+
+<script.py> output:
+    Maximum loglikelihood found for best mu guess=[ 26918.39241406]
+
+
+Notice that the guess for mu that gave the maximum likelihood is precisely the same value as the sample.mean(). The sample_mean is thus said to be the "Maximum Likelihood Estimator" of the population mean mu. We call that value of mu the "Maximum Likelihood Estimator" of the population mu because, of all the mu values tested, it results in a model population with the greatest likelihood of producing the sample data we have.
+
+
