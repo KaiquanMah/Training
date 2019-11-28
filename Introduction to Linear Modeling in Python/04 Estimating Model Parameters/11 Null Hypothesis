@@ -1,0 +1,30 @@
+Null Hypothesis
+In this exercise, we formulate the null hypothesis as
+short and long time durations have no effect on total distance traveled.
+
+
+We interpret the "zero effect size" to mean that if we shuffled samples between short and long times, so that two new samples each have a mix of short and long duration trips, and then compute the test statistic, on average it will be zero.
+
+In this exercise, your goal is to perform the shuffling and resampling. Start with the predefined group_duration_short and group_duration_long which are the un-shuffled time duration groups.
+
+
+# Shuffle the time-ordered distances, then slice the result into two populations.
+shuffle_bucket = np.concatenate((group_duration_short, group_duration_long))
+np.random.shuffle(shuffle_bucket)
+slice_index = len(shuffle_bucket)//2
+shuffled_half1 = shuffle_bucket[0:slice_index]
+shuffled_half2 = shuffle_bucket[slice_index:]
+
+# Create new samples from each shuffled population, and compute the test statistic
+resample_half1 = np.random.choice(shuffled_half1, size=500, replace=True)
+resample_half2 = np.random.choice(shuffled_half2, size=500, replace=True)
+test_statistic = resample_half2 - resample_half1
+
+# Compute and print the effect size
+effect_size = np.mean(test_statistic)
+print('Test Statistic, after shuffling, mean = {}'.format(effect_size))
+
+<script.py> output:
+    Test Statistic, after shuffling, mean = 0.09300205283002799
+
+Notice that your effect size is not exactly zero because there is noise in the data. But the effect size is much closer to zero than before shuffling. Notice that if you rerun your code, which will generate a new shuffle, you will get slightly different results each time for the effect size, but np.abs(test_statistic) should be less than about 1.0, due to the noise, as opposed to the slope, which was about 2.0
