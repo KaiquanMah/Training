@@ -1,0 +1,38 @@
+Visualising the P-Value
+In this exercise, you will visualize the p-value, the chance that the effect (or "speed") we estimated, was the result of random variation in the sample. Your goal is to visualize this as the fraction of points in the shuffled test statistic distribution that fall to the right of the mean of the test statistic ("effect size") computed from the unshuffled samples.
+
+To get you started, we've preloaded the group_duration_short and group_duration_long and functions compute_test_statistic(), shuffle_and_split(), and plot_test_statistic_effect()
+
+
+In [2]: effect_size
+Out[2]: 9.9998105725290927
+
+
+
+# Compute the test stat distribution and effect size for two population groups
+test_statistic_unshuffled = compute_test_statistic(group_duration_short, group_duration_long)
+effect_size = np.mean(test_statistic_unshuffled)
+
+# Randomize the two populations, and recompute the test stat distribution
+shuffled_half1, shuffled_half2 = shuffle_and_split(group_duration_short, group_duration_long)
+test_statistic_shuffled = compute_test_statistic(shuffled_half1, shuffled_half2)
+
+# Compute the p-value as the proportion of shuffled test stat values >= the effect size
+condition = test_statistic_shuffled >= effect_size
+p_value = len(test_statistic_shuffled[condition]) / len(test_statistic_shuffled)
+
+# Print p-value and overplot the shuffled and unshuffled test statistic distributions
+print("The p-value is = {}".format(p_value))
+fig = plot_test_stats_and_pvalue(test_statistic_unshuffled, test_statistic_shuffled)
+
+
+
+<script.py> output:
+    The p-value is = 0.126
+
+
+
+
+
+Note that the entire point of this is compute a p-value to quantify the chance that our estimate for speed could have been obtained by random chance. On the plot, the unshuffle test stats are the distribution of speed values estimated from time-ordered distances. The shuffled test stats are the distribution of speed values computed from randomizing unordered distances. Values of the shuffled stats to the right of the mean non-shuffled effect size line are those that both (1) could have both occured randomly and (2) are at least as big as the estimate you want to use for speed.
+
