@@ -1,0 +1,101 @@
+Fitness goals
+Let's model how activity levels impact weight loss using modern fitness trackers. On days when you go to the gym, you average around 15k steps, and around 5k steps otherwise. You go to the gym 40% of the time. Let's model the step counts in a day as a Poisson random variable with a mean λ dependent on whether or not you go to the gym.
+
+For simplicity, let’s say you have an 80% chance of losing 1lb and a 20% chance of gaining 1lb when you get more than 10k steps. The probabilities are reversed when you get less than 8k steps. Otherwise, there's an even chance of gaining or losing 1lb. Given all this information, find the probability of losing weight in a month.
+
+The seed for this exercise is set to 222
+
+days=30
+In [16]: sims
+Out[16]: 1000
+
+In [3]: lam
+Out[3]: array([5000])
+
+In [2]: np.random.poisson(lam)
+Out[2]: array([5038])
+
+In [5]: w
+Out[5]: 
+[1,
+ -1,
+ -1,
+ -1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ -1,
+ -1,
+ 1,
+ -1,
+ 1,
+ 1,
+ 1,
+ 1,
+ -1,
+ -1,
+ 1,
+ -1,
+ 1,
+ -1,
+ -1,
+ 1,
+ 1,
+ -1,
+ 1,
+ 1,
+ 1]
+
+
+
+
+
+
+In [6]: outcomes
+Out[6]: 
+[14,
+ 0,
+ 2,
+ 12,
+ -2,
+ 6,
+ 10,
+ 8,
+ 14,
+ 2,
+ 4,
+ ...]
+ 
+ 
+ 
+ 
+ 
+ 
+# Simulate steps & choose prob 
+for _ in range(sims):
+    w = []
+    for i in range(days):
+        
+        #go to the gym 40% of the time, taking 15k steps; 5k steps otherwise
+        lam = np.random.choice([5000, 15000], p=[0.6, 0.4], size=1)
+        
+        #Simulate steps as a Poisson random variable for a given day based on the value of lam.
+        steps = np.random.poisson(lam)
+        
+        
+        #Set prob to [0.2, 0.8] if steps > 10000 or to [0.8, 0.2] if steps < 8000. Sum up all the weight lost or gained in a month stored in w.
+        if steps > 10000: 
+            prob = [0.2, 0.8]
+        elif steps < 8000: 
+            prob = [0.8, 0.2]
+        else:
+            prob = [0.5, 0.5]
+        w.append(np.random.choice([1, -1], p=prob))
+    outcomes.append(sum(w))
+
+
+# Calculate fraction of outcomes where there was a weight loss
+weight_loss_outcomes_frac = sum(outcome<0 for outcome in outcomes)/len(outcomes)
+print("Probability of Weight Loss = {}".format(weight_loss_outcomes_frac))
