@@ -1,0 +1,91 @@
+Let's return to our poker game. Last time, we calculated the probability of getting at least two of a kind. This time we are interested in a full house. A full house is when you get two cards of different suits that share the same numeric value and three other cards that have the same numeric value (e.g., 2 of hearts & spades, jacks of clubs, diamonds, & spades).
+
+Thus, a full house is the probability of getting exactly three of a kind conditional on getting exactly two of a kind of another value. Using the same code as before, modify the success condition to get the desired output. This exercise will teach you to estimate conditional probabilities in card games and build your foundation in framing abstract problems for simulation.
+
+The seed for this exercise is set to 123
+In [2]: deck
+Out[2]: 
+[('Heart', 0),
+ ('Heart', 1),
+ ('Heart', 2),
+ ('Heart', 3),
+ ('Heart', 4),
+ ('Heart', 5),
+ ('Heart', 6),
+ ('Heart', 7),
+ ('Heart', 8),
+ ('Heart', 9),
+ ('Heart', 10),
+ ('Heart', 11),
+ ('Heart', 12),
+ ('Club', 0),
+ ('Club', 1),
+ ('Club', 2),
+ ('Club', 3),
+ ('Club', 4),
+ ('Club', 5),
+ ('Club', 6),
+ ('Club', 7),
+ ('Club', 8),
+ ('Club', 9),
+ ('Club', 10),
+ ('Club', 11),
+ ('Club', 12),
+ ('Spade', 0),
+ ('Spade', 1),
+ ('Spade', 2),
+ ('Spade', 3),
+ ('Spade', 4),
+ ('Spade', 5),
+ ('Spade', 6),
+ ('Spade', 7),
+ ('Spade', 8),
+ ('Spade', 9),
+ ('Spade', 10),
+ ('Spade', 11),
+ ('Spade', 12),
+ ('Diamond', 0),
+ ('Diamond', 1),
+ ('Diamond', 2),
+ ('Diamond', 3),
+ ('Diamond', 4),
+ ('Diamond', 5),
+ ('Diamond', 6),
+ ('Diamond', 7),
+ ('Diamond', 8),
+ ('Diamond', 9),
+ ('Diamond', 10),
+ ('Diamond', 11),
+ ('Diamond', 12)]
+
+
+
+
+
+
+
+
+
+
+
+#Shuffle deck & count card occurrences in the hand
+n_sims, full_house, deck_of_cards = 50000, 0, deck.copy() 
+for i in range(n_sims):
+    np.random.shuffle(deck_of_cards)
+    hand, cards_in_hand = deck_of_cards[0:5], {}
+    for card in hand:
+        # Use .get() method to count occurrences of each card
+        cards_in_hand[card[1]] = cards_in_hand.get(card[1], 0) + 1
+        
+    # Condition for getting full house
+    condition = (max(cards_in_hand.values()) ==3) & (min(cards_in_hand.values())==2)
+    if  condition == True: 
+        full_house += 1
+print("Probability of seeing a full house = {}".format(full_house/n_sims))
+
+
+<script.py> output:
+    Probability of seeing a full house = 0.0014
+Look at how small this probability is compared to that of at least two of a kind.
+
+
