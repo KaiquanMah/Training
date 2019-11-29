@@ -1,0 +1,57 @@
+National elections
+This exercise will give you a taste of how you can model a DGP at different levels of complexity.
+
+Consider national elections in a country with two political parties - Red and Blue. This country has 50 states and the party that wins the most states wins the elections. You have the probability p of Red winning in each individual state and want to know the probability of Red winning nationally.
+
+Let's model the DGP to understand the distribution. Suppose the election outcome in each state follows a binomial distribution with probability p such that 0 indicates a loss for Red and 1 indicates a win. We then simulate a number of election outcomes. Finally, we can ask rich questions like what is the probability of Red winning less than 45% of the states?
+
+
+In [3]: election
+Out[3]: 
+array([1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0,
+       1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0,
+       1, 1, 0, 1, 1, 0])
+
+
+The seed for this exercise is set to 224
+
+In [1]: p
+Out[1]: 
+array([0.52076814, 0.67846401, 0.82731745, 0.64722761, 0.03665174,
+       0.17835411, 0.75296372, 0.22206157, 0.72778372, 0.28461556,
+       0.72545221, 0.106571  , 0.09291364, 0.77535718, 0.51440142,
+       0.89604586, 0.39376099, 0.24910244, 0.92518253, 0.08165597,
+       0.4212476 , 0.74123879, 0.2479099 , 0.46125805, 0.19584491,
+       0.24440482, 0.349916  , 0.80224624, 0.80186664, 0.82968251,
+       0.91178779, 0.51739059, 0.67338858, 0.15675863, 0.37772308,
+       0.77134621, 0.71727114, 0.92700912, 0.28386132, 0.25502498,
+       0.30081506, 0.19724585, 0.29129564, 0.56623386, 0.97681039,
+       0.96263926, 0.0548948 , 0.14092758, 0.54739446, 0.54555576])
+
+
+
+
+
+
+outcomes, sims, probs = [], 1000, p
+
+for _ in range(sims):
+    # Simulate elections in the 50 states
+    election = np.random.binomial(n=1, p=probs, size=50)
+    # Get average of Red wins and add to `outcomes`
+    outcomes.append(np.sum(election)/len(election))
+
+# Calculate probability of Red winning in less than 45% of the states
+prob_red_wins = np.sum([outcome<0.45 for outcome in outcomes])/sims
+print("Probability of Red winning in less than 45% of the states = {}".format(prob_red_wins))
+
+
+In [14]: prob_red_wins
+Out[14]: 0.196
+
+<script.py> output:
+    Probability of Red winning in less than 45% of the states = 0.196
+
+Now think about what you would do if you were given the probabilities of winning in each county within a state.
+
+
