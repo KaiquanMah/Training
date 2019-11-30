@@ -1,0 +1,67 @@
+Sign up Flow
+Sign up Flow
+We will now model the DGP of an eCommerce ad flow starting with sign-ups.
+
+On any day, we get many ad impressions, which can be modeled as Poisson random variables (RV). You are told that λ is normally distributed with a mean of 100k visitors and standard deviation 2000.
+
+During the signup journey, the customer sees an ad, decides whether or not to click, and then whether or not to signup. Thus both clicks and signups are binary, modeled using binomial RVs. What about probability p of success? Our current low-cost option gives us a click-through rate of 1% and a sign-up rate of 20%. A higher cost option could increase the clickthrough and signup rate by up to 20%, but we are unsure of the level of improvement, so we model it as a uniform RV.
+
+
+
+
+# Initialize click-through rate and signup rate dictionaries
+ct_rate = {'low':0.01, 'high':np.random.uniform(low=0.01, high=1.2*0.01)}
+su_rate = {'low':0.2, 'high':np.random.uniform(low=0.2, high=1.2*0.2)}
+
+def get_signups(cost, ct_rate, su_rate, sims):
+    #lambda has mean of 100k visitors, sd of 2000
+    lam = np.random.normal(loc=100000, scale=2000, size=sims)
+    
+    # Simulate impressions(poisson), clicks(binomial) and signups(binomial)
+    impressions = np.random.poisson(lam)
+    
+    
+    #Model clicks and signups as binomial random variables with n as impressions and clicks and p as ct_rate[cost] and su_rate[cost], respectively.
+    clicks = np.random.binomial(n=impressions, p=ct_rate[cost])
+    signups = np.random.binomial(n=clicks, p=su_rate[cost])
+    return signups
+
+print("Simulated Signups = {}".format(get_signups('high', ct_rate, su_rate, 1)))
+
+
+
+
+
+
+
+The seed for this exercise is set to 123
+
+In [4]: ct_rate
+Out[4]: {'high': 0.011392938371195723, 'low': 0.01}
+
+In [5]: su_rate
+Out[5]: {'high': 0.21144557339801517, 'low': 0.2}
+
+
+
+In [9]: lam
+Out[9]: array([96987.41057216])
+
+In [15]: impressions
+Out[15]: array([96846])
+
+
+
+In [13]: clicks
+Out[13]: array([1140])
+
+In [14]: signups
+Out[14]: array([238])
+
+
+<script.py> output:
+    Simulated Signups = [238]
+
+
+Now that we have signups, let's see how to model the purchases from these signups.
+
