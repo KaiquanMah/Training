@@ -1,0 +1,250 @@
+Non-standard estimators
+In the last exercise, you ran a simple bootstrap that we will now modify for more complicated estimators.
+
+Suppose you are studying the health of students. You are given the height and weight of 1000 students and are interested in the median height as well as the correlation between height and weight and the associated 95% CI for these quantities. Let's use bootstrapping.
+
+Examine the pandas DataFrame df with the heights and weights of 1000 students. Using this, calculate the 95% CI for both the median height as well as the correlation between height and weight.
+
+
+
+The seed for this exercise is set to 123
+
+In [1]: df
+Out[1]: 
+      heights     weights
+0    3.328739   97.785171
+1    7.494691  276.504049
+2    6.065957  230.262258
+3    2.487411   62.074851
+4    4.342799  163.870440
+5    8.802873  261.388062
+6    0.646642   17.565980
+7    4.642175  134.119915
+8    8.031873  260.923055
+9    3.766519   99.926238
+10   4.142228  158.818629
+11   5.310582  199.717234
+12   8.482779  279.617263
+13   4.222196  157.166418
+14   4.612036  167.953077
+15   4.631297  158.884117
+16   9.911860  400.869361
+17   9.873572  324.553061
+18   7.508108  263.141400
+19   6.272373  209.973372
+20   6.974737  234.821300
+21   8.481464  300.836542
+22   3.628332  119.631737
+23   7.851658  253.297364
+24   2.992239  107.834041
+25   4.224497  177.415686
+26   7.314210  279.566523
+27   2.642639   97.568463
+28   5.219863  164.310269
+29   3.776490  136.837897
+..        ...         ...
+970  8.941841  274.245297
+971  2.363120  108.564112
+972  5.403972  193.205642
+973  3.274941   96.493612
+974  5.370510  200.197941
+975  6.345839  261.255181
+976  5.662982  238.319716
+977  5.401977  209.624636
+978  8.466078  271.522625
+979  6.941979  250.715844
+980  4.954691  181.974752
+981  5.548423  225.245211
+982  7.241796  249.340967
+983  6.719581  235.574630
+984  4.649848  146.406955
+985  1.949514   84.935184
+986  3.130685  104.188713
+987  5.791958  207.368010
+988  1.926946   55.704370
+989  5.195211  183.013375
+990  4.592862  133.739833
+991  7.498506  266.469925
+992  2.863912   85.172552
+993  1.636462   74.759385
+994  4.660719  209.311484
+995  6.769526  258.075950
+996  7.639837  239.396239
+997  3.681346  119.864691
+998  6.440527  185.176085
+999  3.277139  115.039120
+
+[1000 rows x 2 columns]
+
+
+
+
+
+
+
+
+
+
+
+
+In [8]: tmp_df
+Out[8]: 
+      heights     weights
+516  5.799868  169.509334
+108  6.352293  260.461513
+176  6.114768  210.065441
+510  6.332248  212.743306
+479  2.885644  139.740570
+763  1.648826   68.315002
+896  3.287228  121.048229
+959  5.586501  192.895829
+467  6.270132  236.510553
+411  6.150927  240.233088
+888  1.615701   53.649522
+299  7.139521  195.897202
+373  5.770155  214.528811
+943  2.991633  106.916727
+484  6.700350  232.648174
+507  4.431106  164.227118
+139  4.792000  165.506859
+17   9.873572  324.553061
+628  5.201418  205.989103
+300  7.030110  208.945631
+562  2.554045   98.584205
+497  5.446155  189.565236
+4    4.342799  163.870440
+414  7.528608  276.132002
+705  7.045691  215.263228
+812  2.668962  114.276159
+570  5.688306  203.289991
+712  4.304290  150.255285
+897  6.233464  196.465262
+337  6.582463  237.213021
+..        ...         ...
+49   9.976287  355.549472
+824  5.707136  154.124054
+755  7.703052  256.306904
+246  6.760976  213.410719
+602  6.030468  197.968317
+34   7.354925  252.353551
+660  2.956506  100.163295
+442  4.702752  151.563685
+359  3.243339  121.585750
+947  7.856114  294.360112
+907  0.954765    3.995552
+725  9.196760  306.575215
+708  6.882845  266.479353
+320  3.864663  125.681466
+168  5.658454  161.135909
+176  6.114768  210.065441
+923  4.871499  200.261320
+258  5.559286  205.397256
+607  3.332645  141.288394
+828  3.050942  103.486327
+113  6.502498  170.543619
+357  9.612935  309.441162
+651  3.151459  130.412036
+565  8.116387  287.359082
+261  5.181510  146.433856
+547  2.325587   81.894578
+885  3.713608  155.266682
+84   4.870484  111.395327
+306  4.091316  167.145798
+89   5.828882  200.819022
+
+[1000 rows x 2 columns]
+
+
+
+In [3]: np.median(tmp_df.heights)
+Out[3]: 5.432621536918122
+
+In [2]: np.corrcoef(tmp_df['heights'],tmp_df['weights'])
+Out[2]: 
+array([[1.        , 0.94468044],
+       [0.94468044, 1.        ]])
+
+
+
+In [3]: tmp_df.corr()
+Out[3]: 
+         heights  weights
+heights  1.00000  0.94468
+weights  0.94468  1.00000
+
+In [11]: tmp_df.weights.corr(tmp_df.heights)
+Out[11]: 0.9446804398150513
+
+
+
+
+
+
+
+ans 1 using frac=1
+#Use the .sample() method ondf to generate a sample of the data with replacement and assign it to tmp_df.
+#For each generated dataset in tmp_df, calculate the median heights and correlation between heights and weights using .median() and .corr().
+#Append the median heights to height_medians and correlation to hw_corr.
+
+
+# Sample with replacement and calculate quantities of interest
+sims, data_size, height_medians, hw_corr = 1000, df.shape[0], [], []
+for i in range(sims):
+    
+    #https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sample.html
+    tmp_df = df.sample(frac =1,replace=True)
+    height_medians.append(np.median(tmp_df.heights))
+    hw_corr.append(tmp_df.weights.corr(tmp_df.heights))
+
+
+
+
+
+#Finally calculate the 95% confidence intervals for each of the above quantities using np.percentile().
+# Calculate confidence intervals
+height_median_ci = np.percentile(height_medians, [2.5, 97.5])
+height_weight_corr_ci = np.percentile(hw_corr, [2.5, 97.5])
+print("Height Median CI = {} \nHeight Weight Correlation CI = {}".format( height_median_ci, height_weight_corr_ci))
+
+
+
+
+
+
+
+
+ans 2 using n=1000
+#Use the .sample() method ondf to generate a sample of the data with replacement and assign it to tmp_df.
+#For each generated dataset in tmp_df, calculate the median heights and correlation between heights and weights using .median() and .corr().
+#Append the median heights to height_medians and correlation to hw_corr.
+
+
+# Sample with replacement and calculate quantities of interest
+sims, data_size, height_medians, hw_corr = 1000, df.shape[0], [], []
+for i in range(sims):
+    
+    #https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sample.html
+    tmp_df = df.sample(n=1000,replace=True)
+    height_medians.append(np.median(tmp_df.heights))
+    hw_corr.append(tmp_df.weights.corr(tmp_df.heights))
+
+
+
+
+#Finally calculate the 95% confidence intervals for each of the above quantities using np.percentile().
+# Calculate confidence intervals
+height_median_ci = np.percentile(height_medians, [2.5, 97.5])
+height_weight_corr_ci = np.percentile(hw_corr, [2.5, 97.5])
+print("Height Median CI = {} \nHeight Weight Correlation CI = {}".format( height_median_ci, height_weight_corr_ci))
+
+
+
+
+<script.py> output:
+    Height Median CI = [5.25262253 5.55928686] 
+    Height Weight Correlation CI = [0.93892136 0.95103152]
+    
+    
+    
+
+
