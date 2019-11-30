@@ -1,0 +1,88 @@
+Sampling with replacement
+In this example, you will review the np.random.choice() function that you've already seen in the previous chapters. You are given multiple variations of np.random.choice() for sampling from arrays. Look at each variation carefully and use the console to test out the options. Select the option that could generate ['a', 'c', 'c'] as an output.
+
+#NOT np.random.choice(['a', 'b', 'c'], size=3, replace=False)
+
+#YES np.random.choice(['a', 'b', 'c', 'd', 'e'], size=5, replace=True)[:3]
+#We need c to appear twice, so replace is required
+#And we only want to pick 3 items
+
+#NOT np.random.choice(['a', 'b', 'c', 'd', 'e'], size=5, replace=False)[:3]
+#NOT np.random.choice(['a', 'b'], size=3, replace=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Probability example
+In this exercise, we will review the difference between sampling with and without replacement. We will calculate the probability of an event using simulation, but vary our sampling method to see how it impacts probability.
+
+Consider a bowl filled with colored candies - three blue, two green, and five yellow. Draw three candies at random, with replacement and without replacement. You want to know the probability of drawing a yellow candy on the third draw given that the first candy was blue and the second candy was green.
+
+In [10]: sample_rep
+Out[10]: array(['y', 'b', 'b'], dtype='<U1')
+
+In [11]: sample_no_rep
+Out[11]: array(['b', 'b', 'y'], dtype='<U1')
+
+The seed for this exercise is set to 123
+
+
+
+
+
+#Set up your sample space bowl as a list having three blue 'b', two green 'g' and five yellow 'y' candies.
+# Set up the bowl
+success_rep, success_no_rep, sims = 0, 0, 10000
+bowl = ['b', 'b', 'b', 'g', 'g', 'y', 'y', 'y', 'y', 'y']
+
+
+
+#Draw a sample of three candies with replacement (sample_rep) and without replacement (sample_no_rep).
+#Write down the success condition for drawing a yellow candy on the third draw given that the first candy was blue and the second candy was green.
+for i in range(sims):
+    sample_rep = []
+    sample_no_rep = []
+    
+    # Sample with and without replacement & increment success counters
+    sample_rep = np.random.choice(bowl, size=3, replace=True)
+    sample_no_rep = np.random.choice(bowl, size=3, replace=False)
+    
+    if (sample_rep[0] == 'b') & (sample_rep[1] == 'g') & (sample_rep[2] == 'y'): 
+        success_rep += 1
+    if (sample_no_rep[0] == 'b') & (sample_no_rep[1] == 'g') & (sample_no_rep[2] == 'y'): 
+        success_no_rep += 1
+
+
+
+#Calculate the probability with and without replacement as successes divided by the number of iterations.
+# Calculate probabilities
+prob_with_replacement = success_rep/sims
+prob_without_replacement = success_no_rep/sims
+print("Probability with replacement = {}, without replacement = {}".format(prob_with_replacement, prob_without_replacement))
+
+<script.py> output:
+    Probability with replacement = 0.0266, without replacement = 0.0415
+
+
+Does the difference between sampling with and without replacement make sense now?
+
+
+
