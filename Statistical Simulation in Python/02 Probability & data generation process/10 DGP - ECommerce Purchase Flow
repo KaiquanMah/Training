@@ -1,0 +1,72 @@
+Purchase Flow
+After signups, let's model the revenue generation process. Once the customer has signed up, they decide whether or not to purchase - a natural candidate for a binomial RV. Let's assume that 10% of signups result in a purchase.
+
+Although customers can make many purchases, let's assume one purchase. The purchase value could be modeled by any continuous RV, but one nice candidate is the exponential RV. Suppose we know that purchase value per customer has averaged around $1000. We use this information to create the purchase_values RV. The revenue, then, is simply the sum of all purchase values.
+
+The variables ct_rate, su_rate and the function get_signups() from the last exercise are pre-loaded for you.
+
+
+
+
+def get_revenue(signups):
+    rev = []
+    np.random.seed(123)
+    for s in signups:
+        
+        # Model purchases as binomial, purchase_values as exponential
+        #Model purchases as a binomial RV with p=0.1.
+        #10% signups result in a purchase
+        purchases = np.random.binomial(s, p=0.1)
+        
+        #Model purchase_values as an exponential RV scale=1000 and the appropriate size.
+        #purchase value per customer has averaged around $1000
+        purchase_values = np.random.exponential(scale=1000,size=purchases)
+        
+        # Append to revenue the sum of all purchase values.
+        rev.append(sum(purchase_values))
+    return rev
+
+print("Simulated Revenue = ${}".format(get_revenue(get_signups('low', ct_rate, su_rate, 1))[0]))
+
+
+
+
+
+In [2]: get_signups('low', ct_rate, su_rate, 1)
+Out[2]: array([229])
+
+In [4]: purchases
+Out[4]: 23
+
+
+
+
+
+
+In [9]: rev
+Out[9]: []
+
+In [6]: purchase_values
+Out[6]: 
+array([ 497.7737022 ,  420.34225026, 1305.81989701,  577.2721768 ,
+         61.53279923,  507.57135021, 1339.39324   ,  201.49426061,
+        192.91962583,  758.32883933,  758.91864727, 1006.21806126,
+       1893.33910196, 1289.00550332,  944.23637595, 1281.73033983,
+        390.02331936,  449.08578971,  259.11175974,  347.73509005,
+        996.89393203,   96.62647969,  568.63337664])
+
+In [10]: sum(purchase_values)
+Out[10]: 16144.005918310157
+
+In [12]: rev
+Out[12]: [16144.005918310157]
+
+
+
+<script.py> output:
+    Simulated Revenue = $22404.217742298042
+
+
+What are some other distributions you could have used in place of exponential?
+
+
