@@ -1,0 +1,204 @@
+Bootstrapping regression
+Now let's see how bootstrapping works with regression. Bootstrapping helps estimate the uncertainty of non-standard estimators. Consider the R2 statistic associated with a regression. When you run a simple least squares regression, you get a value for R2. But let's see how can we get a 95% CI for R2.
+
+Examine the DataFrame df with a dependent variable y and two independent variables X1 and X2 using df.head(). We've already fit this regression with statsmodels (sm) using:
+reg_fit = sm.OLS(df['y'], df.iloc[:,1:]).fit()
+
+Examine the result using reg_fit.summary() to find that R2=0.3504. Use bootstrapping to calculate the 95% CI.
+
+
+
+The seed for this exercise is set to 123
+
+In [1]: df
+Out[1]: 
+            y  Intercept        X1        X2
+0    1.217851        1.0  0.696469  0.286139
+1    1.555250        1.0  0.226851  0.551315
+2    0.888520        1.0  0.719469  0.423106
+3    1.736052        1.0  0.980764  0.684830
+4    1.632073        1.0  0.480932  0.392118
+5    1.971193        1.0  0.343178  0.729050
+6    1.476274        1.0  0.438572  0.059678
+7    1.512976        1.0  0.398044  0.737995
+8    1.503274        1.0  0.182492  0.175452
+9    1.128883        1.0  0.531551  0.531828
+10   1.269133        1.0  0.634401  0.849432
+11   1.267353        1.0  0.724455  0.611024
+12   1.443943        1.0  0.722443  0.322959
+13   1.532832        1.0  0.361789  0.228263
+14   1.943891        1.0  0.293714  0.630976
+15   1.702955        1.0  0.092105  0.433701
+16   1.707082        1.0  0.430863  0.493685
+17   0.987099        1.0  0.425830  0.312261
+18   2.166817        1.0  0.426351  0.893389
+19   1.625025        1.0  0.944160  0.501837
+20   1.682447        1.0  0.623953  0.115618
+21   1.222395        1.0  0.317285  0.414826
+22   0.838046        1.0  0.866309  0.250455
+23   1.791507        1.0  0.483034  0.985560
+24   1.885423        1.0  0.519485  0.612895
+25   2.091234        1.0  0.120629  0.826341
+26   1.229629        1.0  0.603060  0.545068
+27   1.455928        1.0  0.342764  0.304121
+28   1.367499        1.0  0.417022  0.681301
+29   1.381713        1.0  0.875457  0.510422
+..        ...        ...       ...       ...
+970  1.136979        1.0  0.239886  0.487981
+971  1.885515        1.0  0.757571  0.597765
+972  1.426095        1.0  0.783748  0.264010
+973  1.662173        1.0  0.130825  0.471213
+974  1.570451        1.0  0.664815  0.597546
+975  0.851979        1.0  0.610675  0.092662
+976  1.013111        1.0  0.491319  0.202465
+977  1.562783        1.0  0.710678  0.558419
+978  1.046356        1.0  0.600778  0.595567
+979  1.590879        1.0  0.306213  0.083369
+980  1.862105        1.0  0.413089  0.297741
+981  1.535670        1.0  0.569707  0.223138
+982  1.611361        1.0  0.223702  0.325156
+983  1.908547        1.0  0.173324  0.402011
+984  1.762459        1.0  0.824017  0.852004
+985  1.701902        1.0  0.108247  0.330730
+986  1.003891        1.0  0.613212  0.226949
+987  0.901410        1.0  0.919477  0.706633
+988  1.400502        1.0  0.220290  0.106683
+989  1.298140        1.0  0.073776  0.187974
+990  1.404749        1.0  0.395548  0.750789
+991  1.454428        1.0  0.140999  0.036462
+992  1.097232        1.0  0.891701  0.335376
+993  1.601429        1.0  0.330362  0.525107
+994  1.206976        1.0  0.419830  0.295230
+995  1.648412        1.0  0.715579  0.792169
+996  1.593862        1.0  0.826280  0.770030
+997  0.960210        1.0  0.690428  0.193012
+998  1.339003        1.0  0.731650  0.274711
+999  1.133238        1.0  0.721818  0.097863
+
+[1000 rows x 4 columns]
+
+
+
+
+
+
+
+
+
+In [3]: reg_fit.summary()
+Out[3]: 
+<class 'statsmodels.iolib.summary.Summary'>
+"""
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.359
+Model:                            OLS   Adj. R-squared:                  0.357
+Method:                 Least Squares   F-statistic:                     278.9
+Date:                Sat, 30 Nov 2019   Prob (F-statistic):           6.33e-97
+Time:                        13:27:02   Log-Likelihood:                -173.11
+No. Observations:                1000   AIC:                             352.2
+Df Residuals:                     997   BIC:                             366.9
+Df Model:                           2                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept      1.4802      0.024     61.379      0.000       1.433       1.528
+X1            -0.5006      0.032    -15.818      0.000      -0.563      -0.438
+X2             0.5251      0.031     17.097      0.000       0.465       0.585
+==============================================================================
+Omnibus:                      858.078   Durbin-Watson:                   2.122
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):               61.982
+Skew:                          -0.025   Prob(JB):                     3.47e-14
+Kurtosis:                       1.781   Cond. No.                         5.30
+==============================================================================
+
+Warnings:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+"""
+
+
+
+In [4]: df.shape
+Out[4]: (1000, 4)
+
+In [5]: df.shape[0]
+Out[5]: 1000
+
+In [7]: sm.OLS(bootstrap['y'],bootstrap.iloc[:,1:]).fit().rsquared
+Out[7]: 0.34290359901052014
+
+
+
+
+
+
+
+
+
+
+
+rsquared_boot, coefs_boot, sims = [], [], 1000
+reg_fit = sm.OLS(df['y'], df.iloc[:,1:]).fit()
+
+
+# Run 1K iterations
+for i in range(sims):
+    # First create a bootstrap sample with replacement with n=df.shape[0]
+    bootstrap = df.sample(n=df.shape[0], replace=True)
+    # Fit the regression and append the r square to rsquared_boot
+    rsquared_boot.append(sm.OLS(bootstrap['y'],bootstrap.iloc[:,1:]).fit().rsquared)
+
+# Calculate 95% CI on rsquared_boot
+r_sq_95_ci = np.percentile(rsquared_boot, [2.5, 97.5])
+print("R Squared 95% CI = {}".format(r_sq_95_ci))
+
+
+<script.py> output:
+    R Squared 95% CI = [0.31089312 0.40543591]
+    
+    
+Good job! As a follow-up, can you compare the coefficients of the original regression to their bootstrapped counterparts?
+
+    
+
+
+
+
+
+
+
+
+
+
+In [10]: sm.OLS(bootstrap['y'],bootstrap.iloc[:,1:]).fit().summary()
+Out[10]: 
+<class 'statsmodels.iolib.summary.Summary'>
+"""
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.389
+Model:                            OLS   Adj. R-squared:                  0.388
+Method:                 Least Squares   F-statistic:                     318.0
+Date:                Sat, 30 Nov 2019   Prob (F-statistic):          1.52e-107
+Time:                        13:33:13   Log-Likelihood:                -180.48
+No. Observations:                1000   AIC:                             367.0
+Df Residuals:                     997   BIC:                             381.7
+Df Model:                           2                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept      1.4714      0.024     60.860      0.000       1.424       1.519
+X1            -0.5265      0.032    -16.476      0.000      -0.589      -0.464
+X2             0.5634      0.031     18.201      0.000       0.503       0.624
+==============================================================================
+Omnibus:                     1345.899   Durbin-Watson:                   2.057
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):               66.714
+Skew:                          -0.025   Prob(JB):                     3.26e-15
+Kurtosis:                       1.736   Cond. No.                         5.30
+==============================================================================
+
+Warnings:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+"""
