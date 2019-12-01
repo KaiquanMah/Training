@@ -1,0 +1,59 @@
+Financial timeseries data
+In finance, it is common to be working with a CSV (comma-separated-values) "flat" file of a timeseries of many different assets with their prices, returns, or other data over time. Sometimes the data is stored in databases, but more often than not, even large banks still use spreadsheets.
+
+In this exercise, you have been given a timeseries of trading data for Microsoft stock as a .csv file stored at the url fpath_csv. When you finish the exercise, take note of the various types of data stored in each column.
+
+You will be using pandas to read in the CSV data as a DataFrame.
+
+
+
+
+
+# Import pandas as pd
+import pandas as pd
+
+
+In [1]: fpath_csv
+Out[1]: 'https://s3.amazonaws.com/assets.datacamp.com/production/course_6836/datasets/MSFTPrices.csv'
+
+#Use pd.read_csv() to read in the file from fpath_csv and make sure you parse the 'Date' column correctly using the parse_dates argument.
+# Read in the csv file and parse dates
+StockPrices = pd.read_csv(fpath_csv, parse_dates=["Date"])
+
+
+# Ensure the prices are sorted by Date
+StockPrices = StockPrices.sort_values(by="Date")
+
+
+In [8]: StockPrices.info()
+<class 'pandas.core.frame.DataFrame'>
+Int64Index: 4561 entries, 0 to 4560
+Data columns (total 7 columns):
+Date        4561 non-null datetime64[ns]
+Open        4561 non-null float64
+High        4561 non-null float64
+Low         4561 non-null float64
+Close       4561 non-null float64
+Volume      4561 non-null int64
+Adjusted    4561 non-null float64
+dtypes: datetime64[ns](1), float64(5), int64(1)
+memory usage: 285.1 KB
+
+
+
+
+# Print only the first five rows of StockPrices
+print(StockPrices.head())
+
+<script.py> output:
+            Date    Open    High     Low     Close    Volume   Adjusted
+    0 2000-01-03  88.777  89.722  84.712  58.28125  53228400  38.527809
+    1 2000-01-04  85.893  88.588  84.901  56.31250  54119000  37.226345
+    2 2000-01-05  84.050  88.021  82.726  56.90625  64059600  37.618851
+    3 2000-01-06  84.853  86.130  81.970  55.00000  54976600  36.358688
+    4 2000-01-07  82.159  84.901  81.166  55.71875  62013600  36.833828
+
+
+
+
+
