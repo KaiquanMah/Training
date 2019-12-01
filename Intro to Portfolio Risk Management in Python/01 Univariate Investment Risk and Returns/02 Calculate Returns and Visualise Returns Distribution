@@ -1,0 +1,88 @@
+Calculating financial returns
+The file you loaded in the previous exercise included daily Open, High, Low, Close, Adjusted Close, and Volume data, often referred to as OHLCV data.
+
+The Adjusted Close column is the most important. It is normalized for stock splits, dividends, and other corporate actions, and is a true reflection of the return of the stock over time. You will be using the adjusted close price to calculate the returns of the stock in this exercise.
+
+StockPrices from the previous exercise is available in your workspace, and matplotlib.pyplot is imported as plt.
+
+
+
+
+
+
+# Calculate the daily returns of the adjusted close price
+StockPrices['Returns'] = StockPrices["Adjusted"].pct_change()
+
+# Check the first five rows of StockPrices
+print(StockPrices.head())
+
+<script.py> output:
+                  Open    High     Low     Close    Volume   Adjusted   Returns
+    Date                                                                       
+    2000-01-03  88.777  89.722  84.712  58.28125  53228400  38.527809       NaN
+    2000-01-04  85.893  88.588  84.901  56.31250  54119000  37.226345 -0.033780
+    2000-01-05  84.050  88.021  82.726  56.90625  64059600  37.618851  0.010544
+    2000-01-06  84.853  86.130  81.970  55.00000  54976600  36.358688 -0.033498
+    2000-01-07  82.159  84.901  81.166  55.71875  62013600  36.833828  0.013068
+
+
+
+#Use the Pandas .plot() method to plot the 'Returns' column over time.
+# Plot the returns column over time
+StockPrices['Returns'].plot()
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Return distributions
+In order to analyze the probability of outliers in returns, it is helpful to visualize the historical returns of a stock using a histogram.
+
+You can use the histogram to show the historical density or frequency of a given range of returns. Note the outliers on the left tail of the return distribution are what you often want to avoid, as they represent large negative daily returns. Outliers on the right hand side of the distribution are normally particularly good events for the stock such as a positive earnings surprise.
+
+StockPrices from the previous exercise is available in your workspace, and matplotlib.pyplot is imported as plt.
+
+
+# Convert the decimal returns into percentage returns
+percent_return = StockPrices['Returns']*100
+
+# Drop the missing values
+returns_plot = percent_return.dropna()
+
+
+
+#Plot a histogram of returns_plot with 75 bins using matplotlib's hist() function.
+# Plot the returns histogram
+plt.hist(returns_plot, bins=75)
+plt.show()
+
+
+
+Notice the shape of the plot? What kind of distribution do you think this is?
+
+#Normal distribution
