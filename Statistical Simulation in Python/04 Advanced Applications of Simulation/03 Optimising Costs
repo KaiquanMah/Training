@@ -1,0 +1,135 @@
+Optimising Costs
+Now we will use the functions you've built to optimize our cost of production. We are interested in maximizing average profits. However, our profits depend on a number of factors, but we only control cost. Thus, we can simulate the uncertainty in the other factors and vary cost to see how our profits are impacted.
+
+Since you manage the small corn farm, you have the ability to choose your cost - from $100 to $5,000. You want to choose the cost that gives you the maximum average profit. In this exercise, we will simulate multiple outcomes for each cost level and calculate an average. We will then choose the cost that gives us the maximum mean profit. Upon completion, you will have a framework for selecting optimal inputs for business decisions.
+
+The seed for this exercise is set to 573
+In [3]: cost_levels
+Out[3]: 
+array([ 100,  200,  300,  400,  500,  600,  700,  800,  900, 1000, 1100,
+       1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200,
+       2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300,
+       3400, 3500, 3600, 3700, 3800, 3900, 4000, 4100, 4200, 4300, 4400,
+       4500, 4600, 4700, 4800, 4900, 5000])
+
+
+
+In [6]: profits(cost)
+Out[6]: 17654.28949659551
+
+In [7]: np.mean(profits(cost))
+Out[7]: 14735.897347361835
+
+In [8]: tmp_profits
+Out[8]: 
+[12982.475566128687,
+ ...,
+ 13620.9764830452]
+
+In [13]: len(tmp_profits)
+Out[13]: 1000
+
+
+
+
+In [9]: results
+Out[9]: 
+{100: 13594.87358131959,
+ 200: 14671.529059032124,
+ 300: 15283.334405063797,
+ 400: 15380.927231883534,
+ 500: 15389.822930495455,
+ 600: 15756.212680333141,
+ 700: 15914.405362498796,
+ 800: 15946.969150100113,
+ 900: 16229.304223305424,
+ 1000: 16015.91404782792,
+ 1100: 16185.26327322961,
+ 1200: 16085.21542818748,
+ 1300: 16047.228340798922,
+ 1400: 16476.93471727251,
+ 1500: 16418.001054198998,
+ 1600: 16086.006960617304,
+ 1700: 16288.341663543075,
+ 1800: 16256.352498045659,
+ 1900: 16206.27542288469,
+ 2000: 16278.522915928543,
+ 2100: 16148.65292011008,
+ 2200: 16204.884130272998,
+ 2300: 16043.907636918537,
+ 2400: 15735.95721591726,
+ 2500: 16309.218478751362,
+ 2600: 15978.66974276033,
+ 2700: 16009.52494841504,
+ 2800: 15834.37141610058,
+ 2900: 16016.49576498535,
+ 3000: 16056.666702293445,
+ 3100: 15754.717686881702,
+ 3200: 15936.168499225934,
+ 3300: 15686.355006519523,
+ 3400: 15521.47314650607,
+ 3500: 15713.32949006748,
+ 3600: 15556.403061507077,
+ 3700: 15333.35224766943,
+ 3800: 15470.639907936973,
+ 3900: 15465.32334797528,
+ 4000: 15243.22845230823,
+ 4100: 15148.819698951886,
+ 4200: 15137.228804271836,
+ 4300: 14983.164197953925,
+ 4400: 15020.001773475742,
+ 4500: 15062.94806987348,
+ 4600: 14688.036529265093,
+ 4700: 14914.124866137345,
+ 4800: 14755.078861196462,
+ 4900: 14751.121888365376,
+ 5000: 14583.019879557392}
+ 
+ In [14]: results[500]
+Out[14]: 15460.122249882907
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+#Initialize the empty dictionary results.
+# Initialize results and cost_levels variables
+sims, results = 1000, {}
+cost_levels = np.arange(100, 5100, 100)
+
+
+
+
+#For each cost level, simulate profits using the pre-loaded profits() function and append them to tmp_profits.
+#Store the average of tmp_profits for each cost level in the results dictionary.
+# For each cost level, simulate profits and store mean profit
+for cost in cost_levels:
+    tmp_profits = []
+    
+    for i in range(sims):
+        #average over EACH simulation
+        tmp_profits.append(np.mean(profits(cost)))
+    
+    #average over 1000 simulations per cost level     
+    results[cost] = np.mean(tmp_profits)
+    
+
+
+#Find the cost level cost_max that has the maximum average profit by running results through the list comprehension.
+# Get the cost that maximizes average profit
+cost_max = [x for x in results.keys() if results[x] == max(results.values())][0]
+print("Average profit is maximized when cost = {}".format(cost_max))
+
+
+
+<script.py> output:
+    Average profit is maximized when cost = 1400
+
+In [15]: results[1400]
+Out[15]: 16250.708997924681
+
+
+
