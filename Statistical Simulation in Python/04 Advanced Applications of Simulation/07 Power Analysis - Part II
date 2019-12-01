@@ -1,0 +1,196 @@
+Power Analysis - Part II
+Previously, we simulated one instance of the experiment & generated a p-value. We will now use this framework to calculate statistical power. Power of an experiment is the experiment's ability to detect a difference between treatment & control if the difference really exists. It's good statistical hygiene to strive for 80% power.
+
+For our website, we want to know how many people need to visit each variant, such that we can detect a 10% increase in time spent with 80% power. For this, we start with a small sample (50), simulate multiple instances of this experiment & check power. If 80% power is reached, we stop. If not, we increase the sample size & try again.
+
+
+
+The seed for this exercise is set to 123
+
+In [1]: sims
+Out[1]: 1000
+
+In [3]: control_mean
+Out[3]: 1
+
+In [4]: control_sd
+Out[4]: 0.5
+
+
+
+
+
+
+In [5]: control_time_spent
+Out[5]: 
+array([0.4571847 , 1.49867272, 1.14148925, ..., 0.78816574, 0.46238237,
+       0.25669286])
+
+In [6]:     treatment_time_spent = np.random.normal(loc=control_mean*(1+effect_size), scale=control_sd, size= sample_size*sims)
+
+In [7]: treatment_time_spent
+Out[7]: 
+array([1.46973154, 1.22829467, 0.53887345, ..., 1.64175518, 1.82909468,
+       1.59412566])
+
+In [9]:  control_time_spent.shape
+Out[9]: (50000,)
+
+In [10]:  treatment_time_spent.shape
+Out[10]: (50000,)
+
+In [8]: t, p
+Out[8]: (30.087552485475186, 5.427304139521802e-198)
+
+
+
+
+
+
+
+
+
+
+
+sample_size = 50
+
+
+
+#For the time spent random variables, set the size such that it has shape sample_size × sims.
+# Keep incrementing sample size by 10 till we reach required power
+while 1:
+    control_time_spent = np.random.normal(loc=control_mean, scale=control_sd, size=(sample_size,sims))
+    treatment_time_spent = np.random.normal(loc=control_mean*(1+effect_size), scale=control_sd, size=(sample_size,sims))
+    t, p = st.ttest_ind(treatment_time_spent, control_time_spent)
+    
+    
+ 
+    #Calculate power as a fraction of p-values less than 0.05 (statistically significant).
+    # Power is the fraction of times in the simulation when the p-value was less than 0.05
+    power = (p < 0.05).sum()/sims
+    
+    
+    #If power is greater than or equal to 80%, break out of the while loop. Else, keep incrementing sample_size by 10.
+    if power >= 0.8: 
+        break
+    else: 
+        sample_size += 10
+
+
+print("For 80% power, sample size required = {}".format(sample_size))
+
+
+
+
+
+
+<script.py> output:
+    For 80% power, sample size required = 360
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sample_size = 50
+
+
+
+#For the time spent random variables, set the size such that it has shape sample_size × sims.
+# Keep incrementing sample size by 10 till we reach required power
+while 1:
+    control_time_spent = np.random.normal(loc=control_mean, scale=control_sd, size=(sample_size,sims))
+    treatment_time_spent = np.random.normal(loc=control_mean*(1+effect_size), scale=control_sd, size=(sample_size,sims))
+    t, p = st.ttest_ind(treatment_time_spent, control_time_spent)
+    
+    
+ 
+    #Calculate power as a fraction of p-values less than 0.05 (statistically significant).
+    # Power is the fraction of times in the simulation when the p-value was less than 0.05
+    power = (p < 0.05).sum()/sims
+    
+    
+    #If power is greater than or equal to 80%, break out of the while loop. Else, keep incrementing sample_size by 10.
+    if power >= 0.8: 
+        break
+    else: 
+        sample_size += 10
+        print("Power is {} and sample size is {} right now.".format(power, sample_size))
+print("For 80% power, sample size required = {}".format(sample_size))
+
+
+
+Power is 0.166 and sample size is 60 right now.
+Power is 0.181 and sample size is 70 right now.
+Power is 0.24 and sample size is 80 right now.
+Power is 0.26 and sample size is 90 right now.
+Power is 0.244 and sample size is 100 right now.
+Power is 0.287 and sample size is 110 right now.
+Power is 0.303 and sample size is 120 right now.
+Power is 0.333 and sample size is 130 right now.
+Power is 0.368 and sample size is 140 right now.
+Power is 0.4 and sample size is 150 right now.
+Power is 0.403 and sample size is 160 right now.
+Power is 0.417 and sample size is 170 right now.
+Power is 0.456 and sample size is 180 right now.
+Power is 0.481 and sample size is 190 right now.
+Power is 0.469 and sample size is 200 right now.
+Power is 0.536 and sample size is 210 right now.
+Power is 0.545 and sample size is 220 right now.
+Power is 0.563 and sample size is 230 right now.
+Power is 0.59 and sample size is 240 right now.
+Power is 0.591 and sample size is 250 right now.
+Power is 0.618 and sample size is 260 right now.
+Power is 0.632 and sample size is 270 right now.
+Power is 0.664 and sample size is 280 right now.
+Power is 0.674 and sample size is 290 right now.
+Power is 0.654 and sample size is 300 right now.
+Power is 0.695 and sample size is 310 right now.
+Power is 0.704 and sample size is 320 right now.
+Power is 0.72 and sample size is 330 right now.
+Power is 0.745 and sample size is 340 right now.
+Power is 0.742 and sample size is 350 right now.
+Power is 0.761 and sample size is 360 right now.
+Power is 0.767 and sample size is 370 right now.
+Power is 0.779 and sample size is 380 right now.
+Power is 0.791 and sample size is 390 right now.
+For 80% power, sample size required = 390
+
+
+
+
+
+In [3]:     control_time_spent.shape
+Out[3]: (390, 1000)
+
+In [4]:     treatment_time_spent.shape
+Out[4]: (390, 1000)
