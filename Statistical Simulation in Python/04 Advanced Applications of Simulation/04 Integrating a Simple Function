@@ -1,0 +1,62 @@
+Integrating a Simple Function
+This is a simple exercise introducing the concept of Monte Carlo Integration.
+
+Here we will evaluate a simple integral ∫10xexdx. We know that the exact answer is 1, but simulation will give us an approximate solution, so we can expect an answer close to 1. As we saw in the video, it's a simple process. For a function of a single variable f(x):
+
+1 Get the limits of the x-axis (xmin,xmax) and y-axis (max(f(x)),min(min(f(x)),0)).
+2 Generate a number of uniformly distributed point in this box.
+3 Multiply the area of the box ((max(f(x)−min(f(x))×(xmax−xmin)) by the fraction of points that lie below f(x).
+
+Upon completion, you will have a framework for handling definite integrals using Monte Carlo Integration.
+
+In [7]: x
+Out[7]: 
+array([0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
+       0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
+       0.34317802, 0.72904971, 0.43857224, 0.0596779 , 0.39804426,
+       0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
+       0.63440096, 0.84943179, 0.72445532, 0.61102351, 0.72244338,
+       0.32295891, 0.36178866, 0.22826323, 0.29371405, 0.63097612,
+       0.09210494, 0.43370117, 0.43086276, 0.4936851 , 0.42583029,
+       0.31226122, 0.42635131, 0.89338916, 0.94416002, 0.50183668,
+       0.62395295, 0.1156184 , 0.31728548, 0.41482621, 0.86630916,
+       0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453])
+       
+       
+
+The seed for this exercise is set to 123
+
+# Define the sim_integrate function
+def sim_integrate(func, xmin, xmax, sims):
+    
+    #In the sim_integrate() function, generate uniform random numbers between xmin and xmax and assign to x.
+    x = np.random.uniform(xmin, xmax, sims)
+    
+    #Generate uniform random numbers between min(min(f(x)),0) and max(f(x)) and assign to y
+    y = np.random.uniform(min(min(func(x)), 0), max(func(x)), sims)
+    
+    area = (max(y) - min(y))*(xmax-xmin)
+    
+    
+    #Return the fraction of points less than f(x) multiplied by area ((max(f(x)−min(f(x))×(xmax−xmin)) 
+    result = area * sum(abs(y) < abs(func(x)))/sims
+    return result
+    
+
+#Finally, use lambda function to define func as xe^x
+# Call the sim_integrate function and print results
+result = sim_integrate(func = lambda x: x*np.exp(x), xmin = 0, xmax = 1, sims = 50)
+print("Simulated answer = {}, Actual Answer = 1".format(result))
+
+
+
+
+
+<script.py> output:
+    Simulated answer = 0.7240166789450252, Actual Answer = 1
+    
+    
+    
+    
+Try seeing what happens to the answer when you increase or decrease sims
+
