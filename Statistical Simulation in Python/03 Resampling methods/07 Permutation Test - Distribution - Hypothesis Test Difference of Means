@@ -1,0 +1,78 @@
+Hypothesis testing - Difference of means
+We want to test the hypothesis that there is a difference in the average donations received from A and B. Previously, you learned how to generate one permutation of the data. Now, we will generate a null distribution of the difference in means and then calculate the p-value.
+
+For the null distribution, we first generate multiple permuted datasets and store the difference in means for each case. We then calculate the test statistic as the difference in means with the original dataset. Finally, we calculate the p-value as twice the fraction of cases where the difference is greater than or equal to the absolute value of the test statistic (2-sided hypothesis). A p-value of less than say 0.05 could then determine statistical significance.
+
+
+The seed for this exercise is set to 123
+
+In [1]: reps
+Out[1]: 1000
+
+
+In [5]: perm
+Out[5]: 
+array([[1020, 1121,  241, ...,  424, 1061,  136],
+       [ 535,   37, 1109, ...,  228,  807,  937],
+       [ 584,  633,  643, ...,  807,  438, 1089],
+       ...,
+       [ 291,  537,  247, ...,  979,  341,   47],
+       [ 938,  238,  101, ...,  315,    2,  902],
+       [ 162,  274,  351, ...,   43,   60,  996]])
+
+
+In [7]: perm.shape
+Out[7]: (1000, 1200)
+
+
+
+
+
+
+In [16]: np.mean(permuted_A_datasets, axis=1).shape
+Out[16]: (1000,)
+
+In [17]: np.mean(permuted_B_datasets, axis=1).shape
+Out[17]: (1000,)
+
+In [18]: samples.shape
+Out[18]: (1000,)
+
+
+
+
+In [19]: donations_A.shape
+Out[19]: (500,)
+
+In [20]: donations_B.shape
+Out[20]: (700,)
+
+
+
+
+
+
+#Use list comprehension to generate a list of multiple permutations of donations_A and donations_B & assign it to perm. The number of permutations should be equal to reps.
+# Generate permutations equal to the number of repetitions
+perm = np.array([np.random.permutation(len(donations_A) + len(donations_B)) for i in range(reps)])
+permuted_A_datasets = data[perm[:, :len(donations_A)]]
+permuted_B_datasets = data[perm[:, len(donations_A):]]
+
+
+
+
+#Set samples equal to the difference in means of permuted_A_datasets and permuted_B_datasets along the right axis.
+# Calculate the difference in means for each of the datasets
+samples = np.mean(permuted_A_datasets, axis=1)-np.mean(permuted_B_datasets, axis=1)
+
+
+
+#Set test_stat equal to the difference in means of donations_A and donations_B.
+# Calculate the test statistic and p-value
+test_stat = np.mean(donations_A)-np.mean(donations_B)
+p_val = 2*np.sum(samples >= np.abs(test_stat))/reps
+print("p-value = {}".format(p_val))
+
+<script.py> output:
+    p-value = 0.002
+
