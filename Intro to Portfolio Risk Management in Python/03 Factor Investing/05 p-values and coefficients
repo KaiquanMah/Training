@@ -1,0 +1,107 @@
+p-values and coefficients
+You can use the .pvalues attribute on a fitted smf.ols regression model to retrieve the p-values for each coefficient.
+
+Normally, p-values less than 0.05 are considered statistically significant.
+
+Coefficients can be extracted from the fitted regression object using the .params attribute.
+
+In this example, a statistically significant negative SMB ('Small Minus Big') coefficient would signify a factor exposure to large cap stocks, while a positive coefficient would signify an exposure to small cap stocks.
+
+The fitted regression model FamaFrench_fit from the previous exercise is available in your workspace.
+
+
+
+
+FamaFrench_fit.pvalues
+Intercept        6.904127e-02
+Market_Excess    0.000000e+00
+SMB              1.520051e-33
+HML              4.699308e-07
+dtype: float64
+
+In [4]: smb_pval = FamaFrench_fit.pvalues['SMB']
+
+In [5]: smb_pval
+Out[5]: 1.5200513481259415e-33
+
+
+
+
+In [11]: FamaFrench_fit.params
+Out[11]: 
+Intercept        0.000183
+Market_Excess    1.015498
+SMB             -0.262152
+HML             -0.108657
+dtype: float64
+
+In [12]: smb_coeff = FamaFrench_fit.params['SMB']
+
+In [13]: smb_coeff
+Out[13]: -0.2621515274319268
+
+
+
+
+
+
+
+
+# Extract the p-value of the SMB factor
+smb_pval = FamaFrench_fit.pvalues['SMB']
+
+# If the p-value is significant, print significant
+if smb_pval < 0.05:
+    significant_msg = 'significant'
+else:
+    significant_msg = 'not significant'
+
+# Print the SMB coefficient
+smb_coeff = FamaFrench_fit.params['SMB']
+print("The SMB coefficient is ", smb_coeff, " and is ", significant_msg)
+
+
+
+<script.py> output:
+    The SMB coefficient is  -0.2621515274319268  and is  significant
+
+
+
+Your portfolio has a statistically significant negative exposure (-0.2621) to small-cap stocks - in other words - positive exposure to large caps!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Economic intuition in factor modeling
+Finance is all about risk and return. Higher risk tends to lead to higher returns over time, and lower risk portfolios tend to lead to lower returns over time.
+
+In the Fama-French factor model:
+The HML factor is constructed by calculating the return of growth stocks, or stocks with high valuations, versus the return of value stocks.
+The SMB factor is constructed by calculating the return of small-cap stocks, or stocks with small market capitalizations, versus the return of large-cap stocks.
+
+What would you expect to be historically true about the size factor?
+
+
+#YES Small-cap + Value stocks should have the highest returns and risk.
+#Historically correct! Since 1982, value stocks have outperformed growth stocks in the majority of cases, and the tide often shifts in favour of value stocks during times of crisis and during bubbles such as the dot-com bubble during the late 1990's and early 2000's.
+
+
+
+
+
