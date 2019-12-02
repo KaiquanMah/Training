@@ -1,0 +1,98 @@
+Calculating beta with CAPM
+There are many ways to model stock returns, but the Capital Asset Pricing Model, or CAPM, is one the most well known:
+
+E(RP) − RF = βP (E(RM)−RF) 
+
+E(RP)−RF: The excess expected return of a stock or portfolio P
+E(RM)−RF: The excess expected return of the broad market portfolio B
+RF: The regional risk free-rate
+βP: Portfolio beta, or exposure, to the broad market portfolio B
+
+
+You can call the .fit() method from statsmodels.formula.api on an .ols(formula, data) model object to perform the analysis, and the .summary() method on the analysis object to anaylze the results.
+
+The FamaFrenchData DataFrame is available in your workspace and contains the proper data for this exercise.
+
+
+
+
+CAPM_fit.params
+Intercept        0.000216
+Market_Excess    0.973776
+dtype: float64
+
+
+
+
+
+
+
+#First, you will need to import statsmodels.formula.api as smf.
+# Import statsmodels.formula.api
+import statsmodels.formula.api as smf 
+
+
+
+#Define a regression model that explains Portfolio_Excess as a function of Market_Excess.
+# Define the regression formula
+CAPM_model = smf.ols(formula='Portfolio_Excess ~ Market_Excess', data=FamaFrenchData)
+
+
+
+
+#Extract and print the adjusted r-squared of the fitted regression model.
+# Print adjusted r-squared of the fitted regression
+CAPM_fit = CAPM_model.fit()
+print(CAPM_fit.rsquared_adj)
+
+<script.py> output:
+    0.7942627160017834
+
+
+
+#Extract the market beta of your portfolio.
+# Extract the beta
+regression_beta = CAPM_fit.params['Market_Excess']
+print(regression_beta)
+<script.py> output:
+    0.9737755165745479
+    
+    
+
+Your portfolio beta is once again 0.9738. The adjusted r-squared is 0.7943. A high adjusted r-squared (close to 1) means that the majority of your portfolio's movements can be explained by the factors in your model.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Adjusted R-squared
+Let's assume you conducted two different regression analyses using different financial models to explain returns. Based on the information below, which model is most likely superior?
+
+Model	R-Squared	Adjusted R-Squared
+Model 1	0.60	    0.35
+Model 2	0.95	    0.40
+Model 3	0.90	    0.75
+
+#YES Model 3 is superior
+# Model 3 has the highest adjusted r-squared!
+
+
