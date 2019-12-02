@@ -1,0 +1,51 @@
+Market-cap weighted portfolios
+Conversely, when large companies are doing well, market capitalization, or "market cap" weighted portfolios tend to outperform. This is because the largest weights are being assigned to the largest companies, or the companies with the largest market cap.
+
+Below is a table of the market capitalizations of the companies in your portfolio just before January 2017:
+
+Company Name	Ticker	Market Cap ($ Billions)
+Apple	          AAPL	601.51
+Microsoft	      MSFT	469.25
+Exxon Mobil	    XOM	  349.5
+Johnson & Johnson	JNJ	310.48
+JP Morgan	      JPM	  299.77
+Amazon	        AMZN	356.94
+General Electric	GE	268.88
+Facebook	        FB	331.57
+AT&T	            T	  246.09
+
+
+
+In [3]: mcap_weights
+Out[3]: 
+array([0.18599625, 0.1450994 , 0.10807084, 0.09600524, 0.09269355,
+       0.1103714 , 0.08314188, 0.1025266 , 0.07609485])
+
+
+
+
+
+# Create an array of market capitalizations (in billions)
+market_capitalizations = np.array([601.51, 469.25, 349.5, 310.48, 299.77, 356.94, 268.88, 331.57, 246.09])
+
+
+
+#Calculate mcap_weights array such that each element is the ratio of market cap of the company to the total market cap of all companies.
+# Calculate the market cap weights
+mcap_weights = market_capitalizations/np.sum(market_capitalizations)
+
+
+
+
+#Use the .mul() method on the mcap_weights and returns to calculate the market capitalization weighted portfolio returns.
+# Calculate the market cap weighted portfolio returns
+StockReturns['Portfolio_MCap'] = StockReturns.iloc[:, 0:9].mul(mcap_weights, axis=1).sum(axis=1)
+
+
+#Finally, review the plot of cumulative returns over time.
+cumulative_returns_plot(['Portfolio', 'Portfolio_EW', 'Portfolio_MCap'])
+
+
+
+
+And wow the Market Cap portfolio kills it (relative to the Equal weighted and original portfolio)! Did you know that the S&P 500 Index is market-cap weighted?
