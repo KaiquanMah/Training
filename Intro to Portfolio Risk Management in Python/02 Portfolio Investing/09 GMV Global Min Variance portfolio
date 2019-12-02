@@ -1,0 +1,58 @@
+The GMV portfolio
+The global minimum volatility portfolio, or GMV portfolio, is the portfolio with the lowest standard deviation (risk) and the highest return for the given risk level.
+
+Returns are very hard to predict, but volatilities and correlations tend to be more stable over time. This means that the GMV portfolio often outperforms the MSR portfolios out of sample even though the MSR would outperform quite significantly in-sample. Of course, out of sample results are what really matters in finance.
+
+
+In [4]: GMV_weights
+Out[4]: 
+AAPL weight    0.086586
+MSFT weight    0.015225
+XOM weight     0.045223
+JNJ weight     0.340999
+JPM weight     0.028686
+AMZN weight    0.034818
+GE weight      0.069759
+FB weight      0.018798
+T weight       0.359906
+Name: 27, dtype: float64
+
+In [5]: GMV_weights_array = np.array(GMV_weights)
+
+In [6]: GMV_weights_array
+Out[6]: 
+array([0.08658622, 0.01522472, 0.04522291, 0.34099938, 0.02868646,
+       0.03481758, 0.06975889, 0.01879761, 0.35990623])
+
+
+
+
+
+#Sort RandomPortfolios with the lowest volatility value, ranking in ascending order.
+# Sort the portfolios by volatility
+sorted_portfolios = RandomPortfolios.sort_values(by=['Volatility'], ascending=True)
+
+# Extract the corresponding weights
+GMV_weights = sorted_portfolios.iloc[0, 0:numstocks]
+
+# Cast the GMV weights as a numpy array
+GMV_weights_array = np.array(GMV_weights)
+
+
+
+#Multiply GMV_weights_array across the rows of StockReturns to get weighted stock returns.
+# Calculate the GMV portfolio returns
+StockReturns['Portfolio_GMV'] = StockReturns.iloc[:, 0:numstocks].mul(GMV_weights_array, axis=1).sum(axis=1)
+
+
+
+#Finally, review the plot of cumulative returns over time.
+# Plot the cumulative returns
+cumulative_returns_plot(['Portfolio_EW', 'Portfolio_MCap', 'Portfolio_MSR', 'Portfolio_GMV'])
+
+
+The GMV portfolio tends to be the most stable optimization over time, but of course you can expect a lower volatility portfolio to have lower return than the benchmark market cap weighting method.
+
+
+
+Equal Wt Pf > Mkt Cap Pf > MSR Max Sharpe Ratio Pf > GMV Global Min Variance Pf
