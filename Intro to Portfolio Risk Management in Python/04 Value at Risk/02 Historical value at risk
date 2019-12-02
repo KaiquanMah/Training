@@ -1,0 +1,139 @@
+Historical value at risk
+Drawdown is a measure of sustained losses over time, but what about simple single-day movements?
+
+Value at Risk, often referred to as VaR, is a way to estimate the risk of a single day negative price movement. VaR can be measured for any given probability, or confidence level, but the most commonly quoted tend to be VaR(95) and VaR(99). Historical VaR is the simplest method to calculate VaR, but relies on historical returns data which may not be a good assumption of the future. Historical VaR(95), for example, represents the minimum loss that your portfolio or asset has sustained in the worst 5% of cases.
+
+Below, you will calculate the historical VaR(95) of the USO oil ETF. Returns data is available (in percent) in the variable StockReturns_perc.
+
+
+
+In [1]: StockReturns_perc
+Out[1]: 
+Date
+2007-01-03   -4.263558
+2007-01-04   -4.068832
+2007-01-05    0.928472
+2007-01-08   -0.710851
+2007-01-09   -0.400091
+2007-01-10   -4.101476
+2007-01-11   -2.248679
+2007-01-12    0.654039
+2007-01-16   -2.890435
+2007-01-17    2.030459
+2007-01-18   -2.238808
+2007-01-19    2.775850
+2007-01-22   -1.327932
+2007-01-23    4.128654
+2007-01-24    0.985752
+2007-01-25   -1.800430
+2007-01-26    2.231056
+2007-01-29   -2.830592
+2007-01-30    5.314654
+2007-01-31    1.858110
+2007-02-01   -0.829192
+2007-02-02    3.135452
+2007-02-05   -0.486425
+2007-02-06    0.224035
+2007-02-07   -1.950821
+2007-02-08    3.108808
+2007-02-09    0.482416
+2007-02-12   -3.240654
+2007-02-13    2.046727
+2007-02-14   -1.843598
+                ...   
+2017-11-16   -0.180343
+2017-11-17    2.529359
+2017-11-20   -0.616740
+2017-11-21    1.063830
+2017-11-22    1.754386
+2017-11-24    1.637931
+2017-11-27   -1.696353
+2017-11-28   -0.086281
+2017-11-29   -0.949914
+2017-11-30    0.000000
+2017-12-01    1.743679
+2017-12-04   -1.542416
+2017-12-05    0.435161
+2017-12-06   -2.946274
+2017-12-07    1.160714
+2017-12-08    1.412180
+2017-12-11    0.957354
+2017-12-12   -1.379310
+2017-12-13   -0.961538
+2017-12-14    0.882613
+2017-12-15    0.262467
+2017-12-18   -0.174520
+2017-12-19    0.611888
+2017-12-20    0.868810
+2017-12-21    0.258398
+2017-12-22    0.171821
+2017-12-26    2.487136
+2017-12-27   -0.251046
+2017-12-28    0.419463
+2017-12-29    0.334169
+Name: USO, Length: 2769, dtype: float64
+
+
+
+In [3]: var_95
+Out[3]: -3.6082337640374957
+
+
+
+
+
+
+In [11]: sorted_rets = StockReturns_perc.sort_values(ascending=True)
+
+In [12]: sorted_rets
+Out[12]: 
+Date
+2009-01-07   -10.684564
+2008-09-29   -10.578823
+2009-03-02    -9.500921
+2011-05-05    -9.107717
+2008-11-20    -8.576050
+2009-02-17    -8.359379
+2014-11-28    -8.315412
+2009-01-27    -8.214061
+2016-01-25    -7.874865
+2009-04-20    -7.572163
+...
+2009-03-04     8.743608
+2016-02-03     8.984831
+2015-08-27     9.240407
+2008-11-04     9.316058
+2008-12-31     9.602639
+Name: USO, Length: 2769, dtype: float64
+
+
+
+
+
+
+#Calculate VaR(95), the worst 5% of USO returns (StockReturns_perc), and assign it to var_95.
+# Calculate historical VaR(95)
+var_95 = np.percentile(StockReturns_perc, 5)
+print(var_95)
+
+
+#Sort StockReturns_perc and assign it to sorted_rets.
+# Sort the returns for plotting
+sorted_rets = StockReturns_perc.sort_values(ascending=True)
+
+# Plot the probability of each sorted return quantile
+plt.hist(sorted_rets, normed=True)
+
+# Denote the VaR 95 quantile
+plt.axvline(x=var_95, color='r', linestyle='-', label="VaR 95: {0:.2f}%".format(var_95))
+plt.show()
+
+<script.py> output:
+    -3.6082337640374957
+
+
+
+Historical VaR(95) = -3.61%
+
+
+
