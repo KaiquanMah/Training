@@ -1,0 +1,94 @@
+The 5-factor model
+In 2015, Fama and French extended their previous 3-factor model, adding two additional factors:
+RMW: Profitability
+CMA: Investment
+
+The RMW factor represents the returns of companies with high operating profitability versus those with low operating profitability, and the CMA factor represents the returns of companies with aggressive investments versus those who are more conservative.
+
+The FamaFrenchData object is available in your workspace and contains the RMW and CMA factors in addition to the previous factors.
+
+In [1]: FamaFrenchData.head()
+Out[1]: 
+            Portfolio  Market_Excess     SMB     HML     RMW     CMA   RF  \
+Date                                                                        
+2013-01-03  -0.005066        -0.0014  0.0014  0.0004  0.0020  0.0023  0.0   
+2013-01-04   0.004024         0.0055  0.0019  0.0043 -0.0037  0.0027  0.0   
+2013-01-07   0.004421        -0.0031 -0.0009 -0.0037 -0.0013 -0.0012  0.0   
+2013-01-08  -0.004659        -0.0027  0.0004 -0.0007 -0.0012  0.0009  0.0   
+2013-01-09   0.004636         0.0034  0.0024 -0.0041 -0.0007 -0.0015  0.0   
+
+            Portfolio_Excess  
+Date                          
+2013-01-03         -0.005066  
+2013-01-04          0.004024  
+2013-01-07          0.004421  
+2013-01-08         -0.004659  
+2013-01-09          0.004636
+
+
+
+
+
+# Import statsmodels.formula.api
+import statsmodels.formula.api as smf 
+
+
+
+#Use what you've learned from the previous exercises to define the FamaFrench5_model regression model for Portfolio_Excess against the original 3 Fama-French factors (Market_Excess, SMB, HML) in addition to the two new factors (RMW, CMA).
+# Define the regression formula
+FamaFrench5_model = smf.ols(formula='Portfolio_Excess ~ Market_Excess + SMB + HML + RMW + CMA ', data=FamaFrenchData)
+
+
+
+#Fit the regression model and store the results in FamaFrench5_fit.
+# Fit the regression
+FamaFrench5_fit = FamaFrench5_model.fit()
+
+# Extract the adjusted r-squared
+regression_adj_rsq = FamaFrench5_fit.rsquared_adj
+print(regression_adj_rsq)
+
+<script.py> output:
+    0.836724501922579
+    
+
+The adjusted r-squared is even higher at 0.8367! Could you build a better model?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Alpha vs R-squared
+The results of the 3 models you constructed are in line with Fama and French's findings, with the 5-factor model being superior at explaining portfolio returns.
+
+Model	              Adjusted R-Squared
+CAPM	                0.7943
+Fama-French 3 Factor	0.8194
+Fama-French 5 Factor	0.8367
+
+Without examining the regression intercepts directly, what do these results tell you about the alpha estimated by each model?
+
+
+#YES The Fama-French 5 Factor model explains the most variability, so alpha is lower
+#Correct! But Cliff Assness says this model is not sufficient and that momentum should be taken into account.
+
+
