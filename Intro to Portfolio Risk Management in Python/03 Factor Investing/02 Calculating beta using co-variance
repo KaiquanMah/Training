@@ -1,0 +1,58 @@
+Calculating beta using co-variance
+Beta is an essential component of many financial models, and is a measure of systematic risk, or exposure to the broad market. In the CAPM model, beta is one of two essential factors.
+
+Historical beta can be estimated in a number of ways. In this exercise, you will use the following simple formula involving co-variance and variance to a benchmark market portfolio:
+
+βP = Cov(RP,RB) / Var(RB)
+
+βP:         Portfolio beta
+Cov(RP,RB): The co-variance between the portfolio (P) and the benchmark market index (B)
+Var(RB):    The variance of the benchmark market index
+
+The FamaFrenchData DataFrame is available in your workspace and contains the proper data for this exercise.
+
+
+
+In [3]: covariance_matrix
+Out[3]: 
+                  Portfolio_Excess  Market_Excess
+Portfolio_Excess          0.000070       0.000057
+Market_Excess             0.000057       0.000059
+
+
+
+
+# Calculate the co-variance matrix between Portfolio_Excess and Market_Excess
+covariance_matrix = FamaFrenchData[['Portfolio_Excess', 'Market_Excess']].cov()
+
+# Extract the co-variance co-efficient
+covariance_coefficient = covariance_matrix.iloc[0, 1]
+print(covariance_coefficient)
+
+<script.py> output:
+    5.7261263381549724e-05
+
+
+
+# Calculate the benchmark variance
+#http://www.datasciencemadesimple.com/variance-function-python-pandas-dataframe-row-column-wise-variance/
+benchmark_variance = FamaFrenchData['Market_Excess'].var()
+print(benchmark_variance)
+
+<script.py> output:
+5.880335088211895e-05
+
+
+# Calculating the portfolio market beta
+portfolio_beta = covariance_coefficient / benchmark_variance
+print(portfolio_beta)
+
+
+<script.py> output:
+    0.973775516574547
+
+
+
+
+Your portfolio beta is 0.9738. You can think of market beta as a measure of your exposure to the broad stock market. For every 1.0% rise (or fall) in the market, you can expect your portfolio to rise (fall) roughly 0.97%.
+
