@@ -1,0 +1,69 @@
+Reflecting on analysis
+Based on the plot you created in the last exercise (displayed again here), which of the following seems like a reasonable conclusion about promotions?
+
+#yes In the population there is evidence that women are promoted at a different rate, but we cannot tell whether the difference is due to discrimination or something else.
+There are very few permuted differences which are as extreme as the observed difference, but there cannot be a causative conclusion because the study was observational.
+
+
+
+
+
+
+
+
+
+
+Critical region
+It seems as though the statistic—a difference in promotion rates of 0.2917—is on the extreme end of the permutation distribution. That is, there are very few permuted differences which are as extreme as the observed difference.
+
+To quantify the extreme permuted (null) differences, we use the quantile() function.
+
+The dplyr package has been loaded for you.
+
+
+Using the permuted differences, disc_perm, find the quantile values of stat such that:
+10% of the permuted differences are above the value (0.9 quantile)
+5% of the permuted differences are above the value (0.95 quantile)
+1% of the permuted differences are above the value (0.99 quantile)
+
+
+
+> disc_perm
+# A tibble: 1,000 x 2
+   replicate    stat
+       <int>   <dbl>
+ 1         1  0.0417
+ 2         2  0.0417
+ 3         3 -0.125 
+ 4         4  0.125 
+ 5         5  0.0417
+ 6         6  0.208 
+ 7         7 -0.125 
+ 8         8  0.125 
+ 9         9  0.125 
+10        10  0.0417
+# ... with 990 more rows
+
+
+
+
+disc_perm %>% 
+  summarize(
+    # Find the 0.9 quantile of diff_perm's stat
+    q.90 = quantile(stat, p = 0.90),
+    # ... and the 0.95 quantile
+    q.95 = quantile(stat, p = 0.95),
+    # ... and the 0.99 quantile
+    q.99 = quantile(stat, p = 0.99)
+  )
+  
+  
+
+# A tibble: 1 x 3
+   q.90  q.95  q.99
+  <dbl> <dbl> <dbl>
+1 0.125 0.208 0.292
+
+
+You were able to figure out the upper bound of the permuted statistics. Note, different people will define upper differently. Different options are to use the top 10% or the top 5% or the top 1%.
+
