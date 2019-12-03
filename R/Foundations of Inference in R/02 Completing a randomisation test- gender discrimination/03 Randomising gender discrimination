@@ -1,0 +1,201 @@
+Randomising gender discrimination
+Recall that we are considering a situation where the number of men and women are fixed (representing the resumes) and the number of people promoted is fixed (the managers were able to promote only 35 individuals).
+
+In this exercise, you'll create a randomization distribution of the null statistic with 1000 replicates as opposed to just 5 in the previous exercise. As a reminder, the statistic of interest is the difference in proportions promoted between genders (i.e. proportion for males minus proportion for females). From the original dataset, you can calculate how the promotion rates differ between males and females. Using the specify-hypothesis-generate-calculate workflow in infer, you can calculate the same statistic, but instead of getting a single number, you get a whole distribution. In this exercise, you'll compare that single number from the original dataset to the distribution made by the simulation.
+
+
+
+
+
+
+Part 1
+Calculate the observed difference in promotion rate.
+Group by sex.
+Calculate the fraction promoted for each sex by summarizing on the mean() of promote == "promoted". Call the summary variable prop_prom.
+Calculate the difference in fractions between sexes by summarizing again, setting stat to the diff() of prop_prom.
+
+
+
+
+> diff_orig <- disc %>%
+    group_by(sex)
+# A tibble: 48 x 2
+# Groups:   sex [2]
+   promote  sex  
+   <fct>    <fct>
+ 1 promoted male 
+ 2 promoted male 
+ 3 promoted male 
+ 4 promoted male 
+ 5 promoted male 
+ 6 promoted male 
+ 7 promoted male 
+ 8 promoted male 
+ 9 promoted male 
+10 promoted male 
+# ... with 38 more rows
+
+
+
+
+> diff_orig <- disc %>%
+    group_by(sex) %>%
+    summarise(prop_prom = mean(promote == "promoted"))
+# A tibble: 2 x 2
+  sex    prop_prom
+  <fct>      <dbl>
+1 female     0.583
+2 male       0.875
+
+
+
+
+> diff_orig <- disc %>%
+    group_by(sex) %>%
+    summarise(prop_prom = mean(promote == "promoted"))
+    summarise(stat = diff(prop_prom))
+# A tibble: 1 x 1
+   stat
+  <dbl>
+1 0.292
+
+
+
+
+
+
+
+
+
+
+# Calculate the observed difference in promotion rate
+diff_orig <- disc %>%
+  # Group by sex
+  group_by(sex) %>%
+  # Summarize to calculate fraction promoted
+  summarise(prop_prom = mean(promote == "promoted")) %>%
+  # Summarize to calculate difference
+  summarise(stat = diff(prop_prom)) %>% 
+  pull()
+    
+# See the result
+diff_orig
+
+> diff_orig
+[1] 0.2916667
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 2
+Create a data frame of permuted differences in promotion rates.
+Specify promote vs. sex. ("promoted" is considered success.)
+Set the null hypothesis as "independence".
+Generate 1000 reps of type "permute".
+Calculate the summary stat "diff in props".
+
+
+
+disc_perm <- disc %>%
+  specify(promote ~ sex, success = "promoted")
+
+Response: promote (factor)
+Explanatory: sex (factor)
+# A tibble: 48 x 2
+   promote  sex  
+   <fct>    <fct>
+ 1 promoted male 
+ 2 promoted male 
+ 3 promoted male 
+ 4 promoted male 
+ 5 promoted male 
+ 6 promoted male 
+ 7 promoted male 
+ 8 promoted male 
+ 9 promoted male 
+10 promoted male 
+# ... with 38 more rows  
+  
+  
+  
+  
+
+# Create data frame of permuted differences in promotion rates
+disc_perm <- disc %>%
+  # Specify promote vs. sex
+  specify(promote ~ sex, success = "promoted") %>%
+  # Set null hypothesis as independence
+  hypothesize(null = "independence") %>%
+  # Generate 1000 permutations
+  generate(reps = 1000, type = "permute") %>%
+  # Calculate difference in proportions
+  calculate(stat = "diff in props", order = c("male", "female"))
+
+> disc_perm
+# A tibble: 1,000 x 2
+   replicate    stat
+       <int>   <dbl>
+ 1         1 -0.292 
+ 2         2  0.125 
+ 3         3 -0.0417
+ 4         4 -0.0417
+ 5         5 -0.125 
+ 6         6  0.0417
+ 7         7  0.0417
+ 8         8  0.0417
+ 9         9  0.0417
+10        10  0.125 
+# ... with 990 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 3
+Draw a histogram of permuted differences.
+Using the permutation dataset, disc_perm, plot stat.
+Add a histogram layer with geom_histogram(). The binwidth is set to 0.01.
+Add a vertical line with geom_vline(). The xintercept is at diff_orig.
+
+
+
+
+# From previous steps
+diff_orig <- disc %>%
+  group_by(sex) %>%
+  summarize(prop_prom = mean(promote == "promoted")) %>%
+  summarize(stat = diff(prop_prom)) %>% 
+  pull()
+disc_perm <- disc %>%
+  specify(promote ~ sex, success = "promoted") %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in props", order = c("male", "female"))
+  
+# Using permutation data, plot stat
+ggplot(disc_perm, aes(x = stat)) + 
+  # Add a histogram layer
+  geom_histogram(binwidth = 0.01) +
+  # Add a vertical line at diff_orig
+  geom_vline(aes(xintercept = diff_orig), color = "red")
+
+
+You'll learn more about the distribution of statistics next.
+
