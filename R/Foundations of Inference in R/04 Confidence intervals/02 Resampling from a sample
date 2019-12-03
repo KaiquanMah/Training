@@ -1,0 +1,238 @@
+Resampling from a sample
+To investigate how much the estimates of a population proportion change from sample to sample, you will set up two sampling experiments.
+
+In the first experiment, you will simulate repeated samples from a population. In the second, you will choose a single sample from the first experiment and repeatedly resample from that sample: a method called bootstrapping. More specifically:
+
+Experiment 1: Assume the true proportion of people who will vote for Candidate X is 0.6. Repeatedly sample 30 people from the population and measure the variability of p^ (the sample proportion).
+
+Experiment 2: Take one sample of size 30 from the same population. Repeatedly sample 30 people (with replacement!) from the original sample and measure the variability of p^∗ (the resample proportion).
+
+It's important to realize that the first experiment relies on knowing the population and is typically impossible in practice. The second relies only on the sample of data and is therefore easy to implement for any statistic. Fortunately, as you will see, the variability in p^, or the proportion of "successes" in a sample, is approximately the same whether we sample from the population or resample from a sample.
+
+We have created 1000 random samples, each of size 30, from the population. The resulting data frame, all_polls, is available in your workspace. Take a look before getting started.
+
+
+
+
+
+
+
+
+Part 1
+Compute the sample proportion for each of the 1000 original samples, assigning to ex1_props.
+Group by poll.
+Summarize to calculate stat as the mean() of cases of vote equalling "yes".
+
+
+> all_polls
+> ex1_props <- all_polls %>% 
+    # Group by poll
+    group_by(poll)
+
+#both gave the same result below
+# A tibble: 30,000 x 2
+    poll vote 
+   <int> <chr>
+ 1     1 no   
+ 2     1 yes  
+ 3     1 no   
+ 4     1 no   
+ 5     1 yes  
+ 6     1 no   
+ 7     1 yes  
+ 8     1 yes  
+ 9     1 yes  
+10     1 no   
+# ... with 29,990 more rows
+
+
+
+
+# Compute p-hat for each poll
+ex1_props <- all_polls %>% 
+  # Group by poll
+  group_by(poll) %>% 
+  # Calculate proportion of yes votes
+  summarise(stat = mean(vote == "yes"))
+  
+# Review the result
+ex1_props
+> ex1_props
+# A tibble: 1,000 x 2
+    poll  stat
+   <int> <dbl>
+ 1     1 0.7  
+ 2     2 0.667
+ 3     3 0.633
+ 4     4 0.633
+ 5     5 0.4  
+ 6     6 0.6  
+ 7     7 0.5  
+ 8     8 0.533
+ 9     9 0.567
+10    10 0.567
+# ... with 990 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 2
+Select one poll from which to resample, as one_poll.
+Filter for the first poll. That is, when poll equals 1.
+Select the vote column.
+Compute p^∗ for each resampled poll, as ex2_props.
+Specify the response as vote. The success value is "yes".
+Generate 1000 replicates of type "bootstrap".
+Calculate the "prop"ortion summary statistic.
+Note that because you are looking for an interval estimate, you have not made a hypothesis claim about the proportion (thus, there is no hypothesize step needed in the infer pipeline).
+
+> one_poll <- all_polls %>%
+    filter(poll == 1)
+
+> one_poll
+# A tibble: 30 x 2
+    poll vote 
+   <int> <chr>
+ 1     1 no   
+ 2     1 yes  
+ 3     1 no   
+ 4     1 no   
+ 5     1 yes  
+ 6     1 no   
+ 7     1 yes  
+ 8     1 yes  
+ 9     1 yes  
+10     1 no   
+# ... with 20 more rows
+
+
+
+
+
+
+> one_poll <- all_polls %>%
+    filter(poll == 1) %>%
+    #select only the vote col
+    select(vote)
+
+> one_poll
+# A tibble: 30 x 1
+   vote 
+   <chr>
+ 1 no   
+ 2 yes  
+ 3 no   
+ 4 no   
+ 5 yes  
+ 6 no   
+ 7 yes  
+ 8 yes  
+ 9 yes  
+10 no   
+# ... with 20 more rows
+
+
+
+
+
+
+
+# Select one poll from which to resample
+one_poll <- all_polls %>%
+  # Filter for the first poll
+  filter(poll == 1) %>%
+  # Select vote
+  select(vote)
+  
+# Compute p-hat* for each resampled poll
+ex2_props <- one_poll %>%
+  # Specify vote as the response, where yes means success
+  specify(response = vote, success = "yes") %>%
+  # Generate 1000 reps of type bootstrap
+  generate(reps = 1000, type = "bootstrap") %>% 
+  # Calculate the summary stat "prop"
+  calculate(stat = "prop")
+
+
+
+
+> ex2_props
+# A tibble: 1,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 0.667
+ 2         2 0.633
+ 3         3 0.6  
+ 4         4 0.6  
+ 5         5 0.733
+ 6         6 0.633
+ 7         7 0.467
+ 8         8 0.733
+ 9         9 0.633
+10        10 0.767
+# ... with 990 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 3
+Using ex1_props, calculate the variability of p^. In the call to summarize(), set variability to the standard deviation, sd(), of stat.
+Do the same with ex2_props to calculate the variability of p^∗.
+Again, because you are looking for an interval estimate, you have not made a hypothesis claim about the proportion (thus, there is no hypothesize step needed in the infer pipeline).
+
+
+# From previous steps
+ex1_props <- all_polls %>% 
+  group_by(poll) %>% 
+  summarize(stat = mean(vote == "yes"))
+ex2_props <- all_polls %>%
+  filter(poll == 1) %>%
+  select(vote) %>%
+  specify(response = vote, success = "yes") %>%
+  generate(reps = 1000, type = "bootstrap") %>% 
+  calculate(stat = "prop")
+  
+# Calculate variability of p-hat
+ex1_props %>% 
+  summarize(variability = sd(stat))
+# A tibble: 1 x 1
+  variability
+        <dbl>
+1      0.0868  
+
+
+# Calculate variability of p-hat*
+ex2_props %>% 
+  summarize(variability = sd(stat))
+# A tibble: 1 x 1
+  variability
+        <dbl>
+1      0.0841
+
+
+The variability in the proportion of “successes” in a sample is approximately the same whether we sample from the population or resample from a sample.
+
+
