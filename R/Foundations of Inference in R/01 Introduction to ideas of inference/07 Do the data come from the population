@@ -1,0 +1,60 @@
+Do the data come from the population?
+Recall that the observed difference (i.e. the difference in proportions in the homes dataset, shown as the red vertical line) was around -0.0078, which seems to fall below the bulk of the density of shuffled differences. It is important to know, however, whether any of the randomly permuted differences were as extreme as the observed difference.
+
+In this exercise, you'll re-create this dotplot as a density plot and count the number of permuted differences that were to the left of the observed difference.
+
+
+
+
+
+The homeown_perm dataset is available in your workspace.
+
+Using geom_density(), plot the permuted differences.
+Add a vertical red line with geom_vline() where the observed difference falls. diff_orig is provided in your workspace and represents the original value of the difference statistic.
+Count the number of permuted differences that were less than or equal to the observed difference.
+
+
+> homeown_perm
+# A tibble: 1,000 x 3
+   replicate diff_perm diff_orig
+       <int>     <dbl>     <dbl>
+ 1         1  -0.00289  -0.00783
+ 2         2  -0.00289  -0.00783
+ 3         3   0.00659  -0.00783
+ 4         4   0.00412  -0.00783
+ 5         5   0.00494  -0.00783
+ 6         6   0.00453  -0.00783
+ 7         7  -0.0111   -0.00783
+ 8         8  -0.0185   -0.00783
+ 9         9  -0.00206  -0.00783
+10        10  -0.0115   -0.00783
+# ... with 990 more rows
+
+> diff_orig
+[1] -0.00783
+
+
+
+
+
+# Plot permuted differences, diff_perm
+ggplot(homeown_perm, aes(x = diff_perm)) + 
+  # Add a density layer
+  geom_density() +
+  # Add a vline layer with intercept diff_orig
+  geom_vline(aes(xintercept = diff_orig), color = "red")
+
+# Compare permuted differences to observed difference
+homeown_perm %>%
+  summarize(n_perm_le_obs = sum(diff_perm <= diff_orig))
+  
+# A tibble: 1 x 1
+  n_perm_le_obs
+          <int>
+1           212
+
+
+212 permuted differences are more extreme than the observed difference. This only represents 21.2% of the null statistics, so you can conclude that the observed difference is consistent with the permuted distribution.
+
+
+
