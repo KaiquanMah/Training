@@ -1,0 +1,175 @@
+Randomising opportunity cost
+As in Chapter 2 Exercise 5, you will permute the data to generate a distribution of differences as if the null hypothesis were true.
+
+In the study, the number of individuals in each of the control and treatment groups is fixed. Additionally, when you assume that the null hypothesis is true—that is, the experiment had no effect on the outcome of buying a DVD—it is reasonable to infer that the number of individuals who would buy a DVD is also fixed. That is, 97 people were going to buy a DVD regardless of which treatment group they were in.
+
+Using the new data and the methods from the previous chapter, create a randomization distribution of the difference in proportions calculated on permuted data.
+
+
+
+
+
+Part 1
+Using the opportunity dataset, calculate the observed difference in purchase rate.
+Group by group.
+Summarize to calculate the proportion deciding to buy a DVD. That is, get the mean() of cases of decision equalling "buyDVD".
+Summarize again to calculate the diff()erence of prop_buy between groups.
+
+> diff_obs <- opportunity %>%
+    group_by(group)
+> diff_obs
+# A tibble: 150 x 2
+# Groups:   group [2]
+   decision group  
+   <fct>    <fct>  
+ 1 buyDVD   control
+ 2 buyDVD   control
+ 3 buyDVD   control
+ 4 buyDVD   control
+ 5 buyDVD   control
+ 6 buyDVD   control
+ 7 buyDVD   control
+ 8 buyDVD   control
+ 9 buyDVD   control
+10 buyDVD   control
+# ... with 140 more rows
+
+
+
+
+
+> diff_obs <- opportunity %>%
+    group_by(group) %>%
+    summarise(prop_buy = mean(decision == "buyDVD"))
+> diff_obs
+# A tibble: 2 x 2
+  group     prop_buy
+  <fct>        <dbl>
+1 control      0.747
+2 treatment    0.547    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+# Calculate the observed difference in purchase rate
+diff_obs <- opportunity %>%
+  # Group by group
+  group_by(group) %>%
+  # Calculate proportion deciding to buy a DVD
+  summarise(prop_buy = mean(decision == "buyDVD")) %>%
+  # Calculate difference between groups
+  summarise(stat = diff(prop_buy)) %>% 
+  pull()   
+
+> diff_obs
+[1] -0.2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 2
+Create a data frame of permuted differences in purchase rates.
+Specify the model decision vs. group, with the success value "buyDVD".
+Hypothesise "independence".
+Generate 1000 reps of type "permute".
+Calculate the summary statistic "diff in props".
+
+
+# Create data frame of permuted differences in purchase rates
+opp_perm <- opportunity %>%
+  # Specify decision vs. group, where success is buying a DVD
+  specify(decision ~ group, success = "buyDVD") %>%
+  # Set the null hypothesis to independence
+  hypothesize(null = "independence") %>%
+  # Generate 1000 reps of type permute
+  generate(reps = 1000, type = "permute") %>%
+  # Calculate the summary stat difference in proportions
+  calculate(stat = "diff in props", order = c("treatment", "control"))
+    
+# Review the result
+opp_perm
+
+# A tibble: 1,000 x 2
+   replicate    stat
+       <int>   <dbl>
+ 1         1 -0.0133
+ 2         2  0.0933
+ 3         3 -0.0133
+ 4         4 -0.0133
+ 5         5  0.0933
+ 6         6  0.307 
+ 7         7 -0.0933
+ 8         8 -0.0400
+ 9         9  0.0133
+10        10  0.0133
+# ... with 990 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 3
+Draw a histogram of permuted differences.
+Using the permutation dataset, opp_perm, plot stat.
+Add a histogram layer with geom_histogram(). The binwidth is set to 0.005.
+Add a vertical line with geom_vline(). The xintercept is at diff_obs.
+
+
+
+
+> diff_obs
+[1] -0.2
+
+# From previous steps
+diff_obs <- opportunity %>%
+  group_by(group) %>%
+  summarize(prop_buy = mean(decision == "buyDVD")) %>%
+  summarize(stat = diff(prop_buy)) %>% 
+  pull()
+opp_perm <- opportunity %>%
+  specify(decision ~ group, success = "buyDVD") %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in props", order = c("treatment", "control"))
+  
+# Using the permuation data, plot stat
+ggplot(opp_perm, aes(x = stat)) + 
+  # Add a histogram layer with binwidth 0.005
+  geom_histogram(binwidth = 0.005) +
+  # Add a vline layer with intercept diff_obs
+  geom_vline(aes(xintercept = diff_obs), color = "red")
+
+
+
+In the next exercise, you'll calculate the p-value to judge if the difference in proportions permuted is consistent with the observed difference.
+
