@@ -1,0 +1,138 @@
+Using the NHANES dataset, let's investigate the relationship between gender and home ownership. Remember, more information about the dataset can be found here: NHANES.
+
+As seen in the video, natural variability can be modeled from shuffling observations around to remove any relationships that might exist in the population. However, before you permute the data, you need to calculate the original observed statistic. In this exercise, you will calculate the difference in proportion of home owners who are men versus women.
+
+Recall that:
+%in% returns a logical vector that is TRUE when values on the left hand side are listed on the right hand side.
+The mean of a logical vector is the proportion of cases where that vector is TRUE.
+
+fruits <- c("apple", "banana", "cherry")
+fruits %in% c("banana", "cherry")
+mean(fruits %in% c("banana", "cherry"))
+
+
+
+
+#The dplyr, ggplot2, infer, and NHANES packages have been loaded for you.
+#From NHANES, select the Gender and HomeOwnership columns, then filter the rows to keep individuals whose home ownership status is "Own" or "Rent". Save the result to homes.
+#http://www.datasciencemadesimple.com/in-operator-in-r/
+
+
+homes <- NHANES %>%
+  # Select Gender and HomeOwn
+  select(Gender, HomeOwn) %>%
+  # Filter for HomeOwn equal to "Own" or "Rent"
+  filter(HomeOwn %in% c("Own", "Rent"))
+
+
+
+
+
+#Find the observed difference in proportions of men who own and women who own.
+#Group by Gender.
+#Compute the proportion of individuals who own a home. Note that this will calculate proportions for both genders since you've grouped by the Gender variable in the line before it. The proportion is given by the mean of the HomeOwn variable who "Own".
+#Using the diff() function, calculate the difference in proportion of home ownership.
+
+diff_orig <- homes %>%   
+  # Group by gender
+  group_by(Gender) %>%
+  # Summarize proportion of homeowners
+  summarise(prop_own = mean(HomeOwn %in% c("Own"))) %>%
+  # Summarize difference in proportion of homeowners
+  summarise(obs_diff_prop = diff(prop_own)) # male - female
+  
+# See the result
+diff_orig
+
+> diff_orig
+# A tibble: 1 x 1
+  obs_diff_prop
+          <dbl>
+1      -0.00783
+
+
+
+Now that you have the observed difference in proportions, you'll move on to calculating the difference in proportions for randomized datasets.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Explore
+diff_orig <- homes %>%   
+  # Group by gender
+  group_by(Gender) %>%
+  # Summarize proportion of homeowners
+  summarise(prop_own = mean(HomeOwn %in% c("Own")))
+  
+# See the result
+diff_orig
+
+> diff_orig
+# A tibble: 2 x 2
+  Gender prop_own
+  <fct>     <dbl>
+1 female    0.665
+2 male      0.658
+
+
+
+
+
+
+
+
+
+
+diff_orig <- homes %>%   
+  # Group by gender
+  group_by(Gender)
+    
+# See the result
+diff_orig
+
+> diff_orig
+# A tibble: 9,712 x 2
+# Groups:   Gender [2]
+   Gender HomeOwn
+   <fct>  <fct>  
+ 1 male   Own    
+ 2 male   Own    
+ 3 male   Own    
+ 4 male   Own    
+ 5 female Rent   
+ 6 male   Rent   
+ 7 male   Own    
+ 8 female Own    
+ 9 female Own    
+10 female Own    
+# ... with 9,702 more rows
+
+
+
+
+
+> unique(homes$HomeOwn)
+[1] Own  Rent
+Levels: Own Rent Other
+
+
+
