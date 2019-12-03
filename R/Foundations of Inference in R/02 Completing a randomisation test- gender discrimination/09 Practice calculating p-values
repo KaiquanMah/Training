@@ -1,0 +1,167 @@
+Practice calculating p-values
+In the original dataset, 87.5% of the men were promoted and 58.3% of the women were promoted.
+
+Consider a situation where there are 24 men, 24 women, and 35 people are still promoted. But in this new scenario, 75% of the men are promoted and 70.8% of the women are promoted. Does the difference in promotion rates still appear to be statistically significant? That is, could this difference in promotion rates have come from random chance?
+
+You'll analyze these new data, contained in disc_new, using the same permutation algorithm from before.
+
+The disc_perm and disc_perm_new datasets are available in your workspace.
+
+
+
+
+
+
+
+Part 1
+Run the code to recall the counts of sex and promote in the original dataset.
+Get the counts in the new dataset, disc_new.
+
+
+> disc_new
+        promote    sex
+1      promoted   male
+2      promoted   male
+3      promoted   male
+4      promoted   male
+5      promoted   male
+6      promoted   male
+7      promoted   male
+8      promoted   male
+9      promoted   male
+10     promoted   male
+11     promoted   male
+12     promoted   male
+13     promoted   male
+14     promoted   male
+15     promoted   male
+16     promoted   male
+17     promoted   male
+18     promoted   male
+19     promoted female
+20     promoted female
+21     promoted female
+22     promoted female
+23     promoted female
+24     promoted female
+25     promoted female
+26     promoted female
+27     promoted female
+28     promoted female
+29     promoted female
+30     promoted female
+31     promoted female
+32     promoted female
+33     promoted female
+34     promoted female
+35     promoted female
+36 not_promoted   male
+37 not_promoted   male
+38 not_promoted   male
+39 not_promoted   male
+40 not_promoted   male
+41 not_promoted   male
+42 not_promoted female
+43 not_promoted female
+44 not_promoted female
+45 not_promoted female
+46 not_promoted female
+47 not_promoted female
+48 not_promoted female
+
+
+
+
+# Recall the original data
+disc %>% 
+  count(sex, promote)
+
+# A tibble: 4 x 3
+  sex    promote          n
+  <fct>  <fct>        <int>
+1 female not_promoted    10
+2 female promoted        14
+3 male   not_promoted     3
+4 male   promoted        21
+
+
+# Tabulate the new data
+disc_new %>%
+  count(sex, promote)
+
+# A tibble: 4 x 3
+  sex    promote          n
+  <fct>  <fct>        <int>
+1 female not_promoted     7
+2 female promoted        17
+3 male   not_promoted     6
+4 male   promoted        18
+
+
+
+
+
+
+
+
+
+Part 2
+Run the code to recall the histogram of the difference statistic in the original permutation dataset.
+Draw the histogram with the new permutation dataset, disc_perm_new. On this plot, set the x-axis intercept of the vertical line to diff_orig_new.
+
+
+> diff_orig
+[1] 0.2916667
+> diff_orig_new
+[1] 0.04166667
+
+
+
+# Recall the distribution of the original permuted differences
+ggplot(disc_perm, aes(x = stat)) + 
+  geom_histogram() +
+  geom_vline(aes(xintercept = diff_orig), color = "red")
+
+# Plot the distribution of the new permuted differences
+ggplot(disc_perm_new, aes(x = stat)) + 
+  geom_histogram() +
+  geom_vline(aes(xintercept = diff_orig_new), color = "red")
+
+
+
+
+
+
+
+
+
+
+
+Part 3
+Run the code to recall the p-value of the difference statistic in the original permutation dataset.
+Calculate the p-value with the new permutation dataset, disc_perm_new, and the new observed difference, diff_orig_new.
+
+
+
+# Recall the p-value from the original data
+disc_perm %>%
+  summarize(p_value = mean(diff_orig <= stat))
+# A tibble: 1 x 1
+  p_value
+    <dbl>
+1    0.03
+
+
+
+# Find the p-value from the new data
+disc_perm_new %>%
+  summarize(p_value = mean(diff_orig_new <= stat))
+# A tibble: 1 x 1
+  p_value
+    <dbl>
+1   0.478
+
+
+
+
+
