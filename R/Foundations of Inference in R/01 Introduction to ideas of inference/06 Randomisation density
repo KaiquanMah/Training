@@ -1,0 +1,45 @@
+Randomisation density
+Using 100 repetitions allows you to understand the mechanism of permuting. However, 100 is not enough to observe the full range of likely values for the null differences in proportions.
+
+Recall the four steps of inference. These are the same four steps that will be used in all inference exercises in this course and future statistical inference courses. Use the names of the functions to help you recall the analysis process.
+
+specify will specify the response and explanatory variables.
+hypothesize will declare the null hypothesis.
+generate will generate resamples, permutations, or simulations.
+calculate will calculate summary statistics.
+
+In this exercise, you'll repeat the process 1000 times to get a sense for the complete distribution of null differences in proportions.
+
+
+
+
+
+
+
+The dplyr, ggplot2, NHANES, and infer packages have been loaded for you.
+Generate 1000 differences in proportions by shuffling the HomeOwn variable using the infer syntax. Recall the infer syntax:
+specify that the relationship of interest is HomeOwn vs. Gender and a success in this context is homeownership, success = "Own".
+hypothesize that the null is true where null = "independence" (meaning gender and homeownership are not related).
+generate 1000 permutations; set reps to 1000.
+calculate the statistic stat = "diff in props" with the order of c("male", "female").
+
+Run the density plot code to create a smoothed visual representation of the distribution of differences. What shape does the curve have?
+
+# Perform 1000 permutations
+homeown_perm <- homes %>%
+  # Specify HomeOwn vs. Gender, with `"Own" as success
+  specify(HomeOwn ~ Gender, success = "Own") %>%
+  # Use a null hypothesis of independence
+  hypothesize(null = "independence") %>% 
+  # Generate 1000 repetitions (by permutation)
+  generate(reps = 1000, type = "permute") %>% 
+  # Calculate the difference in proportions (male then female)
+  calculate(stat = "diff in props", order = c("male", "female"))
+
+# Density plot of 1000 permuted differences in proportions
+ggplot(homeown_perm, aes(x = stat)) + 
+  geom_density()
+
+
+You can now see that the distribution is approximately normally distributed around -0.01, but what can we conclude from it? You'll learn how to use this distribution in the next video.
+
