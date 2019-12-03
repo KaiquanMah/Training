@@ -1,0 +1,45 @@
+Calculating two-sided p-values
+What if the original research hypothesis had focused on any difference in promotion rates between men and women instead of focusing on whether men are more likely to be promoted than women? In this case, a difference like the one observed would occur twice as often (by chance) because sometimes the difference would be positive and sometimes it would be negative.
+
+When there is no directionality to the alternative hypothesis, the hypothesis and p-value are considered to be two-sided. In a two-sided setting, the p-value is double the one-sided p-value.
+
+In this exercise, you'll calculate a two-sided p-value given the original randomization distribution and dataset.
+
+The observed difference is stored in diff_orig and the difference in each permutation is the stat column of disc_perm.
+
+
+
+
+
+Calculate the two-sided p-value. This is double the one-sided p-value that you calculated in previous exercises.
+> disc_perm
+# A tibble: 1,000 x 2
+   replicate    stat
+       <int>   <dbl>
+ 1         1  0.0417
+ 2         2  0.0417
+ 3         3 -0.125 
+ 4         4  0.125 
+ 5         5  0.0417
+ 6         6  0.208 
+ 7         7 -0.125 
+ 8         8  0.125 
+ 9         9  0.125 
+10        10  0.0417
+# ... with 990 more rows
+
+> diff_orig
+[1] 0.2916667
+
+
+# Calculate the two-sided p-value
+disc_perm %>%
+  summarise(p_value = 2*mean(diff_orig <= stat))
+
+
+
+Notice, from the calculation, that the two-sided p-value is twice as big as the one-sided p-value. Often, two-sided p-values are preferred as a way of avoiding making false significance claims.
+
+
+
+
