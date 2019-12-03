@@ -1,0 +1,134 @@
+Randomised data under null model of independence
+The infer package will allow you to model a particular null hypothesis and then randomize the data to calculate permuted statistics. In this exercise, after specifying your null hypothesis you will permute the home ownership variable 10 times. By doing so, you will ensure that there is no relationship between home ownership and gender, so any difference in home ownership proportion for female versus male will be due only to natural variability.
+
+This exercise will demonstrate the first three steps from the infer package:
+specify will specify the response and explanatory variables.
+hypothesize will declare the null hypothesis.
+generate will generate resamples, permutations, or simulations.
+
+The dplyr, ggplot2, NHANES, and infer packages have been loaded for you and the homes dataset you created in the last exercise is available in your workspace.
+
+
+#Using the infer framework, step through specifying the null model and then performing 10 permutations to evaluate whether home ownership status (i.e. HomeOwn) differs between the "female" and "male" groups:
+#specify that the relationship of interest is HomeOwn vs. Gender and a success in this context is homeownership, set success to "Own".
+
+
+
+# Specify variables
+homeown_perm <- homes %>%
+  specify(HomeOwn ~ Gender, success = "Own")
+
+# Print results to console
+homeown_perm
+
+> homeown_perm
+Response: HomeOwn (factor)
+Explanatory: Gender (factor)
+# A tibble: 9,712 x 2
+   HomeOwn Gender
+   <fct>   <fct> 
+ 1 Own     male  
+ 2 Own     male  
+ 3 Own     male  
+ 4 Own     male  
+ 5 Rent    female
+ 6 Rent    male  
+ 7 Own     male  
+ 8 Own     female
+ 9 Own     female
+10 Own     female
+# ... with 9,702 more rows
+
+
+
+
+
+
+
+
+
+
+Using the infer framework:
+specify has been done for you.
+hypothesize that the null is true where null = "independence" (gender and homeownership are not related).
+
+
+# Hypothesize independence
+homeown_perm <- homes %>%
+  specify(HomeOwn ~ Gender, success = "Own") %>%
+  hypothesize(null = "independence")  
+
+# Print results to console
+homeown_perm
+
+
+> homeown_perm
+# A tibble: 9,712 x 2
+   HomeOwn Gender
+   <fct>   <fct> 
+ 1 Own     male  
+ 2 Own     male  
+ 3 Own     male  
+ 4 Own     male  
+ 5 Rent    female
+ 6 Rent    male  
+ 7 Own     male  
+ 8 Own     female
+ 9 Own     female
+10 Own     female
+# ... with 9,702 more rows
+
+
+
+
+
+
+
+
+
+
+
+Using the infer framework:
+specify has been done for you.
+hypothesize has been done for you.
+generate ten permutations; set reps to 10.
+
+
+# Perform 10 permutations
+homeown_perm <- homes %>%
+  specify(HomeOwn ~ Gender, success = "Own") %>%
+  hypothesize(null = "independence") %>% 
+  generate(reps = 10, type = "permute") 
+
+
+# Print results to console
+homeown_perm
+
+
+> homeown_perm
+Response: HomeOwn (factor)
+Explanatory: Gender (factor)
+Null Hypothesis: independence
+# A tibble: 97,120 x 3
+# Groups:   replicate [10]
+   HomeOwn Gender replicate
+   <fct>   <fct>      <int>
+ 1 Own     male           1
+ 2 Rent    male           1
+ 3 Own     male           1
+ 4 Own     male           1
+ 5 Own     female         1
+ 6 Own     male           1
+ 7 Rent    male           1
+ 8 Rent    female         1
+ 9 Own     female         1
+10 Own     female         1
+# ... with 97,110 more rows
+
+
+
+
+
+Notice that you went through three sequential steps: (1) the response and explanatory variables were defined by the specify command, (2) the independence null hypothesis was set, and (3) you successfully shuffled the response variable, HomeOwn, ten times.
+
+
