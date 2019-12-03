@@ -1,0 +1,117 @@
+Summarising opportunity cost 2
+Now that you've created the randomization distribution, you'll use it to assess whether the observed difference in proportions is consistent with the null difference. You will measure this consistency (or lack thereof) with a p-value, or the proportion of permuted differences less than or equal to the observed difference.
+
+The permuted dataset and the original observed statistic are available in your workspace as opp_perm and diff_orig respectively.
+
+visualize and get_p_value using the built in infer functions. Remember that the null statistics are above the original difference, so the p-value (which represents how often a null value is more extreme) is calculated by counting the number of null values which are less than the original difference.
+
+
+
+
+
+
+
+
+
+
+
+First visualize the sampling distribution of the permuted statistics indicating the place where obs_stat = diff_orig, and coloring in values below with the command direction = "less".
+Then get_p_value is calculated as the proportion of permuted statistics which are direction = "less" than obs_stat = diff_orig.
+As an alternative way to calculate the p-value, use summarize() and mean() to find the proportion of times the permuted differences in opp_perm (called stat) are less than or equal to the observed difference (called diff_orig).
+You can test your knowledge by trying out: direction = "greater", direction = "two_sided", and direction = "less" before submitting your answer to both visualize and get_p_value.
+
+
+> diff_orig
+[1] -0.2
+
+
+
+
+
+# Visualize the statistic 
+opp_perm %>%
+  	visualize(obs_stat = diff_orig, direction = "less")
+
+
+# Calculate the p-value using `get_p_value`
+opp_perm %>%
+  get_p_value(obs_stat = diff_orig, direction = "less")
+# A tibble: 1 x 1
+  p_value
+    <dbl>
+1   0.017
+
+
+
+# Calculate the p-value using `summarize`
+opp_perm %>%
+  summarize(p_value = mean(opp_perm <= diff_orig))
+# A tibble: 1 x 1
+  p_value
+    <dbl>
+1  0.0085  
+  
+The small p-value indicates that the observed data are inconsistent with the null hypothesis. We should reject the null claim and conclude that financial advice does affect the likelihood of purchase.
+
+
+
+
+
+
+Exploring different get_p_value directions
+> opp_perm %>%
+    get_p_value(obs_stat = diff_orig, direction = "two_sided")
+# A tibble: 1 x 1
+  p_value
+    <dbl>
+1   0.018
+
+
+
+> opp_perm %>%
+    get_p_value(obs_stat = diff_orig, direction = "greater")
+# A tibble: 1 x 1
+  p_value
+    <dbl>
+1   0.995
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Opportunity cost conclusion
+In the last exercise, you computed the p-value, or the proportion of permuted differences less than or equal to the observed difference:
+
+opp_perm %>%
+  summarize(p_value = mean(stat <= diff_orig))
+
+Based on this result of 0.017, what can you conclude from the study about the effect of reminding students to save money?
+
+
+#not Students who are reminded are less likely to buy the DVD, but it could be for reasons other than the reminder (i.e. the relationship is not necessarily causal).
+Because the study is an experiment, all other variables are balanced across the two treatment groups, and the researchers are correct in concluding causation.
+
+#yes Reminding them causes them to be less likely to buy the DVD.
+We can confidently say the different messaging caused the students to change their buying habits, since they were randomly assigned to treatment and control groups. Let's continue.
+
+
+
