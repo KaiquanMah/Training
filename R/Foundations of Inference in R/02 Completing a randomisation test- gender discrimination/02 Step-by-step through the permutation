@@ -1,0 +1,94 @@
+Step-by-step through the permutation
+To help you understand the code used to create the randomization distribution, this exercise will walk you through the steps of the infer framework. In particular, you'll see how differences in the generated replicates affect the calculated statistics.
+
+After running the infer steps, be sure to notice that the numbers are slightly different for each replicate.
+
+
+
+> disc_perm %>%
+    group_by(replicate) %>%
+    count(sex, promote)
+# A tibble: 20 x 4
+# Groups:   replicate [5]
+   replicate sex    promote          n
+       <int> <fct>  <fct>        <int>
+ 1         1 female not_promoted     7
+ 2         1 female promoted        17
+ 3         1 male   not_promoted     6
+ 4         1 male   promoted        18
+ 5         2 female not_promoted     7
+ 6         2 female promoted        17
+ 7         2 male   not_promoted     6
+ 8         2 male   promoted        18
+ 9         3 female not_promoted     7
+10         3 female promoted        17
+11         3 male   not_promoted     6
+12         3 male   promoted        18
+13         4 female not_promoted     7
+14         4 female promoted        17
+15         4 male   not_promoted     6
+16         4 male   promoted        18
+17         5 female not_promoted     8
+18         5 female promoted        16
+19         5 male   not_promoted     5
+20         5 male   promoted        19
+
+
+
+
+
+> disc_perm %>%
+    calculate(stat = "diff in props", order = c("male", "female"))
+# A tibble: 5 x 2
+  replicate   stat
+      <int>  <dbl>
+1         1 0.0417
+2         2 0.0417
+3         3 0.0417
+4         4 0.0417
+5         5 0.125
+
+
+
+
+
+
+
+
+
+
+#The dplyr and infer packages have been loaded for you, along with the disc data frame from the last exercise.
+#Call the functions for the first three steps. The work has been done for you, your job is to investigate the results of calling the first three infer steps.
+
+# Replicate the entire data frame, permuting the promote variable
+disc_perm <- disc %>%
+  specify(promote ~ sex, success = "promoted") %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 5, type = "permute")
+
+
+
+#In order to see the effect of permuting,
+disc_perm %>%
+  
+  #group the permuted data frame, disc_perm, by the new replicate variable, then
+  # Group by replicate
+  group_by(replicate) %>%
+  
+  
+  #count the variables of interest (promote within each sex) using count().
+  # Count per group
+  count(sex, promote)
+
+
+
+disc_perm %>%
+  #Using disc_perm, calculate() the statistic of interest. Set stat to "diff in props" and order to c("male", "female").
+  # Calculate difference in proportion, male then female
+  calculate(stat = "diff in props", order = c("male", "female"))
+  
+  
+  
+Cool calculating! Each replicate had slightly different counts of promotion and sex, which led to slightly different statistics being calculated for each replicate.
+
+
