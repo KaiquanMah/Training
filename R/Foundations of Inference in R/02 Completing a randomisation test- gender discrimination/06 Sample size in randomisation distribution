@@ -1,0 +1,177 @@
+How does sample size affect results?
+Notice that the observed difference of 0.2917 is in the extreme right tail of the permuted differences. If the sample was ten times larger but the sample statistic was exactly the same (i.e. 0.2917), how would the distribution of permuted differences change? Complete the following sentence.
+
+The statistic of 0.2917 would ______.
+
+#yes Be much farther to the right of the permuted differences (completely off of the distribution).
+Right! The statistic would be much farther to the right of the permuted differences, as you'll see in the next exercise.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sample size in randomisation distribution
+We've created two new datasets for you with essentially the same difference in proportions as the original discrimination data. However, one of the datasets (disc_small) is one third the size of the original dataset and the other (disc_big) is 10 times larger than the original dataset.
+
+Additionally, the same permutation code used previously has been run on the small and big datasets to create small and big distributions of permuted differences in promotion rates (disc_small_perm and disc_big_perm, respectively).
+
+In this exercise, you'll use these two new distributions to get a sense for how the differences vary given widely different sample sizes. In particular, notice the range of variability on the x-axis of each plot.
+
+
+
+
+
+
+Part 1
+Tabulate the small dataset, disc_small. That is, call count(), passing the sex and promote columns, to get a contingency table.
+Do the same with the big dataset, disc_big.
+
+
+
+> disc_small
+        promote    sex
+1      promoted   male
+2  not_promoted   male
+...
+14 not_promoted female
+15    promoted  female
+16    promoted  female
+
+
+> disc_big
+         promote    sex
+1       promoted   male
+...
+479    promoted  female
+480    promoted  female
+
+
+
+
+
+
+# Tabulate the small dataset
+disc_small %>% 
+  # Select sex and promote
+  count(sex, promote)
+
+# A tibble: 4 x 3
+  sex    promote          n
+  <fct>  <fct>        <int>
+1 female not_promoted     3
+2 female promoted         5
+3 male   not_promoted     1
+4 male   promoted         7
+
+
+
+
+# Do the same for disc_big
+disc_big %>% 
+  count(sex, promote)
+
+# A tibble: 4 x 3
+  sex    promote          n
+  <fct>  <fct>        <int>
+1 female not_promoted   100
+2 female promoted       140
+3 male   not_promoted    30
+4 male   promoted       210
+
+
+
+
+
+
+
+
+
+Part 2
+Using the small permutation dataset, disc_perm_small, plot stat.
+Add a histogram layer with binwidth 0.01.
+Add a vertical line using geom_vline(), with x-axis intercept diff_orig_small.
+
+
+> disc_perm_small
+# A tibble: 1,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1  0   
+ 2         2  0   
+ 3         3  0   
+ 4         4 -0.25
+ 5         5  0   
+ 6         6 -0.25
+ 7         7  0   
+ 8         8  0   
+ 9         9 -0.25
+10        10  0   
+# ... with 990 more rows
+
+> diff_orig_small
+[1] 0.25
+
+# Using disc_perm_small, plot stat
+ggplot(disc_perm_small, aes(x = stat)) + 
+  # Add a histogram layer with binwidth 0.01
+  geom_histogram(binwidth = 0.01) +
+  # Add a vline layer, crossing x-axis at diff_orig_small
+  geom_vline(aes(xintercept = diff_orig_small), color = "red")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 3
+Draw the same plot again, this time using the big dataset, disc_perm_big and an x-axis intercept of diff_orig_big.
+
+
+> disc_perm_big
+# A tibble: 1,000 x 2
+   replicate     stat
+       <int>    <dbl>
+ 1         1 -0.0333 
+ 2         2 -0.025  
+ 3         3 -0.025  
+ 4         4 -0.0417 
+ 5         5 -0.0167 
+ 6         6  0.0917 
+ 7         7  0.0917 
+ 8         8 -0.00833
+ 9         9  0.025  
+10        10  0      
+# ... with 990 more rows
+
+> diff_orig_big
+[1] 0.2916667
+
+# Swap the dataset to disc_perm_big
+ggplot(disc_perm_big, aes(x = stat)) + 
+  geom_histogram(binwidth = 0.01) +
+  # Change the x-axis intercept to diff_orig_big
+  geom_vline(aes(xintercept = diff_orig_big), color = "red")
+
+The observed difference is consistent with differences you would see by chance if the sample size was small. 
+The observed difference would virtually never be observed by chance if the sample size was big, therefore the observed difference would have a higher hance of being correctly classified as significant.
+
+
+
