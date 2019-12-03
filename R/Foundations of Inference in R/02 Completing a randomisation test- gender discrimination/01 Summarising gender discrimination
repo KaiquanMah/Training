@@ -1,0 +1,129 @@
+Gender discrimination hypotheses
+Which of the following null (H0) and alternative (HA) hypotheses are appropriate for the gender discrimination example described in the previous video?
+
+#yes
+H0: gender and promotion are unrelated variables.
+HA: men are more likely to be promoted.
+
+
+
+
+
+
+
+
+
+Summarising gender discrimination
+As the first step of any analysis, you should look at and summarize the data. Categorical variables are often summarized using proportions, and it is always important to understand the denominator of the proportion.
+
+Do you want the proportion of women who were promoted or the proportion of promoted individuals who were women? Here, you want the first of these, so in your R code it's necessary to group_by() the sex variable.
+
+The discrimination study data are available in your workspace as disc.
+
+
+
+
+> disc
+        promote    sex
+1      promoted   male
+2      promoted   male
+3      promoted   male
+4      promoted   male
+5      promoted   male
+6      promoted   male
+7      promoted   male
+8      promoted   male
+9      promoted   male
+10     promoted   male
+11     promoted   male
+12     promoted   male
+13     promoted   male
+14     promoted   male
+15     promoted   male
+16     promoted   male
+17     promoted   male
+18     promoted   male
+19     promoted   male
+20     promoted   male
+21     promoted   male
+22     promoted female
+23     promoted female
+24     promoted female
+25     promoted female
+26     promoted female
+27     promoted female
+28     promoted female
+29     promoted female
+30     promoted female
+31     promoted female
+32     promoted female
+33     promoted female
+34     promoted female
+35     promoted female
+36 not_promoted   male
+37 not_promoted   male
+38 not_promoted   male
+39 not_promoted female
+40 not_promoted female
+41 not_promoted female
+42 not_promoted female
+43 not_promoted female
+44 not_promoted female
+45 not_promoted female
+46 not_promoted female
+47 not_promoted female
+48 not_promoted female
+
+
+
+
+
+> disc %>%
+    count(sex, promote)
+# A tibble: 4 x 3
+  sex    promote          n
+  <fct>  <fct>        <int>
+1 female not_promoted    10
+2 female promoted        14
+3 male   not_promoted     3
+4 male   promoted        21
+
+
+
+
+
+
+> disc %>%
+    group_by(sex) %>%
+    summarise(promoted_prop = mean(promote == "promoted"))
+# A tibble: 2 x 2
+  sex    promoted_prop
+  <fct>          <dbl>
+1 female         0.583
+2 male           0.875
+
+
+
+
+
+
+
+
+# Create a contingency table summarizing the data
+disc %>%
+  #Using the count() function from dplyr, tabulate the variables sex and promote.
+  # Count the rows by sex, promote
+  count(sex, promote)
+
+# Find proportion of each sex who were promoted
+disc %>%
+  #Summarize the data by using group_by() on the sex variable.
+  # Group by sex
+  group_by(sex) %>%
+  
+  #Find the proportion who were promoted. Call this variable promoted_prop. Note that with binary variables, the proportion of either value can be found using the mean() function (e.g. mean(variable == "value")).
+  # Calculate proportion promoted summary stat
+  summarise(promoted_prop = mean(promote == "promoted"))
+
+Okay, so the difference in proportions promoted is almost 0.3. Great work!
+
