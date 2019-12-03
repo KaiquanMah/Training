@@ -1,0 +1,56 @@
+Sample size for critical region
+Using the randomization distributions with the small and big datasets, calculate different cutoffs for significance. Remember, you are most interested in a large positive difference in promotion rates, so you are calculating the upper quantiles of 0.90, 0.95, and 0.99.
+
+A function for calculating these quantiles, calc_upper_quantiles() is sown in the script.
+
+
+
+
+
+
+As a reference point, run the call to calc_upper_quantiles() to calculate the relevant quantiles associated with the original dataset of 1000 permuted differences, disc_perm.
+Do the same for the small dataset, disc_perm_small ...
+and for the big dataset, disc_perm_big.
+
+
+calc_upper_quantiles <- function(dataset) {
+  dataset %>% 
+    summarize(
+      q.90 = quantile(stat, p = 0.90),
+      q.95 = quantile(stat, p = 0.95),
+      q.99 = quantile(stat, p = 0.99)
+    )
+}
+
+# Recall the quantiles associated with the original dataset
+calc_upper_quantiles(disc_perm)
+# A tibble: 1 x 3
+   q.90  q.95  q.99
+  <dbl> <dbl> <dbl>
+1 0.125 0.208 0.292
+
+
+
+# Calculate the quantiles associated with the small dataset
+#dataset is 1/3 smaller than the original dataset count
+calc_upper_quantiles(disc_perm_small)
+# A tibble: 1 x 3
+   q.90  q.95  q.99
+  <dbl> <dbl> <dbl>
+1  0.25  0.25   0.5
+
+
+
+# Calculate the quantiles associated with the big dataset
+#dataset is 10X bigger than the original dataset count
+calc_upper_quantiles(disc_perm_big)
+# A tibble: 1 x 3
+    q.90   q.95  q.99
+   <dbl>  <dbl> <dbl>
+1 0.0500 0.0667 0.100
+
+Notice how the differences in proportions must be much larger to be significant if the sample size is small. With a big sample size, a small difference in proportions can be significant.
+
+
+
+
