@@ -1,0 +1,81 @@
+Working with the NHANES data
+Throughout this chapter, you will use the NHANES dataset from the NHANES R package. The data are collected by the Center for Disease Control (CDC, the national public health institute in the United States) and can be thought of as a random sample of US residents.
+
+Before moving on to investigate particular variables, you'll have an opportunity to briefly explore the data in this exercise.
+#https://www.rdocumentation.org/packages/NHANES/topics/NHANES
+
+
+# Load packages
+library(ggplot2)
+library(NHANES)
+
+
+# What are the variables in the NHANES dataset?
+colnames(NHANES)
+
+> colnames(NHANES)
+ [1] "ID"               "SurveyYr"         "Gender"           "Age"             
+ [5] "AgeDecade"        "AgeMonths"        "Race1"            "Race3"           
+ [9] "Education"        "MaritalStatus"    "HHIncome"         "HHIncomeMid"     
+[13] "Poverty"          "HomeRooms"        "HomeOwn"          "Work"            
+[17] "Weight"           "Length"           "HeadCirc"         "Height"          
+[21] "BMI"              "BMICatUnder20yrs" "BMI_WHO"          "Pulse"           
+[25] "BPSysAve"         "BPDiaAve"         "BPSys1"           "BPDia1"          
+[29] "BPSys2"           "BPDia2"           "BPSys3"           "BPDia3"          
+[33] "Testosterone"     "DirectChol"       "TotChol"          "UrineVol1"       
+[37] "UrineFlow1"       "UrineVol2"        "UrineFlow2"       "Diabetes"        
+[41] "DiabetesAge"      "HealthGen"        "DaysPhysHlthBad"  "DaysMentHlthBad" 
+[45] "LittleInterest"   "Depressed"        "nPregnancies"     "nBabies"         
+[49] "Age1stBaby"       "SleepHrsNight"    "SleepTrouble"     "PhysActive"      
+[53] "PhysActiveDays"   "TVHrsDay"         "CompHrsDay"       "TVHrsDayChild"   
+[57] "CompHrsDayChild"  "Alcohol12PlusYr"  "AlcoholDay"       "AlcoholYear"     
+[61] "SmokeNow"         "Smoke100"         "Smoke100n"        "SmokeAge"        
+[65] "Marijuana"        "AgeFirstMarij"    "RegularMarij"     "AgeRegMarij"     
+[69] "HardDrugs"        "SexEver"          "SexAge"           "SexNumPartnLife" 
+[73] "SexNumPartYear"   "SameSex"          "SexOrientation"   "PregnantNow"
+
+
+
+
+
+#Using the NHANES data, create a barplot of HomeOwn (fill color) broken down by Gender (x-axis).
+#Set position = "fill" in geom_bar() to compare relative frequencies.
+
+# Create bar plot for Home Ownership by Gender
+#https://ggplot2.tidyverse.org/reference/aes.html
+ggplot(NHANES, aes(x = Gender, fill = HomeOwn)) + 
+  # Set the position to fill
+  # i.e. up to the length of each HomeOwn category
+  # then create a stacked bar chart
+  geom_bar(position = "fill") +
+  ylab("Relative frequencies")
+  
+  
+  
+
+#Create a density plot for SleepHrsNight colored by SleepTrouble and faceted by HealthGen.
+#Since SleepHrsNight contains discrete values, the density should be smoothed a bit using adjust = 2.
+#Use facet_wrap(~ HealthGen) to visualize how the variables of interest vary by general health status.
+
+# Density plot of SleepHrsNight colored by SleepTrouble
+ggplot(NHANES, aes(x = SleepHrsNight, color = SleepTrouble)) + 
+  
+  # Adjust by 2
+  # https://ggplot2.tidyverse.org/reference/geom_density.html
+  # smoothen the curve
+  geom_density(adjust = 2) + 
+  
+  # Facet by HealthGen
+  # a sub-plot for each HealthGen category - 6 categories in total
+  # Excellent, VGood, Good, Fair, Poor, NA
+  facet_wrap(~ HealthGen)
+
+
+
+
+Warning message: Removed 2245 rows containing non-finite values (stat_density).
+
+Notice that the warning message for the densities and the grey portions of the bars both indicate a large number of missing observations in the dataset. If this were your dataset, it would be important to stop here and consider the cause of the missingness. For the course, we will now proceed without worrying about the missing observations.
+
+
+
