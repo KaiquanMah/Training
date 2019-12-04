@@ -1,0 +1,115 @@
+Bootstrap t-confidence interval
+The previous exercises told you two things:
+
+You can measure the variability associated with p^ by resampling from the original sample.
+Once you know the variability of p^, you can use it as a way to measure how far away the true proportion is.
+Note that the rate of closeness (here 95%) refers to how often a sample is chosen so that it is close to the population parameter. You won't ever know if a particular dataset is close to the parameter or far from it, but you do know that over your lifetime, 95% of the samples you collect should give you estimates that are within 2SE of the true population parameter.
+
+The votes from a single poll, one_poll, and the data from 1000 bootstrap resamples, one_poll_boot are available in your workspace. These are based on Experiment 2 from earlier in the chapter.
+
+As in the previous exercise, when discussing the variability of a statistic, the number is referred to as the standard error.
+
+
+
+
+
+
+
+
+
+Calculate p^ and assign the result to p_hat. In the call to summarize(), calculate stat as the mean of vote equalling "yes".
+
+Find an interval of values that are plausible for the true parameter by calculating p^±2SE.
+The lower bound of the confidence interval is p_hat minus twice the standard error of stat. Use sd() to calculate the standard error.
+The upper bound is p_hat plus twice the standard error of stat.
+
+
+> all_polls
+# A tibble: 30,000 x 2
+    poll vote 
+   <int> <chr>
+ 1     1 no   
+ 2     1 yes  
+ 3     1 no   
+ 4     1 no   
+ 5     1 yes  
+ 6     1 no   
+ 7     1 yes  
+ 8     1 yes  
+ 9     1 yes  
+10     1 no   
+# ... with 29,990 more rows
+
+
+> one_poll
+# A tibble: 30 x 1
+   vote 
+   <chr>
+ 1 no   
+ 2 yes  
+ 3 no   
+ 4 no   
+ 5 yes  
+ 6 no   
+ 7 yes  
+ 8 yes  
+ 9 yes  
+10 no   
+# ... with 20 more rows
+
+
+
+
+> one_poll_boot
+# A tibble: 1,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 0.667
+ 2         2 0.633
+ 3         3 0.6  
+ 4         4 0.6  
+ 5         5 0.733
+ 6         6 0.633
+ 7         7 0.467
+ 8         8 0.733
+ 9         9 0.633
+10        10 0.767
+# ... with 990 more rows
+
+
+
+
+
+
+
+# From previous exercises
+one_poll <- all_polls %>%
+  filter(poll == 1) %>%
+  select(vote)
+one_poll_boot <- one_poll %>%
+  specify(response = vote, success = "yes") %>%
+  generate(reps = 1000, type = "bootstrap") %>% 
+  calculate(stat = "prop")
+  
+p_hat <- one_poll %>%
+  # Calculate proportion of yes votes
+  summarize(stat = mean(vote == "yes")) %>%
+  pull()
+
+# Create an interval of plausible values
+one_poll_boot %>%
+  summarize(
+    # Lower bound is p_hat minus 2 std errs
+    lower = p_hat - 2*sd(stat),
+    # Upper bound is p_hat plus 2 std errs
+    upper = p_hat + 2*sd(stat)
+  )
+  
+# A tibble: 1 x 2
+  lower upper
+  <dbl> <dbl>
+1 0.529 0.871
+
+Remember that a confidence level describes how likely you are to have gotten a sample that was close enough to the true parameter. Indeed, with the sample at hand, the confidence interval of plausible values does contain the true population parameter of 0.6. Nice
+
+
