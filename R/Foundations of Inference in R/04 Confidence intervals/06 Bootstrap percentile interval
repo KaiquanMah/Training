@@ -1,0 +1,122 @@
+Bootstrap percentile interval
+The main idea in the previous exercise was that the distance between the original sample p^ and the resampled (or bootstrapped) p^∗ values gives a measure for how far the original p^ is from the true population proportion.
+
+The same variability can be measured through a different mechanism. As before, if p^ is sufficiently close to the true parameter, then the resampled (bootstrapped) p^∗ values will vary in such a way that they overlap with the true parameter.
+
+Instead of using ±2SE as a way to measure the middle 95% of the sampled p^ values, you can find the middle of the resampled p^∗ values by removing the upper and lower 2.5%. Note that this second method of constructing bootstrap intervals also gives an intuitive way for making 90% or 99% confidence intervals as well as 95% intervals.
+
+The bootstrapped resamples, one_poll_boot, and the proportion of yes votes, p_hat are available in your workspace.
+
+
+
+
+
+
+Part 1
+Run the code to remind yourself of the t-interval from the previous exercise.
+Calculate the 95 percent interval of the bootstrapped p^∗ values contained in one_poll_boot.
+Summarize to calculate the lower end at the 2.5% quantile of stat by setting p to 0.025.
+Calculate the upper end in a similar way.
+
+> p_hat
+[1] 0.7
+> one_poll_boot
+# A tibble: 1,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 0.667
+ 2         2 0.633
+ 3         3 0.6  
+ 4         4 0.6  
+ 5         5 0.733
+ 6         6 0.633
+ 7         7 0.467
+ 8         8 0.733
+ 9         9 0.633
+10        10 0.767
+# ... with 990 more rows
+
+
+
+
+# From previous exercise: bootstrap t-confidence interval
+one_poll_boot %>%
+  summarize(
+    lower = p_hat - 2 * sd(stat),
+    upper = p_hat + 2 * sd(stat)
+  )
+  
+# Manually calculate a 95% percentile interval
+one_poll_boot %>%
+  summarize(
+    lower = quantile(stat, p = 0.025),
+    upper = quantile(stat, p = 0.975)
+  )
+  
+# A tibble: 1 x 2
+  lower upper
+  <dbl> <dbl>
+1 0.533 0.833
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 2
+Perform the same calculation using infer's convenience function, get_confidence_interval(). For the interval, use level = 0.95, and call the output percentile_ci.
+
+
+
+# From previous step
+one_poll_boot %>%
+  summarize(
+    lower = quantile(stat, 0.025),
+    upper = quantile(stat, 0.975)
+  )
+  
+# Calculate the same interval, more conveniently
+percentile_ci <- one_poll_boot %>% 
+  get_confidence_interval(level = 0.95)
+  
+# Review the value
+percentile_ci
+
+# A tibble: 1 x 2
+  `2.5%` `97.5%`
+   <dbl>   <dbl>
+1  0.533   0.833
+
+
+
+
+
+
+Part 3
+visualize() the distribution of bootstrapped proportions with the middle 95 percent highlighted.
+Set the endpoints of the highlighted region to percentile_ci.
+Set direction to "between" to highlight in-between those endpoints.
+
+
+# From previous step
+percentile_ci <- one_poll_boot %>% 
+  get_confidence_interval(level = 0.95)
+  
+one_poll_boot %>% 
+  # Visualize in-between the endpoints given by percentile_ci
+  visualize(endpoints=percentile_ci, direction = "between")
+
+
+
+Note that the two intervals were created using different methods. Because the methods are different, the intervals are expected to be a bit different as well. In the long run, however, the intervals should provide the same information.
+
