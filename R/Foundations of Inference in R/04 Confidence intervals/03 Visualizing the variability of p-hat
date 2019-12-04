@@ -1,0 +1,97 @@
+Visualizing the variability of p-hat
+In order to compare the variability of the sampled p^ and p^∗ values in the previous exercises, it is valuable to visualize their distributions. To recall, the exercises walked through two different experiments for investigating the variability of p^ and p^∗:
+
+Experiment 1: Sample (n=30) repeatedly from an extremely large population (gold standard, but unrealistic)
+Experiment 2: Resample (n=30) repeatedly with replacement from a single sample of size 30.
+#expt 2 resampled only from poll #1
+
+
+
+
+Combine data from both experiments by calling bind_rows(), passing ex1_props and ex2_props. Call this both_ex_props. A dataset ID column named experiment will be created.
+Using both_ex_props, plot stat colored by experiment.
+Add a density curve using geom_density(), setting the bandwidth argument, bw, to 0.1.
+
+
+
+
+> both_ex_props
+# A tibble: 2,000 x 4
+   experiment  poll  stat replicate
+   <chr>      <int> <dbl>     <int>
+ 1 1              1 0.7          NA
+ 2 1              2 0.667        NA
+ 3 1              3 0.633        NA
+ 4 1              4 0.633        NA
+ 5 1              5 0.4          NA
+ 6 1              6 0.6          NA
+ 7 1              7 0.5          NA
+ 8 1              8 0.533        NA
+ 9 1              9 0.567        NA
+10 1             10 0.567        NA
+# ... with 1,990 more rows
+
+
+
+
+# Combine data from both experiments
+both_ex_props <- bind_rows(ex1_props, ex2_props, .id = "experiment")
+
+# Using both_ex_props, plot stat colored by experiment
+ggplot(both_ex_props, aes(x=stat, color = experiment)) + 
+  # Add a density layer with bandwidth 0.1
+  geom_density(bw = 0.1)
+
+
+Note that the curves are quite similar in shape. The sampled p^ values are centered around the true (typically unknown parameter) parameter (black); the resampled p^∗ values are centered around the estimate from the very first poll (green). 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Always resample the original number of observations
+In the bootstrap examples, exactly 30 observations have been repeatedly resampled from the original sample. The choice of 30 was given because the original sample had 30 observations. If we had resampled 3 observations instead, the resampled p^∗ value could have ranged from 0 to 1 (producing a much larger SE(p^∗) than desired). If we had resampled 300 observations instead, the resampled p^∗ value would have been close to the same number each time (producing a much smaller SE(p^∗) than desired).
+
+Generally, if n represents the size of the original sample, how many observations should we resample with replacement when bootstrapping?
+
+#not Resample fewer than n observations because otherwise every sample will include the same observations.
+The resamples are done with replacement, so no matter the sample size, the resample will have different observations than the original sample. Additionally, you want to mimic the process of sampling from a population. So the variability of the resamples should be the same size as the variability of the original sample.
+
+#not Resample more than n observations in order to minimize the variability.
+You want to mimic the process of sampling from a population. So the variability should be based on resamples of the same size as the original sample.
+
+#not Resample exactly n observations so that we have the exact same observations as the original sample.
+The resamples are done with replacement, so no matter the sample size, the resample will have different observations than the original sample.
+
+
+#yes Resample exactly n observations because then the variability of p^∗ will be most similar / representative of the original sampling process.
+Resamples with replacement are an excellent model for the process of taking the original sample from the population. Remember, in research problems, you don't have an ability to take more than one original sample, but you can take as many resamples as you like.
+
+
+
+
+
+
+
+
+
+
