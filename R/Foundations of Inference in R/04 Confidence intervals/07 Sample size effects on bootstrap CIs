@@ -1,0 +1,109 @@
+Sample size effects on bootstrap CIs
+In a previous multiple choice exercise, you realized that if you resampled the data with the wrong size (e.g. 300 or 3 instead of 30), the standard error (SE) of the sample proportions was off. With 300 resampled observations, the SE was too small. With 3 resampled observations, the SE was too large.
+
+Here, you will use the incorrect standard error (based on the incorrect sample size) to create a confidence interval. The idea is that when the standard error is off, the interval is not particularly useful, nor is it correct.
+
+
+
+
+A function for calculating the bootstrapped t-confidence interval, calc_t_conf_int(), is shown is the script. Read the code and try to understand it.
+Call calc_t_conf_int() on one_poll_boot to calculate the correct t-confidence interval.
+Do the same on one_poll_boot_300, to find an incorrect interval for the resamples of size 300.
+Do the same on one_poll_boot_3, to find an incorrect interval for the resamples of size 3.
+
+
+> one_poll_boot
+# A tibble: 1,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 0.667
+ 2         2 0.633
+ 3         3 0.6  
+ 4         4 0.6  
+ 5         5 0.733
+ 6         6 0.633
+ 7         7 0.467
+ 8         8 0.733
+ 9         9 0.633
+10        10 0.767
+# ... with 990 more rows
+
+
+
+> one_poll_boot_300
+# A tibble: 1,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 0.707
+ 2         2 0.667
+ 3         3 0.717
+ 4         4 0.72 
+ 5         5 0.7  
+ 6         6 0.69 
+ 7         7 0.703
+ 8         8 0.703
+ 9         9 0.7  
+10        10 0.693
+# ... with 990 more rows
+
+
+> one_poll_boot_3
+# A tibble: 1,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 1    
+ 2         2 1    
+ 3         3 0.333
+ 4         4 0.667
+ 5         5 1    
+ 6         6 1    
+ 7         7 1    
+ 8         8 0.667
+ 9         9 0.333
+10        10 0.333
+# ... with 990 more rows
+
+
+
+
+
+
+
+calc_t_conf_int <- function(resampled_dataset) {
+  resampled_dataset %>%
+    summarize(
+      lower = p_hat - 2 * sd(stat),
+      upper = p_hat + 2 * sd(stat)
+    )
+}
+
+
+# Find the bootstrap t-confidence interval for 30 resamples
+calc_t_conf_int(one_poll_boot)
+# A tibble: 1 x 2
+  lower upper
+  <dbl> <dbl>
+1 0.536 0.864
+
+
+# ... and for 300 resamples
+calc_t_conf_int(one_poll_boot_300)
+
+# increase n and CI becomes narrower
+# A tibble: 1 x 2
+  lower upper
+  <dbl> <dbl>
+1 0.647 0.753
+
+
+
+# ... and for 3 resamples
+calc_t_conf_int(one_poll_boot_3)
+
+# decrease n and CI becomes wider
+# A tibble: 1 x 2
+  lower upper
+  <dbl> <dbl>
+1 0.161  1.24
+
+
