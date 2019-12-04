@@ -1,0 +1,119 @@
+Sample proportion value effects on bootstrap CIs
+One additional element that changes the width of the confidence interval is the sample parameter value, p^.
+
+Generally, when the true parameter is close to 0.5, the standard error of p^ is larger than when the true parameter is closer to 0 or 1. When calculating a bootstrap t-confidence interval, the standard error controls the width of the CI, and here (given a true parameter of 0.8) the sample proportion is higher than in previous exercises, so the width of the confidence interval will be narrower.
+
+
+
+
+
+
+calc_p_hat() is shown in the script to calculate the sample proportions. calc_t_conf_int() from the previous exercise has been updated to now use any value of p_hat as an argument. Read their definitions and try to understand them.
+Run the code to calculate the bootstrap t-confidence interval for the original population.
+Consider a new population where the true parameter is 0.8, one_poll_0.8. Calculate p^ of this new sample, using the same technique as with the original dataset. Call it p_hat_0.8.
+Find the bootstrap t-confidence interval using the new bootstrapped data, one_poll_boot_0.8, and the new p^. Notice that it is narrower than previously calculated.
+
+> p_hat
+[1] 0.7
+
+
+> calc_t_conf_int(one_poll_boot, p_hat)
+# A tibble: 1 x 2
+  lower upper
+  <dbl> <dbl>
+1 0.536 0.864
+
+
+
+> one_poll_0.8
+# A tibble: 30 x 1
+   vote 
+   <chr>
+ 1 yes  
+ 2 yes  
+ 3 yes  
+ 4 yes  
+ 5 yes  
+ 6 yes  
+ 7 yes  
+ 8 yes  
+ 9 yes  
+10 yes  
+# ... with 20 more rows
+
+
+
+> one_poll_boot_0.8
+# A tibble: 1,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 0.8  
+ 2         2 0.833
+ 3         3 0.9  
+ 4         4 0.833
+ 5         5 0.767
+ 6         6 0.933
+ 7         7 0.767
+ 8         8 0.967
+ 9         9 0.933
+10        10 0.767
+# ... with 990 more rows
+
+
+
+
+
+
+
+
+
+calc_p_hat <- function(dataset) {
+  dataset %>%
+    summarize(stat = mean(vote == "yes")) %>%
+    pull()
+}
+
+calc_t_conf_int <- function(resampled_dataset, p_hat) {
+  resampled_dataset %>%
+    summarize(
+      lower = p_hat - 2 * sd(stat),
+      upper = p_hat + 2 * sd(stat)
+    )
+}
+
+# Find proportion of yes votes from original population
+p_hat <- calc_p_hat(one_poll)
+
+# Review the value
+p_hat  
+
+# Calculate bootstrap t-confidence interval (original 0.6 param)
+calc_t_conf_int(one_poll_boot, p_hat)
+
+
+
+
+# Find proportion of yes votes from new population
+p_hat_0.8 <- calc_p_hat(one_poll_0.8)
+  
+# Review the value
+p_hat_0.8  
+
+> p_hat_0.8
+[1] 0.8333333
+
+
+
+# Calculate the bootstrap t-confidence interval (new 0.8 param)
+calc_t_conf_int(one_poll_boot_0.8, p_hat_0.8)
+
+# A tibble: 1 x 2
+  lower upper
+  <dbl> <dbl>
+1 0.695 0.972
+
+You have found the bootstrap t-confidence interval. Note that it's narrower than previously calculated because the sample proportion itself was close to 1.
+
+
+
+
