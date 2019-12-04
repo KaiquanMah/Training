@@ -1,0 +1,55 @@
+Percentile effects on bootstrap CIs
+Most scientists use 95% intervals to quantify their uncertainty about an estimate. That is, they understand that over a lifetime of creating confidence intervals, only 95% of them will actually contain the parameter that they set out to estimate.
+
+There are studies, however, which warrant either stricter or more lenient confidence intervals (and subsequent error rates).
+
+The previous bootstrapped p^∗ values have been loaded for you and are available in one_poll_boot.
+
+
+
+
+Calculate a 95% percentile interval by calling get_confidence_interval(), setting level to 0.95.
+Do the same for a 99% interval,
+... and a 90% interval.
+The results you just got are stored in a dataframe called conf_int_data. With this dataset, plot ci_endpoints (vertical axis) vs. ci_percent (horizontal axis), and add a line layer using geom_line().
+
+
+
+
+> conf_int_data
+# A tibble: 6 x 3
+      p ci_endpoints ci_percent
+  <dbl>        <dbl> <chr>     
+1 0.005        0.500 99%       
+2 0.025        0.533 95%       
+3 0.05         0.567 90%       
+4 0.95         0.833 90%       
+5 0.975        0.833 95%       
+6 0.995        0.9   99%
+
+
+
+
+# Calculate a 95% bootstrap percentile interval
+one_poll_boot %>% 
+  get_confidence_interval(level=0.95)
+
+
+# Calculate a 99% bootstrap percentile interval
+one_poll_boot %>% 
+  get_confidence_interval(level=0.99)
+
+
+# Calculate a 90% bootstrap percentile interval
+one_poll_boot %>% 
+  get_confidence_interval(level=0.90)
+
+
+# Plot ci_endpoints vs. ci_percent to compare the intervals
+ggplot(conf_int_data, aes(x=ci_percent, ci_endpoints)) +
+  # Add a line layer
+  geom_line()
+  
+  
+  
+
