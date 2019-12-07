@@ -1,0 +1,240 @@
+Filtering rows
+
+The vote column in the dataset has a number that represents that country's vote:
+1 = Yes
+2 = Abstain
+3 = No
+8 = Not present
+9 = Not a member
+
+One step of data cleaning is removing observations (rows) that you're not interested in. In this case, you want to remove "Not present" and "Not a member".
+
+
+
+
+Load the dplyr package.
+Print the votes table.
+Filter out rows where the vote recorded is "not present" or "not a member", leaving cases where it is "yes", "abstain", or "no".
+
+
+# Load the dplyr package
+library(dplyr)
+
+# Print the votes dataset
+print(votes)
+
+# A tibble: 508,929 x 4
+    rcid session  vote ccode
+   <dbl>   <dbl> <dbl> <int>
+ 1    46       2     1     2
+ 2    46       2     1    20
+ 3    46       2     9    31
+ 4    46       2     1    40
+ 5    46       2     1    41
+ 6    46       2     1    42
+ 7    46       2     9    51
+ 8    46       2     9    52
+ 9    46       2     9    53
+10    46       2     9    54
+# ... with 508,919 more rows
+
+
+
+
+
+# Filter for votes that are "yes", "abstain", or "no"
+#if we want to assign back to the original dataset
+votes <- votes %>%
+  filter(vote %in% c(1, 2, 3))
+
+
+# Filter for votes that are "yes", "abstain", or "no"
+#if we do not want to assign back to the original dataset
+votes %>%
+  filter(vote <= 3)
+
+# A tibble: 353,547 x 4
+    rcid session  vote ccode
+   <dbl>   <dbl> <dbl> <int>
+ 1    46       2     1     2
+ 2    46       2     1    20
+ 3    46       2     1    40
+ 4    46       2     1    41
+ 5    46       2     1    42
+ 6    46       2     1    70
+ 7    46       2     1    90
+ 8    46       2     1    91
+ 9    46       2     1    92
+10    46       2     1    93
+# ... with 353,537 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Adding a year column
+The next step of data cleaning is manipulating your variables (columns) to make them more informative.
+
+In this case, you have a session column that is hard to interpret intuitively. But since the UN started voting in 1946, and holds one session per year, you can get the year of a UN resolution by adding 1945 to the session number.
+
+
+
+
+
+
+Use mutate() to add a year column by adding 1945 to the session column.
+
+# Add another %>% step to add a year column
+votes %>%
+  filter(vote <= 3) %>%
+  mutate(year = session + 1945)
+
+
+# A tibble: 353,547 x 5
+    rcid session  vote ccode  year
+   <dbl>   <dbl> <dbl> <int> <dbl>
+ 1    46       2     1     2  1947
+ 2    46       2     1    20  1947
+ 3    46       2     1    40  1947
+ 4    46       2     1    41  1947
+ 5    46       2     1    42  1947
+ 6    46       2     1    70  1947
+ 7    46       2     1    90  1947
+ 8    46       2     1    91  1947
+ 9    46       2     1    92  1947
+10    46       2     1    93  1947
+# ... with 353,537 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Adding a country column
+The country codes in the ccode column are what's called Correlates of War codes. This isn't ideal for an analysis, since you'd like to work with recognizable country names.
+#https://correlatesofwar.org/data-sets/downloadable-files/cow-country-codes/cow-country-codes/view
+
+You can use the countrycode package to translate. For example:
+
+library(countrycode)
+
+# Translate the country code 2
+> countrycode(2, "cown", "country.name")
+[1] "United States"
+
+# Translate multiple country codes
+> countrycode(c(2, 20, 40), "cown", "country.name")
+[1] "United States" "Canada"        "Cuba"
+
+
+
+
+Load the countrycode package.
+Convert the country code 100 to its country name.
+Add a new country column in your mutate() statement containing country names, using the countrycode() function to translate from the ccode column. Save the result to votes_processed.
+
+
+
+
+countrycode
+Converts Long Country Names Into One Of Many Different Coding Schemes. Translates From One Scheme To Another. Converts Country Name Or Coding Scheme To The Official Short English Country Name. Creates A New Variable With The Name Of The Continent Or Region To Which Each Country Belongs.
+
+Usage
+countrycode(sourcevar, origin, destination, warn = TRUE, nomatch = NA,
+  custom_dict = NULL, custom_match = NULL, origin_regex = FALSE)
+
+Arguments
+sourcevar
+Vector which contains the codes or country names to be converted (character or factor)
+
+origin
+Coding scheme of origin (string such as "iso3c" enclosed in quotes ""): type "?codelist" for a list of available codes.
+
+destination
+Coding scheme of destination (string such as "iso3c" enclosed in quotes ""): type `?codelist` for a list of available codes.
+
+warn
+Prints unique elements from sourcevar for which no match was found
+
+nomatch
+When countrycode fails to find a match for the code of origin, it fills-in the destination vector with nomatch. The default behavior is to fill non-matching codes with NA. If nomatch = NULL, countrycode tries to use the origin vector to fill-in missing values in the destination vector. nomatch must be either NULL, of length 1, or of the same length as sourcevar.
+
+custom_dict
+A data frame which supplies custom country codes. Variables correspond to country codes, observations must refer to unique countries. When countrycode uses a user-supplied dictionary, no sanity checks are conducted. The data frame format must resemble countrycode::codelist.
+
+custom_match
+A named vector which supplies custom origin and destination matches that will supercede any matching default result. The name of each element will be used as the origin code, and the value of each element will be used as the destination code.
+
+origin_regex
+Logical: When using a custom dictionary, if TRUE then the origin codes will be matched as regex, if FALSE they will be matched exactly. When using the default dictionary (dictionary = NULL), origin_regex will be ignored.
+
+
+
+
+
+# Load the countrycode package
+library(countrycode)
+
+# Convert country code 100
+countrycode(100, "cown", "country.name")
+[1] "Colombia"
+
+
+# Add a country column within the mutate: votes_processed
+votes_processed <- votes %>%
+  filter(vote <= 3) %>%
+  mutate(year = session + 1945, country = countrycode(ccode, "cown", "country.name"))
+  
+
+> votes_processed
+# A tibble: 353,547 x 6
+    rcid session  vote ccode  year country           
+   <dbl>   <dbl> <dbl> <int> <dbl> <chr>             
+ 1    46       2     1     2  1947 United States     
+ 2    46       2     1    20  1947 Canada            
+ 3    46       2     1    40  1947 Cuba              
+ 4    46       2     1    41  1947 Haiti             
+ 5    46       2     1    42  1947 Dominican Republic
+ 6    46       2     1    70  1947 Mexico            
+ 7    46       2     1    90  1947 Guatemala         
+ 8    46       2     1    91  1947 Honduras          
+ 9    46       2     1    92  1947 El Salvador       
+10    46       2     1    93  1947 Nicaragua         
+# ... with 353,537 more rows
