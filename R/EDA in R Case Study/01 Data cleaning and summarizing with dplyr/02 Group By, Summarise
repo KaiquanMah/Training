@@ -1,0 +1,135 @@
+Summarizing the full dataset
+In this analysis, you're going to focus on "% of votes that are yes" as a metric for the "agreeableness" of countries.
+
+You'll start by finding this summary for the entire dataset: the fraction of all votes in their history that were "yes". Note that within your call to summarize(), you can use n() to find the total number of votes and mean(vote == 1) to find the fraction of "yes" votes.
+
+
+Print the votes_processed dataset that you created in the previous exercise.
+Summarize the dataset using the summarize() function to create two columns:
+total: with the number of votes
+percent_yes: the percentage of "yes" votes
+
+
+# Print votes_processed
+votes_processed
+# A tibble: 353,547 x 6
+    rcid session  vote ccode  year country           
+   <dbl>   <dbl> <dbl> <int> <dbl> <chr>             
+ 1    46       2     1     2  1947 United States     
+ 2    46       2     1    20  1947 Canada            
+ 3    46       2     1    40  1947 Cuba              
+ 4    46       2     1    41  1947 Haiti             
+ 5    46       2     1    42  1947 Dominican Republic
+ 6    46       2     1    70  1947 Mexico            
+ 7    46       2     1    90  1947 Guatemala         
+ 8    46       2     1    91  1947 Honduras          
+ 9    46       2     1    92  1947 El Salvador       
+10    46       2     1    93  1947 Nicaragua         
+# ... with 353,537 more rows
+
+
+
+# Find total and fraction of "yes" votes
+votes_processed %>%
+  summarise(total = n(), percent_yes = mean(vote == 1))
+# A tibble: 1 x 2
+   total percent_yes
+   <int>       <dbl>
+1 353547       0.800
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Summarizing by year
+The summarize() function is especially useful because it can be used within groups.
+
+For example, you might like to know how much the average "agreeableness" of countries changed from year to year. To examine this, you can use group_by() to perform your summary not for the entire dataset, but within each year.
+
+Add a group_by() to your code to summarize() within each year.
+
+
+
+# Change this code to summarize by year
+votes_processed %>%
+  group_by(year) %>%
+  summarize(total = n(),
+            percent_yes = mean(vote == 1))
+
+# A tibble: 34 x 3
+    year total percent_yes
+   <dbl> <int>       <dbl>
+ 1  1947  2039       0.569
+ 2  1949  3469       0.438
+ 3  1951  1434       0.585
+ 4  1953  1537       0.632
+ 5  1955  2169       0.695
+ 6  1957  2708       0.609
+ 7  1959  4326       0.588
+ 8  1961  7482       0.573
+ 9  1963  3308       0.729
+10  1965  4382       0.708
+# ... with 24 more rows
+
+The group_by() function must go before your call to summarize() when you're trying to perform your summary within groups.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Summarizing by country
+In the last exercise, you performed a summary of the votes within each year. You could instead summarize() within each country, which would let you compare voting patterns between countries.
+
+# Summarize by country: by_country
+by_country <- votes_processed %>%
+  group_by(country) %>%
+  summarize(total = n(),
+            percent_yes = mean(vote == 1))
+
+> by_country
+# A tibble: 200 x 3
+   country             total percent_yes
+   <chr>               <int>       <dbl>
+ 1 Afghanistan          2373       0.859
+ 2 Albania              1695       0.717
+ 3 Algeria              2213       0.899
+ 4 Andorra               719       0.638
+ 5 Angola               1431       0.924
+ 6 Antigua and Barbuda  1302       0.912
+ 7 Argentina            2553       0.768
+ 8 Armenia               758       0.747
+ 9 Australia            2575       0.557
+10 Austria              2389       0.622
+# ... with 190 more rows
+
+
