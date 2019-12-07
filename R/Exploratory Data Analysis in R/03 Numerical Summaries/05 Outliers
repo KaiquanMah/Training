@@ -1,0 +1,92 @@
+Identify outliers
+Consider the distribution, shown here, of the life expectancies of the countries in Asia. The box plot identifies one clear outlier: a country with a notably low life expectancy. Do you have a guess as to which country this might be? Test your guess in the console using either min() or filter(), then proceed to building a plot with that country removed.
+
+
+
+
+gap2007 is still available in your workspace.
+
+Apply a filter so that it only contains observations from Asia, then create a new variable called is_outlier that is TRUE for countries with life expectancy less than 50. Assign the result to gap_asia.
+Filter gap_asia to remove all outliers, then create another box plot of the remaining life expectancies.
+
+
+> gap2007
+# A tibble: 142 x 6
+   country     continent  year lifeExp       pop gdpPercap
+   <fct>       <fct>     <int>   <dbl>     <int>     <dbl>
+ 1 Afghanistan Asia       2007    43.8  31889923      975.
+ 2 Albania     Europe     2007    76.4   3600523     5937.
+ 3 Algeria     Africa     2007    72.3  33333216     6223.
+ 4 Angola      Africa     2007    42.7  12420476     4797.
+ 5 Argentina   Americas   2007    75.3  40301927    12779.
+ 6 Australia   Oceania    2007    81.2  20434176    34435.
+ 7 Austria     Europe     2007    79.8   8199783    36126.
+ 8 Bahrain     Asia       2007    75.6    708573    29796.
+ 9 Bangladesh  Asia       2007    64.1 150448339     1391.
+10 Belgium     Europe     2007    79.4  10392226    33693.
+# ... with 132 more rows
+
+
+
+
+
+> gap_asia <- gap2007 %>%
+    filter(continent == "Asia") %>%
+    mutate(is_outlier = lifeExp < 50)
+> gap_asia
+# A tibble: 33 x 7
+   country          continent  year lifeExp        pop gdpPercap is_outlier
+   <fct>            <fct>     <int>   <dbl>      <int>     <dbl> <lgl>     
+ 1 Afghanistan      Asia       2007    43.8   31889923      975. TRUE      
+ 2 Bahrain          Asia       2007    75.6     708573    29796. FALSE     
+ 3 Bangladesh       Asia       2007    64.1  150448339     1391. FALSE     
+ 4 Cambodia         Asia       2007    59.7   14131858     1714. FALSE     
+ 5 China            Asia       2007    73.0 1318683096     4959. FALSE     
+ 6 Hong Kong, China Asia       2007    82.2    6980412    39725. FALSE     
+ 7 India            Asia       2007    64.7 1110396331     2452. FALSE     
+ 8 Indonesia        Asia       2007    70.6  223547000     3541. FALSE     
+ 9 Iran             Asia       2007    71.0   69453570    11606. FALSE     
+10 Iraq             Asia       2007    59.5   27499638     4471. FALSE     
+# ... with 23 more rows
+
+
+> gap_asia %>%
+    filter(!is_outlier)
+# A tibble: 32 x 7
+   country          continent  year lifeExp        pop gdpPercap is_outlier
+   <fct>            <fct>     <int>   <dbl>      <int>     <dbl> <lgl>     
+ 1 Bahrain          Asia       2007    75.6     708573    29796. FALSE     
+ 2 Bangladesh       Asia       2007    64.1  150448339     1391. FALSE     
+ 3 Cambodia         Asia       2007    59.7   14131858     1714. FALSE     
+ 4 China            Asia       2007    73.0 1318683096     4959. FALSE     
+ 5 Hong Kong, China Asia       2007    82.2    6980412    39725. FALSE     
+ 6 India            Asia       2007    64.7 1110396331     2452. FALSE     
+ 7 Indonesia        Asia       2007    70.6  223547000     3541. FALSE     
+ 8 Iran             Asia       2007    71.0   69453570    11606. FALSE     
+ 9 Iraq             Asia       2007    59.5   27499638     4471. FALSE     
+10 Israel           Asia       2007    80.7    6426679    25523. FALSE     
+# ... with 22 more rows
+
+
+
+
+
+
+
+
+
+
+
+# Filter for Asia, add column indicating outliers
+gap_asia <- gap2007 %>%
+  filter(continent == "Asia") %>%
+  mutate(is_outlier = lifeExp < 50)
+
+# Remove outliers, create box plot of lifeExp
+gap_asia %>%
+  filter(!is_outlier) %>%
+  ggplot(aes(x = 1, y = lifeExp)) +
+  geom_boxplot()
+  
+
+
