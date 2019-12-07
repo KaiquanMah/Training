@@ -1,0 +1,93 @@
+Spam and !!!
+Let's look at a more obvious indicator of spam: exclamation marks. exclaim_mess contains the number of exclamation marks in each message. Using summary statistics and visualization, see if there is a relationship between this variable and whether or not a message is spam.
+
+Experiment with different types of plots until you find one that is the most informative. Recall that you've seen:
+
+Side-by-side box plots
+Faceted histograms
+Overlaid density plots
+
+
+
+
+The email dataset is still available in your workspace.
+
+Calculate appropriate measures of the center and spread of exclaim_mess for both spam and not-spam using group_by() and summarize().
+Construct an appropriate plot to visualize the association between the same two variables, adding in a log-transformation step if necessary.
+If you decide to use a log transformation, remember that log(0) is -Inf in R, which isn't a very useful value! You can get around this by adding a small number (like 0.01) to the quantity inside the log() function. This way, your value is never zero. This small shift to the right won't affect your results.
+
+
+
+
+> email
+# A tibble: 3,921 x 21
+   spam  to_multiple  from    cc sent_email time                image attach
+   <fct>       <dbl> <dbl> <int>      <dbl> <dttm>              <dbl>  <dbl>
+ 1 not-~           0     1     0          0 2012-01-01 06:16:41     0      0
+ 2 not-~           0     1     0          0 2012-01-01 07:03:59     0      0
+ 3 not-~           0     1     0          0 2012-01-01 16:00:32     0      0
+ 4 not-~           0     1     0          0 2012-01-01 09:09:49     0      0
+ 5 not-~           0     1     0          0 2012-01-01 10:00:01     0      0
+ 6 not-~           0     1     0          0 2012-01-01 10:04:46     0      0
+ 7 not-~           1     1     0          1 2012-01-01 17:55:06     0      0
+ 8 not-~           1     1     1          1 2012-01-01 18:45:21     1      1
+ 9 not-~           0     1     0          0 2012-01-01 21:08:59     0      0
+10 not-~           0     1     0          0 2012-01-01 18:12:00     0      0
+# ... with 3,911 more rows, and 13 more variables: dollar <dbl>, winner <fct>,
+#   inherit <dbl>, viagra <dbl>, password <dbl>, num_char <dbl>,
+#   line_breaks <int>, format <dbl>, re_subj <dbl>, exclaim_subj <dbl>,
+#   urgent_subj <dbl>, exclaim_mess <dbl>, number <fct>
+
+
+> summary(email$exclaim_mess)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+   0.000    0.000    1.000    6.584    4.000 1236.000
+   
+   
+
+
+
+# Compute center and spread for exclaim_mess by spam
+email %>%
+  group_by(spam) %>%
+  summarise(mean(exclaim_mess),
+sd(exclaim_mess))
+
+
+
+
+# Create plot for spam and exclaim_mess
+ggplot(email, aes(x=log(exclaim_mess + 0.01))) +
+geom_histogram() +
+facet_wrap(~ spam)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Spam and !!! interpretation
+Which interpretation of these faceted histograms is not correct?
+
+
+#correct The most common value of exclaim_mess in both classes of email is zero (a log(exclaim_mess) of -4.6 after adding .01).
+
+#not correct There are more cases of spam in this dataset than not-spam.
+
+
+#correct Even after a transformation, the distribution of exclaim_mess in both classes of email is right-skewed.
+#correctThe typical number of exclamations in the not-spam group appears to be slightly higher than in the spam group.
+
+
