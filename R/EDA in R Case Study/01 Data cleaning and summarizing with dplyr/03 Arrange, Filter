@@ -1,0 +1,163 @@
+Sorting by percentage of "yes" votes
+Now that you've summarized the dataset by country, you can start examining it and answering interesting questions.
+
+For example, you might be especially interested in the countries that voted "yes" least often, or the ones that voted "yes" most often.
+
+
+
+
+Print the by_country dataset created in the last exercise.
+Use arrange() to sort the countries in ascending order of percent_yes.
+Arrange the countries by the same variable, but in descending order.
+
+
+#https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/arrange
+> by_country
+# A tibble: 200 x 3
+   country             total percent_yes
+   <chr>               <int>       <dbl>
+ 1 Afghanistan          2373       0.859
+ 2 Albania              1695       0.717
+ 3 Algeria              2213       0.899
+ 4 Andorra               719       0.638
+ 5 Angola               1431       0.924
+ 6 Antigua and Barbuda  1302       0.912
+ 7 Argentina            2553       0.768
+ 8 Armenia               758       0.747
+ 9 Australia            2575       0.557
+10 Austria              2389       0.622
+# ... with 190 more rows
+
+
+
+arrange
+
+Usage
+arrange(.data, ...)
+# S3 method for grouped_df
+arrange(.data, ..., .by_group = FALSE)
+
+Arguments
+.data
+A tbl. All main verbs are S3 generics and provide methods for tbl_df(), dtplyr::tbl_dt() and dbplyr::tbl_dbi().
+
+...
+Comma separated list of unquoted variable names. Use desc() to sort a variable in descending order.
+
+.by_group
+If TRUE, will sort first by grouping variable. Applies to grouped data frames only.
+
+
+
+
+
+
+
+
+# You have the votes summarized by country
+by_country <- votes_processed %>%
+  group_by(country) %>%
+  summarize(total = n(),
+            percent_yes = mean(vote == 1))
+
+# Print the by_country dataset
+print(by_country)
+
+# Sort in ascending order of percent_yes
+arrange(by_country, percent_yes)
+# A tibble: 200 x 3
+   country                         total percent_yes
+   <chr>                           <int>       <dbl>
+ 1 Zanzibar                            2       0    
+ 2 United States                    2568       0.269
+ 3 Palau                             369       0.339
+ 4 Israel                           2380       0.341
+ 5 Federal Republic of Germany      1075       0.397
+ 6 United Kingdom                   2558       0.417
+ 7 France                           2527       0.427
+ 8 Micronesia, Federated States of   724       0.442
+ 9 Marshall Islands                  757       0.491
+10 Belgium                          2568       0.492
+# ... with 190 more rows
+
+
+# Now sort in descending order
+arrange(by_country, desc(percent_yes))
+# A tibble: 200 x 3
+   country               total percent_yes
+   <chr>                 <int>       <dbl>
+ 1 Sao Tome and Principe  1091       0.976
+ 2 Seychelles              881       0.975
+ 3 Djibouti               1598       0.961
+ 4 Guinea-Bissau          1538       0.960
+ 5 Timor-Leste             326       0.957
+ 6 Mauritius              1831       0.950
+ 7 Zimbabwe               1361       0.949
+ 8 Comoros                1133       0.947
+ 9 United Arab Emirates   1934       0.947
+10 Mozambique             1701       0.947
+# ... with 190 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Filtering summarized output
+In the last exercise, you may have noticed that the country that voted least frequently, Zanzibar, had only 2 votes in the entire dataset. You certainly can't make any substantial conclusions based on that data!
+
+Typically in a progressive analysis, when you find that a few of your observations have very little data while others have plenty, you set some threshold to filter them out.
+
+
+
+
+Use filter() to remove from the sorted data countries that have fewer than 100 votes.
+
+
+
+# Filter out countries with fewer than 100 votes
+by_country %>%
+  arrange(percent_yes) %>%
+  filter(total >= 100)
+  
+# A tibble: 197 x 3
+   country                         total percent_yes
+   <chr>                           <int>       <dbl>
+ 1 United States                    2568       0.269
+ 2 Palau                             369       0.339
+ 3 Israel                           2380       0.341
+ 4 Federal Republic of Germany      1075       0.397
+ 5 United Kingdom                   2558       0.417
+ 6 France                           2527       0.427
+ 7 Micronesia, Federated States of   724       0.442
+ 8 Marshall Islands                  757       0.491
+ 9 Belgium                          2568       0.492
+10 Canada                           2576       0.508
+# ... with 187 more rows  
+  
+
+
+
+
+#the 3 countries with <100 votes
+# A tibble: 3 x 3
+  country     total percent_yes
+  <chr>       <int>       <dbl>
+1 Zanzibar        2       0    
+2 South Sudan    53       0.642
+3 Kiribati       72       0.778
+
