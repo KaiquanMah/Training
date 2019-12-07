@@ -1,0 +1,104 @@
+Spam and num_char
+Is there an association between spam and the length of an email?
+
+You could imagine a story either way:
+Spam is more likely to be a short message tempting me to click on a link, or
+My normal email is likely shorter since I exchange brief emails with my friends all the time.
+
+
+Here, you'll use the email dataset to settle that question. Begin by bringing up the help file and learning about all the variables with ?email.
+
+As you explore the association between spam and the length of an email, use this opportunity to try out linking a dplyr chain with the layers in a ggplot2 object.
+
+
+
+
+
+
+
+
+
+Using the email dataset
+
+Load the packages ggplot2, dplyr, and openintro.
+Compute appropriate measures of the center and spread of num_char for both spam and not-spam using group_by() and summarize(). No need to name the new columns created by summarize().
+Construct side-by-side box plots to visualize the association between the same two variables. It will be useful to mutate() a new column containing a log-transformed version of num_char.
+
+> email
+# A tibble: 3,921 x 21
+   spam  to_multiple  from    cc sent_email time                image attach
+   <fct>       <dbl> <dbl> <int>      <dbl> <dttm>              <dbl>  <dbl>
+ 1 not-~           0     1     0          0 2012-01-01 06:16:41     0      0
+ 2 not-~           0     1     0          0 2012-01-01 07:03:59     0      0
+ 3 not-~           0     1     0          0 2012-01-01 16:00:32     0      0
+ 4 not-~           0     1     0          0 2012-01-01 09:09:49     0      0
+ 5 not-~           0     1     0          0 2012-01-01 10:00:01     0      0
+ 6 not-~           0     1     0          0 2012-01-01 10:04:46     0      0
+ 7 not-~           1     1     0          1 2012-01-01 17:55:06     0      0
+ 8 not-~           1     1     1          1 2012-01-01 18:45:21     1      1
+ 9 not-~           0     1     0          0 2012-01-01 21:08:59     0      0
+10 not-~           0     1     0          0 2012-01-01 18:12:00     0      0
+# ... with 3,911 more rows, and 13 more variables: dollar <dbl>, winner <fct>,
+#   inherit <dbl>, viagra <dbl>, password <dbl>, num_char <dbl>,
+#   line_breaks <int>, format <dbl>, re_subj <dbl>, exclaim_subj <dbl>,
+#   urgent_subj <dbl>, exclaim_mess <dbl>, number <fct>
+
+> summary(email$num_char)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.001   1.459   5.856  10.707  14.084 190.087
+
+
+
+
+
+
+
+# Load packages
+library(ggplot2)
+library(dplyr)
+library(openintro)
+
+
+# Compute summary statistics
+email %>%
+  group_by(spam) %>%
+  summarize(median(num_char),
+            IQR(num_char))
+
+# A tibble: 2 x 3
+  spam     `median(num_char)` `IQR(num_char)`
+  <fct>                 <dbl>           <dbl>
+1 not-spam               6.83           13.6 
+2 spam                   1.05            2.82
+
+
+# Create plot
+email %>%
+  mutate(log_num_char = log(num_char)) %>%
+  ggplot(aes(x = spam, y = log_num_char)) +
+  geom_boxplot()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Spam and num_char interpretation
+Which of the following interpretations of the plot is valid?
+#yes The median length of not-spam emails is greater than that of spam emails.
+
