@@ -1,0 +1,108 @@
+Choice of center measure
+The choice of measure for center can have a dramatic impact on what we consider to be a typical observation, so it is important that you consider the shape of the distribution before deciding on the measure.
+
+Which set of measures of central tendency would be worst for describing the two distributions shown here?
+
+#not A: mode, B: median
+
+#yes A: mean, B: mode
+as A is right skewed
+
+#not A: median, B: mean
+#not A: median, B: median
+
+
+
+
+
+
+
+
+
+
+
+
+
+Calculate center measures
+Throughout this chapter, you will use data from gapminder, which tracks demographic data in countries of the world over time. To learn more about it, you can bring up the help file with ?gapminder.
+
+For this exercise, focus on how the life expectancy differs from continent to continent. This requires that you conduct your analysis not at the country level, but aggregated up to the continent level. This is made possible by the one-two punch of group_by() and summarize(), a very powerful syntax for carrying out the same analysis on different subsets of the full dataset.
+
+
+
+
+Create a dataset called gap2007 that contains only data from the year 2007.
+Using gap2007, calculate the mean and median life expectancy for each continent. Don't worry about naming the new columns produced by summarize().
+Confirm the trends that you see in the medians by generating side-by-side box plots of life expectancy for each continent.
+
+
+> gapminder
+# A tibble: 1,704 x 6
+   country     continent  year lifeExp      pop gdpPercap
+   <fct>       <fct>     <int>   <dbl>    <int>     <dbl>
+ 1 Afghanistan Asia       1952    28.8  8425333      779.
+ 2 Afghanistan Asia       1957    30.3  9240934      821.
+ 3 Afghanistan Asia       1962    32.0 10267083      853.
+ 4 Afghanistan Asia       1967    34.0 11537966      836.
+ 5 Afghanistan Asia       1972    36.1 13079460      740.
+ 6 Afghanistan Asia       1977    38.4 14880372      786.
+ 7 Afghanistan Asia       1982    39.9 12881816      978.
+ 8 Afghanistan Asia       1987    40.8 13867957      852.
+ 9 Afghanistan Asia       1992    41.7 16317921      649.
+10 Afghanistan Asia       1997    41.8 22227415      635.
+# ... with 1,694 more rows
+
+
+
+#alternative method to change column names of mean and median calculations
+> gap2007 %>%
+    group_by(continent) %>%
+    summarize(MeanLifeExpectancy = mean(lifeExp),
+              MedianLifeExpectancy = median(lifeExp))
+# A tibble: 5 x 3
+  continent MeanLifeExpectancy MedianLifeExpectancy
+  <fct>                  <dbl>                <dbl>
+1 Africa                  54.8                 52.9
+2 Americas                73.6                 72.9
+3 Asia                    70.7                 72.4
+4 Europe                  77.6                 78.6
+5 Oceania                 80.7                 80.7
+
+
+
+
+
+
+
+# Create dataset of 2007 data
+gap2007 <- filter(gapminder, year %in% 2007)
+
+# Compute groupwise mean and median lifeExp
+gap2007 %>%
+  group_by(continent) %>%
+  summarize(mean(lifeExp),median(lifeExp))
+
+
+> gap2007 %>%
+    group_by(continent) %>%
+    summarize(mean(lifeExp),median(lifeExp))
+# A tibble: 5 x 3
+  continent `mean(lifeExp)` `median(lifeExp)`
+  <fct>               <dbl>             <dbl>
+1 Africa               54.8              52.9
+2 Americas             73.6              72.9
+3 Asia                 70.7              72.4
+4 Europe               77.6              78.6
+5 Oceania              80.7              80.7
+
+# Generate box plots of lifeExp for each continent
+gap2007 %>%
+  ggplot(aes(x = continent, y = lifeExp)) +
+    geom_boxplot()
+    
+
+
+
+
+
+
