@@ -1,0 +1,72 @@
+Choice of spread measure
+The choice of measure for spread can dramatically impact how variable we consider our data to be, so it is important that you consider the shape of the distribution before deciding on the measure.
+
+Which set of measures of spread would be worst for describing the two distributions shown here?
+
+#not A: IQR, B: IQR
+#not A: SD, B: IQR
+
+#yes  A: Variance, B: Range
+A is right skewed and a wider variance
+
+
+
+
+
+
+
+Calculate spread measures
+Let's extend the powerful group_by() and summarize() syntax to measures of spread. If you're unsure whether you're working with symmetric or skewed distributions, it's a good idea to consider a robust measure like IQR in addition to the usual measures of variance or standard deviation.
+
+
+
+
+The gap2007 dataset that you created in an earlier exercise is available in your workspace.
+
+For each continent in gap2007, summarize life expectancies using the sd(), the IQR(), and the count of countries, n(). No need to name the new columns produced here. The n() function within your summarize() call does not take any arguments.
+Graphically compare the spread of these distributions by constructing overlaid density plots of life expectancy broken down by continent.
+
+
+> gap2007
+# A tibble: 142 x 6
+   country     continent  year lifeExp       pop gdpPercap
+   <fct>       <fct>     <int>   <dbl>     <int>     <dbl>
+ 1 Afghanistan Asia       2007    43.8  31889923      975.
+ 2 Albania     Europe     2007    76.4   3600523     5937.
+ 3 Algeria     Africa     2007    72.3  33333216     6223.
+ 4 Angola      Africa     2007    42.7  12420476     4797.
+ 5 Argentina   Americas   2007    75.3  40301927    12779.
+ 6 Australia   Oceania    2007    81.2  20434176    34435.
+ 7 Austria     Europe     2007    79.8   8199783    36126.
+ 8 Bahrain     Asia       2007    75.6    708573    29796.
+ 9 Bangladesh  Asia       2007    64.1 150448339     1391.
+10 Belgium     Europe     2007    79.4  10392226    33693.
+# ... with 132 more rows
+
+
+
+
+# Compute groupwise measures of spread
+gap2007 %>%
+  group_by(continent) %>%
+  summarize(sd(lifeExp),
+            IQR(lifeExp),
+            n())
+# A tibble: 5 x 4
+  continent `sd(lifeExp)` `IQR(lifeExp)` `n()`
+  <fct>             <dbl>          <dbl> <int>
+1 Africa            9.63          11.6      52
+2 Americas          4.44           4.63     25
+3 Asia              7.96          10.2      33
+4 Europe            2.98           4.78     30
+5 Oceania           0.729          0.516     2
+
+
+
+# Generate overlaid density plots
+gap2007 %>%
+  ggplot(aes(x = lifeExp, fill = continent)) +
+  geom_density(alpha = 0.3)
+
+
+
