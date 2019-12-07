@@ -1,0 +1,59 @@
+Describe the shape
+To build some familiarity with distributions of different shapes, consider the four that are plotted here. Which of the following options does the best job of describing their shape in terms of modality and skew/symmetry?
+
+A: unimodal left-skewed; B: unimodal symmetric; C: unimodal right-skewed, D: bimodal symmetric.
+
+
+
+
+
+
+Transformations
+Highly skewed distributions can make it very difficult to learn anything from a visualization. Transformations can be helpful in revealing the more subtle structure.
+
+Here you'll focus on the population variable, which exhibits strong right skew, and transform it with the natural logarithm function (log() in R).
+
+
+
+Using the gap2007 data:
+Create a density plot of the population variable.
+Mutate a new column called log_pop that is the natural log of the population and save it back into gap2007.
+Create a density plot of your transformed variable.
+
+
+
+> gap2007
+# A tibble: 142 x 6
+   country     continent  year lifeExp       pop gdpPercap
+   <fct>       <fct>     <int>   <dbl>     <int>     <dbl>
+ 1 Afghanistan Asia       2007    43.8  31889923      975.
+ 2 Albania     Europe     2007    76.4   3600523     5937.
+ 3 Algeria     Africa     2007    72.3  33333216     6223.
+ 4 Angola      Africa     2007    42.7  12420476     4797.
+ 5 Argentina   Americas   2007    75.3  40301927    12779.
+ 6 Australia   Oceania    2007    81.2  20434176    34435.
+ 7 Austria     Europe     2007    79.8   8199783    36126.
+ 8 Bahrain     Asia       2007    75.6    708573    29796.
+ 9 Bangladesh  Asia       2007    64.1 150448339     1391.
+10 Belgium     Europe     2007    79.4  10392226    33693.
+# ... with 132 more rows
+
+
+
+# Create density plot of old variable
+gap2007 %>%
+  ggplot(aes(x = pop)) +
+  geom_density()
+
+# Transform the skewed pop variable
+gap2007 <- gap2007 %>%
+  mutate(log_pop = log(pop))
+
+# Create density plot of new variable
+gap2007 %>%
+  ggplot(aes(x = log_pop)) +
+  geom_density()
+
+
+
+
