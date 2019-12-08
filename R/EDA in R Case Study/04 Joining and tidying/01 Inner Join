@@ -1,0 +1,147 @@
+Joining datasets with inner_join
+In the first chapter, you created the votes_processed dataset, containing information about each country's votes. You'll now combine that with the new descriptions dataset, which includes topic information about each country, so that you can analyze votes within particular topics.
+
+To do this, you'll make use of the inner_join() function from dplyr.
+
+
+
+Load the dplyr package.
+Print the votes_processed dataset.
+Print the new descriptions dataset.
+Join the two datasets using dplyr's inner_join(), using the rcid and session columns to match them. Save as votes_joined.
+
+# Load dplyr package
+library(dplyr)
+
+# Print the votes_processed dataset
+votes_processed
+# A tibble: 353,547 x 6
+    rcid session  vote ccode  year country           
+   <dbl>   <dbl> <dbl> <int> <dbl> <chr>             
+ 1    46       2     1     2  1947 United States     
+ 2    46       2     1    20  1947 Canada            
+ 3    46       2     1    40  1947 Cuba              
+ 4    46       2     1    41  1947 Haiti             
+ 5    46       2     1    42  1947 Dominican Republic
+ 6    46       2     1    70  1947 Mexico            
+ 7    46       2     1    90  1947 Guatemala         
+ 8    46       2     1    91  1947 Honduras          
+ 9    46       2     1    92  1947 El Salvador       
+10    46       2     1    93  1947 Nicaragua         
+# ... with 353,537 more rows
+
+
+
+# Print the descriptions dataset
+descriptions
+# A tibble: 2,589 x 10
+    rcid session date                unres      me    nu    di    hr    co    ec
+   <dbl>   <dbl> <dttm>              <chr>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+ 1    46       2 1947-09-04 00:00:00 R/2/299     0     0     0     0     0     0
+ 2    47       2 1947-10-05 00:00:00 R/2/355     0     0     0     1     0     0
+ 3    48       2 1947-10-06 00:00:00 R/2/461     0     0     0     0     0     0
+ 4    49       2 1947-10-06 00:00:00 R/2/463     0     0     0     0     0     0
+ 5    50       2 1947-10-06 00:00:00 R/2/465     0     0     0     0     0     0
+ 6    51       2 1947-10-02 00:00:00 R/2/561     0     0     0     0     1     0
+ 7    52       2 1947-11-06 00:00:00 R/2/650     0     0     0     0     1     0
+ 8    53       2 1947-11-06 00:00:00 R/2/651     0     0     0     0     1     0
+ 9    54       2 1947-11-06 00:00:00 R/2/651     0     0     0     0     1     0
+10    55       2 1947-11-06 00:00:00 R/2/667     0     0     0     0     1     0
+# ... with 2,579 more rows
+
+
+
+# Join them together based on the "rcid" and "session" columns
+votes_joined <- votes_processed %>%
+  inner_join(descriptions, by = c("rcid","session"))
+  
+> votes_joined
+# A tibble: 353,547 x 14
+    rcid session  vote ccode  year country date                unres    me    nu
+   <dbl>   <dbl> <dbl> <int> <dbl> <chr>   <dttm>              <chr> <dbl> <dbl>
+ 1    46       2     1     2  1947 United~ 1947-09-04 00:00:00 R/2/~     0     0
+ 2    46       2     1    20  1947 Canada  1947-09-04 00:00:00 R/2/~     0     0
+ 3    46       2     1    40  1947 Cuba    1947-09-04 00:00:00 R/2/~     0     0
+ 4    46       2     1    41  1947 Haiti   1947-09-04 00:00:00 R/2/~     0     0
+ 5    46       2     1    42  1947 Domini~ 1947-09-04 00:00:00 R/2/~     0     0
+ 6    46       2     1    70  1947 Mexico  1947-09-04 00:00:00 R/2/~     0     0
+ 7    46       2     1    90  1947 Guatem~ 1947-09-04 00:00:00 R/2/~     0     0
+ 8    46       2     1    91  1947 Hondur~ 1947-09-04 00:00:00 R/2/~     0     0
+ 9    46       2     1    92  1947 El Sal~ 1947-09-04 00:00:00 R/2/~     0     0
+10    46       2     1    93  1947 Nicara~ 1947-09-04 00:00:00 R/2/~     0     0
+# ... with 353,537 more rows, and 4 more variables: di <dbl>, hr <dbl>,
+#   co <dbl>, ec <dbl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Filtering the joined dataset
+There are six columns in the descriptions dataset (and therefore in the new joined dataset) that describe the topic of a resolution:
+
+me: Palestinian conflict
+nu: Nuclear weapons and nuclear material
+di: Arms control and disarmament
+hr: Human rights
+co: Colonialism
+ec: Economic development
+Each contains a 1 if the resolution is related to this topic and a 0 otherwise.
+
+Filter the votes_joined dataset for votes relating to colonialism.
+
+# Filter for votes related to colonialism
+votes_joined %>%
+  filter(co == 1)
+
+
+
+
+
+
+
+Visualizing colonialism votes
+In an earlier exercise, you graphed the percentage of votes each year where the US voted "yes". Now you'll create that same graph, but only for votes related to colonialism.
+
+Load the ggplot2 package.
+Filter the votes_joined dataset for only votes by the United States relating to colonialism, then summarize() the percentage of votes that are "yes" within each year. Name the resulting column percent_yes and save the entire data frame as US_co_by_year.
+Add a geom_line() layer to your ggplot() call to create a line graph of the percentage of "yes" votes on colonialism (percent_yes) cast by the US over time.
+
+
+# Load the ggplot2 package
+library(ggplot2)
+
+# Filter, then summarize by year: US_co_by_year
+US_co_by_year <- votes_joined %>%
+  filter(country == "United States", co == 1) %>%
+  group_by(year) %>%
+  summarise(percent_yes = mean(vote == 1))
+  
+# Graph the % of "yes" votes over time
+ggplot(US_co_by_year, aes(x=year, y=percent_yes)) +
+  geom_line()
+  
+  
+> US_co_by_year
+# A tibble: 34 x 2
+    year percent_yes
+   <dbl>       <dbl>
+ 1  1947       0.556
+ 2  1949       0.455
+ 3  1951       0.143
+ 4  1953       0.4  
+ 5  1955       0.571
+ 6  1957       0.444
+ 7  1959       0.263
+ 8  1961       0.478
+ 9  1963       0.167
+10  1965       0.2  
+# ... with 24 more rows
