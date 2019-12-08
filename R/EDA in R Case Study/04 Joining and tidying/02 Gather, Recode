@@ -1,0 +1,103 @@
+Tidy data observations
+According to the tidy data framework, which of the following counts as an observation in this graph?
+
+
+#yes A country-vote-topic combination
+A single point in one of the lines on the graph uniquely represents a country-vote-topic combination.
+
+
+
+
+
+
+
+
+Using gather to tidy a dataset
+In order to represent the joined vote-topic data in a tidy form so we can analyze and graph by topic, we need to transform the data so that each row has one combination of country-vote-topic. This will change the data from having six columns (me, nu, di, hr, co, ec) to having two columns (topic and has_topic).
+
+Load the tidyr package.
+Gather the six topic columns in votes_joined into one column called topic (containing one of me, nu, etc.) and a column called has_topic (containing 0 or 1). Print the result without saving it.
+You don't actually care about the cases where has_topic is 0. Perform the gather() operation again, but this time also filter for only the rows where the topic in topic describes the vote. Save the result as votes_gathered.
+
+# Load the tidyr package
+library(tidyr)
+
+# Gather the six me/nu/di/hr/co/ec columns
+votes_joined %>%
+  gather(topic, has_topic, me:ec)
+
+
+# Perform gather again, then filter
+votes_gathered <- votes_joined %>%
+  gather(topic, has_topic, me:ec) %>%
+  filter(has_topic == 1)
+
+> votes_gathered
+# A tibble: 350,032 x 10
+    rcid session  vote ccode  year country date                unres topic
+   <dbl>   <dbl> <dbl> <int> <dbl> <chr>   <dttm>              <chr> <chr>
+ 1    77       2     1     2  1947 United~ 1947-11-06 00:00:00 R/2/~ me   
+ 2    77       2     1    20  1947 Canada  1947-11-06 00:00:00 R/2/~ me   
+ 3    77       2     3    40  1947 Cuba    1947-11-06 00:00:00 R/2/~ me   
+ 4    77       2     1    41  1947 Haiti   1947-11-06 00:00:00 R/2/~ me   
+ 5    77       2     1    42  1947 Domini~ 1947-11-06 00:00:00 R/2/~ me   
+ 6    77       2     2    70  1947 Mexico  1947-11-06 00:00:00 R/2/~ me   
+ 7    77       2     1    90  1947 Guatem~ 1947-11-06 00:00:00 R/2/~ me   
+ 8    77       2     2    91  1947 Hondur~ 1947-11-06 00:00:00 R/2/~ me   
+ 9    77       2     2    92  1947 El Sal~ 1947-11-06 00:00:00 R/2/~ me   
+10    77       2     1    93  1947 Nicara~ 1947-11-06 00:00:00 R/2/~ me   
+# ... with 350,022 more rows, and 1 more variable: has_topic <dbl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Recoding the topics
+There's one more step of data cleaning to make this more interpretable. Right now, topics are represented by two-letter codes:
+
+me: Palestinian conflict
+nu: Nuclear weapons and nuclear material
+di: Arms control and disarmament
+hr: Human rights
+co: Colonialism
+ec: Economic development
+So that you can interpret the data more easily, recode the data to replace these codes with their full name. You can do that with dplyr's recode() function, which replaces values with ones you specify:
+
+example <- c("apple", "banana", "apple", "orange")
+recode(example,
+       apple = "plum",
+       banana = "grape")
+
+Use the recode() function from dplyr in a mutate() to replace each two-letter code in the votes_gathered data frame with the corresponding full name. Save this as votes_tidied.
+
+
+
+# Replace the two-letter codes in topic: votes_tidied
+votes_tidied <- votes_gathered %>%
+  mutate(topic = recode(topic,
+                        me = "Palestinian conflict",
+                        nu = "Nuclear weapons and nuclear material",
+                        di = "Arms control and disarmament",
+                        hr = "Human rights",
+                        co = "Colonialism",
+                        ec = "Economic development"))
+
+
+
+
