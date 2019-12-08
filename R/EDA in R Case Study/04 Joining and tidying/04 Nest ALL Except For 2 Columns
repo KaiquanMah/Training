@@ -1,0 +1,215 @@
+Nesting by topic and country
+In the last chapter, you constructed a linear model for each country by nesting the data in each country, fitting a model to each dataset, then tidying each model with broom and unnesting the coefficients. The code looked something like this:
+
+country_coefficients <- by_year_country %>%
+  nest(-country) %>%
+  mutate(model = map(data, ~ lm(percent_yes ~ year, data = .)),
+         tidied = map(model, tidy)) %>%
+  unnest(tidied)
+
+Now, you'll again be modeling change in "percentage" yes over time, but instead of fitting one model for each country, you'll fit one for each combination of country and topic.
+
+
+
+
+Load the purrr, tidyr, and broom packages.
+Print the by_country_year_topic dataset to the console.
+Fit a linear model within each country and topic in this dataset, saving the result as country_topic_coefficients. You can use the above code as a starting point.
+Print the country_topic_coefficients dataset to the console.
+
+
+# Load purrr, tidyr, and broom
+library(purrr)
+library(tidyr)
+library(broom)
+
+# Print by_country_year_topic
+by_country_year_topic
+
+# Fit model on the by_country_year_topic dataset
+country_topic_coefficients <- by_country_year_topic %>%
+  nest(-country, -topic) %>%
+  mutate(model = map(data, ~lm(percent_yes ~ year, data = .)),
+          tidied = map(model, tidy)) %>%
+  unnest(tidied)
+
+# Print country_topic_coefficients
+country_topic_coefficients
+
+# A tibble: 2,383 x 9
+   country  topic          data model term  estimate std.error statistic p.value
+   <chr>    <chr>     <list<df> <lis> <chr>    <dbl>     <dbl>     <dbl>   <dbl>
+ 1 Afghani~ Colonial~  [34 x 3] <lm>  (Int~ -9.20e+0  1.96         -4.70 4.76e-5
+ 2 Afghani~ Colonial~  [34 x 3] <lm>  year   5.11e-3  0.000989      5.17 1.23e-5
+ 3 Afghani~ Economic~  [32 x 3] <lm>  (Int~ -1.15e+1  3.62         -3.17 3.49e-3
+ 4 Afghani~ Economic~  [32 x 3] <lm>  year   6.24e-3  0.00183       3.42 1.85e-3
+ 5 Afghani~ Human ri~  [34 x 3] <lm>  (Int~ -7.27e+0  4.37         -1.66 1.06e-1
+ 6 Afghani~ Human ri~  [34 x 3] <lm>  year   4.08e-3  0.00221       1.85 7.43e-2
+ 7 Afghani~ Palestin~  [30 x 3] <lm>  (Int~ -1.33e+1  3.57         -3.73 8.66e-4
+ 8 Afghani~ Palestin~  [30 x 3] <lm>  year   7.17e-3  0.00180       3.98 4.42e-4
+ 9 Afghani~ Arms con~  [29 x 3] <lm>  (Int~ -1.38e+1  4.13         -3.33 2.53e-3
+10 Afghani~ Arms con~  [29 x 3] <lm>  year   7.37e-3  0.00208       3.54 1.49e-3
+# ... with 2,373 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Interpreting tidy models
+Now you have both the slope and intercept terms for each model. Just as you did in the last chapter with the tidied coefficients, you'll need to filter for only the slope terms.
+
+You'll also have to extract only cases that are statistically significant, which means adjusting the p-value for the number of models, and then filtering to include only significant changes.
+
+Filter the country_topic_coefficients data to include only the slope term.
+Add a p.adjusted column containing adjusted p-values (using the p.adjust() function).
+Filter for only adjusted p-values less than .05.
+Save the result as country_topic_filtered.
+
+
+# Create country_topic_filtered
+country_topic_filtered <- country_topic_coefficients %>%
+  filter(term == "year") %>%
+  mutate(p.adjusted = p.adjust(p.value)) %>%
+  filter(p.adjusted < 0.05)
+
+# A tibble: 56 x 8
+   country       topic    term  estimate std.error statistic  p.value p.adjusted
+   <chr>         <chr>    <chr>    <dbl>     <dbl>     <dbl>    <dbl>      <dbl>
+ 1 Afghanistan   Colonia~ year   0.00511  0.000989      5.17  1.23e-5  0.0141   
+ 2 Austria       Colonia~ year   0.00835  0.00152       5.49  8.10e-6  0.00936  
+ 3 Barbados      Colonia~ year   0.00669  0.00120       5.60  1.25e-5  0.0144   
+ 4 Barbados      Palesti~ year   0.0166   0.00295       5.61  1.21e-5  0.0139   
+ 5 Belgium       Colonia~ year   0.00731  0.00155       4.73  4.36e-5  0.0492   
+ 6 Bolivia, Plu~ Colonia~ year   0.00852  0.00118       7.23  3.26e-8  0.0000383
+ 7 Brazil        Colonia~ year   0.00827  0.00140       5.90  1.43e-6  0.00167  
+ 8 Chile         Colonia~ year   0.00932  0.00123       7.59  1.21e-8  0.0000143
+ 9 Colombia      Colonia~ year   0.00715  0.00124       5.76  2.18e-6  0.00255  
+10 Costa Rica    Colonia~ year   0.00738  0.00141       5.25  9.72e-6  0.0112   
+# ... with 46 more rows
+
+
+
+
+
+
+
+
+Steepest trends by topic
+country_topic_filtered from the previous exercise is available in your workspace. Which combination of country and topic has the steepest downward trend?
+
+
+#not this query
+> arrange(country_topic_filtered, p.adjusted)
+# A tibble: 56 x 8
+   country     topic       term  estimate std.error statistic p.value p.adjusted
+   <chr>       <chr>       <chr>    <dbl>     <dbl>     <dbl>   <dbl>      <dbl>
+ 1 United Sta~ Colonialism year  -0.00747  0.000922     -8.10 2.97e-9 0.00000351
+ 2 New Zealand Colonialism year   0.0109   0.00136       7.98 4.16e-9 0.00000491
+ 3 Nepal       Palestinia~ year   0.0187   0.00221       8.46 8.28e-9 0.00000977
+ 4 South Afri~ Colonialism year   0.0166   0.00188       8.82 1.13e-8 0.0000133 
+ 5 Chile       Colonialism year   0.00932  0.00123       7.59 1.21e-8 0.0000143 
+ 6 Malta       Arms contr~ year  -0.00930  0.00109      -8.51 1.46e-8 0.0000172 
+ 7 Malta       Nuclear we~ year  -0.0112   0.00137      -8.15 3.14e-8 0.0000370 
+ 8 Bolivia, P~ Colonialism year   0.00852  0.00118       7.23 3.26e-8 0.0000383 
+ 9 South Afri~ Arms contr~ year   0.0130   0.00145       8.98 7.35e-8 0.0000863 
+10 Cyprus      Arms contr~ year  -0.00878  0.00123      -7.13 1.80e-7 0.000211  
+# ... with 46 more rows
+
+#US
+
+
+
+#should be this query
+> arrange(country_topic_filtered, estimate)
+# A tibble: 56 x 8
+   country   topic        term  estimate std.error statistic  p.value p.adjusted
+   <chr>     <chr>        <chr>    <dbl>     <dbl>     <dbl>    <dbl>      <dbl>
+ 1 Vanuatu   Palestinian~ year  -0.0327    0.00516     -6.33  2.60e-5  0.0295   
+ 2 Vanuatu   Colonialism  year  -0.0179    0.00271     -6.60  2.53e-5  0.0288   
+ 3 Malta     Nuclear wea~ year  -0.0112    0.00137     -8.15  3.14e-8  0.0000370
+ 4 Cyprus    Human rights year  -0.0108    0.00196     -5.48  1.22e-5  0.0141   
+ 5 United S~ Palestinian~ year  -0.0107    0.00194     -5.51  6.85e-6  0.00793  
+ 6 Cyprus    Nuclear wea~ year  -0.0107    0.00172     -6.20  1.76e-6  0.00206  
+ 7 Israel    Colonialism  year  -0.00953   0.00177     -5.38  7.19e-6  0.00831  
+ 8 Romania   Human rights year  -0.00945   0.00185     -5.11  2.26e-5  0.0259   
+ 9 Malta     Arms contro~ year  -0.00930   0.00109     -8.51  1.46e-8  0.0000172
+10 Cyprus    Arms contro~ year  -0.00878   0.00123     -7.13  1.80e-7  0.000211 
+# ... with 46 more rows
+
+
+#vanuatu - palestinian conflicy
+Vanuatu on the Palestinian conflict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Checking models visually
+In the last exercise, you found that over its history, Vanuatu (an island nation in the Pacific Ocean) sharply changed its pattern of voting on the topic of Palestinian conflict.
+
+Let's examine this country's voting patterns more closely. Recall that the by_country_year_topic dataset contained one row for each combination of country, year, and topic. You can use that to create a plot of Vanuatu's voting, faceted by topic.
+
+Instructions
+100 XP
+Filter the by_country_year_topic variable for only Vanuatu's votes to create a vanuatu_by_country_year_topic object.
+Create a plot with year on the x-axis and percent_yes on the y-axis, and facet by topic.
+
+
+> vanuatu_by_country_year_topic
+# A tibble: 83 x 5
+   country  year topic                                total percent_yes
+   <chr>   <dbl> <chr>                                <int>       <dbl>
+ 1 Vanuatu  1981 Arms control and disarmament            22       0.955
+ 2 Vanuatu  1981 Colonialism                              9       1    
+ 3 Vanuatu  1981 Economic development                     3       1    
+ 4 Vanuatu  1981 Human rights                             6       1    
+ 5 Vanuatu  1981 Nuclear weapons and nuclear material    14       1    
+ 6 Vanuatu  1981 Palestinian conflict                     5       1    
+ 7 Vanuatu  1983 Arms control and disarmament            35       1    
+ 8 Vanuatu  1983 Colonialism                             15       1    
+ 9 Vanuatu  1983 Economic development                     6       1    
+10 Vanuatu  1983 Human rights                            15       1    
+# ... with 73 more rows
+
+
+# Create vanuatu_by_country_year_topic
+vanuatu_by_country_year_topic <- by_country_year_topic %>%
+  filter(country == "Vanuatu")
+
+# Plot of percentage "yes" over time, faceted by topic
+ggplot(vanuatu_by_country_year_topic, aes(x= year,y=percent_yes)) +
+  geom_line() +
+  facet_wrap(~topic)
+  
+  
+
