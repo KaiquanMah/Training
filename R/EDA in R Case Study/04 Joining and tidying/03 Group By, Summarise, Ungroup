@@ -1,0 +1,86 @@
+Summarize by country, year, and topic
+In previous exercises, you summarized the votes dataset by country, by year, and by country-year combination.
+
+Now that you have topic as an additional variable, you can summarize the votes for each combination of country, year, and topic (e.g. for the United States in 2013 on the topic of nuclear weapons.)
+
+Print the votes_tidied dataset to the console.
+In a single summarize() call, compute both the total number of votes (total) and the percentage of "yes" votes (percent_yes) for each combination of country, year, and topic. Save this as by_country_year_topic. Make sure that you ungroup() after summarizing.
+Print the by_country_year_topic dataset to the console.
+
+> votes_tidied
+# A tibble: 350,032 x 10
+    rcid session  vote ccode  year country date                unres topic
+   <dbl>   <dbl> <dbl> <int> <dbl> <chr>   <dttm>              <chr> <chr>
+ 1    77       2     1     2  1947 United~ 1947-11-06 00:00:00 R/2/~ Pale~
+ 2    77       2     1    20  1947 Canada  1947-11-06 00:00:00 R/2/~ Pale~
+ 3    77       2     3    40  1947 Cuba    1947-11-06 00:00:00 R/2/~ Pale~
+ 4    77       2     1    41  1947 Haiti   1947-11-06 00:00:00 R/2/~ Pale~
+ 5    77       2     1    42  1947 Domini~ 1947-11-06 00:00:00 R/2/~ Pale~
+ 6    77       2     2    70  1947 Mexico  1947-11-06 00:00:00 R/2/~ Pale~
+ 7    77       2     1    90  1947 Guatem~ 1947-11-06 00:00:00 R/2/~ Pale~
+ 8    77       2     2    91  1947 Hondur~ 1947-11-06 00:00:00 R/2/~ Pale~
+ 9    77       2     2    92  1947 El Sal~ 1947-11-06 00:00:00 R/2/~ Pale~
+10    77       2     1    93  1947 Nicara~ 1947-11-06 00:00:00 R/2/~ Pale~
+# ... with 350,022 more rows, and 1 more variable: has_topic <dbl>
+
+
+
+# Print votes_tidied
+votes_tidied
+
+# Summarize the percentage "yes" per country-year-topic
+by_country_year_topic <- votes_tidied %>%
+  group_by(country, year, topic) %>%
+  summarise(total = n(), percent_yes = mean(vote == 1)) %>%
+  ungroup()
+
+# Print by_country_year_topic
+by_country_year_topic
+
+
+> by_country_year_topic
+# A tibble: 26,968 x 5
+   country      year topic                                total percent_yes
+   <chr>       <dbl> <chr>                                <int>       <dbl>
+ 1 Afghanistan  1947 Colonialism                              8       0.5  
+ 2 Afghanistan  1947 Economic development                     1       0    
+ 3 Afghanistan  1947 Human rights                             1       0    
+ 4 Afghanistan  1947 Palestinian conflict                     6       0    
+ 5 Afghanistan  1949 Arms control and disarmament             3       0    
+ 6 Afghanistan  1949 Colonialism                             22       0.864
+ 7 Afghanistan  1949 Economic development                     1       1    
+ 8 Afghanistan  1949 Human rights                             3       0    
+ 9 Afghanistan  1949 Nuclear weapons and nuclear material     3       0    
+10 Afghanistan  1949 Palestinian conflict                    11       0.818
+# ... with 26,958 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+Visualizing trends in topics for one country
+You can now visualize the trends in percentage "yes" over time for all six topics side-by-side. Here, you'll visualize them just for the United States.
+
+Load the ggplot2 package.
+Filter the by_country_year_topic dataset for just the United States and save the result as US_by_country_year_topic.
+Use this dataset to graph the percentage "yes" over time for the United States, faceting by topic.
+
+# Load the ggplot2 package
+library(ggplot2)
+
+# Filter by_country_year_topic for just the US
+US_by_country_year_topic <- by_country_year_topic %>%
+  filter(country == "United States")
+
+# Plot % yes over time for the US, faceting by topic
+ggplot(US_by_country_year_topic, aes(x= year,y= percent_yes)) +
+  geom_line() +
+  facet_wrap(~topic)
+
