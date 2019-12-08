@@ -1,0 +1,32 @@
+Tidy each linear regression model
+You've now performed a linear regression on each nested dataset and have a linear model stored in the list column model. But you can't recombine the models until you've tidied each into a table of coefficients. To do that, you'll need to use map() one more time and the tidy() function from the broom package.
+
+Recall that you can simply give a function to map() (e.g. map(models, tidy)) in order to apply that function to each item of a list.
+
+
+
+
+# Load the broom package
+library(broom)
+
+# Add another mutate that applies tidy() to each model
+by_year_country %>%
+  nest(-country) %>%
+  mutate(model = map(data, ~ lm(percent_yes ~ year, data = .))) %>%
+  mutate(tidied = map(model, tidy))
+
+
+# A tibble: 200 x 4
+   country                                   data model  tidied          
+   <chr>                           <list<df[,3]>> <list> <list>          
+ 1 Afghanistan                           [34 x 3] <lm>   <tibble [2 x 5]>
+ 2 Argentina                             [34 x 3] <lm>   <tibble [2 x 5]>
+ 3 Australia                             [34 x 3] <lm>   <tibble [2 x 5]>
+ 4 Belarus                               [34 x 3] <lm>   <tibble [2 x 5]>
+ 5 Belgium                               [34 x 3] <lm>   <tibble [2 x 5]>
+ 6 Bolivia, Plurinational State of       [34 x 3] <lm>   <tibble [2 x 5]>
+ 7 Brazil                                [34 x 3] <lm>   <tibble [2 x 5]>
+ 8 Canada                                [34 x 3] <lm>   <tibble [2 x 5]>
+ 9 Chile                                 [34 x 3] <lm>   <tibble [2 x 5]>
+10 Colombia                              [34 x 3] <lm>   <tibble [2 x 5]>
+# ... with 190 more rows
