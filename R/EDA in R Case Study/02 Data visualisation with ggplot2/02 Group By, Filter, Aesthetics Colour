@@ -1,0 +1,188 @@
+Summarizing by year and country
+You're more interested in trends of voting within specific countries than you are in the overall trend. So instead of summarizing just by year, summarize by both year and country, constructing a dataset that shows what fraction of the time each country votes "yes" in each year.
+
+
+votes_processed %>%
+  group_by(year) %>%
+  summarize(total = n(),
+            percent_yes = mean(vote == 1))
+# A tibble: 34 x 3
+    year total percent_yes
+   <dbl> <int>       <dbl>
+ 1  1947  2039       0.569
+ 2  1949  3469       0.438
+ 3  1951  1434       0.585
+ 4  1953  1537       0.632
+ 5  1955  2169       0.695
+ 6  1957  2708       0.609
+ 7  1959  4326       0.588
+ 8  1961  7482       0.573
+ 9  1963  3308       0.729
+10  1965  4382       0.708
+# ... with 24 more rows
+
+
+> votes_processed
+# A tibble: 353,547 x 6
+    rcid session  vote ccode  year country           
+   <dbl>   <dbl> <dbl> <int> <dbl> <chr>             
+ 1    46       2     1     2  1947 United States     
+ 2    46       2     1    20  1947 Canada            
+ 3    46       2     1    40  1947 Cuba              
+ 4    46       2     1    41  1947 Haiti             
+ 5    46       2     1    42  1947 Dominican Republic
+ 6    46       2     1    70  1947 Mexico            
+ 7    46       2     1    90  1947 Guatemala         
+ 8    46       2     1    91  1947 Honduras          
+ 9    46       2     1    92  1947 El Salvador       
+10    46       2     1    93  1947 Nicaragua         
+# ... with 353,537 more rows
+
+
+
+
+
+
+
+
+# Group by year and country: by_year_country
+by_year_country <- votes_processed %>%
+  group_by(year, country) %>%
+  summarize(total = n(),
+            percent_yes = mean(vote == 1))
+
+
+# A tibble: 4,744 x 4
+# Groups:   year [34]
+    year country                         total percent_yes
+   <dbl> <chr>                           <int>       <dbl>
+ 1  1947 Afghanistan                        34       0.382
+ 2  1947 Argentina                          38       0.579
+ 3  1947 Australia                          38       0.553
+ 4  1947 Belarus                            38       0.5  
+ 5  1947 Belgium                            38       0.605
+ 6  1947 Bolivia, Plurinational State of    37       0.595
+ 7  1947 Brazil                             38       0.658
+ 8  1947 Canada                             38       0.605
+ 9  1947 Chile                              38       0.658
+10  1947 Colombia                           35       0.543
+# ... with 4,734 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Plotting just the UK over time
+Now that you have the percentage of time that each country voted "yes" within each year, you can plot the trend for a particular country. In this case, you'll look at the trend for just the United Kingdom.
+
+This will involve using filter() on your data before giving it to ggplot2.
+
+
+Print the by_year_country dataset.
+Create a filtered version of the dataset called UK_by_year.
+Create a line plot of the percentage of "yes" votes over time for the United Kingdom.
+
+
+
+
+# Start with by_year_country dataset
+by_year_country <- votes_processed %>%
+  group_by(year, country) %>%
+  summarize(total = n(),
+            percent_yes = mean(vote == 1))
+
+# Print by_year_country
+by_year_country
+
+# A tibble: 4,744 x 4
+# Groups:   year [34]
+    year country                         total percent_yes
+   <dbl> <chr>                           <int>       <dbl>
+ 1  1947 Afghanistan                        34       0.382
+ 2  1947 Argentina                          38       0.579
+ 3  1947 Australia                          38       0.553
+ 4  1947 Belarus                            38       0.5  
+ 5  1947 Belgium                            38       0.605
+ 6  1947 Bolivia, Plurinational State of    37       0.595
+ 7  1947 Brazil                             38       0.658
+ 8  1947 Canada                             38       0.605
+ 9  1947 Chile                              38       0.658
+10  1947 Colombia                           35       0.543
+# ... with 4,734 more rows
+
+
+
+
+# Create a filtered version: UK_by_year
+UK_by_year <- by_year_country %>%
+  filter(country == "United Kingdom")
+
+# Line plot of percent_yes over time for UK only
+ggplot(UK_by_year, aes(x=year, y=percent_yes)) +
+  geom_line()
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Plotting multiple countries
+Plotting just one country at a time is interesting, but you really want to compare trends between countries. For example, suppose you want to compare voting trends for the United States, the UK, France, and India.
+
+You'll have to filter to include all four of these countries and use another aesthetic (not just x- and y-axes) to distinguish the countries on the resulting visualization. Instead, you'll use the color aesthetic to represent different countries.
+
+
+
+
+
+The by_year_country dataset you created in the last exercise is available in your workspace.
+
+Create a filtered version of by_year_country called filtered_4_countries with just the countries listed in the editor (you may find the %in% operator useful here).
+Show the trend for each of these countries on the same graph, using color to distinguish each country.
+
+
+# Vector of four countries to examine
+countries <- c("United States", "United Kingdom",
+               "France", "India")
+
+# Filter by_year_country: filtered_4_countries
+filtered_4_countries <- by_year_country %>%
+  filter(country %in% countries)
+
+# Line plot of % yes in four countries
+ggplot(filtered_4_countries, aes(x=year, y=percent_yes, color=country)) +
+  geom_line()
+  
+
