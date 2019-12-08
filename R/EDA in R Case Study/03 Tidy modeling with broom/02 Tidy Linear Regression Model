@@ -1,0 +1,69 @@
+Tidying a linear regression model
+In the last section, you fit a linear model. Now, you'll use the tidy() function in the broom package to turn that model into a tidy data frame.
+
+
+The US_fit linear model is available in your workspace.
+Load the broom package.
+Use the tidy() function from broom on the model object to turn it into a tidy data frame. Don't store the result; just print the output to the console.
+
+
+# Load the broom package
+library(broom)
+
+# Call the tidy() function on the US_fit object
+tidy(US_fit)
+
+> tidy(US_fit)
+# A tibble: 2 x 5
+  term        estimate std.error statistic      p.value
+  <chr>          <dbl>     <dbl>     <dbl>        <dbl>
+1 (Intercept) 12.7      1.84          6.89 0.0000000848
+2 year        -0.00624  0.000928     -6.72 0.000000137
+
+
+
+
+
+
+
+
+Combining models for multiple countries
+One important advantage of changing models to tidied data frames is that they can be combined.
+
+In an earlier section, you fit a linear model to the percentage of "yes" votes for each year in the United States. Now you'll fit the same model for the United Kingdom and combine the results from both countries.
+
+
+
+Fit a model for the United Kingdom similar to the one you fit for the US and save it as UK_fit.
+Tidy US_fit into a data frame called US_tidied and the UK model into UK_tidied.
+Use bind_rows() from dplyr to combine the two tidied models, printing the result to the console.
+
+# Linear regression of percent_yes by year for US
+US_by_year <- by_year_country %>%
+  filter(country == "United States")
+US_fit <- lm(percent_yes ~ year, US_by_year)
+
+# Fit model for the United Kingdom
+UK_by_year <- by_year_country %>%
+  filter(country == "United Kingdom")
+UK_fit <- lm(percent_yes ~ year, UK_by_year)
+
+# Create US_tidied and UK_tidied
+US_tidied <- tidy(US_fit)
+UK_tidied <- tidy(UK_fit)
+
+# Combine the two tidied models
+bind_rows(US_tidied, UK_tidied)
+
+# A tibble: 4 x 5
+  term        estimate std.error statistic      p.value
+  <chr>          <dbl>     <dbl>     <dbl>        <dbl>
+1 (Intercept) 12.7      1.84          6.89 0.0000000848
+2 year        -0.00624  0.000928     -6.72 0.000000137 
+3 (Intercept) -3.27     1.96         -1.67 0.105       
+4 year         0.00187  0.000989      1.89 0.0677
+
+We can compare the two models more easily now.
+
+
+
