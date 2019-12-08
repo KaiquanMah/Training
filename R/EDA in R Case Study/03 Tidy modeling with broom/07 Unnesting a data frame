@@ -1,0 +1,40 @@
+Unnesting a data frame
+You now have a tidied version of each model stored in the tidied column. You want to combine all of those into a large data frame, similar to how you combined the US and UK tidied models earlier. Recall that the unnest() function from tidyr achieves this.
+
+
+Add an unnest() step to unnest the tidied models stored in the tidied column. Save the result as country_coefficients.
+Print the resulting country_coefficients object to the console.
+
+
+
+# Add one more step that unnests the tidied column
+country_coefficients <- by_year_country %>%
+  nest(-country) %>%
+  mutate(model = map(data, ~ lm(percent_yes ~ year, data = .)),
+         tidied = map(model, tidy)) %>%
+  unnest(tidied)
+
+
+# Print the resulting country_coefficients variable
+country_coefficients
+
+# A tibble: 399 x 8
+   country          data model  term     estimate std.error statistic    p.value
+   <chr>     <list<df[,> <list> <chr>       <dbl>     <dbl>     <dbl>      <dbl>
+ 1 Afghanis~    [34 x 3] <lm>   (Interc~ -1.11e+1  1.47         -7.52    1.44e-8
+ 2 Afghanis~    [34 x 3] <lm>   year      6.01e-3  0.000743      8.09    3.06e-9
+ 3 Argentina    [34 x 3] <lm>   (Interc~ -9.46e+0  2.10         -4.50    8.32e-5
+ 4 Argentina    [34 x 3] <lm>   year      5.15e-3  0.00106       4.85    3.05e-5
+ 5 Australia    [34 x 3] <lm>   (Interc~ -4.55e+0  2.15         -2.12    4.22e-2
+ 6 Australia    [34 x 3] <lm>   year      2.57e-3  0.00108       2.37    2.42e-2
+ 7 Belarus      [34 x 3] <lm>   (Interc~ -7.00e+0  1.50         -4.66    5.33e-5
+ 8 Belarus      [34 x 3] <lm>   year      3.91e-3  0.000759      5.15    1.28e-5
+ 9 Belgium      [34 x 3] <lm>   (Interc~ -5.85e+0  1.52         -3.86    5.22e-4
+10 Belgium      [34 x 3] <lm>   year      3.20e-3  0.000765      4.19    2.07e-4
+# ... with 389 more rows
+
+
+
+
+
+
