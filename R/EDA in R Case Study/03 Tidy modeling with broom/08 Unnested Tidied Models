@@ -1,0 +1,172 @@
+Filtering model terms
+You currently have both the intercept and slope terms for each by-country model. You're probably more interested in how each is changing over time, so you want to focus on the slope terms.
+
+
+Print the country_coefficients data frame to the console.
+Perform a filter() step that extracts only the slope (not intercept) terms.
+
+
+# Print the country_coefficients dataset
+country_coefficients
+
+
+> country_coefficients
+# A tibble: 399 x 6
+   country     term         estimate std.error statistic       p.value
+   <chr>       <chr>           <dbl>     <dbl>     <dbl>         <dbl>
+ 1 Afghanistan (Intercept) -11.1      1.47         -7.52 0.0000000144 
+ 2 Afghanistan year          0.00601  0.000743      8.09 0.00000000306
+ 3 Argentina   (Intercept)  -9.46     2.10         -4.50 0.0000832    
+ 4 Argentina   year          0.00515  0.00106       4.85 0.0000305    
+ 5 Australia   (Intercept)  -4.55     2.15         -2.12 0.0422       
+ 6 Australia   year          0.00257  0.00108       2.37 0.0242       
+ 7 Belarus     (Intercept)  -7.00     1.50         -4.66 0.0000533    
+ 8 Belarus     year          0.00391  0.000759      5.15 0.0000128    
+ 9 Belgium     (Intercept)  -5.85     1.52         -3.86 0.000522     
+10 Belgium     year          0.00320  0.000765      4.19 0.000207     
+# ... with 389 more rows
+
+
+
+
+# Filter for only the slope terms
+country_coefficients %>%
+  filter(term == "year")
+# A tibble: 199 x 6
+   country                       term  estimate std.error statistic      p.value
+   <chr>                         <chr>    <dbl>     <dbl>     <dbl>        <dbl>
+ 1 Afghanistan                   year   0.00601  0.000743      8.09      3.06e-9
+ 2 Argentina                     year   0.00515  0.00106       4.85      3.05e-5
+ 3 Australia                     year   0.00257  0.00108       2.37      2.42e-2
+ 4 Belarus                       year   0.00391  0.000759      5.15      1.28e-5
+ 5 Belgium                       year   0.00320  0.000765      4.19      2.07e-4
+ 6 Bolivia, Plurinational State~ year   0.00580  0.000966      6.01      1.06e-6
+ 7 Brazil                        year   0.00611  0.000817      7.48      1.64e-8
+ 8 Canada                        year   0.00152  0.000955      1.59      1.22e-1
+ 9 Chile                         year   0.00678  0.000822      8.24      2.05e-9
+10 Colombia                      year   0.00616  0.000965      6.38      3.58e-7
+# ... with 189 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#https://www.rdocumentation.org/packages/stats/versions/3.6.1/topics/p.adjust
+Filtering for significant countries
+Not all slopes are significant, and you can use the p-value to guess which are and which are not.
+
+However, when you have lots of p-values, like one for each country, you run into the problem of multiple hypothesis testing, where you have to set a stricter threshold. The p.adjust() function is a simple way to correct for this, where p.adjust(p.value) on a vector of p-values returns a set that you can trust.
+Here you'll add two steps to process the slope_terms dataset: use a mutate to create the new, adjusted p-value column, and filter to filter for those below a .05 threshold.
+
+Use the p.adjust() function to adjust the p.value column, saving the result into a new p.adjusted column. Then, filter for cases where p.adjusted is less than .05.
+
+# Filter for only the slope terms
+slope_terms <- country_coefficients %>%
+  filter(term == "year")
+
+# Add p.adjusted column, then filter
+slope_terms %>%
+  mutate(p.adjusted = p.adjust(p.value)) %>%
+  filter(p.adjusted < 0.05)
+
+# A tibble: 61 x 7
+   country              term  estimate std.error statistic    p.value p.adjusted
+   <chr>                <chr>    <dbl>     <dbl>     <dbl>      <dbl>      <dbl>
+ 1 Afghanistan          year   0.00601  0.000743      8.09    3.06e-9    5.95e-7
+ 2 Argentina            year   0.00515  0.00106       4.85    3.05e-5    4.81e-3
+ 3 Belarus              year   0.00391  0.000759      5.15    1.28e-5    2.08e-3
+ 4 Belgium              year   0.00320  0.000765      4.19    2.07e-4    3.01e-2
+ 5 Bolivia, Plurinatio~ year   0.00580  0.000966      6.01    1.06e-6    1.88e-4
+ 6 Brazil               year   0.00611  0.000817      7.48    1.64e-8    3.12e-6
+ 7 Chile                year   0.00678  0.000822      8.24    2.05e-9    3.99e-7
+ 8 Colombia             year   0.00616  0.000965      6.38    3.58e-7    6.56e-5
+ 9 Costa Rica           year   0.00654  0.000812      8.05    3.39e-9    6.54e-7
+10 Cuba                 year   0.00461  0.000721      6.40    3.43e-7    6.31e-5
+# ... with 51 more rows
+
+Notice that there are now only 61 countries with significant trends.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sorting by slope
+Now that you've filtered for countries where the trend is probably not due to chance, you may be interested in countries whose percentage of "yes" votes is changing most quickly over time. Thus, you want to find the countries with the highest and lowest slopes; that is, the estimate column.
+
+Using arrange() and desc(), sort the filtered countries to find the countries whose percentage "yes" is most quickly increasing over time.
+Using arrange(), sort to find the countries whose percentage "yes" is most quickly decreasing.
+
+
+# Filter by adjusted p-values
+filtered_countries <- country_coefficients %>%
+  filter(term == "year") %>%
+  mutate(p.adjusted = p.adjust(p.value)) %>%
+  filter(p.adjusted < .05)
+
+# Sort for the countries increasing most quickly
+arrange(filtered_countries, desc(estimate))
+
+# A tibble: 61 x 7
+   country             term  estimate std.error statistic  p.value  p.adjusted
+   <chr>               <chr>    <dbl>     <dbl>     <dbl>    <dbl>       <dbl>
+ 1 South Africa        year   0.0119   0.00140       8.47 1.60e- 8 0.00000305 
+ 2 Kazakhstan          year   0.0110   0.00195       5.62 3.24e- 4 0.0451     
+ 3 Yemen Arab Republic year   0.0109   0.00159       6.84 1.20e- 6 0.000211   
+ 4 Kyrgyzstan          year   0.00973  0.000988      9.84 2.38e- 5 0.00378    
+ 5 Malawi              year   0.00908  0.00181       5.02 4.48e- 5 0.00703    
+ 6 Dominican Republic  year   0.00806  0.000914      8.81 5.96e-10 0.000000117
+ 7 Portugal            year   0.00802  0.00171       4.68 7.13e- 5 0.0110     
+ 8 Honduras            year   0.00772  0.000921      8.38 1.43e- 9 0.000000281
+ 9 Peru                year   0.00730  0.000976      7.48 1.65e- 8 0.00000312 
+10 Nicaragua           year   0.00708  0.00107       6.60 1.92e- 7 0.0000355  
+# ... with 51 more rows
+
+
+
+# Sort for the countries decreasing most quickly
+arrange(filtered_countries, estimate)
+
+# A tibble: 61 x 7
+   country               term  estimate std.error statistic   p.value p.adjusted
+   <chr>                 <chr>    <dbl>     <dbl>     <dbl>     <dbl>      <dbl>
+ 1 Korea, Republic of    year  -0.00921  0.00155      -5.96   1.39e-4  0.0209   
+ 2 Israel                year  -0.00685  0.00117      -5.85   1.89e-6  0.000331 
+ 3 United States         year  -0.00624  0.000928     -6.72   1.37e-7  0.0000254
+ 4 Belgium               year   0.00320  0.000765      4.19   2.07e-4  0.0301   
+ 5 Guinea                year   0.00362  0.000833      4.35   1.87e-4  0.0275   
+ 6 Morocco               year   0.00380  0.000860      4.42   1.46e-4  0.0218   
+ 7 Belarus               year   0.00391  0.000759      5.15   1.28e-5  0.00208  
+ 8 Iran, Islamic Republ~ year   0.00391  0.000856      4.57   6.91e-5  0.0107   
+ 9 Congo                 year   0.00397  0.000922      4.30   2.27e-4  0.0326   
+10 Sudan                 year   0.00399  0.000961      4.15   2.98e-4  0.0420   
+# ... with 51 more rows
+
+
