@@ -1,0 +1,203 @@
+Commodities data
+The plotting function pairs() creates a pairwise scatterplot of the components of a multivariate time series with two or more dimensions. It is used on a zoo object rather than an xts object.
+
+A roughly circular shape of a scatterplot indicates a low correlation between the log-returns of two different commodities. Generally speaking, low correlation is good in a portfolio as it implies that the assets are diversified. High correlation, on the other hand, represents a risk that must be properly modelled.
+
+In this exercise, you will look at gold and oil prices over a 25 year period, calculate their daily and monthly log-returns, and plot them. The data gold and oil, containing the daily prices from 1990-2015 of gold and Brent crude oil, respectively, are available in your workspace.
+
+
+Use plot() to plot the gold and oil time series separately.
+Calculate the daily log-returns of each commodity and assign to goldx and oilx, respectively.
+Calculate the monthly log-returns of each commodity and assign to goldx_m and oilx_m, respectively.
+Use merge() to merge goldx_m and oilx_m, in that order, into coms.
+Plot coms, a multivariate series, with vertical bars.
+Convert coms to a zoo object with as.zoo() and then apply pairs() to create a pairwise scatterplot.
+
+# Plot gold and oil prices
+plot(gold)
+plot(oil)
+
+# Calculate daily log-returns
+goldx <- diff(log(gold))
+oilx <- diff(log(oil))
+
+# Calculate monthly log-returns
+goldx_m <- apply.monthly(goldx, sum)
+oilx_m <- apply.monthly(oilx, sum)
+
+# Merge goldx_m and oilx_m into coms
+coms <- merge(goldx_m, oilx_m, all=TRUE)
+
+# Plot coms with vertical bars
+plot.zoo(coms, type="h")
+
+# Make a pairwise scatterplot of coms
+#https://www.statmethods.net/graphs/scatterplot.html
+pairs(as.zoo(coms))
+
+As you can see, gold and oil are well diversified commodities.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Interest-rate data
+The object zcb contains daily values of Canadian zero-coupon-bond yields, expressed as percentages, for the period 2006-2015. Yields are the key risk-factor when it comes to analysing the interest-rate risk in a portfolio of bonds or other fixed-income products.
+
+It is not so clear what is the best way of calculating risk-factor changes for yields. It is possible to compute log-returns, provided yields are not negative, and it is also possible to calculate simple returns. To compute the simple returns of a series, use only diff() instead of diff() and log().
+
+In this exercise, you will plot time series of yields for fixed times to maturity, and plot risk-factor changes for these yields. You will also plot the whole yield curve on particular dates. The zcb data has been loaded into your workspace. A vector yield_cols containing the names of the columns corresponding to maturities of 1, 5 and 10 years has been created. A numerical vector maturity containing all the maturities in years has also been created.
+
+Compute the log-returns of zcb as zcb_x and the simple log-returns as zcb_x2.
+Plot zcb_x for 1, 5 and 10-year maturities in one plot.
+Plot zcb_x2 for 1, 5 and 10-year maturities in one plot.
+Index zcb in plot() to plot the yield curve for the first day in zcb.
+Index zcb in lines() to add a line to the yield curve for the last day in zcb.
+
+
+> zcb
+               0.25y     0.50y     0.75y     1.00y     1.25y     1.50y
+2006-01-03 3.4711705 3.6325093 3.6999260 3.7377179 3.7607875 3.7753075
+2006-01-04 3.4375057 3.5661828 3.6177281 3.6465924 3.6649311 3.6775197
+2006-01-05 3.4210180 3.5377530 3.5876772 3.6172213 3.6370378 3.6514540
+2006-01-06 3.4477504 3.5642264 3.6181466 3.6515721 3.6745202 3.6912642
+...
+
+> index(zcb)
+   [1] "2006-01-03" "2006-01-04" "2006-01-05" "2006-01-06" "2006-01-09"
+   [6] "2006-01-10" "2006-01-11" "2006-01-12" "2006-01-13" "2006-01-16"
+  [11] "2006-01-17" "2006-01-18" "2006-01-19" "2006-01-20" "2006-01-23"
+  [16] "2006-01-24" "2006-01-25" "2006-01-26" "2006-01-27" "2006-01-30"
+...
+
+
+> yield_cols
+[1] "1.00y"  "5.00y"  "10.00y"
+
+
+> maturity
+  [1]  0.25  0.50  0.75  1.00  1.25  1.50  1.75  2.00  2.25  2.50  2.75  3.00
+ [13]  3.25  3.50  3.75  4.00  4.25  4.50  4.75  5.00  5.25  5.50  5.75  6.00
+ [25]  6.25  6.50  6.75  7.00  7.25  7.50  7.75  8.00  8.25  8.50  8.75  9.00
+ [37]  9.25  9.50  9.75 10.00 10.25 10.50 10.75 11.00 11.25 11.50 11.75 12.00
+ [49] 12.25 12.50 12.75 13.00 13.25 13.50 13.75 14.00 14.25 14.50 14.75 15.00
+ [61] 15.25 15.50 15.75 16.00 16.25 16.50 16.75 17.00 17.25 17.50 17.75 18.00
+ [73] 18.25 18.50 18.75 19.00 19.25 19.50 19.75 20.00 20.25 20.50 20.75 21.00
+ [85] 21.25 21.50 21.75 22.00 22.25 22.50 22.75 23.00 23.25 23.50 23.75 24.00
+ [97] 24.25 24.50 24.75 25.00 25.25 25.50 25.75 26.00 26.25 26.50 26.75 27.00
+[109] 27.25 27.50 27.75 28.00 28.25 28.50 28.75 29.00 29.25 29.50 29.75 30.00
+
+
+
+> zcb[1,]
+              0.25y    0.50y    0.75y    1.00y    1.25y    1.50y    1.75y
+2006-01-03 3.471171 3.632509 3.699926 3.737718 3.760787 3.775307 3.784628
+              2.00y    2.25y    2.50y    2.75y   3.00y    3.25y    3.50y
+2006-01-03 3.790822 3.795249 3.798817 3.802126 3.80556 3.809346 3.813598
+              3.75y  4.00y   4.25y    4.50y    4.75y    5.00y    5.25y    5.50y
+2006-01-03 3.818355 3.8236 3.82928 3.835323 3.841646 3.848162 3.854791 3.861455
+              5.75y    6.00y    6.25y    6.50y    6.75y    7.00y    7.25y
+2006-01-03 3.868089 3.874636 3.881051 3.887303 3.893367 3.899231 3.904891
+              7.50y    7.75y    8.00y    8.25y    8.50y    8.75y    9.00y
+2006-01-03 3.910353 3.915625 3.920724 3.925671 3.930488 3.935201 3.939836
+              9.25y    9.50y    9.75y   10.00y   10.25y   10.50y   10.75y
+2006-01-03 3.944418 3.948975 3.953531 3.958107 3.962725 3.967402 3.972153
+            11.00y   11.25y   11.50y   11.75y   12.00y   12.25y   12.50y
+2006-01-03 3.97699 3.981922 3.986954 3.992088 3.997325 4.002659 4.008086
+             12.75y   13.00y   13.25y   13.50y   13.75y   14.00y   14.25y
+2006-01-03 4.013594 4.019174 4.024811 4.030489 4.036191 4.041897 4.047588
+             14.50y   14.75y   15.00y   15.25y   15.50y   15.75y   16.00y
+2006-01-03 4.053242 4.058837 4.064351 4.069761 4.075044 4.080177 4.085139
+             16.25y   16.50y   16.75y   17.00y   17.25y   17.50y   17.75y
+2006-01-03 4.089907 4.094461 4.098779 4.102844 4.106637 4.110141 4.113341
+             18.00y   18.25y   18.50y   18.75y   19.00y   19.25y   19.50y
+2006-01-03 4.116223 4.118774 4.120984 4.122844 4.124346 4.125483 4.126253
+             19.75y   20.00y   20.25y   20.50y   20.75y   21.00y   21.25y
+2006-01-03 4.126651 4.126679 4.126335 4.125623 4.124547 4.123111 4.121324
+             21.50y   21.75y   22.00y  22.25y   22.50y   22.75y   23.00y
+2006-01-03 4.119193 4.116728 4.113939 4.11084 4.107443 4.103763 4.099814
+             23.25y   23.50y   23.75y   24.00y   24.25y   24.50y  24.75y
+2006-01-03 4.095612 4.091174 4.086518 4.081661 4.076621 4.071418 4.06607
+             25.00y   25.25y  25.50y   25.75y   26.00y   26.25y   26.50y
+2006-01-03 4.060596 4.055017 4.04935 4.043617 4.037835 4.032025 4.026205
+             26.75y   27.00y   27.25y   27.50y   27.75y   28.00y   28.25y
+2006-01-03 4.020395 4.014611 4.008873 4.003198 3.997604 3.992106 3.986721
+             28.50y   28.75y 29.00y   29.25y   29.50y   29.75y  30.00y
+2006-01-03 3.981466 3.976354 3.9714 3.966619 3.962024 3.957627 3.95344
+
+> max(index(zcb))
+[1] "2015-08-31"
+
+> zcb["2015-08-31",]
+             0.25y   0.50y   0.75y   1.00y   1.25y   1.50y   1.75y 2.00y
+2015-08-31 0.37403 0.40078 0.40853 0.41628 0.44413 0.43152 0.42572 0.427
+             2.25y   2.50y   2.75y   3.00y   3.25y   3.50y   3.75y   4.00y
+2015-08-31 0.43497 0.44899 0.46834 0.49233 0.52029 0.55161 0.58576 0.62225
+             4.25y   4.50y  4.75y   5.00y   5.25y   5.50y   5.75y   6.00y
+2015-08-31 0.66066 0.70062 0.7418 0.78392 0.82674 0.87005 0.91366 0.95742
+             6.25y   6.50y   6.75y   7.00y   7.25y   7.50y   7.75y   8.00y
+2015-08-31 1.00118 1.04484 1.08829 1.13144 1.17421 1.21655 1.25839 1.29968
+             8.25y   8.50y   8.75y  9.00y   9.25y   9.50y  9.75y  10.00y 10.25y
+2015-08-31 1.34038 1.38046 1.41987 1.4586 1.49661 1.53388 1.5704 1.60614 1.6411
+            10.50y  10.75y  11.00y  11.25y  11.50y  11.75y  12.00y  12.25y
+2015-08-31 1.67525 1.70858 1.74108 1.77275 1.80357 1.83353 1.86264 1.89088
+            12.50y  12.75y  13.00y  13.25y  13.50y  13.75y  14.00y  14.25y
+2015-08-31 1.91825 1.94476 1.97038 1.99513 2.01901 2.04202 2.06415 2.08541
+            14.50y  14.75y  15.00y  15.25y  15.50y  15.75y  16.00y  16.25y
+2015-08-31 2.10581 2.12535 2.14404 2.16188 2.17889 2.19507 2.21043 2.22499
+            16.50y  16.75y  17.00y  17.25y  17.50y 17.75y  18.00y  18.25y
+2015-08-31 2.23876 2.25174 2.26396 2.27544 2.28617 2.2962 2.30552 2.31416
+            18.50y  18.75y 19.00y  19.25y  19.50y  19.75y  20.00y  20.25y
+2015-08-31 2.32214 2.32948 2.3362 2.34231 2.34785 2.35282 2.35726 2.36119
+            20.50y  20.75y  21.00y  21.25y  21.50y  21.75y 22.00y  22.25y
+2015-08-31 2.36462 2.36758 2.37009 2.37218 2.37386 2.37516 2.3761 2.37671
+           22.50y  22.75y  23.00y  23.25y  23.50y  23.75y  24.00y  24.25y
+2015-08-31  2.377 2.37699 2.37671 2.37618 2.37542 2.37444 2.37327 2.37192
+            24.50y  24.75y 25.00y  25.25y  25.50y  25.75y  26.00y  26.25y
+2015-08-31 2.37041 2.36877  2.367 2.36512 2.36316 2.36111 2.35901 2.35685
+            26.50y  26.75y  27.00y 27.25y  27.50y  27.75y  28.00y  28.25y
+2015-08-31 2.35466 2.35245 2.35023  2.348 2.34578 2.34358 2.34141 2.33927
+            28.50y  28.75y  29.00y 29.25y  29.50y  29.75y  30.00y
+2015-08-31 2.33717 2.33512 2.33313 2.3312 2.32934 2.32754 2.32582
+
+
+
+
+
+
+# Compute log-returns as zcb_x and simple returns as zcb_x2
+zcb_x <- diff(log(zcb))
+zcb_x2 <- diff(zcb)
+
+# Plot zcb_x for 1, 5 and 10-year maturities
+#https://dzone.com/articles/learn-r-how-extract-rows
+plot.zoo(zcb_x[,yield_cols], plot.type="single")
+
+# Plot zcb_x2 for 1, 5 and 10-year maturities
+plot.zoo(zcb_x2[,yield_cols], plot.type="single")
+
+# Plot the yield curve for the first day of zcb
+plot(maturity, zcb[1,], ylim = range(zcb), type = "l", ylab = "yield (%)", col = "red")
+
+
+# Add a line for the last day of zcb
+lines(maturity, zcb["2015-08-31",], ylim = range(zcb), type = "l", ylab = "yield (%)", col = "red")
+
+
+
+Yields can seem a little tricky to work with at first but they are fundamental for analyzing bond portfolios and many other financial products that depend on interest rates.
+
+
+
