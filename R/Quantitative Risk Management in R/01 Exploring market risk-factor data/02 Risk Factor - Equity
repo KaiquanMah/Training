@@ -1,0 +1,91 @@
+Exploring risk-factor time series: individual equities
+
+For some risk management applications, it is sufficient to model equity risk by looking at indexes. If you want a more detailed model of the risk in a portfolio of equities, you can drill down to the level of individual share prices.
+In the previous chapter, you used DJ["2008/2009"] to extract the Dow Jones data from certain rows of an xts object by specifying a date range index. To also extract data from particular columns, you can add a column identifier, like a string name or numeric index, in the brackets following a comma. To select multiple columns, include these column identifiers in a vector. This [rows, columns] format is consistent with indexing most other two dimensional objects in R.
+
+data[index, colname]
+data[index, c(col1index, col2index)]
+The qrmdata package also includes data for certain constituents, or the stocks or companies part of a larger index. The Dow Jones constituents data are contained in "DJ_const". In this exercise, you will view the names of all its stocks, select the Apple and Goldman Sachs share prices, and plot them using the command plot.zoo() to display multiple time series.
+
+
+Load the DJ constituents data "DJ_const" from qrmdata.
+Use names() to view the names in DJ_const and head() to display the first few rows.
+Extract only the Apple ("AAPL") and Goldman Sachs ("GS") share prices for 2008-2009 and assign them to object stocks.
+Plot stocks using plot.zoo().
+
+
+> names(DJ_const)
+ [1] "AAPL" "AXP"  "BA"   "CAT"  "CSCO" "CVX"  "DD"   "DIS"  "GE"   "GS"  
+[11] "HD"   "IBM"  "INTC" "JNJ"  "JPM"  "KO"   "MCD"  "MMM"  "MRK"  "MSFT"
+[21] "NKE"  "PFE"  "PG"   "TRV"  "UNH"  "UTX"  "V"    "VZ"   "WMT"  "XOM"
+
+
+> head(DJ_const)
+           AAPL AXP       BA      CAT CSCO CVX       DD      DIS       GE GS HD
+1962-01-02   NA  NA 0.212905 0.593184   NA  NA 1.227958 0.061014 0.145967 NA NA
+1962-01-03   NA  NA 0.217163 0.598964   NA  NA 1.229230 0.061832 0.144501 NA NA
+1962-01-04   NA  NA 0.215034 0.614372   NA  NA 1.220331 0.061832 0.142794 NA NA
+1962-01-05   NA  NA 0.210773 0.620152   NA  NA 1.187280 0.062039 0.139132 NA NA
+1962-01-08   NA  NA 0.211306 0.624001   NA  NA 1.169484 0.061832 0.138889 NA NA
+1962-01-09   NA  NA 0.211839 0.629777   NA  NA 1.173297 0.063060 0.139620 NA NA
+                IBM INTC JNJ JPM       KO MCD MMM MRK MSFT NKE PFE PG TRV UNH
+1962-01-02 2.346625   NA  NA  NA 0.031031  NA  NA  NA   NA  NA  NA NA  NA  NA
+1962-01-03 2.367136   NA  NA  NA 0.030339  NA  NA  NA   NA  NA  NA NA  NA  NA
+1962-01-04 2.343548   NA  NA  NA 0.030571  NA  NA  NA   NA  NA  NA NA  NA  NA
+1962-01-05 2.297395   NA  NA  NA 0.029879  NA  NA  NA   NA  NA  NA NA  NA  NA
+1962-01-08 2.254319   NA  NA  NA 0.029570  NA  NA  NA   NA  NA  NA NA  NA  NA
+1962-01-09 2.280983   NA  NA  NA 0.030110  NA  NA  NA   NA  NA  NA NA  NA  NA
+           UTX  V VZ WMT XOM
+1962-01-02  NA NA NA  NA  NA
+1962-01-03  NA NA NA  NA  NA
+1962-01-04  NA NA NA  NA  NA
+1962-01-05  NA NA NA  NA  NA
+1962-01-08  NA NA NA  NA  NA
+1962-01-09  NA NA NA  NA  NA
+
+
+> head(stocks)
+               AAPL       GS
+2008-01-02 25.91691 188.2965
+2008-01-03 25.92888 185.7932
+2008-01-04 23.94959 181.3397
+2008-01-07 23.62902 176.6232
+2008-01-08 22.77905 171.8796
+2008-01-09 23.86313 173.9203
+
+> tail(stocks)
+               AAPL       GS
+2009-12-23 26.88261 151.5511
+2009-12-24 27.80574 151.8660
+2009-12-28 28.14759 151.6715
+2009-12-29 27.81372 152.0049
+2009-12-30 28.15158 154.3944
+2009-12-31 28.03054 156.3765
+
+
+
+
+
+# Load DJ constituents data
+data("DJ_const")
+
+# Apply names() and head() to DJ_const
+names(DJ_const)
+head(DJ_const)
+
+# Extract AAPL and GS in 2008-09 and assign to stocks
+stocks <- DJ_const["2008/2009", c("AAPL","GS")]
+
+
+# Plot stocks with plot.zoo()
+plot.zoo(stocks)
+
+
+
+
+
+
+
+
+
+
