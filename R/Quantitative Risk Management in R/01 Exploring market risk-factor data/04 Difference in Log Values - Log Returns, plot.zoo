@@ -1,0 +1,95 @@
+Exploring return series
+To analyze risk, the key task is to model the fluctuations in prices and rates over different time periods; these fluctuations are known as returns. To calculate the log-returns of the FTSE stock index and assign to ftse_x, apply the log() and diff() functions in succession:
+
+> ftse_x <- diff(log(FTSE))
+As you saw in the video, differencing in this way will always give a NA in the first position of the time series, which can then be removed with diff(log(FTSE))[-1]. However, you will not need to do this in the course unless it is specified in the instructions.
+
+In this exercise, you will calculate and plot log-return series for the equity and FX risk factors that you have previously encountered. The datasets dj0809, djstocks, and GBP_USD have been pre-loaded into your workspace.
+
+#https://www.povertyactionlab.org/sites/default/files/r-cheat-sheet.pdf
+#https://cran.r-project.org/doc/contrib/Paradis-rdebuts_en.pdf
+
+# Compute the log-returns of dj0809 and assign to dj0809_x
+dj0809_x <- diff(log(dj0809))
+
+# Plot the log-returns
+plot(dj0809_x)
+
+# Compute the log-returns of djstocks and assign to djstocks_x
+djstocks_x <- diff(log(djstocks))
+
+
+# Plot the two share returns
+plot.zoo(djstocks_x)
+
+
+# Compute the log-returns of GBP_USD and assign to erate_x
+erate_x <- diff(log(GBP_USD))
+
+# Plot the log-returns
+plot(erate_x)
+
+
+The return series often just look like noise with some periods of larger fluctuations. You'll discover later that they typically have a lot of interesting structure.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Different ways of plotting risk-factor and return series
+You already know that you can use plot.zoo() to plot multiple time series. For a four-dimensional time series data, the call plot.zoo(data) creates four separate plots by default, unless you include the parameter plot.type = "single" to plot all four series in one plot. You can also add even more parameters such as col to specify different colors and type = "h" to get vertical bars instead of joining points, which can sometimes be a better way of displaying returns.
+
+plot.zoo(x, plot.type, col = 1, type = "l", ...)
+In this exercise, you will explore the plot.zoo() function to plot equity risk-factor data and the corresponding returns in different ways. The multivariate time series djstocks and DJ_const are available in your workspace.
+#https://www.rdocumentation.org/packages/zoo/versions/1.8-6/topics/plot.zoo
+
+
+Plot djstocks in four separate plots.
+Plot djstocks in one plot in colors 1 to 4. The code to create an appropriate legend for the plot is provided.
+Compute the log-returns of djstocks and assign them to djstocks_x.
+Plot djstocks_x in four separate plots.
+Plot djstocks_x in four separate plots with vertical bars.
+
+
+
+
+# Plot djstocks in four separate plots
+#type="l" - no lines below each point 
+#type="h" - lines/fill below each point
+plot.zoo(djstocks)
+
+
+# Plot djstocks in one plot and add legend
+plot.zoo(djstocks, plot.type="single", col=1:4, type="l")
+legend(julian(x = as.Date("2009-01-01")), y = 70, legend = names(DJ_const)[1:4], fill = 1:4)
+
+# Compute log-returns and assign to djstocks_x
+djstocks_x <- diff(log(djstocks))
+
+# Plot djstocks_x in four separate plots
+plot.zoo(djstocks_x, plot.type="multiple", col=1:4, type="l")
+
+# Plot djstocks_x with vertical bars
+plot.zoo(djstocks_x, plot.type="multiple", col=1:4, type="h")
+
+
+
+
+Note how in late 2008 there were large returns for all series. That was the height of the financial crisis.
+
