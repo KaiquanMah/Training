@@ -1,0 +1,171 @@
+Numerical tests of normality
+The moments package contains functions for computing the kurtosis and skewness of data and well as for implementing the Jarque-Bera test, which is a test of normality based on these higher-order moments. In one command, it compares the skewness and kurtosis of the data with the theoretical values for the normal distribution, which are 0 and 3, respectively.
+
+jarque.test(x)
+skewness(x, na.rm = FALSE)
+kurtosis(x, na.rm = FALSE)
+
+In this exercise, you will calculate the skewness and kurtosis for the djx, the Dow Jones index from 2008-2011, and apply the Jarque-Bera test of normality. You will then apply the same methods to djreturns, which contains 29 of the Dow Jones stocks for the same period.
+
+Recall that you can use apply(X, MARGIN, FUN, …) to apply functions over array margins. The MARGIN parameter is a vector indicating where the function will be applied; in this instance, you will use 2 to specify that the function FUN should be applied to the columns in matrix X.
+
+The moments package has been imported for you, and the djx and djreturns data is in your workspace.
+
+
+Calculate the skewness and kurtosis of the Dow Jones index returns in djx using skewness() and kurtosis(), respectively.
+Carry out a Jarque-Bera test of normality for djx using jarque.test().
+Use apply() to calculate the skewness and kurtosis of the individual equity returns in djreturns assigning the results to s and k, respectively.
+Fill in plot() to plot k against s with parameter type = "n", and then place the stock symbols at the points with the command text() (this has been done for you).
+Use apply() to carry out the Jarque-Bera test for each of the Dow Jones constituents in djreturns.
+
+#https://www.rdocumentation.org/packages/moments/versions/0.14
+
+> head(djx)
+[1] -0.08200514 -0.08014005 -0.07615925 -0.07234497 -0.05863401 -0.05725062
+
+
+> head(djreturns)
+                    AAPL          AXP           BA          CAT          CSCO
+2008-01-03  0.0004618312 -0.012420096  0.004147486 -0.003545848  0.0078813925
+2008-01-04 -0.0794059951 -0.025516215 -0.013426179 -0.026637519 -0.0238331403
+2008-01-07 -0.0134755425  0.004467030 -0.034978916  0.002914256  0.0003827376
+2008-01-08 -0.0366345753 -0.028981559 -0.036372110 -0.023256883 -0.0271544676
+2008-01-09  0.0464935037  0.023292842  0.004868614  0.001190681  0.0313553718
+2008-01-10 -0.0077220221 -0.003265388  0.025330234  0.002673791  0.0000000000
+                    CVX           DD           DIS           GE          GS
+2008-01-03  0.012229658  0.007743145 -0.0022009177  0.001087576 -0.01338402
+2008-01-04 -0.013407343 -0.016007680 -0.0203504957 -0.020868354 -0.02426190
+2008-01-07 -0.013155256 -0.002307958  0.0009632643  0.003877034 -0.02635331
+2008-01-08 -0.012890715 -0.012321398 -0.0200978743 -0.021794652 -0.02722494
+2008-01-09  0.017655234  0.046392437 -0.0125208114  0.011236020  0.01180341
+2008-01-10 -0.007264064  0.011103832  0.0167684423  0.003346323  0.02655435
+                      HD          IBM         INTC           JNJ          JPM
+2008-01-03 -0.0111690211  0.002003896 -0.027190810  0.0003033566 -0.006900614
+2008-01-04 -0.0338748864 -0.036600737 -0.084545474 -0.0013660846 -0.022945132
+2008-01-07  0.0162929161 -0.010736697  0.009220662  0.0153734010  0.009967272
+2008-01-08 -0.0251460566 -0.024895103 -0.027471763  0.0011958441 -0.040479369
+2008-01-09 -0.0004043158  0.007350737  0.021773780  0.0127654960  0.014007176
+2008-01-10  0.0219965470  0.016244123 -0.009273596  0.0016211106  0.026230295
+                    KO          MCD           MMM           MRK         MSFT
+2008-01-03 0.010421824 -0.002930253 -0.0001209312 -0.0008719071  0.004249821
+2008-01-04 0.001942027 -0.015307326 -0.0114314153 -0.0082333945 -0.028388939
+2008-01-07 0.023331275  0.017032052 -0.0079818840  0.0186465100  0.006667654
+2008-01-08 0.004098311 -0.016506279 -0.0111580895  0.0295990623 -0.034090876
+2008-01-09 0.026390821  0.006809270 -0.0002493245  0.0139816012  0.029166827
+2008-01-10 0.004433247  0.012106635  0.0002493245 -0.0004959905 -0.003198970
+                    NKE          PFE            PG          TRV           UNH
+2008-01-03 -0.009048450  0.011716339  0.0000000000  0.013280423  0.0045775114
+2008-01-04 -0.015588830 -0.015214345 -0.0040185991 -0.031979805 -0.0164707674
+2008-01-07  0.005974994  0.017369058  0.0065047909  0.012569090  0.0155921114
+2008-01-08 -0.004518299  0.010278435  0.0026176573 -0.031029898 -0.0118491430
+2008-01-09  0.002261665  0.018991956 -0.0019281059  0.013388668 -0.0003558674
+2008-01-10  0.009155935  0.006666692 -0.0008274378  0.008568672 -0.0017812392
+                    UTX           VZ         WMT          XOM
+2008-01-03  0.014126576  0.004617916 -0.01114934  0.003416243
+2008-01-04 -0.016656071 -0.018835745 -0.01433249 -0.018826865
+2008-01-07 -0.004676312  0.017452348  0.01820596 -0.009383605
+2008-01-08 -0.039333182 -0.021906144 -0.01275279 -0.012909081
+2008-01-09  0.002365191  0.011366384  0.02002867  0.016629371
+2008-01-10  0.005957763  0.022812989  0.03148215  0.001091638
+
+> names(s)
+ [1] "AAPL" "AXP"  "BA"   "CAT"  "CSCO" "CVX"  "DD"   "DIS"  "GE"   "GS"  
+[11] "HD"   "IBM"  "INTC" "JNJ"  "JPM"  "KO"   "MCD"  "MMM"  "MRK"  "MSFT"
+[21] "NKE"  "PFE"  "PG"   "TRV"  "UNH"  "UTX"  "VZ"   "WMT"  "XOM"
+
+
+
+
+
+
+
+
+
+
+
+# Calculate skewness and kurtosis of djx
+head(djx)
+skewness(djx)
+kurtosis(djx)
+
+> head(djx)
+[1] -0.08200514 -0.08014005 -0.07615925 -0.07234497 -0.05863401 -0.05725062
+> skewness(djx)
+[1] 0.001913285
+> kurtosis(djx)
+[1] 9.058875
+
+
+# Carry out a Jarque-Bera test for djx
+jarque.test(djx)
+
+	Jarque-Bera Normality Test
+
+data:  djx
+JB = 1541.8, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+
+
+
+
+# Calculate skewness and kurtosis of djreturns 
+head(djreturns)
+s <- apply(djreturns,2,skewness)
+k <- apply(djreturns,2,kurtosis)
+
+
+>s
+       AAPL         AXP          BA         CAT        CSCO         CVX 
+-0.53952133  0.09052392  0.13594687  0.04477130 -0.42912132  0.18715005 
+         DD         DIS          GE          GS          HD         IBM 
+-0.29111468  0.29893800  0.03897536  0.36355592  0.46514923  0.17660752 
+       INTC         JNJ         JPM          KO         MCD         MMM 
+-0.08864259  0.63324365  0.30331619  0.61296900 -0.01425864 -0.02305602 
+        MRK        MSFT         NKE         PFE          PG         TRV 
+-0.52988740  0.28282105  0.11941805 -0.06088174 -0.15289172  0.33214904 
+        UNH         UTX          VZ         WMT         XOM 
+ 0.47270017  0.27580573  0.38034361  0.18348920  0.15397525
+ 
+> k
+     AAPL       AXP        BA       CAT      CSCO       CVX        DD       DIS 
+ 9.492773  8.034826  5.861787  5.691696 11.059239 14.193479  6.256395  7.972336 
+       GE        GS        HD       IBM      INTC       JNJ       JPM        KO 
+ 8.292980 12.117460  6.215699  6.949749  6.481881 14.872308  9.709614 13.056397 
+      MCD       MMM       MRK      MSFT       NKE       PFE        PG       TRV 
+ 7.390279  6.005775 10.868809 10.347217  7.735951  7.131164  9.337623 16.819125 
+      UNH       UTX        VZ       WMT       XOM 
+18.793972  7.955090  9.804818 10.472432 14.759901
+
+
+
+
+
+# Plot k against s and add text labels to identify stocks
+plot(s, k, type="n")
+text(s, k, names(s), cex = 0.6)
+
+# Carry out Jarque-Bera tests for each constituent in djreturns
+apply(djreturns,2,jarque.test)
+
+
+$AAPL
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 1819.5, p-value < 2.2e-16
+alternative hypothesis: greater
+...
+$XOM
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 5812.4, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+The return distributions of the Dow Jones stocks all have high kurtosis and some of them are quite skewed.
+
