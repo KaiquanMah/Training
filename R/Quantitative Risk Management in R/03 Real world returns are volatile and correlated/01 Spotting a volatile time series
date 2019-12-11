@@ -1,0 +1,83 @@
+Spotting a volatile time series
+In this exercise you will plot the Dow Jones log-returns for 2008-2011 alongside independent and identically distributed (iid) normal data and iid Student t data.
+
+The xts object djx contains the Dow Jones index and the objects npars and tpars contain the parameter estimates that are obtained when a normal distribution and a t distribution are fitted to djx. All three objects are loaded in your workspace.
+
+In this exercise, you will generate a normal sample from the fitted model by generating standard normal data, scaling them with the second component npars[2] and shifting them with the first component npars[1]. For the Student t sample you will do something similar but note that this time the first component tpars[1] contains the degree of freedom parameter and tpars[2] and tpars[3] contain the location and scale parameters.
+
+After making the plots, you should compare the behavior of the real returns with that of the iid returns, particularly around the 2008 financial crisis.
+
+Compute the length n of djx.
+Generate a normal sample of size n with parameters given by npars and assign the data to ndata.
+Generate a t sample of size n with parameters given by tpars and assign the data to tdata.
+Convert ndata and tdata into xts objects named ndatax and tdatax with the same dates as djx.
+Merge the time series djx, ndatax and tdatax into a single object called alldata and plot with plot.zoo() using type = "h".
+
+
+
+> npars
+           mu         sigma 
+-8.150765e-05  1.643593e-02
+> tpars
+          nu           mu        sigma 
+2.4378523151 0.0005501499 0.0093176276
+
+> n
+[1] 1009
+
+> head(ndata)
+[1]  0.003619340 -0.017633256 -0.022949504  0.012647080  0.013525699
+[6] -0.003905121
+> head(tdata)
+[1]  0.004517345  0.009000277  0.020919491  0.014657260 -0.002100827
+[6]  0.004500568
+
+> length(ndata)
+[1] 1009
+
+
+
+
+#xts
+#https://www.rdocumentation.org/packages/xts/versions/0.11-2/topics/xts
+> head(ndatax)
+                   [,1]
+2008-01-02  0.003619340
+2008-01-03 -0.017633256
+2008-01-04 -0.022949504
+2008-01-07  0.012647080
+2008-01-08  0.013525699
+2008-01-09 -0.003905121
+> head(tdatax)
+                   [,1]
+2008-01-02  0.004517345
+2008-01-03  0.009000277
+2008-01-04  0.020919491
+2008-01-07  0.014657260
+2008-01-08 -0.002100827
+2008-01-09  0.004500568
+
+
+
+
+
+# Compute the length n of djx 
+n <- length(djx)
+
+#  Generate a normal sample of size n with parameters given by npars
+ndata <- rnorm(n)*npars[2] + npars[1]
+
+
+# Generate a t-distributed sample of size n with paramaters given by tpars
+tdata <- rt(n, df = tpars[1])*tpars[3] + tpars[2]
+
+# Make ndata and tdata into xts objects
+ndatax <- xts(ndata, time(djx))
+tdatax <- xts(tdata, time(djx))
+
+# Merge djx, ndatax, and tdatax and plot
+alldata <- merge(djx, ndatax, tdatax)
+plot.zoo(alldata, type="h", ylim = range(alldata))
+
+Note how the real returns look more volatile than the iid returns. There was clearly a period of large movements around the 2008 financial crisis followed by a quieter period in 2010.
+
