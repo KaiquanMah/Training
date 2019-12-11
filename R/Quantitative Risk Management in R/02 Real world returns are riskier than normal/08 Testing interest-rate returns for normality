@@ -1,0 +1,131 @@
+The object zcbx_m contains monthly log-return series for the 1-year, 5-year and 10-year Canadian zero-coupon bond yields. The object zcbx2_m contains the corresponding simple returns. Both are multivariate; they are loaded into your workspace.
+
+In this exercise, you will plot these interest rate return series and then examine their normality with Q-Q plots and Jarque-Bera tests.
+
+The log-returns show clearer evidence of non-normality than the simple returns in this case.
+
+
+Plot zcbx_m and zcbx2_m with the appropriate plotting function and the parameter type = "h".
+Use brackets for indexing and qqnorm() to create Q-Q plots of the 3rd component series of zcbx_m and zcbx2_m.
+Use apply() to compute the kurtosis of each component series in zcbx_m and zcbx2_m.
+Use apply() to conduct the Jarque-Bera test on each component series in zcbx_m and zcbx2_m.
+
+# monthly log returns
+> head(zcbx_m)
+                 1.00y       5.00y       10.00y
+2006-01-31 0.003607509 0.040968846  0.049097443
+2006-02-28 0.037313507 0.003459607 -0.012241565
+2006-03-31 0.015859657 0.027620152  0.031555658
+2006-04-28 0.027444162 0.039116530  0.049770853
+2006-05-31 0.024294291 0.001086646 -0.003203177
+2006-06-30 0.051445196 0.033103295  0.026187367
+
+# simple returns
+> head(zcbx2_m)
+               1.00y     5.00y     10.00y
+2006-01-31 0.0135082 0.1609288  0.1991826
+2006-02-28 0.1426156 0.0138939 -0.0505815
+2006-03-31 0.0622473 0.1126642  0.1316562
+2006-04-28 0.1100751 0.1649779  0.2162847
+2006-05-31 0.0999943 0.0046758 -0.0142462
+2006-06-30 0.2199377 0.1449049  0.1178184
+
+
+
+
+# Plot the interest-rate return series zcbx_m and zcbx2_m
+plot.zoo(zcbx_m, type = "h")
+plot.zoo(zcbx2_m, type = "h")
+
+# Make Q-Q plots of the 3rd component series of zcbx_m and zcbx2_m
+qqnorm(zcbx_m[,3])
+qqnorm(zcbx2_m[,3])
+
+
+# Compute the kurtosis of each series in zcbx_m and zcbx2_m
+apply(zcbx_m, 2, kurtosis)
+apply(zcbx2_m, 2, kurtosis)
+
+# Conduct the Jarque-Bera test on each series in zcbx_m and zcbx2_m
+apply(zcbx_m, 2, jarque.test)
+apply(zcbx2_m, 2, jarque.test)
+
+
+
+
+
+
+
+
+
+> apply(zcbx_m, 2, kurtosis)
+    1.00y     5.00y    10.00y 
+ 8.597562 13.891654  7.991542
+ 
+> apply(zcbx2_m, 2, kurtosis)
+   1.00y    5.00y   10.00y 
+6.107231 3.728619 3.511835
+
+
+> apply(zcbx_m, 2, jarque.test)
+$`1.00y`
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 164.96, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+$`5.00y`
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 644.21, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+$`10.00y`
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 142.27, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+
+
+> apply(zcbx2_m, 2, jarque.test)
+$`1.00y`
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 77.596, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+$`5.00y`
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 5.7135, p-value = 0.05746
+alternative hypothesis: greater
+
+
+$`10.00y`
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 4.0954, p-value = 0.129
+alternative hypothesis: greater
+
+
+Note how the simple monthly returns for the 5 and 10 year yields did not fail the normality test.
+#for simple monthly returns for 5 and 10 year yields, the p-value is > 0.05. So they do not fail the normality test.
+
+
