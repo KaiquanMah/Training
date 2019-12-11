@@ -1,0 +1,70 @@
+A Student t distribution is generally a much better fit to daily, weekly, and monthly returns than a normal distribution.
+
+You can create one by using the fit.st() function in the QRM package. The resulting fitted model has a parameter estimates component par.ests which can be assigned to a list tpars in order to store its values of nu, mu, and sigma for later use:
+
+> tfit <- fit.st(ftse)
+> tpars <- tfit$par.ests
+> tpars
+          nu           mu        sigma
+2.949514e+00 4.429863e-05 1.216422e-02
+In this exercise, you will fit a Student t distribution to the daily log-returns of the Dow Jones index from 2008-2011 contained in djx. Then, you will plot a histogram of the data and superimpose a red line to the plot showing the fitted t density. The djx data and QRM package have been loaded for you.
+
+
+
+
+Use fit.st() to fit a Student t distribution to the data in djx and assign the results to tfit.
+Assign the par.ests component of the fitted model to tpars and the elements of tpars to nu, mu, and sigma, respectively.
+Fill in hist() to plot a histogram of djx.
+Fill in dt() to compute the fitted t density at the values djx and assign to yvals. Refer to the video for this equation.
+Fill in lines() to add a red line to the histogram of djx showing the fitted t density.
+
+
+
+> tfit
+$converged
+[1] TRUE
+
+$par.ests
+          nu           mu        sigma 
+2.4378523151 0.0005501499 0.0093176276 
+
+$par.ses
+          nu           mu        sigma 
+0.2536121070 0.0003660764 0.0004510678 
+
+$asymp.cov
+                 nu            mu         sigma
+nu     6.431910e-02 -9.118275e-06  8.126115e-05
+mu    -9.118275e-06  1.340120e-07 -1.603707e-08
+sigma  8.126115e-05 -1.603707e-08  2.034622e-07
+
+$ll.max
+[1] 2842.162
+
+
+
+
+
+
+
+# Fit a Student t distribution to djx
+tfit <- fit.st(djx)
+
+# Define tpars, nu, mu, and sigma
+tpars <- tfit$par.ests
+nu <- tpars[1]
+mu <- tpars[2]
+sigma <- tpars[3]
+
+# Plot a histogram of djx
+hist(djx, nclass = 20, probability = TRUE, ylim = range(0, 40))
+
+# Compute the fitted t density at the values djx
+yvals <- dt((djx - mu)/sigma, df = nu)/sigma
+
+# Superimpose a red line to show the fitted t density
+lines(djx, yvals, col = "red")
+
+The fitted Student t distribution looks a lot better than the normal did.
+
+
