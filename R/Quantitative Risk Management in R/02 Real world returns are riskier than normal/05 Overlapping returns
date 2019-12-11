@@ -1,0 +1,114 @@
+Overlapping returns
+When you aggregate series by summing daily log-returns into longer intervals, you analyze a smaller amount of observations. To preserve the quantity of data, you can calculate overlapping returns with the rollapplyr() function; this also creates strong correlations between observations.
+
+There are 5 trading days in the average calendar week. By computing the 5-day moving sums of the log-returns of daily index data, you obtain approximate overlapping weekly returns ending on each calendar week. Similarly, calculating 21-day moving sums gives approximate overlapping monthly returns, and calculating 63-day moving sums gives approximate overlapping quarterly returns.
+
+Let's look at an example with the Dow Jones daily return data in djx. Because 5 values are used to calculate each moving sum, the first 4 values in the result are NA. In this instance, we will use indexing to remove them:
+
+> djx5 <- rollapplyr(djx, width = 5, FUN = sum)
+> head(djx5)
+                  ^DJI
+2008-01-03          NA
+2008-01-04          NA
+2008-01-07          NA
+2008-01-08          NA
+2008-01-09 -0.02394677
+2008-01-10 -0.01571869
+
+> djx5 <- djx5[-(1:4)]
+
+
+In this exercise, you will calculate moving sums of different intervals from djx, which is loaded in your workspace. You will then find the skewness and kurtosis of the resulting data and conduct the Jarque-Bera test just as you have in previous exercises. Do the overlapping returns appear more normal?
+
+
+
+
+Calculate a 21-day moving sum of the log-returns in djx, remove the first 20 values, and assign to djx21.
+Calculate a 63-day moving sum of the log-returns in djx, remove the first 62 values, and assign to djx63
+Use merge() and all = FALSE to merge djx, djx21, and djx63 in that order, then assign to djx2. Plot it with plot.zoo().
+Use apply() and the appropriate functions to compute the skewness and kurtosis for each of the series in djx2.
+Use apply() and the appropriate function to conduct the Jarque-Bera test on each of the series in djx2.
+
+
+> head(djx21)
+                  ^DJI
+2008-02-01 -0.02332814
+2008-02-04 -0.03281951
+2008-02-05 -0.04269894
+2008-02-06 -0.05014643
+2008-02-07 -0.02754799
+2008-02-08 -0.04440830
+
+> head(djx63)
+                 ^DJI
+2008-04-03 0.03319413
+2008-04-04 0.02851093
+2008-04-07 0.04641601
+2008-04-08 0.05581721
+2008-04-09 0.06489243
+2008-04-10 0.03437620
+
+> head(djx2)
+                   X.DJI    X.DJI.1    X.DJI.2
+2008-04-03  0.0013560838 0.03319413 0.03319413
+2008-04-04 -0.0013164301 0.02851093 0.02851093
+2008-04-07  0.0002386634 0.04641601 0.04641601
+2008-04-08 -0.0028575543 0.05581721 0.05581721
+2008-04-09 -0.0039182054 0.06489243 0.06489243
+2008-04-10  0.0043586177 0.03437620 0.03437620
+
+
+
+> apply(djx2,2,skewness)
+      X.DJI     X.DJI.1     X.DJI.2 
+-0.01276806 -1.16018080 -1.16018080
+> apply(djx2,2,kurtosis)
+   X.DJI  X.DJI.1  X.DJI.2 
+9.264838 5.845321 5.845321
+> apply(djx2,2,jarque.test)
+$X.DJI
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 1547.1, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+$X.DJI.1
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 531.33, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+$X.DJI.2
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 531.33, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+
+
+# Calculate a 21-day moving sum of djx
+djx21 <- rollapplyr(djx, width=21, FUN=sum)[-(1:20)]
+
+# Calculate a 63-day moving sum of djx
+djx63 <- rollapplyr(djx, width=63, FUN=sum)[-(1:62)]
+
+
+# Merge the three series and plot
+djx2 <- merge(djx,djx21,djx63,all = FALSE)
+plot.zoo(djx2)
+
+# Compute the skewness and kurtosis for each series in djx2
+apply(djx2,2,skewness)
+apply(djx2,2,kurtosis)
+
+# Conduct the Jarque-Bera test to each series in djx2
+apply(djx2,2,jarque.test)
