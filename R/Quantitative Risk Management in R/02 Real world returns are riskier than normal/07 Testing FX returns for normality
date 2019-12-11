@@ -1,0 +1,97 @@
+So far, the exercises in this chapter have examined the normality of equity index returns and individual equity returns.
+
+To reinforce these ideas, you will apply similar ideas to exchange-rate log-returns. The dataset fx_d contains daily log-returns of the EUR/USD, GBP/USD and JPY/USD exchange rates for the period 2001-2015, and the dataset fx_m contains the corresponding monthly log-returns. Both are multivariate; they are loaded into your workspace.
+
+Which of the monthly log-return series appears the most normal?
+
+
+Plot the daily exchange-rate log-return series in fx_d with the appropriate plotting function.
+Use apply() to conduct the Jarque-Bera test on each of the series in fx_d.
+Plot the monthly log-return series in fx_m with the same plotting function and parameter type = "h".
+Use apply() to conduct the Jarque-Bera test on each of series in fx_m.
+Fill in apply() to fit a Student t distribution to each of the series in fx_m and obtain the parameter estimates.
+
+
+> head(fx_d)
+                 GBP.USD       EUR.USD       USD.JPY
+2001-01-01  0.0016729686  0.0001061627 -8.738585e-05
+2001-01-02  0.0030043084  0.0089828874  1.747793e-04
+2001-01-03 -0.0066885408 -0.0229870715  6.840332e-03
+2001-01-04  0.0077545679  0.0226713984 -1.796508e-02
+2001-01-05  0.0003994674  0.0081752892 -7.233928e-03
+2001-01-06  0.0008649656 -0.0020898649 -5.147122e-04
+
+
+> head(fx_m)
+                 GBP.USD      EUR.USD      USD.JPY
+2001-01-31 -0.0194771830 -0.005642815 -0.016897417
+2001-02-28 -0.0133371976 -0.013977219 -0.008129778
+2001-03-31 -0.0197804807 -0.054626783 -0.073590372
+2001-04-30  0.0101138662  0.014530849  0.021287616
+2001-05-31 -0.0093376604 -0.047663784  0.036826106
+2001-06-30 -0.0009880029  0.004481668 -0.045764443
+
+
+
+# Plot the daily log-return series in fx_d
+plot.zoo(fx_d)
+
+# Apply the Jarque-Bera test to each of the series in fx_d
+apply(fx_d, 2, jarque.test)
+
+# Plot the monthly log-return series in fx_m
+plot.zoo(fx_m)
+
+# Apply the Jarque-Bera test to each of the series in fx_m
+apply(fx_m, 2, jarque.test)
+
+
+# Fit a Student t distribution to each of the series in fx_m
+apply(fx_m, 2, function(v){fit.st(v)$par.ests})
+
+
+
+
+
+
+
+> apply(fx_m, 2, jarque.test)
+$GBP.USD
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 41.032, p-value = 1.23e-09
+alternative hypothesis: greater
+
+
+$EUR.USD
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 22.72, p-value = 1.165e-05
+alternative hypothesis: greater
+
+
+$USD.JPY
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 3.6547, p-value = 0.1608
+alternative hypothesis: greater
+
+
+
+
+
+> apply(fx_m, 2, function(v){fit.st(v)$par.ests})
+           GBP.USD     EUR.USD      USD.JPY
+nu    6.0444926549 4.912878245 1.837154e+01
+mu    0.0008655583 0.001947311 1.066249e-04
+sigma 0.0204357969 0.023764956 2.552498e-02
+
+
+Do you agree that the JPY/USD exchange rate log-returns appear to be the most normal?
+
