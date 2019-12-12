@@ -1,0 +1,94 @@
+What happens when you apply the same analyses as in the previous exercise to the monthly returns rather than the daily returns? Does the amount of serial dependence in the data appear to increase or decrease?
+
+The objects djx and djall from the previous exercise are loaded in your workspace. Recall that djall is a multivariate series.
+
+Use apply.monthly() to sum the daily log-returns in djx and assign the resulting monthly log-returns to djx_m.
+Fill in Box.test() to carry out Ljung-Box tests on the raw and absolute values of djx_m with lag = 10.
+Use apply.monthly() to create monthly log-returns for all the daily return series in djall and assign the results to djall_m.
+Fill in apply() to carry out Ljung-Box tests on the raw and absolute values of each component in djall_m with lag = 10.
+
+
+
+# Create monthly log-returns from djx
+djx_m <- apply.monthly(djx, FUN=sum)
+
+# Apply Ljung-Box tests to raw and absolute values of djx_m
+Box.test(djx_m, lag = 10, type = "Ljung")
+Box.test(abs(djx_m), lag = 10, type = "Ljung")
+
+# Create monthly log-returns from djall
+djall_m <- apply.monthly(djall, colSums)
+
+# Apply Ljung-Box tests to raw and absolute values of djall_m
+apply(djall_m, 2, Box.test, lag = 10, type = "Ljung")
+apply(abs(djall_m), 2, Box.test, lag = 10, type = "Ljung")
+
+The amount of serial dependence appears to decrease when we move from daily to monthly returns.
+
+
+
+
+> Box.test(djx_m, lag = 10, type = "Ljung")
+
+	Box-Ljung test
+
+data:  djx_m
+X-squared = 21.099, df = 10, p-value = 0.02041
+
+
+> Box.test(abs(djx_m), lag = 10, type = "Ljung")
+
+	Box-Ljung test
+
+data:  abs(djx_m)
+X-squared = 12.78, df = 10, p-value = 0.2362
+
+
+
+
+
+
+
+
+
+
+> apply(djall_m, 2, Box.test, lag = 10, type = "Ljung")
+$AAPL
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 8.9101, df = 10, p-value = 0.5407
+
+
+$AXP
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 24.309, df = 10, p-value = 0.006821
+...
+
+
+
+
+
+
+
+> apply(abs(djall_m), 2, Box.test, lag = 10, type = "Ljung")
+$AAPL
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 25.377, df = 10, p-value = 0.004675
+
+
+$AXP
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 63.498, df = 10, p-value = 7.847e-10
+
+
