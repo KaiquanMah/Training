@@ -1,0 +1,150 @@
+As you saw in the video, this code applies the Ljung-Box test to the ftse data with a lag of 10:
+Box.test(ftse, lag = 10, type = "Ljung")
+In this exercise, you will carry out a Ljung-Box test for serial correlation on the time series djx which contains the Dow Jones daily index returns for 2008-2011, as well as on all the individual equity return series in djall which contains the Dow Jones data for 2006-2015. You will implement this test on both the raw return series and the absolute values of the series, which you can calculate with abs(). Both djx and djall are loaded in your workspace.
+
+You should notice that while the hypothesis of no serial correlation is rejected for many of the raw return series, it is rejected overwhelmingly for all of the absolute value series.
+
+
+
+
+> head(djall)
+                   AAPL          AXP           BA          CAT          CSCO
+2007-01-03 -0.012334121 -0.002647245  0.003707674 -0.002775765  0.0145298305
+2007-01-04  0.021952927 -0.007316344  0.004029117 -0.002619510  0.0259847196
+2007-01-05 -0.007146655 -0.013271885 -0.004253386 -0.012869324  0.0003513139
+2007-01-08  0.004926130  0.009426057 -0.002358358  0.001161734  0.0056042225
+2007-01-09  0.079799667 -0.006386523 -0.010625199  0.005458576 -0.0056042225
+2007-01-10  0.046745828 -0.000674667  0.014328642 -0.004961130  0.0073491452
+                    CVX            DD          DIS            GE           GS
+2007-01-03 -0.035436194  0.0067520101 -0.002044584  0.0202188821  0.006848800
+2007-01-04 -0.009770024 -0.0069572792  0.007863637 -0.0058109041 -0.009360107
+2007-01-05  0.003834481 -0.0134369575 -0.008156048 -0.0050457875  0.001005264
+2007-01-08  0.012676131  0.0004161387  0.009026137 -0.0002663388  0.023239503
+2007-01-09 -0.011542923  0.0064282683 -0.001450278  0.0000000000  0.001716517
+2007-01-10 -0.017423932 -0.0024834283  0.001160411  0.0002663388  0.019554704
+                     HD          IBM          INTC          JNJ          JPM
+2007-01-03  0.022406441  0.001234392  0.0049261599  0.005739398  0.002290903
+2007-01-04 -0.012249038  0.010635139  0.0395041744  0.012422552  0.002493236
+2007-01-05 -0.019413229 -0.009094215 -0.0033120287 -0.009114765 -0.008335066
+2007-01-08 -0.007568135  0.015077743 -0.0042745679 -0.001652526  0.003342363
+2007-01-09 -0.004314218  0.011760691  0.0009515332 -0.003765913 -0.004179747
+2007-01-10  0.011630939 -0.011861828  0.0230326968 -0.001661512  0.007303087
+                      KO          MCD          MMM          MRK         MSFT
+2007-01-03  0.0068161475 -0.010430998  0.004225661  0.009586971  0.000000000
+2007-01-04  0.0004115519 -0.007550612 -0.003969083  0.024459880 -0.001675928
+2007-01-05 -0.0070204949  0.000000000 -0.006822448 -0.018119324 -0.005719106
+2007-01-08  0.0064030498  0.003896806  0.002193384 -0.000225708  0.009736518
+2007-01-09  0.0008232112  0.001828618  0.001159333 -0.009300282  0.001001805
+2007-01-10  0.0014390177  0.010675781  0.002186051  0.005454492 -0.010063794
+                    NKE          PFE           PG          TRV          UNH
+2007-01-03 -0.013828347  0.014945707  0.004192282 -0.002610961 -0.021825883
+2007-01-04  0.010186512  0.003417457 -0.007621118 -0.008438889  0.006446744
+2007-01-05  0.001620292 -0.003037224 -0.008624180 -0.013079494 -0.006827278
+2007-01-08 -0.003040228 -0.005337357  0.002202289 -0.007469141  0.014546411
+2007-01-09  0.012406265  0.000382178 -0.002517298 -0.002502171 -0.012075611
+2007-01-10  0.000000000  0.001145714  0.011901148 -0.006573902  0.002843371
+                     UTX           VZ          WMT          XOM
+2007-01-03  0.0046278109  0.015454645  0.029234983 -0.033438126
+2007-01-04  0.0009547662  0.005537480  0.004825341 -0.018934007
+2007-01-05 -0.0030266603 -0.017239685 -0.008195893  0.007125218
+2007-01-08  0.0081036092 -0.004472362 -0.008263621 -0.008088281
+2007-01-09 -0.0114595733  0.004066674  0.008263621 -0.007738114
+2007-01-10  0.0035154689 -0.005697922 -0.002323891 -0.015376298
+
+
+# Apply the Ljung-Box test to djx
+Box.test(djx, lag = 10, type = "Ljung")
+
+# Apply the Ljung-Box test to absolute values of djx
+Box.test(abs(djx), lag = 10, type = "Ljung")
+
+
+# Apply the Ljung-Box test to all return series in djall
+apply(djall, 2, Box.test, lag = 10, type = "Ljung")
+
+# Apply the Ljung-Box test to absolute values of all returns in djall
+apply(abs(djall), 2, Box.test, lag = 10, type = "Ljung")
+
+
+
+
+
+
+
+
+
+
+
+
+
+> Box.test(djx, lag = 10, type = "Ljung")
+
+	Box-Ljung test
+
+data:  djx
+X-squared = 34.228, df = 10, p-value = 0.000169
+
+
+
+
+> Box.test(abs(djx), lag = 10, type = "Ljung")
+
+	Box-Ljung test
+
+data:  abs(djx)
+X-squared = 1083.9, df = 10, p-value < 2.2e-16
+
+
+
+
+
+
+
+> apply(djall, 2, Box.test, lag = 10, type = "Ljung")
+$AAPL
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 14.763, df = 10, p-value = 0.141
+
+
+$AXP
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 45.464, df = 10, p-value = 1.793e-06
+...
+
+
+
+
+
+
+> apply(abs(djall), 2, Box.test, lag = 10, type = "Ljung")
+$AAPL
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 910.45, df = 10, p-value < 2.2e-16
+
+
+$AXP
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 3114.7, df = 10, p-value < 2.2e-16
+
+
+
+
+
+
+
+
+
+Note that the Ljung-Box test did not reject the null hypothesis when applied to the raw returns for AAPL, CAT, CSCO and HD.
+
