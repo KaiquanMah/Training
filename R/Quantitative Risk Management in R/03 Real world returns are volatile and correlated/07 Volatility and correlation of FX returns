@@ -1,0 +1,220 @@
+In this exercise, you will discover evidence of volatility and serial dependence in daily and weekly exchange-rate log-returns. The dataset fx contains daily log-returns for the "EUR_USD", "GBP_USD", "JPY_USD" and "CHF_USD" exchange rates while fx_w contains the corresponding weekly log-returns. Both are in your workspace.
+
+Note that foreign exchange trading takes place every day of the week although the lower volume of trading at weekends leads to an unusual weekly correlation cycle which will be evident in one of the pictures you create.
+
+Plot the multivariate time series fx and fx_w with the option type = "h".
+Use acf() to make acf plots for both fx and the absolute values of fx.
+Use apply() to conduct the Ljung-Box test, with a lag of 10, on the components of fx and then their absolute values.
+Use acf() to make acf plots for both fx_w and the absolute values of fx_w.
+Use apply() to conduct the Ljung-Box test, with a lag of 10, on the components of fx_w and then their absolute values.
+
+
+> head(fx)
+                 GBP.USD      EUR.USD       USD.JPY       CHF.USD
+2011-01-01  0.0070067461  0.002993790  0.0023377433  1.215578e-03
+2011-01-02 -0.0001281230 -0.000298976 -0.0002463358  9.344484e-05
+2011-01-03 -0.0059759214 -0.003819800 -0.0024600258 -6.542974e-04
+2011-01-04  0.0018672939  0.001949172 -0.0073439743 -6.378410e-03
+2011-01-05  0.0003859017 -0.008574705 -0.0052302011 -1.431101e-02
+2011-01-06 -0.0032204073 -0.010021341 -0.0091777000 -1.219703e-02
+> head(fx_w)
+                GBP.USD       EUR.USD      USD.JPY      CHF.USD
+2011-01-02  0.006878623  0.0026948141  0.002091408  0.001309023
+2011-01-09 -0.004172959 -0.0358444948 -0.024091687 -0.034604213
+2011-01-16  0.020692809  0.0365917673  0.003854498  0.004054451
+2011-01-23  0.008096194  0.0169614850  0.003384916  0.005188827
+2011-01-30 -0.009104958 -0.0005877167  0.005707709  0.017198391
+2011-02-06  0.015957286 -0.0022070192 -0.001095490 -0.014136187
+
+
+# Plot fx and fx_w
+plot.zoo(fx, type="h")
+plot.zoo(fx_w, type="h")
+
+# Make acf plots of fx and the absolute values of fx
+acf(fx)
+acf(abs(fx))
+
+# Apply the Ljung-Box test to the components of fx and their absolute values
+apply(fx, 2, Box.test, lag = 10, type = "Ljung")
+apply(abs(fx), 2, Box.test, lag = 10, type = "Ljung")
+
+
+# Make acf plots of fx_w and the absolute values of fx_w
+acf(fx_w)
+acf(abs(fx_w))
+
+
+# Apply the Ljung-Box test to the components of fx_w and their absolute values
+apply(fx_w, 2, Box.test, lag = 10, type = "Ljung")
+apply(abs(fx_w), 2, Box.test, lag = 10, type = "Ljung")
+
+
+
+
+There is strong evidence of serial dependence in the absolute values of the weekly log-returns.
+
+
+
+
+
+
+
+
+
+> apply(fx, 2, Box.test, lag = 10, type = "Ljung")
+$GBP.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 206.44, df = 10, p-value < 2.2e-16
+
+
+$EUR.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 195.33, df = 10, p-value < 2.2e-16
+
+
+$USD.JPY
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 141.56, df = 10, p-value < 2.2e-16
+
+
+$CHF.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 310.46, df = 10, p-value < 2.2e-16
+
+
+
+
+
+> apply(abs(fx), 2, Box.test, lag = 10, type = "Ljung")
+$GBP.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 235.89, df = 10, p-value < 2.2e-16
+
+
+$EUR.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 307.05, df = 10, p-value < 2.2e-16
+
+
+$USD.JPY
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 264.54, df = 10, p-value < 2.2e-16
+
+
+$CHF.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 376.51, df = 10, p-value < 2.2e-16
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+> apply(fx_w, 2, Box.test, lag = 10, type = "Ljung")
+$GBP.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 8.8896, df = 10, p-value = 0.5426
+
+
+$EUR.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 10.364, df = 10, p-value = 0.4091
+
+
+$USD.JPY
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 7.7924, df = 10, p-value = 0.6491
+
+
+$CHF.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 10.961, df = 10, p-value = 0.3605
+
+
+
+
+
+
+
+
+> apply(abs(fx_w), 2, Box.test, lag = 10, type = "Ljung")
+$GBP.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 47.097, df = 10, p-value = 9.066e-07
+
+
+$EUR.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 29.168, df = 10, p-value = 0.00117
+
+
+$USD.JPY
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 46.153, df = 10, p-value = 1.345e-06
+
+
+$CHF.USD
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 34.449, df = 10, p-value = 0.000155
