@@ -1,0 +1,181 @@
+In this exercise you will explore whether volatility and serial dependence is also a feature of daily and monthly interest-rate log-returns. The dataset zcb_x contains daily log-returns for the 1-year, 5-year and 10-year Canadian zero-coupon bond yields while zcbx_m contains the corresponding monthly log-returns.
+
+Make acf plots and cross-correlation plots for zcb_x and the absolute values of zcb_x.
+Apply the Ljung-Box test to the components of zcb_x and the absolute values with the option lag = 10.
+Make acf plots and cross-correlation plots for zcbx_m and the absolute values of zcbx_m.
+Apply the Ljung-Box test to the components of zcbx_m and the absolute values with the option lag = 10.
+
+> head(zcb_x)
+                  1.00y        5.00y       10.00y
+2006-01-04 -0.024682096 -0.018153194 -0.008830756
+2006-01-05 -0.008087008  0.000932526  0.005303136
+2006-01-06  0.009451653  0.009403568  0.005727968
+2006-01-09  0.003080142  0.002712729  0.003641066
+2006-01-10  0.009251941  0.011409961  0.010691653
+2006-01-11  0.007174351  0.006483565  0.003110544
+
+
+> head(zcbx_m)
+                 1.00y       5.00y       10.00y
+2006-01-31 0.003607509 0.040968846  0.049097443
+2006-02-28 0.037313507 0.003459607 -0.012241565
+2006-03-31 0.015859657 0.027620152  0.031555658
+2006-04-28 0.027444162 0.039116530  0.049770853
+2006-05-31 0.024294291 0.001086646 -0.003203177
+2006-06-30 0.051445196 0.033103295  0.026187367
+
+
+
+# Make acf plots of zcb_x and the absolute values of zcb_x
+acf(zcb_x)
+acf(abs(zcb_x))
+
+
+# Apply the Ljung-Box test to the components of zcb_x and their absolute values
+apply(zcb_x, 2, FUN = Box.test, lag=10, type="Ljung")
+apply(abs(zcb_x), 2, FUN = Box.test, lag=10, type="Ljung")
+
+
+# Make acf plots of zcbx_m and the absolute values of zcbx_m
+acf(zcbx_m)
+acf(abs(zcbx_m))
+
+
+# Apply the Ljung-Box test to the components of zcbx_m and their absolute values
+apply(zcbx_m, 2, FUN = Box.test, lag=10, type="Ljung")
+apply(abs(zcbx_m), 2, FUN = Box.test, lag=10, type="Ljung")
+
+
+
+The monthly log-returns for the 5 and 10 year yields don't appear to show much serial dependence.
+
+
+
+
+
+
+
+
+
+
+> apply(zcb_x, 2, FUN = Box.test, lag=10, type="Ljung")
+$`1.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 34.528, df = 10, p-value = 0.0001503
+
+
+$`5.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 11.875, df = 10, p-value = 0.2935
+
+
+$`10.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 17.072, df = 10, p-value = 0.07279
+
+
+
+
+
+
+
+> apply(abs(zcb_x), 2, FUN = Box.test, lag=10, type="Ljung")
+$`1.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 1246.9, df = 10, p-value < 2.2e-16
+
+
+$`5.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 1826.1, df = 10, p-value < 2.2e-16
+
+
+$`10.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 1147.4, df = 10, p-value < 2.2e-16
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+> apply(zcbx_m, 2, FUN = Box.test, lag=10, type="Ljung")
+$`1.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 8.3951, df = 10, p-value = 0.5903
+
+
+$`5.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 5.4826, df = 10, p-value = 0.8567
+
+
+$`10.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 4.2486, df = 10, p-value = 0.9354
+
+
+
+
+
+> apply(abs(zcbx_m), 2, FUN = Box.test, lag=10, type="Ljung")
+$`1.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 41.992, df = 10, p-value = 7.524e-06
+
+
+$`5.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 8.9816, df = 10, p-value = 0.5338
+
+
+$`10.00y`
+
+	Box-Ljung test
+
+data:  newX[, i]
+X-squared = 11.917, df = 10, p-value = 0.2906
