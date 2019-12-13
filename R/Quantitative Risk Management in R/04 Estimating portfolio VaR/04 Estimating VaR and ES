@@ -1,0 +1,56 @@
+Estimating VaR and ES
+Now you are ready to estimate VaR and ES for the international equity investor using the historically simulated losses and gains in hslosses.
+
+You will do this by two methods. First, you will apply a simple non-parametric method using a sample quantile to estimate VaR and the average of values exceeding the sample quantile to estimate ES.
+
+Then, you will compare these estimates with the values obtained when you assume that the hslosses have a normal distribution. Obviously, this is a very bad assumption and you should compare the two sets of estimates to see which are more conservative.
+
+
+
+
+Use quantile() to estimate the 99th sample percentile of the distribution of hslosses.
+Estimate the 99% ES by computing the mean of the hslosses that are at least as large as the VaR estimate (this has been done for you).
+Use the appropriate functions to estimate the mean and standard deviation of hslosses and assign to mu and sigma, respectively.
+Use qnorm() with the calculated mean and standard deviation values to compute the 99% quantile of a normal distribution.
+Use ESnorm() with the calculated mean and standard deviation values to compute the 99% ES of a normal distribution.
+
+
+
+
+
+# Estimate the 99th sample percentile of the distribution of hslosses
+quantile(hslosses, 0.99)
+
+> quantile(hslosses, 0.99)
+       99% 
+0.03076173
+
+
+# Estimate the 99% ES
+mean(hslosses[hslosses >= quantile(hslosses, 0.99)])
+[1] 0.04184655
+
+
+# Estimate the mean and standard deviation of hslosses
+mu <- mean(hslosses)
+sigma <- sd(hslosses)
+
+> mu
+[1] -0.0001267186
+> sigma
+[1] 0.01124357
+
+
+
+# Compute the 99% quantile of a normal distribution
+qnorm(0.99, mean = mu, sd = sigma)
+[1] 0.02602973
+
+
+# Compute the 99% ES of a normal distribution
+ESnorm(0.99, mu = mu, sd = sigma)
+[1] 0.02983979
+ 
+
+The estimates derived from a normal assumption are much less conservative than the estimates derived using the non-parametric method. That is not to say that the latter method is the best possible, but it is a reasonable first attempt to estimate the risk measures.
+
