@@ -1,0 +1,57 @@
+Examining risk factors for international equity portfolio
+The UK investor in UK, US, and Swiss equities is exposed to 5 risk factors; the data is contained in riskfactors, a multivariate dataset.
+
+In this exercise, you will recall some of the tests and techniques that you learned earlier for showing that these risk factors are heavier tailed than normal, highly volatile and subject to profound serial dependencies.
+
+
+Use the appropriate function to plot riskfactors.
+Calculate the log-returns of riskfactors, remove the first NA value for all series, and assign to returns. Use the appropriate function to plot returns.
+Use apply() with 3 parameters to carry out the Jarque-Bera test of normality for all series.
+Use qqnorm() to make a Q-Q plot against normal for only the 5th return series in returns. Then, add a reference line with qqline().
+Use acf() to make a picture of the sample acfs for the returns and then the absolute values of the returns.
+
+
+
+> head(riskfactors)
+           X.FTSE  X.GSPC X.SSMI USD.GBP CHF.GBP
+2000-01-04 6665.9 1399.42 7268.1  0.6114  0.3925
+2000-01-05 6535.9 1402.11 7181.3  0.6091  0.3918
+2000-01-06 6447.2 1403.45 7280.6  0.6073  0.3906
+2000-01-07 6504.8 1441.47 7448.0  0.6103  0.3899
+2000-01-10 6607.7 1457.60 7452.8  0.6111  0.3893
+2000-01-11 6518.9 1438.56 7420.1  0.6067  0.3894
+
+
+> head(returns)
+                 X.FTSE        X.GSPC        X.SSMI       USD.GBP       CHF.GBP
+2000-01-05 -0.019694921  0.0019203377 -0.0120145249 -0.0037689516 -0.0017850317
+2000-01-06 -0.013664084  0.0009552219  0.0137328918 -0.0029595549 -0.0030674871
+2000-01-07  0.008894378  0.0267299501  0.0227322501  0.0049277366 -0.0017937225
+2000-01-10  0.015695329  0.0111278250  0.0006442346  0.0013099724 -0.0015400414
+2000-01-11 -0.013530030 -0.0131485768 -0.0043972272 -0.0072261770  0.0002568383
+2000-01-12  0.002129977 -0.0043960200  0.0027052090  0.0003295979 -0.0030864222
+
+
+
+# Plot the risk-factor data
+plot.zoo(riskfactors)
+
+# Calculate the log-returns, assign to returns, and plot
+returns <- diff(log(riskfactors))[-1, ]
+plot.zoo(returns)
+
+
+# Use apply() to carry out the Jarque-Bera test for all 5 series
+apply(returns, 2, jarque.test)
+
+# Make a Q-Q plot against normal for the 5th return series and add a reference line
+qqnorm(returns[, "CHF.GBP"])
+qqline(returns[, "CHF.GBP"])
+
+# Make a picture of the sample acfs for returns and their absolute values
+acf(returns)
+acf(abs(returns))
+
+
+All five risk factors are clearly non-normal and show strong serial and cross dependencies.
+
