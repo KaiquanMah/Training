@@ -1,0 +1,114 @@
+Computing VaR for weekly losses
+In this final exercise, you will test your understanding by computing an empirical estimate of VaR for weekly losses in the returns data. You will have to repeat the analysis of the previous exercise, but this time, you need to:
+
+Find the weekly log-returns of returns using apply.weekly().
+Use these weekly log-returns to simulate the losses of the two risk factors through lossop().
+
+Note that the lossop() function has been adjusted in your workspace so that it correctly calculates the losses and gains of the option portfolio for a one-week time horizon. It still takes in arguments as follows:
+lossop(xseries, S, sigma)
+
+Your challenge is to compute the 99% VaR for weekly changes in value of the European call option in returns when the current stock price is S = 120 and the current volatility is sigma = 0.25. What is the correct answer?
+
+
+#not 0.256
+#yes 0.194
+#not 0.158
+#not -0.203
+#not -0.245
+
+
+
+> head(returns)
+                 X.GSPC       X.VIX
+1990-01-03 -0.002588886 0.053639782
+1990-01-04 -0.008650298 0.055079304
+1990-01-05 -0.009804141 0.045265902
+1990-01-08  0.004504312 0.007431245
+1990-01-09 -0.011856706 0.091443835
+1990-01-10 -0.006629089 0.010752791
+
+
+> apply.weekly(returns, FUN=sum)
+                    [,1]
+1990-01-05  0.1329416635
+1990-01-12  0.1676943079
+1990-01-19 -0.0931530126
+1990-01-26  0.1151341121
+1990-02-02 -0.0619161403
+1990-02-09 -0.0181200846
+...
+2010-11-12  0.0990920811
+2010-11-19 -0.1327513327
+2010-11-26  0.1997536528
+2010-12-03 -0.1808105291
+2010-12-10 -0.0097303017
+2010-12-17 -0.0862009759
+2010-12-23  0.0323855059
+2010-12-31  0.0755370397
+
+
+
+
+returns_w <- apply.weekly(returns, FUN=sum)
+
+> args(lossop)
+function (xseries, r = 0.01, K = 100, T = 1, sigma = 0.2, S = 100) 
+
+#not lossop(returns_w, S=120, sigma=0.25)
+#not hslosses <- lossop(returns, S = 120, sigma = 0.25)
+> head(hslosses)
+           [,1]
+1990-01-05   NA
+1990-01-12   NA
+1990-01-19   NA
+1990-01-26   NA
+1990-02-02   NA
+1990-02-09   NA
+
+
+
+
+
+
+
+> hslosses <- lossop(returns, S = 120, sigma = 0.25)
+> head(hslosses)
+                   [,1]
+1990-01-03 -0.003975352
+1990-01-04  0.019213918
+1990-01-05  0.027195603
+1990-01-08 -0.016638660
+1990-01-09  0.018109741
+1990-01-10  0.026684071
+
+
+
+
+
+
+
+
+mean(hslosses[hslosses >= quantile(hslosses, 0.99)])
+> mean(hslosses[hslosses >= quantile(hslosses, 0.99)])
+[1] 0.1330352
+
+
+
+mu <- mean(hslosses)
+sigma <- sd(hslosses)
+> mu
+[1] 0.0009915646
+> sigma
+[1] 0.03630773
+
+
+qnorm(0.99, mean=mu, sd=sigma)
+[1] 0.08545596
+
+ESnorm(0.99, mu=mu, sd=sigma)
+[1] 0.09775943
+
+
+
+#unable to replicate ans
+
