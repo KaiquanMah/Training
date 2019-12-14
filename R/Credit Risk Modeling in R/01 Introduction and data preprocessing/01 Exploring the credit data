@@ -1,0 +1,209 @@
+Exploring the credit data
+We will be examining the dataset loan_data discussed in the video throughout the exercises in this course.
+
+After being given loan_data, you are particularly interested about the defaulted loans in the data set. You want to get an idea of the number, and percentage of defaults. Defaults are rare, so you always want to check what the proportion of defaults is in a loan dataset. The CrossTable() function is very useful here.
+
+Remember that default information is stored in the response variable loan_status, where 1 represents a default, and 0 represents non-default.
+
+To learn more about variable structures and spot unexpected tendencies in the data, you should examine the relationship between loan_status and certain factor variables. For example, you would expect that the proportion of defaults in the group of customers with grade G (worst credit rating score) is substantially higher than the proportion of defaults in the grade A group (best credit rating score).
+
+Conveniently, CrossTable() can also be applied on two categorical variables. Let's explore!
+
+
+Get familiar with the dataset by looking at its structure with str().
+Load the gmodels package using library(). It is already installed on DataCamp's servers.
+Have a look at the CrossTable() of loan status, using just one argument: loan_data$loan_status.
+Call CrossTable() with x argument loan_data$grade and y argument loan_data$loan_status. We only want row-wise proportions, so set prop.r to TRUE, but prop.c , prop.t and prop.chisq to FALSE (default values here are TRUE, and this would lead to inclusion of column proportions, table proportions and chi-square contributions for each cell. We do not need these here.)
+
+
+#http://www.rdocumentation.org/packages/gmodels/functions/CrossTable
+#http://www.rdocumentation.org/packages/utils/functions/str
+
+
+
+ 
+ > head(loan_data)
+  loan_status loan_amnt int_rate grade emp_length home_ownership annual_inc age
+1           0      5000    10.65     B         10           RENT      24000  33
+2           0      2400       NA     C         25           RENT      12252  31
+3           0     10000    13.49     C         13           RENT      49200  24
+4           0      5000       NA     A          3           RENT      36000  39
+5           0      3000       NA     E          9           RENT      48000  24
+6           0     12000    12.69     B         11            OWN      75000  28
+
+
+
+ # View the structure of loan_data
+str(loan_data)
+
+
+> str(loan_data)
+'data.frame':	29092 obs. of  8 variables:
+ $ loan_status   : Factor w/ 2 levels "0","1": 1 1 1 1 1 1 2 1 2 1 ...
+ $ loan_amnt     : int  5000 2400 10000 5000 3000 12000 9000 3000 10000 1000 ...
+ $ int_rate      : num  10.7 NA 13.5 NA NA ...
+ $ grade         : Factor w/ 7 levels "A","B","C","D",..: 2 3 3 1 5 2 3 2 2 4 ...
+ $ emp_length    : int  10 25 13 3 9 11 0 3 3 0 ...
+ $ home_ownership: Factor w/ 4 levels "MORTGAGE","OTHER",..: 4 4 4 4 4 3 4 4 4 4 ...
+ $ annual_inc    : num  24000 12252 49200 36000 48000 ...
+ $ age           : int  33 31 24 39 24 28 22 22 28 22 ...
+ 
+ 
+ 
+ 
+
+# Load the gmodels package 
+library(gmodels)
+
+# Call CrossTable() on loan_status
+CrossTable(loan_data$loan_status)
+
+
+> CrossTable(loan_data$loan_status)
+
+ 
+   Cell Contents
+|-------------------------|
+|                       N |
+|         N / Table Total |
+|-------------------------|
+
+ 
+Total Observations in Table:  29092 
+
+ 
+          |         0 |         1 | 
+          |-----------|-----------|
+          |     25865 |      3227 | 
+          |     0.889 |     0.111 | 
+          |-----------|-----------|
+
+
+
+
+
+# Call CrossTable() on grade and loan_status
+CrossTable(loan_data$grade, loan_data$loan_status, prop.r=TRUE, prop.c=FALSE, prop.t=FALSE, prop.chisq=FALSE)
+
+
+
+
+> CrossTable(loan_data$grade, loan_data$loan_status)
+
+ 
+   Cell Contents
+|-------------------------|
+|                       N |
+| Chi-square contribution |
+|           N / Row Total |
+|           N / Col Total |
+|         N / Table Total |
+|-------------------------|
+
+ 
+Total Observations in Table:  29092 
+
+ 
+                | loan_data$loan_status 
+loan_data$grade |         0 |         1 | Row Total | 
+----------------|-----------|-----------|-----------|
+              A |      9084 |       565 |      9649 | 
+                |    29.764 |   238.561 |           | 
+                |     0.941 |     0.059 |     0.332 | 
+                |     0.351 |     0.175 |           | 
+                |     0.312 |     0.019 |           | 
+----------------|-----------|-----------|-----------|
+              B |      8344 |       985 |      9329 | 
+                |     0.299 |     2.398 |           | 
+                |     0.894 |     0.106 |     0.321 | 
+                |     0.323 |     0.305 |           | 
+                |     0.287 |     0.034 |           | 
+----------------|-----------|-----------|-----------|
+              C |      4904 |       844 |      5748 | 
+                |     8.337 |    66.821 |           | 
+                |     0.853 |     0.147 |     0.198 | 
+                |     0.190 |     0.262 |           | 
+                |     0.169 |     0.029 |           | 
+----------------|-----------|-----------|-----------|
+              D |      2651 |       580 |      3231 | 
+                |    17.096 |   137.024 |           | 
+                |     0.820 |     0.180 |     0.111 | 
+                |     0.102 |     0.180 |           | 
+                |     0.091 |     0.020 |           | 
+----------------|-----------|-----------|-----------|
+              E |       692 |       176 |       868 | 
+                |     8.235 |    66.004 |           | 
+                |     0.797 |     0.203 |     0.030 | 
+                |     0.027 |     0.055 |           | 
+                |     0.024 |     0.006 |           | 
+----------------|-----------|-----------|-----------|
+              F |       155 |        56 |       211 | 
+                |     5.663 |    45.394 |           | 
+                |     0.735 |     0.265 |     0.007 | 
+                |     0.006 |     0.017 |           | 
+                |     0.005 |     0.002 |           | 
+----------------|-----------|-----------|-----------|
+              G |        35 |        21 |        56 | 
+                |     4.392 |    35.206 |           | 
+                |     0.625 |     0.375 |     0.002 | 
+                |     0.001 |     0.007 |           | 
+                |     0.001 |     0.001 |           | 
+----------------|-----------|-----------|-----------|
+   Column Total |     25865 |      3227 |     29092 | 
+                |     0.889 |     0.111 |           | 
+----------------|-----------|-----------|-----------|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+> CrossTable(loan_data$grade, loan_data$loan_status, prop.r=TRUE, prop.c=FALSE, prop.t=FALSE, prop.chisq=FALSE)
+
+ 
+   Cell Contents
+|-------------------------|
+|                       N |
+|           N / Row Total |
+|-------------------------|
+
+ 
+Total Observations in Table:  29092 
+
+ 
+                | loan_data$loan_status 
+loan_data$grade |         0 |         1 | Row Total | 
+----------------|-----------|-----------|-----------|
+              A |      9084 |       565 |      9649 | 
+                |     0.941 |     0.059 |     0.332 | 
+----------------|-----------|-----------|-----------|
+              B |      8344 |       985 |      9329 | 
+                |     0.894 |     0.106 |     0.321 | 
+----------------|-----------|-----------|-----------|
+              C |      4904 |       844 |      5748 | 
+                |     0.853 |     0.147 |     0.198 | 
+----------------|-----------|-----------|-----------|
+              D |      2651 |       580 |      3231 | 
+                |     0.820 |     0.180 |     0.111 | 
+----------------|-----------|-----------|-----------|
+              E |       692 |       176 |       868 | 
+                |     0.797 |     0.203 |     0.030 | 
+----------------|-----------|-----------|-----------|
+              F |       155 |        56 |       211 | 
+                |     0.735 |     0.265 |     0.007 | 
+----------------|-----------|-----------|-----------|
+              G |        35 |        21 |        56 | 
+                |     0.625 |     0.375 |     0.002 | 
+----------------|-----------|-----------|-----------|
+   Column Total |     25865 |      3227 |     29092 | 
+----------------|-----------|-----------|-----------|
