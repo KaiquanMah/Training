@@ -1,0 +1,81 @@
+Historical simulation of losses for option portfolio
+Suppose that an investor has invested one unit of wealth in a single European call option on the S&P 500 index. The function lossop() computes the loss or gain incurred by the investor over a one-day time horizon due to changes in the log stock price or changes in the log volatility. As before, this function has been written specially for the particular portfolio in this exercise:
+lossop(xseries, S, sigma)
+
+The first argument contains the log returns corresponding to the stock price and volatility risk factors, either in a series or in form c(stock_risk, volatility_risk), S is the current stock price, and sigma is the current volatility.
+
+Changes in the interest rate over the time horizon will be neglected as being of lesser importance.
+
+In this exercise, you will form the historically simulated losses for the option portfolio and examine their properties before estimating VaR and ES in the next exercise. The interest rate, strike price, and maturity have been set to r = 0.01, K = 100 and T = 1, respectively. The returns object is also in your workspace.
+
+
+
+Use lossop() to calculate the loss resulting from a log-return of -0.1 for both risk factors, assuming the current stock price is 80 and volatility is 0.2.
+Use lossop() to calculate the loss resulting from a log-return of -0.1 for the stock and 0.1 for the volatility, assuming the current stock price is 100 and volatility is 0.2.
+Create the object hslosses by applying lossop() to returns, assuming S = 100 and sigma = 0.2, and then plot hslosses.
+Form a Q-Q plot of hslosses against the normal distribution.
+Plot the sample acf of hslosses and of the corresponding absolute values.
+
+
+
+> names(returns)
+[1] "X.GSPC" "X.VIX"
+
+
+> args(lossop)
+function (xseries, r = 0.01, K = 100, T = 1, sigma = 0.2, S = 100) 
+NULL
+
+
+
+> lossop(c(-0.1, -0.1), S = 80, sigma = 0.2)
+[1] 0.8030928
+
+#increased S, i.e. the price of the equity right now relative to the constant Strike Price K
+#you can potentially stand to gain from the savings you would incur when you buy at a much cheaper price through the call option
+#therefore an increase in the current price of equity S led to a drop in loss/lossop OR increase in profitability
+> lossop(c(-0.1, -0.1), S = 100, sigma = 0.2)
+[1] 0.5989897
+
+
+#within c(stock_risk, volatility_risk), lossop looks at log returns corresponding to the stock price and volatility risk factors
+#+ve indicates +ve returns from that risk factor
+#therefore an increase in volatility risk led to a drop in loss/lossop OR increase in profitability
+> lossop(c(-0.1, 0.1), S = 100, sigma = 0.2)
+[1] 0.4380754
+
+
+#increased sigma
+> lossop(c(-0.1, 0.1), S = 100, sigma = 0.3)
+[1] 0.3013452
+
+
+
+
+
+# Calculate the first loss
+#not lossop(c("X.GSPC","X.VIX"), S = 80, sigma = 0.2)
+#not lossop(returns, S = 80, sigma = 0.2)
+#after checking https://joannamsc.wordpress.com/2017/07/02/option-portfolio/
+lossop(c(-0.1, -0.1), S = 80, sigma = 0.2)
+
+#increased S
+# Calculate the second loss
+lossop(c(-0.1, 0.1), S = 100, sigma = 0.2)
+
+
+
+# Create and plot hslosses
+hslosses <- lossop(returns, S = 100, sigma = 0.2)
+plot(hslosses)
+
+# Form a Q-Q plot of hslosses against normal
+qqnorm(hslosses)
+
+# Plot the sample acf of raw data and absolute values in hslosses
+acf(hslosses)
+acf(abs(hslosses))
+
+
+Note that, once again, these historically simulated losses are highly non-normal and very volatile.
+
