@@ -1,0 +1,65 @@
+Now you are ready to estimate VaR and ES for the investor in the European call option using the historically simulated losses and gains in hslosses.
+
+Once again, you will do this by two methods. First, you will apply a non-parametric method using a sample quantile to estimate VaR and calculate the average of values exceeding the same quantile to estimate ES.
+
+Then, you will compare these estimates with the values obtained when you assume that the hslosses have a normal distribution. Like in the previous exercise, this is a bad assumption and you should compare the two sets of estimates to see which are more conservative.
+
+
+
+Estimate the 99.5% sample percentile of the distribution of hslosses using quantile().
+Estimate the 99.5% ES by computing the mean of the hslosses that are at least as large as the VaR estimate (this has been done for you).
+Use the appropriate functions to estimate the mean and standard deviation of hslosses and assign to mu and sigma, respectively.
+Use qnorm() with the calculated mean and standard deviation to compute the 99.5% quantile of a normal distribution.
+Use ESnorm() with the calculated mean and standard deviation to compute the 99.5% ES of a normal distribution.
+
+
+> args(quantile)
+function (x, ...) 
+
+> args(qnorm)
+function (p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE) 
+
+
+> args(ESnorm)
+function (p, mu = 0, sd = 1) 
+
+
+
+
+
+
+# Estimate the 99.5% percentile of the distribution
+quantile(hslosses, 0.995)
+> quantile(hslosses, 0.995)
+    99.5% 
+0.1618376
+
+
+# Estimate the 99.5% ES
+mean(hslosses[hslosses >= quantile(hslosses, 0.995)])
+[1] 0.2211743
+
+# Estimate the mean and standard deviation of hslosses
+mu <- mean(hslosses)
+sigma <- sd(hslosses)
+
+> mu
+[1] -0.003060914
+> sigma
+[1] 0.05714901
+
+
+
+# Compute the 99.5% quantile of a normal distribution
+qnorm(0.995, mean=mu, sd=sigma)
+[1] 0.1441452
+
+# Compute the 99.5% ES of a normal distribution
+ESnorm(0.995, mu=mu, sd=sigma)
+[1] 0.1622111
+
+
+
+
+It will be no surprise to you now that the normal distribution greatly underestimates these measures of risk.
+
