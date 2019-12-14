@@ -1,0 +1,96 @@
+Equity and implied volatility risk factors
+To analyze the risk of a portfolio consisting of an option, it is necessary to consider changes in all three risk factors: stock price, volatility and interest rates. Here, you will focus on the first two of these risk factors and assume that interest rates do not change much over short time intervals. The daily risk-factor values for the period 1990-2010 are contained in riskfactors and the corresponding log-returns in returns; both multivariate datasets are loaded in your workspace.
+
+Volatility is a new risk factor that hasn't been considered so far in this course. It is represented by the VIX index which is constructed from the implied volatilities of a wide range of options on the S&P 500 index:
+> names(returns)
+[1] "X.GSPC" "X.VIX"
+
+In this exercise, you will be able to verify whether the log-returns of volatility behave like other return data you have encountered, and to see how they vary with the log-returns of the S&P 500 index.
+
+
+Use the appropriate function to plot the data in riskfactors and in returns.
+Use plot() and as.matrix() in succession to create a scatterplot of returns.
+Use apply() to conduct the Jarque-Bera test on returns, and then use qqnorm() and brackets for indexing to make a Q-Q plot against normal for the log-returns of the series in returns containing volatility data.
+Create the sample acf plot of the data in returns and then the absolute returns of the data.
+Use cor() to calculate the correlation between the log-returns of the two risk factors in returns.
+
+
+> head(riskfactors)
+           X.GSPC X.VIX
+1990-01-02 359.69 17.24
+1990-01-03 358.76 18.19
+1990-01-04 355.67 19.22
+1990-01-05 352.20 20.11
+1990-01-08 353.79 20.26
+1990-01-09 349.62 22.20
+
+> head(returns)
+                 X.GSPC       X.VIX
+1990-01-03 -0.002588886 0.053639782
+1990-01-04 -0.008650298 0.055079304
+1990-01-05 -0.009804141 0.045265902
+1990-01-08  0.004504312 0.007431245
+1990-01-09 -0.011856706 0.091443835
+1990-01-10 -0.006629089 0.010752791
+
+
+
+
+
+
+# Plot the risk factors and the log-returns
+plot.zoo(riskfactors)
+plot.zoo(returns)
+
+# Make a scatterplot of the two return series
+plot(as.matrix(returns))
+
+
+# Apply the Jarque-Bera test to the returns and make a Q-Q plot of the volatility log-returns
+apply(returns, 2, jarque.test)
+
+> apply(returns, 2, jarque.test)
+$X.GSPC
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 17397, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+$X.VIX
+
+	Jarque-Bera Normality Test
+
+data:  newX[, i]
+JB = 4412.6, p-value < 2.2e-16
+alternative hypothesis: greater
+
+
+
+
+
+
+
+qqnorm(returns[,2])
+
+# Create the sample acf of the returns and absolute returns
+acf(returns)
+acf(abs(returns))
+
+# Calculate the correlation between the log-returns
+cor(returns)
+
+
+
+
+> cor(returns)
+           X.GSPC      X.VIX
+X.GSPC  1.0000000 -0.6978308
+X.VIX  -0.6978308  1.0000000
+
+
+
+It is clear that the log-returns of the VIX index show the same stylized facts as other returns that you have analyzed - non-normality, heavy tails, volatility, serial dependence in the absolute values but not the raw values. Moreover, they are negatively correlated with the log-returns of the SP500 index.
+
