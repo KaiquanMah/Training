@@ -1,0 +1,75 @@
+Splitting the data set
+To make your training and test sets, you should first set a seed using set.seed(). Seeds allow you to create a starting point for randomly generated numbers, so that each time your code is run the same answer is generated. The advantage of doing this in your sampling is that you or anyone else can recreate the exact same training and test sets by using the same seed.
+
+Using sample(), you can randomly assign observations to the training and test set.
+
+For this exercise you will use the two first arguments in the sample() function:
+
+The first argument is the vector from which we will sample values. We will randomly pick row numbers as indices; you can use 1:nrow(loan_data) to create the vector of row numbers.
+The second argument is the number of items to choose. We will enter 2 / 3 * nrow(loan_data), as we construct the training set first.
+
+
+
+
+
+#http://www.rdocumentation.org/packages/base/functions/Random
+#https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/sample
+
+
+Set a seed of 567 using the set.seed() function.
+Store the row indices of the training set in the object index_train. Use the sample() function with a first and a second argument as discussed above.
+Create the training set by selecting the row numbers stored in index_train from the data set loan_data. Save the result to training_set.
+The test set contains the rows that are not in index_train. Copy the code that you used to create the training set, but use the negative sign (-) right before index_train inside the square brackets. Save the result to test_set.
+
+
+> index_train
+    [1] 21654 25467 18407 14234  7588  7026  2180 14930 17083 15573  9917  7961
+   [13] 10317 17176 ...
+   ...
+   [19381] 12745 20053 17915  6082 24431 19392  8631  8419 17989 27099 28265 23517
+[19393]  7713 21323
+
+
+# Set seed of 567
+set.seed(567)
+
+# Store row numbers for training set: index_train
+# sample without replacement
+index_train <- sample(1:nrow(loan_data), 2 / 3 * nrow(loan_data))
+
+# Create training set: training_set
+training_set <- loan_data[index_train, ]
+
+# Create test set: test_set
+test_set <- loan_data[-index_train,]
+
+
+
+
+
+> nrow(training_set)
+[1] 19394
+> nrow(test_set)
+[1] 9697
+> str(test_set)
+'data.frame':	9697 obs. of  8 variables:
+ $ loan_status   : Factor w/ 2 levels "0","1": 1 1 1 1 1 1 1 1 2 1 ...
+ $ loan_amnt     : int  5000 2400 10000 5000 3000 3000 1000 3600 21000 10000 ...
+ $ grade         : Factor w/ 7 levels "A","B","C","D",..: 2 3 3 1 5 2 4 1 2 2 ...
+ $ home_ownership: Factor w/ 4 levels "MORTGAGE","OTHER",..: 4 4 4 4 4 4 4 1 4 4 ...
+ $ annual_inc    : num  24000 12252 49200 36000 48000 ...
+ $ age           : int  33 31 24 39 24 22 22 27 29 22 ...
+ $ emp_cat       : Factor w/ 5 levels "0-15","15-30",..: 1 2 1 1 1 1 1 1 2 1 ...
+ $ ir_cat        : Factor w/ 5 levels "0-8","11-13.5",..: 4 5 2 5 5 4 3 1 2 2 ...
+ 
+ 
+ 
+ 
+ #row indexes
+ 1:nrow(loan_data)
+     [1]     1     2     3     4     5     6     7     8     9    10    11    12
+   [13]    13    14    15 ...
+   ...
+   [29077] 29077 29078 29079 29080 29081 29082 29083 29084 29085 29086 29087 29088
+[29089] 29089 29090 29091
+ 
