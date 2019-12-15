@@ -1,0 +1,182 @@
+Making more discriminative models
+In the previous exercise, the range for predicted probabilities of default was rather small. As discussed, small predicted default probabilities are to be expected with low default rates, but building bigger models (which basically means: including more predictors) can expand the range of your predictions.
+
+Whether this will eventually lead to better predictions still needs to be validated and depends on the quality of the newly included predictors. But first, have a look at how bigger models can expand the range.
+
+
+Make log_model_full like the way you made log_model_small, but this time, include all available predictors in the data set. If you don't want to type the name of every column seperately, you can simply select all variables using loan_status ~ .
+Create your prediction vector predictions_all_full for all the cases in the test set using predict(). Notice that these values represent the probability of defaulting.
+Look at the range of the predictions.
+
+
+> log_model_small
+
+Call:  glm(formula = loan_status ~ age + ir_cat, family = "binomial", 
+    data = training_set)
+
+Coefficients:
+  (Intercept)            age  ir_cat11-13.5    ir_cat13.5+     ir_cat8-11  
+     -2.53477       -0.01088        0.98335        1.31789        0.54229  
+ir_catMissing  
+      0.69776  
+
+Degrees of Freedom: 19393 Total (i.e. Null);  19388 Residual
+Null Deviance:	    13680 
+Residual Deviance: 13280 	AIC: 13290
+
+
+> summary(log_model_small)
+
+Call:
+glm(formula = loan_status ~ age + ir_cat, family = "binomial", 
+    data = training_set)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-0.6538  -0.5472  -0.4492  -0.3425   2.5409  
+
+Coefficients:
+               Estimate Std. Error z value Pr(>|z|)    
+(Intercept)   -2.534771   0.123088 -20.593  < 2e-16 ***
+age           -0.010880   0.003886  -2.800  0.00511 ** 
+ir_cat11-13.5  0.983347   0.076424  12.867  < 2e-16 ***
+ir_cat13.5+    1.317895   0.075431  17.471  < 2e-16 ***
+ir_cat8-11     0.542290   0.083131   6.523 6.88e-11 ***
+ir_catMissing  0.697760   0.098215   7.104 1.21e-12 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 13676  on 19393  degrees of freedom
+Residual deviance: 13281  on 19388  degrees of freedom
+AIC: 13293
+
+Number of Fisher Scoring iterations: 5
+
+
+> summary(training_set)
+  loan_status       loan_amnt     grade     home_ownership   annual_inc     
+ Min.   :0.0000   Min.   :  500   A:6462   MORTGAGE:8032   Min.   :   4000  
+ 1st Qu.:0.0000   1st Qu.: 5000   B:6188   OTHER   :  67   1st Qu.:  40000  
+ Median :0.0000   Median : 8000   C:3831   OWN     :1531   Median :  56004  
+ Mean   :0.1129   Mean   : 9600   D:2139   RENT    :9764   Mean   :  66566  
+ 3rd Qu.:0.0000   3rd Qu.:12250   E: 580                   3rd Qu.:  80000  
+ Max.   :1.0000   Max.   :35000   F: 149                   Max.   :1900000  
+                                  G:  45                                    
+      age           emp_cat          ir_cat    
+ Min.   :20.00   0-15   :17069   0-8    :4766  
+ 1st Qu.:23.00   15-30  : 1579   11-13.5:4628  
+ Median :26.00   30-45  :  171   13.5+  :4008  
+ Mean   :27.66   45+    :   21   8-11   :4114  
+ 3rd Qu.:30.00   Missing:  554   Missing:1878  
+ Max.   :84.00
+ 
+ > colnames(training_set)
+[1] "loan_status"    "loan_amnt"      "grade"          "home_ownership"
+[5] "annual_inc"     "age"            "emp_cat"        "ir_cat"
+ 
+
+
+ 
+ 
+
+
+
+
+
+
+# Change the code below to construct a logistic regression model using all available predictors in the data set
+log_model_small <- glm(loan_status ~ age + ir_cat, family = "binomial", data = training_set)
+
+# Make PD-predictions for all test set elements using the the full logistic regression model
+log_model_full <- glm(loan_status ~ age + ir_cat + emp_cat + annual_inc + home_ownership + grade + loan_amnt, family = "binomial", data = training_set)
+
+
+# Look at the predictions range
+predictions_all_full <- predict(log_model_full, newdata=test_set, type="response")
+range(predictions_all_full)
+[1] 8.369797e-06 5.141640e-01
+
+
+
+
+
+
+
+> log_model_full
+
+Call:  glm(formula = loan_status ~ age + ir_cat + emp_cat + annual_inc + 
+    home_ownership + grade + loan_amnt, family = "binomial", 
+    data = training_set)
+
+Coefficients:
+        (Intercept)                  age        ir_cat11-13.5  
+         -2.300e+00           -7.379e-03            6.496e-01  
+        ir_cat13.5+           ir_cat8-11        ir_catMissing  
+          5.580e-01            4.071e-01            3.803e-01  
+       emp_cat15-30         emp_cat30-45           emp_cat45+  
+          1.040e-01            9.275e-02            6.949e-01  
+     emp_catMissing           annual_inc  home_ownershipOTHER  
+          7.792e-01           -4.977e-06           -1.153e-01  
+  home_ownershipOWN   home_ownershipRENT               gradeB  
+         -2.253e-01           -9.284e-02            2.190e-01  
+             gradeC               gradeD               gradeE  
+          5.423e-01            8.996e-01            1.027e+00  
+             gradeF               gradeG            loan_amnt  
+          1.433e+00            2.014e+00           -3.376e-06  
+
+Degrees of Freedom: 19393 Total (i.e. Null);  19373 Residual
+Null Deviance:	    13680 
+Residual Deviance: 13080 	AIC: 13130
+
+
+
+
+
+
+
+> summary(log_model_full)
+
+Call:
+glm(formula = loan_status ~ age + ir_cat + emp_cat + annual_inc + 
+    home_ownership + grade + loan_amnt, family = "binomial", 
+    data = training_set)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.2272  -0.5390  -0.4394  -0.3359   3.2855  
+
+Coefficients:
+                      Estimate Std. Error z value Pr(>|z|)    
+(Intercept)         -2.300e+00  1.330e-01 -17.298  < 2e-16 ***
+age                 -7.379e-03  3.883e-03  -1.900 0.057384 .  
+ir_cat11-13.5        6.496e-01  1.308e-01   4.965 6.87e-07 ***
+ir_cat13.5+          5.580e-01  1.454e-01   3.837 0.000124 ***
+ir_cat8-11           4.071e-01  1.161e-01   3.507 0.000453 ***
+ir_catMissing        3.803e-01  1.273e-01   2.988 0.002806 ** 
+emp_cat15-30         1.040e-01  8.672e-02   1.199 0.230553    
+emp_cat30-45         9.275e-02  2.607e-01   0.356 0.722025    
+emp_cat45+           6.949e-01  5.633e-01   1.234 0.217380    
+emp_catMissing       7.792e-01  1.142e-01   6.822 8.99e-12 ***
+annual_inc          -4.976e-06  7.611e-07  -6.538 6.22e-11 ***
+home_ownershipOTHER -1.153e-01  3.842e-01  -0.300 0.764190    
+home_ownershipOWN   -2.253e-01  9.474e-02  -2.377 0.017432 *  
+home_ownershipRENT  -9.284e-02  5.187e-02  -1.790 0.073446 .  
+gradeB               2.190e-01  1.051e-01   2.085 0.037097 *  
+gradeC               5.423e-01  1.201e-01   4.516 6.29e-06 ***
+gradeD               8.996e-01  1.365e-01   6.589 4.42e-11 ***
+gradeE               1.027e+00  1.649e-01   6.227 4.77e-10 ***
+gradeF               1.433e+00  2.251e-01   6.367 1.93e-10 ***
+gradeG               2.014e+00  3.364e-01   5.987 2.13e-09 ***
+loan_amnt           -3.376e-06  4.109e-06  -0.822 0.411204    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 13676  on 19393  degrees of freedom
+Residual deviance: 13085  on 19373  degrees of freedom
+AIC: 13127
+
+Number of Fisher Scoring iterations: 5
