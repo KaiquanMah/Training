@@ -1,0 +1,82 @@
+Keeping missing data
+In some situations, the fact that an input is missing is important information in itself. NAs can be kept in a separate "missing" category using coarse classification.
+
+Coarse classification allows you to simplify your data and improve the interpretability of your model. Coarse classification requires you to bin your responses into groups that contain ranges of values. You can use this binning technique to place all NAs in their own bin.
+
+In the video, we illustrated the idea of coarse classification for employment length. The code from that example has been reproduced in the R script to the right and can be adapted to coarse classify the int_rate variable.
+
+
+
+Make the necessary changes to the code provided to coarse classify int_rate, saving the result to a new variable called ir_cat.
+First, replace loan_data$emp_cat by loan_data$ir_cat where it occurs in the R script, as well as replacing loan_data$emp_length by loan_data$int_rate.
+Next, the variables should be binned in categories "0-8", "8-11", "11-13.5", and "13.5+" (replacing "0-15","15-30","30-45" and "45+"). Usage of > and <= is exactly as in the video. Make sure to change the numbers in the conditional statements too (15, 30 and 45 should be changed to 8, 11 and 13.5 respectively).
+Look at your new variable ir_cat using plot(loan_data$ir_cat).
+
+
+# Make the necessary replacements in the coarse classification example below 
+loan_data$emp_cat <- rep(NA, length(loan_data$emp_length))
+
+loan_data$emp_cat[which(loan_data$emp_length <= 15)] <- "0-15"
+loan_data$emp_cat[which(loan_data$emp_length > 15 & loan_data$emp_length <= 30)] <- "15-30"
+loan_data$emp_cat[which(loan_data$emp_length > 30 & loan_data$emp_length <= 45)] <- "30-45"
+loan_data$emp_cat[which(loan_data$emp_length > 45)] <- "45+"
+loan_data$emp_cat[which(is.na(loan_data$emp_length))] <- "Missing"
+
+loan_data$emp_cat <- as.factor(loan_data$emp_cat)
+
+#Levels: 0-15 15-30 30-45 45+ Missing
+ 
+
+
+
+
+
+
+
+> str(loan_data)
+'data.frame':	29091 obs. of  8 variables:
+ $ loan_status   : Factor w/ 2 levels "0","1": 1 1 1 1 1 1 2 1 2 1 ...
+ $ loan_amnt     : int  5000 2400 10000 5000 3000 12000 9000 3000 10000 1000 ...
+ $ int_rate      : num  10.7 NA 13.5 NA NA ...
+ $ grade         : Factor w/ 7 levels "A","B","C","D",..: 2 3 3 1 5 2 3 2 2 4 ...
+ $ home_ownership: Factor w/ 4 levels "MORTGAGE","OTHER",..: 4 4 4 4 4 3 4 4 4 4 ...
+ $ annual_inc    : num  24000 12252 49200 36000 48000 ...
+ $ age           : int  33 31 24 39 24 28 22 22 28 22 ...
+ $ emp_cat       : Factor w/ 5 levels "0-15","15-30",..: 1 2 1 1 1 1 1 1 1 1 ...
+ 
+> summary(loan_data$emp_cat)
+   0-15   15-30   30-45     45+ Missing 
+  25642    2345     263      32     809
+  
+> summary(loan_data$int_rate)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   5.42    7.90   10.99   11.00   13.47   23.22    2776
+   
+   
+   
+   
+# Make the necessary replacements in the coarse classification example below 
+#rep.int(x, times)
+loan_data$ir_cat <- rep(NA, length(loan_data$int_rate))
+
+....
+[29089] NA NA NA
+
+
+
+loan_data$ir_cat[which(loan_data$int_rate <= 8)] <- "0-8"
+loan_data$ir_cat[which(loan_data$int_rate > 8 & loan_data$int_rate <= 11)] <- "8-11"
+loan_data$ir_cat[which(loan_data$int_rate > 11 & loan_data$int_rate <= 13.5)] <- "11-13.5"
+loan_data$ir_cat[which(loan_data$int_rate > 13.5)] <- "13.5+"
+loan_data$ir_cat[which(is.na(loan_data$int_rate))] <- "Missing"
+
+loan_data$ir_cat <- as.factor(loan_data$ir_cat)
+
+# Look at your new variable using plot()
+plot(loan_data$ir_cat)
+
+
+
+
+#https://www.r-bloggers.com/basics-of-histograms/
+#https://www.rdocumentation.org/packages/base/versions/3.6.1/topics/rep
