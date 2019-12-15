@@ -1,0 +1,49 @@
+Predicting the probability of default
+In the video you looked at the predicted probability of default for one case in the test set. Luckily, you can predict the probability for all the test set cases at once using the predict() function.
+
+After having obtained all the predictions for the test set elements, it is useful to get an initial idea of how good the model is at discriminating by looking at the range of predicted probabilities. A small range means that predictions for the test set cases do not lie far apart, and therefore the model might not be very good at discriminating good from bad customers. With low default percentages, you will notice that in general, very low probabilities of default are predicted. It's time to have a look at a first model.
+
+log_model_small is loaded in the workspace.
+
+#http://www.rdocumentation.org/packages/stats/functions/predict.glm
+#https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/range
+
+
+
+The code for the prediction of test_case in the video is copied in your workspace. Change the code such that the function predict() is applied to all cases in test_set. You can store them in the object predictions_all_small.
+Get an initial idea of how well the model can discriminate using range()
+
+
+
+
+
+
+> test_case
+  loan_status loan_amnt grade home_ownership annual_inc age emp_cat ir_cat
+1           0      5000     B           RENT      24000  33    0-15   8-11
+
+> head(test_set)
+  loan_status loan_amnt grade home_ownership annual_inc age emp_cat  ir_cat
+1           0      5000     B           RENT      24000  33    0-15    8-11
+2           0      2400     C           RENT      12252  31   15-30 Missing
+3           0     10000     C           RENT      49200  24    0-15 11-13.5
+4           0      5000     A           RENT      36000  39    0-15 Missing
+5           0      3000     E           RENT      48000  24    0-15 Missing
+8           0      3000     B           RENT      15000  22    0-15    8-11
+
+
+
+
+
+# Build the logistic regression model
+#predictions_all_small <- predict(log_model_small, newdata = test_case, type = "response")
+predictions_all_small <- predict(log_model_small, newdata = test_set, type = "response")
+
+# Look at the range of the object "predictions_all_small"
+range(predictions_all_small)
+[1] 0.0345903 0.1924035
+
+
+> head(predictions_all_small)
+         1          2          3          4          5          8 
+0.08694611 0.10208429 0.14033217 0.09437801 0.10927964 0.09692823
