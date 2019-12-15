@@ -1,0 +1,75 @@
+In the video, you looked at how the Gini-measure is used to create the perfect split for a tree. Now, you will compute the gain for the tree loaded in your workspace.
+
+The data set contains 500 cases, 89 of these cases are defaults. This led to a Gini of 0.292632 in the root node. As a small reminder, remember that Gini of a certain node = 2 * proportion of defaults in this node * proportion of non-defaults in this node. Have a look at the code for a refresher.
+
+gini_root <- 2 * (89 / 500) * (411 / 500)
+You will use these Gini measures to help you calculate the gain of the leaf nodes with respect to the root node. Look at the following code to get an idea of how you can use the gini measures you created to calculate the gain of a node.
+
+Gain = gini_root - (prop(cases left leaf) * gini_left) - (prop(cases right leaf * gini_right))
+Compute the gini in the left hand and the right hand node, and the gain of the two leaf nodes with respect to the root node. The object containing the tree is small_tree.
+
+
+
+
+
+The computation for the Gini of the root node is given.
+Compute the Gini measure for the left leaf node.
+Compute the Gini measure for the right leaf node.
+Compute the gain by taking the difference between the root node Gini and the weighted leaf node Gini measures.
+Information regarding the split in this tree can be found using $split and the tree object, small_tree. Instead of gain, you should look at the improve column here. improve is an alternative metric for gain, simply obtained by multiplying gain by the number of cases in the data set. Make sure that the object improve (code given) has the same value as in small_tree$split.
+
+
+> small_tree
+n= 500 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+1) root 500 89 0 (0.8220000 0.1780000)  
+  2) age>=32.5 446 45 0 (0.8991031 0.1008969) *
+  3) age< 32.5 54 10 1 (0.1851852 0.8148148) *
+
+
+
+
+> small_tree$splits
+    count ncat  improve index adj
+age   500    1 49.10042  32.5   0
+
+
+
+
+
+
+
+# The Gini-measure of the root node is given below
+gini_root <- 2 * 89 / 500 * 411 / 500
+
+# Compute the Gini measure for the left leaf node
+gini_ll <- 2 * (401/446) * (45/446)
+
+# Compute the Gini measure for the right leaf node
+gini_rl <- 2 * (10/54) * (44/54)
+
+# Compute the gain
+gain <- gini_root - 446 / 500 * gini_ll - 54 / 500 * gini_rl
+
+# compare the gain-column in small_tree$splits with our computed gain, multiplied by 500, and assure they are the same
+small_tree$splits
+improve <- gain * 500
+
+
+> gini_root
+[1] 0.292632
+> gini_ll
+[1] 0.1814334
+> gini_rl
+[1] 0.3017833
+
+
+> gain
+[1] 0.09820084
+> improve
+[1] 49.10042
+
+
