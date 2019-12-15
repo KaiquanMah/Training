@@ -1,0 +1,49 @@
+Specifying a cut-off
+We have shown you how the specification of a cut-off can make the difference to obtain a good confusion matrix. Now, you will learn how to transform the prediction vector to a vector of binary values indicating the status of the loan. The ifelse() function in R can help you here.
+
+Applying the ifelse() function in the context of a cut-off, you would have something like
+ifelse(predictions > 0.3, 1, 0)
+
+In the first argument, you are testing whether a certain value in the predictions-vector is bigger than 0.3. If this is TRUE, R returns "1" (specified in the second argument), if FALSE, R returns "0" (specified in the third argument), representing "default" and "no default", respectively.
+
+
+
+The code for the full logistic regression model along with the predictions-vector is given in your console.
+Using a cutoff of 0.15, create vector pred_cutoff_15 using the the ifelse() function and predictions_all_full.
+Look at the confusion matrix using table() (enter the true values, so test_set$loan_status, in the first argument).
+
+#https://stat.ethz.ch/R-manual/R-devel/library/base/html/colnames.html
+#https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html
+
+
+> pred_cutoff_15
+    1     2     3     4     5     8    10    12    15    17    26    28    30 
+    0     1     1     0     1     0     1     0     0     0     1     0     0 
+...
+ 29052 29057 29060 29062 29068 29071 29073 29079 29084 29090 29091 
+  0     0     0     1     0     0     0     0     0     0     0    
+
+
+# The code for the logistic regression model and the predictions is given below
+log_model_full <- glm(loan_status ~ ., family = "binomial", data = training_set)
+predictions_all_full <- predict(log_model_full, newdata = test_set, type = "response")
+
+# Make a binary predictions-vector using a cut-off of 15%
+pred_cutoff_15 <- ifelse(predictions_all_full > 0.15, 1, 0)
+
+
+# Construct a confusion matrix
+#table(actual values, predicted values)
+table(test_set$loan_status, pred_cutoff_15)
+
+
+
+> table(test_set$loan_status, pred_cutoff_15)
+   pred_cutoff_15
+       0    1
+  0 6745 1915
+  1  641  396
+  
+  
+  
+  
