@@ -1,0 +1,60 @@
+Multiple variables in a logistic regression model
+The interpretation of a single parameter still holds when including several variables in a model. When you do include several variables and ask for the interpretation when a certain variable changes, it is assumed that the other variables remain constant, or unchanged. There is a fancy latin phrase for this, ceteris paribus, literally meaning "keeping all others the same".
+
+To build a logistic regression model with multiple variables, you can use the + sign to add variables. Your formula will look something like:
+y ~ x1 + ... + xk
+
+In order to evaluate the model there are a number of things to be aware of. You already looked at the parameter values, but that is not the only thing of importance. Also important is the statistical significance of a certain parameter estimate. The significance of a parameter is often refered to as a p-value, however in a model output you will see it denoted as Pr(>|t|). In glm, mild significance is denoted by a "." to very strong significance denoted by "***". When a parameter is not significant, this means you cannot assure that this parameter is significantly different from 0. Statistical significance is important. In general, it only makes sense to interpret the effect by default for significant parameters.
+
+
+
+Create a logistic regression model using the glm() function, and the training_set. Include the variables age, ir_cat, grade, loan_amnt and annual_inc. Call this model log_model_multi.
+Obtain the significance levels using summary() in combination with our model. You will look more deeply into what significance levels mean in the next exercise!
+
+
+# Build the logistic regression model
+log_model_multi <- glm(loan_status ~ age + ir_cat + grade + loan_amnt + annual_inc,family="binomial",data=training_set)
+
+
+# Obtain significance levels using summary()
+summary(log_model_multi)
+
+> summary(log_model_multi)
+
+Call:
+glm(formula = loan_status ~ age + ir_cat + grade + loan_amnt + 
+    annual_inc, family = "binomial", data = training_set)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.1261  -0.5411  -0.4409  -0.3432   3.2309  
+
+Coefficients:
+                Estimate Std. Error z value Pr(>|z|)    
+(Intercept)   -2.300e+00  1.265e-01 -18.176  < 2e-16 ***
+age           -7.471e-03  3.872e-03  -1.930 0.053663 .  
+ir_cat11-13.5  6.103e-01  1.303e-01   4.682 2.83e-06 ***
+ir_cat13.5+    5.294e-01  1.451e-01   3.648 0.000264 ***
+ir_cat8-11     3.783e-01  1.156e-01   3.274 0.001062 ** 
+ir_catMissing  3.531e-01  1.272e-01   2.776 0.005509 ** 
+gradeB         2.186e-01  1.047e-01   2.087 0.036857 *  
+gradeC         5.306e-01  1.198e-01   4.429 9.45e-06 ***
+gradeD         8.783e-01  1.362e-01   6.448 1.14e-10 ***
+gradeE         9.993e-01  1.644e-01   6.077 1.22e-09 ***
+gradeF         1.416e+00  2.245e-01   6.306 2.87e-10 ***
+gradeG         1.979e+00  3.364e-01   5.883 4.03e-09 ***
+loan_amnt     -3.666e-06  4.110e-06  -0.892 0.372379    
+annual_inc    -4.808e-06  7.262e-07  -6.621 3.56e-11 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 13676  on 19393  degrees of freedom
+Residual deviance: 13134  on 19380  degrees of freedom
+AIC: 13162
+
+Number of Fisher Scoring iterations: 5
+
+
+
