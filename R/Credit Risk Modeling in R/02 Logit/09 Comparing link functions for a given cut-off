@@ -1,0 +1,94 @@
+Comparing link functions for a given cut-off
+In this last exercise, you will fit a model using each of the three link functions (logit, probit and cloglog), make predictions for the test set, classify the predictions in the appropriate group (default versus non-default) for a given cut-off, make a confusion matrix and compute the accuracy and sensitivity for each of the models given the cut-off value! Wow, you've learned a lot so far. And finally, you will try to identify the model that performs best in terms of accuracy given the cut-off value!
+
+It is important to know that the differences between the models will generally be very small, and again, the results will depend on the chosen cut-off value. The observed outcome (default versus non-default) is stored in true_val in the console.
+
+
+Fit three logistic regression models using links logit, probit and cloglog respectively. Part of the code is given. Use age, emp_cat, ir_cat and loan_amnt as predictors.
+Make predictions for all models using the test_set.
+Use a cut-off value of 14% to make predictions for each of the models, such that their performance can be evaluated.
+Make a confusion matrix for the three models.
+Lastly, compute the classification accuracy for all three models.
+
+
+
+> tab_class_logit
+        class_pred_logit
+true_val    0    1
+       0 6359 2301
+       1  590  447
+
+> diag(tab_class_logit)
+   0    1 
+6359  447
+
+
+
+
+
+> tab_class_probit
+        class_pred_probit
+true_val    0    1
+       0 6354 2306
+       1  589  448
+
+> diag(tab_class_probit)
+   0    1 
+6354  448
+
+
+
+
+
+
+
+> tab_class_cloglog
+        class_pred_cloglog
+true_val    0    1
+       0 6369 2291
+       1  593  444
+       
+> diag(tab_class_cloglog)
+   0    1 
+6369  444       
+       
+
+
+> nrow(test_set)
+[1] 9697
+
+
+
+
+
+
+# Fit the logit, probit and cloglog-link logistic regression models
+log_model_logit <- glm(loan_status ~ age + emp_cat + ir_cat + loan_amnt,family = binomial(link = logit), data = training_set)
+log_model_probit <- glm(loan_status ~ age + emp_cat + ir_cat + loan_amnt,family = binomial(link = probit), data = training_set)
+log_model_cloglog <-  glm(loan_status ~ age + emp_cat + ir_cat + loan_amnt,family = binomial(link = cloglog), data = training_set)
+      
+  
+  
+# Make predictions for all models using the test set
+predictions_logit <- predict(log_model_logit, newdata = test_set, type = "response")
+predictions_probit <- predict(log_model_probit, newdata = test_set, type = "response")
+predictions_cloglog <- predict(log_model_cloglog, newdata = test_set, type = "response")
+  
+  
+# Use a cut-off of 14% to make binary predictions-vectors
+cutoff <- 0.14
+class_pred_logit <- ifelse(predictions_logit > cutoff, 1, 0)
+class_pred_probit <- ifelse(predictions_probit > cutoff, 1, 0)
+class_pred_cloglog <- ifelse(predictions_cloglog > cutoff, 1, 0)
+  
+  
+# Make a confusion matrix for the three models
+tab_class_logit <- table(true_val,class_pred_logit)
+tab_class_probit <- table(true_val,class_pred_probit)
+tab_class_cloglog <- table(true_val,class_pred_cloglog)
+  
+  
+# Compute the classification accuracy for all three models
+acc_logit <- sum(diag(tab_class_logit)) / nrow(test_set)
+acc_probit <- sum(diag(tab_class_probit)) / nrow(test_set)
+acc_cloglog <- sum(diag(tab_class_cloglog)) / nrow(test_set)
