@@ -1,0 +1,50 @@
+Basic logistic regression
+In the video, you looked at a logistic regression model including the variable age as a predictor. Now, you will include a categorical variable, and learn how to interpret its parameter estimates.
+
+When you include a categorical variable in a logistic regression model in R, you will obtain a parameter estimate for all but one of its categories. This category for which no parameter estimate is given is called the reference category. The parameter for each of the other categories represents the odds ratio in favor of a loan default between the category of interest and the reference category. Don't worry if this doesn't make complete sense to you yet, you'll do more exercises on this later on!
+
+
+#https://www.rdocumentation.org/packages/stats/versions/3.3.1/topics/glm
+
+Construct a logistic regression model called log_model_cat with the categorical variable ir_cat as the only predictor. Your call to glm() should contain three arguments:
+loan_status ~ ir_cat
+family = "binomial"
+data = training_set
+View the result in the console to see your parameter estimates.
+Find out what the reference category is by looking at the structure of ir_cat (in the full data set loan_data) again. Use the table() function to do this.
+
+
+
+# Build a glm model with variable ir_cat as a predictor
+log_model_cat <- glm(loan_status ~ ir_cat,family = "binomial",data = training_set)
+
+
+# Print the parameter estimates 
+log_model_cat
+
+# Look at the different categories in ir_cat using table()
+table(loan_data$ir_cat)
+
+
+
+
+> log_model_cat
+
+Call:  glm(formula = loan_status ~ ir_cat, family = "binomial", data = training_set)
+
+Coefficients:
+  (Intercept)  ir_cat11-13.5    ir_cat13.5+     ir_cat8-11  ir_catMissing  
+      -2.8323         0.9808         1.3152         0.5414         0.6940  
+
+Degrees of Freedom: 19393 Total (i.e. Null);  19389 Residual
+Null Deviance:	    13680 
+Residual Deviance: 13290 	AIC: 13300
+
+
+
+> table(loan_data$ir_cat)
+
+    0-8 11-13.5   13.5+    8-11 Missing 
+   7130    6953    6002    6230    2776
+   
+   
