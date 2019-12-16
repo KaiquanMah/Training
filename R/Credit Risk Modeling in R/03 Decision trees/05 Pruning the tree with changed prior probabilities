@@ -1,0 +1,152 @@
+In the video, you have learned that pruning a tree is necessary to avoid overfitting. There were some big trees in the previous exercises and now you will put what you have learned into practice, and prune the previously constructed tree with the changed prior probabilities. The rpart package is already loaded in your workspace.
+
+You will first set a seed to make sure the results are reproducible as mentioned in the video, because you will be examining cross-validated error results. Results involve randomness and could differ slightly upon running the function again with a different seed.
+
+In this exercise you will learn to identify which complexity parameter (CP) will minimize the cross-validated error results, then prune your tree based on this value.
+
+
+tree_prior is loaded in your workspace.
+Use plotcp() to visualize cross-vaidated error (X-val Relative Error) in relation to the complexity parameter for tree_prior.
+Use printcp() to print a table of information about CP, splits, and errors. See if you can identify which split has the minimum cross-validated error in tree_prior.
+Use which.min() to identify which row in tree_prior$cptable has the minimum cross-validated error "xerror". Assign this to index.
+Create tree_min by selecting the index of tree_prior$cptable within the column "CP".
+Use the prune() function to obtain the pruned tree. Call the pruned tree ptree_prior.
+Package rpart.plot is loaded in your workspace. Plot the pruned tree using function prp() (default setting).
+
+
+#https://www.rdocumentation.org/packages/rpart/versions/4.1-15/topics/plotcp
+#https://www.rdocumentation.org/packages/rpart/versions/4.1-15/topics/printcp
+#https://www.rdocumentation.org/packages/rpart/versions/4.1-15/topics/prune.rpart
+#https://www.rdocumentation.org/packages/rpart.plot/versions/3.0.8/topics/prp
+
+
+
+
+# tree_prior is loaded in your workspace
+
+# Plot the cross-validated error rate as a function of the complexity parameter
+plotcp(tree_prior)
+
+# Use printcp() to identify for which complexity parameter the cross-validated error rate is minimized.
+printcp(tree_prior)
+
+# Create an index for of the row with the minimum xerror
+index <- which.min(tree_prior$cptable[ , "xerror"])
+
+# Create tree_min
+tree_min <- tree_prior$cptable[index, "CP"]
+
+#  Prune the tree using tree_min
+ptree_prior <- prune(tree_prior, cp = tree_min)
+
+# Use prp() to plot the pruned tree
+prp(ptree_prior)
+
+
+
+
+
+
+
+
+
+
+
+
+> printcp(tree_prior)
+
+Classification tree:
+rpart(formula = loan_status ~ ., data = training_set, method = "class", 
+    parms = list(prior = c(0.7, 0.3)), control = rpart.control(cp = 0.001))
+
+Variables actually used in tree construction:
+[1] age            annual_inc     emp_cat        grade          home_ownership
+[6] ir_cat         loan_amnt     
+
+Root node error: 5818.2/19394 = 0.3
+
+n= 19394 
+
+          CP nsplit rel error  xerror     xstd
+1  0.0046850      0   1.00000 1.00000 0.020126
+2  0.0043855      4   0.98126 1.00089 0.019933
+3  0.0042545      5   0.97687 0.99707 0.019797
+4  0.0032463      6   0.97262 0.98599 0.019527
+5  0.0016595      9   0.96288 0.98530 0.019330
+6  0.0014514     13   0.95424 0.99000 0.019143
+7  0.0013609     14   0.95279 0.99648 0.019157
+8  0.0013065     15   0.95142 0.99487 0.019136
+9  0.0012886     17   0.94881 0.99524 0.019144
+10 0.0012298     25   0.93711 0.99714 0.019146
+11 0.0011755     27   0.93465 0.99980 0.019144
+12 0.0011377     28   0.93348 0.99818 0.019112
+13 0.0011122     33   0.92754 0.99779 0.019081
+14 0.0011122     34   0.92643 0.99814 0.019078
+15 0.0010353     40   0.91925 0.99900 0.019113
+16 0.0010000     41   0.91822 0.99700 0.019104
+
+
+
+
+
+
+
+> tree_prior$cptable
+            CP nsplit rel error    xerror       xstd
+1  0.004685050      0 1.0000000 1.0000000 0.02012607
+2  0.004385462      4 0.9812598 1.0008902 0.01993287
+3  0.004254453      5 0.9768743 0.9970651 0.01979692
+4  0.003246263      6 0.9726199 0.9859883 0.01952660
+5  0.001659458      9 0.9628811 0.9853006 0.01932985
+6  0.001451399     13 0.9542368 0.9900020 0.01914349
+7  0.001360892     14 0.9527854 0.9964759 0.01915675
+8  0.001306535     15 0.9514245 0.9948709 0.01913623
+9  0.001288593     17 0.9488115 0.9952417 0.01914421
+10 0.001229750     25 0.9371108 0.9971405 0.01914584
+11 0.001175526     27 0.9346513 0.9998033 0.01914429
+12 0.001137660     28 0.9334758 0.9981847 0.01911226
+13 0.001112198     33 0.9275446 0.9977868 0.01908122
+14 0.001112198     34 0.9264324 0.9981439 0.01907768
+15 0.001035280     40 0.9192529 0.9989985 0.01911295
+16 0.001000000     41 0.9182176 0.9970002 0.01910357
+
+
+> index <- which.min(tree_prior$cptable[ , "xerror"])
+> index
+5 
+
+
+> tree_min <- tree_prior$cptable[index, "CP"]
+> tree_min
+[1] 0.001659458
+
+
+
+
+> ptree_prior
+n= 19394 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+  1) root 19394 5818.20000 0 (0.7000000 0.3000000)  
+    2) grade=A,B 12650 2776.26400 0 (0.7673623 0.2326377) *
+    3) grade=C,D,E,F,G 6744 3041.93600 0 (0.5922419 0.4077581)  
+      6) annual_inc>=64995.96 2704  980.32680 0 (0.6527225 0.3472775)  
+       12) grade=C,D,E 2600  897.96880 0 (0.6653028 0.3346972) *
+       13) grade=F,G 104   57.60482 1 (0.4115721 0.5884279) *
+      7) annual_inc< 64995.96 4040 2061.60900 0 (0.5554247 0.4445753)  
+       14) grade=C 2394 1060.02800 0 (0.5976049 0.4023951)  
+         28) annual_inc>=49469.5 781  284.26820 0 (0.6516861 0.3483139) *
+         29) annual_inc< 49469.5 1613  775.76000 0 (0.5733294 0.4266706)  
+           58) loan_amnt< 7525 1038  438.35750 0 (0.6111260 0.3888740) *
+           59) loan_amnt>=7525 575  337.40250 0 (0.5116638 0.4883362)  
+            118) annual_inc>=39842.5 280  114.23860 0 (0.6207935 0.3792065) *
+            119) annual_inc< 39842.5 295  166.50160 1 (0.4272938 0.5727062) *
+       15) grade=D,E,F,G 1646 1001.37700 1 (0.4999492 0.5000508)  
+         30) home_ownership=OWN,RENT 1282  696.05860 0 (0.5362540 0.4637460)  
+           60) annual_inc>=15300 1227  642.92440 0 (0.5472985 0.4527015) *
+           61) annual_inc< 15300 55   27.61875 1 (0.3420152 0.6579848) *
+         31) home_ownership=MORTGAGE,OTHER 364  196.48770 1 (0.3914022 0.6085978) *
+
+
