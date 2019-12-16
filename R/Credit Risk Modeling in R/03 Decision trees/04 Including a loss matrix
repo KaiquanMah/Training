@@ -1,0 +1,44 @@
+Including a loss matrix
+Thirdly, you can include a loss matrix, changing the relative importance of misclassifying a default as non-default versus a non-default as a default. You want to stress that misclassifying a default as a non-default should be penalized more heavily. Including a loss matrix can again be done in the argument parms in the loss matrix.
+parms = list(loss = matrix(c(0, cost_def_as_nondef, cost_nondef_as_def, 0), ncol=2))
+Doing this, you are constructing a 2x2-matrix with zeroes on the diagonal and changed loss penalties off-diagonal. The default loss matrix is all ones off-diagonal.
+
+
+Change the code provided such a loss matrix is included, with a penalization that is 10 times bigger when misclassifying an actual default as a non-default. This can be done replacing cost_def_as_nondef by 10, and cost_nondef_as_def by 1. Similar to what you've done in the previous exercises, include rpart.control to relax the complexity parameter to 0.001.
+Plot the decision tree using the function plot and the tree object name. Add a second argument uniform = TRUE to get equal-sized branches, and add labels to the tree using text() with the tree object name.
+
+
+> c(0, 10, 1, 0)
+[1]  0 10  1  0
+
+
+#matrix arranges the elements by placing elements in the first col
+#followed by placing elements in the second col
+> matrix(c(0, 10, 1, 0), ncol=2)
+     [,1] [,2]
+[1,]    0    1
+[2,]   10    0
+
+> loss = matrix(c(0, 10, 1, 0), ncol=2)
+> loss
+     [,1] [,2]
+[1,]    0    1
+[2,]   10    0
+
+> list(loss = matrix(c(0, 10, 1, 0), ncol=2))
+$loss
+     [,1] [,2]
+[1,]    0    1
+[2,]   10    0
+
+
+
+# Change the code below such that a decision tree is constructed using a loss matrix penalizing 10 times more heavily for misclassified defaults.
+tree_loss_matrix <- rpart(loan_status ~ ., method="class", data=training_set, control=rpart.control(cp = 0.001), parms = list(loss = matrix(c(0, 10, 1, 0), ncol=2)))
+
+
+# Plot the decision tree
+plot(tree_loss_matrix, uniform=TRUE)
+
+# Add labels to the decision tree
+text(tree_loss_matrix)
