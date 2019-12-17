@@ -1,0 +1,86 @@
+ROC-curves for comparison of logistic regression models
+
+ROC-curves can easily be created using the pROC-package in R. Let's have a look if there is a big difference between ROC-curves for the four logistic regression-models previously used throughout this course. A small heads up:
+predictions_logit contains probability of default (PD) predictions using the default logit link and containing variables age, emp_cat, ir_cat and loan_amnt.
+predictions_probit contains PD-predictions using the probit and containing variables age, emp_cat, ir_cat and loan_amnt.
+predictions_cloglog contains PD-predictions using the cloglog link and containing variables age, emp_cat, ir_cat and loan_amnt.
+predictions_all_full contains PD-predictions using the default logit link and containing all seven variables in the data set.
+
+You will first draw the ROC-curves for these four models in one plot. Afterwards, you will look at the area under the curve.
+
+
+
+Load the pROC-package in your R-console.
+Construct the ROC-objects for the four logistic regression models using function roc(response, predictor). Remember that the response is the loan status indicator in the test_set, which can be obtained through test_set$loan_status.
+Use the previously created objects to construct ROC-curves. To draw them all on one plot, use plot() for the first ROC-curve drawn (for ROC_logit), and use [lines()](http://www.rdocumentation.org/packages/graphics/functions/lines to add the ROC-curves) for the other three models to the same plot.
+Use the col-argument to change the color of the curve of ROC_probit to "blue", ROC_cloglog to "red" and ROC_all_full to "green". Note that, in contrast with what has been discussed in the video, the x-axis label is Specificity and not "1-Specificity", resulting in an axis that goes from 1 on the left-hand side to 0 on the right-hand side.
+It seems that the link function does not have a big impact on the ROC here, and the main trigger of a better ROC is the inclusion of more variables in a model. To get an exact idea of the performance of the ROC-curves, have a look at the AUC's, using function auc().
+
+
+
+#https://www.rdocumentation.org/packages/pROC/versions/1.15.3/topics/auc
+
+> head(predictions_logit)
+         1          2          3          4          5          8 
+0.08825517 0.11202768 0.13632298 0.09657199 0.11264550 0.09947478
+> head(predictions_probit)
+         1          2          3          4          5          8 
+0.08820948 0.11312941 0.13629916 0.09666017 0.11299842 0.09982278
+> head(predictions_cloglog)
+         1          2          3          4          5          8 
+0.08839313 0.11158818 0.13633345 0.09665718 0.11247513 0.09936701
+> head(predictions_all_full)
+         1          2          3          4          5          8 
+0.10462139 0.15916251 0.16015765 0.07608741 0.19586915 0.11772106
+
+
+
+
+
+
+# Load the pROC-package
+library(pROC)
+
+# Construct the objects containing ROC-information
+#actual vs expected/predicted
+ROC_logit <- roc(test_set$loan_status, predictions_logit)
+ROC_probit <- roc(test_set$loan_status, predictions_probit)
+ROC_cloglog <- roc(test_set$loan_status, predictions_cloglog)
+ROC_all_full <- roc(test_set$loan_status, predictions_all_full)
+
+
+# Draw all ROCs on one plot
+plot(ROC_logit)
+>plot(ROC_logit)
+Call:
+roc.default(response = test_set$loan_status, predictor = predictions_logit)
+
+Data: predictions_logit in 8660 controls (test_set$loan_status 0) < 1037 cases (test_set$loan_status 1).
+Area under the curve: 0.6334
+
+
+
+lines(ROC_probit, col="blue")
+lines(ROC_cloglog, col="red")
+lines(ROC_all_full, col="green")
+
+
+
+# Compute the AUCs
+auc(ROC_logit)
+auc(ROC_probit)
+auc(ROC_cloglog)
+auc(ROC_all_full)
+
+
+
+
+> auc(ROC_logit)
+Area under the curve: 0.6334
+> auc(ROC_probit)
+Area under the curve: 0.6333
+> auc(ROC_cloglog)
+Area under the curve: 0.6334
+> auc(ROC_all_full)
+Area under the curve: 0.6512
+
