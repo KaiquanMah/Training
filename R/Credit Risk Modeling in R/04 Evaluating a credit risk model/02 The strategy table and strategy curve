@@ -1,0 +1,184 @@
+The strategy table and strategy curve
+Repeating the calculations you did in the previous exercise for several acceptance rates, you can obtain a strategy table. This table can be a useful tool for banks, as they can give them a better insight to define an acceptance strategy.
+
+You know how to compute a bad rate for a certain acceptance rate by now, so the function strategy_bank was written and loaded into your workspace to speed things up. This function computes the cut-off and bad rate for the acceptance rates that are multiples of 5% (0%, 5%, 10%, ...).
+
+Have a look at the function strategy_bank.
+The vector predictions_cloglog contains predicted probabilities of default using the cloglog model you used in chapter 2, the vector predictions_loss_matrixcontains the predicted probabilities of default using the pruned tree including a loss matrix (previously constructed in chapter 3). Apply function strategy_bank to each of the prediction-vectors, assign the name strategy_cloglog and strategy_loss_matrix respectively.
+The strategy tables can be obtained using the object names in combination with $table.
+The strategy curves have been plotted for you. The strategy curve of the tree model shows pretty strange behavior. Because of the structure of classification trees, you might have a bigger chance for weird "jumps" here. Additionally, the tree with a loss matrix was a very big one, so this might be the result of overfitting!
+
+
+> args(strategy_bank)
+function (prob_of_def) 
+
+> head(predictions_cloglog)
+         1          2          3          4          5          8 
+0.08839313 0.11158818 0.13633345 0.09665718 0.11247513 0.09936701
+
+
+
+> strategy_cloglog
+$table
+      accept_rate cutoff bad_rate
+ [1,]        1.00 0.3679   0.1069
+ [2,]        0.95 0.1890   0.1012
+ [3,]        0.90 0.1808   0.0983
+ [4,]        0.85 0.1707   0.0943
+ [5,]        0.80 0.1538   0.0905
+ [6,]        0.75 0.1434   0.0873
+ [7,]        0.70 0.1383   0.0832
+ [8,]        0.65 0.1328   0.0803
+ [9,]        0.60 0.1255   0.0763
+[10,]        0.55 0.1136   0.0741
+[11,]        0.50 0.1050   0.0711
+[12,]        0.45 0.0975   0.0677
+[13,]        0.40 0.0938   0.0642
+[14,]        0.35 0.0904   0.0600
+[15,]        0.30 0.0861   0.0543
+[16,]        0.25 0.0779   0.0486
+[17,]        0.20 0.0571   0.0454
+[18,]        0.15 0.0549   0.0384
+[19,]        0.10 0.0529   0.0402
+[20,]        0.05 0.0501   0.0389
+[21,]        0.00 0.0305   0.0000
+
+$bad_rate
+ [1] 0.10694029 0.10117238 0.09830431 0.09427323 0.09049890 0.08730923
+ [7] 0.08323512 0.08025377 0.07631488 0.07406713 0.07114869 0.06768809
+[13] 0.06415872 0.06001765 0.05431420 0.04863974 0.04536082 0.03843514
+[19] 0.04020619 0.03893443 0.00000000
+
+$accept_rate
+ [1] 1.00 0.95 0.90 0.85 0.80 0.75 0.70 0.65 0.60 0.55 0.50 0.45 0.40 0.35 0.30
+[16] 0.25 0.20 0.15 0.10 0.05 0.00
+
+$cutoff
+ [1] 0.36793996 0.18895552 0.18083776 0.17065434 0.15384783 0.14340525
+ [7] 0.13826064 0.13283885 0.12546827 0.11356596 0.10495633 0.09753708
+[13] 0.09380085 0.09036575 0.08611782 0.07792886 0.05711016 0.05490995
+[19] 0.05291104 0.05013794 0.03053523
+
+
+
+
+
+
+
+
+
+
+
+> strategy_loss_matrix
+$table
+      accept_rate cutoff bad_rate
+ [1,]        1.00 0.2830   0.1069
+ [2,]        0.95 0.1698   0.1071
+ [3,]        0.90 0.1698   0.1071
+ [4,]        0.85 0.1698   0.1071
+ [5,]        0.80 0.1698   0.1071
+ [6,]        0.75 0.1698   0.1071
+ [7,]        0.70 0.1698   0.1071
+ [8,]        0.65 0.1698   0.1071
+ [9,]        0.60 0.1667   0.0746
+[10,]        0.55 0.1332   0.0743
+[11,]        0.50 0.1300   0.0719
+[12,]        0.45 0.0724   0.0629
+[13,]        0.40 0.0704   0.0631
+[14,]        0.35 0.0704   0.0631
+[15,]        0.30 0.0655   0.0584
+[16,]        0.25 0.0610   0.0502
+[17,]        0.20 0.0584   0.0459
+[18,]        0.15 0.0411   0.0362
+[19,]        0.10 0.0411   0.0362
+[20,]        0.05 0.0411   0.0362
+[21,]        0.00 0.0000   0.0800
+
+$bad_rate
+ [1] 0.10694029 0.10712061 0.10712061 0.10712061 0.10712061 0.10712061
+ [7] 0.10712061 0.10712061 0.07457569 0.07428872 0.07194526 0.06286616
+[13] 0.06308630 0.06308630 0.05839416 0.05019455 0.04594181 0.03616533
+[19] 0.03616533 0.03616533 0.08000000
+
+$accept_rate
+ [1] 1.00 0.95 0.90 0.85 0.80 0.75 0.70 0.65 0.60 0.55 0.50 0.45 0.40 0.35 0.30
+[16] 0.25 0.20 0.15 0.10 0.05 0.00
+
+$cutoff
+ [1] 0.28301887 0.16978055 0.16978055 0.16978055 0.16978055 0.16978055
+ [7] 0.16978055 0.16978055 0.16666667 0.13324538 0.13000000 0.07236842
+[13] 0.07035398 0.07035398 0.06554473 0.06099656 0.05839416 0.04112093
+[19] 0.04112093 0.04112093 0.00000000
+
+
+
+
+
+
+
+
+
+# Have a look at the function strategy_bank
+args(strategy_bank)
+
+
+# Apply the function strategy_bank to both predictions_cloglog and predictions_loss_matrix
+strategy_cloglog <- strategy_bank(predictions_cloglog)
+strategy_loss_matrix <- strategy_bank(predictions_loss_matrix)
+
+
+# Obtain the strategy tables for both prediction-vectors
+strategy_cloglog$table
+strategy_loss_matrix$table
+
+
+# Plot the strategy functions
+par(mfrow = c(1,2))
+plot(strategy_cloglog$accept_rate, strategy_cloglog$bad_rate, 
+     type = "l", xlab = "Acceptance rate", ylab = "Bad rate", 
+     lwd = 2, main = "logistic regression")
+
+plot(strategy_loss_matrix$accept_rate, strategy_loss_matrix$bad_rate, 
+     type = "l", xlab = "Acceptance rate", 
+     ylab = "Bad rate", lwd = 2, main = "tree")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+To tree or not to tree?
+Imagine you have 2 banks: Bank A, and Bank B. These banks are restricted to using a certain acceptance rate.
+
+Bank A has to use an acceptance rate of 45%
+Bank B has to use an acceptance rate of 85%
+Based on the strategy tables, which model will Bank A and Bank B prefer to use?
+
+Do not hesitate to have a look at the tables again. They are loaded in your workspace as strategy_cloglog$table and strategy_loss_matrix$table.
+
+#not Bank A and Bank B will both prefer to use the logistic regression model (represented by strategy_cloglog)
+#not Bank A and Bank B will both prefer to use the classification tree model (represented by strategy_loss_matrix)
+#not Bank A will prefer to use the logistic regression model, but for Bank B, the classification tree model leads to a lower bad rate.
+
+#yes Bank A will prefer to use the classification tree model, but for Bank B, the logistic regression model leads to lower bad rates.
+
