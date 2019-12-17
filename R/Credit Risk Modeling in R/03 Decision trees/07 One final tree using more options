@@ -1,0 +1,175 @@
+One final tree using more options
+In this exercise, you will use some final arguments that were discussed in the video. Some specifications in the rpart.control()-function will be changed, and some weights will be included using the weights argument in rpart(). The vector case_weights has been constructed for you and is loaded in your workspace. This vector contains weights of 1 for the non-defaults in the training set, and weights of 3 for defaults in the training sets. By specifying higher weights for default, the model will assign higher importance to classifying defaults correctly.
+
+
+#https://www.rdocumentation.org/packages/rpart/versions/4.1-15/topics/rpart.control
+#http://www.rdocumentation.org/packages/rpart/functions/plotcp
+
+Set a seed of 345.
+Add to the provided code by passing case_weights to the weights argument of `rpart().
+Change the minimum number of splits that are allowed in a node to 5, and the minimum number of observations allowed in leaf nodes to 2 by using the arguments minsplit and minbucket in rpart.control respectively.
+Use function plotcp() to investigate where the cross-validated error rate can be minimized.
+Use which.min() to identify the row with the minimum "xerror" in tree_weights$cp. Assign this to index.
+Use the provided code to select the cp for which the crossvalidated error is minimized
+Prune the tree using the complexity parameter where the cross-validated error rate is minimized. Store the pruned tree in ptree_weights.
+Plot the pruned tree using function prp(). Include a second argument extra and set it equal to 1.
+
+
+> case_weights
+    [1] 1 1 3 1 .....
+    [19369] 1 1 1 1 1 1 1 1 1 1 1 1 3 1 1 1 1 1 1 3 1 1 1 1 1 1
+
+
+> tree_weights
+n= 19394 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+   1) root 19394 6570 0 (0.7236477 0.2763523)  
+     2) grade=A,B 12650 3135 0 (0.7873134 0.2126866) *
+     3) grade=C,D,E,F,G 6744 3435 0 (0.6197698 0.3802302)  
+       6) annual_inc>=64995.96 2704 1107 0 (0.6783847 0.3216153)  
+        12) grade=C,D,E 2600 1014 0 (0.6904762 0.3095238) *
+        13) grade=F,G 104   73 1 (0.4397590 0.5602410)  
+          26) home_ownership=OTHER,RENT 39   21 0 (0.6037736 0.3962264)  
+            52) annual_inc< 158000 36   12 0 (0.7272727 0.2727273) *
+            53) annual_inc>=158000 3    0 1 (0.0000000 1.0000000) *
+          27) home_ownership=MORTGAGE,OWN 65   41 1 (0.3628319 0.6371681)  
+            54) loan_amnt< 12250 18    9 0 (0.6250000 0.3750000)  
+             108) loan_amnt>=7000 14    0 0 (1.0000000 0.0000000) *
+             109) loan_amnt< 7000 4    1 1 (0.1000000 0.9000000) *
+            55) loan_amnt>=12250 47   26 1 (0.2921348 0.7078652) *
+       7) annual_inc< 64995.96 4040 2328 0 (0.5836910 0.4163090)  
+        14) grade=C 2394 1197 0 (0.6250000 0.3750000)  
+          28) annual_inc>=49469.5 781  321 0 (0.6773869 0.3226131) *
+          29) annual_inc< 49469.5 1613  876 0 (0.6012745 0.3987255)  
+            58) loan_amnt< 7525 1038  495 0 (0.6381579 0.3618421) *
+            59) loan_amnt>=7525 575  381 0 (0.5404101 0.4595899)  
+             118) annual_inc>=39842.5 280  129 0 (0.6475410 0.3524590) *
+             119) annual_inc< 39842.5 295  211 1 (0.4557235 0.5442765)  
+               238) emp_cat=0-15 270  199 1 (0.4830097 0.5169903)  
+                 476) annual_inc< 38700 255  189 0 (0.5039370 0.4960630)  
+                   952) annual_inc>=27288 213  138 0 (0.5475410 0.4524590)  
+                    1904) age< 30.5 165   84 0 (0.6199095 0.3800905) *
+                    1905) age>=30.5 48   30 1 (0.3571429 0.6428571) *
+                   953) annual_inc< 27288 42   25 1 (0.3289474 0.6710526) *
+                 477) annual_inc>=38700 15    7 1 (0.2258065 0.7741935) *
+               239) emp_cat=15-30,Missing 25   12 1 (0.2352941 0.7647059) *
+        15) grade=D,E,F,G 1646 1131 0 (0.5287500 0.4712500)  
+          30) home_ownership=OWN,RENT 1282  786 0 (0.5647841 0.4352159)  
+            60) annual_inc>=15300 1227  726 0 (0.5756867 0.4243133)  
+             120) ir_cat=0-8,13.5+ 1070  606 0 (0.5888738 0.4111262)  
+               240) grade=D 805  420 0 (0.6129032 0.3870968) *
+               241) grade=E,F,G 265  186 0 (0.5218509 0.4781491)  
+                 482) age>=26.5 113   54 0 (0.6375839 0.3624161) *
+                 483) age< 26.5 152  108 1 (0.4500000 0.5500000)  
+                   966) annual_inc< 59500 133   99 0 (0.5025126 0.4974874)  
+                    1932) annual_inc< 19168 7    0 0 (1.0000000 0.0000000) *
+                    1933) annual_inc>=19168 126   93 1 (0.4843750 0.5156250)  
+                      3866) annual_inc>=38200 73   42 0 (0.5841584 0.4158416)  
+                        7732) loan_amnt< 15125 53   18 0 (0.7230769 0.2769231) *
+                        7733) loan_amnt>=15125 20   12 1 (0.3333333 0.6666667) *
+                      3867) annual_inc< 38200 53   34 1 (0.3736264 0.6263736) *
+                   967) annual_inc>=59500 19    8 1 (0.1951220 0.8048780) *
+             121) ir_cat=11-13.5,Missing 157  117 1 (0.4936709 0.5063291)  
+               242) grade=E,F,G 22    0 0 (1.0000000 0.0000000) *
+               243) grade=D 135   95 1 (0.4418605 0.5581395) *
+            61) annual_inc< 15300 55   35 1 (0.3684211 0.6315789)  
+             122) annual_inc< 9800 7    0 0 (1.0000000 0.0000000) *
+             123) annual_inc>=9800 48   28 1 (0.3181818 0.6818182) *
+          31) home_ownership=MORTGAGE,OTHER 364  249 1 (0.4191919 0.5808081) *
+
+
+
+
+
+
+
+
+> tree_weights$cp
+            CP nsplit rel error    xerror       xstd
+1  0.003652968      0 1.0000000 1.0000000 0.01049496
+2  0.003044140      5 0.9815830 1.0001522 0.01049546
+3  0.002080162      6 0.9785388 0.9926941 0.01047113
+4  0.001902588      9 0.9722983 0.9946728 0.01047761
+5  0.001826484     11 0.9684932 0.9966514 0.01048407
+6  0.001674277     13 0.9648402 0.9952816 0.01047960
+7  0.001471334     14 0.9631659 0.9957382 0.01048109
+8  0.001369863     18 0.9550989 1.0001522 0.01049546
+9  0.001217656     19 0.9537291 1.0010654 0.01049842
+10 0.001065449     23 0.9482496 1.0068493 0.01051706
+11 0.001000000     26 0.9450533 1.0123288 0.01053457
+
+> tree_weights$cptable
+            CP nsplit rel error    xerror       xstd
+1  0.003652968      0 1.0000000 1.0000000 0.01049496
+2  0.003044140      5 0.9815830 1.0001522 0.01049546
+3  0.002080162      6 0.9785388 0.9926941 0.01047113
+4  0.001902588      9 0.9722983 0.9946728 0.01047761
+5  0.001826484     11 0.9684932 0.9966514 0.01048407
+6  0.001674277     13 0.9648402 0.9952816 0.01047960
+7  0.001471334     14 0.9631659 0.9957382 0.01048109
+8  0.001369863     18 0.9550989 1.0001522 0.01049546
+9  0.001217656     19 0.9537291 1.0010654 0.01049842
+10 0.001065449     23 0.9482496 1.0068493 0.01051706
+11 0.001000000     26 0.9450533 1.0123288 0.01053457
+
+> tree_min
+[1] 0.002080162
+
+> prune(tree_weights,cp=tree_min)
+n= 19394 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+ 1) root 19394 6570 0 (0.7236477 0.2763523)  
+   2) grade=A,B 12650 3135 0 (0.7873134 0.2126866) *
+   3) grade=C,D,E,F,G 6744 3435 0 (0.6197698 0.3802302)  
+     6) annual_inc>=64995.96 2704 1107 0 (0.6783847 0.3216153)  
+      12) grade=C,D,E 2600 1014 0 (0.6904762 0.3095238) *
+      13) grade=F,G 104   73 1 (0.4397590 0.5602410) *
+     7) annual_inc< 64995.96 4040 2328 0 (0.5836910 0.4163090)  
+      14) grade=C 2394 1197 0 (0.6250000 0.3750000) *
+      15) grade=D,E,F,G 1646 1131 0 (0.5287500 0.4712500)  
+        30) home_ownership=OWN,RENT 1282  786 0 (0.5647841 0.4352159)  
+          60) annual_inc>=15300 1227  726 0 (0.5756867 0.4243133) *
+          61) annual_inc< 15300 55   35 1 (0.3684211 0.6315789) *
+        31) home_ownership=MORTGAGE,OTHER 364  249 1 (0.4191919 0.5808081) *
+
+
+
+
+
+
+
+
+
+
+
+# set a seed and run the code to obtain a tree using weights, minsplit and minbucket
+set.seed(345)
+tree_weights <- rpart(loan_status ~ ., 
+                      method = "class",
+                      data = training_set,
+                      control = rpart.control(minsplit = 5, 
+                                              minbucket = 2, 
+                                              cp = 0.001),
+                      weights = case_weights)
+
+# Plot the cross-validated error rate for a changing cp
+plotcp(tree_weights)
+
+# Create an index for of the row with the minimum xerror
+index <- which.min(tree_weights$cp[ , "xerror"])
+
+# Create tree_min
+tree_min <- tree_weights$cp[index, "CP"]
+
+# Prune the tree using tree_min
+prune(tree_weights,cp=tree_min)
+
+# Plot the pruned tree using the rpart.plot()-package
+prp(tree_weights, extra=1)
+
