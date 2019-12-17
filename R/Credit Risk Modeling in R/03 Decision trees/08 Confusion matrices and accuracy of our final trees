@@ -1,0 +1,338 @@
+Confusion matrices and accuracy of our final trees
+Over the past few exercises, you have constructed quite a few pruned decision trees, with four in total. As you can see, the eventual number of splits varies quite a bit from one tree to another:
+
+ptree_undersample  # 7 splits
+ptree_prior  # 9 splits
+ptree_loss_matrix  # 24 splits
+ptree_weights  # 6 splits
+
+Now it is important to know which tree performs best in terms of accuracy. In order to get the accuracy, you will start off by making predictions using the test set, and construct the confusion matrix for each of these trees. You will add the argument type = "class" when doing these predictions. By doing this there is no need to set a cut-off.
+
+Nevertheless, it is important to be aware of the fact that not only the accuracy is important, but also the sensitivity and specificity. Additionally, predicting probabilities instead of binary values (0 or 1) has the advantage that the cut-off can be moved along. Then again, the difficulty here is the choice of the cut-off. You will return to this in the next chapter.
+
+In case you needed a reminder, here is how to compute the accuracy:
+Classification accuracy=(TP+TN)/(TP+FP+TN+FN)
+
+
+
+
+Use predict() to make predictions for all four trees. The test_set should be included in the argument newdata. Don't forget to include type = "class"!
+Construct confusion matrices for each of these decision trees. Use the function table(), and include the "true"" status (using test_set$loan_status) first, followed by the prediction.
+Compute the accuracy using each of the confusion matrices.
+
+
+
+> ptree_undersample
+n= 6570 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+  1) root 6570 2190 0 (0.6666667 0.3333333)  
+    2) grade=A,B 3993 1045 0 (0.7382920 0.2617080) *
+    3) grade=C,D,E,F,G 2577 1145 0 (0.5556849 0.4443151)  
+      6) annual_inc>=63898 992  378 0 (0.6189516 0.3810484) *
+      7) annual_inc< 63898 1585  767 0 (0.5160883 0.4839117)  
+       14) grade=C 884  397 0 (0.5509050 0.4490950)  
+         28) age>=52 13    2 0 (0.8461538 0.1538462) *
+         29) age< 52 871  395 0 (0.5464983 0.4535017)  
+           58) annual_inc>=49100 262  105 0 (0.5992366 0.4007634) *
+           59) annual_inc< 49100 609  290 0 (0.5238095 0.4761905)  
+            118) loan_amnt< 8600 436  189 0 (0.5665138 0.4334862) *
+            119) loan_amnt>=8600 173   72 1 (0.4161850 0.5838150) *
+       15) grade=D,E,F,G 701  331 1 (0.4721826 0.5278174)  
+         30) home_ownership=OWN,RENT 537  260 0 (0.5158287 0.4841713) *
+         31) home_ownership=MORTGAGE,OTHER 164   54 1 (0.3292683 0.6707317) *
+
+
+
+> ptree_undersample$cp
+           CP nsplit rel error    xerror       xstd
+1 0.005936073      0 1.0000000 1.0000000 0.01744746
+2 0.004414003      4 0.9744292 0.9990868 0.01744348
+3 0.003653000      7 0.9611872 0.9817352 0.01736615
+
+
+
+
+
+
+
+
+
+
+
+
+
+> ptree_prior
+n= 19394 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+  1) root 19394 5818.20000 0 (0.7000000 0.3000000)  
+    2) grade=A,B 12650 2776.26400 0 (0.7673623 0.2326377) *
+    3) grade=C,D,E,F,G 6744 3041.93600 0 (0.5922419 0.4077581)  
+      6) annual_inc>=64995.96 2704  980.32680 0 (0.6527225 0.3472775)  
+       12) grade=C,D,E 2600  897.96880 0 (0.6653028 0.3346972) *
+       13) grade=F,G 104   57.60482 1 (0.4115721 0.5884279) *
+      7) annual_inc< 64995.96 4040 2061.60900 0 (0.5554247 0.4445753)  
+       14) grade=C 2394 1060.02800 0 (0.5976049 0.4023951)  
+         28) annual_inc>=49469.5 781  284.26820 0 (0.6516861 0.3483139) *
+         29) annual_inc< 49469.5 1613  775.76000 0 (0.5733294 0.4266706)  
+           58) loan_amnt< 7525 1038  438.35750 0 (0.6111260 0.3888740) *
+           59) loan_amnt>=7525 575  337.40250 0 (0.5116638 0.4883362)  
+            118) annual_inc>=39842.5 280  114.23860 0 (0.6207935 0.3792065) *
+            119) annual_inc< 39842.5 295  166.50160 1 (0.4272938 0.5727062) *
+       15) grade=D,E,F,G 1646 1001.37700 1 (0.4999492 0.5000508)  
+         30) home_ownership=OWN,RENT 1282  696.05860 0 (0.5362540 0.4637460)  
+           60) annual_inc>=15300 1227  642.92440 0 (0.5472985 0.4527015) *
+           61) annual_inc< 15300 55   27.61875 1 (0.3420152 0.6579848) *
+         31) home_ownership=MORTGAGE,OTHER 364  196.48770 1 (0.3914022 0.6085978) *
+
+
+
+> ptree_prior$cp
+           CP nsplit rel error    xerror       xstd
+1 0.004685050      0 1.0000000 1.0000000 0.02012607
+2 0.004385462      4 0.9812598 1.0008902 0.01993287
+3 0.004254453      5 0.9768743 0.9970651 0.01979692
+4 0.003246263      6 0.9726199 0.9859883 0.01952660
+5 0.001659458      9 0.9628811 0.9853006 0.01932985
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+> ptree_loss_matrix
+n= 19394 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+   1) root 19394 17204 1 (0.88707848 0.11292152)  
+     2) grade=A,B 12650 10450 0 (0.91739130 0.08260870)  
+       4) ir_cat=0-8,Missing 6009  3570 0 (0.94058912 0.05941088)  
+         8) annual_inc>=54036 3283  1350 0 (0.95887907 0.04112093) *
+         9) annual_inc< 54036 2726  2220 0 (0.91856200 0.08143800)  
+          18) emp_cat=0-15 2320  1690 0 (0.92715517 0.07284483)  
+            36) annual_inc>=15042.5 2260  1590 0 (0.92964602 0.07035398) *
+            37) annual_inc< 15042.5 60    50 1 (0.83333333 0.16666667) *
+          19) emp_cat=15-30,30-45,45+,Missing 406   353 1 (0.86945813 0.13054187) *
+       5) ir_cat=11-13.5,8-11 6641  5953 1 (0.89640114 0.10359886)  
+        10) annual_inc>=43924.5 4496  3950 0 (0.91214413 0.08785587)  
+          20) annual_inc>=91217.1 1180   750 0 (0.93644068 0.06355932)  
+            40) age< 52.5 1164   710 0 (0.93900344 0.06099656) *
+            41) age>=52.5 16    12 1 (0.75000000 0.25000000) *
+          21) annual_inc< 91217.1 3316  2996 1 (0.90349819 0.09650181)  
+            42) emp_cat=0-15,15-30,30-45 3263  2958 1 (0.90652774 0.09347226)  
+              84) ir_cat=8-11 1982  1610 0 (0.91876892 0.08123108)  
+               168) age>=24.5 1202   850 0 (0.92928453 0.07071547)  
+                 336) annual_inc< 85002 1129   740 0 (0.93445527 0.06554473) *
+                 337) annual_inc>=85002 73    62 1 (0.84931507 0.15068493) *
+               169) age< 24.5 780   704 1 (0.90256410 0.09743590)  
+                 338) loan_amnt>=4925 645   540 0 (0.91627907 0.08372093)  
+                   676) loan_amnt< 17550 550   380 0 (0.93090909 0.06909091)  
+                    1352) loan_amnt>=10562.5 207    80 0 (0.96135266 0.03864734) *
+                    1353) loan_amnt< 10562.5 343   300 0 (0.91253644 0.08746356)  
+                      2706) annual_inc>=47150 304   220 0 (0.92763158 0.07236842) *
+                      2707) annual_inc< 47150 39    31 1 (0.79487179 0.20512821) *
+                   677) loan_amnt>=17550 95    79 1 (0.83157895 0.16842105) *
+                 339) loan_amnt< 4925 135   113 1 (0.83703704 0.16296296) *
+              85) ir_cat=11-13.5 1281  1137 1 (0.88758782 0.11241218)  
+               170) age>=27.5 498   430 0 (0.91365462 0.08634538)  
+                 340) annual_inc>=89002 19     0 0 (1.00000000 0.00000000) *
+                 341) annual_inc< 89002 479   430 0 (0.91022965 0.08977035)  
+                   682) annual_inc< 84618 453   360 0 (0.92052980 0.07947020)  
+                    1364) annual_inc>=62750 214   110 0 (0.94859813 0.05140187) *
+                    1365) annual_inc< 62750 239   214 1 (0.89539749 0.10460251) *
+                   683) annual_inc>=84618 26    19 1 (0.73076923 0.26923077) *
+               171) age< 27.5 783   682 1 (0.87100894 0.12899106)  
+                 342) loan_amnt< 1900 25     0 0 (1.00000000 0.00000000) *
+                 343) loan_amnt>=1900 758   657 1 (0.86675462 0.13324538) *
+            43) emp_cat=45+,Missing 53    38 1 (0.71698113 0.28301887) *
+        11) annual_inc< 43924.5 2145  1852 1 (0.86340326 0.13659674)  
+          22) ir_cat=8-11 1330  1175 1 (0.88345865 0.11654135)  
+            44) loan_amnt>=13012.5 93    40 0 (0.95698925 0.04301075) *
+            45) loan_amnt< 13012.5 1237  1086 1 (0.87793048 0.12206952)  
+              90) home_ownership=OWN 137    80 0 (0.94160584 0.05839416) *
+              91) home_ownership=MORTGAGE,OTHER,RENT 1100   957 1 (0.87000000 0.13000000) *
+          23) ir_cat=11-13.5 815   677 1 (0.83067485 0.16932515) *
+     3) grade=C,D,E,F,G 6744  5599 1 (0.83021945 0.16978055) *
+
+
+
+
+
+> ptree_loss_matrix$cp
+            CP nsplit rel error    xerror       xstd
+1  0.067135550      0 1.0000000 10.000000 0.02561968
+2  0.053882818      1 0.9328645  5.346373 0.04012988
+3  0.010317368      2 0.8789816  6.375494 0.03995584
+4  0.006132295      4 0.8583469  5.598989 0.04026390
+5  0.005144153      6 0.8460823  5.481342 0.04024712
+6  0.003642564      8 0.8357940  5.638514 0.04027613
+7  0.002906301     11 0.8248663  5.477563 0.04024825
+8  0.002790049     12 0.8219600  5.399791 0.04022400
+9  0.001898783     13 0.8191700  5.414904 0.04022844
+10 0.001627528     16 0.8134736  5.480528 0.04024469
+11 0.001472526     17 0.8118461  5.470007 0.04023912
+12 0.001453150     21 0.8053360  5.488433 0.04024397
+13 0.001424087     22 0.8038828  5.472390 0.04023925
+14 0.001278800     24 0.8010346  5.350326 0.04019267
+
+
+
+
+
+
+
+
+
+> ptree_weights
+n= 19394 
+
+node), split, n, loss, yval, (yprob)
+      * denotes terminal node
+
+ 1) root 19394 6570 0 (0.7236477 0.2763523)  
+   2) grade=A,B 12650 3135 0 (0.7873134 0.2126866) *
+   3) grade=C,D,E,F,G 6744 3435 0 (0.6197698 0.3802302)  
+     6) annual_inc>=64995.96 2704 1107 0 (0.6783847 0.3216153)  
+      12) grade=C,D,E 2600 1014 0 (0.6904762 0.3095238) *
+      13) grade=F,G 104   73 1 (0.4397590 0.5602410) *
+     7) annual_inc< 64995.96 4040 2328 0 (0.5836910 0.4163090)  
+      14) grade=C 2394 1197 0 (0.6250000 0.3750000) *
+      15) grade=D,E,F,G 1646 1131 0 (0.5287500 0.4712500)  
+        30) home_ownership=OWN,RENT 1282  786 0 (0.5647841 0.4352159)  
+          60) annual_inc>=15300 1227  726 0 (0.5756867 0.4243133) *
+          61) annual_inc< 15300 55   35 1 (0.3684211 0.6315789) *
+        31) home_ownership=MORTGAGE,OTHER 364  249 1 (0.4191919 0.5808081) *
+
+
+
+
+
+> ptree_weights$cp
+           CP nsplit rel error    xerror       xstd
+1 0.003652968      0 1.0000000 1.0000000 0.01049496
+2 0.003044140      5 0.9815830 1.0001522 0.01049546
+3 0.002080162      6 0.9785388 0.9926941 0.01047113
+
+
+
+
+
+
+
+
+
+
+
+> confmat_undersample
+   pred_undersample
+       0    1
+  0 8314  346
+  1  964   73
+
+> acc_undersample
+[1] 0.8649067
+
+
+
+> confmat_prior
+   pred_prior
+       0    1
+  0 8335  325
+  1  950   87
+
+> acc_prior
+[1] 0.868516
+
+
+
+> confmat_loss_matrix
+   pred_loss_matrix
+       0    1
+  0 4159 4501
+  1  279  758
+
+> acc_loss_matrix
+[1] 0.507064
+
+
+
+
+> confmat_weights
+   pred_weights
+       0    1
+  0 8458  202
+  1  983   54
+  
+> acc_weights
+[1] 0.8777973
+
+
+
+
+
+
+
+# Make predictions for each of the pruned trees using the test set.
+#note that trees being used for predictions below have not undergone pruning
+pred_undersample <- predict(ptree_undersample, newdata = test_set,  type = "class")
+pred_prior <- predict(ptree_prior, newdata = test_set,  type = "class")
+pred_loss_matrix <- predict(ptree_loss_matrix, newdata = test_set,  type = "class")
+pred_weights <- predict(ptree_weights, newdata = test_set,  type = "class")
+
+
+# construct confusion matrices using the predictions.
+#actual vs prediction
+confmat_undersample <- table(test_set$loan_status, pred_undersample)
+confmat_prior <- table(test_set$loan_status, pred_prior)
+confmat_loss_matrix <- table(test_set$loan_status, pred_loss_matrix)
+confmat_weights <- table(test_set$loan_status, pred_weights)
+
+
+# Compute the accuracies
+acc_undersample <- sum(diag(confmat_undersample)) / nrow(test_set)
+acc_prior <- sum(diag(confmat_prior)) / nrow(test_set)
+acc_loss_matrix <- sum(diag(confmat_loss_matrix)) / nrow(test_set)
+acc_weights <- sum(diag(confmat_weights)) / nrow(test_set)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Optimizing the accuracy
+The accuracies obtained in the previous exercise,
+acc_undersample
+acc_prior
+acc_loss_matrix
+acc_weights
+are loaded in your workspace again. Have a look at them. Which tree performs best, when looking at accuracy alone?
+
+#yes ptree_weights
