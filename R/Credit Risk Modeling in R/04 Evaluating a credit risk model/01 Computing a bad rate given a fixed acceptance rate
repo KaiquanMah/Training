@@ -1,0 +1,73 @@
+Computing a bad rate given a fixed acceptance rate
+In the video, you learned how to compute the bad rate (or, the percentage of defaults) in the loan portfolio of a bank when given:
+a specific model
+the acceptance rate
+
+In this exercise, you will compute the bad rate that a bank can expect when using the pruned tree ptree_prior that you fitted before, and an acceptance rate of 80%. As a reminder, the tree is plotted on your right hand side.
+
+
+In the script, you are provided the code to make predictions for the probability of default using the pruned tree and test_set. Remember that if you use the predict() function for a tree, the probability of default can be found in the second column. Therefore [,2] was pasted to the predict() function.
+Obtain the cut-off that leads to an acceptance rate of 80%, using prob_default_prior. You can use the quantile()- function to do this, setting the second argument to 0.8. Assign the name cutoff_prior.
+The code to obtain the actual binary default predictions (0 or 1) is provided. ifelse() here. Name the object bin_pred_prior_80.
+The code to select the default indicators of test_set for the accepted loans acording to a 80% acceptance rate is provided.
+Compute the percentage of defaults (or the "bad rate") for the accepted loans. This is the number of occurences of 1 in accepted_status_prior_80, divided by the total number of instances in this vector. Print the solution to your R-console.
+
+#https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/quantile
+#https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse
+
+> predict(ptree_prior, newdata = test_set)
+              0         1
+1     0.7673623 0.2326377
+2     0.6111260 0.3888740
+3     0.6207935 0.3792065
+4     0.7673623 0.2326377
+...
+
+
+> cutoff_prior
+      80% 
+0.3483139
+
+
+> head(test_set)
+  loan_status loan_amnt grade home_ownership annual_inc age emp_cat  ir_cat
+1           0      5000     B           RENT      24000  33    0-15    8-11
+2           0      2400     C           RENT      12252  31   15-30 Missing
+3           0     10000     C           RENT      49200  24    0-15 11-13.5
+4           0      5000     A           RENT      36000  39    0-15 Missing
+5           0      3000     E           RENT      48000  24    0-15 Missing
+8           0      3000     B           RENT      15000  22    0-15    8-11
+
+> accepted_status_prior_80
+   [1] 0 0 0 0 1 0 
+...
+[7993] 0 0 1 0 0
+
+
+
+
+# Make predictions for the probability of default using the pruned tree and the test set.
+prob_default_prior <- predict(ptree_prior, newdata = test_set)[ ,2]
+
+# Obtain the cutoff for acceptance rate 80%
+cutoff_prior <- quantile(prob_default_prior,0.8)
+
+
+# Obtain the binary predictions.
+# >80% will be 1
+# <=80% will be 0
+bin_pred_prior_80 <- ifelse(prob_default_prior > cutoff_prior, 1, 0)
+
+
+# Obtain the actual default status for the accepted loans
+# based on whether the binary predicted value is 0/non-default, give me True/False values
+# then subset the original loan_status column using the indexes from the 0/non-default predicted observations
+accepted_status_prior_80 <- test_set$loan_status[bin_pred_prior_80 == 0]
+
+
+# Obtain the bad rate for the accepted loans
+# i.e. the sum of actual 1s when we predicted as 0s, i.e. the False Negatives
+# then divide by the length of the list
+sum(accepted_status_prior_80)/length(accepted_status_prior_80)
+[1] 0.09228461
+
