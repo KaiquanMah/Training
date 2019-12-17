@@ -1,0 +1,58 @@
+ROC-curves for comparison of tree-based models
+It's time for you to repeat the previous exercises, now comparing the tree-based models. The pROC() is now loaded in your workspace. The PD-predictions for tree-based methods are stored in the objects
+
+predictions_undersample
+predictions_prior
+predictions_loss_matrix
+predictions_weights
+
+
+
+Construct the ROC-objects for the tree based methods using function roc(response, predictor).
+Use the previously created objects to construct ROC-curves. To draw them all on one plot, use plot() for the first ROC-curve drawn (for ROC_undersample), and lines() for the other three models to the same plot. Use the col-argument to change the color of the curve of ROC_prior to blue, ROC_loss_matrix to red and ROC_weights to green.
+To get a better idea of the performance of the ROC-curves, have a look at the AUC's using function auc().
+
+
+
+# Construct the objects containing ROC-information
+ROC_undersample <- roc(test_set$loan_status, predictions_undersample)
+ROC_prior <- roc(test_set$loan_status, predictions_prior)
+ROC_loss_matrix <- roc(test_set$loan_status, predictions_loss_matrix)
+ROC_weights <- roc(test_set$loan_status, predictions_weights)
+
+
+# Draw the ROC-curves in one plot
+plot(ROC_undersample)
+> plot(ROC_undersample)
+Call:
+roc.default(response = test_set$loan_status, predictor = predictions_undersample)
+
+Data: predictions_undersample in 8660 controls (test_set$loan_status 0) < 1037 cases (test_set$loan_status 1).
+Area under the curve: 0.5997
+
+
+
+
+lines(ROC_prior, col="blue")  
+lines(ROC_loss_matrix, col="red")  
+lines(ROC_weights, col="green")  
+
+
+# Compute the AUCs
+auc(ROC_undersample)
+auc(ROC_prior)
+auc(ROC_loss_matrix)
+auc(ROC_weights)
+
+
+
+> auc(ROC_undersample)
+Area under the curve: 0.5997
+> auc(ROC_prior)
+Area under the curve: 0.6016
+> auc(ROC_loss_matrix)
+Area under the curve: 0.6272
+> auc(ROC_weights)
+Area under the curve: 0.6006
+
+
