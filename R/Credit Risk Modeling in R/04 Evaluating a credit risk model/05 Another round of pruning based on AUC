@@ -1,0 +1,62 @@
+Another round of pruning based on AUC
+In the video you saw how the "full" logistic regression model with a logit link was being pruned based on the AUC. You saw how the variable home_ownership was deleted from the model, as it improved the overall AUC. After repeating this process for two additional rounds, the variables age and ir_cat were deleted, leading to the model:
+log_3_remove_ir <- glm(loan_status ~ loan_amnt + grade + annual_inc + emp_cat, family = binomial, data = training_set)
+
+with an AUC of 0.6545. Now, it's your turn to see whether the AUC can still be improved by deleting another variable from the model.
+
+Delete one variable at a time in the model log_3_remove_ir, Remember that you should be using the default link function (logit).
+Make probability of default-predictions for each of the models you created.
+Use function auc() using test_set$loan_status as a first argument and the predictions for each of the four models as a second argument to obtain the AUC's for each model.
+Copy the name of the object (as given in the first question of this exercise) that represents the model with the best AUC.
+
+
+
+
+# Build four models each time deleting one variable in log_3_remove_ir
+log_4_remove_amnt <- glm(loan_status ~ grade + annual_inc + emp_cat, 
+                        family = binomial, data = training_set) 
+log_4_remove_grade <- glm(loan_status ~ loan_amnt + annual_inc + emp_cat, family = binomial, data = training_set)
+log_4_remove_inc <- glm(loan_status ~ loan_amnt + grade + emp_cat, family = binomial, data = training_set)
+log_4_remove_emp <-glm(loan_status ~ loan_amnt + grade + annual_inc, family = binomial, data = training_set)
+
+# Make PD-predictions for each of the models
+pred_4_remove_amnt <- predict(log_4_remove_amnt, newdata = test_set, type = "response")
+pred_4_remove_grade <- predict(log_4_remove_grade, newdata = test_set, type = "response")
+pred_4_remove_inc <- predict(log_4_remove_inc, newdata = test_set, type = "response")
+pred_4_remove_emp <- predict(log_4_remove_emp, newdata = test_set, type = "response")
+
+# Compute the AUCs
+auc(test_set$loan_status, pred_4_remove_amnt)
+auc(test_set$loan_status, pred_4_remove_grade)
+auc(test_set$loan_status, pred_4_remove_inc)
+auc(test_set$loan_status, pred_4_remove_emp)
+
+
+> auc(test_set$loan_status, pred_4_remove_amnt)
+Area under the curve: 0.6548
+> auc(test_set$loan_status, pred_4_remove_grade)
+Area under the curve: 0.5904
+> auc(test_set$loan_status, pred_4_remove_inc)
+Area under the curve: 0.6401
+> auc(test_set$loan_status, pred_4_remove_emp)
+Area under the curve: 0.6535
+
+
+
+
+
+
+
+
+Best of four
+The AUC-values for the four models built in the previous exercise are stored in
+
+AUC_4_remove_amnt 
+AUC_4_remove_grade
+AUC_4_remove_inc 
+AUC_4_remove_emp 
+Which model should be preferred based on AUC?
+
+#yes log_4_remove_amnt
+
+
