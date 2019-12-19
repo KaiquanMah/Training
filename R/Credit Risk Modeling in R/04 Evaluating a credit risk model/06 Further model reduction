@@ -1,0 +1,57 @@
+Further model reduction?
+Deleting the variable loan_amnt, the AUC can be further improved to 0.6548! The resulting model is
+log_4_remove_amnt <- glm(loan_status ~ grade + annual_inc + emp_cat, family = binomial, data = training_set) 
+
+Is it possible to reduce the logistic regression model to only two variable without reducing the AUC? In this exercise you will see if it is possible!
+
+
+
+Again, delete one variable at a time in the model log_4_remove_amnt, Remember that you should be using the default link function (logit).
+Use predict() to make probability of default predictions for each model you created.
+Obtain the AUC's for each of the three models, using test_set$loan_status as a first argument and the predictions for each of the three models as a second argument.
+Plot the ROC-curve for the model with the highest AUC in your workspace, using plot(roc()) where the content of roc() is the same as the content for the function auc() with the highest AUC. Note that it is possible that the AUC cannot be reduced anymore with respect to model log_4_remove_amnt. The predictions for this model are loaded in your workspace as pred_4_remove_amnt, in the case that this model leads to the highest AUC.
+
+
+# Build three models each time deleting one variable in log_4_remove_amnt
+log_5_remove_grade <- glm(loan_status ~ annual_inc + emp_cat, family = binomial, data = training_set) 
+log_5_remove_inc <- glm(loan_status ~ grade + emp_cat, family = binomial, data = training_set) 
+log_5_remove_emp <- glm(loan_status ~ grade + annual_inc, family = binomial, data = training_set)  
+
+
+# Make PD-predictions for each of the models
+pred_5_remove_grade <- predict(log_5_remove_grade, newdata = test_set, type = "response")
+pred_5_remove_inc <- predict(log_5_remove_inc, newdata = test_set, type = "response")
+pred_5_remove_emp <- predict(log_5_remove_emp, newdata = test_set, type = "response")
+
+
+# Compute the AUCs
+auc(test_set$loan_status, pred_5_remove_grade)
+auc(test_set$loan_status, pred_5_remove_inc)
+auc(test_set$loan_status, pred_5_remove_emp)
+
+
+
+> auc(test_set$loan_status, pred_5_remove_grade)
+Area under the curve: 0.5878
+> auc(test_set$loan_status, pred_5_remove_inc)
+Area under the curve: 0.634
+> auc(test_set$loan_status, pred_5_remove_emp)
+Area under the curve: 0.6537
+
+
+
+
+
+
+# Plot the ROC-curve for the best model here
+plot(roc(test_set$loan_status, pred_4_remove_amnt))
+
+>plot(roc(test_set$loan_status, pred_4_remove_amnt))
+Call:
+roc.default(response = test_set$loan_status, predictor = pred_4_remove_amnt)
+
+Data: pred_4_remove_amnt in 8660 controls (test_set$loan_status 0) < 1037 cases (test_set$loan_status 1).
+Area under the curve: 0.6548
+
+
+
