@@ -1,0 +1,121 @@
+Make a VCorpus from a data frame
+If your text data is in a data frame you can use DataframeSource() for your analysis. The data frame passed to DataframeSource() must have a specific structure:
+Column one must be called doc_id and contain a unique string for each row.
+Column two must be called text with "UTF-8" encoding (pretty standard).
+Any other columns, 3+ are considered metadata and will be retained as such.
+
+This exercise introduces meta() to extract the metadata associated with each document. Often your data will have metadata such as authors, dates, topic tags or places which can inform your analysis. Once your text is a corpus, you can apply meta() to examine the additional document level information.
+
+
+
+In your workspace, there's a simple data frame called example_text with the correct column names and some metadata. There is also vec_corpus which is a volatile corpus made with VectorSource()
+Create df_source using DataframeSource() with the example_text.
+Create df_corpus by converting df_source to a volatile corpus object with VCorpus().
+Print out df_corpus. Notice how many documents it contains and the number of retained document level metadata points.
+Use meta() on df_corpus to print the document associated metadata.
+Examine the pre-loaded vec_corpus object. Compare the number of documents to df_corpus.
+Use meta() on vec_corpus to compare any metadata found between vec_corpus and df_corpus.
+
+
+
+> example_text
+  doc_id                                text  author       date
+1      1        Text mining is a great time. Author1 1514953399
+2      2     Text analysis provides insights Author2 1514866998
+3      3 qdap and tm are used in text mining Author3 1514780598
+
+> vec_corpus
+<<VCorpus>>
+Metadata:  corpus specific: 0, document level (indexed): 0
+Content:  documents: 3
+
+
+
+
+
+
+
+> df_source
+$encoding
+[1] ""
+
+$length
+[1] 3
+
+$position
+[1] 0
+
+$reader
+function (elem, language, id) 
+{
+    PlainTextDocument(elem$content[, "text"], id = elem$content[, 
+        "doc_id"], language = language)
+}
+<environment: namespace:tm>
+
+$content
+  doc_id                                text  author       date
+1      1        Text mining is a great time. Author1 1514953399
+2      2     Text analysis provides insights Author2 1514866998
+3      3 qdap and tm are used in text mining Author3 1514780598
+
+attr(,"class")
+[1] "DataframeSource" "SimpleSource"    "Source"
+
+
+
+
+
+
+
+
+
+
+
+# Create a DataframeSource from the example text
+df_source <- DataframeSource(example_text)
+
+# Convert df_source to a volatile corpus
+df_corpus <- VCorpus(df_source)
+
+# Examine df_corpus
+df_corpus
+
+# Examine df_corpus metadata
+meta(df_corpus)
+
+# Compare the number of documents in the vector source
+vec_corpus
+
+# Compare metadata in the vector corpus
+meta(vec_corpus)
+
+
+
+
+
+#using DataframeSource(example_text)
+> df_corpus
+<<VCorpus>>
+Metadata:  corpus specific: 0, document level (indexed): 2
+Content:  documents: 3
+
+#you can get more meaningful metadata with meta(corpus)
+> meta(df_corpus)
+   author       date
+1 Author1 1514953399
+2 Author2 1514866998
+3 Author3 1514780598
+
+
+
+#using VectorSource(example_text)
+> vec_corpus
+<<VCorpus>>
+Metadata:  corpus specific: 0, document level (indexed): 0
+Content:  documents: 3
+
+> meta(vec_corpus)
+data frame with 0 columns and 3 rows
+
+
