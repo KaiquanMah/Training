@@ -1,0 +1,63 @@
+Load some text
+Text mining begins with loading some text data into R, which we'll do with the read.csv() function. By default, read.csv() treats character strings as factor levels like Male/Female. To prevent this from happening, it's very important to use the argument stringsAsFactors = FALSE.
+A best practice is to examine the object you read in to make sure you know which column(s) are important. The str() function provides an efficient way of doing this.
+If the data frame contains columns that are not text, you may want to make a new object using only the correct column of text (e.g. some_object$column_name).
+Be aware that this is real data from Twitter and as such there is always a risk that it may contain profanity or other offensive content (in this exercise, and any following exercises that also use real Twitter data).
+
+
+
+The data has been loaded for you and is available in coffee_data_file.
+Create a new object tweets using read.csv() on the file coffee_data_file, which contains tweets mentioning coffee. Remember to add stringsAsFactors = FALSE!
+Examine the tweets object using str() to determine which column has the text you'll want to analyze.
+Make a new coffee_tweets object using only the text column you identified earlier. To do so, use the $ operator and column name.
+
+
+> coffee_data_file
+[1] "/usr/local/share/datasets/coffee.csv"
+
+> str(tweets)
+'data.frame':	1000 obs. of  15 variables:
+ $ num         : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ text        : chr  "@ayyytylerb that is so true drink lots of coffee" "RT @bryzy_brib: Senior March tmw morning at 7:25 A.M. in the SENIOR lot. Get up early, make yo coffee/breakfast"| __truncated__ "If you believe in #gunsense tomorrow would be a very good day to have your coffee any place BUT @Starbucks Guns"| __truncated__ "My cute coffee mug. http://t.co/2udvMU6XIG" ...
+ $ favorited   : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+ $ replyToSN   : chr  "ayyytylerb" NA NA NA ...
+ $ created     : chr  "8/9/2013 2:43" "8/9/2013 2:43" "8/9/2013 2:43" "8/9/2013 2:43" ...
+ $ truncated   : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+ $ replyToSID  : num  3.66e+17 NA NA NA NA ...
+ $ id          : num  3.66e+17 3.66e+17 3.66e+17 3.66e+17 3.66e+17 ...
+ $ replyToUID  : int  1637123977 NA NA NA NA NA NA 1316942208 NA NA ...
+ $ statusSource: chr  "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>" "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>" "web" "<a href=\"http://twitter.com/download/android\" rel=\"nofollow\">Twitter for Android</a>" ...
+ $ screenName  : chr  "thejennagibson" "carolynicosia" "janeCkay" "AlexandriaOOTD" ...
+ $ retweetCount: int  0 1 0 0 2 0 0 0 1 2 ...
+ $ retweeted   : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+ $ longitude   : logi  NA NA NA NA NA NA ...
+ $ latitude    : logi  NA NA NA NA NA NA ...
+
+
+
+
+
+
+# Import text data from CSV, no factors
+tweets <- read.csv(coffee_data_file, stringsAsFactors = FALSE)
+
+
+# View the structure of tweets
+str(tweets)
+
+# Isolate text from tweets
+coffee_tweets <- tweets$text
+
+
+
+
+> head(coffee_tweets)
+[1] "@ayyytylerb that is so true drink lots of coffee"                                                                                            
+[2] "RT @bryzy_brib: Senior March tmw morning at 7:25 A.M. in the SENIOR lot. Get up early, make yo coffee/breakfast, cus this will only happen ?"
+[3] "If you believe in #gunsense tomorrow would be a very good day to have your coffee any place BUT @Starbucks Guns+Coffee=#nosense @MomsDemand" 
+[4] "My cute coffee mug. http://t.co/2udvMU6XIG"                                                                                                  
+[5] "RT @slaredo21: I wish we had Starbucks here... Cause coffee dates in the morning sound perff!"                                               
+[6] "Does anyone ever get a cup of coffee before a cocktail??"
+
+
+
