@@ -1,0 +1,86 @@
+Word stemming and stem completion on a sentence
+Let's consider the following sentence as our document for this exercise:
+"In a complicated haste, Tom rushed to fix a new complication, too complicatedly."
+
+This sentence contains the same three forms of the word "complicate" that we saw in the previous exercise. The difference here is that even if you called stemDocument() on this sentence, it would return the sentence without stemming any words. Take a moment and try it out in the console. Be sure to include the punctuation marks.
+This happens because stemDocument() treats the whole sentence as one word. In other words, our document is a character vector of length 1, instead of length n, where n is the number of words in the document. To solve this problem, we first remove the punctuation marks with the removePunctuation() function you learned a few exercises back. We then strsplit() this character vector of length 1 to length n, unlist(), then proceed to stem and re-complete.
+Don't worry if that was confusing. Let's go through the process step by step!
+
+
+
+The document text_data and the completion dictionary comp_dict are loaded in your workspace.
+Remove the punctuation marks in text_data using removePunctuation(), assigning to rm_punc.
+Call strsplit() on rm_punc with the split argument set equal to " ". Nest this inside unlist(), assigning to n_char_vec.
+Use stemDocument() again to perform word stemming on n_char_vec, assigning to stem_doc.
+Create complete_doc by re-completing your stemmed document with stemCompletion() and using comp_dict as your reference corpus.
+Are stem_doc and complete_doc what you expected?
+
+
+
+
+> text_data
+[1] "In a complicated haste, Tom rushed to fix a new complication, too complicatedly."
+
+> stemDocument(text_data)
+[1] "In a complic haste, Tom rush to fix a new complication, too complicatedly."
+
+
+> comp_dict
+ [1] "In"         "a"          "complicate" "haste"      "Tom"       
+ [6] "rush"       "to"         "fix"        "new"        "too"
+
+
+> removePunctuation(text_data)
+[1] "In a complicated haste Tom rushed to fix a new complication too complicatedly"
+
+> strsplit(rm_punc, split = " ")
+[[1]]
+ [1] "In"            "a"             "complicated"   "haste"        
+ [5] "Tom"           "rushed"        "to"            "fix"          
+ [9] "a"             "new"           "complication"  "too"          
+[13] "complicatedly"
+
+> unlist(strsplit(rm_punc, split = " "))
+ [1] "In"            "a"             "complicated"   "haste"        
+ [5] "Tom"           "rushed"        "to"            "fix"          
+ [9] "a"             "new"           "complication"  "too"          
+[13] "complicatedly"
+
+
+
+
+
+
+
+
+
+
+
+# Remove punctuation: rm_punc
+rm_punc <- removePunctuation(text_data)
+
+
+# Create character vector: n_char_vec
+n_char_vec <- unlist(strsplit(rm_punc, split = " "))
+
+# Perform word stemming: stem_doc
+stem_doc <- stemDocument(n_char_vec)
+
+# Print stem_doc
+stem_doc
+
+# Re-complete stemmed document: complete_doc
+complete_doc <- stemCompletion(stem_doc, comp_dict)
+
+# Print complete_doc
+complete_doc
+
+> complete_doc
+          In            a      complic         hast          Tom         rush 
+        "In"          "a" "complicate"      "haste"        "Tom"       "rush" 
+          to          fix            a          new      complic          too 
+        "to"        "fix"          "a"        "new" "complicate"        "too" 
+     complic 
+"complicate"
+
+
