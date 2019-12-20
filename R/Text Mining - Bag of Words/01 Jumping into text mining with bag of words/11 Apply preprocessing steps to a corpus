@@ -1,0 +1,99 @@
+Apply preprocessing steps to a corpus
+The tm package provides a function tm_map() to apply cleaning functions to an entire corpus, making the cleaning steps easier.
+tm_map() takes two arguments, a corpus and a cleaning function. Here, removeNumbers() is from the tm package.
+corpus <- tm_map(corpus, removeNumbers)
+
+For compatibility, base R and qdap functions need to be wrapped in content_transformer().
+corpus <- tm_map(corpus, content_transformer(replace_abbreviation))
+
+You may be applying the same functions over multiple corpora; using a custom function like the one displayed in the editor will save you time (and lines of code). clean_corpus() takes one argument, corpus, and applies a series of cleaning functions to it in order, then returns the updated corpus.
+The order of cleaning steps makes a difference. For example, if you removeNumbers() and then replace_number(), the second function won't find anything to change! Check, check, and re-check your results!
+
+
+
+
+Edit the custom function clean_corpus() in the sample code to apply (in order):
+tm's removePunctuation().
+Base R's tolower().
+Append "mug" to the stop words list.
+tm's stripWhitespace().
+
+
+
+
+# Alter the function code to match the instructions
+clean_corpus <- function(corpus) {
+  # Remove punctuation
+  corpus <- tm_map(corpus, removePunctuation)
+  # Transform to lower case
+  corpus <- tm_map(corpus, content_transformer(tolower))
+  # Add more stopwords
+  corpus <- tm_map(corpus, removeWords, words = c(stopwords("en"), "coffee", "mug"))
+  # Strip whitespace
+  corpus <- tm_map(corpus, stripWhitespace)
+  return(corpus)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Create clean_corp by applying clean_corpus() to the included corpus tweet_corp.
+Print the cleaned 227th tweet in clean_corp using indexing [[227]] and content().
+Compare it to the original tweet from tweets$text tweet using [227].
+
+
+> tweet_corp
+<<VCorpus>>
+Metadata:  corpus specific: 0, document level (indexed): 0
+Content:  documents: 1000
+
+> clean_corpus(tweet_corp)
+<<VCorpus>>
+Metadata:  corpus specific: 0, document level (indexed): 0
+Content:  documents: 1000
+
+
+> content(clean_corp[[227]])
+[1] "also dogs arent smart enough dip donut eat part thats dipped ladyandthetramp"
+
+
+> tweets$text[227]
+[1] "Also, dogs aren't smart enough to dip the donut in the coffee and then eat the part that's been dipped. #ladyandthetramp"
+
+
+
+
+
+
+
+# Alter the function code to match the instructions
+clean_corpus <- function(corpus){
+  corpus <- tm_map(corpus, removePunctuation)
+  corpus <- tm_map(corpus, content_transformer(tolower))
+  corpus <- tm_map(corpus, removeWords, words = c(stopwords("en"), "coffee", "mug"))
+  corpus <- tm_map(corpus, stripWhitespace)
+  return(corpus)
+}
+
+
+# Apply your customized function to the tweet_corp: clean_corp
+clean_corp <- clean_corpus(tweet_corp)
+
+# Print out a cleaned up tweet
+content(clean_corp[[227]])
+
+# Print out the same tweet in original form
+tweets$text[227]
+
+
