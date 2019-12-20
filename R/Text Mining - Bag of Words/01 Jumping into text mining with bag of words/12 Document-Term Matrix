@@ -1,0 +1,58 @@
+Make a document-term matrix
+Hopefully you are not too tired after all this basic text mining work! Just in case, let's revisit the coffee and get some Starbucks while building a document-term matrix from coffee tweets.
+Beginning with the coffee.csv file, we have used common transformations to produce a clean corpus called clean_corp.
+The document-term matrix is used when you want to have each document represented as a row. This can be useful if you are comparing authors within rows, or the data is arranged chronologically and you want to preserve the time series. The tm package uses a "simple triplet matrix" class. However, it is often easier to manipulate and examine the object by re-classifying the DTM with as.matrix()
+
+
+Create coffee_dtm by applying DocumentTermMatrix() to clean_corp.
+Create coffee_m, a matrix version of coffee_dtm, using as.matrix().
+Print the dimensions of coffee_m to the console using the dim() function. Note the number of rows and columns.
+Print the subset of coffee_m containing documents (rows) 25 through 35 and terms (columns) "star" and "starbucks".
+
+
+
+
+# Create the document-term matrix from the corpus
+coffee_dtm <- DocumentTermMatrix(clean_corp)
+
+# Print out coffee_dtm data
+coffee_dtm
+> coffee_dtm
+<<DocumentTermMatrix (documents: 1000, terms: 3101)>>
+Non-/sparse entries: 7724/3093276
+Sparsity           : 100%
+Maximal term length: 33
+Weighting          : term frequency (tf)
+
+
+# Convert coffee_dtm to a matrix
+coffee_m <- as.matrix(coffee_dtm)
+
+# Print the dimensions of coffee_m
+dim(coffee_m)
+> dim(coffee_m)
+[1] 1000 3101
+
+
+# Review a portion of the matrix to get some Starbucks
+coffee_m[25:35, c("star", "starbucks")]
+
+
+> coffee_m[25:35, c("star", "starbucks")]
+    Terms
+Docs star starbucks
+  25    0         0
+  26    0         1
+  27    0         1
+  28    0         0
+  29    0         0
+  30    0         0
+  31    0         0
+  32    0         0
+  33    0         0
+  34    0         1
+  35    0         0
+  
+  
+None of those coffee-related tweets talked about stars but several talked about starbucks. Now let's make a term-document matrix. These are the basis for bag of words text mining.
+
