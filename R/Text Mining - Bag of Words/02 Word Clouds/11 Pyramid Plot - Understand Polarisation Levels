@@ -1,0 +1,120 @@
+Polarized tag cloud
+Commonality clouds show words that are shared across documents. One interesting thing that they can't show you is which of those words appear more commonly in one document compared to another. For this, you need a pyramid plot; these can be generated using pyramid.plot() from the plotrix package.
+
+First, some data manipulation is required to get the data in a suitable form. This is most easily done by converting it to a data frame and using dplyr. Given a matrix of word counts, as created by as.matrix(tdm), you need to end up with a data frame with three columns:
+The words contained in each document.
+The counts of those words from document 1.
+The counts of those words from document 2.
+
+Then pyramid.plot() using
+pyramid.plot(word_count_data$count1, word_count_data$count2, word_count_data$word)
+
+There are some additional arguments to improve the cosmetic appearance of the plot.
+Now you'll explore words that are common in chardonnay tweets, but rare in coffee tweets. all_dtm_m is created for you.
+
+
+
+
+
+Convert all_tdm_m to a data frame. Set the rownames to a column named "word".
+Filter to keep rows where all columns are greater than zero, using the syntax . > 0.
+Add a column named difference, equal to the count in the chardonnay column minus the count in the coffee column.
+Filter to keep the top 25 rows by difference.
+Arrange the rows by desc()ending order of difference.
+
+> head(all_tdm_m)
+                Docs
+Terms            chardonnay coffee
+  aaliyahmaxwell          4      0
+  abasc                   0      1
+  abbslovesfed            0      1
+  abbycastro              0      1
+  abc                     0      1
+  abccarpet               0      1
+  
+  
+top25_df <- all_tdm_m %>%
+  # Convert to data frame using the dplyr function "as_data_frame"
+  as_data_frame(rownames = "word") %>% 
+  # Keep rows where word appears everywhere
+  filter_all(all_vars(. >0)) %>% 
+  # Get difference in counts
+  mutate(difference = chardonnay-coffee) %>% 
+  # Keep rows with biggest difference
+  top_n(n=25, wt = difference) %>% 
+  # Arrange by descending difference
+  arrange(desc(difference))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Set the left count to the chardonnay column.
+Set the right count to the coffee column.
+Set the labels to the word column.
+
+
+> str(top25_df)
+Classes 'tbl_df', 'tbl' and 'data.frame':	25 obs. of  4 variables:
+ $ word      : chr  "bottle" "little" "ass" "inspired" ...
+ $ chardonnay: num  47 35 24 19 20 19 18 43 19 17 ...
+ $ coffee    : num  3 4 2 1 2 1 1 26 3 1 ...
+ $ difference: num  44 31 22 18 18 18 17 17 16 16 ...
+
+
+> head(top25_df)
+# A tibble: 6 x 4
+  word      chardonnay coffee difference
+  <chr>          <dbl>  <dbl>      <dbl>
+1 bottle            47      3         44
+2 little            35      4         31
+3 ass               24      2         22
+4 inspired          19      1         18
+5 milkshake         20      2         18
+6 polite            19      1         18
+
+
+
+
+
+top25_df <- all_tdm_m %>%
+  # Convert to data frame
+  as_data_frame(rownames = "word") %>% 
+  # Keep rows where word appears everywhere
+  filter_all(all_vars(. > 0)) %>% 
+  # Get difference in counts
+  mutate(difference = chardonnay - coffee) %>% 
+  # Keep rows with biggest difference
+  top_n(25, wt = difference) %>% 
+  # Arrange by descending difference
+  arrange(desc(difference))
+  
+
+pyramid.plot(
+  # Chardonnay counts
+  top25_df$chardonnay, 
+  # Coffee counts
+  top25_df$coffee, 
+  # Words
+  labels = top25_df$word, 
+  top.labels = c("Chardonnay", "Words", "Coffee"), 
+  main = "Words in Common", 
+  unit = NULL,
+  gap = 8,
+)
+
+
+[1] 5.1 4.1 4.1 2.1
+Premium pyramid plotting! Pyramid plots let you see words that are common in one document, but rare in another.
+
+
