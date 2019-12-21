@@ -1,0 +1,101 @@
+Visualise word networks
+Another way to view word connections is to treat them as a network, similar to a social network. Word networks show term association and cohesion. A word of caution: these visuals can become very dense and hard to interpret visually.
+In a network graph, the circles are called nodes and represent individual terms, while the lines connecting the circles are called edges and represent the connections between the terms.
+For the over-caffeinated text miner, qdap provides a shorcut for making word networks. The word_network_plot() and word_associate() functions both make word networks easy!
+The sample code constructs a word network for words associated with "Marvin".
+
+
+
+Update the word_associate() plotting code to work with the coffee data.
+Change the vector to coffee_tweets$text.
+Change the match string to "barista".
+Change "chardonnay" to "coffee" in the stopwords too.
+Change the title to "Barista Coffee Tweet Associations" in the sample code for the plot.
+
+
+> Top200Words
+  [1] "the"       "of"        "and"       "a"         "to"        "in"       
+  [7] "is"        "you"       "that"      "it"        "he"        "was"      
+ [13] "for"       "on"        "are"       "as"        "with"      "his"      
+ [19] "they"      "I"         "at"        "be"        "this"      "have"     
+ [25] "from"      "or"        "one"       "had"       "by"        "word"     
+ [31] "but"       "not"       "what"      "all"       "were"      "we"       
+ [37] "when"      "your"      "can"       "said"      "there"     "use"      
+ [43] "an"        "each"      "which"     "she"       "do"        "how"      
+ [49] "their"     "if"        "will"      "up"        "other"     "about"    
+ [55] "out"       "many"      "then"      "them"      "these"     "so"       
+ [61] "some"      "her"       "would"     "make"      "like"      "him"      
+ [67] "into"      "time"      "has"       "look"      "two"       "more"     
+ [73] "write"     "go"        "see"       "number"    "no"        "way"      
+ [79] "could"     "people"    "my"        "than"      "first"     "water"    
+ [85] "been"      "call"      "who"       "oil"       "its"       "now"      
+ [91] "find"      "long"      "down"      "day"       "did"       "get"      
+ [97] "come"      "made"      "may"       "part"      "over"      "new"      
+[103] "sound"     "take"      "only"      "little"    "work"      "know"     
+[109] "place"     "year"      "live"      "me"        "back"      "give"     
+[115] "most"      "very"      "after"     "thing"     "our"       "just"     
+[121] "name"      "good"      "sentence"  "man"       "think"     "say"      
+[127] "great"     "where"     "help"      "through"   "much"      "before"   
+[133] "line"      "right"     "too"       "mean"      "old"       "any"      
+[139] "same"      "tell"      "boy"       "follow"    "came"      "want"     
+[145] "show"      "also"      "around"    "form"      "three"     "small"    
+[151] "set"       "put"       "end"       "does"      "another"   "well"     
+[157] "large"     "must"      "big"       "even"      "such"      "because"  
+[163] "turn"      "here"      "why"       "ask"       "went"      "men"      
+[169] "read"      "need"      "land"      "different" "home"      "us"       
+[175] "move"      "try"       "kind"      "hand"      "picture"   "again"    
+[181] "change"    "off"       "play"      "spell"     "air"       "away"     
+[187] "animal"    "house"     "point"     "page"      "letter"    "mother"   
+[193] "answer"    "found"     "study"     "still"     "learn"     "should"   
+[199] "America"   "world"
+
+
+> head(chardonnay_tweets$text)
+[1] "RT @oceanclub: @eilisohanlon @stonyjim @vonprond Eilis, I'm from Pearse St and even I can tell a Chardonnay from so?"                        
+[2] "?@roystbaggage: 'Go to your Auntie Chardonnay and she will help you piss up against that wall' - the scum of Dover.?what's this even mean ha"
+[3] "Big thank you to Ian at Fowles wine for making me a Chardonnay drinker. @LadiesWhoShoot #wrongwayround http://t.co/KiA2StsOEO"               
+[4] "RT @oceanclub: @eilisohanlon @stonyjim @vonprond Eilis, I'm from Pearse St and even I can tell a Chardonnay from so?"                        
+[5] "After to worst rain at night known, floating flip flops, we have woke to the hottest sun!! #pool #sunshine #Chardonnay #happyhols"           
+[6] "@eilisohanlon @stonyjim @vonprond Eilis, I'm from Pearse St and even I can tell a Chardonnay from something else."
+
+
+> head(coffee_tweets$text)
+[1] "@ayyytylerb that is so true drink lots of coffee"                                                                                            
+[2] "RT @bryzy_brib: Senior March tmw morning at 7:25 A.M. in the SENIOR lot. Get up early, make yo coffee/breakfast, cus this will only happen ?"
+[3] "If you believe in #gunsense tomorrow would be a very good day to have your coffee any place BUT @Starbucks Guns+Coffee=#nosense @MomsDemand" 
+[4] "My cute coffee mug. http://t.co/2udvMU6XIG"                                                                                                  
+[5] "RT @slaredo21: I wish we had Starbucks here... Cause coffee dates in the morning sound perff!"                                               
+[6] "Does anyone ever get a cup of coffee before a cocktail??"
+
+
+#Chardonnay
+# Word association
+word_associate(chardonnay_tweets$text, 
+               match.string = "marvin", 
+               stopwords = c(Top200Words, "chardonnay", "amp"), 
+               network.plot = TRUE, 
+               cloud.colors = c("gray85", "darkred"))
+
+# Add title
+title(main = "Chardonnay Tweets Associated with Marvin")
+
+
+
+
+#Barista
+# Word association
+word_associate(coffee_tweets$text, 
+               match.string = "barista", 
+               stopwords = c(Top200Words, "coffee", "amp"), 
+               network.plot = TRUE, 
+               cloud.colors = c("gray85", "darkred"))
+
+
+# Add title
+title(main = "Barista Coffee Tweet Associations")
+
+
+
+
+Watch out, these can be cluttered but sometimes can help you understand relationships.
+
