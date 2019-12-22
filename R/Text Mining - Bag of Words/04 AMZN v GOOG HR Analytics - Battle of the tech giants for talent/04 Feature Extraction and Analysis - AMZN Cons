@@ -1,0 +1,36 @@
+Feature extraction & analysis: amzn_cons
+You now decide to contrast this with the amzn_cons_corp corpus in another bigram TDM. Of course, you expect to see some different phrases in your word cloud.
+Once again, you will use this custom function to extract your bigram features for the visual:
+
+tokenizer <- function(x) 
+  NGramTokenizer(x, Weka_control(min = 2, max = 2))
+
+
+
+
+Create amzn_c_tdm by converting amzn_cons_corp into a TermDocumentMatrix and incorporating the bigram function control = list(tokenize = tokenizer).
+Create amzn_c_tdm_m as a matrix version of amzn_c_tdm.
+Create amzn_c_freq by using rowSums() to get term frequencies from amzn_c_tdm_m.
+Create a wordcloud() using names(amzn_c_freq) and the values amzn_c_freq. Use the arguments max.words = 25 and color = "red" as well.
+
+# Create amzn_c_tdm
+amzn_c_tdm <- TermDocumentMatrix(
+  amzn_cons_corp,
+  control = list(tokenize = tokenizer)
+)
+
+# Create amzn_c_tdm_m
+amzn_c_tdm_m <- as.matrix(amzn_c_tdm)
+
+# Create amzn_c_freq
+amzn_c_freq <- rowSums(amzn_c_tdm_m)
+
+# Plot a wordcloud of negative Amazon bigrams
+wordcloud(names(amzn_c_freq),
+          amzn_c_freq,
+          max.words = 25,
+          color = "red")
+
+
+
+
