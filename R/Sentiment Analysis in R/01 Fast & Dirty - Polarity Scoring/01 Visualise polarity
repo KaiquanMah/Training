@@ -1,0 +1,107 @@
+https://www.rdocumentation.org/packages/qdap/versions/2.3.2/topics/qdap
+https://www.rdocumentation.org/packages/qdap/versions/2.3.2/topics/polarity
+#Magrittr - Ceci N'est Pas Un Pipe
+https://www.rdocumentation.org/packages/magrittr/versions/1.5/topics/magrittr
+#Magrittr Exposition Pipe-Operator
+https://www.rdocumentation.org/packages/magrittr/versions/1.5/topics/%25%24%25
+
+https://www.rdocumentation.org/packages/qdap/versions/2.3.2/topics/counts
+https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/plot
+
+
+
+
+
+Visualise polarity
+Sentiment analysis helps you extract an author's feelings towards a subject. This exercise will give you a taste of what's to come!
+We created text_df representing a conversation with person and text columns.
+Use qdap's polarity() function to score text_df. polarity() will accept a single character object or data frame with a grouping variable to calculate a positive or negative score.
+
+In this example you will use the magrittr package's dollar pipe operator %$%. The dollar sign forwards the data frame into polarity() and you declare a text column name or the text column and a grouping variable without quotes.
+text_data_frame %$% polarity(text_column_name)
+
+To create an object with the dollar sign operator:
+polarity_object <- text_data_frame %$% 
+  polarity(text_column_name, grouping_column_name)
+
+More specifically, to make a quantitative judgement about the sentiment of some text, you need to give it a score. A simple method is a positive or negative value related to a sentence, passage or a collection of documents called a corpus. Scoring with positive or negative values only is called "polarity." A useful function for extracting polarity scores is counts() applied to the polarity object. For a quick visual call plot() on the polarity() outcome.
+
+
+
+
+
+
+
+Examine the text_df conversation data frame.
+Using %$% pass text_df to polarity() along with the column name text without quotes. This will print the polarity for all text.
+Create a new object datacamp_conversation by forwarding text_df with %$% to polarity(). Pass in text followed by the grouping person column. This will calculate polarity according to each individual person. Since it is all within parentheses the result will be printed too.
+Apply counts() to datacamp_conversation to print the specific emotional words that were found.
+plot() the datacamp_conversation.
+
+
+
+
+
+> str(text_df)
+'data.frame':	8 obs. of  2 variables:
+ $ person: Factor w/ 4 levels "Jonathan","Martijn",..: 3 1 2 4 3 1 2 4
+ $ text  : Factor w/ 8 levels "DataCamp courses are the best",..: 1 3 6 8 2 7 5 4
+
+> head(text_df)
+    person                                             text
+1     Nick                    DC courses are the best
+2 Jonathan                       I like talking to students
+3  Martijn  Other online data science curricula are boring.
+4   Nicole                               What is for lunch?
+5     Nick              DC has lots of great content!
+6 Jonathan Students are passionate and are excited to learn
+
+
+
+> text_df %$% polarity(text)
+  all total.sentences total.words ave.polarity sd.polarity stan.mean.polarity
+1 all               8          54        0.179       0.452              0.396
+
+> counts(datacamp_conversation)
+    person wc polarity           pos.words       neg.words                                                                   text.var
+1     Nick  5    0.447                best               -                                              DataCamp courses are the best
+2 Jonathan  5    0.447                like               -                                                 I like talking to students
+3  Martijn  7   -0.378                   -          boring                            Other online data science curricula are boring.
+4   Nicole  4    0.000                   -               -                                                         What is for lunch?
+5     Nick  6    0.408               great               -                                        DataCamp has lots of great content!
+6 Jonathan  8    0.707 passionate, excited               -                           Students are passionate and are excited to learn
+7  Martijn 12   -0.577                   - hard, difficult Other data science curriculum is hard to learn and difficult to understand
+8   Nicole  7    0.378                good               -                                             I think the food here is good.
+
+
+
+
+
+
+
+
+# Examine the text data
+text_df
+
+# Calc overall polarity score
+text_df %$% polarity(text)
+
+# Calc polarity score by person
+(datacamp_conversation <- text_df %$% polarity(text, person))
+
+#enclosing the above in brackets prints it out
+> (datacamp_conversation <- text_df %$% polarity(text, person))
+
+    person total.sentences total.words ave.polarity sd.polarity stan.mean.polarity
+1 Jonathan               2          13        0.577       0.184              3.141
+2  Martijn               2          19       -0.478       0.141             -3.388
+3     Nick               2          11        0.428       0.028             15.524
+4   Nicole               2          11        0.189       0.267              0.707
+
+
+
+# Counts table from datacamp_conversation
+counts(datacamp_conversation)
+
+# Plot the conversation polarity
+plot(datacamp_conversation)
