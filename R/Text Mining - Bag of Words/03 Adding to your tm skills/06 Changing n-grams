@@ -1,0 +1,77 @@
+N-gram tokenization
+Will increasing the n-gram length increase, decrease or make no difference for the TDM or DTM size?
+#yes Increase
+
+
+
+
+Changing n-grams
+So far, we have only made TDMs and DTMs using single words. The default is to make them with unigrams, but you can also focus on tokens containing two or more words. This can help extract useful phrases which lead to some additional insights or provide improved predictive attributes for a machine learning algorithm.
+
+The function below uses the RWeka package to create trigram (three word) tokens: min and max are both set to 3.
+tokenizer <- function(x) {
+  NGramTokenizer(x, Weka_control(min = 3, max = 3))
+}
+
+
+Then the customized tokenizer() function can be passed into the TermDocumentMatrix or DocumentTermMatrix functions as an additional parameter:
+tdm <- TermDocumentMatrix(
+  corpus, 
+  control = list(tokenize = tokenizer)
+)
+
+
+
+A corpus has been preprocessed as before using the chardonnay tweets. The resulting object text_corp is available in your workspace.
+Create a tokenizer function like the above which creates 2-word bigrams.
+Make unigram_dtm by calling DocumentTermMatrix() on text_corp without using the tokenizer() function.
+Make bigram_dtm using DocumentTermMatrix() on text_corp with the tokenizer() function you just made.
+Examine unigram_dtm and bigram_dtm. Which has more terms?
+
+
+
+# Make tokenizer function 
+tokenizer <- function(x) {
+  NGramTokenizer(x, Weka_control(min=2, max=2))
+}
+
+# Create unigram_dtm
+unigram_dtm <- DocumentTermMatrix(text_corp)
+
+# Create bigram_dtm
+bigram_dtm <- DocumentTermMatrix(
+  text_corp, 
+  control = list(tokenize = tokenizer)
+)
+
+# Print unigram_dtm
+unigram_dtm
+
+# Print bigram_dtm
+bigram_dtm
+
+
+
+
+> text_corp
+<<VCorpus>>
+Metadata:  corpus specific: 0, document level (indexed): 0
+Content:  documents: 1000
+
+> unigram_dtm
+<<DocumentTermMatrix (documents: 1000, terms: 3004)>>
+Non-/sparse entries: 8065/2995935
+Sparsity           : 100%
+Maximal term length: 27
+Weighting          : term frequency (tf)
+
+> bigram_dtm
+<<DocumentTermMatrix (documents: 1000, terms: 5555)>>
+Non-/sparse entries: 7802/5547198
+Sparsity           : 100%
+Maximal term length: 40
+Weighting          : term frequency (tf)
+
+
+Bigrams are a powerful way to explore text and useful derive phrases.
+
