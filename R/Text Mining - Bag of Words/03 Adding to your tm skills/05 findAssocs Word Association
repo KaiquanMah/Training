@@ -1,0 +1,75 @@
+Using word association
+Another way to think about word relationships is with the findAssocs() function in the tm package. For any given word, findAssocs() calculates its correlation with every other word in a TDM or DTM. Scores range from 0 to 1. A score of 1 means that two words always appear together in documents, while a score approaching 0 means the terms seldom appear in the same document.
+Keep in mind the calculation for findAssocs() is done at the document level. So for every document that contains the word in question, the other terms in those specific documents are associated. Documents without the search term are ignored.
+To use findAssocs() pass in a TDM or DTM, the search term, and a minimum correlation. The function will return a list of all other terms that meet or exceed the minimum threshold.
+findAssocs(tdm, "word", 0.25)
+
+Minimum correlation values are often relatively low because of word diversity. Don't be surprised if 0.10 demonstrates a strong pairwise term association.
+The coffee tweets have been cleaned and organized into tweets_tdm for the exercise. You will search for a term association, and manipulate the results with list_vect2df() from qdap and then create a plot with the ggplot2 code in the example script.
+
+
+Create associations using findAssocs() on tweets_tdm to find terms associated with "venti", which meet a minimum threshold of 0.2.
+View the terms associated with "venti" by printing associations to the console.
+Create associations_df, by calling list_vect2df(), passing associations, then setting col2 to "word" and col3 to "score".
+Run the ggplot2 code to make a dot plot of the association values.
+
+  # Create associations
+associations <- findAssocs(tweets_tdm, "venti", 0.2)
+
+# View the venti associations
+associations
+
+# Create associations_df
+associations_df <- list_vect2df(associations, col2="word", col3="score")
+
+# Plot the associations_df values
+ggplot(associations_df, aes(score, word)) + 
+  geom_point(size = 3) + 
+  theme_gdocs()
+  
+  
+  
+
+> associations
+$venti
+    breve   drizzle    entire     pumps     extra       cuz    forget      okay 
+     0.58      0.58      0.58      0.58      0.47      0.41      0.41      0.41 
+    hyper     mocha   vanilla       wtf    always    asleep       get starbucks 
+     0.33      0.33      0.33      0.29      0.26      0.26      0.25      0.25 
+    white 
+     0.23
+
+
+> associations_df
+      X1      word score
+1  venti     white  0.23
+2  venti       get  0.25
+3  venti starbucks  0.25
+4  venti    always  0.26
+5  venti    asleep  0.26
+6  venti       wtf  0.29
+7  venti     hyper  0.33
+8  venti     mocha  0.33
+9  venti   vanilla  0.33
+10 venti       cuz  0.41
+11 venti    forget  0.41
+12 venti      okay  0.41
+13 venti     extra  0.47
+14 venti     breve  0.58
+15 venti   drizzle  0.58
+16 venti    entire  0.58
+17 venti     pumps  0.58
+
+
+> str(associations)
+List of 1
+ $ venti: Named num [1:17] 0.58 0.58 0.58 0.58 0.47 0.41 0.41 0.41 0.33 0.33 ...
+  ..- attr(*, "names")= chr [1:17] "breve" "drizzle" "entire" "pumps" ...
+
+> str(associations_df)
+'data.frame':	17 obs. of  3 variables:
+ $ X1   : chr  "venti" "venti" "venti" "venti" ...
+ $ word : Factor w/ 17 levels "white","get",..: 1 2 3 4 5 6 7 8 9 10 ...
+ $ score: num  0.23 0.25 0.25 0.26 0.26 0.29 0.33 0.33 0.33 0.41 ...
+
+Correlation is a powerful tool. Next up, tokenization!
