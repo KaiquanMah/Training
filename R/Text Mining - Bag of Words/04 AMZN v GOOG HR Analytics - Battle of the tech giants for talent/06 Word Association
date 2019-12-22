@@ -1,0 +1,138 @@
+Word Association
+As expected, you see similar topics throughout the dendrogram. Switching back to positive comments, you decide to examine top phrases that appeared in the word clouds. You hope to find associated terms using the findAssocs()function from tm. You want to check for something surprising now that you have learned of long hours and a lack of work-life balance.
+
+
+The amzn_pros_corp corpus has been cleaned using the custom functions like before.
+Construct a TDM called amzn_p_tdm from amzn_pros_corp and control = list(tokenize = tokenizer).
+Create amzn_p_m by converting amzn_p_tdm to a matrix.
+Create amzn_p_freq by applying rowSums() to amzn_p_m.
+Create term_frequency using sort() on amzn_p_freq along with the argument decreasing = TRUE.
+Examine the first 5 bigrams using term_frequency[1:5].
+You may be surprised to see "fast paced" as a top term because it could be a negative term related to "long hours". Look at the terms most associated with "fast paced". Use findAssocs() on amzn_p_tdm to examine "fast paced" with a 0.2 cutoff.
+
+# Create amzn_p_tdm
+amzn_p_tdm <- TermDocumentMatrix(
+  amzn_pros_corp,
+  control = list(tokenize = tokenizer)
+)
+
+# Create amzn_p_m
+amzn_p_m <- as.matrix(amzn_p_tdm)
+
+# Create amzn_p_freq
+amzn_p_freq <- rowSums(amzn_p_m)
+
+# Create term_frequency
+term_frequency <- sort(amzn_p_freq,
+                       decreasing = TRUE)
+
+# Print the 5 most common terms
+term_frequency[1:5]
+> term_frequency[1:5]
+      good pay great benefits   smart people     place work     fast paced 
+            25             24             20             17             16
+            
+            
+            
+# Find associations with fast paced
+findAssocs(amzn_p_tdm,
+            "fast paced",
+            0.2)
+            
+
+> findAssocs(amzn_p_tdm,
+              "fast paced",
+              0.2)
+$`fast paced`
+       paced environment        environments ever               learn fast 
+                    0.49                     0.35                     0.35 
+          paced friendly               paced work               able excel 
+                    0.35                     0.35                     0.25 
+          activity ample              advance one                also well 
+                    0.25                     0.25                     0.25 
+             amount time        ample opportunity        assistance ninety 
+                    0.25                     0.25                     0.25 
+      benefits including           break computer            call activity 
+                    0.25                     0.25                     0.25 
+              can choose            catchy cheers            center things 
+                    0.25                     0.25                     0.25 
+      challenging expect       cheers opportunity           choose success 
+                    0.25                     0.25                     0.25 
+  combined encouragement competitive environments            computer room 
+                    0.25                     0.25                     0.25 
+             cool things          deliver results               dock makes 
+                    0.25                     0.25                     0.25 
+          driven deliver               easy learn        emphasis shipping 
+                    0.25                     0.25                     0.25 
+encouragement innovation     environment benefits       environment catchy 
+                    0.25                     0.25                     0.25 
+      environment center         environment fast         environment help 
+                    0.25                     0.25                     0.25 
+       environment smart               ever known           ever witnessed 
+                    0.25                     0.25                     0.25 
+       everchanging fast    everyones preferences            excel advance 
+                    0.25                     0.25                     0.25 
+      excel everchanging     exciting environment             expect learn 
+                    0.25                     0.25                     0.25 
+       experience noting           extremely fast             facility top 
+                    0.25                     0.25                     0.25 
+         fail successful           fantastic able               fired part 
+                    0.25                     0.25                     0.25 
+            five percent           freindly place      friendly atmosphere 
+                    0.25                     0.25                     0.25 
+     friendly management             full medical                get fired 
+                    0.25                     0.25                     0.25 
+            go extremely             great plenty           great teamwork 
+                    0.25                     0.25                     0.25 
+    happening technology          hassle benefits                 help get 
+                    0.25                     0.25                     0.25 
+            help workers             high quality              high volume 
+                    0.25                     0.25                     0.25 
+          including full        innovation owning         job requirements 
+                    0.25                     0.25                     0.25 
+              leader can               line break       lot responsibility 
+                    0.25                     0.25                     0.25 
+        maintaining high               makes time          management nice 
+                    0.25                     0.25                     0.25 
+           nice facility              ninety five             noting short 
+                    0.25                     0.25                     0.25 
+      offers opportunity          one competitive                 one fast 
+                    0.25                     0.25                     0.25 
+    opportunity overtime         opportunity yell           ownership fast 
+                    0.25                     0.25                     0.25 
+             owning work           paced emphasis           paced exciting 
+                    0.25                     0.25                     0.25 
+              paced high              paced never          paced rewarding 
+                    0.25                     0.25                     0.25 
+              paced ship           paced software             paid upfront 
+                    0.25                     0.25                     0.25 
+          people focused             percent paid            plenty shifts 
+                    0.25                     0.25                     0.25 
+           position fast           possible still         preferences fast 
+                    0.25                     0.25                     0.25 
+        products quickly              quality bar         quickly possible 
+                    0.25                     0.25                     0.25 
+       readily available        requirements easy responsibility ownership 
+                    0.25                     0.25                     0.25 
+           results great             results team         rewarding people 
+                    0.25                     0.25                     0.25 
+        shifts everyones                ship dock        shipping products 
+                    0.25                     0.25                     0.25 
+            short amount          short fantastic          smart coworkers 
+                    0.25                     0.25                     0.25 
+       still maintaining             success fail          successful also 
+                    0.25                     0.25                     0.25 
+             team driven         technology today         things happening 
+                    0.25                     0.25                     0.25 
+              things lot                time fast                  time go 
+                    0.25                     0.25                     0.25 
+                top line       upfront experience              vision well 
+                    0.25                     0.25                     0.25 
+             volume call            well rewarded             well tuition 
+                    0.25                     0.25                     0.25 
+      witnessed combined                 work can                work cool 
+                    0.25                     0.25                     0.25 
+       work environments                work fast                 work job 
+                    0.25                     0.25                     0.25 
+         workers readily              yell leader 
+                    0.25                     0.25
