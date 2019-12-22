@@ -1,0 +1,64 @@
+amzn_cons Dendrogram
+It seems there is a strong indication of long working hours and poor work-life balance in the reviews. As a simple clustering technique, you decide to perform a hierarchical cluster and create a dendrogram to see how connected these phrases are.
+
+
+Create amzn_c_tdm as a TermDocumentMatrix using amzn_cons_corp with control = list(tokenize = tokenizer).
+Print amzn_c_tdm to the console.
+Create amzn_c_tdm2 by applying the removeSparseTerms() function to amzn_c_tdm with the sparse argument equal to .993.
+Create hc, a hierarchical cluster object by nesting the distance matrix dist(amzn_c_tdm2) inside the hclust() function. Make sure to also pass method = "complete" to the hclust() function.
+Plot hc to view the clustered bigrams and see how the concepts in the Amazon cons section may lead you to a conclusion.
+
+
+> tokenizer
+function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
+
+> amzn_c_tdm
+<<TermDocumentMatrix (terms: 4754, documents: 500)>>
+Non-/sparse entries: 5190/2371810
+Sparsity           : 100%
+Maximal term length: 31
+Weighting          : term frequency (tf)
+
+> amzn_c_tdm2 <- removeSparseTerms(amzn_c_tdm, sparse=.993)
+> amzn_c_tdm2
+<<TermDocumentMatrix (terms: 29, documents: 500)>>
+Non-/sparse entries: 217/14283
+Sparsity           : 99%
+Maximal term length: 23
+Weighting          : term frequency (tf)
+ 
+
+> hc <- hclust(dist(amzn_c_tdm2),
+             method = "complete")
+> hc
+Call:
+hclust(d = dist(amzn_c_tdm2), method = "complete")
+
+Cluster method   : complete 
+Distance         : euclidean 
+Number of objects: 29
+
+
+
+
+
+# Create amzn_c_tdm
+amzn_c_tdm <- TermDocumentMatrix(
+  amzn_cons_corp,
+  control = list(tokenize = tokenizer)
+)
+
+# Print amzn_c_tdm to the console
+amzn_c_tdm
+
+# Create amzn_c_tdm2 by removing sparse terms 
+amzn_c_tdm2 <- removeSparseTerms(amzn_c_tdm, sparse=.993)
+
+# Create hc as a cluster of distance values
+hc <- hclust(dist(amzn_c_tdm2),
+           method = "complete")
+
+# Produce a plot of hc
+plot(hc)
+
+
