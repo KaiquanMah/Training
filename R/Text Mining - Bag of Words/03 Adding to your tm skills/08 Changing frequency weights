@@ -1,0 +1,56 @@
+Changing frequency weights
+So far you've simply counted terms in documents in the DocumentTermMatrix or TermDocumentMatrix. In this exercise, you'll learn about TfIdf weighting instead of simple term frequency. TfIdf stands for term frequency-inverse document frequency and is used when you have a large corpora with limited term diversity.
+TfIdf counts terms (i.e. Tf), normalizes the value by document length, and then penalizes the value the more often a word appears among the documents. This is common sense; if a word is commonplace it's important but not insightful. This penalty aspect is captured in the inverse document frequency (i.e. Idf).
+For example, reviewing customer service notes may include the term "cu" as shorthand for customer. One note may state "the cu has a damaged package" and another as "cu called with question about delivery". With document frequency weighting, "cu" appears twice so it is expected to be informative. However in TfIdf, "cu" is penalized because it appears in all the documents. As a result "cu" isn't considered novel so its value is reduced towards 0 which lets other terms have higher values for analysis.
+
+
+Create tdm, a term frequency-based TermDocumentMatrix() using text_corp.
+Create tdm_m by converting tdm to matrix form.
+Examine the term frequency for "coffee", "espresso", and "latte" in a few tweets. Subset tdm_m to get rows c("coffee", "espresso", "latte") and columns 161 to 166.
+
+# Create a TDM
+tdm <- TermDocumentMatrix(text_corp)
+
+# Convert it to a matrix
+tdm_m <- as.matrix(tdm)
+
+# Examine part of the matrix
+tdm_m[c("coffee", "espresso", "latte"), 161:166]
+
+
+> tdm_m[c("coffee", "espresso", "latte"), 161:166]
+          Docs
+Terms      161 162 163 164 165 166
+  coffee     1   1   1   2   0   1
+  espresso   1   0   0   0   0   0
+  latte      0   0   0   0   0   1
+
+
+
+
+
+
+Edit the TermDocumentMatrix() to use TfIdf weighting. Pass control = list(weighting = weightTfIdf) as an argument to the function.
+Run the code and compare the new scores to the first part of the exercise.
+
+# Create a TDM
+tdm <- TermDocumentMatrix(text_corp, 
+                          control = list(weighting = weightTfIdf))
+
+# Convert it to a matrix
+tdm_m <- as.matrix(tdm)
+
+# Examine part of the matrix
+tdm_m[c("coffee", "espresso", "latte"), 161:166]
+
+
+> tdm_m[c("coffee", "espresso", "latte"), 161:166]
+          Docs
+Terms              161         162         163        164 165         166
+  coffee   0.005611691 0.008729297 0.005611691 0.02618789   0 0.009820459
+  espresso 0.545989728 0.000000000 0.000000000 0.00000000   0 0.000000000
+  latte    0.000000000 0.000000000 0.000000000 0.00000000   0 1.047602723
+
+
+Using TF weighting, coffee has a score of 1 in all tweets, which isn't that interesting. Using Tf-Idf, terms that are important in specific documents have a higher score.
+
