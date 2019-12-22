@@ -1,0 +1,75 @@
+Feature extraction & analysis: amzn_pros
+amzn_pros_corp, amzn_cons_corp, goog_pros_corp and goog_cons_corp have all been preprocessed, so now you can extract the features you want to examine. Since you are using the bag of words approach, you decide to create a bigram TermDocumentMatrix for Amazon's positive reviews corpus, amzn_pros_corp. From this, you can quickly create a wordcloud() to understand what phrases people positively associate with working at Amazon.
+
+The function below uses RWeka to tokenize two terms and is used behind the scenes in this exercise.
+tokenizer <- function(x) {
+  NGramTokenizer(x, Weka_control(min = 2, max = 2))
+}
+
+
+
+Create amzn_p_tdm as a TermDocumentMatrix from amzn_pros_corp. Make sure to add control = list(tokenize = tokenizer) so that the terms are bigrams.
+Create amzn_p_tdm_m from amzn_p_tdm by using the as.matrix() function.
+Create amzn_p_freq to obtain the term frequencies from amzn_p_tdm_m.
+Create a wordcloud() using names(amzn_p_freq) as the words, amzn_p_freq as their frequencies, and max.words = 25 and color = "blue" for aesthetics.
+
+> amzn_pros_corp
+<<VCorpus>>
+Metadata:  corpus specific: 0, document level (indexed): 0
+Content:  documents: 500
+
+> amzn_p_tdm_m
+                                  Docs
+Terms                              1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+  ability customer                 0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0
+  ability iterate                  0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0
+  ability make                     0 0 0 0 0 0 0 0 0  0  0  0  0  0  0  0  0  0
+  ...
+ 
+ 
+ 
+amzn_p_freq <- rowSums(amzn_p_tdm_m)
+> head(amzn_p_freq)
+ability customer  ability iterate     ability make      ability see 
+               1                1                1                1 
+      able excel        able make 
+               1                1
+               
+> head(names(amzn_p_freq))
+[1] "ability customer" "ability iterate"  "ability make"     "ability see"     
+[5] "able excel"       "able make"
+
+
+
+amzn_p_freq <- colSums(amzn_p_tdm_m)
+> head(amzn_p_freq)
+ 1  2  3  4  5  6 
+ 6 15 14  4  2 18               
+               
+               
+              
+              
+
+ 
+
+# Create amzn_p_tdm
+amzn_p_tdm <- TermDocumentMatrix(
+  amzn_pros_corp,
+  control=list(tokenize = tokenizer)
+)
+
+# Create amzn_p_tdm_m
+amzn_p_tdm_m <- as.matrix(amzn_p_tdm)
+
+# Create amzn_p_freq
+amzn_p_freq <- rowSums(amzn_p_tdm_m)
+
+
+# Plot a wordcloud using amzn_p_freq values
+wordcloud(names(amzn_p_freq),
+          amzn_p_freq,
+          max.words = 25,
+          color = "blue")
+
+
+
