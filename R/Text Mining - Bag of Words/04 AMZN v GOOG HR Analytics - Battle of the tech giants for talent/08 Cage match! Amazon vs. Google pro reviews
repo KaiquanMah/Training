@@ -1,0 +1,88 @@
+Cage match! Amazon vs. Google pro reviews
+Amazon's positive reviews appear to mention bigrams such as "good benefits", while its negative reviews focus on bigrams such as "work load" and "work-life balance" issues.
+In contrast, Google's positive reviews mention "great food", "perks", "smart people", and "fun culture", among other things. Google's negative reviews discuss "politics", "getting big", "bureaucracy", and "middle management".
+You decide to make a pyramid plot lining up positive reviews for Amazon and Google so you can compare the differences between any shared bigrams.
+We have preloaded a data frame, all_tdm_df, consisting of terms and corresponding AmazonPro, and GooglePro bigram frequencies. Using this data frame you will identify the top 5 bigrams that are shared between the two corpora.
+
+Create common_words from all_tdm_df using dplyr functions.
+filter() on the AmazonPro column for nonzero values.
+Likewise filter the GooglePro column for nonzero values.
+Then mutate() a new column, diff which is the abs (absolute) difference between the term frequencies columns.
+Although we could have piped again, create top5_df by applying top_n to common_words to extract the top 5 values in the diff column. It will print to your console for review.
+Create a pyramid.plot passing in top5_df$AmazonPro then top5_df$GooglePro and finally add labels with top5_df$terms.
+
+
+> head(all_tdm_df)
+                AmazonPro GooglePro           terms
+abandon open            0         1    abandon open
+ability advance         1         0 ability advance
+able sacrifice          1         0  able sacrifice
+able sit                1         0        able sit
+able work               1         1       able work
+absolutely cons         0         1 absolutely cons
+
+
+> str(all_tdm_df)
+'data.frame':	9337 obs. of  3 variables:
+ $ AmazonPro: num  0 1 1 1 1 0 1 1 1 1 ...
+ $ GooglePro: num  1 0 0 0 1 1 0 0 0 0 ...
+ $ terms    : chr  "abandon open" "ability advance" "able sacrifice" "able sit" ...
+ 
+ 
+ 
+ > head(common_words)
+  AmazonPro GooglePro             terms diff
+1         1         1         able work    0
+2         1         1       actual work    0
+3         1         1      area traffic    0
+4         1         1 atmosphere little    0
+5         1         1        back forth    0
+6         3         1          bad work    2
+
+> (top5_df <- top_n(common_words,n=5, diff))
+  AmazonPro GooglePro            terms diff
+1         3        12        can think    9
+2        20         8     life balance   12
+3        29        10       long hours   19
+4        21         8        work life   13
+5        21         8 worklife balance   13
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Filter to words in common and create an absolute diff column
+common_words <- all_tdm_df %>% 
+  filter(
+    all_tdm_df$AmazonPro != 0,
+    all_tdm_df$GooglePro != 0
+  ) %>%
+  mutate(diff = abs(AmazonPro - GooglePro))
+
+# Extratop5_dfct top 5 common bigrams
+(top5_df <- top_n(common_words,n=5, diff))
+
+# Create the pyramid plot
+pyramid.plot(top5_df$AmazonPro, 
+             top5_df$GooglePro, 
+             labels = top5_df$terms, 
+             gap = 12, 
+             top.labels = c("Amzn", "Pro Words", "Goog"), 
+             main = "Words in Common", 
+             unit = NULL)
+
+
+
+[1] 5.1 4.1 4.1 2.1
+A real duel of tech giants…notice common terms yet the frequency differences among the companies.
+
+
