@@ -1,0 +1,68 @@
+Put it all together: a text based dendrogram
+Its time to put your skills to work to make your first text-based dendrogram. Remember, dendrograms reduce information to help you make sense of the data. This is much like how an average tells you something, but not everything, about a population. Both can be misleading. With text, there are often a lot of nonsensical clusters, but some valuable clusters may also appear.
+A peculiarity of TDM and DTM objects is that you have to convert them first to matrices (with as.matrix()), before using them with the dist() function.
+For the chardonnay tweets, you may have been surprised to see the soul music legend Marvin Gaye appear in the word cloud. Let's see if the dendrogram picks up the same.
+
+
+Create tweets_tdm2 by applying removeSparseTerms() on tweets_tdm. Use sparse = 0.975.
+Create tdm_m by using as.matrix() on tweets_tdm2 to convert it to matrix form.
+Create tweets_dist containing the distances of tdm_m using the dist() function.
+Create a hierarchical cluster object called hc using hclust() on tweets_dist.
+Make a dendrogram with plot() and hc.
+
+> tweets_tdm
+<<TermDocumentMatrix (terms: 3207, documents: 1000)>>
+Non-/sparse entries: 12179/3194821
+Sparsity           : 100%
+Maximal term length: 266
+Weighting          : term frequency (tf)
+
+> tweets_tdm2 <- removeSparseTerms(tweets_tdm, sparse = 0.975)
+> tweets_tdm2
+<<TermDocumentMatrix (terms: 55, documents: 1000)>>
+Non-/sparse entries: 4892/50108
+Sparsity           : 91%
+Maximal term length: 10
+Weighting          : term frequency (tf)
+
+
+
+> tdm_m
+            Docs
+Terms        1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+  a          1 0 1 1 0 1 0 0 0  0  0  0  2  1  0  0  0  1  0  1  0  1  0  0  0
+  all        0 0 0 0 0 0 0 0 0  0  0  0  0  1  0  0  0  0  0  0  0  0  0  0  0
+  amp        0 0 0 0 0 0 0 0 0  0  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0
+  and        1 1 0 1 0 1 1 0 1  0  0  0  1  1  1  1  1  0  1  1  0  1  1  1  0
+  ...
+  you          0   0   0   0   0   1   0   1   0   0    0
+  your         2   0   0   0   0   0   0   0   0   0    0
+
+
+
+
+> hc
+Call:
+hclust(d = tweets_dist)
+Cluster method   : complete 
+Distance         : euclidean 
+Number of objects: 55
+
+
+
+# Create tweets_tdm2
+tweets_tdm2 <- removeSparseTerms(tweets_tdm, sparse = 0.975)
+
+# Create tdm_m
+tdm_m <- as.matrix(tweets_tdm2)
+
+# Create tweets_dist
+tweets_dist <- dist(tdm_m)
+
+# Create hc
+hc <- hclust(tweets_dist)
+
+# Plot the dendrogram
+plot(hc)
+
+
