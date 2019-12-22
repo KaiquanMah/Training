@@ -1,0 +1,139 @@
+Capturing metadata in tm
+Depending on what you are trying to accomplish, you may want to keep metadata about the document when you create a corpus.
+
+To capture document level metadata, the column names and order must be:
+doc_id - a unique string for each document
+text - the text to be examined
+... - any other columns will be automatically catalogued as metadata.
+
+Sometimes you will need to rename columns in order to fit the expectations of DataframeSource(). The names() function is helpful for this.
+
+
+
+tweets exists in your worksapce as a data frame with columns "num", "text", "screenName", and "created".
+Rename the first column of tweets to "doc_id".
+Set the document schema with DataframeSource() on the smaller tweets data frame.
+Make the document collection a volatile corpus nested in the custom clean_corpus() function.
+Apply content() to the first tweet with double brackets such as text_corpus[[1]] to see the cleaned plain text.
+Confirm that all metadata was captured using the meta() function on the first document with single brackets.
+Remember, when accessing part of a corpus the double or single brackets make a difference! For this exercise you will use double brackets with content() and single brackets with meta().
+
+
+
+> str(tweets)
+'data.frame':	1000 obs. of  4 variables:
+ $ num       : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ text      : chr  "@ayyytylerb that is so true drink lots of coffee" "RT @bryzy_brib: Senior March tmw morning at 7:25 A.M. in the SENIOR lot. Get up early, make yo coffee/breakfast"| __truncated__ "If you believe in #gunsense tomorrow would be a very good day to have your coffee any place BUT @Starbucks Guns"| __truncated__ "My cute coffee mug. http://t.co/2udvMU6XIG" ...
+ $ screenName: chr  "thejennagibson" "carolynicosia" "janeCkay" "AlexandriaOOTD" ...
+ $ created   : chr  "8/9/2013 2:43" "8/9/2013 2:43" "8/9/2013 2:43" "8/9/2013 2:43" ...
+ 
+
+> str(tweets)
+'data.frame':	1000 obs. of  4 variables:
+ $ doc_id    : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ text      : chr  "@ayyytylerb that is so true drink lots of coffee" "RT @bryzy_brib: Senior March tmw morning at 7:25 A.M. in the SENIOR lot. Get up early, make yo coffee/breakfast"| __truncated__ "If you believe in #gunsense tomorrow would be a very good day to have your coffee any place BUT @Starbucks Guns"| __truncated__ "My cute coffee mug. http://t.co/2udvMU6XIG" ...
+ $ screenName: chr  "thejennagibson" "carolynicosia" "janeCkay" "AlexandriaOOTD" ...
+ $ created   : chr  "8/9/2013 2:43" "8/9/2013 2:43" "8/9/2013 2:43" "8/9/2013 2:43" ...
+
+
+> head(docs)
+  doc_id
+1      1
+2      2
+3      3
+4      4
+5      5
+6      6
+                                                                                                                                          text
+1                                                                                             @ayyytylerb that is so true drink lots of coffee
+2 RT @bryzy_brib: Senior March tmw morning at 7:25 A.M. in the SENIOR lot. Get up early, make yo coffee/breakfast, cus this will only happen ?
+3  If you believe in #gunsense tomorrow would be a very good day to have your coffee any place BUT @Starbucks Guns+Coffee=#nosense @MomsDemand
+4                                                                                                   My cute coffee mug. http://t.co/2udvMU6XIG
+5                                                RT @slaredo21: I wish we had Starbucks here... Cause coffee dates in the morning sound perff!
+6                                                                                     Does anyone ever get a cup of coffee before a cocktail??
+      screenName       created
+1 thejennagibson 8/9/2013 2:43
+2  carolynicosia 8/9/2013 2:43
+3       janeCkay 8/9/2013 2:43
+4 AlexandriaOOTD 8/9/2013 2:43
+5    Rooosssaaaa 8/9/2013 2:43
+6        E_Z_MAC 8/9/2013 2:43
+
+
+> VCorpus(docs)
+<<VCorpus>>
+Metadata:  corpus specific: 0, document level (indexed): 2
+Content:  documents: 1000
+
+> text_corpus
+<<VCorpus>>
+Metadata:  corpus specific: 0, document level (indexed): 2
+Content:  documents: 1000
+
+
+
+
+
+
+> text_corpus[[1]]
+<<PlainTextDocument>>
+Metadata:  7
+Content:  chars: 33
+
+
+
+> text_corpus[[1]][1]
+$content
+[1] "ayyytylerb true drink lots coffee"
+
+> content(text_corpus[[1]])
+[1] "ayyytylerb true drink lots coffee"
+
+
+
+
+> text_corpus[[1]][2]
+$meta
+  author       : character(0)
+  datetimestamp: 2019-12-22 07:46:24
+  description  : character(0)
+  heading      : character(0)
+  id           : 1
+  language     : en
+  origin       : character(0)
+  
+> meta(text_corpus[[1]])
+  author       : character(0)
+  datetimestamp: 2019-12-22 07:46:24
+  description  : character(0)
+  heading      : character(0)
+  id           : 1
+  language     : en
+  origin       : character(0)  
+  
+> meta(text_corpus[1])
+      screenName       created
+1 thejennagibson 8/9/2013 2:43
+
+
+
+
+
+
+# Rename columns
+names(tweets)[1] <- "doc_id"
+
+# Set the schema: docs
+docs <- DataframeSource(tweets)
+
+# Make a clean volatile corpus: text_corpus
+text_corpus <- clean_corpus(VCorpus(docs))
+
+# Examine the first doc content
+content(text_corpus[[1]])
+
+# Access the first doc metadata
+meta(text_corpus[1])
+
+You are now ready to put your skills to the test in a real case study.
+
