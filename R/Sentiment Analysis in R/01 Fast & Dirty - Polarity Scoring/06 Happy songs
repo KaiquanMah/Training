@@ -1,0 +1,72 @@
+Of course just positive and negative words aren't enough. In this exercise you will learn about valence shifters which tell you about the author's emotional intent. Previously you applied polarity() to text without valence shifters. In this example you will see amplification and negation words in action.
+Recall that an amplifying word adds 0.8 to a positive word in polarity() so the positive score becomes 1.8. For negative words 0.8 is subtracted so the total becomes -1.8. Then the score is divided by the square root of the total number of words.
+
+Consider the following example from Frank Sinatra:
+"It was a very good year"
+"Good" equals 1 and "very" adds another 0.8. So, 1.8/sqrt(6) results in 0.73 polarity.
+
+A negating word such as "not" will inverse the subjectivity score. Consider the following example from Bobby McFerrin:
+"Don't worry Be Happy"
+"worry is now 1 due to the negation "don't." Adding the "happy", +1, equals 2. With 4 total words, 2 / sqrt(4) equals a polarity score of 1.
+
+
+
+
+Examine the conversation data frame,conversation. Note the valence shifters like "never" in the text column.
+Apply polarity() to the text column of conversation to calculate polarity for the entire conversation.
+Calculate the polarity scores by student, assigning the result to student_pol.
+Call polarity() again, this time passing two columns of conversation.
+The text variable is text and the grouping variable is student.
+To see the student level results, use scores() on student_pol.
+The counts() function applied to student_pol will print the sentence level polarity for the entire data frame along with lexicon words identified.
+The polarity object, student_pol, can be plotted with plot().
+
+
+
+
+
+
+# Examine conversation
+conversation
+> conversation
+  student                                                    text
+1 Martijn                            This restaurant is never bad
+2    Nick                                 The lunch was very good
+3  Nicole It was awful I got food poisoning and was extremely ill
+
+
+# Polarity - All
+polarity(conversation$text)
+> polarity(conversation$text)
+  all total.sentences total.words ave.polarity sd.polarity stan.mean.polarity
+1 all               3          21        0.317       0.565              0.561
+
+
+# Polarity - Grouped
+student_pol <- conversation %$%
+  polarity(text, student)
+
+# Student results
+scores(student_pol)
+> scores(student_pol)
+  student total.sentences total.words ave.polarity sd.polarity stan.mean.polarity
+1 Martijn               1           5        0.447          NA                 NA
+2    Nick               1           5        0.805          NA                 NA
+3  Nicole               1          11       -0.302          NA                 NA
+
+
+# Sentence by sentence
+counts(student_pol)
+> counts(student_pol)
+  student wc polarity pos.words neg.words                                                text.var
+1 Martijn  5    0.447         -       bad                            This restaurant is never bad
+2    Nick  5    0.805      good         -                                 The lunch was very good
+3  Nicole 11   -0.302         -     awful It was awful I got food poisoning and was extremely ill
+
+
+# qdap plot
+plot(student_pol)
+
+
+'Extremely good' is more positive than 'very good', which is more positive than 'good', which is more positive than 'quite good'.
+
