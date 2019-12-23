@@ -1,0 +1,75 @@
+Polarity on actual text
+So far you have learned the basic components needed for assessing positive or negative intent in text. Remember the following points so you can feel confident in your results.
+The subjectivity lexicon is a predefined list of words associated with emotions or positive/negative feelings.
+You don't have to list every word in a subjectivity lexicon because Zipf's law describes human expression.
+
+
+A quick way to get started is to use the polarity() function which has a built-in subjectivity lexicon.
+The function scans the text to identify words in the lexicon. It then creates a cluster around an identified subjectivity word. Within the cluster valence shifters adjust the score. Valence shifters are words that amplify or negate the emotional intent of the subjectivity word. For example, "well known" is positive while "not well known" is negative. Here "not" is a negating term and reverses the emotional intent of "well known." In contrast, "very well known" employs an amplifier increasing the positive intent.
+The polarity() function then calculates a score using subjectivity terms, valence shifters and the total number of words in the passage. This exercise demonstrates a simple polarity calculation. In the next video we look under the hood of polarity() for more detail.
+
+
+
+Calculate the polarity() of positive in a new object called pos_score. Encase the entire call in parentheses so the output is also printed.
+# Example statement
+positive <- "DC courses are good for learning"
+
+# Calculate polarity of statement
+#Encase the entire call in parentheses so the output is also printed.
+(pos_score <-polarity(positive))
+
+> (pos_score <-polarity(positive))
+  all total.sentences total.words ave.polarity sd.polarity stan.mean.polarity
+1 all               1           6        0.408          NA                 NA
+ 
+
+
+
+
+
+
+Manually perform the same polarity calculation.
+Get a word count object by calling counts() on the polarity object.
+All the identified subjectivity words are part of count object's list. Specifically, positive words are in $pos.words element vector. Find the number of positive words in n_good by calling length() on the first part of the $pos.words element.
+Capture the total number of words and assign it to n_words. This value is stored in pos_count as the wc element.
+De-construct the polarity() calculation by dividing n_good by sqrt() of n_words. Compare the result to pos_pol to the equation's result.
+
+https://www.rdocumentation.org/packages/qdap/versions/2.3.2/topics/counts
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/MathFun
+
+
+> (pos_counts <- counts(pos_score))
+  all wc polarity pos.words neg.words                               text.var
+1 all  6    0.408      good         - DataCamp courses are good for learning
+
+> pos_counts$pos.words
+[[1]]
+[1] "good"
+
+> pos_counts$pos.words[[1]]
+[1] "good"
+
+
+
+
+# From previous step
+positive <- "DataCamp courses are good for learning"
+pos_score <- polarity(positive)
+
+# Get counts
+(pos_counts <- counts(pos_score))
+  
+# Number of positive words
+n_good <- length(pos_counts$pos.words[[1]])
+  
+# Total number of words
+n_words <- pos_counts$wc
+  
+# Verify polarity score
+n_good / sqrt(n_words)
+[1] 0.4082483
+
+Using the polarity() function is much easier, and still gets the same answer!
+
+
+
