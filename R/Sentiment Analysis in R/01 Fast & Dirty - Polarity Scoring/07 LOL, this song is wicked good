@@ -1,0 +1,107 @@
+LOL, this song is wicked good
+Even with Zipf's law in action, you will still need to adjust lexicons to fit the text source (for example twitter versus legal documents) or the author's demographics (teenager versus the elderly). This exercise demonstrates the explicit components of polarity() so you can change it if needed.
+In Trey Songz "Lol :)" song there is a lyric "LOL smiley face, LOL smiley face." In the basic polarity() function, "LOL" is not defined as positive. However, "LOL" stands for "Laugh Out Loud" and should be positive. As a result, you should adjust the lexicon to fit the text's context which includes pop-culture slang. If your analysis contains text from a specific channel (Twitter's "LOL"), location (Boston's "Wicked Good"), or age group (teenagers' "sick") you will likely have to adjust the lexicon.
+In this exercise you are not adjusting the subjectivity lexicon or qdap dictionaries containing valence shifters. Instead you are examining the existing word data frame objects so you can change them in the following exercise.
+We've created text containing two excerpts from Beyoncé's "Crazy in Love" lyrics for the exercise.
+
+
+Print key.pol to see a portion of the subjectivity words and values.
+Examine the predefined negation.words to print all the negating terms.
+Now print the amplification.words to see the words that add values to the lexicon.
+Check the deamplification.words to print the words that reduce the lexicon values.
+Call text to see conversation.
+
+
+https://www.rdocumentation.org/packages/qdapDictionaries/versions/1.0.7/topics/key.pol
+https://www.rdocumentation.org/packages/qdapDictionaries/versions/1.0.7/topics/negation.words
+https://www.rdocumentation.org/packages/qdapDictionaries/versions/1.0.7/topics/amplification.words
+https://www.rdocumentation.org/packages/qdapDictionaries/versions/1.0.7/topics/deamplification.words
+
+
+# Examine the key.pol
+key.pol
+> key.pol
+               x  y
+   1:     a plus  1
+   2:   abnormal -1
+   3:    abolish -1
+   4: abominable -1
+   5: abominably -1
+  ---              
+6775:  zealously -1
+6776:     zenith  1
+6777:       zest  1
+6778:      zippy  1
+6779:     zombie -1
+
+
+
+# Negators
+negation.words
+> negation.words
+ [1] "ain't"     "aren't"    "can't"     "couldn't"  "didn't"    "doesn't"  
+ [7] "don't"     "hasn't"    "isn't"     "mightn't"  "mustn't"   "neither"  
+[13] "never"     "no"        "nobody"    "nor"       "not"       "shan't"   
+[19] "shouldn't" "wasn't"    "weren't"   "won't"     "wouldn't"
+
+
+
+# Amplifiers
+amplification.words 
+> amplification.words
+ [1] "acute"         "acutely"       "certain"       "certainly"    
+ [5] "colossal"      "colossally"    "deep"          "deeply"       
+ [9] "definite"      "definitely"    "enormous"      "enormously"   
+[13] "extreme"       "extremely"     "great"         "greatly"      
+[17] "heavily"       "heavy"         "high"          "highly"       
+[21] "huge"          "hugely"        "immense"       "immensely"    
+[25] "incalculable"  "incalculably"  "massive"       "massively"    
+[29] "more"          "particular"    "particularly"  "purpose"      
+[33] "purposely"     "quite"         "real"          "really"       
+[37] "serious"       "seriously"     "severe"        "severely"     
+[41] "significant"   "significantly" "sure"          "surely"       
+[45] "true"          "truly"         "vast"          "vastly"       
+[49] "very"
+
+
+
+# De-amplifiers
+deamplification.words
+> deamplification.words
+ [1] "barely"       "faintly"      "few"          "hardly"       "little"      
+ [6] "only"         "rarely"       "seldom"       "slightly"     "sparsely"    
+[11] "sporadically" "very few"     "very little"
+
+
+# Examine
+text
+> text
+  speaker
+1 beyonce
+2   jay_z
+                                                                    words
+1 I know I dont understand Just how your love can do what no one else can
+2                    They cant figure him out they like hey, is he insane
+
+
+
+
+
+# Complete the polarity parameters
+polarity(
+  text.var       = text$words,
+  grouping.var   = text$speaker,
+  polarity.frame = key.pol,
+  negators       = negation.words,
+  amplifiers     = amplification.words,
+  deamplifiers   = deamplification.words 
+)
+
+
+  speaker total.sentences total.words ave.polarity sd.polarity stan.mean.polarity
+1 beyonce               1          16         0.25          NA                 NA
+2   jay_z               1          11         0.00          NA                 NA
+
+
+The polarity() function is very flexible and allows you to overwrite scores given to each word.
+
