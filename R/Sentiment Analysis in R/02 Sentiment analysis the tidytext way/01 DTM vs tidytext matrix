@@ -1,0 +1,118 @@
+One theory of emotion
+What is the philosophical basis for the Plutchik's wheel of emotion?
+
+#not Plutchik wanted a round framework so made it like a wheel.
+#not Plutchik was an angry person and wanted to explain his actions to others.
+
+#yes Plutchik believed the primary emotions were formed as survival mechanisms in humans and animals.
+Yes! To survive in the wild, it is important to maintain a healthy fear of crocodiles.
+
+#not Plutchik performed extensive field tests with sloths in the field because they are slow to react.
+
+
+
+
+
+
+
+
+
+
+DTM vs tidytext matrix
+The tidyverse is a collection of R packages that share common philosophies and are designed to work together. This chapter covers some tidy functions to manipulate data. In this exercise you will compare a DTM to a tidy text data frame called a tibble.
+Within the tidyverse, each observation is a single row in a data frame. That makes working in different packages much easier since the fundamental data structure is the same. Parts of this course borrow heavily from the tidytext package which uses this data organization.
+For example, you may already be familiar with the %>% operator from the magrittr package. This forwards an object on its left-hand side as the first argument of the function on its right-hand side.
+
+In the example below, you are forwarding the data object to function1(). Notice how the parentheses are empty. This in turn is forwarded to function2(). In the last function you don't have to add the data object because it was forwarded from the output of function1(). However, you do add a fictitious parameter, some_parameter as TRUE. These pipe forwards ultimately create the object.
+object <- data %>% 
+           function1() %>%
+           function2(some_parameter = TRUE)
+
+To use the %>% operator, you don't necessarily need to load the magrittr package, since it is also available in the dplyr package. dplyr also contains the functions inner_join() (which you'll learn more about later) and count() for tallying data. The last function you'll need is mutate() to create new variables or modify existing ones.
+object <- data %>%
+  mutate(new_Var_name = Var1 - Var2)
+
+or to modify a variable
+object <- data %>%
+  mutate(Var1 = as.factor(Var1))
+
+
+You will also use tidyr's spread() function to organize the data with each row being a line from the book and the positive and negative values as columns.
+index	negative	positive
+42	2	0
+43	0	1
+44	1	0
+
+To change a DTM to a tidy format use tidy() from the broom package.
+tidy_format <- tidy(Document_Term_Matrix)
+This exercise uses text from the Greek tragedy, Agamemnon. Agamemnon is a story about marital infidelity and murder. You can download a copy here.
+
+
+
+We've already created a clean DTM called ag_dtm for this exercise.
+Create ag_dtm_m by applying as.matrix() to ag_dtm.
+Using brackets, [ and ], index ag_dtm_m to row 2206.
+Apply tidy() to ag_dtm. Call the new object ag_tidy.
+Examine ag_tidy at rows [831:835, ] to compare the tidy format. You will see a common word from the examined part of ag_dtm_m in step 2.
+
+
+
+http://tidyverse.org/
+https://www.rdocumentation.org/packages/tidytext
+https://www.rdocumentation.org/packages/magrittr/topics/magrittr
+
+https://www.rdocumentation.org/packages/dplyr
+https://www.rdocumentation.org/packages/dplyr/topics/join
+https://www.rdocumentation.org/packages/dplyr/topics/tally
+https://www.rdocumentation.org/packages/dplyr/topics/mutate
+
+https://www.rdocumentation.org/packages/tidyr
+https://www.rdocumentation.org/packages/tidyr/topics/spread
+
+https://www.rdocumentation.org/packages/broom/
+https://www.rdocumentation.org/packages/broom/topics/tidy
+http://www.gutenberg.org/cache/epub/14417/pg14417.txt
+
+
+
+
+
+# As matrix
+ag_dtm_m <- as.matrix(ag_dtm)
+
+# Examine line 2206 and columns 245:250
+ag_dtm_m[2206, 245:250]
+> ag_dtm_m[2206, 245:250]
+       bleed       bleeds        blent        bless blessãd     blessing 
+           0            0            0            1            0            0
+
+
+
+# Tidy up the original DTM
+ag_tidy <- tidy(ag_dtm)
+
+
+# Examine tidy with a word you saw
+ag_tidy[831:835, ]
+> ag_tidy[831:835, ]
+# A tibble: 5 x 3
+  document term     count
+  <chr>    <chr>    <dbl>
+1 234      bleeds       1
+2 234      sleepeth     1
+3 235      comes        1
+4 235      will         1
+5 235      wisdom       1
+
+
+
+> ag_dtm
+<<DocumentTermMatrix (documents: 2682, terms: 2835)>>
+Non-/sparse entries: 8184/7595286
+Sparsity           : 100%
+Maximal term length: 18
+Weighting          : term frequency (tf)
+
+
+
+
