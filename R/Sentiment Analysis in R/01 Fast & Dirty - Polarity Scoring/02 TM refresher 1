@@ -1,0 +1,76 @@
+TM refresher (I)
+In the Text Mining: Bag of Words course you learned that a corpus is a set of texts, and you studied some functions for preprocessing the text. To recap, one way to create & clean a corpus is with the functions below. Even though this is a different course, sentiment analysis is part of text mining so a refresher can be helpful.
+Turn a character vector into a text source using VectorSource().
+Turn a text source into a corpus using VCorpus().
+Remove unwanted characters from the corpus using cleaning functions like removePunctuation() and stripWhitespace() from tm, and replace_abbreviation() from qdap.
+
+In this exercise a custom clean_corpus() function has been created using standard preprocessing functions for easier application.
+clean_corpus() accepts the output of VCorpus() and applies cleaning functions. For example:
+processed_corpus <- clean_corpus(my_corpus)
+
+
+
+Your R session has a text vector, tm_define, containing two small documents and the function clean_corpus().
+
+Create an object called tm_vector by applying VectorSource() to tm_define.
+Make tm_corpus using VCorpus() on tm_vector.
+Use content() to examine the contents of the first document in tm_corpus.
+Documents in the corpus are accessed using list syntax, so use double square brackets, e.g. [[1]].
+Clean the corpus text using the custom function clean_corpus() on tm_corpus. Call this new object tm_clean.
+Examine the first document of the new tm_clean object again to see how the text changed after clean_corpus() was applied.
+
+https://www.rdocumentation.org/packages/tm/versions/0.7-7/topics/VectorSource
+https://www.rdocumentation.org/packages/tm/versions/0.7-7/topics/VCorpus
+#content https://www.rdocumentation.org/packages/NLP/versions/0.2-0/topics/generics
+https://www.rdocumentation.org/packages/qdap/versions/2.3.2/topics/replace_abbreviation
+https://www.rdocumentation.org/packages/tm/versions/0.7-7/topics/removePunctuation
+https://www.rdocumentation.org/packages/tm/versions/0.7-7/topics/stripWhitespace
+
+
+> clean_corpus
+function(corpus){
+  corpus <- tm_map(corpus, content_transformer(replace_abbreviation))
+  corpus <- tm_map(corpus, removePunctuation)
+  corpus <- tm_map(corpus, removeNumbers)
+  corpus <- tm_map(corpus, removeWords, c(stopwords("en"), "coffee"))
+  corpus <- tm_map(corpus, content_transformer(tolower))
+  corpus <- tm_map(corpus, stripWhitespace)
+  return(corpus)
+}
+
+> tm_define
+[1] "Text mining is the process of distilling actionable insights from text."                          
+[2] "Sentiment analysis represents the set of tools to extract an author's feelings towards a subject."
+
+
+
+# clean_corpus(), tm_define are pre-defined
+clean_corpus
+tm_define
+
+# Create a VectorSource
+tm_vector <- VectorSource(tm_define)
+
+# Apply VCorpus
+tm_corpus <- VCorpus(tm_vector)
+
+# Examine the first document's contents
+content(tm_corpus[[1]])
+> content(tm_corpus[[1]])
+[1] "Text mining is the process of distilling actionable insights from text."
+
+
+
+# Clean the text
+tm_clean <- clean_corpus(tm_corpus)
+
+# Reexamine the contents of the first doc
+content(tm_clean[[1]])
+> content(tm_clean[[1]])
+[1] "text mining process distilling actionable insights text"
+
+
+
+
+If you work with text, it's useful to know how to work with corpora.
+
