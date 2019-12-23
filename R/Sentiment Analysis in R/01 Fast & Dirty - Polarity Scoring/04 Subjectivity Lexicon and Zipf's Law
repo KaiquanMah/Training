@@ -1,0 +1,111 @@
+What is a subjectivity lexicon?
+As discussed in the video a lexicon is a list of words. What is the purpose of a subjectivity lexicon?
+
+
+A subjectivity lexicon is a predefined list of words associated with emotional context such as positive/negative.
+Absolutely correct! The meaning of text can depend upon who wrote it.
+
+
+
+
+
+
+
+
+Where can you observe Zipf's law?
+Although Zipf observed a steep and predictable decline in word usage you may not buy into Zipf's law. You may be thinking "I know plenty of words, and have a distinctive vocabulary". That may be the case, but the same can't be said for most people! To prove it, let's construct a visual from 3 million tweets mentioning "#sb". Keep in mind that the visual doesn't follow Zipf's law perfectly, the tweets all mentioned the same hashtag so it is a bit skewed. That said, the visual you will make follows a steep decline showing a small lexical diversity among the millions of tweets. So there is some science behind using lexicons for natural language analysis!
+In this exercise, you will use the package metricsgraphics. Although the author suggests using the pipe %>% operator, you will construct the graphic step-by-step to learn about the various aspects of the plot. The main function of the package metricsgraphics is the mjs_plot() function which is the first step in creating a JavaScript plot. Once you have that, you can add other layers on top of the plot.
+
+An example metricsgraphics workflow without using the %>% operator is below:
+metro_plot <- mjs_plot(data, x = x_axis_name, y = y_axis_name, show_rollover_text = FALSE)
+metro_plot <- mjs_line(metro_plot)
+metro_plot <- mjs_add_line(metro_plot, line_one_values)
+metro_plot <- mjs_add_legend(metro_plot, legend = c('names', 'more_names'))
+metro_plot
+
+
+
+
+Use head() on sb_words to review top words.
+Create a new column expectations by dividing the largest word frequency, freq[1], by the rank column.
+Start sb_plot using mjs_plot().
+Pass in sb_words with x = rank and y = freq.
+Within mjs_plot() set show_rollover_text to FALSE.
+Overwrite sb_plot using mjs_line() and pass in sb_plot.
+Add to sb_plot with mjs_add_line().
+Pass in the previous sb_plot object and the vector, expectations.
+Place a legend on a new sb_plot object using mjs_add_legend().
+Pass in the previous sb_plot object
+The legend labels should consist of "Frequency" and "Expectation".
+Call sb_plot to display the plot. Mouseover a point to simultaneously highlight a freq and Expectation point. The magic of JavaScript!
+
+
+
+
+
+# %>% https://www.rdocumentation.org/packages/magrittr/versions/1.5/topics/%25%3E%25
+https://www.rdocumentation.org/packages/utils/versions/3.6.2/topics/head
+
+https://www.rdocumentation.org/packages/metricsgraphics/versions/0.9.0
+https://www.rdocumentation.org/packages/metricsgraphics/versions/0.9.0/topics/mjs_plot
+https://www.rdocumentation.org/packages/metricsgraphics/versions/0.9.0/topics/mjs_line
+https://www.rdocumentation.org/packages/metricsgraphics/versions/0.9.0/topics/mjs_add_line
+https://www.rdocumentation.org/packages/metricsgraphics/versions/0.9.0/topics/mjs_add_legend
+
+
+
+
+# Examine sb_words
+head(sb_words)
+> head(sb_words)
+  word    freq rank
+1   sb 1984423    1
+2   rt 1700564    2
+3  the 1101899    3
+4   to  588803    4
+5    a  428598    5
+6  for  388390    6
+
+
+
+# Create expectations
+#freq[1] is the freq value @ row 1
+sb_words$expectations <- sb_words %$% 
+  {freq[1] / rank}
+
+head(sb_words)
+> head(sb_words)
+  word    freq rank expectations
+1   sb 1984423    1    1984423.0
+2   rt 1700564    2     992211.5
+3  the 1101899    3     661474.3
+4   to  588803    4     496105.8
+5    a  428598    5     396884.6
+6  for  388390    6     330737.2
+
+
+
+# Create metrics plot
+sb_plot <- mjs_plot(sb_words, x = rank, y = freq, show_rollover_text = FALSE)
+
+# Add 1st line
+#plot actual data
+sb_plot <- mjs_line(sb_plot)
+
+# Add 2nd line
+#plot expected data
+#specify just the colname instead of df$colname as the plot remembers which df was read in order to draw the plot
+sb_plot <- mjs_add_line(sb_plot, expectations)
+
+
+# Add legend
+sb_plot <- mjs_add_legend(sb_plot, legend = c("Frequency", "Expectation"))
+
+# Display plot
+sb_plot
+
+
+
+While you may not obey Zipf's Law, it seems like most people on Twitter do!
+
+
