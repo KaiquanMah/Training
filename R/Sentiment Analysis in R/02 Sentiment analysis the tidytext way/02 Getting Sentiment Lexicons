@@ -1,0 +1,140 @@
+Getting Sentiment Lexicons
+So far you have used a single lexicon. Now we will transition to using three, each measuring sentiment in different ways.
+
+The tidytext package contains a function called get_sentiments which along with the [textdata] package allows you to download & interact well researched lexicons. Here is a small section of the loughran lexicon.
+Word	Sentiment
+abandoned	negative
+abandoning	negative
+abandonment	negative
+abandonments	negative
+abandons	negative
+
+This lexicon contains 4150 terms with corresponding information. We will be exploring other lexicons but the structure & method to get them is similar.
+
+Let's use tidytext with textdata to explore other lexicons' word labels!
+
+
+
+Use get_sentiments() to obtain the "afinn" lexicon, assigning to afinn_lex.
+Review the overall count() of value in afinn_lex.
+https://www.rdocumentation.org/packages/tidytext/versions/0.2.2/topics/get_sentiments
+
+
+# Subset to AFINN
+afinn_lex <- get_sentiments("afinn")
+> afinn_lex
+# A tibble: 2,477 x 2
+   word       value
+   <chr>      <dbl>
+ 1 abandon       -2
+ 2 abandoned     -2
+ 3 abandons      -2
+ 4 abducted      -2
+ 5 abduction     -2
+ 6 abductions    -2
+ 7 abhor         -3
+ 8 abhorred      -3
+ 9 abhorrent     -3
+10 abhors        -3
+# ... with 2,467 more rows
+
+
+
+# Count AFINN scores
+afinn_lex %>% 
+  count(value)
+# A tibble: 11 x 2
+   value     n
+   <dbl> <int>
+ 1    -5    16
+ 2    -4    43
+ 3    -3   264
+ 4    -2   966
+ 5    -1   309
+ 6     0     1
+ 7     1   208
+ 8     2   448
+ 9     3   172
+10     4    45
+11     5     5
+
+
+
+
+
+
+
+
+
+
+
+Do the same again, this time with the "nrc" lexicon. That is,
+get the sentiments, assigning to nrc_lex, then
+count the sentiment column, assigning to nrc_counts.
+
+# Subset to nrc
+nrc_lex <- get_sentiments("nrc")
+# A tibble: 13,901 x 2
+   word        sentiment
+   <chr>       <chr>    
+ 1 abacus      trust    
+ 2 abandon     fear     
+ 3 abandon     negative 
+ 4 abandon     sadness  
+ 5 abandoned   anger    
+ 6 abandoned   fear     
+ 7 abandoned   negative 
+ 8 abandoned   sadness  
+ 9 abandonment anger    
+10 abandonment fear     
+# ... with 13,891 more rows
+
+
+
+# Make the nrc counts object
+nrc_counts <- nrc_lex %>%
+  count(sentiment)
+
+
+> nrc_counts
+# A tibble: 10 x 2
+   sentiment        n
+   <chr>        <int>
+ 1 anger         1247
+ 2 anticipation   839
+ 3 disgust       1058
+ 4 fear          1476
+ 5 joy            689
+ 6 negative      3324
+ 7 positive      2312
+ 8 sadness       1191
+ 9 surprise       534
+10 trust         1231
+
+
+
+
+
+
+
+
+
+
+
+
+Create a ggplot labeling the y-axis as n vs. x-axis of sentiment.
+Add a col layer using geom_col(). (This is like geom_bar(), but used when you've already summarized with count().)
+
+# From previous step
+nrc_counts <- get_sentiments("nrc") %>% 
+  count(sentiment)
+  
+# Plot n vs. sentiment
+ggplot(nrc_counts, aes(x = sentiment, y = n)) +
+  # Add a col layer
+  geom_col() +
+  theme_gdocs()
+  
+
+Lovely lexicon exploration! Negative words are the most common type in the NRC lexicon.
+
