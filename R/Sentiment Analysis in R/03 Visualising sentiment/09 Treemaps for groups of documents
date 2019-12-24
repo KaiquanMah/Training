@@ -1,0 +1,207 @@
+Treemaps for groups of documents
+Often you will find yourself working with documents in groups, such as author, product or by company. This exercise lets you learn about the text while retaining the groups in a compact visual. For example, with customer reviews grouped by product you may want to explore multiple dimensions of the customer reviews at the same time. First you could calculate the polarity() of the reviews. Another dimension may be length. Document length can demonstrate the emotional intensity. If a customer leaves a short "great shoes!" one could infer they are actually less enthusiastic compared to a lengthier positive review. You may also want to group reviews by product type such as women's, men's and children's shoes. A treemap lets you examine all of these dimensions.
+For text analysis, within a treemap each individual box represents a document such as a tweet. Documents are grouped in some manner such as author. The size of each box is determined by a numeric value such as number of words or letters. The individual colors are determined by a sentiment score.
+
+After you organize the tibble, you use the treemap library containing the function treemap() to make the visual. The code example below declares the data, grouping variables, size, color and other aesthetics.
+treemap(
+  data_frame,
+  index = c("group", "individual_document"),
+  vSize = "doc_length",
+  vColor = "avg_score",
+  type = "value",
+  title = "Sentiment Scores by Doc",
+  palette = c("red", "white", "green")
+)
+
+The pre-loaded all_books object contains a combined tidy format corpus with 4 Shakespeare, 3 Melville and 4 Twain books. Based on the treemap you should be able to tell who writes longer books, and the polarity of the author as a whole and for individual books.
+
+
+
+
+
+
+
+
+
+Calculate each book's length in a new object called book_length using count() with the book column.
+https://www.rdocumentation.org/packages/treemap/versions/2.4-2
+
+
+> all_books
+# A tibble: 479,990 x 5
+   term            document count author   book     
+ * <chr>           <chr>    <dbl> <chr>    <chr>    
+ 1 chapter         2            1 melville moby_dick
+ 2 loomings        2            1 melville moby_dick
+ 3 agonever        5            1 melville moby_dick
+ 4 call            5            1 melville moby_dick
+ 5 ishmael         5            1 melville moby_dick
+ 6 long            5            1 melville moby_dick
+ 7 mind            5            1 melville moby_dick
+ 8 preciselyhaving 5            1 melville moby_dick
+ 9 some            5            1 melville moby_dick
+10 years           5            1 melville moby_dick
+# ... with 479,980 more rows
+
+
+book_length <- all_books %>%
+  # Count number of words per book
+  count(book)
+  
+# Examine the results
+book_length
+> book_length
+# A tibble: 11 x 2
+   book                  n
+   <chr>             <int>
+ 1 bartleby           8871
+ 2 confidence_man    48834
+ 3 ct_yankee         58229
+ 4 hamlet            18725
+ 5 huck_finn         55198
+ 6 innocents_abroad  99031
+ 7 julius_caesar     13165
+ 8 macbeth           12240
+ 9 moby_dick        109996
+10 romeo_juliet      16870
+11 tom_sawyer        38831
+
+
+
+
+
+
+
+Inner join all_books to the lexicon, afinn.
+Group by author and book.
+Use summarize() to calculate the mean_value as the mean() of value.
+Inner join again, this time to book_length. Join by the book column.
+
+
+# From previous step
+book_length <- all_books %>%
+  count(book)
+  
+book_tree <- all_books %>% 
+  # Inner join to afinn lexicon
+  inner_join(afinn, by = c("term" = "word")) %>% 
+  # Group by author, book
+  group_by(author, book) %>%
+  # Calculate mean book value
+  summarise(mean_value = mean(value)) %>% 
+  # Inner join by book
+  inner_join(book_length, by = "book")
+
+# Examine the results
+book_tree
+
+
+
+
+#before the second inner join to get book length
+> book_tree <- all_books %>% 
+    # Inner join to afinn lexicon
+    inner_join(afinn, by = c("term" = "word")) %>% 
+    # Group by author, book
+    group_by(author, book) %>%
+    # Calculate mean book value
+    summarise(mean_value = mean(value))
+> book_tree
+# A tibble: 11 x 3
+# Groups:   author [3]
+   author      book             mean_value
+   <chr>       <chr>                 <dbl>
+ 1 melville    bartleby             0.101 
+ 2 melville    confidence_man       0.506 
+ 3 melville    moby_dick            0.161 
+ 4 shakespeare hamlet               0.0984
+ 5 shakespeare julius_caesar        0.0846
+ 6 shakespeare macbeth              0.222 
+ 7 shakespeare romeo_juliet         0.175 
+ 8 twain       ct_yankee            0.199 
+ 9 twain       huck_finn            0.0763
+10 twain       innocents_abroad     0.405 
+11 twain       tom_sawyer          -0.0265
+
+
+
+
+
+
+#after the second inner join to get book length
+> book_tree <- all_books %>% 
+    # Inner join to afinn lexicon
+    inner_join(afinn, by = c("term" = "word")) %>% 
+    # Group by author, book
+    group_by(author, book) %>%
+    # Calculate mean book value
+    summarise(mean_value = mean(value)) %>% 
+    # Inner join by book
+    inner_join(book_length, by = "book")
+> book_tree
+# A tibble: 11 x 4
+# Groups:   author [3]
+   author      book             mean_value      n
+   <chr>       <chr>                 <dbl>  <int>
+ 1 melville    bartleby             0.101    8871
+ 2 melville    confidence_man       0.506   48834
+ 3 melville    moby_dick            0.161  109996
+ 4 shakespeare hamlet               0.0984  18725
+ 5 shakespeare julius_caesar        0.0846  13165
+ 6 shakespeare macbeth              0.222   12240
+ 7 shakespeare romeo_juliet         0.175   16870
+ 8 twain       ct_yankee            0.199   58229
+ 9 twain       huck_finn            0.0763  55198
+10 twain       innocents_abroad     0.405   99031
+11 twain       tom_sawyer          -0.0265  38831
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Draw a treemap, setting the following arguments.
+Use the book_tree from the previous step.
+Specify the aggregation index columns as "author" and "book".
+Specify the vertex size column, vSize, as "n".
+Specify the vertex color column, vColor, as "mean_value".
+Specify a direct mapping from vColor to the palette by setting type = "value".
+
+
+# From previous steps
+book_length <- all_books %>%
+  count(book)
+book_tree <- all_books %>% 
+  inner_join(afinn, by = c("term" = "word")) %>% 
+  group_by(author, book) %>%
+  summarize(mean_value = mean(value)) %>% 
+  inner_join(book_length, by = "book")
+
+treemap(
+  # Use the book tree
+  book_tree,
+  # Index by author and book
+  index = c("author", "book"),
+  # Use n as vertex size
+  vSize = "n",
+  # Color vertices by mean_value
+  vColor = "mean_value",
+  # Draw a value type
+  type = "value",
+  title = "Book Sentiment Scores",
+  palette = c("red", "white", "green")
+)
+
+
+
+Treemaps are great ways to explore grouped data.
+
+
