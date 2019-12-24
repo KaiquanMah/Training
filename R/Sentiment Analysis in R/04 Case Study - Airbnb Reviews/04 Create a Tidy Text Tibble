@@ -1,0 +1,135 @@
+Create a Tidy Text Tibble!
+Since you learned about tidy principles this code helps you organize your data into a tibble so you can then work within the tidyverse!
+Previously you learned that applying tidy() on a TermDocumentMatrix() object will convert the TDM to a tibble. In this exercise you will create the word data directly from the review column called comments.
+
+First you use unnest_tokens() to make the text lowercase and tokenize the reviews into single words.
+Sometimes it is useful to capture the original word order within each group of a corpus. To do so, use mutate(). In mutate() you will use seq_along() to create a sequence of numbers from 1 to the length of the object. This will capture the word order as it was written.
+In the tm package, you would use removeWords() to remove stopwords. In the tidyverse you first need to load the stop words lexicon and then apply an anti_join() between the tidy text data frame and the stopwords.
+
+
+
+Create tidy_reviews by piping (%>%) the original reviews object bos_reviews to the unnest_tokens() function. Pass in a new column name, word and declare the comments column. Remember in the tidyverse you don't need a $ or quotes.
+Create a new variable the tidy way! Rewrite tidy_reviews by piping tidy_reviews to group_by with the column id. Then %>% it again to mutate(). Within mutate create a new variable original_word_order equal to seq_along(word).
+Print out the tibble, tidy_reviews.
+Load the premade "SMART" stopwords to your R session with data("stop_words").
+Overwrite tidy_reviews by passing the original tidy_reviews to anti_join() with a %>%. Within anti_join() pass in the predetermined stop_words lexicon.
+
+
+https://www.rdocumentation.org/packages/broom/topics/tidy
+https://www.rdocumentation.org/packages/broom/versions/0.5.3/topics/reexports
+https://www.rdocumentation.org/packages/tidytext/versions/0.2.2/topics/unnest_tokens
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/mutate
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq
+https://www.rdocumentation.org/packages/tm/versions/0.7-7
+https://www.rdocumentation.org/packages/tm/versions/0.7-7/topics/removeWords
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/join
+
+
+
+
+
+> str(bos_reviews)
+'data.frame':	1000 obs. of  2 variables:
+ $ id      : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ comments: chr  "My daughter and I had a wonderful stay with Maura. She kept in close touch with us throughout the day as we wer"| __truncated__ "We stay at Elizabeth's place for 3 nights in October 2014.\nThe apartment is really a great place to stay. \nLo"| __truncated__ "If you're staying in South Boston, this is a terrific place to camp out. The apartment and bedroom are lovely, "| __truncated__ "Derian and Brian were great and prompt with their communications with us. The room was as described; it was a s"| __truncated__ ...
+ 
+
+# Vector to tibble
+tidy_reviews <- bos_reviews %>% 
+  unnest_tokens(word, comments)
+
+> tidy_reviews <- bos_reviews %>% 
+    unnest_tokens(word, comments)
+> str(tidy_reviews)
+'data.frame':	70834 obs. of  2 variables:
+ $ id  : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ word: chr  "my" "daughter" "and" "i" ...
+
+ 
+ 
+
+
+# Group by and mutate
+tidy_reviews <- tidy_reviews %>% 
+  group_by(id) %>% 
+  mutate(original_word_order = seq_along(word))
+
+> str(tidy_reviews)
+Classes 'grouped_df', 'tbl_df', 'tbl' and 'data.frame':	70834 obs. of  3 variables:
+ $ id                 : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ word               : chr  "my" "daughter" "and" "i" ...
+ $ original_word_order: int  1 2 3 4 5 6 7 8 9 10 ...
+ 
+ 
+# Quick review
+tidy_reviews
+# A tibble: 70,834 x 3
+# Groups:   id [1,000]
+      id word      original_word_order
+   <int> <chr>                   <int>
+ 1     1 my                          1
+ 2     1 daughter                    2
+ 3     1 and                         3
+ 4     1 i                           4
+ 5     1 had                         5
+ 6     1 a                           6
+ 7     1 wonderful                   7
+ 8     1 stay                        8
+ 9     1 with                        9
+10     1 maura                      10
+# ... with 70,824 more rows
+
+
+
+
+# Load stopwords
+data("stop_words")
+
+> stop_words
+# A tibble: 1,149 x 2
+   word        lexicon
+   <chr>       <chr>  
+ 1 a           SMART  
+ 2 a's         SMART  
+ 3 able        SMART  
+ 4 about       SMART  
+ 5 above       SMART  
+ 6 according   SMART  
+ 7 accordingly SMART  
+ 8 across      SMART  
+ 9 actually    SMART  
+10 after       SMART  
+# ... with 1,139 more rows
+
+
+
+
+
+# Perform anti-join
+tidy_reviews_without_stopwords <- tidy_reviews %>% 
+  anti_join(stop_words)
+
+# A tibble: 26,055 x 3
+# Groups:   id [998]
+      id word      original_word_order
+   <int> <chr>                   <int>
+ 1     1 daughter                    2
+ 2     1 wonderful                   7
+ 3     1 stay                        8
+ 4     1 maura                      10
+ 5     1 close                      14
+ 6     1 touch                      15
+ 7     1 day                        20
+ 8     1 arriving                   24
+ 9     1 til                        25
+10     1 evening                    29
+# ... with 26,045 more rows
+
+
+Tidy Text Tibbles are a mouthful but you did it!
+
+  
+  
+  
+  
+  
