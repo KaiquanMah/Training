@@ -1,0 +1,165 @@
+Bing tidy polarity: Count & spread the white whale
+In this exercise you will apply another inner_join() using the "bing" lexicon.
+Then you will manipulate the results with both count() from dplyr and spread() from tidyr to learn about the text.
+The spread() function spreads a key-value pair across multiple columns. In this case the key is the sentiment & the values are the frequency of positive or negative terms for each line. Using spread() changes the data so that each row now has positive and negative values, even if it is 0.
+
+
+In this exercise, your R session has m_dick_tidy which contains the book Moby Dick and bing, containing the lexicon similar to the previous exercise.
+Perform an inner_join() on m_dick_tidy and bing.
+As before, join the "term" column in m_dick_tidy to the "word" column in the lexicon.
+Call the new object moby_lex_words.
+Create a column index, equal to as.numeric() applied to document. This occurs within mutate() in the tidyverse.
+Create moby_count by forwarding moby_lex_words to count(), passing in sentiment, index.
+Generate moby_spread by piping moby_count to spread() which contains sentiment, n, and fill = 0.
+
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/tally
+https://www.rdocumentation.org/packages/tidyr/versions/0.8.3/topics/spread
+
+
+
+
+> m_dick_tidy
+# A tibble: 105,245 x 3
+   document term      count
+   <chr>    <chr>     <dbl>
+ 1 2        chapter       1
+ 2 2        loomings      1
+ 3 5        agonever      1
+ 4 5        call          1
+ 5 5        ishmael       1
+ 6 5        long          1
+ 7 5        mind          1
+ 8 5        precisely     1
+ 9 5        years         1
+10 6        interest      1
+# ... with 105,235 more rows
+
+> bing
+# A tibble: 6,786 x 2
+   word        sentiment
+   <chr>       <chr>    
+ 1 2-faces     negative 
+ 2 abnormal    negative 
+ 3 abolish     negative 
+ 4 abominable  negative 
+ 5 abominably  negative 
+ 6 abominate   negative 
+ 7 abomination negative 
+ 8 abort       negative 
+ 9 aborted     negative 
+10 aborts      negative 
+# ... with 6,776 more rows
+
+
+
+# Inner join
+moby_lex_words <- inner_join(m_dick_tidy, bing, by = c("term" = "word"))
+
+
+> moby_lex_words
+# A tibble: 12,876 x 4
+   document term          count sentiment
+   <chr>    <chr>         <dbl> <chr>    
+ 1 5        precisely         1 positive 
+ 2 9        grim              1 negative 
+ 3 11       involuntarily     1 negative 
+ 4 13       strong            1 positive 
+ 5 17       flourish          1 positive 
+ 6 19       cherish           1 positive 
+ 7 22       insular           1 negative 
+ 8 24       right             1 positive 
+ 9 25       noble             1 positive 
+10 31       like              1 positive 
+# ... with 12,866 more rows
+
+
+
+
+
+
+
+moby_lex_words <- moby_lex_words %>%
+  # Set index to numeric document
+  mutate(index = as.numeric(document))
+
+> moby_lex_words
+# A tibble: 12,876 x 5
+   document term          count sentiment index
+   <chr>    <chr>         <dbl> <chr>     <dbl>
+ 1 5        precisely         1 positive      5
+ 2 9        grim              1 negative      9
+ 3 11       involuntarily     1 negative     11
+ 4 13       strong            1 positive     13
+ 5 17       flourish          1 positive     17
+ 6 19       cherish           1 positive     19
+ 7 22       insular           1 negative     22
+ 8 24       right             1 positive     24
+ 9 25       noble             1 positive     25
+10 31       like              1 positive     31
+# ... with 12,866 more rows
+
+
+
+
+
+
+
+
+moby_count <- moby_lex_words %>%
+  # Count by sentiment, index
+  # this would remove the other cols besides sentiment, index, the row # col + count/n col
+  count(sentiment, index)
+
+# Examine the counts
+moby_count
+
+> moby_count
+# A tibble: 10,609 x 3
+   sentiment index     n
+   <chr>     <dbl> <int>
+ 1 negative      9     1
+ 2 negative     11     1
+ 3 negative     22     1
+ 4 negative     41     1
+ 5 negative     42     2
+ 6 negative     44     1
+ 7 negative     56     1
+ 8 negative     64     1
+ 9 negative     66     1
+10 negative     68     1
+# ... with 10,599 more rows
+
+
+
+
+
+
+
+
+
+moby_spread <- moby_count %>%
+  # Spread sentiments
+  # n is the count col created in moby_count
+  # fill missing values with 0
+  spread(sentiment, n, fill = 0)
+
+# Review the spread data
+moby_spread
+> moby_spread
+# A tibble: 9,234 x 3
+   index negative positive
+   <dbl>    <dbl>    <dbl>
+ 1     5        0        1
+ 2     9        1        0
+ 3    11        1        0
+ 4    13        0        1
+ 5    17        0        1
+ 6    19        0        1
+ 7    22        1        0
+ 8    24        0        1
+ 9    25        0        1
+10    31        0        2
+# ... with 9,224 more rows
+
+
+
