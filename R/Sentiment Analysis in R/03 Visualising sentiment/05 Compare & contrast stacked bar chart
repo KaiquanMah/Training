@@ -1,0 +1,124 @@
+Compare & contrast stacked bar chart
+Another way to slice your text is to understand how much of the document(s) are made of positive or negative words. For example a restaurant review may have some positive aspects such as "the food was good" but then continue to add "the restaurant was dirty, the staff was rude and parking was awful." As a result, you may want to understand how much of a document is dedicated to positive vs negative language. In this example it would have a higher negative percentage compared to positive.
+One method for doing so is to count() the positive and negative words then divide by the number of subjectivity words identified. In the restaurant review example, "good" would count as 1 positive and "dirty," "rude," and "awful" count as 3 negative terms. A simple calculation would lead you to believe the restaurant review is 25% positive and 75% negative since there were 4 subjectivity terms.
+Start by performing the inner_join() on a unified tidy data frame containing 4 books, Agamemnon, Oz, Huck Finn, and Moby Dick. Just like the previous exercise you will use filter() and grepl().
+To perform the count() you have to group the data by book and then sentiment. For example all the positive words for Agamemnon have to be grouped then tallied so that positive words from all books are not mixed. Luckily, you can pass multiple variables into count() directly.
+
+
+Inner join all_books to the lexicon, nrc.
+Filter to keep rows where sentiment contains "positive" or "negative". That is, use grepl() on the sentiment column, checking without the negation so that "positive|negative" are kept.
+Count by book and sentiment.
+
+> tail(all_books)
+# A tibble: 6 x 4
+  document term   count book     
+  <chr>    <chr>  <dbl> <chr>    
+1 1        yon        3 agememnon
+2 1        yonder     3 agememnon
+3 1        yore       2 agememnon
+4 1        young      8 agememnon
+5 1        your       2 agememnon
+6 1        zeus      21 agememnon
+
+
+
+# Review tail of all_books
+tail(all_books)
+
+# Count by book & sentiment
+books_sent_count <- all_books %>%
+  # Inner join to nrc lexicon
+  inner_join(nrc, by = c("term" = "word")) %>% 
+  # Keep only positive or negative
+  filter(grepl("positive|negative", sentiment)) %>% 
+  # Count by book and by sentiment
+  count(book, sentiment)
+  
+# Review entire object
+books_sent_count
+
+
+
+
+
+
+
+
+
+
+
+Group books_sent_count by line.
+Mutate to add a column named percent_positive. This should e calculated as 100 times n divided by the sum of n.
+
+> books_sent_count
+# A tibble: 8 x 3
+  book      sentiment     n
+  <chr>     <chr>     <int>
+1 agememnon negative    334
+2 agememnon positive    275
+3 huck      negative   2471
+4 huck      positive   3544
+5 moby      negative   7134
+6 moby      positive   9248
+7 oz        negative   1424
+8 oz        positive   2026
+
+
+
+# From previous step
+books_sent_count <- all_books %>%
+  inner_join(nrc, by = c("term" = "word")) %>% 
+  filter(grepl("positive|negative", sentiment)) %>% 
+  count(book, sentiment)
+  
+book_pos <- books_sent_count %>%
+  # Group by book
+  group_by(book) %>% 
+  # Mutate to add % positive column 
+  mutate(percent_positive = 100 * n / sum(n) )
+  
+> book_pos
+# A tibble: 8 x 4
+# Groups:   book [4]
+  book      sentiment     n percent_positive
+  <chr>     <chr>     <int>            <dbl>
+1 agememnon negative    334             54.8
+2 agememnon positive    275             45.2
+3 huck      negative   2471             41.1
+4 huck      positive   3544             58.9
+5 moby      negative   7134             43.5
+6 moby      positive   9248             56.5
+7 oz        negative   1424             41.3
+8 oz        positive   2026             58.7  
+
+
+
+
+
+
+
+
+
+
+
+
+Using book_pos, plot percent_positive vs. book, using sentiment as the fill color.
+Add a column layer with geom_col().
+
+# From previous steps
+book_pos <- all_books %>%
+  inner_join(nrc, by = c("term" = "word")) %>% 
+  filter(grepl("positive|negative", sentiment)) %>% 
+  count(book, sentiment) %>%
+  group_by(book) %>% 
+  mutate(percent_positive = 100 * n / sum(n))
+  
+# Plot percent_positive vs. book, filled by sentiment
+# "fill" would separate the "fill colour" based on the value/category in the 'sentiment' col
+# i.e. either pos or neg
+ggplot(book_pos, aes(x=book, y=percent_positive, fill = sentiment)) +  
+  # Add a col layer
+  geom_col()
+
+Cruising along! Now you know how to see the proportional positivity in text.
+
