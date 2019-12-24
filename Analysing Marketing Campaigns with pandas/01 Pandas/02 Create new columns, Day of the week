@@ -1,0 +1,120 @@
+Updating the data type of a column
+You will often want to modify the data type of columns to suit your needs. Pandas and Python have special functionalities around manipulating data types that can make your analysis easier and more robust, such as concatenating strings and summing boolean values. However, this functionality is only possible if columns are stored as the intended data type.
+In this exercise, you will modify the data type of the is_retained column.
+
+Print the data type of the is_retained column.
+# Check the data type of is_retained
+print(marketing['is_retained'].dtype)
+<script.py> output:
+    object
+    
+
+Update the data type of the is_retained column to boolean and then check its data type again.
+# Convert is_retained to a boolean
+marketing['is_retained'] = marketing['is_retained'].astype('bool')
+#astype('boolean) does not work
+
+
+# Check the data type of is_retained, again
+print(marketing['is_retained'].dtype)    
+<script.py> output:
+    bool    
+
+By changing the data type to boolean, you can now sum the is_retained column to calculate the number of users who were retained.
+
+
+
+
+
+
+
+Adding new columns
+Adding new columns that derive information from existing data or based on domain knowledge is known as Feature Engineering. Even in relatively simple datasets, there are always new characteristics you could pull out to create a more in-depth analysis.
+One of the most critical skills a data scientist needs to learn is how to identify opportunities for feature engineering.
+
+In this exercise, you will add two columns to marketing:
+day_of_week: represents the day of the week as an integer (we added a new column, day that represents the day of the week and defined a dictionary that maps the day of the week to each numerical value from 0 to 6 for this purpose.)
+is_correct_lang: conveys whether the ad was shown to the user in their preferred language
+
+
+
+Add a new column, channel_code, which maps the values in the subscribing_channel column to a numeric scale using the channel_dict dictionary.
+# Mapping for channels
+channel_dict = {"House Ads": 1, "Instagram": 2, 
+                "Facebook": 3, "Email": 4, "Push": 5}
+
+# Map the channel to a channel code
+marketing['channel_code'] = marketing['subscribing_channel'].map(channel_dict)
+
+
+
+
+
+Import numpy with the alias np.
+Add a new column, is_correct_lang, which is 'Yes' if the user was shown the ad in their preferred language, 'No' otherwise.
+
+# Mapping for channels
+channel_dict = {"House Ads": 1, "Instagram": 2, 
+                "Facebook": 3, "Email": 4, "Push": 5}
+
+# Map the channel to a channel code
+marketing['channel_code'] = marketing['subscribing_channel'].map(channel_dict)
+
+# Import numpy
+import numpy as np
+
+
+# Add the new column is_correct_lang
+#if the values match, give me "Yes", else give me "No"
+marketing['is_correct_lang'] = np.where(marketing.language_displayed==marketing.language_preferred, "Yes", "No")
+
+We'll use these columns to understand trends over time in future exercises.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Date columns
+Currently, the date columns in the marketing DataFrame are being incorrectly read as objects. We need to convert these columns to date columns to be able to use Python and pandas' robust date manipulation and formatting capabilities.
+In this exercise, you will practice reading the CSV with proper date columns and create a day of the week column.
+
+Import pandas into the environment with the alias pd.
+Read 'marketing.csv' into your environment correctly identifying date columns,'date_served' 'date_subscribed' and 'date_canceled' within your call to read_csv().
+Create a day of week column from 'date_subscribed' using dt.dayofweek.
+
+
+
+# Import pandas into the environment
+import pandas as pd
+
+# Import marketing.csv with date columns
+marketing = pd.read_csv('marketing.csv',
+                        parse_dates=['date_served',
+                                    'date_subscribed', 
+                                    'date_canceled'])
+
+print(marketing.date_subscribed.dtype)
+In [5]: print(marketing.date_subscribed.dtype)
+datetime64[ns]
+
+# Add a DoW column
+marketing['DoW'] = marketing.date_subscribed.dt.dayofweek
+
+Great job correcting the data types of date columns! Now, let's do some exploratory analysis.
+
+
+
