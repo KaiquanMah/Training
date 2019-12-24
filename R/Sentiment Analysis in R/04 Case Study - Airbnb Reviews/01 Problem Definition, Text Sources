@@ -1,0 +1,67 @@
+Step 1: What do you want to know?
+Throughout this chapter you will analyze the text of a corpus of Airbnb housing rental reviews. Which of the following questions can you answer using a sentiment analysis of these reviews?
+
+#not What document clusters exist in the reviews?
+#not How many words are associated with rental reviews?
+#yes What property qualities are listed in positive or negative comments?
+Your answer is positively amazing! Sentiment analysis is focussed on positive and negative text.
+
+#not What named entities are in the documents?
+
+
+
+
+
+
+Step 2: Identify Text Sources
+In this short exercise you will load and examine a small corpus of property rental reviews from around Boston. Hopefully you already know read.csv() which enables you to load a comma separated file. In this exercise you will also need to specify stringsAsFactors = FALSE when loading the corpus. This ensures that the reviews are character vectors, not factors. This may seem mundane but the point of this chapter is to get you doing an entire workflow from start to finish so let's begin with data ingestion!
+Next you simply apply str() to review the data frame's structure. It is a convenient function for compactly displaying initial values and class types for vectors.
+Lastly you will apply dim() to print the dimensions of the data frame. For a data frame, your console will print the number of rows and the number of columns.
+Other functions like head(), tail() or summary() are often used for data exploration but in this case we keep the examination short so you can get to the fun sentiment analysis!
+
+
+The Boston property rental reviews are stored in a CSV file located by the predefined variable bos_reviews_file.
+Load the property reviews from bos_reviews_file with read.csv(). Call the object bos_reviews. Be sure to pass in the parameter stringsAsFactors = FALSE so the comments are not unique factors.
+Examine the structure of the data frame using the base str() function applied to bos_reviews.
+Find out how many reviews you are working with by calling dim() on the bos_reviews.
+
+
+# bos_reviews_file has been pre-defined
+bos_reviews_file
+[1] "/usr/local/share/datasets/bos_reviews.csv"
+
+# load raw text
+bos_reviews <- read.csv(bos_reviews_file, stringsAsFactors = FALSE)
+
+# Structure
+str(bos_reviews)
+'data.frame':	1000 obs. of  2 variables:
+ $ id      : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ comments: chr  "My daughter and I had a wonderful stay with Maura. She kept in close touch with us throughout the day as we wer"| __truncated__ "We stay at Elizabeth's place for 3 nights in October 2014.\nThe apartment is really a great place to stay. \nLo"| __truncated__ "If you're staying in South Boston, this is a terrific place to camp out. The apartment and bedroom are lovely, "| __truncated__ "Derian and Brian were great and prompt with their communications with us. The room was as described; it was a s"| __truncated__ ...
+
+
+# Dimensions
+dim(bos_reviews)
+[1] 1000    2
+
+Now that you've imported the data, let's get started with the sentiment analysis.
+
+
+> head(bos_reviews)
+  id
+1  1
+2  2
+3  3
+4  4
+5  5
+6  6
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               comments
+1                                                                                                                              My daughter and I had a wonderful stay with Maura. She kept in close touch with us throughout the day as we weren't arriving til later in the evening. The room was charming and the whole apartment was very warm and eclectic. She asked us what time we'd like breakfast and laid out a very nice spread. Right down the street from Jamaica Pond and very close to Center St. as well. All in all, great experience!
+2                                                                                                         We stay at Elizabeth's place for 3 nights in October 2014.\nThe apartment is really a great place to stay. \nLovely decorated and extremely well located. Very close to Back Bay station if you come by train, and close also to the subway and just a nice walk from the city center. \n\nI would say that is better that what you appreciate in the pictures\nAlso the bed is very confortable.\nSo really it was an optimal choice for us.
+3                                                                                                                                                                                                                                                                                                                                  If you're staying in South Boston, this is a terrific place to camp out. The apartment and bedroom are lovely, Ellie is an excellent host, and there is a lot within walking distance in a neighborhood on the rise.
+4 Derian and Brian were great and prompt with their communications with us. The room was as described; it was a small nice and clean room with a very comfortable bed and pillows. We shared a bathroom with others in the apartment. Derian had turned on the AC in our room prior to our arrival which we appreciated a lot. He also greeted us kindly when we arrived and showed us around. We arrived late and left early in the morning to catch our flight, so unfortunately, we did not get a chance to meet Brian or to talk much with Derian. 
+5                                                                                                                                                                                                                                                                                                                                                                                                                                                   John and Dan were gracious hosts and the location and accommodations were very nice......as listed.
+6                                                                                                                                 The best thing about Sean's place is the location. It's by a T station, there are a number of groceries and restaurants around, etc. It was nice to see all the drawings he made while studying architecture. The building is a bit old so walls are a bit thinner but overall it was a nice place to be.\n\nSean was great in answering phone calls and questions. He was there to meet us when we got to the place.
+
+
+
