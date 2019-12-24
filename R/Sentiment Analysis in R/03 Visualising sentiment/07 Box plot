@@ -1,0 +1,72 @@
+Box plot
+An easy way to compare multiple distributions is with a box plot. This code will help you construct multiple box plots to make a compact visual.
+
+In this exercise the all_book_polarity object is already loaded. The data frame contains two columns, book and polarity. It comprises all books with qdap's polarity() function applied. Here are the first 3 rows of the large object.
+book	polarity
+14	huck	0.2773501
+22	huck	0.2581989
+26	huck	-0.5773503
+
+This exercise introduces tapply() which allows you to apply functions over a ragged array. You input a vector of values and then a vector of factors. For each factor, value combination the third parameter, a function like min(), is applied. For example here's some code with tapply() used on two vectors.
+f1 <- as.factor(c("Group1", "Group2", "Group1", "Group2"))
+stat1 <- c(1, 2, 1, 2)
+tapply(stat1, f1, sum)
+
+The result is an array where Group1 has a value of 2 (1+1) and Group2 has a value of 4 (2+2).
+
+
+
+
+
+Since it's already loaded, examine the all_book_polarity with str().
+Using tapply(), pass in all_book_polarity$polarity, all_book_polarity$book and the summary() function. This will print the summary statistics for the 4 books in terms of their polarity() scores. You would expect to see Oz and Huck Finn to have higher averages than Agamemnon or Moby Dick. Pay close attention to the median.
+Create a box plot with ggplot() by passing in all_book_polarity.
+Aesthetics should be aes(x = book, y = polarity).
+Using a + add the geom_boxplot() with col = "darkred". Pay close attention to the dark line in each box representing median.
+Next add another layer called geom_jitter() to add points for each of the words.
+
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/tapply
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/Extremes
+https://www.rdocumentation.org/packages/ggplot2/versions/3.2.1/topics/geom_boxplot
+https://www.rdocumentation.org/packages/ggplot2/versions/3.2.1/topics/geom_jitter
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/summary
+
+
+# Examine
+str(all_book_polarity)
+> str(all_book_polarity)
+'data.frame':	14437 obs. of  2 variables:
+ $ book    : Factor w/ 4 levels "huck","agamemnon",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ polarity: num  0.277 0.258 -0.577 0.25 0.516 ...
+ 
+ 
+ 
+# Summary by document
+tapply(all_book_polarity$polarity, all_book_polarity$book, summary)
+$huck
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-1.38695 -0.25820  0.23570  0.04156  0.26726  1.60357 
+
+$agamemnon
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+-1.4667 -0.3780 -0.3333 -0.1266  0.3333  1.2247 
+
+$moby
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-2.13333 -0.28868 -0.25000 -0.02524  0.28868  1.84752 
+
+$oz
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+-1.2728 -0.2774  0.2582  0.0454  0.2887  1.1877
+
+
+
+# Box plot
+ggplot(all_book_polarity, aes(x = book, y = polarity)) +
+  geom_boxplot(fill = c("#bada55", "#F00B42", "#F001ED", "#BA6E15"), col = "darkred") +
+  geom_jitter(position = position_jitter(width = 0.1, height = 0), alpha = 0.02) +
+  theme_gdocs() +
+  ggtitle("Book Polarity")
+
+Boom goes the dynamite! Box plots help you quickly compare multiple distributions
+
