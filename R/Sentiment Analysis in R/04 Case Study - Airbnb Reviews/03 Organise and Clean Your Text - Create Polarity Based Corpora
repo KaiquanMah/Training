@@ -1,0 +1,176 @@
+Create Polarity Based Corpora
+In this exercise you will perform Step 3 of the text mining workflow. Although qdap isn't a tidy package you will mutate() a new column based on the returned polarity list representing all polarity (that's a hint BTW) scores. In chapter 3 we used a custom function pol_subsections which uses only base R declarations. However, in following the tidy principles this exercise uses filter() then introduces pull(). The pull() function works like works like [[ to extract a single variable.
+Once segregated you collapse all the positive and negative comments into two larger documents representing all words among the positive and negative rental reviews.
+Lastly, you will create a Term Frequency Inverse Document Frequency (TFIDF) weighted Term Document Matrix (TDM). Since this exercise code starts with a tidy structure, some of the functions borrowed from tm are used along with the %>% operator to keep the style consistent. If the basics of the tm package aren't familiar check out the Text Mining: Bag of Words course. Instead of counting the number of times a word is used (frequency), the values in the TDM are penalized for over used terms, which helps reduce non-informative words.
+
+
+Get the positive comments.
+Mutate to add a polarity column, equal to bos_pol$all$polarity.
+Filter to keep rows where polarity is greater than zero.
+Use pull() to extract the comments column. (Pass this column without quotes.)
+Collapse into a single string, separated by spaces using paste(), passing collapse = " ".
+
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/pull
+  
+
+
+> pos_terms <- bos_reviews %>%
+    # Add polarity column
+    mutate(polarity = bos_pol$all$polarity)
+> head(pos_terms)
+  id
+1  1
+2  2
+3  3
+4  4
+5  5
+6  6
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               comments
+1                                                                                                                              My daughter and I had a wonderful stay with Maura. She kept in close touch with us throughout the day as we weren't arriving til later in the evening. The room was charming and the whole apartment was very warm and eclectic. She asked us what time we'd like breakfast and laid out a very nice spread. Right down the street from Jamaica Pond and very close to Center St. as well. All in all, great experience!
+2                                                                                                         We stay at Elizabeth's place for 3 nights in October 2014.\nThe apartment is really a great place to stay. \nLovely decorated and extremely well located. Very close to Back Bay station if you come by train, and close also to the subway and just a nice walk from the city center. \n\nI would say that is better that what you appreciate in the pictures\nAlso the bed is very confortable.\nSo really it was an optimal choice for us.
+3                                                                                                                                                                                                                                                                                                                                  If you're staying in South Boston, this is a terrific place to camp out. The apartment and bedroom are lovely, Ellie is an excellent host, and there is a lot within walking distance in a neighborhood on the rise.
+4 Derian and Brian were great and prompt with their communications with us. The room was as described; it was a small nice and clean room with a very comfortable bed and pillows. We shared a bathroom with others in the apartment. Derian had turned on the AC in our room prior to our arrival which we appreciated a lot. He also greeted us kindly when we arrived and showed us around. We arrived late and left early in the morning to catch our flight, so unfortunately, we did not get a chance to meet Brian or to talk much with Derian. 
+5                                                                                                                                                                                                                                                                                                                                                                                                                                                   John and Dan were gracious hosts and the location and accommodations were very nice......as listed.
+6                                                                                                                                 The best thing about Sean's place is the location. It's by a T station, there are a number of groceries and restaurants around, etc. It was nice to see all the drawings he made while studying architecture. The building is a bit old so walls are a bit thinner but overall it was a nice place to be.\n\nSean was great in answering phone calls and questions. He was there to meet us when we got to the place.
+   polarity
+1 1.1851900
+2 1.2455047
+3 0.4803845
+4 0.7562283
+5 0.2500000
+6 0.5625440
+
+
+
+#get only the comments col
+pos_terms <- bos_reviews %>%
+  # Add polarity column
+  mutate(polarity = bos_pol$all$polarity) %>%
+  # Filter for positive polarity
+  filter(polarity>0) %>%
+  # Extract comments column
+  pull(comments) %>% 
+  # Paste and collapse
+  paste(collapse = " ")
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Do the same again, this time with negative comments.
+Mutate to add a polarity column, equal to bos_pol$all$polarity.
+Filter to keep rows where polarity is less than zero.
+Extract the comments column.
+Collapse into a single string, separated by spaces.
+
+neg_terms <- bos_reviews %>%
+  # Add polarity column
+  mutate(polarity=bos_pol$all$polarity) %>%
+  # Filter for negative polarity
+  filter(polarity<0) %>%
+  # Extract comments column
+  pull(comments) %>%
+  # Paste and collapse
+  paste(collapse = " ")
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+Create a corpus of both positive and negative comments.
+Use c() to concatenate pos_terms and neg_terms.
+Source the text using VectorSource() without arguments.
+Convert to a volatile corpus by calling VCorpus(), again without arguments.
+
+# From previous steps
+pos_terms <- bos_reviews %>%
+  mutate(polarity = bos_pol$all$polarity) %>%
+  filter(polarity > 0) %>%
+  pull(comments) %>% 
+  paste(collapse = " ")
+neg_terms <- bos_reviews %>%
+  mutate(polarity = bos_pol$all$polarity) %>%
+  filter(polarity < 0) %>%
+  pull(comments) %>% 
+  paste(collapse = " ")
+
+# Concatenate the terms
+all_corpus <- c(pos_terms, neg_terms) %>% 
+  # Source from a vector
+  VectorSource() %>% 
+  # Create a volatile corpus
+  VCorpus()
+
+
+
+
+
+
+
+Create a term-document matrix from all_corpus.
+Use term frequency inverse document frequency weighting by setting weighting to weightTfIdf.
+Remove punctuation by setting removePunctuation to TRUE.
+Use English stopwords by setting stopwords to stopwords(kind = "en").
+
+# From previous steps
+pos_terms <- bos_reviews %>%
+  mutate(polarity = bos_pol$all$polarity) %>%
+  filter(polarity > 0) %>%
+  pull(comments) %>% 
+  paste(collapse = " ")
+neg_terms <- bos_reviews %>%
+  mutate(polarity = bos_pol$all$polarity) %>%
+  filter(polarity < 0) %>%
+  pull(comments) %>% 
+  paste(collapse = " ")
+all_corpus <- c(pos_terms, neg_terms) %>% 
+  VectorSource() %>% 
+  VCorpus()
+  
+all_tdm <- TermDocumentMatrix(
+  # Use all_corpus
+  all_corpus, 
+  control = list(
+    # Use TFIDF weighting
+    weighting = weightTfIdf, 
+    # Remove the punctuation
+    removePunctuation = TRUE,
+    # Use English stopwords
+    stopwords = stopwords(kind='en')
+  )
+)
+
+# Examine the TDM
+all_tdm
+
+
+> all_tdm
+<<TermDocumentMatrix (terms: 4965, documents: 2)>>
+Non-/sparse entries: 4348/5582
+Sparsity           : 56%
+Maximal term length: 93
+Weighting          : term frequency - inverse document frequency (normalized) (tf-idf)
+
+Congrats now you have a TFIDF weighted TDM splitting up your text!
+
