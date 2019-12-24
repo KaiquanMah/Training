@@ -1,0 +1,125 @@
+Comparison Cloud
+This exercise will create a common visual for you to understand term frequency. Specifically, you will review the most frequent terms from among the positive and negative collapsed documents. Recall the TermDocumentMatrix all_tdm you created earlier. Instead of 1000 rental reviews the matrix contains 2 documents containing all reviews separated by the polarity() score.
+It's usually easier to change the TDM to a matrix. From there you simply rename the columns. Remember that the colnames() function is called on the left side of the assignment operator as shown below.
+colnames(OBJECT) <- c("COLUMN_NAME1", "COLUMN_NAME2")
+
+Once done, you will reorder the matrix to see the most positive and negative words. Review these terms so you can answer the conclusion exercises!
+Lastly, you'll visualize the terms using comparison.cloud().
+
+Change the pre-loaded all_tdm to a matrix called all_tdm_m using as.matrix().
+Use colnames() on all_tdm_m to declare c("positive", "negative").
+Apply order() to all_tdm_m[,1] and set decreasing = TRUE.
+Review the top 10 terms of the reordered TDM using pipe (%>%) then head() with n = 10.
+Repeat the previous two steps with negative comments. Now you will order() by the second column, all_tdm_m[,2] and use decreasing = TRUE.
+Review the 10 most negative terms indexing all_tdm_m by order_by_neg. Pipe this to head() with n = 10.
+
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/row%2Bcolnames
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/order
+
+
+
+# Matrix
+all_tdm_m <- as.matrix(all_tdm)
+> str(all_tdm_m)
+ num [1:4918, 1:2] 2.96e-05 2.96e-05 2.96e-05 2.96e-05 2.96e-05 ...
+ - attr(*, "dimnames")=List of 2
+  ..$ Terms: chr [1:4918] "–•’™" "—•–™" "—•‘" "—œœ" ...
+  ..$ Docs : chr [1:2] "1" "2"
+
+
+# Column names
+colnames(all_tdm_m) <- c("positive", "negative")
+> str(all_tdm_m)
+ num [1:4918, 1:2] 2.96e-05 2.96e-05 2.96e-05 2.96e-05 2.96e-05 ...
+ - attr(*, "dimnames")=List of 2
+  ..$ Terms: chr [1:4918] "–•’™" "—•–™" "—•‘" "—œœ" ...
+  ..$ Docs : chr [1:2] "positive" "negative"
+
+
+
+
+# Top pos words
+# POS is in col 1
+# Most POS on top
+order_by_pos <- order(all_tdm_m[, 1], decreasing = TRUE)
+> order_by_pos
+   [1] 4716 1262 4166  920 4848 3672 2092 4158 1534 4232 2153 1405 1361 1593
+  [15] 4259 1667  968 2654  292  737 3454 4698 3475 4777 2857 4089 4733 1284
+  [29]  250 3335 3477 2966 4368 4505  142 2647 3666 4491 1913 4192 4793 2643
+  ...
+  [4901] 4780 4787 4799 4804 4806 4809 4819 4820 4824 4835 4838 4840 4843 4854
+  [4915] 4865 4871 4878 4896
+
+
+
+
+# Review top 10 pos words
+# from the matrix, based on the indices
+# get me the top 10 records
+all_tdm_m[order_by_pos, ] %>% head(n=10)
+             Docs
+Terms            positive negative
+  walk        0.004565669        0
+  definitely  0.004180255        0
+  staying     0.003735547        0
+  city        0.003290839        0
+  wonderful   0.003112956        0
+  restaurants 0.003053661        0
+  highly      0.002964720        0
+  station     0.002697895        0
+  enjoyed     0.002431070        0
+  subway      0.002401423        0
+
+
+
+
+
+
+
+
+
+# Top neg words
+# NEG is in col 2
+# Most NEG on top
+order_by_neg <- order(all_tdm_m[, 2], decreasing = TRUE)
+
+# Review top 10 neg words
+all_tdm_m[order_by_neg, ] %>% head(n=10)
+              Docs
+Terms          positive    negative
+  condition           0 0.002162942
+  demand              0 0.001441961
+  disappointed        0 0.001441961
+  dumpsters           0 0.001441961
+  hygiene             0 0.001441961
+  inform              0 0.001441961
+  nasty               0 0.001441961
+  safety              0 0.001441961
+  shouldve            0 0.001441961
+  sounds              0 0.001441961
+
+
+
+
+
+
+
+
+
+
+
+Draw a comparison.cloud() on all_tdm_m. Specify max.words equal to 20.
+
+# From previous step
+all_tdm_m <- as.matrix(all_tdm)
+colnames(all_tdm_m) <- c("positive", "negative")
+
+comparison.cloud(
+  # Use the term-document matrix
+  all_tdm_m,
+  # Limit to 20 words
+  max.words = 20,
+  colors = c("darkgreen","darkred")
+)
+
+
