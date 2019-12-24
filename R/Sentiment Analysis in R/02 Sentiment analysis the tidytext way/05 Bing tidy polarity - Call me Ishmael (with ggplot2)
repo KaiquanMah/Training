@@ -1,0 +1,65 @@
+Bing tidy polarity: Call me Ishmael (with ggplot2)!
+The last Bing lexicon exercise! In this exercise you will use the pipe operator (%>%) to create a timeline of the sentiment in Moby Dick. In the end you will also create a simple visual following the code structure below. The next chapter goes into more depth for visuals.
+
+ggplot(spread_data, aes(index_column, polarity_column)) +
+  geom_smooth()
+
+
+Inner join moby to the bing lexicon.
+Call inner_join() to join the tibbles.
+Join by the term column in the text and the word column in the lexicon.
+
+Count by sentiment and index.
+
+Reshape so that each sentiment has its own column.
+Call spread().
+The key column (to split into multiple columns) is sentiment.
+The value column (containing the counts) is n.
+Also specify fill = 0 to fill out missing values with a zero.
+
+Use mutate() to add the polarity column. Define it as the difference between the positive and negative columns.
+
+
+moby_polarity <- moby %>%
+  # Inner join to lexicon
+  inner_join(bing, by = c("term" = "word")) %>%
+  # Count the sentiment scores
+  count(sentiment, index) %>% 
+  # Spread the sentiment into positive and negative columns
+  spread(sentiment, n, fill = 0) %>%
+  # Add polarity column
+  mutate(polarity = positive-negative)
+  
+  
+  
+> moby_polarity
+# A tibble: 9,234 x 4
+   index negative positive polarity
+   <dbl>    <dbl>    <dbl>    <dbl>
+ 1     5        0        1        1
+ 2     9        1        0       -1
+ 3    11        1        0       -1
+ 4    13        0        1        1
+ 5    17        0        1        1
+ 6    19        0        1        1
+ 7    22        1        0       -1
+ 8    24        0        1        1
+ 9    25        0        1        1
+10    31        0        2        2
+# ... with 9,224 more rows  
+
+
+
+
+Using moby_polarity, plot polarity vs. index.
+Add a smooth trend layer by calling geom_smooth() with no arguments.  
+# Plot polarity vs. index
+ggplot(moby_polarity, aes(x=index, y=polarity)) + 
+  # Add a smooth trend curve
+  geom_smooth()   
+  
+  
+  
+Does Moby Dick have a happy ending?
+
+ 
