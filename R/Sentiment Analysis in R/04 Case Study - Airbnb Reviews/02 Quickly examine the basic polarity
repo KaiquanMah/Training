@@ -1,0 +1,77 @@
+Quickly examine the basic polarity
+When starting a sentiment project, sometimes a quick polarity() will help you set expectations or learn about the problem. In this exercise (to save time), you will apply polarity() to a portion of the comments vector while the larger polarity object is loaded in the background.
+Using a kernel density plot you should notice the reviews do not center on 0. Often there are two causes for this sentiment "grade inflation." First, social norms may lead respondents to be pleasant instead of neutral. This, of course, is channel specific. Particularly snarky channels like e-sports or social media posts may skew negative leading to "deflation." These channels have different expectations. A second possible reason could be "feature based sentiment". In some reviews an author may write "the bed was comfortable and nice but the kitchen was dirty and gross." The sentiment of this type of review encompasses multiple features simultaneously and therefore could make an average score skewed.
+In a subsequent exercise you will adjust this "grade inflation" but here explore the reviews without any change.
+
+
+Create practice_pol using polarity() on the first six reviews as in bos_reviews$comments[1:6]
+Review the returned polarity object by calling practice_pol.
+Call summary() on practice_pol$all$polarity - this will access the overall polarity for all 6 comments.
+We've also loaded a larger polarity object for all 1000 comments. This new object is called bos_pol. Now apply summary() to the correct list element that returns all polarity scores of bos_pol.
+The sample code has a barplot and kernel density plot almost ready to print. You must enter the data frame representing all scores. Hint: in the previous step, polarity represents a column of this data frame.
+
+
+
+> str(bos_reviews)
+'data.frame':	1000 obs. of  2 variables:
+ $ id      : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ comments: chr  "My daughter and I had a wonderful stay with Maura. She kept in close touch with us throughout the day as we wer"| __truncated__ "We stay at Elizabeth's place for 3 nights in October 2014.\nThe apartment is really a great place to stay. \nLo"| __truncated__ "If you're staying in South Boston, this is a terrific place to camp out. The apartment and bedroom are lovely, "| __truncated__ "Derian and Brian were great and prompt with their communications with us. The room was as described; it was a s"| __truncated__ ...
+
+
+# Practice apply polarity to first 6 reviews
+practice_pol <- polarity(bos_reviews$comments[1:6])
+
+
+# Review the object
+practice_pol
+> practice_pol
+  all total.sentences total.words ave.polarity sd.polarity stan.mean.polarity
+1 all               6         390        0.747       0.398              1.875
+
+   
+# Check out the practice polarity
+summary(practice_pol$all$polarity)
+> summary(practice_pol$all$polarity)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.2500  0.5009  0.6594  0.7466  1.0779  1.2455
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+# Summary for all reviews
+summary(bos_pol$all$polarity)
+
+> bos_pol
+  all total.sentences total.words ave.polarity sd.polarity stan.mean.polarity
+1 all            1000       70481        0.902       0.502              1.799
+
+> summary(bos_pol$all)
+     all                  wc            polarity      
+ Length:1000        Min.   :  2.00   Min.   :-0.9712  
+ Class :character   1st Qu.: 34.75   1st Qu.: 0.6047  
+ Mode  :character   Median : 56.00   Median : 0.8921  
+                    Mean   : 70.48   Mean   : 0.9022  
+                    3rd Qu.: 88.00   3rd Qu.: 1.2063  
+                    Max.   :504.00   Max.   : 3.7510  
+                                     NA's   :1    
+
+> summary(bos_pol$all$polarity)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+-0.9712  0.6047  0.8921  0.9022  1.2063  3.7510       1
+
+
+
+# Plot Boston polarity all element
+ggplot(bos_pol$all, aes(x = polarity, y = ..density..)) + 
+  geom_histogram(binwidth = 0.25, fill = "#bada55", colour = "grey60") +
+  geom_density(size = 0.75) +
+  theme_gdocs() 
+  
+  
+Quick and easy yet polarity can help you get familiar with your data.
+
+
