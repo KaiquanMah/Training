@@ -1,0 +1,136 @@
+Word impact, frequency analysis
+One of the easiest ways to explore data is with a frequency analysis. Although not difficult, in sentiment analysis this simple method can be surprisingly illuminating. Specifically, you will build a barplot. In this exercise you are once again working with moby and bing to construct your visual.
+To get the bars ordered from lowest to highest, you will use a trick with factors. reorder() lets you change the order of factor levels based upon another scoring variable. In this case, you will reorder the factor variable term by the scoring variable polarity.
+
+Create moby_tidy_sentiment.
+Use count() with term, sentiment, and wt = count.
+Pipe to spread() with sentiment, n, and fill = 0.
+Pipe to mutate(). Call the new variable polarity; calculated as positive minus negative.
+Call moby_tidy_sentiment to review and compare it to the previous exercise.
+
+> moby_tidy_sentiment <- moby %>% 
+    # Inner join to bing lexicon by term = word
+    inner_join(bing, by = c("term" = "word")) %>% 
+    # using wt=n or wt='n' would not work
+    # Count by term and sentiment, weighted by count
+    count(term, sentiment, wt = count)
+> moby_tidy_sentiment
+# A tibble: 2,372 x 3
+   term        sentiment     n
+   <chr>       <chr>     <dbl>
+ 1 abominable  negative      3
+ 2 abominate   negative      1
+ 3 abomination negative      1
+ 4 abound      positive      3
+ 5 abruptly    negative      2
+ 6 absence     negative      5
+ 7 absurd      negative      3
+ 8 absurdly    negative      1
+ 9 abundance   positive      3
+10 abundant    positive      2
+# ... with 2,362 more rows
+
+
+
+
+moby_tidy_sentiment <- moby %>% 
+  # Inner join to bing lexicon by term = word
+  inner_join(bing, by = c("term" = "word")) %>% 
+  # Count by term and sentiment, weighted by count
+  # using wt=n or wt='n' would not work
+  count(term, sentiment, wt = count) %>%
+  # Spread sentiment, using n as values
+  spread(sentiment, n, fill = 0) %>%
+  # Mutate to add a polarity column
+  mutate(polarity = positive - negative)
+
+# Review
+moby_tidy_sentiment
+> moby_tidy_sentiment
+# A tibble: 2,371 x 4
+   term        negative positive polarity
+   <chr>          <dbl>    <dbl>    <dbl>
+ 1 abominable         3        0       -3
+ 2 abominate          1        0       -1
+ 3 abomination        1        0       -1
+ 4 abound             0        3        3
+ 5 abruptly           2        0       -2
+ 6 absence            5        0       -5
+ 7 absurd             3        0       -3
+ 8 absurdly           1        0       -1
+ 9 abundance          0        3        3
+10 abundant           0        2        2
+# ... with 2,361 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Use filter() on moby_tidy_sentiment to keep rows where the absolute polarity is greater than or equal to 50. abs() gives you absolute values.
+mutate() a new vector pos_or_neg with an ifelse() function checking if polarity > 0 then declare the document "positive" else declare it "negative".
+
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/ifelse
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/MathFun
+
+
+moby_tidy_pol <- moby_tidy_sentiment %>% 
+  # Filter for absolute polarity at least 50 values each term
+  filter(abs(polarity) >= 50) %>% 
+  # then out of the terms with at least 50 values each
+  # Add positive/negative status
+  # if polarity is > 0, return "positive", else "negative"
+  mutate(
+    pos_or_neg = ifelse(polarity>0, "positive", "negative")
+  )
+
+> moby_tidy_pol
+# A tibble: 22 x 5
+   term   negative positive polarity pos_or_neg
+   <chr>     <dbl>    <dbl>    <dbl> <chr>     
+ 1 best          0       65       65 positive  
+ 2 better        0       62       62 positive  
+ 3 dark         55        0      -55 negative  
+ 4 dead         90        0      -90 negative  
+ 5 death        75        0      -75 negative  
+ 6 dick         80        0      -80 negative  
+ 7 enough        0       76       76 positive  
+ 8 fine          0       57       57 positive  
+ 9 good          0      196      196 positive  
+10 grand         0       52       52 positive  
+# ... with 12 more rows
+
+
+
+
+
+
+
+
+Using moby_tidy_pol, plot polarity vs. term, reordered by polarity (reorder(term, polarity)), filled by pos_or_neg.
+Inside element_text(), rotate the x-axis text 90 degrees by setting angle = 90 and shifting the vertical justification with vjust = -0.1.
+https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/reorder.default
+
+# Plot polarity vs. (term reordered by polarity), filled by pos_or_neg
+#reorder(term, polarity) means reordering "term" values based on "polarity" value in ascending order from neg to pos
+ggplot(moby_tidy_pol, aes(reorder(term, polarity), polarity, fill = pos_or_neg)) +
+  geom_col() + 
+  ggtitle("Moby Dick: Sentiment Word Frequency") + 
+  theme_gdocs() +
+  # Rotate text and vertically justify
+  theme(axis.text.x = element_text(angle = 90, vjust = -0.1))
+  
+  
+You went all the way from documents to visualizations.
+
