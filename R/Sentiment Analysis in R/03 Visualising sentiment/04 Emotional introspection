@@ -1,0 +1,128 @@
+Emotional introspection
+In this exercise you go beyond subsetting on positive and negative language. Instead you will subset text by each of the 8 emotions in Plutchik's emotional wheel to construct a visual. With this approach you will get more clarity in word usage by mapping to a specific emotion instead of just positive or negative.
+Using the tidytext subjectivity lexicon, "nrc", you perform an inner_join() with your text. The "nrc" lexicon has the 8 emotions plus positive and negative term classes. So you will have to drop positive and negative words after performing your inner_join(). One way to do so is with the negation, !, and grepl().
+
+The "Global Regular Expression Print Logical" function, grepl(), will return a True or False if a string pattern is identified in each row. In this exercise you will search for positive OR negative using the | operator, representing "or" as shown below. Often this straight line is above the enter key on a keyboard. Since the ! negation precedes grepl(), the T or F is switched so the "positive|negative" is dropped instead of kept.
+Object <- tibble %>%
+  filter(!grepl("positive|negative", column_name))
+
+Next you apply count() on the identified words along with spread() to get the data frame organized.
+comparison.cloud() requires its input to have row names, so you'll have to convert it to a base-R data.frame, calling data.frame() with the row.names argument.
+
+
+
+
+inner_join() moby to nrc.
+Using filter() with a negation (!) and grepl() search for "positive|negative". The column to search is called sentiment.
+Use count() to count by sentiment and term.
+Reshape the data frame with spread(), passing in sentiment, n, and fill = 0.
+Convert to plain data frame with data.frame(), making the term column into rownames.
+Examine moby_tidy using head().
+
+
+moby_tidy <- moby %>%
+  # Inner join to nrc lexicon
+  inner_join(nrc, by = c("term" = "word")) %>% 
+  # Drop positive or negative
+  filter(!grepl("positive|negative", sentiment)) %>% 
+  # Count by sentiment and term
+  count(sentiment, term) %>% 
+  # Spread sentiment, using n for values
+  spread(sentiment, n, fill = 0)  %>% 
+  # Convert to data.frame, making term the row names
+  data.frame(row.names = "term")
+
+# Examine
+head(moby_tidy)
+
+> head(moby_tidy)
+            anger anticipation disgust fear joy sadness surprise trust
+abandon         0            0       0    3   0       3        0     0
+abandoned       7            0       0    7   0       7        0     0
+abandonment     2            0       0    2   0       2        2     0
+abhorrent       1            0       1    1   0       0        0     0
+abominable      0            0       3    3   0       0        0     0
+abomination     1            0       1    1   0       0        0     0
+
+
+
+
+#count
+> moby_tidy <- moby %>%
+    inner_join(nrc, by = c("term" = "word")) %>% 
+    filter(!grepl("positive|negative", sentiment)) %>% 
+    count(sentiment, term)
+> moby_tidy
+# A tibble: 4,119 x 3
+   sentiment term            n
+   <chr>     <chr>       <int>
+ 1 anger     abandoned       7
+ 2 anger     abandonment     2
+ 3 anger     abhorrent       1
+ 4 anger     abomination     1
+ 5 anger     accursed       10
+ 6 anger     adverse         1
+ 7 anger     agitated        4
+ 8 anger     agony           7
+ 9 anger     anger           2
+10 anger     angry           1
+# ... with 4,109 more rows
+
+
+
+
+
+
+
+#spread turned the df contents into a pivot table
+> moby_tidy <- moby %>%
+    inner_join(nrc, by = c("term" = "word")) %>% 
+    filter(!grepl("positive|negative", sentiment)) %>% 
+    count(sentiment, term) %>% 
+    spread(sentiment, n, fill = 0)
+> moby_tidy
+# A tibble: 2,168 x 9
+   term        anger anticipation disgust  fear   joy sadness surprise trust
+   <chr>       <dbl>        <dbl>   <dbl> <dbl> <dbl>   <dbl>    <dbl> <dbl>
+ 1 abandon         0            0       0     3     0       3        0     0
+ 2 abandoned       7            0       0     7     0       7        0     0
+ 3 abandonment     2            0       0     2     0       2        2     0
+ 4 abhorrent       1            0       1     1     0       0        0     0
+ 5 abominable      0            0       3     3     0       0        0     0
+ 6 abomination     1            0       1     1     0       0        0     0
+ 7 abortion        0            0       1     1     0       1        0     0
+ 8 absence         0            0       0     5     0       5        0     0
+ 9 absent          0            0       0     0     0       6        0     0
+10 abundance       0            3       3     0     3       0        0     3
+# ... with 2,158 more rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+Using moby_tidy, draw a comparison.cloud().
+Limit to 50 words.
+Increase the title size to 1.5.
+
+# From previous step
+moby_tidy <- moby %>%
+  inner_join(nrc, by = c("term" = "word")) %>% 
+  filter(!grepl("positive|negative", sentiment)) %>% 
+  count(sentiment, term) %>% 
+  spread(sentiment, n, fill = 0) %>% 
+  data.frame(row.names = "term")
+  
+# Plot comparison cloud
+comparison.cloud(moby_tidy, max.words = 50, title.size = 1.5)
+
+How does this cloud compare to the one from the previous exercise?
+
+
