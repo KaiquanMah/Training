@@ -1,0 +1,159 @@
+Divide & Conquer - Using polarity for a comparison cloud
+Now that you have seen how polarity can be used to divide a corpus, let's do it! This code will walk you through dividing a corpus based on sentiment so you can peer into the information in subsets instead of holistically.
+Your R session has oz_pol which was created by applying polarity() to "The Wonderful Wizard of Oz."
+For simplicity's sake, we created a simple custom function called pol_subsections() which will divide the corpus by polarity score. First, the function accepts a data frame with each row being a sentence or document of the corpus. The data frame is subset anywhere the polarity values are greater than or less than 0. Finally, the positive and negative sentences, non-zero polarities, are pasted with parameter collapse so that the terms are grouped into a single corpus. Lastly, the two documents are concatenated into a single vector of two distinct documents.
+
+pol_subsections <- function(df) {
+  x.pos <- subset(df$text, df$polarity > 0)
+  x.neg <- subset(df$text, df$polarity < 0)
+  x.pos <- paste(x.pos, collapse = " ")
+  x.neg <- paste(x.neg, collapse = " ")
+  all.terms <- c(x.pos, x.neg)
+  return(all.terms)
+}
+
+At this point you have omitted the neutral sentences and want to focus on organizing the remaining text. In this exercise we use the %>% operator again to forward objects to functions. After some simple cleaning use comparison.cloud() to make the visual.
+
+
+
+
+
+Extract the bits you need from oz_pol.
+Call select(), declaring the first column text as text.var which is the raw text. The second column polarity should refer to the polarity scores polarity.
+Now apply pol_subsections() to oz_df. Call the new object all_terms.
+To create all_corpus apply VectorSource() to all_terms and then %>% to VCorpus().
+
+https://www.r-bloggers.com/collapse-pasting-in-r/
+
+> str(oz_pol)
+List of 2
+ $ all  :'data.frame':	4721 obs. of  6 variables:
+  ..$ all      : chr [1:4721] "all" "all" "all" "all" ...
+  ..$ wc       : int [1:4721] 5 0 0 1 0 3 0 0 0 1 ...
+  ..$ polarity : num [1:4721] 0.447 NaN NaN 0 NaN ...
+  ..$ pos.words:List of 4721
+  .. ..$ : chr "wonderful"
+  .. ..$ : chr "great"
+  .. .. [list output truncated]
+  ..$ neg.words:List of 4721
+  .. ..$ : chr "horrible"
+  .. ..$ : chr "fearsome"
+  .. ..$ : chr "disagreeable"
+  .. .. [list output truncated]
+  ..$ text.var : chr [1:4721] "The Wonderful Wizard of Oz" "" "" "by" ...
+ $ group:'data.frame':	1 obs. of  6 variables:
+  ..$ all               : chr "all"
+  ..$ total.sentences   : int 4721
+  ..$ total.words       : int 39670
+  ..$ ave.polarity      : num 0.021
+  ..$ sd.polarity       : num 0.281
+  ..$ stan.mean.polarity: num 0.0748
+ - attr(*, "class")= chr [1:2] "polarity" "list"
+ - attr(*, "digits")= num 3
+ - attr(*, "constrained")= logi FALSE
+ - attr(*, "unconstrained.polarity")= num [1:4721] 0.447 NaN NaN 0 NaN ...
+ 
+ 
+ 
+ > head(oz_df)
+                        text  polarity
+1 The Wonderful Wizard of Oz 0.4472136
+2                                  NaN
+3                                  NaN
+4                         by 0.0000000
+5                                  NaN
+6              L. Frank Baum 0.0000000
+
+
+
+oz_df <- oz_pol$all %>%
+  # Select text.var as text and polarity
+  select(text = text.var, polarity = polarity)
+
+# Apply custom function pol_subsections()
+all_terms <- pol_subsections(oz_df)
+
+all_corpus <- all_terms %>%
+  # Source from a vector
+  VectorSource() %>% 
+  # Make a volatile corpus 
+  VCorpus()
+  
+  
+  
+
+
+
+
+
+
+
+Create a term-document matrix, all_tdm, using TermDocumentMatrix() on all_corpus.
+Add in the parameters control = list(removePunctuation = TRUE, stopwords = stopwords(kind = "en"))).
+Then %>% to as.matrix() and %>% again to set_colnames(c("positive", "negative")).
+
+# From previous step
+all_corpus <- oz_pol$all %>%
+  select(text = text.var, polarity = polarity) %>% 
+  pol_subsections() %>%
+  VectorSource() %>% 
+  VCorpus()
+  
+all_tdm <- TermDocumentMatrix(
+  # Create TDM from corpus
+  all_corpus,
+  control = list(
+    # Yes, remove the punctuation
+    removePunctuation = TRUE,
+    # Use English stopwords
+    stopwords = stopwords(kind = "en")
+  )
+) %>%
+  # Convert to matrix
+  as.matrix() %>%
+  # Set column names
+  set_colnames(c("positive", "negative"))
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+Apply comparison.cloud() to all_tdm with parameters max.words = 50, and colors = c("darkgreen","darkred").
+
+# From previous steps
+all_tdm <- oz_pol$all %>%
+  select(text = text.var, polarity = polarity) %>% 
+  pol_subsections() %>%
+  VectorSource() %>% 
+  VCorpus() %>% 
+  TermDocumentMatrix(
+    control = list(
+      removePunctuation = TRUE,
+      stopwords = stopwords(kind = "en")
+    )
+  ) %>%
+  as.matrix() %>%
+  set_colnames(c("positive", "negative"))
+  
+comparison.cloud(
+  # Create plot from the all_tdm matrix
+  all_tdm,
+  # Limit to 50 words
+  max.words = 50,
+  # Use darkgreen and darkred colors
+  colors = c("darkgreen", "darkred")
+)
+
+
+Word clouds are a great way to get an overview of your data.
+
