@@ -1,0 +1,113 @@
+Scaled Comparison Cloud
+Recall the "grade inflation" of polarity scores on the rental reviews? Sometimes, another way to uncover an insight is to scale the scores back to 0 then perform the corpus subset. This means some of the previously positive comments may become part of the negative subsection or vice versa since the mean is changed to 0. This exercise will help you scale the scores and then re-plot the comparison.cloud(). Removing the "grade inflation" can help provide additional insights.
+Previously you applied polarity() to the bos_reviews$comments and created a comparison.cloud(). In this exercise you will scale() the outcome before creating the comparison.cloud(). See if this shows something different in the visual!
+Since this is largely a review exercise, a lot of the code exists, just fill in the correct objects and parameters!
+
+
+Review a section of the pre-loaded bos_pol$all while indexing [1:6,1:3].
+Add a new column to called scaled_polarity with scale() applied to the polarity score column bos_pol$all$polarity.
+For positive comments, subset() where the new column bos_reviews$scaled_polarity is greater than (>) zero.
+For negative comments, subset() where the new column bos_reviews$scaled_polarity is less than (<) zero.
+Create pos_terms using paste() on pos_comments.
+Now create neg_terms with paste() on neg_comments.
+Organize the collapsed documents, pos_terms and neg_terms documents into a single corpus called all_terms.
+Following the usual tm workflow by nesting VectorSource() inside VCorpus() applied to all_terms.
+Make the TermDocumentMatrix() using the all_corpus object. Note this is a TfIdf weighted TDM with basic cleaning functions.
+Change all_tdm to all_tdm_m using as.matrix(). Then rename the columns in the existing code to "positive" and "negative".
+Finally! apply comparison.cloud() to the matrix object all_tdm_m. Take notice of the new most frequent negative words. Maybe it will uncover an unknown insight!
+
+
+
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/scale
+
+# Review
+bos_pol$all[1:6,1:3]
+> bos_pol$all[1:6,1:3]
+  all  wc  polarity
+1 all  77 1.1851900
+2 all  78 1.2455047
+3 all  39 0.4803845
+4 all 101 0.7562283
+5 all  16 0.2500000
+6 all  79 0.5625440
+
+
+
+# Scale/center & append
+bos_reviews$scaled_polarity <- scale(bos_pol$all$polarity)
+> bos_reviews$scaled_polarity
+                 [,1]
+   [1,]  5.643043e-01
+   [2,]  6.845653e-01
+   [3,] -8.410015e-01
+   [4,] -2.909989e-01
+   [5,] -1.300363e+00
+   [6,] -6.771844e-01
+   [7,]  7.573575e-01
+   [8,] -3.370284e-02
+   [9,]  1.720473e+00
+  [10,]  1.150529e+00
+...
+ [990,]  5.507191e-01
+ [991,]  7.267599e-01
+ [992,] -2.795782e+00
+ [993,]  4.228457e-02
+ [994,] -1.311651e+00
+ [995,]  8.521438e-02
+ [996,]  9.947611e-01
+ [997,] -1.657493e+00
+ [998,] -3.001198e+00
+ [999,] -2.350991e+00
+[1000,] -1.549383e+00
+attr(,"scaled:center")
+[1] 0.9021735
+attr(,"scaled:scale")
+[1] 0.5015318
+
+
+
+
+
+# Subset positive comments
+pos_comments <- subset(bos_reviews$comments, bos_reviews$scaled_polarity>0)
+
+# Subset negative comments
+neg_comments <- subset(bos_reviews$comments, bos_reviews$scaled_polarity<0)
+
+
+# Paste and collapse the positive comments
+pos_terms <- paste(pos_comments, collapse = " ")
+
+# Paste and collapse the negative comments
+neg_terms <- paste(neg_comments, collapse = " ")
+
+# Organize
+all_terms<- c(pos_terms, neg_terms)
+
+# VCorpus
+all_corpus <- VCorpus(VectorSource(all_terms))
+
+# TDM
+all_tdm <- TermDocumentMatrix(
+  all_corpus, 
+  control = list(
+    weighting = weightTfIdf, 
+    removePunctuation = TRUE, 
+    stopwords = stopwords(kind = "en")
+  )
+)
+
+# Column names
+all_tdm_m <- as.matrix(all_tdm)
+colnames(all_tdm_m) <- c("positive", "negative")
+
+# Comparison cloud
+comparison.cloud(
+  all_tdm_m, 
+  max.words = 100,
+  colors = c("darkgreen", "darkred")
+)
+
+Almost there! Another comparison cloud to help you extract your insights.
+
+
