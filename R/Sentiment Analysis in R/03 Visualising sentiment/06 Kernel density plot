@@ -1,0 +1,70 @@
+Kernel density plot
+Now that you learned about a kernel density plot you can create one! Remember it's like a smoothed histogram but isn't affected by binwidth. This exercise will help you construct a kernel density plot from sentiment values.
+In this exercise you will plot 2 kernel densities. One for Agamemnon and another for The Wizard of Oz. For both you will perform an inner_join() with the "afinn" lexicon. Recall the "afinn" lexicon has terms scored from -5 to 5. Once in a tidy format, both books will retain words and corresponding scores for the lexicon.
+After that, you need to row bind the results into a larger data frame using bind_rows() and create a plot with ggplot2.
+From the visual you will be able to understand which book uses more positive versus negative language. There is clearly overlap as negative things happen to Dorothy but you could infer the kernel density is demonstrating a greater probability of positive language in the Wizard of Oz compared to Agamemnon.
+We've loaded ag and oz as tidy versions of Agamemnon and The Wizard of Oz respectively, and created afinn as a subset of the tidytext "afinn" lexicon.
+
+
+Inner join ag to the lexicon, afinn, assigning to ag_afinn.
+Do the same for The Wizard of Oz. This is the same code, but starting with the oz dataset and assigning to oz_afinn.
+Use bind_rows() to combine ag_afinn to oz_afinn. Set the .id argument to "book" to create a new column with the name of each book.
+
+https://www.rdocumentation.org/packages/dplyr/topics/bind_rows
+
+ag_afinn <- ag %>% 
+  # Inner join to afinn lexicon
+  inner_join(afinn, by = c("term" = "word"))
+
+oz_afinn <- oz %>% 
+  # Inner join to afinn lexicon
+  inner_join(afinn, by = c("term" = "word")) 
+
+# Combine
+all_df <- bind_rows(agamemnon = ag_afinn, oz = oz_afinn, .id = "book")
+
+
+
+
+
+
+Using all_df, plot value, using book as the fill color.
+Set the alpha transparency to 0.3.
+
+> all_df
+# A tibble: 2,594 x 5
+   book      document term     count value
+   <chr>     <chr>    <chr>    <dbl> <dbl>
+ 1 agamemnon 1        accept       3     1
+ 2 agamemnon 1        accepted     2     1
+ 3 agamemnon 1        ache         2    -2
+ 4 agamemnon 1        aching       3    -2
+ 5 agamemnon 1        afraid       2    -2
+ 6 agamemnon 1        aghast       1    -2
+ 7 agamemnon 1        alas         9    -1
+ 8 agamemnon 1        alive        2     1
+ 9 agamemnon 1        alone        7    -2
+10 agamemnon 1        anger        2    -3
+# ... with 2,584 more rows
+
+
+
+# From previous step
+all_df <- bind_rows(
+  agamemnon = ag %>% inner_join(afinn, by = c("term" = "word")), 
+  oz = oz %>% inner_join(afinn, by = c("term" = "word")),
+  .id = "book"
+)
+
+
+# Plot value, filled by book
+ggplot(all_df, aes(x=value, fill = book)) + 
+  # Set transparency to 0.3
+  geom_density(alpha = 0.3) + 
+  theme_gdocs() +
+  ggtitle("AFINN Score Densities")
+  
+  
+  
+Kernel densities are great for understanding a distribution.
+
