@@ -1,0 +1,111 @@
+Bing tidy polarity: Simple example
+Now that you understand the basics of an inner join, let's apply this to the "Bing" lexicon. Keep in mind the inner_join() function comes from dplyr and the lexicon object is obtained using tidytext's get_sentiments() function'.
+
+The Bing lexicon labels words as positive or negative. The next three exercises let you interact with this specific lexicon. To use get_sentiments() pass in a string such as "afinn", "bing", "nrc", or "loughran" to download the specific lexicon.
+
+
+The inner join workflow:
+Obtain the correct lexicon using get_sentiments().
+Pass the lexicon and the tidy text data to inner_join().
+In order for inner_join() to work there must be a shared column name. If there are no shared column names, declare them with an additional parameter, by equal to c with column names like below.
+object <- x %>% 
+    inner_join(y, by = c("column_from_x" = "column_from_y"))
+    
+Perform some aggregation and analysis on the table intersection.
+
+
+
+
+
+
+We've loaded ag_txt containing the first 100 lines from Agamemnon and ag_tidy which is the tidy version.
+For comparison, use polarity() on ag_txt.
+Get the "bing" lexicon by passing that string to get_sentiments().
+Perform an inner_join() with ag_tidy and bing.
+The word columns are called "term" in ag_tidy & "word" in the lexicon, so declare the by argument.
+Call the new object ag_bing_words.
+Print ag_bing_words, and look at some of the words that are in the result.
+Pass ag_bing_words to count() of sentiment using the pipe operator, %>%. Compare the polarity() score to sentiment count ratio.
+
+
+> ag_tidy
+# A tibble: 2,913 x 3
+   document term      count
+   <chr>    <chr>     <dbl>
+ 1 1        abate         2
+ 2 1        abhorreth     1
+ 3 1        abides        1
+ 4 1        abideth       1
+ 5 1        abounding     1
+ 6 1        above         3
+ 7 1        absent        1
+ 8 1        abundance     1
+ 9 1        accept        3
+10 1        accepted      2
+# ... with 2,903 more rows
+
+
+
+
+# Qdap polarity
+polarity(ag_txt)
+> polarity(ag_txt)
+1 all             100       15155       -2.783          NA                 NA
+
+
+# Get Bing lexicon
+bing <- get_sentiments("bing")
+> bing
+# A tibble: 6,786 x 2
+   word        sentiment
+   <chr>       <chr>    
+ 1 2-faces     negative 
+ 2 abnormal    negative 
+ 3 abolish     negative 
+ 4 abominable  negative 
+ 5 abominably  negative 
+ 6 abominate   negative 
+ 7 abomination negative 
+ 8 abort       negative 
+ 9 aborted     negative 
+10 aborts      negative 
+# ... with 6,776 more rows
+
+
+
+# Join text to lexicon
+ag_bing_words <- inner_join(ag_tidy, bing, by = c("term" = "word"))
+
+# Examine
+ag_bing_words
+> ag_bing_words
+# A tibble: 483 x 4
+   document term       count sentiment
+   <chr>    <chr>      <dbl> <chr>    
+ 1 1        abundance      1 positive 
+ 2 1        acclaim        1 positive 
+ 3 1        ache           2 negative 
+ 4 1        aching         3 negative 
+ 5 1        affliction     1 negative 
+ 6 1        affront        1 negative 
+ 7 1        afraid         2 negative 
+ 8 1        aghast         1 negative 
+ 9 1        agony          5 negative 
+10 1        amply          1 positive 
+# ... with 473 more rows
+
+
+# Get counts by sentiment
+ag_bing_words %>%
+  count(sentiment)
+  
+> ag_bing_words %>%
+    count(sentiment)
+# A tibble: 2 x 2
+  sentiment     n
+  <chr>     <int>
+1 negative    321
+2 positive    162
+
+Did you notice the sentiment count() ratio? It's 321:162.
+
