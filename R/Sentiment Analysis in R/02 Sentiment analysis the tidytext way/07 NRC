@@ -1,0 +1,104 @@
+The wonderful wizard of NRC
+Last but not least, you get to work with the NRC lexicon which labels words across multiple emotional states. Remember Plutchik's wheel of emotion? The NRC lexicon tags words according to Plutchik's 8 emotions plus positive/negative.
+
+In this exercise there is a new operator, %in%, which matches a vector to another. In the code below %in% will return FALSE, FALSE, TRUE. This is because within some_vec, 1 and 2 are not found within some_other_vector but 3 is found and returns TRUE. The %in% is useful to find matches.
+some_vec <- c(1, 2, 3)
+some_other_vector <- c(3, "a", "b")
+some_vec %in% some_other_vector
+
+Another new operator is !. For logical conditions, adding ! will inverse the result. In the above example, the FALSE, FALSE, TRUE will become TRUE, TRUE, FALSE. Using it in concert with %in% will inverse the response and is good for removing items that are matched.
+!some_vec %in% some_other_vector
+
+We've created oz which is the tidy version of The Wizard of Oz along with nrc containing the "NRC" lexicon with renamed columns.
+
+
+
+
+Inner join oz to the nrc lexicon.
+Call inner_join() to join the tibbles.
+Join by the term column in the text and the word column in the lexicon.
+
+Filter to only Pluchik's emotions and drop the positive or negative words in the lexicon.
+Use filter() to keep rows where the sentiment is not "positive" or "negative".
+
+Group by sentiment.
+Call group_by(), passing sentiment without quotes.
+
+Get the total count of each sentiment.
+Call summarize(), setting total_count equal to the sum() of count.
+Assign the result to oz_plutchik.
+
+
+
+> nrc
+# A tibble: 13,901 x 2
+   word        sentiment
+   <chr>       <chr>    
+ 1 abacus      trust    
+ 2 abandon     fear     
+ 3 abandon     negative 
+ 4 abandon     sadness  
+ 5 abandoned   anger    
+ 6 abandoned   fear     
+ 7 abandoned   negative 
+ 8 abandoned   sadness  
+ 9 abandonment anger    
+10 abandonment fear     
+# ... with 13,891 more rows
+
+> oz
+# A tibble: 19,007 x 3
+   document term         count
+   <chr>    <chr>        <dbl>
+ 1 1        the              1
+ 2 1        wizard           1
+ 3 1        wonderful        1
+ 4 6        baum             1
+ 5 6        frank            1
+ 6 10       contents         1
+ 7 12       introduction     1
+ 8 13       cyclone          1
+ 9 13       the              1
+10 14       council          1
+# ... with 18,997 more rows
+
+
+
+oz_plutchik <- oz %>% 
+  # Join to nrc lexicon by term = word
+  inner_join(nrc, by = c("term" = "word")) %>%
+  # Only consider Plutchik sentiments
+  # ! is an inverse operation
+  # so we do not want sentiments in "positive" or "negative"
+  filter(!sentiment %in% c("positive", "negative")) %>%
+  # Group by sentiment
+  group_by(sentiment) %>% 
+  # Get total count by sentiment
+  summarise(total_count = sum(count))
+> oz_plutchik
+# A tibble: 8 x 2
+  sentiment    total_count
+  <chr>              <dbl>
+1 anger                609
+2 anticipation         854
+3 disgust              486
+4 fear                1255
+5 joy                  868
+6 sadness              609
+7 surprise             481
+8 trust                925
+
+
+
+  
+
+Create a bar plot with ggplot().
+Pass in oz_plutchik to the data argument.
+Then specify the x and y aesthetics, calling aes() and passing sentiment and total_count without quotes.
+Add a column geom with geom_col(). (This is the same as geom_bar(), but doesn't summarize the data, since you've done that already.)
+
+# Plot total_count vs. sentiment
+ggplot(oz_plutchik, aes(x = sentiment, y = total_count)) +
+  # Add a column geom
+  geom_col()
+
