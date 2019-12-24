@@ -1,0 +1,97 @@
+Radar chart
+Remember Plutchik's wheel of emotion? The NRC lexicon has the 8 emotions corresponding to the first ring of the wheel. Previously you created a comparison.cloud() according to the 8 primary emotions. Now you will create a radar chart similar to the wheel in this exercise.
+A radarchart is a two-dimensional representation of multidimensional data (at least 3). In this case the tally of the different emotions for a book are represented in the chart. Using a radar chart, you can review all 8 emotions simultaneously.
+As before we've loaded the "nrc" lexicon as nrc and moby_huck which is a combined tidy version of both Moby Dick and Huck Finn.
+
+In this exercise you once again use a negated grepl() to remove "positive|negative" emotional classes from the chart. As a refresher here is an example:
+object <- tibble %>%
+  filter(!grepl("positive|negative", column_name))
+
+
+This exercise reintroduces spread() which rearranges the tallied emotional words. As a refresher consider this raw data called datacamp.
+people	food	like
+Nicole	bread	78
+Nicole	salad	66
+Ted	bread	99
+Ted	salad	21
+
+If you applied spread() as in spread(datacamp, people, like) the data looks like this.
+food	Nicole	Ted
+bread	78	99
+salad	66	21
+
+
+
+Review moby_huck with tail().
+inner_join() moby_huck and nrc.
+Next, filter() negating "positive|negative" in the sentiment column. Assign the result to books_pos_neg.
+After books_pos_neg is forwarded to group_by() with book and sentiment. Then tally() the object with an empty function.
+Then spread() the books_tally by the book and n column.
+Review the scores data.
+
+https://en.wikipedia.org/wiki/Robert_Plutchik#/media/File:Plutchik-wheel.svg
+https://www.rdocumentation.org/packages/radarchart/versions/0.3.1
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/tally
+
+
+# Review tail of moby_huck
+tail(moby_huck)
+> tail(moby_huck)
+# A tibble: 6 x 4
+  book  document term       count
+  <chr> <chr>    <chr>      <dbl>
+1 huck  11788    subscribe      1
+2 huck  11789    ebooks         1
+3 huck  11789    email          1
+4 huck  11789    hear           1
+5 huck  11789    new            1
+6 huck  11789    newsletter     1
+
+
+
+scores <- moby_huck %>% 
+  # Inner join to lexicon
+  inner_join(nrc, by = c("term" = "word")) %>% 
+  # Drop positive or negative sentiments
+  filter(!grepl("positive|negative", sentiment)) %>% 
+  # Count by book and sentiment
+  count(book, sentiment) %>% 
+  # Spread book, using n as values
+  spread(book, n)
+
+# Review scores
+scores
+> scores
+# A tibble: 8 x 3
+  sentiment     huck  moby
+  <chr>        <int> <int>
+1 anger         1123  2764
+2 anticipation  2214  4750
+3 disgust        823  1966
+4 fear          1332  4149
+5 joy           1713  3197
+6 sadness       1303  3350
+7 surprise      1154  2168
+8 trust         2191  5131
+
+
+
+
+
+Call chartJSRadar() on scores which is an htmlwidget from the radarchart package.
+https://www.rdocumentation.org/packages/radarchart/versions/0.3.1
+https://www.rdocumentation.org/packages/radarchart/versions/0.3.1/topics/chartJSRadar
+http://www.htmlwidgets.org/
+
+# From previous step
+scores <- moby_huck %>% 
+  inner_join(nrc, by = c("term" = "word")) %>% 
+  filter(!grepl("positive|negative", sentiment)) %>% 
+  count(book, sentiment) %>%
+  spread(book, n)
+  
+# JavaScript radar chart
+chartJSRadar(scores)
+
+Radical radar plotting! Bar plots are usually a clearer alternative, but radar charts do look pretty.
+
