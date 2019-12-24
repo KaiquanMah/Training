@@ -1,0 +1,127 @@
+Assessing author effort
+Often authors will use more words when they are more passionate. For example, a mad airline passenger will leave a longer review the worse (the perceived) service. Conversely a less impassioned passenger may not feel compelled to spend a lot of time writing a review. Lengthy reviews may inflate overall sentiment since the reviews will inherently contain more positive or negative language as the review lengthens. This coding exercise helps to examine effort and sentiment.
+In this exercise you will visualize the relationship between effort and sentiment. Recall your rental review tibble contains an id and that a word is represented in each row. As a result a simple count() of the id will capture the number of words used in each review. Then you will join this summary to the positive and negative data. Ultimately you will create a scatter plot that will visualize author review length and its relationship to polarity.
+
+Calculate a measure of effort as the count of id.
+Inner join to the polarity of each review, pos_neg.
+Mutate to add a pol column. Use ifelse() to set pol to "Positive" if polarity is greater than or equal to zero, else "Negative".
+
+
+
+# Review tidy_reviews and pos_neg
+tidy_reviews
+pos_neg
+
+> tidy_reviews
+# A tibble: 26,055 x 3
+# Groups:   id [998]
+      id word      original_word_order
+   <int> <chr>                   <int>
+ 1     1 daughter                    2
+ 2     1 wonderful                   7
+ 3     1 stay                        8
+ 4     1 maura                      10
+ 5     1 close                      14
+ 6     1 touch                      15
+ 7     1 day                        20
+ 8     1 arriving                   24
+ 9     1 til                        25
+10     1 evening                    29
+# ... with 26,045 more rows
+
+> pos_neg
+# A tibble: 953 x 4
+# Groups:   id [953]
+      id negative positive polarity
+   <int>    <dbl>    <dbl>    <dbl>
+ 1     1        0        4        4
+ 2     2        0        3        3
+ 3     3        0        3        3
+ 4     4        0        6        6
+ 5     5        0        2        2
+ 6     6        0        3        3
+ 7     7        0        5        5
+ 8     8        0        2        2
+ 9     9        0        4        4
+10    10        1       15       14
+# ... with 943 more rows
+
+
+
+
+
+
+
+
+
+
+pos_neg_pol <- tidy_reviews %>% 
+  # Effort is measured as count by id
+  count(id) %>% 
+  # Inner join to pos_neg
+  inner_join(pos_neg, by="id") %>% 
+  # Add polarity status
+  mutate(pol = ifelse(polarity>=0, "Positive", "Negative"))
+
+
+> pos_neg_pol <- tidy_reviews %>% 
+    # Effort is measured as count by id
+    count(id)
+> pos_neg_pol
+# A tibble: 998 x 2
+# Groups:   id [998]
+      id     n
+   <int> <int>
+ 1     1    26
+ 2     2    27
+ 3     3    16
+ 4     4    32
+ 5     5     8
+ 6     6    21
+ 7     7    18
+ 8     8    10
+ 9     9    12
+10    10    46
+# ... with 988 more rows
+
+
+# Examine results
+pos_neg_pol
+# A tibble: 953 x 6
+# Groups:   id [953]
+      id     n negative positive polarity pol     
+   <int> <int>    <dbl>    <dbl>    <dbl> <chr>   
+ 1     1    26        0        4        4 Positive
+ 2     2    27        0        3        3 Positive
+ 3     3    16        0        3        3 Positive
+ 4     4    32        0        6        6 Positive
+ 5     5     8        0        2        2 Positive
+ 6     6    21        0        3        3 Positive
+ 7     7    18        0        5        5 Positive
+ 8     8    10        0        2        2 Positive
+ 9     9    12        0        4        4 Positive
+10    10    46        1       15       14 Positive
+# ... with 943 more rows
+
+
+
+
+
+
+Using pos_neg_pol, plot n vs. polarity, colored by pol.
+Add a point layer using geom_point().
+Add a smooth trend layer using geom_smooth().
+
+# Plot n vs. polarity, colored by pol
+# based on the polarity, what is the correlation with the # of words
+ggplot(pos_neg_pol, aes(x=polarity, y=n, color = pol)) + 
+  # Add point layer
+  geom_point(alpha = 0.25) +
+  # Add smooth layer
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_gdocs() +
+  ggtitle("Relationship between word effort & polarity")
+
+
+Now you know how much effort an author exerted.
+As polarity goes to its extremes, # of words in each review tends to increase.
