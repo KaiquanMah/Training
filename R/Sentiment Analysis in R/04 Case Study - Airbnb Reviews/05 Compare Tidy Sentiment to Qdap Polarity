@@ -1,0 +1,52 @@
+Compare Tidy Sentiment to Qdap Polarity
+Here you will learn that differing sentiment methods will cause different results. Often you will simply need to have results align directionally although the specifics may be different. In the last exercise you created tidy_reviews which is a data frame of rental reviews without stopwords. Earlier in the chapter, you calculated and plotted qdap's basic polarity() function. This showed you the reviews tend to be positive.
+Now let's perform a similar analysis the tidytext way! Recall from an earlier chapter you will perform an inner_join() followed by count() and then a spread().
+Lastly, you will create a new column using mutate() and passing in positive - negative.
+
+
+Using the get_sentiments() function with "bing" will obtain the bing subjectivity lexicon. Call the lexicon bing.
+Since you already wrote this code in Chapter 2 simply enter in the lexicon object, bing, the new column name (polarity) and its calculation within mutate().
+Lastly call summary() on the new object pos_neg. Although the values are different, are most rental reviews similarly positive compared to using polarity()? Do you see "grade inflation?"
+
+
+> str(tidy_reviews)
+Classes 'grouped_df', 'tbl_df', 'tbl' and 'data.frame':	26055 obs. of  3 variables:
+ $ id                 : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ word               : chr  "daughter" "wonderful" "stay" "maura" ...
+ $ original_word_order: int  2 7 8 10 14 15 20 24 25 29 ...
+ 
+> str(bing)
+Classes 'tbl_df', 'tbl' and 'data.frame':	6786 obs. of  2 variables:
+ $ word     : chr  "2-faces" "abnormal" "abolish" "abominable" ...
+ $ sentiment: chr  "negative" "negative" "negative" "negative" ...
+ 
+
+
+# Get the correct lexicon
+bing <- get_sentiments("bing")
+
+# Calculate polarity for each review
+pos_neg <- tidy_reviews %>% 
+  inner_join(bing, by="word") %>%
+  count(sentiment) %>%
+  spread(sentiment, n, fill = 0) %>% 
+  mutate(polarity = positive - negative)
+
+# Check outcome
+summary(pos_neg)
+
+> summary(pos_neg)
+       id            negative          positive        polarity      
+ Min.   :   1.0   Min.   : 0.0000   Min.   : 0.00   Min.   :-11.000  
+ 1st Qu.: 253.0   1st Qu.: 0.0000   1st Qu.: 3.00   1st Qu.:  2.000  
+ Median : 498.0   Median : 0.0000   Median : 4.00   Median :  4.000  
+ Mean   : 500.4   Mean   : 0.6139   Mean   : 4.97   Mean   :  4.356  
+ 3rd Qu.: 748.0   3rd Qu.: 1.0000   3rd Qu.: 7.00   3rd Qu.:  6.000  
+ Max.   :1000.0   Max.   :14.0000   Max.   :28.00   Max.   : 26.000
+ 
+ 
+ 
+ Often different polarity methods yield similar results.
+
+
+
