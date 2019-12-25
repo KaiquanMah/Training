@@ -1,0 +1,58 @@
+Modeling positive sentiment
+Now it's time for you to build a linear model for positive sentiment in this dataset of pop songs, just like you did for negative sentiment in the last exercise. Use the same approach and see what the results are!
+
+
+Count using three arguments: song, year, and total number of words.
+Use mutate() to define a new percent column that is n divided by total_words
+Specify a linear model with lm() in the same way as the last exercise, but with data = positive_by_year this time.
+Explore the results of the model fitting with summary().
+
+
+positive_by_year <- lyric_sentiment %>%
+    filter(sentiment == "positive") %>%
+    # Count by song, year, and total number of words
+    count(song, year, total_words) %>%
+    ungroup() %>%
+    # Define a new column: percent
+    mutate(percent = n/total_words)
+
+# Fit a linear model with percent as the response and year as the predictor
+model_positive <- lm(percent ~ year, data = positive_by_year)
+
+# Use summary to see the results of the model fitting
+summary(model_positive)
+
+You did it! Notice how low these p-values are and which direction the slope is; positive sentiment does change significantly with year, in contrast with negative sentiment.
+
+
+
+> model_positive
+Call:
+lm(formula = percent ~ year, data = positive_by_year)
+
+Coefficients:
+(Intercept)         year  
+  1.1169778   -0.0005373
+  
+
+
+
+
+> summary(model_positive)
+Call:
+lm(formula = percent ~ year, data = positive_by_year)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.058050 -0.024032 -0.007756  0.014774  0.269726 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.117e+00  6.859e-02   16.29   <2e-16 ***
+year        -5.373e-04  3.446e-05  -15.59   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.03495 on 4770 degrees of freedom
+Multiple R-squared:  0.0485,	Adjusted R-squared:  0.0483 
+F-statistic: 243.1 on 1 and 4770 DF,  p-value: < 2.2e-16
