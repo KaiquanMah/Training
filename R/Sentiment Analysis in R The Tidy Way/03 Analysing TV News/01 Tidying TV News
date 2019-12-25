@@ -1,0 +1,54 @@
+https://api.gdeltproject.org/api/v2/summary/summary?d=iatv&t=summary
+Tidying TV news
+Take a look at the dataset of TV news text about climate change you will use in this chapter. The climate_text dataset contains almost 600 closed captioning snippets and four columns:
+station, the TV news station where the text is from,
+show, the show on that station where the text was spoken,
+show_date, the broadcast date of the spoken text, and
+text, the actual text spoken on TV.
+
+Type climate_text in the console to take a look at the dataset before getting started with transforming it to a tidy format.
+Load the tidytext package.
+Pipe the original dataset to the next line.
+Use unnest_tokens() to transform the non-tidy text data to a tidy text dataset, with a word column in the output.
+
+
+> climate_text
+# A tibble: 593 x 4
+   station show              show_date           text                           
+   <chr>   <chr>             <dttm>              <chr>                          
+ 1 MSNBC   Morning Meeting   2009-09-22 13:00:00 the interior positively oozes ~
+ 2 MSNBC   Morning Meeting   2009-10-23 13:00:00 corporations have withdrawn fr~
+ 3 CNN     CNN Newsroom      2009-12-03 20:00:00 he says he was bumped by the g~
+ 4 CNN     American Morning  2009-12-07 11:00:00 especially at at time now wher~
+ 5 MSNBC   Morning Meeting   2009-12-08 14:00:00 lots more coming up quite simp~
+ 6 MSNBC   Countdown With K~ 2009-12-10 06:00:00 so they're carrying a lot of w~
+ 7 CNN     Sanjay Gupta MD   2009-12-12 12:30:00 let me ask you about something~
+ 8 CNN     The Situation Ro~ 2009-12-16 21:00:00 other important news we're fol~
+ 9 MSNBC   Countdown With K~ 2009-12-19 01:00:00 let democrats be democrats cra~
+10 MSNBC   The Rachel Maddo~ 2010-01-08 04:00:00 you know there are real fights~
+# ... with 583 more rows
+
+
+# Load the tidytext package
+library(tidytext)
+
+# Pipe the climate_text dataset to the next line
+tidy_tv <- climate_text %>%
+    # Transform the non-tidy text data to tidy text data
+    unnest_tokens(word, text)
+> tidy_tv
+# A tibble: 41,127 x 4
+   station show            show_date           word      
+   <chr>   <chr>           <dttm>              <chr>     
+ 1 MSNBC   Morning Meeting 2009-09-22 13:00:00 the       
+ 2 MSNBC   Morning Meeting 2009-09-22 13:00:00 interior  
+ 3 MSNBC   Morning Meeting 2009-09-22 13:00:00 positively
+ 4 MSNBC   Morning Meeting 2009-09-22 13:00:00 oozes     
+ 5 MSNBC   Morning Meeting 2009-09-22 13:00:00 class     
+ 6 MSNBC   Morning Meeting 2009-09-22 13:00:00 raves     
+ 7 MSNBC   Morning Meeting 2009-09-22 13:00:00 car       
+ 8 MSNBC   Morning Meeting 2009-09-22 13:00:00 magazine  
+ 9 MSNBC   Morning Meeting 2009-09-22 13:00:00 slick     
+10 MSNBC   Morning Meeting 2009-09-22 13:00:00 and       
+# ... with 41,117 more rows    
+
