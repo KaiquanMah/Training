@@ -1,0 +1,154 @@
+Which states have the most positive Twitter users?
+For the last exercise in this chapter, you will determine how the overall sentiment of Twitter sentiment varies from state to state. You will use a dataset called tweets_bing, which is the output of an inner join created just the same way that you did earlier. Check out what tweets_bing looks like in the console.
+You can use group_by() and summarize() to find which states had the highest frequency of positive and negative words, then pipe to ggplot2 (after some tidyr manipulation) to make a clear, interesting visualization.
+
+Choose variables in the call to group_by() so that you can summarize() by first state and the sentiment.
+After using spread() from tidyr and ungrouping, calculate the ratio of positive to negative words for each state.
+To make a plot, set up aes() so that states will go on the x-axis and the ratio will go on the y-axis.
+Add the correct geom_* layer to make points on the plot.
+The call to coord_flip() flips the axes so you can read the names of the states more easily.
+
+> tweets_bing %>% 
+    # Group by two columns: state and sentiment
+    group_by(state, sentiment) %>%
+    # Use summarize to calculate the mean frequency for these groups
+    summarise(freq = mean(freq))
+# A tibble: 98 x 3
+# Groups:   state [49]
+   state      sentiment   freq
+   <chr>      <chr>      <dbl>
+ 1 alabama    negative  47984.
+ 2 alabama    positive  91261.
+ 3 arizona    negative  48099.
+ 4 arizona    positive  88048.
+ 5 arkansas   negative  44455.
+ 6 arkansas   positive  90684.
+ 7 california negative  43659.
+ 8 california positive  81782.
+ 9 colorado   negative  41343.
+10 colorado   positive  79719.
+# ... with 88 more rows
+
+
+
+
+#spread breaks down the sentiment col values and moves the values to the cols
+> tweets_bing %>% 
+    # Group by two columns: state and sentiment
+    group_by(state, sentiment) %>%
+    # Use summarize to calculate the mean frequency for these groups
+    summarise(freq = mean(freq)) %>%
+    spread(sentiment, freq)
+# A tibble: 49 x 3
+# Groups:   state [49]
+   state                negative positive
+   <chr>                   <dbl>    <dbl>
+ 1 alabama                47984.   91261.
+ 2 arizona                48099.   88048.
+ 3 arkansas               44455.   90684.
+ 4 california             43659.   81782.
+ 5 colorado               41343.   79719.
+ 6 connecticut            44188.   83579.
+ 7 delaware               50416.   87815.
+ 8 district of columbia   34284.   62429.
+ 9 florida                44559.   88380.
+10 georgia                49179.   89900.
+# ... with 39 more rows
+
+
+
+
+
+> tweets_bing %>% 
+    # Group by two columns: state and sentiment
+    group_by(state, sentiment) %>%
+    # Use summarize to calculate the mean frequency for these groups
+    summarise(freq = mean(freq)) %>%
+    spread(sentiment, freq) %>%
+    ungroup()
+# A tibble: 49 x 3
+   state                negative positive
+   <chr>                   <dbl>    <dbl>
+ 1 alabama                47984.   91261.
+ 2 arizona                48099.   88048.
+ 3 arkansas               44455.   90684.
+ 4 california             43659.   81782.
+ 5 colorado               41343.   79719.
+ 6 connecticut            44188.   83579.
+ 7 delaware               50416.   87815.
+ 8 district of columbia   34284.   62429.
+ 9 florida                44559.   88380.
+10 georgia                49179.   89900.
+# ... with 39 more rows
+
+
+
+
+
+
+
+# tweets_bing has been pre-defined
+tweets_bing
+
+tweets_bing %>% 
+  # Group by two columns: state and sentiment
+  group_by(state, sentiment) %>%
+  # Use summarize to calculate the mean frequency for these groups
+  summarise(freq = mean(freq)) %>%
+  spread(sentiment, freq) %>%
+  ungroup() %>%
+  # Calculate the ratio of positive to negative words
+  # then reorder state according to the ratio 
+  # reorder(colToReorder, accordingToThisCriteriaCol)
+  mutate(ratio = positive / negative,
+         state = reorder(state, ratio)) %>%
+  # Use aes() to put state on the x-axis and ratio on the y-axis
+  ggplot(aes(x = state, y = ratio)) +
+  # Make a plot with points using geom_point()
+  geom_point() +
+  coord_flip()
+  
+Combining your data with a sentiment lexicon, you can do all sorts of exploratory data analysis. Looks like Missouri tops the list for this one!
+
+
+
+
+
+
+
+
+
+
+tweets_bing %>% 
+  # Group by two columns: state and sentiment
+  group_by(state, sentiment) %>%
+  # Use summarize to calculate the mean frequency for these groups
+  summarise(freq = mean(freq)) %>%
+  spread(sentiment, freq) %>%
+  ungroup() %>%
+  # Calculate the ratio of positive to negative words
+  # then reorder state according to the ratio 
+  # reorder(colToReorder, accordingToThisCriteriaCol)
+  mutate(ratio = positive / negative,
+         state = reorder(state, ratio))
+         
+# somwhow the reordering is not showing up in the results below
+# instead the reordering is showing up in the plot
+# A tibble: 49 x 4
+   state                negative positive ratio
+   <fct>                   <dbl>    <dbl> <dbl>
+ 1 alabama                47984.   91261.  1.90
+ 2 arizona                48099.   88048.  1.83
+ 3 arkansas               44455.   90684.  2.04
+ 4 california             43659.   81782.  1.87
+ 5 colorado               41343.   79719.  1.93
+ 6 connecticut            44188.   83579.  1.89
+ 7 delaware               50416.   87815.  1.74
+ 8 district of columbia   34284.   62429.  1.82
+ 9 florida                44559.   88380.  1.98
+10 georgia                49179.   89900.  1.83
+# ... with 39 more rows
+
+
+
+
