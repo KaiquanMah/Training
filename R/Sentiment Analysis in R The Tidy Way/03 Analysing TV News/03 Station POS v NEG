@@ -1,0 +1,52 @@
+Which station uses the most positive or negative words?
+You performed sentiment analysis on this dataset of TV news text, and the results are available in your environment in tv_sentiment. How do the words used when discussing climate change compare across stations? Which stations use more positive words? More negative words?
+
+
+Start off by looking at negative words.
+Define a new column percent using mutate() that is n divided by station_total, the proportion of words that belong to that sentiment.
+Filter only for the negative sentiment rows.
+Arrange by percent so you can see the results sorted by proportion of negative words.
+Now repeat these steps to examine positive words!
+
+http://www.datasciencemadesimple.com/unique-function-in-r/
+>     unique(tv_sentiment$sentiment)
+ [1] "disgust"      "positive"     "trust"        "joy"          "fear"        
+ [6] "anger"        "negative"     "sadness"      "anticipation" "surprise"
+ 
+# Which stations use the most negative words?
+tv_sentiment %>% 
+    count(station, sentiment, station_total) %>%
+    # Define a new column percent
+    mutate(percent = n/station_total) %>%
+    # Filter only for negative words
+    filter(sentiment == "negative") %>%
+    # Arrange by percent
+    # arrange from the least # of neg words to the greatest # of neg words in ascending order
+    arrange(percent)
+# A tibble: 3 x 5
+  station  sentiment station_total     n percent
+  <chr>    <chr>             <int> <int>   <dbl>
+1 MSNBC    negative          19514   526  0.0270
+2 CNN      negative          10726   331  0.0309
+3 FOX News negative          10887   403  0.0370
+
+
+
+# Now do the same but for positive words
+tv_sentiment %>% 
+    count(station, sentiment, station_total) %>%
+    mutate(percent = n/station_total) %>%
+    filter(sentiment == "positive") %>%
+    # arrange from the least # of pos words to the greatest # of pos words in ascending order
+    arrange(percent)
+# A tibble: 3 x 5
+  station  sentiment station_total     n percent
+  <chr>    <chr>             <int> <int>   <dbl>
+1 FOX News positive          10887   514  0.0472
+2 CNN      positive          10726   522  0.0487
+3 MSNBC    positive          19514   953  0.0488    
+    
+    
+Notice that MSNBC used a low proportion of negative words but a high proportion of positive words, the reverse is true of FOX News, and CNN is middle of the pack.
+
+    
