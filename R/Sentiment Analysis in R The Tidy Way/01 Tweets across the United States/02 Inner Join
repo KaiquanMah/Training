@@ -1,0 +1,133 @@
+Implement an inner join
+In this exercise you will implement sentiment analysis using an inner join. The inner_join() function from dplyr will identify which words are in both the sentiment lexicon and the text dataset you are examining. To learn more about joining data frames using dplyr, check out Joining Data in R with dplyr.
+
+The geocoded_tweets dataset is taken from Quartz and contains three columns:
+state, a state in the United States
+word, a word used in tweets posted on Twitter
+freq, the average frequency of that word in that state (per billion words)
+https://qz.com/862325/the-great-american-word-mapper/#int/words=dinner_supper&smoothing=3
+
+
+If you look at this dataset in the console, you will notice that the word "a" has a high frequency compared to the other words near the top of the sorted data frame; this makes sense! You can use inner_join() to implement a sentiment analysis on this dataset because it is in a tidy format.
+In the console, take a look at the geocoded_tweets object.
+Use get_sentiments() to access the "bing" lexicon and assign it to bing.
+Use an inner_join() to implement sentiment analysis on the geocoded tweet data using the bing lexicon.
+
+
+
+> geocoded_tweets
+# A tibble: 520,304 x 3
+   state   word           freq
+   <chr>   <chr>         <dbl>
+ 1 alabama a         16256686.
+ 2 alabama a-            5491.
+ 3 alabama a-day         3992.
+ 4 alabama aa            4739.
+ 5 alabama aaliyah       8252.
+ 6 alabama aamu          4306.
+ 7 alabama aaron        19813.
+ 8 alabama ab           68032.
+ 9 alabama abandoned     4071.
+10 alabama abbeville     7153.
+# ... with 520,294 more rows
+
+> bing <- get_sentiments("bing")
+> bing
+# A tibble: 6,786 x 2
+   word        sentiment
+   <chr>       <chr>    
+ 1 2-faces     negative 
+ 2 abnormal    negative 
+ 3 abolish     negative 
+ 4 abominable  negative 
+ 5 abominably  negative 
+ 6 abominate   negative 
+ 7 abomination negative 
+ 8 abort       negative 
+ 9 aborted     negative 
+10 aborts      negative 
+# ... with 6,776 more rows
+
+
+
+
+
+
+
+
+
+
+
+# geocoded_tweets has been pre-defined
+geocoded_tweets
+
+# Access bing lexicon: bing
+bing <- get_sentiments("bing")
+
+# Use data frame with text data
+geocoded_tweets %>%
+  # With inner join, implement sentiment analysis using `bing`
+  inner_join(bing)
+  
+ 
+# A tibble: 64,303 x 4
+   state   word             freq sentiment
+   <chr>   <chr>           <dbl> <chr>    
+ 1 alabama abuse           7186. negative 
+ 2 alabama abused          3073. negative 
+ 3 alabama accomplish      5957. positive 
+ 4 alabama accomplished   13121. positive 
+ 5 alabama accomplishment  3036. positive 
+ 6 alabama accurate       28262. positive 
+ 7 alabama ache            7306. negative 
+ 8 alabama aching          5080. negative 
+ 9 alabama addict          5441. negative 
+10 alabama addicted       40389. negative 
+# ... with 64,293 more rows
+
+Marvelous! By inner joining geocoded_tweets with the "bing" lexicon, you can see the average frequency and the sentiment associated with each word that exists in both data frames.
+
+
+
+
+
+
+
+
+
+
+
+
+Understanding an inner join
+Let's say you have the following text dataset, available in your environment as text:
+
+       word
+      <chr>
+1 chocolate
+2     makes
+3        me
+4     happy
+5       but
+6      this
+7     movie
+8        is
+9       sad
+And the following sentiment lexicon, in your environment as lexicon:
+
+       word
+      <chr>
+1     happy
+2       sad
+3 chocolate
+4  broccoli
+Which word will be in the output of an inner join between this text dataset and this sentiment lexicon?
+
+happy
+sad
+chocolate
+The word “chocolate” is in both the text dataset and the lexicon.
+
+
+
+
+
