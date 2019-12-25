@@ -1,0 +1,60 @@
+Calculating total words per song
+For some next steps in this analysis, you need to know the total number of words sung in each song. Use count() to count up the words per song, and then left_join() these word totals to the tidy data set. You can specify exactly which column to use when joining the two data frames if you add by = "song".
+
+Count by song to find the word totals.
+With the rename() function, change the name of the new n column to total_words.
+Use left_join() to combine totals with tidy_lyrics using the song column.
+
+totals <- tidy_lyrics %>%
+  # Count by song to find the word totals for each song
+  count(song) %>%
+  # gives you the 'n' col
+  # which we would rename
+  # Rename the new column
+  rename(total_words = n)
+
+# Print totals    
+totals
+> totals
+# A tibble: 4,341 x 2
+   song                   total_words
+   <chr>                        <int>
+ 1 0 to 100  the catch up         894
+ 2 1 2 3 4 sumpin new             670
+ 3 1 2 3 red light                145
+ 4 1 2 step                       437
+ 5 1 thing                        532
+ 6 100 pure love                  590
+ 7 100 years                      257
+ 8 123                            220
+ 9 18 and life                    285
+10 19 somethin                    281
+# ... with 4,331 more rows
+
+
+
+
+
+lyric_counts <- tidy_lyrics %>%
+  # Combine totals with tidy_lyrics using the "song" column
+  left_join(totals, by = "song")
+
+
+> lyric_counts
+# A tibble: 1,602,879 x 6
+    rank song        artist                        year word         total_words
+   <int> <chr>       <chr>                        <int> <chr>              <int>
+ 1     1 wooly bully sam the sham and the pharao~  1965 sam                  125
+ 2     1 wooly bully sam the sham and the pharao~  1965 the                  125
+ 3     1 wooly bully sam the sham and the pharao~  1965 sham                 125
+ 4     1 wooly bully sam the sham and the pharao~  1965 miscellaneo~         125
+ 5     1 wooly bully sam the sham and the pharao~  1965 wooly                125
+ 6     1 wooly bully sam the sham and the pharao~  1965 bully                125
+ 7     1 wooly bully sam the sham and the pharao~  1965 wooly                125
+ 8     1 wooly bully sam the sham and the pharao~  1965 bully                125
+ 9     1 wooly bully sam the sham and the pharao~  1965 sam                  125
+10     1 wooly bully sam the sham and the pharao~  1965 the                  125
+# ... with 1,602,869 more rows
+
+Now you have the total number of words for each song.
+
