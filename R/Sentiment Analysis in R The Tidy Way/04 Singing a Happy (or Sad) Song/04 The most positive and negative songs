@@ -1,0 +1,64 @@
+The most positive and negative songs
+You have successfully implemented sentiment analysis on this dataset of song lyrics, and now you can ask question such as, "Which songs have the highest proportion of positive words? Of negative words?" You calculated the total number of words for each song earlier, so now you need to count the number of words for each sentiment and song.
+
+
+Use count() with three arguments to find the number of sentiment words for each song and total number of words.
+Make a new column using mutate() that is named percent, equal to n (the output of count()) divided by the total number of words.
+Filter for only negative words.
+Arrange by descending percent.
+Now repeat these same steps for positive words.
+
+# What songs have the highest proportion of negative words?
+lyric_sentiment %>%
+    # Count using three arguments
+    count(song, sentiment, total_words) %>%
+    ungroup() %>%
+    # Make a new percent column with mutate 
+    mutate(percent = n/total_words) %>%
+    # Filter for only negative words
+    filter(sentiment == "negative") %>%
+    # Arrange by descending percent
+    arrange(desc(percent))
+# A tibble: 4,169 x 5
+   song                           sentiment total_words     n percent
+   <chr>                          <chr>           <int> <int>   <dbl>
+ 1 bad boy                        negative          237    77   0.325
+ 2 rack city                      negative          458   142   0.310
+ 3 ill tumble 4 ya                negative          269    79   0.294
+ 4 time wont let me               negative          154    42   0.273
+ 5 bang bang my baby shot me down negative          163    40   0.245
+ 6 the stroke                     negative          279    57   0.204
+ 7 the wild boys                  negative          245    49   0.2  
+ 8 pop that thang                 negative          204    40   0.196
+ 9 disturbia                      negative          956   182   0.190
+10 dance a                        negative          407    72   0.177
+# ... with 4,159 more rows
+
+
+
+
+
+# What songs have the highest proportion of positive words?
+lyric_sentiment %>%
+    count(song, sentiment, total_words) %>%
+    ungroup() %>%
+    mutate(percent = n/total_words) %>%
+    filter(sentiment == "positive") %>%
+    arrange(desc(percent))
+# A tibble: 4,295 x 5
+   song                                   sentiment total_words     n percent
+   <chr>                                  <chr>           <int> <int>   <dbl>
+ 1 love to love you baby                  positive          240    78   0.325
+ 2 dance dance dance yowsah yowsah yowsah positive          305    94   0.308
+ 3 i got the feelin                       positive          141    35   0.248
+ 4 i love music                           positive          252    61   0.242
+ 5 sweet and innocent                     positive          218    51   0.234
+ 6 me and baby brother                    positive          181    42   0.232
+ 7 love hangover                          positive          173    40   0.231
+ 8 sweet cream ladies                     positive          179    41   0.229
+ 9 mighty love                            positive          482   110   0.228
+10 keep feeling fascination               positive          189    43   0.228
+# ... with 4,285 more rows    
+
+Fabulous! One of the songs with the highest proportion of positive words is “Dance, Dance, Dance (Yowsah, Yowsah, Yowsah)” from 1977.
+
