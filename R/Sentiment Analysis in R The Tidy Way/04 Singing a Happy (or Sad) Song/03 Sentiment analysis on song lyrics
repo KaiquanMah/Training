@@ -1,0 +1,62 @@
+Sentiment analysis on song lyrics
+You have been practicing how to implement sentiment analysis with a join throughout this course. After transforming the text of these songs to a tidy text dataset and preparing the data frame, the resulting data frame lyric_counts is ready for you to perform sentiment analysis once again. Once you have done the sentiment analysis, you can learn which songs have the most sentiment words from the NRC lexicon. Remember that the NRC lexicon has 10 categories of sentiment:
+anger
+anticipation
+disgust
+fear
+joy
+negative
+positive
+sadness
+surprise
+trust
+
+
+Use the correct kind of join to implement sentiment analysis.
+Add the "nrc" lexicon as the argument to the join function.
+Find the songs with the most sentiment words by using two arguments in count(), along with sort = TRUE.
+
+
+
+lyric_sentiment <- lyric_counts %>%
+    # Implement sentiment analysis with the "nrc" lexicon
+    inner_join(get_sentiments("nrc"), by="word")
+
+# A tibble: 399,347 x 7
+    rank song        artist                     year word  total_words sentiment
+   <int> <chr>       <chr>                     <int> <chr>       <int> <chr>    
+ 1     1 wooly bully sam the sham and the pha~  1965 sham          125 anger    
+ 2     1 wooly bully sam the sham and the pha~  1965 sham          125 disgust  
+ 3     1 wooly bully sam the sham and the pha~  1965 sham          125 negative 
+ 4     1 wooly bully sam the sham and the pha~  1965 bully         125 anger    
+ 5     1 wooly bully sam the sham and the pha~  1965 bully         125 fear     
+ 6     1 wooly bully sam the sham and the pha~  1965 bully         125 negative 
+ 7     1 wooly bully sam the sham and the pha~  1965 bully         125 anger    
+ 8     1 wooly bully sam the sham and the pha~  1965 bully         125 fear     
+ 9     1 wooly bully sam the sham and the pha~  1965 bully         125 negative 
+10     1 wooly bully sam the sham and the pha~  1965 sham          125 anger    
+# ... with 399,337 more rows
+
+
+
+lyric_sentiment %>%
+    # Find how many sentiment words each song has
+    count(song, sentiment, sort = TRUE)
+# A tibble: 39,564 x 3
+   song           sentiment     n
+   <chr>          <chr>     <int>
+ 1 baby           positive    264
+ 2 baby           joy         255
+ 3 real love      positive    213
+ 4 angel          positive    193
+ 5 disturbia      negative    182
+ 6 live your life positive    174
+ 7 my love        positive    173
+ 8 angel          joy         164
+ 9 damn           negative    164
+10 disturbia      sadness     164
+# ... with 39,554 more rows
+
+
+The song “Baby” has the highest number of positive words while “Disturbia” has the highest number of negative words.
+
