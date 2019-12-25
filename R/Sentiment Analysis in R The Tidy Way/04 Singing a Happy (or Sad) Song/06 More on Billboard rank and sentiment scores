@@ -1,0 +1,61 @@
+More on Billboard rank and sentiment scores
+In the last exercise, you explored how positive sentiment and Billboard rank are related using a visualization, and you found that there was no visible trend. Songs with more positive words do not reach higher or lower ranks on the Billboard chart. Next, check the same relationship using the same visualization but for negative words. The lyric_sentiment data frame that you created earlier is still available in your environment.
+
+
+Filter for only negative words.
+Count using three arguments: song, Billboard rank, and total number of words.
+Define a new percent column with mutate() that is equal to n divided by total_words.
+
+Then use ggplot2 to make your visualization.
+Call aes() to put rank on the x-axis and percent on the y-axis; like in the previous exercise, treat rank as a factor with as.factor(rank).
+Make a boxplot.
+
+lyric_sentiment %>%
+    # Filter for only negative words
+    filter(sentiment == "negative") %>%
+    # Count by song, Billboard rank, and the total number of words
+    count(song, rank, total_words) %>%
+    ungroup() %>%
+    # Mutate to make a percent column
+    mutate(percent = n/total_words,
+           rank = 10 * floor(rank / 10)) %>%
+    # Use ggplot to set up a plot with rank and percent
+    # use as.factor(rank) to split up the boxplots for different rank bins (e.g. 1-9, 10-19, ...)
+    # instead of lumping the boxplot for all rank bins together
+    ggplot(aes(x=as.factor(rank), y=percent)) +
+    # Make a boxplot
+    geom_boxplot()
+
+That is exactly right, but still no trend! Sentiment and Billboard rank appear to be unrelated.
+
+
+
+
+
+
+
+
+> lyric_sentiment %>%
+      # Filter for only negative words
+      filter(sentiment == "negative") %>%
+      # Count by song, Billboard rank, and the total number of words
+      count(song, rank, total_words) %>%
+      ungroup() %>%
+      # Mutate to make a percent column
+      mutate(percent = n/total_words,
+             rank = 10 * floor(rank / 10))
+# A tibble: 4,630 x 5
+   song                    rank total_words     n percent
+   <chr>                  <dbl>       <int> <int>   <dbl>
+ 1 0 to 100  the catch up    90         894    47 0.0526 
+ 2 1 2 3 4 sumpin new        40         670    14 0.0209 
+ 3 1 2 3 red light           40         145     2 0.0138 
+ 4 1 2 step                   0         437     4 0.00915
+ 5 1 thing                   60         532     2 0.00376
+ 6 100 pure love             40         590    12 0.0203 
+ 7 100 pure love             80         590    12 0.0203 
+ 8 100 years                 70         257     4 0.0156 
+ 9 123                       60         220     8 0.0364 
+10 18 and life               60         285    12 0.0421 
+# ... with 4,620 more rows
+
