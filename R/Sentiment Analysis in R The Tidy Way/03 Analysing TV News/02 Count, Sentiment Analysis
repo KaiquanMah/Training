@@ -1,0 +1,150 @@
+Counting totals
+Now that you have transformed the TV news data to a tidy data structure, you can find out what words are most common when discussing climate change on TV news, as well as the total number of words from each station. These are both helpful exploratory steps before moving on in analysis!
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/tally
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/select
+
+Find the most common words in this dataset with count() using sort = TRUE. (The command anti_join(stop_words) removes common words like "and", "of", and "to.")
+You will now calculate the total number of words from each station, a quantity you'll use to find proportions later.
+Use count() with one argument to find how many words came from each stations.
+Change the name of the new column with rename() so that it is called station_total instead of n.
+
+
+> tidy_tv
+# A tibble: 41,127 x 4
+   station show            show_date           word      
+   <chr>   <chr>           <dttm>              <chr>     
+ 1 MSNBC   Morning Meeting 2009-09-22 13:00:00 the       
+ 2 MSNBC   Morning Meeting 2009-09-22 13:00:00 interior  
+ 3 MSNBC   Morning Meeting 2009-09-22 13:00:00 positively
+ 4 MSNBC   Morning Meeting 2009-09-22 13:00:00 oozes     
+ 5 MSNBC   Morning Meeting 2009-09-22 13:00:00 class     
+ 6 MSNBC   Morning Meeting 2009-09-22 13:00:00 raves     
+ 7 MSNBC   Morning Meeting 2009-09-22 13:00:00 car       
+ 8 MSNBC   Morning Meeting 2009-09-22 13:00:00 magazine  
+ 9 MSNBC   Morning Meeting 2009-09-22 13:00:00 slick     
+10 MSNBC   Morning Meeting 2009-09-22 13:00:00 and       
+# ... with 41,117 more rows
+
+
+
+
+tidy_tv %>% 
+    anti_join(stop_words) %>%
+    # Count by word with sort = TRUE
+    count(word, sort=TRUE)
+# A tibble: 3,692 x 2
+   word          n
+   <chr>     <int>
+ 1 climate    1629
+ 2 change     1615
+ 3 people      139
+ 4 real        125
+ 5 president   112
+ 6 global      107
+ 7 issue        87
+ 8 trump        86
+ 9 warming      85
+10 issues       69
+# ... with 3,682 more rows    
+    
+    
+    
+
+
+
+tidy_tv %>%
+    # Count by station
+    count(station) %>%
+    # Rename the new column station_total
+    rename(station_total = n)
+
+# before rename
+# A tibble: 3 x 2
+  station      n
+  <chr>    <int>
+1 CNN      10726
+2 FOX News 10887
+3 MSNBC    19514
+
+#after rename
+# A tibble: 3 x 2
+  station  station_total
+  <chr>            <int>
+1 CNN              10726
+2 FOX News         10887
+3 MSNBC            19514
+
+Notice that common words include “issue”, “global”, and “job”.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sentiment analysis of TV news
+After transforming the TV news texts to a tidy format in a previous exercise, the resulting data frame tidy_tv is ready for sentiment analysis using tidy data principles. Before you implement the inner join, add new column with the total number of words from each station so you can calculate proportions soon.
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/n
+
+Define groups for each station in the dataset using group_by().
+Make a new column called station_total in the dataframe that tallies the total number of words from each station; the mutate() verb will make a new column and the function n() counts the number of observations in the current group.
+Finally, implement sentiment analysis using the correct kind of join and the "nrc" lexicon as the argument to the join function.
+
+> tidy_tv %>% 
+      # Group by station
+      group_by(station)
+# A tibble: 41,127 x 4
+# Groups:   station [3]
+   station show            show_date           word      
+   <chr>   <chr>           <dttm>              <chr>     
+ 1 MSNBC   Morning Meeting 2009-09-22 13:00:00 the       
+ 2 MSNBC   Morning Meeting 2009-09-22 13:00:00 interior  
+ 3 MSNBC   Morning Meeting 2009-09-22 13:00:00 positively
+ 4 MSNBC   Morning Meeting 2009-09-22 13:00:00 oozes     
+ 5 MSNBC   Morning Meeting 2009-09-22 13:00:00 class     
+ 6 MSNBC   Morning Meeting 2009-09-22 13:00:00 raves     
+ 7 MSNBC   Morning Meeting 2009-09-22 13:00:00 car       
+ 8 MSNBC   Morning Meeting 2009-09-22 13:00:00 magazine  
+ 9 MSNBC   Morning Meeting 2009-09-22 13:00:00 slick     
+10 MSNBC   Morning Meeting 2009-09-22 13:00:00 and       
+# ... with 41,117 more rows
+
+
+
+
+tv_sentiment <- tidy_tv %>% 
+    # Group by station
+    group_by(station) %>% 
+    # Define a new column station_total
+    mutate(station_total = n()) %>%
+    ungroup() %>%
+    # Implement sentiment analysis with the NRC lexicon
+    inner_join(get_sentiments("nrc"), by="word")
+
+
+
+
+
+
+
+> tv_sentiment
+# A tibble: 10,175 x 6
+   station show            show_date           word      station_total sentiment
+   <chr>   <chr>           <dttm>              <chr>             <int> <chr>    
+ 1 MSNBC   Morning Meeting 2009-09-22 13:00:00 interior          19514 disgust  
+ 2 MSNBC   Morning Meeting 2009-09-22 13:00:00 interior          19514 positive 
+ 3 MSNBC   Morning Meeting 2009-09-22 13:00:00 interior          19514 trust    
+ 4 MSNBC   Morning Meeting 2009-09-22 13:00:00 sensuous          19514 joy      
+ 5 MSNBC   Morning Meeting 2009-09-22 13:00:00 sensuous          19514 positive 
+ 6 MSNBC   Morning Meeting 2009-09-22 13:00:00 striking          19514 positive 
+ 7 MSNBC   Morning Meeting 2009-09-22 13:00:00 join              19514 positive 
+ 8 MSNBC   Morning Meeting 2009-09-22 13:00:00 president         19514 positive 
+ 9 MSNBC   Morning Meeting 2009-09-22 13:00:00 president         19514 trust    
+10 MSNBC   Morning Meeting 2009-09-22 13:00:00 change            19514 fear     
+# ... with 10,165 more rows
