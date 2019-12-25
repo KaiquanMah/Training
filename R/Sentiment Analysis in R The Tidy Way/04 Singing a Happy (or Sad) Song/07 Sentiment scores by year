@@ -1,0 +1,88 @@
+Sentiment scores by year
+You are going to make two more exploratory plots in this exercise, much like the plots you made for Billboard rank. This time, you are going to explore how sentiment has been changing with time. Are songs on the Billboard chart changing in their use of negative or positive words through the decades?
+
+
+Filter for only negative words.
+Use count() with three arguments to find the number of sentiment words for each song, year, and total number of words.
+Use ggplot() to set up a plot with year on the x-axis (remember to treat it as a factor with as.factor(year)) and percent on the y-axis.
+Now repeat these same steps for positive words.
+
+
+# How is negative sentiment changing over time?
+lyric_sentiment %>%
+    # Filter for only negative words
+    filter(sentiment == "negative") %>%
+    # Count by song, year, and the total number of words
+    count(song, year, total_words) %>%
+    ungroup() %>%
+    mutate(percent = n / total_words,
+           year = 10 * floor(year / 10)) %>%
+    # Use ggplot to set up a plot with year and percent
+    ggplot(aes(x=as.factor(year), y=percent)) +
+    geom_boxplot()
+    
+    
+> lyric_sentiment %>%
+      # Filter for only negative words
+      filter(sentiment == "negative") %>%
+      # Count by song, year, and the total number of words
+      count(song, year, total_words) %>%
+      ungroup() %>%
+      mutate(percent = n / total_words,
+             year = 10 * floor(year / 10))
+# A tibble: 4,626 x 5
+   song                    year total_words     n percent
+   <chr>                  <dbl>       <int> <int>   <dbl>
+ 1 0 to 100  the catch up  2010         894    47 0.0526 
+ 2 1 2 3 4 sumpin new      1990         670    14 0.0209 
+ 3 1 2 3 red light         1960         145     2 0.0138 
+ 4 1 2 step                2000         437     4 0.00915
+ 5 1 thing                 2000         532     2 0.00376
+ 6 100 pure love           1990         590    12 0.0203 
+ 7 100 pure love           1990         590    12 0.0203 
+ 8 100 years               2000         257     4 0.0156 
+ 9 123                     1980         220     8 0.0364 
+10 18 and life             1980         285    12 0.0421 
+# ... with 4,616 more rows
+    
+    
+    
+    
+    
+    
+    
+    
+# How is positive sentiment changing over time?
+lyric_sentiment %>%
+    filter(sentiment == "positive") %>%
+    count(song, year, total_words) %>%
+    ungroup() %>%
+    mutate(percent = n / total_words,
+           year = 10 * floor(year / 10)) %>%
+        ggplot(aes(x=as.factor(year), y=percent)) +
+    geom_boxplot()
+
+> lyric_sentiment %>%
+      filter(sentiment == "positive") %>%
+      count(song, year, total_words) %>%
+      ungroup() %>%
+      mutate(percent = n / total_words,
+             year = 10 * floor(year / 10))
+# A tibble: 4,772 x 5
+   song                    year total_words     n percent
+   <chr>                  <dbl>       <int> <int>   <dbl>
+ 1 0 to 100  the catch up  2010         894    34  0.0380
+ 2 1 2 3 4 sumpin new      1990         670    18  0.0269
+ 3 1 2 3 red light         1960         145     9  0.0621
+ 4 1 2 step                2000         437    20  0.0458
+ 5 100 pure love           1990         590    11  0.0186
+ 6 100 pure love           1990         590    11  0.0186
+ 7 100 years               2000         257     4  0.0156
+ 8 123                     1980         220    15  0.0682
+ 9 18 and life             1980         285     9  0.0316
+10 19 somethin             2000         281     6  0.0214
+# ... with 4,762 more rows
+
+Notice that the proportion of negative words does not change significantly but the proportion of positive words exhibits a decrease over time.
+
+
