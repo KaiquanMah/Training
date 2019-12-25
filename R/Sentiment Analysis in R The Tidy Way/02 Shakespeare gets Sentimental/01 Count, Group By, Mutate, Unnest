@@ -1,0 +1,130 @@
+To be, or not to be
+Let's take a look at the dataset you will use in this chapter to learn more about tidying text and sentiment analysis. The shakespeare dataset contains three columns:
+title, the title of a Shakespearean play,
+type, the type of play, either tragedy or comedy, and
+text, a line from that play.
+
+This data frame contains the entire texts of six plays.
+In the console, take a look at the shakespeare object.
+Pipe the data frame with the Shakespeare texts to the next line.
+Use count() with two arguments to find out which titles are in this dataset, whether they are tragedies or comedies, and how many lines they have.
+
+# The data set shakespeare in available in the workspace
+shakespeare
+
+# Pipe the shakespeare data frame to the next line
+shakespeare %>% 
+  # Use count to find out how many titles/types there are
+  count(type, title)
+# A tibble: 6 x 3
+  type    title                               n
+  <chr>   <chr>                           <int>
+1 Comedy  A Midsummer Night's Dream        3459
+2 Comedy  Much Ado about Nothing           3799
+3 Comedy  The Merchant of Venice           4225
+4 Tragedy Hamlet, Prince of Denmark        6776
+5 Tragedy The Tragedy of Macbeth           3188
+6 Tragedy The Tragedy of Romeo and Juliet  4441  
+
+
+> shakespeare %>% 
+    # Use count to find out how many titles/types there are
+    count(title, type)
+# A tibble: 6 x 3
+  title                           type        n
+  <chr>                           <chr>   <int>
+1 A Midsummer Night's Dream       Comedy   3459
+2 Hamlet, Prince of Denmark       Tragedy  6776
+3 Much Ado about Nothing          Comedy   3799
+4 The Merchant of Venice          Comedy   4225
+5 The Tragedy of Macbeth          Tragedy  3188
+6 The Tragedy of Romeo and Juliet Tragedy  4441
+
+Passing a dataset and a variable to count() returns the unique values in that variable and the corresponding count n, which in this case, is the number of lines in a play.
+
+
+
+
+
+
+
+Unnesting from text to word
+The shakespeare dataset is not yet compatible with tidy tools. You need to first break the text into individual tokens (the process of tokenization); a token is a meaningful unit of text for analysis, in many cases, just synonymous with a single word. You also need to transform the text to a tidy data structure with one token per row. You can use tidytext’s unnest_tokens() function to accomplish all of this at once.
+
+Load the tidytext package.
+Group by title to annotate the data frame by line number.
+Define a new column using mutate() called linenumber that keeps track of which line of the play text is from. (Check out row_number() to do this!)
+Use unnest_tokens() to transform the non-tidy text data to a tidy text dataset.
+Pipe the tidy Shakespeare data frame to the next line.
+Use count() to find out how many times each word is used in Shakespeare's plays.
+
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/ranking
+https://www.rdocumentation.org/packages/tidytext/versions/0.2.2/topics/unnest_tokens
+
+
+# Load tidytext
+library(tidytext)
+
+tidy_shakespeare <- shakespeare %>%
+  # Group by the titles of the plays
+  group_by(title) %>%
+  # Define a new column linenumber
+  mutate(linenumber = row_number(title)) %>%
+  # Transform the non-tidy text data to tidy text data
+  unnest_tokens(word, text) %>%
+  ungroup()
+
+
+
+
+
+> tidy_shakespeare
+# A tibble: 141,078 x 4
+   title                           type    linenumber word       
+   <chr>                           <chr>        <int> <chr>      
+ 1 The Tragedy of Romeo and Juliet Tragedy          1 the        
+ 2 The Tragedy of Romeo and Juliet Tragedy          1 complete   
+ 3 The Tragedy of Romeo and Juliet Tragedy          1 works      
+ 4 The Tragedy of Romeo and Juliet Tragedy          1 of         
+ 5 The Tragedy of Romeo and Juliet Tragedy          1 william    
+ 6 The Tragedy of Romeo and Juliet Tragedy          1 shakespeare
+ 7 The Tragedy of Romeo and Juliet Tragedy          3 the        
+ 8 The Tragedy of Romeo and Juliet Tragedy          3 tragedy    
+ 9 The Tragedy of Romeo and Juliet Tragedy          3 of         
+10 The Tragedy of Romeo and Juliet Tragedy          3 romeo      
+# ... with 141,068 more rows
+
+
+
+
+
+
+
+
+
+
+# Pipe the tidy Shakespeare data frame to the next line
+tidy_shakespeare %>% 
+  # Use count to find out how many times each word is used
+  count(word, sort = TRUE)
+  
+  
+  
+  
+# A tibble: 10,736 x 2
+   word      n
+   <chr> <int>
+ 1 the    4651
+ 2 and    4170
+ 3 i      3296
+ 4 to     3047
+ 5 of     2645
+ 6 a      2511
+ 7 you    2287
+ 8 my     1913
+ 9 in     1836
+10 that   1721
+# ... with 10,726 more rows  
+
+Notice how the most common words in the data frame are words like “the”, “and”, and “i” that have no sentiments associated with them. In the next exercise, you'll join the data with a lexicon to implement sentiment analysis.
+
