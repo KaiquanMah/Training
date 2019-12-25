@@ -1,0 +1,52 @@
+Sentiment analysis of Shakespeare
+You learned how to implement sentiment analysis with a join in the first chapter of this course. After transforming the text of these Shakespearean plays to a tidy text dataset in the last exercise, the resulting data frame tidy_shakespeare is ready for sentiment analysis with such an approach. Once you have performed the sentiment analysis, you can find out how many negative and positive words each play has with just one line of code.
+
+
+Use the correct kind of join to implement sentiment analysis.
+Add the "bing" lexicon as the argument to the join function.
+Find how many positive and negative words each play has by using two arguments in count().
+
+shakespeare_sentiment <- tidy_shakespeare %>%
+  # Implement sentiment analysis with the "bing" lexicon
+  inner_join(get_sentiments("bing")) 
+  
+# A tibble: 11,584 x 5
+   title                           type    linenumber word     sentiment
+   <chr>                           <chr>        <int> <chr>    <chr>    
+ 1 The Tragedy of Romeo and Juliet Tragedy          1 works    positive 
+ 2 The Tragedy of Romeo and Juliet Tragedy          3 tragedy  negative 
+ 3 The Tragedy of Romeo and Juliet Tragedy          5 works    positive 
+ 4 The Tragedy of Romeo and Juliet Tragedy          9 works    positive 
+ 5 The Tragedy of Romeo and Juliet Tragedy         12 readable positive 
+ 6 The Tragedy of Romeo and Juliet Tragedy         23 tragedy  negative 
+ 7 The Tragedy of Romeo and Juliet Tragedy         97 dignity  positive 
+ 8 The Tragedy of Romeo and Juliet Tragedy         98 fair     positive 
+ 9 The Tragedy of Romeo and Juliet Tragedy         99 grudge   negative 
+10 The Tragedy of Romeo and Juliet Tragedy         99 break    negative 
+# ... with 11,574 more rows
+
+
+
+
+shakespeare_sentiment %>%
+  # Find how many positive/negative words each play has
+  count(title, sentiment)
+  
+# A tibble: 12 x 3
+   title                           sentiment     n
+   <chr>                           <chr>     <int>
+ 1 A Midsummer Night's Dream       negative    681
+ 2 A Midsummer Night's Dream       positive    773
+ 3 Hamlet, Prince of Denmark       negative   1323
+ 4 Hamlet, Prince of Denmark       positive   1223
+ 5 Much Ado about Nothing          negative    767
+ 6 Much Ado about Nothing          positive   1127
+ 7 The Merchant of Venice          negative    740
+ 8 The Merchant of Venice          positive    962
+ 9 The Tragedy of Macbeth          negative    914
+10 The Tragedy of Macbeth          positive    749
+11 The Tragedy of Romeo and Juliet negative   1235
+12 The Tragedy of Romeo and Juliet positive   1090  
+
+Fabulous! Passing two variables to count() returns the count n for each unique combination of the two variables. In this case, you have 6 plays and 2 sentiments, so count() returns 6 x 2 = 12 rows.
+
