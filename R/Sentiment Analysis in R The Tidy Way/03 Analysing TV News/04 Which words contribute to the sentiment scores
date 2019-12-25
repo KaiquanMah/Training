@@ -1,0 +1,72 @@
+Which words contribute to the sentiment scores?
+It's important to understand which words specifically are driving sentiment scores, and when you use tidy data principles, it's not too difficult to check. In this exercise, you will make a plot showing which words contribute the most to the ten types of sentiment in the NRC lexicon. Look at the result, and think about which words might not be appropriate in these contexts. Are there proper names? Are there words which used in these contexts are neutral?
+If so, you can always remove these words from your dataset (or the sentiment lexicon) using anti_join().
+
+Count by word and sentiment to find which words are contributing most overall to the sentiment scores.
+Group by sentiment.
+Take the top 10 words for each sentiment using top_n().
+Set up the plot using aes(), with the words on the x-axis, the number of uses n on the y-axis, and fill corresponding to sentiment.
+https://www.rdocumentation.org/packages/dplyr/versions/0.7.8/topics/top_n
+
+
+tv_sentiment %>%
+    # Count by word and sentiment
+    count(word, sentiment) %>%
+    # Group by sentiment
+    group_by(sentiment) %>%
+    # Take the top 10 words for each sentiment
+    top_n(n=10) %>%
+    ungroup() %>%
+    mutate(word = reorder(word, n)) %>%
+    # Set up the plot with aes()
+    ggplot(aes(x=word, y=n, fill=sentiment)) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~ sentiment, scales = "free") +
+    coord_flip()
+
+Notice that you see proper names like Gore and Trump, which should be treated as neutral, and that “change” was a strong driver of fear sentiment, even though it is by definition part of these texts on climate change. It is important to see which words contribute to your sentiment scores so you can adjust the sentiment lexicons if appropriate.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Word choice and TV station
+In the last exercise, you saw which words contributed to which sentiment for this dataset of closed captioning texts about climate change from TV news station. Now it's time to explore the different words that each station used in the context of discussing climate change. Which negative words did each station use when talking about climate change on the air?
+
+Filter for only negative words.
+Count by word and station to find which words are contributing most overall to the sentiment scores.
+Group by TV station.
+Take the top 10 words for each station.
+Set up the plot using aes(), with the words on the x-axis, the number of uses n on the y-axis, and fill corresponding to station.
+
+tv_sentiment %>%
+    # Filter for only negative words
+    filter(sentiment == "negative") %>%
+    # Count by word and station
+    count(word, station) %>%
+    # Group by station
+    group_by(station) %>%
+    # Take the top 10 words for each station
+    top_n(n=10) %>%
+    ungroup() %>%
+    mutate(word = reorder(paste(word, station, sep = "__"), n)) %>%
+    # Set up the plot with aes()
+    ggplot(aes(x=word, y=n, fill=station)) +
+    geom_col(show.legend = FALSE) +
+    scale_x_discrete(labels = function(x) gsub("__.+$", "", x)) +
+    facet_wrap(~ station, nrow = 2, scales = "free") +
+    coord_flip()
+
+Some words, like “threat” are used by all three stations but some word choices are quite different. FOX News talks about terrorism and hurricanes, while CNN discusses hoaxes.
+
+
+
