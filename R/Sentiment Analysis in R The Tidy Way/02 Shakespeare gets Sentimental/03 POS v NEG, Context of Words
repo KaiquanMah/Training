@@ -1,0 +1,220 @@
+Tragedy or comedy?
+The tidy dataset you created, tidy_shakespeare, is again available in your environment. Which plays have a higher percentage of negative words? Do the tragedies have more negative words than the comedies?
+
+First, calculate how many negative and positive words each play used.
+Implement sentiment analysis using the "bing" lexicon.
+Use count() to find the number of words for each combination of title, type, and sentiment.
+
+Now, find the percentage of negative words for each play.
+Group by the titles of the plays.
+Find the total number of words in each play using sum().
+Calculate a percent for each play that is the number of words of each sentiment divided by the total words in that play.
+Filter the results for only negative sentiment.
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/sum
+
+sentiment_counts <- tidy_shakespeare %>%
+    # Implement sentiment analysis using the "bing" lexicon
+    inner_join(get_sentiments("bing")) %>%
+    # Count the number of words by title, type, and sentiment
+    count(title, type, sentiment)
+
+# A tibble: 12 x 4
+   title                           type    sentiment     n
+   <chr>                           <chr>   <chr>     <int>
+ 1 A Midsummer Night's Dream       Comedy  negative    681
+ 2 A Midsummer Night's Dream       Comedy  positive    773
+ 3 Hamlet, Prince of Denmark       Tragedy negative   1323
+ 4 Hamlet, Prince of Denmark       Tragedy positive   1223
+ 5 Much Ado about Nothing          Comedy  negative    767
+ 6 Much Ado about Nothing          Comedy  positive   1127
+ 7 The Merchant of Venice          Comedy  negative    740
+ 8 The Merchant of Venice          Comedy  positive    962
+ 9 The Tragedy of Macbeth          Tragedy negative    914
+10 The Tragedy of Macbeth          Tragedy positive    749
+11 The Tragedy of Romeo and Juliet Tragedy negative   1235
+12 The Tragedy of Romeo and Juliet Tragedy positive   1090
+
+
+
+
+
+sentiment_counts %>%
+    # Group by the titles of the plays
+    group_by(title) %>%
+    # Find the total number of words in each play
+    mutate(total = sum(n),
+    # Calculate the number of words divided by the total
+           percent = n/total) %>%
+    # Filter the results for only negative sentiment
+    filter(sentiment == "negative") %>%
+    arrange(percent)
+
+
+
+
+> sentiment_counts %>%
+      # Group by the titles of the plays
+      group_by(title) %>%
+      # Find the total number of words in each play
+      mutate(total = sum(n))
+# A tibble: 12 x 5
+# Groups:   title [6]
+   title                           type    sentiment     n total
+   <chr>                           <chr>   <chr>     <int> <int>
+ 1 A Midsummer Night's Dream       Comedy  negative    681  1454
+ 2 A Midsummer Night's Dream       Comedy  positive    773  1454
+ 3 Hamlet, Prince of Denmark       Tragedy negative   1323  2546
+ 4 Hamlet, Prince of Denmark       Tragedy positive   1223  2546
+ 5 Much Ado about Nothing          Comedy  negative    767  1894
+ 6 Much Ado about Nothing          Comedy  positive   1127  1894
+ 7 The Merchant of Venice          Comedy  negative    740  1702
+ 8 The Merchant of Venice          Comedy  positive    962  1702
+ 9 The Tragedy of Macbeth          Tragedy negative    914  1663
+10 The Tragedy of Macbeth          Tragedy positive    749  1663
+11 The Tragedy of Romeo and Juliet Tragedy negative   1235  2325
+12 The Tragedy of Romeo and Juliet Tragedy positive   1090  2325
+
+
+
+
+> sentiment_counts %>%
+      # Group by the titles of the plays
+      group_by(title) %>%
+      # Find the total number of words in each play
+      mutate(total = sum(n),
+      # Calculate the number of words divided by the total
+             percent = n/total) %>%
+      # Filter the results for only negative sentiment
+      filter(sentiment == "negative") %>%
+      arrange(percent)
+# A tibble: 6 x 6
+# Groups:   title [6]
+  title                           type    sentiment     n total percent
+  <chr>                           <chr>   <chr>     <int> <int>   <dbl>
+1 Much Ado about Nothing          Comedy  negative    767  1894   0.405
+2 The Merchant of Venice          Comedy  negative    740  1702   0.435
+3 A Midsummer Night's Dream       Comedy  negative    681  1454   0.468
+4 Hamlet, Prince of Denmark       Tragedy negative   1323  2546   0.520
+5 The Tragedy of Romeo and Juliet Tragedy negative   1235  2325   0.531
+6 The Tragedy of Macbeth          Tragedy negative    914  1663   0.550
+
+Looking at the percent column of your output, you can see that tragedies do in fact have a higher percentage of negative words!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Most common positive and negative words
+You found in the previous exercise that Shakespeare's tragedies use proportionally more negative words than the comedies. Now you can explore which specific words are driving these sentiment scores. Which are the most common positive and negative words in these plays?
+There are three steps in the code in this exercise. The first step counts how many times each word is used, the second step takes the top 10 most-used positive and negative words, and the final step makes a plot to visualize this result.
+
+Implement sentiment analysis using the "bing" lexicon.
+Use count() to find word counts by sentiment.
+Group by sentiment so you can take the top 10 words in each sentiment.
+Notice what the line mutate(word = reorder(word, n)) does; it converts word from a character that would be plotted in alphabetical order to a factor that will be plotted in order of n.
+
+Now you can make a visualization of top_words using ggplot2 to see these results.
+Put word on the x-axis and n on the y-axis.
+Use geom_col() to make a bar chart.
+
+
+word_counts <- tidy_shakespeare %>%
+  # Implement sentiment analysis using the "bing" lexicon
+  inner_join(get_sentiments("bing")) %>%
+  # Count by word and sentiment
+  count(word, sentiment)
+
+# A tibble: 1,598 x 3
+   word         sentiment     n
+   <chr>        <chr>     <int>
+ 1 abominably   negative      1
+ 2 abound       positive      2
+ 3 absence      negative      6
+ 4 absurd       negative      2
+ 5 abundance    positive      1
+ 6 abuse        negative      4
+ 7 abuses       negative      2
+ 8 accidental   negative      1
+ 9 accomplished positive      1
+10 accursed     negative      4
+# ... with 1,588 more rows
+
+
+
+
+
+
+top_words <- word_counts %>%
+  # Group by sentiment
+  group_by(sentiment) %>%
+  # Take the top 10 for each sentiment
+  top_n(10) %>%
+  ungroup() %>%
+  # Make word a factor in order of n
+  mutate(word = reorder(word, n))
+
+# A tibble: 22 x 3
+   word  sentiment     n
+   <fct> <chr>     <int>
+ 1 dead  negative    125
+ 2 death negative    171
+ 3 die   negative     67
+ 4 fair  positive    156
+ 5 faith positive     84
+ 6 fall  negative     44
+ 7 fear  negative    111
+ 8 good  positive    442
+ 9 great positive     97
+10 haste negative     44
+# ... with 12 more rows
+
+
+
+
+# Use aes() to put words on the x-axis and n on the y-axis
+ggplot(top_words, aes(x=word, y=n, fill=sentiment)) +
+  # Make a bar chart with geom_col()
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales = "free") +  
+  coord_flip()
+  
+Death is pretty negative and love is positive, but are there words in that list that had different connotations during Shakespeare's time? Do you see a word that the lexicon has misidentified?
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+Which word was misidentified?
+In the last exercise, you found the top 10 words that contributed most to negative sentiment in these Shakespearean plays, but lexicons are not always foolproof tools for use with all kinds of text. Which of those top 10 negative words used by Shakespeare was actually misidentified as negative by the sentiment lexicon?
+#not death
+#not poor
+#not mad
+#not die
+
+#yes wilt
+Correct! The word \"wilt\" was used differently in Shakespeare's time and was not negative; the lexicon has misidentified it. For example, from Romeo and Juliet, \"For thou wilt lie upon the wings of night\". It is important to explore the details of how words were - cored when performing sentiment analyses.
+
