@@ -1,0 +1,145 @@
+Word contributions by play
+You have already explored how words contribute to sentiment scores for Shakespeare's plays as a whole. In this exercise, you will look at differences between titles. You will also practice using a different sentiment lexicon, the "afinn" lexicon in which words have a value from -5 to 5. Different lexicons take different approaches to quantifying the emotion/opinion content of words.
+Which words contribute to the overall sentiment in which plays? In this exercise, you will look specifically at Macbeth.
+
+Use count() to find how many times each word is used in each play.
+Implement sentiment analysis with the "afinn" lexicon. (Notice that it is possible to perform sentiment analysis on count data, not only the original tidy data frame.)
+Filter to only look at the sentiments for Macbeth; the title for Macbeth is "The Tragedy of Macbeth".
+In a second argument to filter(), only examine words with negative sentiment (value).
+
+
+tidy_shakespeare %>%
+  # Count by title and word
+  count(title, word, sort = TRUE) %>%
+  # Implement sentiment analysis using the "afinn" lexicon
+  inner_join(get_sentiments("afinn"), by="word") %>%
+  # Filter to only examine the values for Macbeth that are negative
+  filter(title=="The Tragedy of Macbeth", value<0)
+  
+# A tibble: 237 x 4
+   title                  word        n value
+   <chr>                  <chr>   <int> <dbl>
+ 1 The Tragedy of Macbeth no         73    -1
+ 2 The Tragedy of Macbeth fear       35    -2
+ 3 The Tragedy of Macbeth death      20    -2
+ 4 The Tragedy of Macbeth bloody     16    -3
+ 5 The Tragedy of Macbeth poor       16    -2
+ 6 The Tragedy of Macbeth strange    16    -1
+ 7 The Tragedy of Macbeth dead       14    -3
+ 8 The Tragedy of Macbeth leave      14    -1
+ 9 The Tragedy of Macbeth fight      13    -1
+10 The Tragedy of Macbeth charges    11    -2
+# ... with 227 more rows
+
+
+Marvelous! Notice the use of words specific to Macbeth like “bloody”.
+
+
+
+
+
+
+
+
+
+Calculating a contribution score
+In the last exercise, you saw how words in Macbeth were used different number of times and also had different sentiment values in the "afinn" lexicon, from -5 to 5. Since this lexicon provides these values for each word, you can calculate a relative contribution for each word in each play. This contribution can be found by multiplying the value for each word by the times it is used in each play and divided by the total words in each play.
+
+Use count() to find how many times each word is used in each play.
+Implement sentiment analysis with the "afinn" lexicon.
+Group by the titles of the plays to get ready to calculate a total for each play in the next line.
+Calculate a contribution for each word in each play; the contribution can be found by multiplying each word's value by the times it is used in the play and divided by the total words in the play.
+
+sentiment_contributions <- tidy_shakespeare %>%
+  # Count by title and word
+  count(title, word, sort = TRUE) %>%
+  # Implement sentiment analysis using the "afinn" lexicon
+  inner_join(get_sentiments("afinn"), by="word") %>%
+  # Group by title
+  group_by(title) %>%
+  # Calculate a contribution for each word in each title
+  mutate(contribution = value*n/sum(n)) %>%
+  ungroup()
+    
+sentiment_contributions
+# A tibble: 2,366 x 5
+   title                           word      n value contribution
+   <chr>                           <chr> <int> <dbl>        <dbl>
+ 1 Hamlet, Prince of Denmark       no      143    -1      -0.0652
+ 2 The Tragedy of Romeo and Juliet love    140     3       0.213 
+ 3 Much Ado about Nothing          no      132    -1      -0.0768
+ 4 Much Ado about Nothing          hero    114     2       0.133 
+ 5 A Midsummer Night's Dream       love    110     3       0.270 
+ 6 Hamlet, Prince of Denmark       good    109     3       0.149 
+ 7 The Tragedy of Romeo and Juliet no      102    -1      -0.0518
+ 8 Much Ado about Nothing          good     93     3       0.162 
+ 9 The Merchant of Venice          no       92    -1      -0.0630
+10 Much Ado about Nothing          love     91     3       0.159 
+# ... with 2,356 more rows
+
+Notice that “hero” shows up in your results there; that is the name of one of the characters in “Much Ado About Nothing”.
+
+
+
+
+
+
+
+
+
+
+Alas, poor Yorick!
+The sentiment_contributions that you calculated in the last exercise is available in your environment. It's time to explore some of your results! Look at Hamlet and The Merchant of Venice to see what negative and positive words are important in these two plays.
+
+
+sentiment_contributions %>%
+  # Filter for Hamlet
+  filter(title == "Hamlet, Prince of Denmark") %>%
+  # Arrange to see the most negative words
+  # in ascending order, you would get the most negative words on top
+  arrange(contribution)
+# A tibble: 493 x 5
+   title                     word        n value contribution
+   <chr>                     <chr>   <int> <dbl>        <dbl>
+ 1 Hamlet, Prince of Denmark no        143    -1      -0.0652
+ 2 Hamlet, Prince of Denmark dead       33    -3      -0.0451
+ 3 Hamlet, Prince of Denmark death      38    -2      -0.0347
+ 4 Hamlet, Prince of Denmark madness    22    -3      -0.0301
+ 5 Hamlet, Prince of Denmark mad        21    -3      -0.0287
+ 6 Hamlet, Prince of Denmark fear       21    -2      -0.0192
+ 7 Hamlet, Prince of Denmark poor       20    -2      -0.0182
+ 8 Hamlet, Prince of Denmark hell       10    -4      -0.0182
+ 9 Hamlet, Prince of Denmark grave      17    -2      -0.0155
+10 Hamlet, Prince of Denmark ghost      32    -1      -0.0146
+# ... with 483 more rows
+
+
+
+
+
+
+sentiment_contributions %>%
+  # Filter for The Merchant of Venice
+  filter(title == "The Merchant of Venice") %>%
+  # Arrange to see the most positive words
+  # arrange(desc(colname)) gives you the most pos words on top
+  arrange(desc(contribution))
+  
+# A tibble: 344 x 5
+   title                  word        n value contribution
+   <chr>                  <chr>   <int> <dbl>        <dbl>
+ 1 The Merchant of Venice good       63     3       0.129 
+ 2 The Merchant of Venice love       60     3       0.123 
+ 3 The Merchant of Venice fair       35     2       0.0479
+ 4 The Merchant of Venice like       34     2       0.0466
+ 5 The Merchant of Venice true       24     2       0.0329
+ 6 The Merchant of Venice sweet      23     2       0.0315
+ 7 The Merchant of Venice pray       42     1       0.0288
+ 8 The Merchant of Venice better     21     2       0.0288
+ 9 The Merchant of Venice justice    17     2       0.0233
+10 The Merchant of Venice welcome    17     2       0.0233
+# ... with 334 more rows  
+
+These are definitely characteristic words for these two plays.
+
+
