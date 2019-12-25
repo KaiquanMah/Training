@@ -1,0 +1,57 @@
+Modeling negative sentiment
+You saw in your visualizations in the last exercise how positive and negative sentiment appear to be related to year. Now, you can explore that relationship with linear modeling. One more time, make a dataframe with one row per song that contains the proportion of negative words. Then, build a linear model and see whether the relationship is significant. The lyric_sentiment data frame that you created earlier is still available in your environment.
+https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/lm
+
+Filter for only negative words
+Use mutate() to define a new percent column that is n divided by total_words
+When fitting the linear model with lm(), percent will be your response and year will be your predictor.
+To see the results of your model fitting, call summary on your model fit object
+
+
+negative_by_year <- lyric_sentiment %>%
+    # Filter for negative words
+    filter(sentiment == "negative") %>%
+    count(song, year, total_words) %>%
+    ungroup() %>%
+    # Define a new column: percent
+    mutate(percent = n/total_words)
+
+# Specify the model with percent as the response and year as the predictor
+model_negative <- lm(percent ~ year, data = negative_by_year)
+
+# Use summary to see the results of the model fitting
+summary(model_negative)
+
+Great job fitting this model! Notice how high the p-values are; negative sentiment does not change significantly with year.
+
+
+
+
+
+> model_negative
+Call:
+lm(formula = percent ~ year, data = negative_by_year)
+
+Coefficients:
+(Intercept)         year  
+  3.809e-02   -3.720e-06
+  
+
+
+> summary(model_negative)
+
+Call:
+lm(formula = percent ~ year, data = negative_by_year)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.030288 -0.017205 -0.005778  0.010505  0.294194 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept)  3.809e-02  5.022e-02   0.758    0.448
+year        -3.720e-06  2.523e-05  -0.147    0.883
+
+Residual standard error: 0.02513 on 4624 degrees of freedom
+Multiple R-squared:  4.702e-06,	Adjusted R-squared:  -0.0002116 
+F-statistic: 0.02174 on 1 and 4624 DF,  p-value: 0.8828
