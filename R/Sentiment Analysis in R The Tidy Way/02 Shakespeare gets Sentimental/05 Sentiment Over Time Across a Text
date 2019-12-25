@@ -1,0 +1,186 @@
+Sentiment changes through a play
+In the last set of exercises in this chapter, you will examine how sentiment changes through the narrative arcs of these Shakespearean plays. We will start by first implementing sentiment analysis using inner_join(), and then use count() with four arguments:
+title,
+type,
+an index that will section together lines of the play, and
+sentiment.
+
+After these lines of code, you will have the number of positive and negative words used in each index-ed section of the play. These sections will be 70 lines long in your analysis here. You want a chunk of text that is not too small (because then the sentiment changes will be very noisy) and not too big (because then you will not be able to see plot structure). In an analysis of this type you may need to experiment with what size chunks to make; sections of 70 lines works well for these plays.
+
+
+Implement sentiment analysis using the "bing" lexicon.
+Use count() to find the number of words for each sentiment used in each play in sections, using four arguments.
+The first argument for count() maps to the plays themselves.
+The second argument keeps track of whether the play is a comedy or tragedy.
+The third argument is defined by you; call it index and set it equal to linenumber %/% 70. This index makes chunks of text that are 70 lines long using integer division (%/%).
+The fourth argument maps to the different sentiment categories.
+
+> tidy_shakespeare
+# A tibble: 141,078 x 4
+   title                           type    linenumber word       
+   <chr>                           <chr>        <int> <chr>      
+ 1 The Tragedy of Romeo and Juliet Tragedy          1 the        
+ 2 The Tragedy of Romeo and Juliet Tragedy          1 complete   
+ 3 The Tragedy of Romeo and Juliet Tragedy          1 works      
+ 4 The Tragedy of Romeo and Juliet Tragedy          1 of         
+ 5 The Tragedy of Romeo and Juliet Tragedy          1 william    
+ 6 The Tragedy of Romeo and Juliet Tragedy          1 shakespeare
+ 7 The Tragedy of Romeo and Juliet Tragedy          3 the        
+ 8 The Tragedy of Romeo and Juliet Tragedy          3 tragedy    
+ 9 The Tragedy of Romeo and Juliet Tragedy          3 of         
+10 The Tragedy of Romeo and Juliet Tragedy          3 romeo      
+# ... with 141,068 more rows
+
+
+tidy_shakespeare %>%
+  # Implement sentiment analysis using "bing" lexicon
+  inner_join(get_sentiments("bing"), by="word") %>%
+  # create index col
+  # mutate(index = linenumber %/% 70) %>%
+  # Count using four arguments
+  count(title, 
+        type, 
+        index = linenumber %/% 70, 
+        sentiment)
+
+# A tibble: 744 x 5
+   title                     type   index sentiment     n
+   <chr>                     <chr>  <dbl> <chr>     <int>
+ 1 A Midsummer Night's Dream Comedy     0 negative      4
+ 2 A Midsummer Night's Dream Comedy     0 positive     11
+ 3 A Midsummer Night's Dream Comedy     1 negative      7
+ 4 A Midsummer Night's Dream Comedy     1 positive     19
+ 5 A Midsummer Night's Dream Comedy     2 negative     20
+ 6 A Midsummer Night's Dream Comedy     2 positive     23
+ 7 A Midsummer Night's Dream Comedy     3 negative     12
+ 8 A Midsummer Night's Dream Comedy     3 positive     18
+ 9 A Midsummer Night's Dream Comedy     4 negative      9
+10 A Midsummer Night's Dream Comedy     4 positive     27
+# ... with 734 more rows
+
+This is the first step in looking at narrative arcs.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Calculating net sentiment
+Now you will build on the code from the previous exercise and continue to move forward to see how sentiment changes through these Shakespearean plays. The next steps involve spread() from the tidyr package. After these lines of code, you will have the net sentiment in each index-ed section of the play; net sentiment is the negative sentiment subtracted from the positive sentiment.
+
+Load the tidyr package.
+Use spread() to spread sentiment and n across multiple columns.
+Take a look at the output of the process after the spread() line in the console.
+Make a new column using mutate() that has the net sentiment found by subtracting negative sentiment from positive.
+
+> tidy_shakespeare %>%
+    inner_join(get_sentiments("bing")) %>%
+    count(title, type, index = linenumber %/% 70, sentiment) %>%
+    # Spread sentiment and n across multiple columns
+    spread(sentiment, n, fill = 0)
+Joining, by = "word"
+# A tibble: 373 x 5
+   title                     type   index negative positive
+   <chr>                     <chr>  <dbl>    <dbl>    <dbl>
+ 1 A Midsummer Night's Dream Comedy     0        4       11
+ 2 A Midsummer Night's Dream Comedy     1        7       19
+ 3 A Midsummer Night's Dream Comedy     2       20       23
+ 4 A Midsummer Night's Dream Comedy     3       12       18
+ 5 A Midsummer Night's Dream Comedy     4        9       27
+ 6 A Midsummer Night's Dream Comedy     5       11       21
+ 7 A Midsummer Night's Dream Comedy     6       12       16
+ 8 A Midsummer Night's Dream Comedy     7        9        6
+ 9 A Midsummer Night's Dream Comedy     8        6       12
+10 A Midsummer Night's Dream Comedy     9       19       12
+# ... with 363 more rows
+
+
+
+
+
+
+# Load the tidyr package
+library(tidyr)
+
+tidy_shakespeare %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(title, type, index = linenumber %/% 70, sentiment) %>%
+  # Spread sentiment and n across multiple columns
+  spread(sentiment, n, fill = 0) %>%
+  # Use mutate to find net sentiment
+  mutate(sentiment = positive - negative)  
+  
+
+# A tibble: 373 x 6
+   title                     type   index negative positive sentiment
+   <chr>                     <chr>  <dbl>    <dbl>    <dbl>     <dbl>
+ 1 A Midsummer Night's Dream Comedy     0        4       11         7
+ 2 A Midsummer Night's Dream Comedy     1        7       19        12
+ 3 A Midsummer Night's Dream Comedy     2       20       23         3
+ 4 A Midsummer Night's Dream Comedy     3       12       18         6
+ 5 A Midsummer Night's Dream Comedy     4        9       27        18
+ 6 A Midsummer Night's Dream Comedy     5       11       21        10
+ 7 A Midsummer Night's Dream Comedy     6       12       16         4
+ 8 A Midsummer Night's Dream Comedy     7        9        6        -3
+ 9 A Midsummer Night's Dream Comedy     8        6       12         6
+10 A Midsummer Night's Dream Comedy     9       19       12        -7
+# ... with 363 more rows
+
+You are closer to plotting the sentiment through these plays.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Visualizing narrative arcs
+Now, in this final exercise exploring Shakespearean plays, you will continue to build on your manipulations of this text dataset and visualize the results of this sentiment analysis. How does sentiment change through the narrative arcs of these six plays by Shakespeare?
+
+Load the ggplot2 package.
+Put index on the x-axis, sentiment on the y-axis, and use type for fill.
+Use geom_col() to make a bar chart. (If you are familiar with geom_bar(stat = "identity"), geom_col() does the same thing.)
+Call facet_wrap() to make a separate panel for each title; be sure to add scales = "free_x" so the x-axes behave nicely.
+
+
+library(tidyr)
+
+# Load the ggplot2 package
+library(ggplot2)
+
+
+tidy_shakespeare %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(title, type, index = linenumber %/% 70, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative) %>%
+  # Put index on x-axis, sentiment on y-axis, and map comedy/tragedy to fill
+  ggplot(aes(x=index, y=sentiment, fill=type)) +
+  # Make a bar chart with geom_col()
+  geom_col() +
+  # Separate panels for each title with facet_wrap()
+  facet_wrap(~title, scales = "free_x")
+
+Awesome! These plots show how sentiment changes through these plays. Notice how the comedies have happier endings and more positive sentiment than the tragedies.
+
