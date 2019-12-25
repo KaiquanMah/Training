@@ -1,0 +1,100 @@
+Visualizing sentiment over time
+You have compared how TV stations use positive and negative words; now it is time to see how sentiment is changing over time. Are TV news stations using more negative words as time passes? More positive words? You will use a function called floor_date() from the lubridate package to count uses of positive and negative words over time.
+The tidy_tv dataframe you created near the beginning of this chapter is available in your environment.
+
+Load the lubridate package.
+Define the new column with a mutate() statement using the floor_date() function, rounding each date down to the nearest 6-month unit.
+Group by the new date column (each 6 months).
+Implement sentiment analysis using the correct kind of join and the "nrc" sentiment lexicon.
+
+Now you have a dataframe with the number of words per sentiment per 6 months, as well as the total words used in each 6 months!
+Filter for both positive and negative words so you can plot both.
+Count with three arguments: date, sentiment, and the total number of words.
+Set up your plot with aes() and put date on the x-axis, percent on the y-axis, and have color correspond to sentiment.
+https://www.rdocumentation.org/packages/lubridate/topics/round_date
+
+> tidy_tv
+# A tibble: 41,127 x 4
+   station show            show_date           word      
+   <chr>   <chr>           <dttm>              <chr>     
+ 1 MSNBC   Morning Meeting 2009-09-22 13:00:00 the       
+ 2 MSNBC   Morning Meeting 2009-09-22 13:00:00 interior  
+ 3 MSNBC   Morning Meeting 2009-09-22 13:00:00 positively
+ 4 MSNBC   Morning Meeting 2009-09-22 13:00:00 oozes     
+ 5 MSNBC   Morning Meeting 2009-09-22 13:00:00 class     
+ 6 MSNBC   Morning Meeting 2009-09-22 13:00:00 raves     
+ 7 MSNBC   Morning Meeting 2009-09-22 13:00:00 car       
+ 8 MSNBC   Morning Meeting 2009-09-22 13:00:00 magazine  
+ 9 MSNBC   Morning Meeting 2009-09-22 13:00:00 slick     
+10 MSNBC   Morning Meeting 2009-09-22 13:00:00 and       
+# ... with 41,117 more rows
+
+
+> get_sentiments("nrc")
+# A tibble: 13,901 x 2
+   word        sentiment
+   <chr>       <chr>    
+ 1 abacus      trust    
+ 2 abandon     fear     
+ 3 abandon     negative 
+ 4 abandon     sadness  
+ 5 abandoned   anger    
+ 6 abandoned   fear     
+ 7 abandoned   negative 
+ 8 abandoned   sadness  
+ 9 abandonment anger    
+10 abandonment fear     
+# ... with 13,891 more rows
+
+
+
+# Load the lubridate package
+library(lubridate)
+
+sentiment_by_time <- tidy_tv %>%
+    # Define a new column using floor_date()
+    mutate(date = floor_date(show_date, unit = "6 months")) %>%
+    # Group by date
+    group_by(date) %>%
+    mutate(total_words = n()) %>%
+    ungroup() %>%
+    # Implement sentiment analysis using the NRC lexicon
+    inner_join(get_sentiments("nrc"), by="word")
+
+
+> sentiment_by_time
+# A tibble: 10,175 x 7
+   station show  show_date           word  date                total_words
+   <chr>   <chr> <dttm>              <chr> <dttm>                    <int>
+ 1 MSNBC   Morn~ 2009-09-22 13:00:00 inte~ 2009-07-01 00:00:00         493
+ 2 MSNBC   Morn~ 2009-09-22 13:00:00 inte~ 2009-07-01 00:00:00         493
+ 3 MSNBC   Morn~ 2009-09-22 13:00:00 inte~ 2009-07-01 00:00:00         493
+ 4 MSNBC   Morn~ 2009-09-22 13:00:00 sens~ 2009-07-01 00:00:00         493
+ 5 MSNBC   Morn~ 2009-09-22 13:00:00 sens~ 2009-07-01 00:00:00         493
+ 6 MSNBC   Morn~ 2009-09-22 13:00:00 stri~ 2009-07-01 00:00:00         493
+ 7 MSNBC   Morn~ 2009-09-22 13:00:00 join  2009-07-01 00:00:00         493
+ 8 MSNBC   Morn~ 2009-09-22 13:00:00 pres~ 2009-07-01 00:00:00         493
+ 9 MSNBC   Morn~ 2009-09-22 13:00:00 pres~ 2009-07-01 00:00:00         493
+10 MSNBC   Morn~ 2009-09-22 13:00:00 chan~ 2009-07-01 00:00:00         493
+# ... with 10,165 more rows, and 1 more variable: sentiment <chr>
+
+
+
+
+
+sentiment_by_time %>%
+    # Filter for positive and negative words
+    filter(sentiment %in% c("positive", "negative")) %>%
+    # Count by date, sentiment, and total_words
+    count(date, sentiment, total_words) %>%
+    ungroup() %>%
+    mutate(percent = n / total_words) %>%
+    # Set up the plot with aes()
+    ggplot(aes(x=date, y=percent, fill=sentiment)) +
+    geom_line(size = 1.5) +
+    geom_smooth(method = "lm", se = FALSE, lty = 2) +
+    expand_limits(y = 0)
+    
+    
+
+The proportion of positive words looks flat, and the proportion of negative words may be increasing.
