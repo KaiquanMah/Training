@@ -1,0 +1,156 @@
+What are the most common sadness words?
+After you have implemented sentiment analysis using inner_join(), you can use dplyr functions such as group_by() and summarize() to understand your results. For example, what are the most common words related to sadness in this Twitter dataset?
+
+
+Take a look at the tweets_nrc object, the output of an inner join just like the one you did in the last exercise. Then manipulate it to find the most common words that are related to sadness.
+Filter only the rows that have words associated with sadness.
+Group by word to find the average across the United States.
+Use the summarize() and arrange() verbs find the average frequency for each word, and then sort.
+Be aware that this is real data from Twitter and there is some use of profanity; the sentiment lexicons include profane and curse words.
+
+> tweets_nrc
+# A tibble: 210,027 x 4
+   state   word        freq sentiment
+   <chr>   <chr>      <dbl> <chr>    
+ 1 alabama abandoned  4071. anger    
+ 2 alabama abandoned  4071. fear     
+ 3 alabama abandoned  4071. negative 
+ 4 alabama abandoned  4071. sadness  
+ 5 alabama ability   12406. positive 
+ 6 alabama abortion   3267. disgust  
+ 7 alabama abortion   3267. fear     
+ 8 alabama abortion   3267. negative 
+ 9 alabama abortion   3267. sadness  
+10 alabama absolute  22956. positive 
+# ... with 210,017 more rows
+
+
+> tweets_nrc %>%
+    # Filter to only choose the words associated with sadness
+    filter(sentiment == "sadness") %>%
+    # Group by word
+    group_by(word) %>%
+    # Use the summarize verb to find the mean frequency
+    summarise(freq = mean(freq))
+
+# A tibble: 585 x 2
+   word          freq
+   <chr>        <dbl>
+ 1 abandon      4258.
+ 2 abandoned    6016.
+ 3 abandonment  6895.
+ 4 abortion     4791.
+ 5 absence      4190.
+ 6 absent       4003.
+ 7 abuse       10306.
+ 8 abysmal      3258.
+ 9 abyss        3294.
+10 accident    34755.
+# ... with 575 more rows
+
+
+
+
+
+
+# tweets_nrc has been pre-defined
+tweets_nrc
+
+tweets_nrc %>%
+  # Filter to only choose the words associated with sadness
+  filter(sentiment == "sadness") %>%
+  # Group by word
+  group_by(word) %>%
+  # Use the summarize verb to find the mean frequency
+  summarise(freq = mean(freq)) %>%
+  # Arrange to sort in order of descending frequency
+  arrange(desc(freq))
+
+# A tibble: 585 x 2
+   word        freq
+   <chr>      <dbl>
+ 1 hate    1253840.
+ 2 bad      984943.
+ 3 bitch    787774.
+ 4 hell     486259.
+ 5 crazy    447047.
+ 6 feeling  407562.
+ 7 leave    397806.
+ 8 mad      393559.
+ 9 music    373608.
+10 sick     362023.
+# ... with 575 more rows  
+  
+
+No need to be sad anymore! Next you will look at words associated with joy.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+What are the most common joy words?
+You can use the same approach from the last exercise to find the most common words associated with joy in these tweets. Use the same pattern of dplyr verbs to find a new result.
+
+
+First, filter to find only words associated with "joy".
+Next, group by word.
+Summarize for each word to find the average frequency freq across the whole United States.
+Arrange in descending order of frequency.
+Now you can make a visualization using ggplot2 to see these results.
+
+Put words on the x-axis and frequency on the y-axis.
+Use geom_col() to make a bar chart. (If you are familiar with geom_bar(stat = "identity"), geom_col() does the same thing.)
+
+
+
+# tweets_nrc has been pre-defined
+tweets_nrc
+
+joy_words <- tweets_nrc %>%
+  # Filter to choose only words associated with joy
+  filter(sentiment == "joy") %>%
+  # Group by each word
+  group_by(word) %>%
+  # Use the summarize verb to find the mean frequency
+  summarise(freq = mean(freq)) %>%
+  # Arrange to sort in order of descending frequency
+  arrange(desc(freq))    
+
+> joy_words
+# A tibble: 463 x 2
+   word         freq
+   <chr>       <dbl>
+ 1 love     3878683.
+ 2 good     2826808.
+ 3 happy    1477718.
+ 4 birthday  841002.
+ 5 god       782323.
+ 6 baby      746107.
+ 7 pretty    715284.
+ 8 hope      699189.
+ 9 fun       517207.
+10 friend    508583.
+# ... with 453 more rows
+
+
+joy_words %>%
+  top_n(20) %>%
+  mutate(word = reorder(word, freq)) %>%
+  # Use aes() to put words on the x-axis and frequency on the y-axis
+  ggplot(aes(x=word, y=freq)) +
+  # Make a bar chart with geom_col()
+  geom_col() +
+  coord_flip()
+
+
+
