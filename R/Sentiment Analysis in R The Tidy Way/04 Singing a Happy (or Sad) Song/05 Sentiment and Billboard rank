@@ -1,0 +1,72 @@
+Sentiment and Billboard rank
+The lyric_sentiment data frame that you created earlier by using inner_join() is available in your environment. You can now explore how the sentiment score of a song is related to other aspects of that song. First, start with Billboard rank, how high on the annual Billboard chart the song reached. Do songs that use more positive or negative words achieve higher or lower ranks? Start with positive words, and make a visualization to see how these characteristics are related.
+
+
+Count with three arguments: song, Billboard rank, and the total number of words that you calculated before
+Use the correct dplyr function to make two new columns, percent and a rounded version of rank
+Call the correct ggplot2 geom_* to make a boxplot
+
+> lyric_sentiment
+# A tibble: 399,347 x 7
+    rank song        artist                     year word  total_words sentiment
+   <int> <chr>       <chr>                     <int> <chr>       <int> <chr>    
+ 1     1 wooly bully sam the sham and the pha~  1965 sham          125 anger    
+ 2     1 wooly bully sam the sham and the pha~  1965 sham          125 disgust  
+ 3     1 wooly bully sam the sham and the pha~  1965 sham          125 negative 
+ 4     1 wooly bully sam the sham and the pha~  1965 bully         125 anger    
+ 5     1 wooly bully sam the sham and the pha~  1965 bully         125 fear     
+ 6     1 wooly bully sam the sham and the pha~  1965 bully         125 negative 
+ 7     1 wooly bully sam the sham and the pha~  1965 bully         125 anger    
+ 8     1 wooly bully sam the sham and the pha~  1965 bully         125 fear     
+ 9     1 wooly bully sam the sham and the pha~  1965 bully         125 negative 
+10     1 wooly bully sam the sham and the pha~  1965 sham          125 anger    
+# ... with 399,337 more rows
+
+lyric_sentiment %>%
+    filter(sentiment == "positive") %>%
+    # Count by song, Billboard rank, and the total number of words
+    count(song, rank, total_words) %>%
+    ungroup() %>%
+    # Use the correct dplyr verb to make two new columns
+    mutate(percent = n / total_words,
+           rank = 10 * floor(rank / 10)) %>%
+    ggplot(aes(as.factor(rank), percent)) +
+    # Make a boxplot
+    geom_boxplot()
+
+Notice that there is not a visible trend relating Billboard rank and positive sentiment.
+
+
+
+
+
+
+
+
+
+
+
+
+
+> lyric_sentiment %>%
+      filter(sentiment == "positive") %>%
+      # Count by song, Billboard rank, and the total number of words
+      count(song, rank, total_words) %>%
+      ungroup() %>%
+      # Use the correct dplyr verb to make two new columns
+      mutate(percent = n / total_words,
+             rank = 10 * floor(rank / 10))
+# A tibble: 4,777 x 5
+   song                    rank total_words     n percent
+   <chr>                  <dbl>       <int> <int>   <dbl>
+ 1 0 to 100  the catch up    90         894    34  0.0380
+ 2 1 2 3 4 sumpin new        40         670    18  0.0269
+ 3 1 2 3 red light           40         145     9  0.0621
+ 4 1 2 step                   0         437    20  0.0458
+ 5 100 pure love             40         590    11  0.0186
+ 6 100 pure love             80         590    11  0.0186
+ 7 100 years                 70         257     4  0.0156
+ 8 123                       60         220    15  0.0682
+ 9 18 and life               60         285     9  0.0316
+10 19 somethin               80         281     6  0.0214
+# ... with 4,767 more rows
