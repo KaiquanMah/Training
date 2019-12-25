@@ -1,0 +1,66 @@
+Tidying song lyrics
+Let's take a look at the dataset you will use in this final chapter to practice your sentiment analysis skills. The song_lyrics dataset contains five columns:
+rank, the rank a song achieved on the Billboard Year-End Hot 100,
+song, the song's title,
+artist, the artist who recorded the song,
+year, the year the song reached the given rank on the Billboard chart, and
+lyrics, the lyrics of the song.
+
+This dataset contains over 5000 songs, from 1965 to the present. The lyrics are all in one column, so they are not yet in a tidy format, ready for analysis using tidy tools. It's your turn to tidy this text data!
+https://www.kaylinpavlik.com/about/
+
+
+Load the tidytext package.
+Pipe the song_lyrics object to the next line.
+Use unnest_tokens() to unnest the lyrics column into a new word column.
+https://www.rdocumentation.org/packages/tidytext/versions/0.2.2/topics/unnest_tokens
+
+# Load the tidytext package
+library(tidytext)
+
+
+> song_lyrics
+# A tibble: 4,831 x 5
+    rank song               artist          year lyrics                         
+   <int> <chr>              <chr>          <int> <chr>                          
+ 1     1 wooly bully        sam the sham ~  1965 sam the sham miscellaneous woo~
+ 2     2 i cant help mysel~ four tops       1965 sugar pie honey bunch you know~
+ 3     4 you were on my mi~ we five         1965 when i woke up this morning yo~
+ 4     5 youve lost that l~ the righteous~  1965 you never close your eyes anym~
+ 5     6 downtown           petula clark    1965 when youre alone and life is m~
+ 6     7 help               the beatles     1965 help i need somebody help not ~
+ 7     8 cant you hear my ~ hermans hermi~  1965 carterlewis every time i see y~
+ 8     9 crying in the cha~ elvis presley   1965 you saw me crying in the chape~
+ 9    10 my girl            the temptatio~  1965 ive got sunshine on a cloudy d~
+10    11 help me rhonda     the beach boys  1965 well since she put me down i v~
+# ... with 4,821 more rows
+
+
+
+
+# Pipe song_lyrics to the next line
+tidy_lyrics <- song_lyrics %>% 
+  # Transform the original/input lyrics column to an output word column
+  unnest_tokens(word, lyrics)
+
+# Print tidy_lyrics
+tidy_lyrics
+> tidy_lyrics
+# A tibble: 1,602,879 x 5
+    rank song        artist                         year word         
+   <int> <chr>       <chr>                         <int> <chr>        
+ 1     1 wooly bully sam the sham and the pharaohs  1965 sam          
+ 2     1 wooly bully sam the sham and the pharaohs  1965 the          
+ 3     1 wooly bully sam the sham and the pharaohs  1965 sham         
+ 4     1 wooly bully sam the sham and the pharaohs  1965 miscellaneous
+ 5     1 wooly bully sam the sham and the pharaohs  1965 wooly        
+ 6     1 wooly bully sam the sham and the pharaohs  1965 bully        
+ 7     1 wooly bully sam the sham and the pharaohs  1965 wooly        
+ 8     1 wooly bully sam the sham and the pharaohs  1965 bully        
+ 9     1 wooly bully sam the sham and the pharaohs  1965 sam          
+10     1 wooly bully sam the sham and the pharaohs  1965 the          
+# ... with 1,602,869 more rows
+
+
+The unnest_tokens() function tokenizes the input column into words by default.
+
