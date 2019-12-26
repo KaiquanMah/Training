@@ -1,0 +1,87 @@
+Filtering based on a factor
+Categorical data are often stored as factors in R. In this exercise, we'll practice working with a factor variable, number, from the email50 dataset. This variable tells us what type of number (none, small, or big) an email contains.
+Recall from the video that the filter() function from dplyr can be used to filter a dataset to create a subset containing only certain levels of a variable. For example, the following code filters the mtcars dataset for cars containing 6 cylinders:
+
+mtcars %>%
+  filter(cyl == 6)
+
+Create a new dataset called email50_big that is a subset of the original email50 dataset containing only emails with "big" numbers. This information is stored in the number variable.
+Report the dimensions of email50_big using the glimpse() function again. How many emails contain big numbers?
+
+# Subset of emails with big numbers: email50_big
+email50_big <- email50 %>%
+  filter(number == "big")
+
+# Glimpse the subset
+glimpse(email50_big)
+
+
+Observations: 7
+Variables: 21
+$ spam         <dbl> 0, 0, 1, 0, 0, 0, 0
+$ to_multiple  <dbl> 0, 0, 0, 0, 0, 0, 0
+$ from         <dbl> 1, 1, 1, 1, 1, 1, 1
+$ cc           <int> 0, 0, 0, 0, 0, 0, 0
+$ sent_email   <dbl> 0, 0, 0, 0, 0, 1, 0
+$ time         <dttm> 2012-02-16 20:10:06, 2012-02-04 23:26:09, 2012-01-24 ...
+$ image        <dbl> 0, 0, 0, 0, 0, 0, 0
+$ attach       <dbl> 0, 0, 0, 0, 0, 0, 0
+$ dollar       <dbl> 0, 0, 3, 2, 0, 0, 0
+$ winner       <fct> no, no, yes, no, no, no, no
+$ inherit      <dbl> 0, 0, 0, 0, 0, 0, 0
+$ viagra       <dbl> 0, 0, 0, 0, 0, 0, 0
+$ password     <dbl> 0, 2, 0, 0, 0, 0, 8
+$ num_char     <dbl> 7.011, 10.368, 42.793, 26.520, 6.563, 11.223, 10.613
+$ line_breaks  <int> 183, 198, 712, 692, 140, 512, 225
+$ format       <dbl> 1, 1, 1, 1, 1, 1, 1
+$ re_subj      <dbl> 0, 0, 0, 0, 0, 0, 0
+$ exclaim_subj <dbl> 0, 0, 0, 1, 0, 0, 0
+$ urgent_subj  <dbl> 0, 0, 0, 0, 0, 0, 0
+$ exclaim_mess <dbl> 1, 1, 2, 7, 2, 9, 9
+$ number       <fct> big, big, big, big, big, big, big
+
+Seven emails contain big numbers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Complete filtering based on a factor
+The droplevels() function removes unused levels of factor variables from our dataset. As we saw in the video, it's often useful to determine which levels are unused (i.e. contain zero values) with the table() function.
+In this exercise, we'll see which levels of the number variable are dropped after applying the droplevels() function.
+
+Make a table() of the number variable in the email50_big dataset. Which two levels are unused?
+Apply the droplevels() function to the number variable. Assign the result to email50_big$number_dropped.
+Remake the table() of the number_dropped variable in the email50_big dataset. How is this output different from the first?
+
+# Subset of emails with big numbers: email50_big
+email50_big <- email50 %>%
+  filter(number == "big")
+
+# Table of the number variable
+table(email50_big$number)
+ none small   big 
+    0     0     7
+    
+# Drop levels
+email50_big$number_dropped <- droplevels(email50_big$number)
+
+# Table of the number_dropped variable
+table(email50_big$number_dropped)
+big 
+  7
+
+Did you notice that dropping the levels of the number variable gets rid of the levels with counts of zero? This will be useful when you're creating visualizations later on. Great work!
+
