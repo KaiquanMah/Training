@@ -1,0 +1,81 @@
+Combining levels of a different factor
+Another common way of creating a new variable based on an existing one is by combining levels of a categorical variable. For example, the email50 dataset has a categorical variable called number with levels "none", "small", and "big", but suppose we're only interested in whether an email contains a number. In this exercise, we will create a variable containing this information and also visualize it.
+For now, do your best to understand the code we've provided to generate the plot. We will go through it in detail in the next video.
+
+Create a new column in email50 called number_yn that is "no" if there is no number in the email and "yes" otherwise. Use case_when() for this . Assign this to email50_fortified. Remember that you can type ?case_when in the console to get a refresher on how to use it!
+Run the code provided to visualize the distribution of the number_yn variable.
+
+
+
+
+case_when
+A General Vectorised If
+This function allows you to vectorise multiple if and else if statements. It is an R equivalent of the SQL CASE WHEN statement.
+
+Usage
+case_when(...)
+
+Arguments
+...
+A sequence of two-sided formulas. The left hand side (LHS) determines which values match this case. The right hand side (RHS) provides the replacement value.
+The LHS must evaluate to a logical vector. The RHS does need to be logical, but all RHSs must evaluate to the same type of vector.
+Both LHS and RHS may have the same length of either 1 or n. The value of n must be consistent across all cases. The case of n == 0 is treated as a variant of n != 1.
+These dots support tidy dots features.
+
+Value
+A vector of length 1 or n, matching the length of the logical input or output vectors, with the type (and attributes) of the first RHS. Inconsistent lengths or types will generate an error.
+
+Examples
+x <- 1:50
+case_when(
+  x %% 35 == 0 ~ "fizz buzz",
+  x %% 5 == 0 ~ "fizz",
+  x %% 7 == 0 ~ "buzz",
+  TRUE ~ as.character(x)
+)
+
+
+
+
+
+# Create number_yn column in email50
+email50_fortified <- email50 %>%
+  mutate(
+    number_yn = case_when(
+      # if number is "none", make number_yn "no"
+      number == "none" ~ "no", 
+      # if number is not "none", make number_yn "yes"
+      number != "none" ~ "yes"  
+    )
+  )
+  
+
+# Visualize the distribution of number_yn
+ggplot(email50_fortified, aes(x = number_yn)) +
+  geom_bar()
+  
+
+> email50_fortified
+# A tibble: 50 x 22
+    spam to_multiple  from    cc sent_email time                image attach
+   <dbl>       <dbl> <dbl> <int>      <dbl> <dttm>              <dbl>  <dbl>
+ 1     0           0     1     0          1 2012-01-04 13:19:16     0      0
+ 2     0           0     1     0          0 2012-02-16 20:10:06     0      0
+ 3     1           0     1     4          0 2012-01-04 15:36:23     0      2
+ 4     0           0     1     0          0 2012-01-04 17:49:52     0      0
+ 5     0           0     1     0          0 2012-01-27 09:34:45     0      0
+ 6     0           0     1     0          0 2012-01-17 17:31:57     0      0
+ 7     0           0     1     0          0 2012-03-18 04:18:55     0      0
+ 8     0           0     1     0          1 2012-03-31 13:58:56     0      0
+ 9     0           0     1     1          1 2012-01-11 01:57:54     0      0
+10     0           0     1     0          0 2012-01-07 19:29:16     0      0
+# ... with 40 more rows, and 14 more variables: dollar <dbl>, winner <fct>,
+#   inherit <dbl>, viagra <dbl>, password <dbl>, num_char <dbl>,
+#   line_breaks <int>, format <dbl>, re_subj <dbl>, exclaim_subj <dbl>,
+#   urgent_subj <dbl>, exclaim_mess <dbl>, number <fct>, number_yn <chr>
+
+
+> table(email50_fortified$number_yn)
+ no yes 
+  6  44
+
