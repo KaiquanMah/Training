@@ -1,0 +1,157 @@
+Number of males and females admitted
+The goal of this exercise is to determine the numbers of male and female applicants who got admitted and rejected. Specifically, we want to find out how many males are admitted and how many are rejected. And similarly we want to find how many females are admitted and how many are rejected.
+To do so we will use the count() function from the dplyr package.
+In one step, count() groups the data and then tallies the number of observations in each level of the grouping variable. These counts are available under a new variable called n.
+
+Pass the gender and admission status columns to count() on the ucb_admit dataset (which is already pre-loaded) to count how many of each gender are admitted and how many are rejected.
+
+# Load packages
+library(dplyr)
+
+> glimpse(ucb_admit)
+Observations: 4,526
+Variables: 3
+$ Admit  <fct> Admitted, Admitted, Admitted, Admitted, Admitted, Admitted, ...
+$ Gender <fct> Male, Male, Male, Male, Male, Male, Male, Male, Male, Male, ...
+$ Dept   <chr> "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", ...
+
+# Count number of male and female applicants admitted
+ucb_admit %>%
+  count(Gender, Admit)
+  
+# A tibble: 4 x 3
+  Gender Admit        n
+  <fct>  <fct>    <int>
+1 Male   Admitted  1198
+2 Male   Rejected  1493
+3 Female Admitted   557
+4 Female Rejected  1278
+
+Cool counting! Passing several arguments to count() gives you the number of rows for each combination of those arguments.
+
+
+
+
+
+
+
+
+
+
+Proportion of males admitted overall
+Next we'll calculate the percentage of males and percentage of females admitted, by creating a new variable, called prop (short for proportion) based off of the counts calculated in the previous exercise and using the mutate() from the dplyr package.
+Proportions for each row of the data frame we created in the previous exercise can be calculated as n / sum(n). Note that since the data are grouped by gender, sum(n) will be calculated for males and females separately.
+
+The table of counts of gender and admission status you developed earlier is available as ucb_admission_counts.
+Group the data by gender.
+Create the new variable described above, prop, the proportion of males and females admitted.
+Filter the data for those who are admitted so that the resulting data frame only contains proportions of males and females who are admitted.
+Which gender has a higher admission rate, male or female?
+
+ucb_admission_counts %>%
+  # Group by gender
+  group_by(Gender) %>%
+  # Create new variable
+  mutate(prop = n / sum(n)) %>%
+  # Filter for admitted
+  filter(Admit == "Admitted")
+
+
+
+# A tibble: 2 x 4
+# Groups:   Gender [2]
+  Gender Admit        n  prop
+  <fct>  <fct>    <int> <dbl>
+1 Male   Admitted  1198 0.445
+2 Female Admitted   557 0.304
+
+Fantastic! It looks like 44% of males were admitted versus only 30% of females, but as you'll see in the next exercise, there's more to the story.
+
+
+
+
+
+
+
+
+
+
+
+
+Proportion of males admitted for each department
+Finally we'll make a table similar to the one we constructed earlier, except we'll first group the data by department. The goal is to compare the proportions of male admitted students across departments.
+Proportions for each row of the data frame we create can be calculated as n / sum(n). Note that since the data are grouped by department and gender, sum(n) will be calculated for males and females separately for each department.
+
+ucb_admit has been pre-loaded for you.
+Assign ucb_admission_counts as the count() of ucb_admit by department, gender, and admission status.
+
+ucb_admission_counts <- ucb_admit %>%
+  # Counts by department, then gender, then admission status
+  count(Dept, Gender, Admit)
+
+# See the result
+ucb_admission_counts
+
+# A tibble: 24 x 4
+   Dept  Gender Admit        n
+   <chr> <fct>  <fct>    <int>
+ 1 A     Male   Admitted   512
+ 2 A     Male   Rejected   313
+ 3 A     Female Admitted    89
+ 4 A     Female Rejected    19
+ 5 B     Male   Admitted   353
+ 6 B     Male   Rejected   207
+ 7 B     Female Admitted    17
+ 8 B     Female Rejected     8
+ 9 C     Male   Admitted   120
+10 C     Male   Rejected   205
+# ... with 14 more rows
+
+
+
+
+
+
+Group ucb_admission_counts by department then gender.
+Add a new column, prop, which is the ratio of those admitted or rejected by department and gender.
+Filter the rows for males and for those who are admitted.
+
+ucb_admission_counts  %>%
+  # Group by department, then gender
+  group_by(Dept, Gender) %>%
+  # Create new variable
+  mutate(prop = n/sum(n)) %>%
+  # Filter for male and admitted
+  filter(Gender == "Male", Admit == "Admitted")
+
+# A tibble: 6 x 5
+# Groups:   Dept, Gender [6]
+  Dept  Gender Admit        n   prop
+  <chr> <fct>  <fct>    <int>  <dbl>
+1 A     Male   Admitted   512 0.621 
+2 B     Male   Admitted   353 0.630 
+3 C     Male   Admitted   120 0.369 
+4 D     Male   Admitted   138 0.331 
+5 E     Male   Admitted    53 0.277 
+6 F     Male   Admitted    22 0.0590
+
+The proportion of males admitted varies wildly between departments.
+
+
+
+
+
+
+
+
+
+
+
+
+Admission rates for males across departments
+The final result from the previous exercise is available in your workspace as perc_admit_by_dept. Which of the following best describes the relationship between admission status and gender?
+
+#yes Within most departments, female applicants are more likely to be admitted.
+
+#not Within most departments, male applicants are more likely to be admitted.
+#not Within most departments, male and female applicants are equally likely to be admitted.
