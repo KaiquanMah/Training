@@ -1,0 +1,148 @@
+Simple random sample in R
+Suppose we want to collect some data from a sample of eight states. A list of all states and the region they belong to (Northeast, Midwest, South, West) are given in the us_regions data frame.
+
+The dplyr package and us_regions data frame have been loaded.
+Use simple random sampling to select eight states from us_regions. Save this sample in a data frame called states_srs.
+Count the number of states from each region in your sample.
+
+> us_regions
+                  state    region
+1           Connecticut Northeast
+2                 Maine Northeast
+3         Massachusetts Northeast
+4         New Hampshire Northeast
+5          Rhode Island Northeast
+6               Vermont Northeast
+7            New Jersey Northeast
+8              New York Northeast
+9          Pennsylvania Northeast
+10             Illinois   Midwest
+11              Indiana   Midwest
+12             Michigan   Midwest
+13                 Ohio   Midwest
+14            Wisconsin   Midwest
+15                 Iowa   Midwest
+16               Kansas   Midwest
+17            Minnesota   Midwest
+18             Missouri   Midwest
+19             Nebraska   Midwest
+20         North Dakota   Midwest
+21         South Dakota   Midwest
+22             Delaware     South
+23              Florida     South
+24              Georgia     South
+25             Maryland     South
+26       North Carolina     South
+27       South Carolina     South
+28             Virginia     South
+29 District of Columbia     South
+30        West Virginia     South
+31              Alabama     South
+32             Kentucky     South
+33          Mississippi     South
+34            Tennessee     South
+35             Arkansas     South
+36            Louisiana     South
+37             Oklahoma     South
+38                Texas     South
+39              Arizona      West
+40             Colorado      West
+41                Idaho      West
+42              Montana      West
+43               Nevada      West
+44           New Mexico      West
+45                 Utah      West
+46              Wyoming      West
+47               Alaska      West
+48           California      West
+49               Hawaii      West
+50               Oregon      West
+51           Washington      West
+
+
+# Simple random sample: states_srs
+states_srs <- us_regions %>%
+  sample_n(size=8)
+
+# Count states by region
+states_srs %>%
+  count(region)
+# A tibble: 3 x 2
+  region        n
+  <fct>     <int>
+1 Midwest       1
+2 Northeast     3
+3 South         4  
+
+
+
+
+
+#if we do not include 'region' within the count() function
+> states_srs %>%
+    count()
+# A tibble: 1 x 1
+      n
+  <int>
+1     8
+
+
+Notice that this strategy may select an unequal number of states from each region. In the next exercise, you'll implement stratified sampling to be sure to select an equal number of states from each region.
+
+
+
+
+
+
+
+
+
+
+
+Stratified sample in R
+In the previous exercise, we took a simple random sample of eight states. However, we did not have any control over how many states from each region got sampled. The goal of stratified sampling in this context is to have control over the number of states sampled from each region. Our goal for this exercise is to sample an equal number of states from each region.
+
+The dplyr package has been loaded and us_regions is still available in your workspace.
+Use stratified sampling to select a total of 8 states, where each stratum is a region. Save this sample in a data frame called states_str. Remember that there are 4 regions, each to be sampled equally!
+Count the number of states from each region in your sample to confirm that each region is represented equally in your sample.
+
+# Stratified sample
+states_str <- us_regions %>%
+  group_by(region) %>%
+  sample_n(size=2)
+
+# Count states by region
+states_str %>%
+  count()
+
+# A tibble: 4 x 2
+# Groups:   region [4]
+  region        n
+  <fct>     <int>
+1 Midwest       2
+2 Northeast     2
+3 South         2
+4 West          2
+
+In this stratified sample, each stratum (i.e. Region) is represented equally.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Compare SRS vs. stratified sample
+Which method you implemented, simple random sampling or stratified sampling, ensured an equal number of states from each region?
+
+#not Simple random sampling
+#yes Stratified sampling
+
+Simple random sampling would result in diferent amounts of data being sampled from each state.
+
