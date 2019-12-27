@@ -1,0 +1,67 @@
+Understanding correlation scale
+In a scientific paper, three correlations are reported with the following values:
+-0.395
+1.827
+0.738
+
+Choose the correct interpretation of these findings.
+(2) is invalid.
+Right! Correlation coefficients cannot be greater than 1.
+
+
+
+
+
+
+Understanding correlation sign
+In a scientific paper, three correlations are reported with the following values:
+0.582
+0.134
+-0.795
+
+Which of these values represents the strongest correlation?
+-0.795
+
+
+
+
+
+
+
+Computing correlation
+The cor(x, y) function will compute the Pearson product-moment correlation between variables, x and y. Since this quantity is symmetric with respect to x and y, it doesn't matter in which order you put the variables.
+At the same time, the cor() function is very conservative when it encounters missing data (e.g. NAs). The use argument allows you to override the default behavior of returning NA whenever any of the values encountered is NA. Setting the use argument to "pairwise.complete.obs" allows cor() to compute the correlation coefficient for those observations where the values of x and y are both not missing.
+
+Use cor() to compute the correlation between the birthweight of babies in the ncbirths dataset and their mother's age. There is no missing data in either variable.
+Compute the correlation between the birthweight and the number of weeks of gestation for all non-missing pairs.
+
+> glimpse(ncbirths)
+Observations: 1,000
+Variables: 13
+$ fage           <int> NA, NA, 19, 21, NA, NA, 18, 17, NA, 20, 30, NA, NA, ...
+$ mage           <int> 13, 14, 15, 15, 15, 15, 15, 15, 16, 16, 16, 16, 16, ...
+$ mature         <fct> younger mom, younger mom, younger mom, younger mom, ...
+$ weeks          <int> 39, 42, 37, 41, 39, 38, 37, 35, 38, 37, 45, 42, 40, ...
+$ premie         <fct> full term, full term, full term, full term, full ter...
+$ visits         <int> 10, 15, 11, 6, 9, 19, 12, 5, 9, 13, 9, 8, 4, 12, 15,...
+$ marital        <fct> married, married, married, married, married, married...
+$ gained         <int> 38, 20, 38, 34, 27, 22, 76, 15, NA, 52, 28, 34, 12, ...
+$ weight         <dbl> 7.63, 7.88, 6.63, 8.00, 6.38, 5.38, 8.44, 4.69, 8.81...
+$ lowbirthweight <fct> not low, not low, not low, not low, not low, low, no...
+$ gender         <fct> male, male, female, male, female, male, male, male, ...
+$ habit          <fct> nonsmoker, nonsmoker, nonsmoker, nonsmoker, nonsmoke...
+$ whitemom       <fct> not white, not white, white, white, not white, not w...
+
+# Compute correlation
+ncbirths %>%
+  summarize(N = n(), r = cor(weight, mage))
+     N          r
+1 1000 0.05506589
+
+
+# Compute correlation for all non-missing pairs
+ncbirths %>%
+  summarize(N = n(), r = cor(weight, mage, use = "pairwise.complete.obs"))
+     N          r
+1 1000 0.05506589  
+
