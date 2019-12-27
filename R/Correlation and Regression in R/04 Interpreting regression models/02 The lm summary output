@@ -1,0 +1,120 @@
+The lm summary output
+An "lm" object contains a host of information about the regression model that you fit. There are various ways of extracting different pieces of information.
+The coef() function displays only the values of the coefficients. Conversely, the summary() function displays not only that information, but a bunch of other information, including the associated standard error and p-value for each coefficient, the R2, adjusted R2, and the residual standard error. The summary of an "lm" object in R is very similar to the output you would see in other statistical computing environments (e.g. Stata, SPSS, etc.)
+
+We have already created the mod object, a linear model for the weight of individuals as a function of their height, using the bdims dataset and the code
+mod <- lm(wgt ~ hgt, data = bdims)
+
+Now, you will:
+Use coef() to display the coefficients of mod.
+Use summary() to display the full regression output of mod.
+
+
+# Show the coefficients
+coef(mod)
+
+(Intercept)         hgt 
+-105.011254    1.017617
+
+
+# Show the full output
+summary(mod)
+
+Call:
+lm(formula = wgt ~ hgt, data = bdims)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-18.743  -6.402  -1.231   5.059  41.103 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -105.01125    7.53941  -13.93   <2e-16 ***
+hgt            1.01762    0.04399   23.14   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 9.308 on 505 degrees of freedom
+Multiple R-squared:  0.5145,	Adjusted R-squared:  0.5136 
+F-statistic: 535.2 on 1 and 505 DF,  p-value: < 2.2e-16
+
+
+
+
+
+
+
+
+
+
+
+Fitted values and residuals
+Once you have fit a regression model, you are often interested in the fitted values (y^i) and the residuals (ei), where i indexes the observations. Recall that:
+ei=yi − y^i
+
+The least squares fitting procedure guarantees that the mean of the residuals is zero (n.b., numerical instability may result in the computed values not being exactly zero). At the same time, the mean of the fitted values must equal the mean of the response variable.
+In this exercise, we will confirm these two mathematical facts by accessing the fitted values and residuals with the fitted.values() and residuals() functions, respectively, for the following model:
+mod <- lm(wgt ~ hgt, data = bdims)
+
+mod (defined above) is available in your workspace.
+Confirm that the mean of the body weights equals the mean of the fitted values of mod.
+Compute the mean of the residuals of mod.
+
+# Mean of weights equal to mean of fitted values?
+mean(bdims$wgt) == fitted.values(mod)
+
+    1     2     3     4     5     6     7     8     9    10    11    12    13 
+FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE 
+   495   496   497   498   499   500   501   502   503   504   505   506   507 
+FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+
+
+# Mean of the residuals
+mean(residuals(mod))
+[1] -1.266971e-15
+
+Great! You have verified both facts.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Tidying your linear model
+As you fit a regression model, there are some quantities (e.g. R2) that apply to the model as a whole, while others apply to each observation (e.g. y^i). If there are several of these per-observation quantities, it is sometimes convenient to attach them to the original data as new variables.
+The augment() function from the broom package does exactly this. It takes a model object as an argument and returns a data frame that contains the data on which the model was fit, along with several quantities specific to the regression model, including the fitted values, residuals, leverage scores, and standardized residuals.
+
+The same linear model from the last exercise, mod, is available in your workspace.
+Load the broom package.
+Create a new data frame called bdims_tidy that is the augmentation of the mod linear model.
+View the bdims_tidy data frame using glimpse().
+
+# Load broom
+library(broom)
+
+# Create bdims_tidy
+bdims_tidy <- augment(mod)
+
+# Glimpse the resulting data frame
+glimpse(bdims_tidy)
+Observations: 507
+Variables: 9
+$ wgt        <dbl> 65.6, 71.8, 80.7, 72.6, 78.8, 74.8, 86.4, 78.4, 62.0, 81...
+$ hgt        <dbl> 174.0, 175.3, 193.5, 186.5, 187.2, 181.5, 184.0, 184.5, ...
+$ .fitted    <dbl> 72.05406, 73.37697, 91.89759, 84.77427, 85.48661, 79.686...
+$ .se.fit    <dbl> 0.4320546, 0.4520060, 1.0667332, 0.7919264, 0.8183471, 0...
+$ .resid     <dbl> -6.4540648, -1.5769666, -11.1975919, -12.1742745, -6.686...
+$ .hat       <dbl> 0.002154570, 0.002358152, 0.013133942, 0.007238576, 0.00...
+$ .sigma     <dbl> 9.312824, 9.317005, 9.303732, 9.301360, 9.312471, 9.3147...
+$ .cooksd    <dbl> 5.201807e-04, 3.400330e-05, 9.758463e-03, 6.282074e-03, ...
+$ .std.resid <dbl> -0.69413418, -0.16961994, -1.21098084, -1.31269063, -0.7...
+
+
