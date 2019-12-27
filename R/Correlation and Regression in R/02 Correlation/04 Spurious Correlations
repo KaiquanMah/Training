@@ -1,0 +1,36 @@
+Spurious correlation in random data
+Statisticians must always be skeptical of potentially spurious correlations. Human beings are very good at seeing patterns in data, sometimes when the patterns themselves are actually just random noise. To illustrate how easy it can be to fall into this trap, we will look for patterns in truly random data.
+The noise dataset contains 20 sets of x and y variables drawn at random from a standard normal distribution. Each set, denoted as z, has 50 observations of x, y pairs. Do you see any pairs of variables that might be meaningfully correlated? Are all of the correlation coefficients close to zero?
+
+Create a faceted scatterplot that shows the relationship between each of the 20 sets of pairs of random variables x and y. You will need the facet_wrap() function for this.
+Compute the actual correlation between each of the 20 sets of pairs of x and y.
+Identify the datasets that show non-trivial correlation of greater than 0.2 in absolute value.
+
+> glimpse(noise)
+Observations: 1,000
+Variables: 3
+$ y <dbl> -1.20706575, 0.27742924, 1.08444118, -2.34569770, 0.42912469, 0.5...
+$ x <dbl> -1.20533342, 0.30146674, -1.53914522, 0.63537072, 0.70295177, -1....
+$ z <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19...
+
+# Create faceted scatterplot
+ggplot(noise, aes(x=x, y=y)) +
+  geom_point() +
+  facet_wrap(~z)
+
+
+
+# Compute correlations for each dataset
+noise_summary <- noise %>%
+  group_by(z) %>%
+  summarize(N = n(), spurious_cor = cor(x, y))
+
+# Isolate sets with correlations above 0.2 in absolute strength
+noise_summary %>%
+  filter(abs(spurious_cor) > 0.2)
+# A tibble: 3 x 3
+      z     N spurious_cor
+  <int> <int>        <dbl>
+1     7    50        0.240
+2    15    50        0.309
+3    16    50        0.218
