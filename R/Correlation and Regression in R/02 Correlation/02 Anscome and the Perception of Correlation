@@ -1,0 +1,221 @@
+Exploring Anscombe
+In 1973, Francis Anscombe famously created four datasets with remarkably similar numerical properties, but obviously different graphic relationships. The Anscombe dataset contains the x and y coordinates for these four datasets, along with a grouping variable, set, that distinguishes the quartet.
+It may be helpful to remind yourself of the graphic relationship by viewing the four scatterplots:
+
+ggplot(data = Anscombe, aes(x = x, y = y)) +
+  geom_point() +
+  facet_wrap(~ set)
+
+For each of the four sets of data points in the Anscombe dataset, compute the following in the order specified. Names are provided in your call to summarize().
+Number of observations, N
+Mean of x
+Standard deviation of x
+Mean of y
+Standard deviation of y
+Correlation coefficient between x and y
+
+> glimpse(Anscombe)
+Observations: 44
+Variables: 4
+$ id  <int> 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, ...
+$ set <chr> "1", "2", "3", "4", "1", "2", "3", "4", "1", "2", "3", "4", "1"...
+$ x   <dbl> 10, 10, 10, 8, 8, 8, 8, 8, 13, 13, 13, 8, 9, 9, 9, 8, 11, 11, 1...
+$ y   <dbl> 8.04, 9.14, 7.46, 6.58, 6.95, 8.14, 6.77, 5.76, 7.58, 8.74, 12....
+
+# Compute properties of Anscombe
+Anscombe %>%
+  group_by(set) %>%
+  summarise(
+    N = n(), 
+    mean_of_x = mean(x), 
+    std_dev_of_x = sd(x), 
+    mean_of_y = mean(y), 
+    std_dev_of_y = sd(y), 
+    correlation_between_x_and_y = cor(x,y)
+  )
+
+# A tibble: 4 x 7
+  set       N mean_of_x std_dev_of_x mean_of_y std_dev_of_y correlation_between~
+  <chr> <int>     <dbl>        <dbl>     <dbl>        <dbl>                <dbl>
+1 1        11         9         3.32      7.50         2.03                0.816
+2 2        11         9         3.32      7.50         2.03                0.816
+3 3        11         9         3.32      7.5          2.03                0.816
+4 4        11         9         3.32      7.50         2.03                0.817
+
+Note that all of the measures are identical (ignoring rounding error) across the four different sets.
+
+
+
+
+
+Perception of correlation
+Recall the scatterplot between the poverty rate of counties in the United States and the high school graduation rate in those counties from the previous chapter. Which of the following values is the correct correlation between poverty rate and high school graduation rate?
+-0.681
+
+
+
+
+
+
+
+Perception of correlation (2)
+Estimating the value of the correlation coefficient between two quantities from their scatterplot can be tricky. Statisticians have shown that people's perception of the strength of these relationships can be influenced by design choices like the x and y scales.
+Nevertheless, with some practice your perception of correlation will improve. Toggle through the four scatterplots in the plotting window, each of which you've seen in a previous exercise. Jot down your best estimate of the value of the correlation coefficient between each pair of variables. Then, compare these values to the actual values you compute in this exercise.
+If you're having trouble recalling variable names, it may help to preview a dataset in the console with str() or glimpse().
+
+
+https://statistics.stanford.edu/sites/g/files/sbiybj6031/f/EFS%20NSF%20206.pdf
+Draw the plot then calculate the correlation between OBP and SLG for all players in the mlbBat10 dataset.
+
+
+> glimpse(mlbBat10)
+Observations: 1,199
+Variables: 19
+$ name     <fct> I Suzuki, D Jeter, M Young, J Pierre, R Weeks, M Scutaro, ...
+$ team     <fct> SEA, NYY, TEX, CWS, MIL, BOS, BAL, MIN, NYY, CIN, MIL, DET...
+$ position <fct> OF, SS, 3B, OF, 2B, SS, OF, OF, 2B, 2B, OF, OF, 2B, OF, 3B...
+$ G        <dbl> 162, 157, 157, 160, 160, 150, 160, 153, 160, 155, 157, 151...
+$ AB       <dbl> 680, 663, 656, 651, 651, 632, 629, 629, 626, 626, 619, 618...
+$ R        <dbl> 74, 111, 99, 96, 112, 92, 79, 85, 103, 100, 101, 103, 67, ...
+$ H        <dbl> 214, 179, 186, 179, 175, 174, 187, 166, 200, 172, 188, 181...
+$ `2B`     <dbl> 30, 30, 36, 18, 32, 38, 45, 24, 41, 33, 45, 34, 41, 29, 29...
+$ `3B`     <dbl> 3, 3, 3, 3, 4, 0, 3, 10, 3, 5, 1, 10, 4, 3, 3, 1, 5, 1, 2,...
+$ HR       <dbl> 6, 10, 21, 1, 29, 11, 12, 3, 29, 18, 25, 4, 10, 25, 11, 23...
+$ RBI      <dbl> 43, 67, 91, 47, 83, 56, 60, 58, 109, 59, 103, 41, 75, 91, ...
+$ TB       <dbl> 268, 245, 291, 206, 302, 245, 274, 219, 334, 269, 310, 247...
+$ BB       <dbl> 45, 63, 50, 45, 76, 53, 73, 60, 57, 46, 56, 47, 28, 41, 56...
+$ SO       <dbl> 86, 106, 115, 47, 184, 71, 93, 74, 77, 83, 105, 170, 94, 1...
+$ SB       <dbl> 42, 18, 4, 68, 11, 5, 7, 26, 3, 16, 14, 27, 14, 18, 17, 1,...
+$ CS       <dbl> 9, 5, 2, 18, 4, 4, 2, 4, 2, 12, 3, 6, 4, 9, 5, 1, 3, 3, 15...
+$ OBP      <dbl> 0.359, 0.340, 0.330, 0.341, 0.366, 0.333, 0.370, 0.331, 0....
+$ SLG      <dbl> 0.394, 0.370, 0.444, 0.316, 0.464, 0.388, 0.436, 0.348, 0....
+$ AVG      <dbl> 0.315, 0.270, 0.284, 0.275, 0.269, 0.275, 0.297, 0.264, 0....
+
+
+# Run this and look at the plot
+ggplot(data = mlbBat10, aes(x = OBP, y = SLG)) +
+  geom_point()
+
+
+# Correlation for all baseball players
+mlbBat10 %>%
+  summarize(N = n(), r = cor(OBP, SLG))
+     N         r
+1 1199 0.8145628
+
+
+
+
+
+
+Draw the plot then calculate the correlation between OBP and SLG for all players in the mlbBat10 dataset with at least 200 at-bats.
+# Run this and look at the plot
+mlbBat10 %>% 
+    filter(AB > 200) %>%
+    ggplot(aes(x = OBP, y = SLG)) + 
+    geom_point()
+
+# Correlation for all players with at least 200 ABs
+mlbBat10 %>%
+  filter(AB >= 200) %>%
+  summarize(N = n(), r = cor(OBP, SLG))
+    N         r
+1 329 0.6855364
+
+
+
+
+
+
+
+
+
+
+
+
+Draw the plot then calculate the correlation between height and weight for each sex in the bdims dataset.
+> glimpse(bdims)
+Observations: 507
+Variables: 25
+$ bia.di <dbl> 42.9, 43.7, 40.1, 44.3, 42.5, 43.3, 43.5, 44.4, 43.5, 42.0, ...
+$ bii.di <dbl> 26.0, 28.5, 28.2, 29.9, 29.9, 27.0, 30.0, 29.8, 26.5, 28.0, ...
+$ bit.di <dbl> 31.5, 33.5, 33.3, 34.0, 34.0, 31.5, 34.0, 33.2, 32.1, 34.0, ...
+$ che.de <dbl> 17.7, 16.9, 20.9, 18.4, 21.5, 19.6, 21.9, 21.8, 15.5, 22.5, ...
+$ che.di <dbl> 28.0, 30.8, 31.7, 28.2, 29.4, 31.3, 31.7, 28.8, 27.5, 28.0, ...
+$ elb.di <dbl> 13.1, 14.0, 13.9, 13.9, 15.2, 14.0, 16.1, 15.1, 14.1, 15.6, ...
+$ wri.di <dbl> 10.4, 11.8, 10.9, 11.2, 11.6, 11.5, 12.5, 11.9, 11.2, 12.0, ...
+$ kne.di <dbl> 18.8, 20.6, 19.7, 20.9, 20.7, 18.8, 20.8, 21.0, 18.9, 21.1, ...
+$ ank.di <dbl> 14.1, 15.1, 14.1, 15.0, 14.9, 13.9, 15.6, 14.6, 13.2, 15.0, ...
+$ sho.gi <dbl> 106.2, 110.5, 115.1, 104.5, 107.5, 119.8, 123.5, 120.4, 111....
+$ che.gi <dbl> 89.5, 97.0, 97.5, 97.0, 97.5, 99.9, 106.9, 102.5, 91.0, 93.5...
+$ wai.gi <dbl> 71.5, 79.0, 83.2, 77.8, 80.0, 82.5, 82.0, 76.8, 68.5, 77.5, ...
+$ nav.gi <dbl> 74.5, 86.5, 82.9, 78.8, 82.5, 80.1, 84.0, 80.5, 69.0, 81.5, ...
+$ hip.gi <dbl> 93.5, 94.8, 95.0, 94.0, 98.5, 95.3, 101.0, 98.0, 89.5, 99.8,...
+$ thi.gi <dbl> 51.5, 51.5, 57.3, 53.0, 55.4, 57.5, 60.9, 56.0, 50.0, 59.8, ...
+$ bic.gi <dbl> 32.5, 34.4, 33.4, 31.0, 32.0, 33.0, 42.4, 34.1, 33.0, 36.5, ...
+$ for.gi <dbl> 26.0, 28.0, 28.8, 26.2, 28.4, 28.0, 32.3, 28.0, 26.0, 29.2, ...
+$ kne.gi <dbl> 34.5, 36.5, 37.0, 37.0, 37.7, 36.6, 40.1, 39.2, 35.5, 38.3, ...
+$ cal.gi <dbl> 36.5, 37.5, 37.3, 34.8, 38.6, 36.1, 40.3, 36.7, 35.0, 38.6, ...
+$ ank.gi <dbl> 23.5, 24.5, 21.9, 23.0, 24.4, 23.5, 23.6, 22.5, 22.0, 22.2, ...
+$ wri.gi <dbl> 16.5, 17.0, 16.9, 16.6, 18.0, 16.9, 18.8, 18.0, 16.5, 16.9, ...
+$ age    <int> 21, 23, 28, 23, 22, 21, 26, 27, 23, 21, 23, 22, 20, 26, 23, ...
+$ wgt    <dbl> 65.6, 71.8, 80.7, 72.6, 78.8, 74.8, 86.4, 78.4, 62.0, 81.6, ...
+$ hgt    <dbl> 174.0, 175.3, 193.5, 186.5, 187.2, 181.5, 184.0, 184.5, 175....
+$ sex    <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+
+
+# Run this and look at the plot
+ggplot(data = bdims, aes(x = hgt, y = wgt, color = factor(sex))) +
+  geom_point() 
+
+
+# Correlation of body dimensions
+bdims %>%
+  group_by(sex) %>%
+  summarize(N = n(), r = cor(hgt, wgt))
+# A tibble: 2 x 3
+    sex     N     r
+  <int> <int> <dbl>
+1     0   260 0.431
+2     1   247 0.535
+
+
+
+
+
+
+
+
+
+
+Draw the plot then calculate the correlation between body weight and brain weight for all species of mammals. Alongside this computation, compute the correlation between the same two quantities after taking their natural logarithms.
+
+> glimpse(mammals)
+Observations: 62
+Variables: 11
+$ Species     <fct> Africanelephant, Africangiantpouchedrat, ArcticFox, Arc...
+$ BodyWt      <dbl> 6654.000, 1.000, 3.385, 0.920, 2547.000, 10.550, 0.023,...
+$ BrainWt     <dbl> 5712.0, 6.6, 44.5, 5.7, 4603.0, 179.5, 0.3, 169.0, 25.6...
+$ NonDreaming <dbl> NA, 6.3, NA, NA, 2.1, 9.1, 15.8, 5.2, 10.9, 8.3, 11.0, ...
+$ Dreaming    <dbl> NA, 2.0, NA, NA, 1.8, 0.7, 3.9, 1.0, 3.6, 1.4, 1.5, 0.7...
+$ TotalSleep  <dbl> 3.3, 8.3, 12.5, 16.5, 3.9, 9.8, 19.7, 6.2, 14.5, 9.7, 1...
+$ LifeSpan    <dbl> 38.6, 4.5, 14.0, NA, 69.0, 27.0, 19.0, 30.4, 28.0, 50.0...
+$ Gestation   <dbl> 645, 42, 60, 25, 624, 180, 35, 392, 63, 230, 112, 281, ...
+$ Predation   <int> 3, 3, 1, 5, 3, 4, 1, 4, 1, 1, 5, 5, 2, 5, 1, 2, 2, 2, 1...
+$ Exposure    <int> 5, 1, 1, 2, 5, 4, 1, 5, 2, 1, 4, 5, 1, 5, 1, 2, 2, 2, 2...
+$ Danger      <int> 3, 3, 1, 3, 4, 4, 1, 4, 1, 1, 4, 5, 2, 5, 1, 2, 2, 2, 1...
+
+
+# Run this and look at the plot
+ggplot(data = mammals, aes(x = BodyWt, y = BrainWt)) +
+  geom_point() + scale_x_log10() + scale_y_log10()
+
+
+# Correlation among mammals, with and without log
+mammals %>%
+  summarize(N = n(), 
+            r = cor(BodyWt, BrainWt), 
+            r_log = cor(log(BodyWt), log(BrainWt)))
+
+   N         r     r_log
+1 62 0.9341638 0.9595748
