@@ -1,0 +1,57 @@
+Making predictions
+The fitted.values() function or the augment()-ed data frame provides us with the fitted values for the observations that were in the original data. However, once we have fit the model, we may want to compute expected values for observations that were not present in the data on which the model was fit. These types of predictions are called out-of-sample.
+The ben data frame contains a height and weight observation for one person. The mod object contains the fitted model for weight as a function of height for the observations in the bdims dataset. We can use the predict() function to generate expected values for the weight of new individuals. We must pass the data frame of new observations through the newdata argument.
+
+The same linear model, mod, is defined in your workspace.
+Print ben to the console.
+Use predict() with the newdata argument to compute the expected weight of the individual in the ben data frame.
+
+# Print ben
+ben
+> ben
+   wgt   hgt
+1 74.8 182.8
+
+> mod
+Call:
+lm(formula = wgt ~ hgt, data = bdims)
+
+Coefficients:
+(Intercept)          hgt  
+   -105.011        1.018
+   
+   
+   
+# Predict the weight of ben
+predict(mod, newdata=ben)
+       1 
+81.00909
+
+
+Note that the data frame ben has variables with the exact same names as those in the fitted model.
+
+
+
+
+
+
+
+
+
+Adding a regression line to a plot manually
+The geom_smooth() function makes it easy to add a simple linear regression line to a scatterplot of the corresponding variables. And in fact, there are more complicated regression models that can be visualized in the data space with geom_smooth(). However, there may still be times when we will want to add regression lines to our scatterplot manually. To do this, we will use the geom_abline() function, which takes slope and intercept arguments. Naturally, we have to compute those values ahead of time, but we already saw how to do this (e.g. using coef()).
+The coefs data frame contains the model estimates retrieved from coef(). Passing this to geom_abline() as the data argument will enable you to draw a straight line on your scatterplot.
+
+Use geom_abline() to add a line defined in the coefs data frame to a scatterplot of weight vs. height for individuals in the bdims dataset.
+
+# Add the line to the scatterplot
+ggplot(data = bdims, aes(x = hgt, y = wgt)) + 
+  geom_point() + 
+  geom_abline(data = coefs, 
+              aes(intercept = `(Intercept)`, slope = `hgt`),  
+              color = "dodgerblue")
+
+> coefs
+  (Intercept)      hgt
+1   -105.0113 1.017617
+
