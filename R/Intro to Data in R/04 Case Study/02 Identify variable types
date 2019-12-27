@@ -1,0 +1,64 @@
+Identify variable types
+It's always useful to start your exploration of a dataset by identifying variable types. The results from this exercise will help you design appropriate visualizations and calculate useful summary statistics later in your analysis.
+
+
+Explore the evals data once again with the following goals in mind: (1) Identify each variable as numerical or categorical. (2) If numerical, determine if it is discrete or continuous. (3) If categorical, determine if it is ordinal or not.
+We've created a vector of variable names in the editor called cat_vars. To test your understanding of the data, remove the names of any variables that are not categorical.
+
+# Inspect variable types
+glimpse(evals)
+
+
+# Remove non-factor variables from the vector below
+# cols c("score", "rank", "ethnicity", "gender", "language", "age",
+#              "cls_students", "cls_level", "cls_profs", "cls_credits",
+#              "bty_avg", "pic_outfit", "pic_color")
+cat_vars <- c("rank", "ethnicity", "gender", "language", "cls_level", "cls_profs", "cls_credits","pic_outfit", "pic_color")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Recode a variable
+The cls_students variable in evals tells you the number of students in the class. Suppose instead of the exact number of students, you're interested in whether the class is
+"small" (18 students or fewer),
+"midsize" (19 - 59 students), or
+"large" (60 students or more).
+
+Recode the cls_students variable into a new variable, cls_type, using case_when(). This new variable should have three levels as described above. Save the resulting data frame (with the new variable) as evals.
+What type of variable is cls_type?
+
+
+#method 1
+# Recode cls_students as cls_type
+evals_fortified <- evals %>%
+  mutate(
+    cls_type = case_when(
+      cls_students <= 18 ~ "small",
+      cls_students >18 & cls_students < 60 ~ "midsize",
+      cls_students >= 60 ~ "large"
+    )
+  )
+
+The cls_type variable is a categorical variable, stored as a character vector. You could have made it a factor variable by wrapping the nested ifelse() statements inside factor(). You don't have to do that now. Let's move on!
+
+
+#method 2
+evals_fortified <- evals %>%
+  mutate(
+    cls_type = case_when(
+      cls_students < 19 ~ "small",
+      cls_students < 60 ~ "midsize",
+      cls_students >= 60 ~ "large"
+    )
+  )
+
