@@ -1,0 +1,102 @@
+Regression model terminology
+Consider a linear regression model of the form:
+Y = β0 + β1⋅X + ϵ, where ϵ∼N(0,σϵ).
+
+The slope coefficient is:
+β1 
+
+
+
+
+Regression model output terminology
+The fitted model for the poverty rate of U.S. counties as a function of high school graduation rate is:
+povertyˆ = 64.594 − 0.591⋅hs_grad
+
+In Hampshire County in western Massachusetts, the high school graduation rate is 92.4%. These two facts imply that the poverty rate in Hampshire County is ___.
+expected to be about 10.0%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fitting a linear model "by hand"
+Recall the simple linear regression model:
+Y = b0 + b1⋅X
+
+Two facts enable you to compute the slope b1 and intercept b0 of a simple linear regression model from some basic summary statistics.
+First, the slope can be defined as:
+b1 = rX,Y * sY/sX
+where 
+rX,Y represents the correlation (cor()) of X and Y and 
+sX and sY represents the standard deviation (sd()) of X and Y, respectively.
+
+Second, the point (x¯,y¯) is always on the least squares regression line, 
+where x¯ and y¯ denote the average of x and y, respectively.
+
+The bdims_summary data frame contains all of the information you need to compute the slope and intercept of the least squares regression line for body weight (Y) as a function of height (X). You might need to do some algebra to solve for b0!
+
+
+
+Print the bdims_summary data frame.
+Use mutate() to add the slope and intercept to the bdims_summary data frame.
+
+
+> str(bdims)
+'data.frame':	507 obs. of  25 variables:
+ $ bia.di: num  42.9 43.7 40.1 44.3 42.5 43.3 43.5 44.4 43.5 42 ...
+ $ bii.di: num  26 28.5 28.2 29.9 29.9 27 30 29.8 26.5 28 ...
+ $ bit.di: num  31.5 33.5 33.3 34 34 31.5 34 33.2 32.1 34 ...
+ $ che.de: num  17.7 16.9 20.9 18.4 21.5 19.6 21.9 21.8 15.5 22.5 ...
+ $ che.di: num  28 30.8 31.7 28.2 29.4 31.3 31.7 28.8 27.5 28 ...
+ $ elb.di: num  13.1 14 13.9 13.9 15.2 14 16.1 15.1 14.1 15.6 ...
+ $ wri.di: num  10.4 11.8 10.9 11.2 11.6 11.5 12.5 11.9 11.2 12 ...
+ $ kne.di: num  18.8 20.6 19.7 20.9 20.7 18.8 20.8 21 18.9 21.1 ...
+ $ ank.di: num  14.1 15.1 14.1 15 14.9 13.9 15.6 14.6 13.2 15 ...
+ $ sho.gi: num  106 110 115 104 108 ...
+ $ che.gi: num  89.5 97 97.5 97 97.5 ...
+ $ wai.gi: num  71.5 79 83.2 77.8 80 82.5 82 76.8 68.5 77.5 ...
+ $ nav.gi: num  74.5 86.5 82.9 78.8 82.5 80.1 84 80.5 69 81.5 ...
+ $ hip.gi: num  93.5 94.8 95 94 98.5 95.3 101 98 89.5 99.8 ...
+ $ thi.gi: num  51.5 51.5 57.3 53 55.4 57.5 60.9 56 50 59.8 ...
+ $ bic.gi: num  32.5 34.4 33.4 31 32 33 42.4 34.1 33 36.5 ...
+ $ for.gi: num  26 28 28.8 26.2 28.4 28 32.3 28 26 29.2 ...
+ $ kne.gi: num  34.5 36.5 37 37 37.7 36.6 40.1 39.2 35.5 38.3 ...
+ $ cal.gi: num  36.5 37.5 37.3 34.8 38.6 36.1 40.3 36.7 35 38.6 ...
+ $ ank.gi: num  23.5 24.5 21.9 23 24.4 23.5 23.6 22.5 22 22.2 ...
+ $ wri.gi: num  16.5 17 16.9 16.6 18 16.9 18.8 18 16.5 16.9 ...
+ $ age   : int  21 23 28 23 22 21 26 27 23 21 ...
+ $ wgt   : num  65.6 71.8 80.7 72.6 78.8 74.8 86.4 78.4 62 81.6 ...
+ $ hgt   : num  174 175 194 186 187 ...
+ $ sex   : int  1 1 1 1 1 1 1 1 1 1 ...
+ 
+ 
+ 
+ # Print bdims_summary
+bdims_summary
+> bdims_summary
+    N         r mean_hgt   sd_hgt mean_wgt   sd_wgt
+1 507 0.7173011 171.1438 9.407205 69.14753 13.34576
+
+
+# Add slope and intercept
+bdims_summary %>%
+  mutate(#x hgt, y wgt
+         #slope = correlation * sd of y / sd of x
+         slope = r * sd_wgt/sd_hgt, 
+         #intercept = avg y - slope * avg x
+         intercept = mean_wgt - slope*mean_hgt)
+         
+    N         r mean_hgt   sd_hgt mean_wgt   sd_wgt    slope intercept
+1 507 0.7173011 171.1438 9.407205 69.14753 13.34576 1.017617 -105.0113
+
+
+
