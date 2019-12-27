@@ -1,0 +1,74 @@
+Leverage
+The leverage of an observation in a regression model is defined entirely in terms of the distance of that observation from the mean of the explanatory variable. That is, observations close to the mean of the explanatory variable have low leverage, while observations far from the mean of the explanatory variable have high leverage. Points of high leverage may or may not be influential.
+The augment() function from the broom package will add the leverage scores (.hat) to a model data frame.
+
+Use augment() to list the top 6 observations by their leverage scores, in descending order.
+
+> mod %>%
+    augment()
+# A tibble: 737 x 9
+     SLG   OBP .fitted .se.fit  .resid    .hat .sigma   .cooksd .std.resid
+   <dbl> <dbl>   <dbl>   <dbl>   <dbl>   <dbl>  <dbl>     <dbl>      <dbl>
+ 1 0.394 0.359   0.438 0.00356 -0.0437 0.00248 0.0715 0.000465      -0.612
+ 2 0.37  0.34    0.413 0.00317 -0.0426 0.00196 0.0715 0.000349      -0.596
+ 3 0.444 0.33    0.399 0.00299  0.0447 0.00175 0.0715 0.000343       0.626
+ 4 0.316 0.341   0.414 0.00318 -0.0979 0.00198 0.0715 0.00187       -1.37 
+ 5 0.464 0.366   0.447 0.00372  0.0170 0.00270 0.0715 0.0000772      0.239
+ 6 0.388 0.333   0.403 0.00304 -0.0153 0.00181 0.0715 0.0000415     -0.214
+ 7 0.436 0.37    0.452 0.00381 -0.0163 0.00285 0.0715 0.0000740     -0.228
+ 8 0.348 0.331   0.401 0.00301 -0.0526 0.00177 0.0715 0.000482      -0.737
+ 9 0.534 0.381   0.467 0.00409  0.0672 0.00327 0.0715 0.00145        0.941
+10 0.43  0.332   0.402 0.00303  0.0280 0.00179 0.0715 0.000138       0.392
+# ... with 727 more rows
+
+
+# Rank points of high leverage
+mod %>%
+  augment() %>%
+  #.hat is the leverage score
+  arrange(desc(.hat)) %>%
+  head()
+
+# A tibble: 6 x 9
+    SLG   OBP .fitted .se.fit  .resid   .hat .sigma  .cooksd .std.resid
+  <dbl> <dbl>   <dbl>   <dbl>   <dbl>  <dbl>  <dbl>    <dbl>      <dbl>
+1 0     0     -0.0374 0.00996  0.0374 0.0194 0.0715 0.00277       0.529
+2 0     0     -0.0374 0.00996  0.0374 0.0194 0.0715 0.00277       0.529
+3 0     0     -0.0374 0.00996  0.0374 0.0194 0.0715 0.00277       0.529
+4 0.308 0.55   0.690  0.00916 -0.382  0.0164 0.0701 0.243        -5.39 
+5 0     0.037  0.0115 0.00877 -0.0115 0.0150 0.0715 0.000202     -0.162
+6 0.038 0.038  0.0128 0.00874  0.0252 0.0149 0.0715 0.000953      0.354
+
+
+
+
+
+
+
+
+
+
+Influence
+As noted previously, observations of high leverage may or may not be influential. The influence of an observation depends not only on its leverage, but also on the magnitude of its residual. Recall that while leverage only takes into account the explanatory variable (x), the residual depends on the response variable (y) and the fitted value (y^).
+Influential points are likely to have high leverage and deviate from the general relationship between the two variables. We measure influence using Cook's distance, which incorporates both the leverage and residual of each observation.
+
+Use augment() to list the top 6 observations by their Cook's distance (.cooksd), in descending order.
+
+# Rank influential points
+mod %>%
+  augment() %>%
+  #.cooksd is the Cook's distance or Influence score
+  arrange(desc(.cooksd)) %>%
+  head()
+
+# A tibble: 6 x 9
+    SLG   OBP .fitted .se.fit .resid    .hat .sigma .cooksd .std.resid
+  <dbl> <dbl>   <dbl>   <dbl>  <dbl>   <dbl>  <dbl>   <dbl>      <dbl>
+1 0.308 0.55   0.690  0.00916 -0.382 0.0164  0.0701  0.243       -5.39
+2 0.833 0.385  0.472  0.00419  0.361 0.00344 0.0703  0.0441       5.06
+3 0.8   0.455  0.565  0.00619  0.235 0.00749 0.0710  0.0411       3.30
+4 0.379 0.133  0.139  0.00579  0.240 0.00656 0.0710  0.0376       3.37
+5 0.786 0.438  0.542  0.00568  0.244 0.00631 0.0710  0.0371       3.42
+6 0.231 0.077  0.0645 0.00751  0.167 0.0110  0.0713  0.0306       2.34
+
+
