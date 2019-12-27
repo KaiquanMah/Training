@@ -1,0 +1,63 @@
+RMSE
+The residual standard error reported for the regression model for poverty rate of U.S. counties in terms of high school graduation rate is 4.67. What does this mean?
+
+#YES The typical difference between the observed poverty rate and the poverty rate predicted by the model is about 4.67 percentage points.
+
+#NOT The typical difference between the observed poverty rate and the poverty rate predicted by the model is about 4.67%.
+#NOT The model explains about 4.67% of the variability in poverty rate among counties.
+#NOT The model correctly predicted the poverty rate of 4.67% of the counties.
+
+
+
+
+
+
+
+Standard error of residuals
+One way to assess strength of fit is to consider how far off the model is for a typical case. That is, for some observations, the fitted value will be very close to the actual value, while for others it will not. The magnitude of a typical residual can give us a sense of generally how close our estimates are.
+However, recall that some of the residuals are positive, while others are negative. In fact, it is guaranteed by the least squares fitting procedure that the mean of the residuals is zero. Thus, it makes more sense to compute the square root of the mean squared residual, or root mean squared error (RMSE). R calls this quantity the residual standard error.
+To make this estimate unbiased, you have to divide the sum of the squared residuals by the degrees of freedom in the model. Thus,
+RMSE = √[(∑e^2) /d.f.] = √ [SSE / d.f.]
+You can recover the residuals from mod with residuals(), and the degrees of freedom with df.residual().
+
+View a summary() of mod.
+Compute the mean of the residuals() and verify that it is approximately zero.
+Use residuals() and df.residual() to compute the root mean squared error (RMSE), a.k.a. residual standard error.
+
+> summary(mod)
+Call:
+lm(formula = wgt ~ hgt, data = bdims)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-18.743  -6.402  -1.231   5.059  41.103 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -105.01125    7.53941  -13.93   <2e-16 ***
+hgt            1.01762    0.04399   23.14   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 9.308 on 505 degrees of freedom
+Multiple R-squared:  0.5145,	Adjusted R-squared:  0.5136 
+F-statistic: 535.2 on 1 and 505 DF,  p-value: < 2.2e-16
+
+
+
+
+
+# View summary of model
+summary(mod)
+
+# Compute the mean of the residuals
+mean(residuals(mod))
+[1] -1.266971e-15
+
+# Compute RMSE
+sqrt(sum(residuals(mod)^2) / df.residual(mod))
+[1] 9.30804
+
+> df.residual(mod)
+[1] 505
+
