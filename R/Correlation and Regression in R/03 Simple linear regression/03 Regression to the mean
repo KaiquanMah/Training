@@ -1,0 +1,64 @@
+Regression to the mean
+Regression to the mean is a concept attributed to Sir Francis Galton. The basic idea is that extreme random observations will tend to be less extreme upon a second trial. This is simply due to chance alone. While "regression to the mean" and "linear regression" are not the same thing, we will examine them together in this exercise.
+One way to see the effects of regression to the mean is to compare the heights of parents to their children's heights. While it is true that tall mothers and fathers tend to have tall children, those children tend to be less tall than their parents, relative to average. That is, fathers who are 3 inches taller than the average father tend to have children who may be taller than average, but by less than 3 inches.
+The Galton_men and Galton_women datasets contain data originally collected by Galton himself in the 1880s on the heights of men and women, respectively, along with their parents' heights.
+Compare the slope of the regression line to the slope of the diagonal line. What does this tell you?
+
+Create a scatterplot of the height of men as a function of their father's height. Add the simple linear regression line and a diagonal line (with slope equal to 1 and intercept equal to 0) to the plot.
+Create a scatterplot of the height of women as a function of their mother's height. Add the simple linear regression line and a diagonal line to the plot.
+
+> str(Galton_men)
+'data.frame':	465 obs. of  6 variables:
+ $ family: Factor w/ 197 levels "1","10","100",..: 1 108 108 123 134 134 145 145 145 166 ...
+ $ father: num  78.5 75.5 75.5 75 75 75 75 75 75 74 ...
+ $ mother: num  67 66.5 66.5 64 64 64 58.5 58.5 58.5 68 ...
+ $ sex   : Factor w/ 2 levels "F","M": 2 2 2 2 2 2 2 2 2 2 ...
+ $ height: num  73.2 73.5 72.5 71 70.5 68.5 72 69 68 76.5 ...
+ $ nkids : int  4 4 4 2 5 5 6 6 6 6 ...
+
+> str(Galton_women)
+'data.frame':	433 obs. of  6 variables:
+ $ family: Factor w/ 197 levels "1","10","100",..: 1 1 1 108 108 123 134 134 134 145 ...
+ $ father: num  78.5 78.5 78.5 75.5 75.5 75 75 75 75 75 ...
+ $ mother: num  67 67 67 66.5 66.5 64 64 64 64 58.5 ...
+ $ sex   : Factor w/ 2 levels "F","M": 1 1 1 1 1 1 1 1 1 1 ...
+ $ height: num  69.2 69 69 65.5 65.5 68 67 64.5 63 66.5 ...
+ $ nkids : int  4 4 4 4 4 2 5 5 5 6 ...
+ 
+ 
+ 
+ 
+# Height of children vs. height of father
+ggplot(data = Galton_men, aes(x = father, y = height)) +
+  geom_point() + 
+  # slope=1 means that each increase in the dad's height by 1 inch would increase the child's height by 1 inch
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_smooth(method = "lm", se = FALSE)
+
+# Height of children vs. height of mother
+ggplot(data = Galton_women, aes(x = mother, y = height)) +
+  geom_point() + 
+  # slope=1 means that each increase in the dad's height by 1 inch would increase the child's height by 1 inch
+  geom_abline(slope = 1, intercept = 0) + 
+  geom_smooth(method = "lm", se = FALSE)
+
+Because the slope of the regression line is smaller than 1 (the slope of the diagonal line) for both males and females, we can verify Sir Francis Galton's regression to the mean concept!
+
+
+
+
+
+
+
+
+
+
+"Regression" in the parlance of our time
+In an opinion piece about nepotism published in The New York Times in 2015, economist Seth Stephens-Davidowitz wrote that:
+"Regression to the mean is so powerful that once-in-a-generation talent basically never sires once-in-a-generation talent. It explains why Michael Jordan’s sons were middling college basketball players and Jakob Dylan wrote two good songs. It is why there are no American parent-child pairs among Hall of Fame players in any major professional sports league."
+https://www.nytimes.com/2015/03/22/opinion/sunday/seth-stephens-davidowitz-just-how-nepotistic-are-we.html
+
+The author is arguing that...
+Because of regression to the mean, an outstanding basketball player is likely to have sons that are good at basketball, but not as good as him.
+
+
