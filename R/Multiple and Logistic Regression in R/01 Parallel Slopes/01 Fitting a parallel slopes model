@@ -1,0 +1,71 @@
+Fitting a parallel slopes model
+We use the lm() function to fit linear models to data. In this case, we want to understand how the price of MarioKart games sold at auction varies as a function of not only the number of wheels included in the package, but also whether the item is new or used. Obviously, it is expected that you might have to pay a premium to buy these new. But how much is that premium? Can we estimate its value after controlling for the number of wheels?
+We will fit a parallel slopes model using lm(). In addition to the data argument, lm() needs to know which variables you want to include in your regression model, and how you want to include them. It accomplishes this using a formula argument. A simple linear regression formula looks like y ~ x, where y is the name of the response variable, and x is the name of the explanatory variable. Here, we will simply extend this formula to include multiple explanatory variables. A parallel slopes model has the form y ~ x + z, where z is a categorical explanatory variable, and x is a numerical explanatory variable.
+The output from lm() is a model object, which when printed, will show the fitted coefficients.
+
+The dataset mario_kart is already loaded for you. Explore the data using glimpse() or str().
+Use lm() to fit a parallel slopes model for total price as a function of the number of wheels and the condition of the item. Use the argument data to specify the dataset you're using.
+
+# Explore the data
+glimpse(mario_kart)
+> glimpse(mario_kart)
+Observations: 141
+Variables: 12
+$ ID         <dbl> 150377422259, 260483376854, 320432342985, 280405224677, ...
+$ duration   <int> 3, 7, 3, 3, 1, 3, 1, 1, 3, 7, 1, 1, 1, 1, 7, 7, 3, 3, 1,...
+$ nBids      <int> 20, 13, 16, 18, 20, 19, 13, 15, 29, 8, 15, 15, 13, 16, 6...
+$ cond       <fct> new, used, new, new, new, new, used, new, used, used, ne...
+$ startPr    <dbl> 0.99, 0.99, 0.99, 0.99, 0.01, 0.99, 0.01, 1.00, 0.99, 19...
+$ shipPr     <dbl> 4.00, 3.99, 3.50, 0.00, 0.00, 4.00, 0.00, 2.99, 4.00, 4....
+$ totalPr    <dbl> 51.55, 37.04, 45.50, 44.00, 71.00, 45.00, 37.02, 53.99, ...
+$ shipSp     <fct> standard, firstClass, firstClass, standard, media, stand...
+$ sellerRate <int> 1580, 365, 998, 7, 820, 270144, 7284, 4858, 27, 201, 485...
+$ stockPhoto <fct> yes, yes, no, yes, yes, yes, yes, yes, yes, no, yes, yes...
+$ wheels     <int> 1, 1, 1, 1, 2, 0, 0, 2, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2,...
+$ title      <fct> "~~ Wii MARIO KART &amp; WHEEL ~ NINTENDO Wii ~ BRAND NE...
+
+
+
+
+
+# fit parallel slopes
+lm(totalPr ~ wheels + cond, data=mario_kart)
+Call:
+lm(formula = totalPr ~ wheels + cond, data = mario_kart)
+
+Coefficients:
+(Intercept)       wheels     condused  
+     42.370        7.233       -5.585
+
+
+On average, how much more does a new game cost compared to a used game?
+
+
+
+
+
+
+
+
+
+Reasoning about two intercepts
+The mario_kart data contains several other variables. The totalPr, startPr, and shipPr variables are numeric, while the cond and stockPhoto variables are categorical.
+
+Which formula will result in a parallel slopes model?
+totalPr ~ startPr + shipPr
+cond ~ startPr + stockPhoto
+totalPr ~ cond
+
+#yes totalPr ~ shipPr + stockPhoto
+2 numeric and 1 categorical variable
+numeric ~ numeric + categorical
+turn numeric into categorical variable using factor(variableName) OR as.factor(variableName)
+
+
+
+
+
+
+
+
+
