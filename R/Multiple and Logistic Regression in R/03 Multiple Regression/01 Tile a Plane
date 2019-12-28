@@ -1,0 +1,107 @@
+Fitting a MLR model
+In terms of the R code, fitting a multiple linear regression model is easy: simply add variables to the model formula you specify in the lm() command.
+In a parallel slopes model, we had two explanatory variables: one was numeric and one was categorical. Here, we will allow both explanatory variables to be numeric.
+
+> glimpse(mario_kart)
+Observations: 141
+Variables: 12
+$ ID         <dbl> 150377422259, 260483376854, 320432342985, 280405224677, ...
+$ duration   <int> 3, 7, 3, 3, 1, 3, 1, 1, 3, 7, 1, 1, 1, 1, 7, 7, 3, 3, 1,...
+$ nBids      <int> 20, 13, 16, 18, 20, 19, 13, 15, 29, 8, 15, 15, 13, 16, 6...
+$ cond       <fct> new, used, new, new, new, new, used, new, used, used, ne...
+$ startPr    <dbl> 0.99, 0.99, 0.99, 0.99, 0.01, 0.99, 0.01, 1.00, 0.99, 19...
+$ shipPr     <dbl> 4.00, 3.99, 3.50, 0.00, 0.00, 4.00, 0.00, 2.99, 4.00, 4....
+$ totalPr    <dbl> 51.55, 37.04, 45.50, 44.00, 71.00, 45.00, 37.02, 53.99, ...
+$ shipSp     <fct> standard, firstClass, firstClass, standard, media, stand...
+$ sellerRate <int> 1580, 365, 998, 7, 820, 270144, 7284, 4858, 27, 201, 485...
+$ stockPhoto <fct> yes, yes, no, yes, yes, yes, yes, yes, yes, no, yes, yes...
+$ wheels     <int> 1, 1, 1, 1, 2, 0, 0, 2, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2,...
+$ title      <fct> "~~ Wii MARIO KART &amp; WHEEL ~ NINTENDO Wii ~ BRAND NE...
+
+
+# Fit the model using duration and startPr
+lm(totalPr ~ duration + startPr, data=mario_kart)
+
+Call:
+lm(formula = totalPr ~ duration + startPr, data = mario_kart)
+
+Coefficients:
+(Intercept)     duration      startPr  
+     51.030       -1.508        0.233
+     
+     
+     
+     
+     
+
+
+
+
+
+Tiling the plane
+One method for visualizing a multiple linear regression model is to create a heatmap of the fitted values in the plane defined by the two explanatory variables. This heatmap will illustrate how the model output changes over different combinations of the explanatory variables.
+https://en.wikipedia.org/wiki/Heat_map
+
+This is a multistep process:
+First, create a grid of the possible pairs of values of the explanatory variables. The grid should be over the actual range of the data present in each variable. We've done this for you and stored the result as a data frame called grid.
+Use augment() with the newdata argument to find the y^'s corresponding to the values in grid.
+Add these to the data_space plot by using the fill aesthetic and geom_tile().
+
+
+The model object mod is already in your workspace.
+Use augment() to create a data.frame that contains the values the model outputs for each row of grid.
+Use geom_tile to illustrate these predicted values over the data_space plot. Use the fill aesthetic and set alpha = 0.5.
+
+> grid
+# A tibble: 69,950 x 2
+   duration startPr
+      <dbl>   <dbl>
+ 1        1  0.01  
+ 2        1  0.02  
+ 3        1  0.03  
+ 4        1  0.04  
+ 5        1  0.05  
+ 6        1  0.06  
+ 7        1  0.0700
+ 8        1  0.08  
+ 9        1  0.09  
+10        1  0.10  
+# ... with 69,940 more rows
+
+> mod
+Call:
+lm(formula = totalPr ~ duration + startPr, data = mario_kart)
+
+Coefficients:
+(Intercept)     duration      startPr  
+     51.030       -1.508        0.233
+     
+
+> head(augment(mod))
+  totalPr duration startPr  .fitted   .se.fit    .resid        .hat   .sigma
+1   51.55        3    0.99 46.73575 0.7496217  4.814246 0.009355859 7.767223
+2   37.04        7    0.99 40.70325 1.1454285 -3.663250 0.021844158 7.771769
+3   45.50        3    0.99 46.73575 0.7496217 -1.235754 0.009355859 7.777485
+4   44.00        3    0.99 46.73575 0.7496217 -2.735754 0.009355859 7.774663
+5   71.00        1    0.01 49.52371 0.9965480 21.476289 0.016534682 7.554950
+6   45.00        3    0.99 46.73575 0.7496217 -1.735754 0.009355859 7.776781
+       .cooksd .std.resid
+1 1.226261e-03  0.6241215
+2 1.700319e-03 -0.4779277
+3 8.079608e-05 -0.1602038
+4 3.959865e-04 -0.3546646
+5 4.375970e-02  2.7943410
+6 1.594053e-04 -0.2250241
+
+
+# add predictions to grid
+price_hats <- augment(mod, newdata=grid)
+
+
+# tile the plane
+data_space + 
+  geom_tile(data = price_hats, 
+            aes(fill=.fitted), 
+            alpha=0.5)
+
+
