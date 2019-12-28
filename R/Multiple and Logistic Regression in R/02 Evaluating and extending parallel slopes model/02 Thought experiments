@@ -1,0 +1,83 @@
+Thought experiments
+Suppose that after going apple picking you have 12 apples left over. You decide to conduct an experiment to investigate how quickly they will rot under certain conditions. You place six apples in a cool spot in your basement, and leave the other six on the window sill in the kitchen. Every week, you estimate the percentage of the surface area of the apple that is rotten or moldy.
+
+Consider the following models:
+rot = β0 + β1⋅t + β2⋅temp,
+and
+rot = β0 + β1⋅t + β2⋅temp + β3⋅temp⋅t,
+where t is time, measured in weeks, and temp is a binary variable indicating either cool or warm.
+
+If you decide to keep the interaction term present in the second model, you are implicitly assuming that:
+
+The amount of rot will vary based on the temperature.
+The amount of rot will vary based on the temperature, after controlling for the length of time they have been left out.
+Time and temperature are independent.
+#yes The rate at which apples rot will vary based on the temperature.
+
+
+
+
+
+Fitting a model with interaction
+Including an interaction term in a model is easy—we just have to tell lm() that we want to include that new variable. An expression of the form
+    lm(y ~ x + z + x:z, data = mydata)
+will do the trick. The use of the colon (:) here means that the interaction between x and z will be a third term in the model.
+
+> glimpse(mario_kart)
+Observations: 141
+Variables: 12
+$ ID         <dbl> 150377422259, 260483376854, 320432342985, 280405224677, ...
+$ duration   <int> 3, 7, 3, 3, 1, 3, 1, 1, 3, 7, 1, 1, 1, 1, 7, 7, 3, 3, 1,...
+$ nBids      <int> 20, 13, 16, 18, 20, 19, 13, 15, 29, 8, 15, 15, 13, 16, 6...
+$ cond       <fct> new, used, new, new, new, new, used, new, used, used, ne...
+$ startPr    <dbl> 0.99, 0.99, 0.99, 0.99, 0.01, 0.99, 0.01, 1.00, 0.99, 19...
+$ shipPr     <dbl> 4.00, 3.99, 3.50, 0.00, 0.00, 4.00, 0.00, 2.99, 4.00, 4....
+$ totalPr    <dbl> 51.55, 37.04, 45.50, 44.00, 71.00, 45.00, 37.02, 53.99, ...
+$ shipSp     <fct> standard, firstClass, firstClass, standard, media, stand...
+$ sellerRate <int> 1580, 365, 998, 7, 820, 270144, 7284, 4858, 27, 201, 485...
+$ stockPhoto <fct> yes, yes, no, yes, yes, yes, yes, yes, yes, no, yes, yes...
+$ wheels     <int> 1, 1, 1, 1, 2, 0, 0, 2, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2,...
+$ title      <fct> "~~ Wii MARIO KART &amp; WHEEL ~ NINTENDO Wii ~ BRAND NE...
+
+
+# include interaction
+lm(totalPr ~ cond + duration + cond:duration, data=mario_kart)
+
+Call:
+lm(formula = totalPr ~ cond + duration + cond:duration, data = mario_kart
+
+Coefficients:
+      (Intercept)           condused           duration  condused:duration  
+           58.268            -17.122             -1.966              2.325
+
+
+> lm(totalPr ~ cond + duration, data=mario_kart)
+
+Call:
+lm(formula = totalPr ~ cond + duration, data = mario_kart)
+
+Coefficients:
+(Intercept)     condused     duration  
+    54.7059      -9.8710      -0.4087
+    
+#with the interaction term, the indiv coeffs became larger    
+    
+
+
+
+
+
+
+Visualizing interaction models
+Interaction allows the slope of the regression line in each group to vary. In this case, this means that the relationship between the final price and the length of the auction is moderated by the condition of each item.
+Interaction models are easy to visualize in the data space with ggplot2 because they have the same coefficients as if the models were fit independently to each group defined by the level of the categorical variable. In this case, new and used MarioKarts each get their own regression line. To see this, we can set an aesthetic (e.g. color) to the categorical variable, and then add a geom_smooth() layer to overlay the regression line for each color.
+
+The dataset mario_kart is already loaded in your workspace.
+Use the color aesthetic and the geom_smooth() function to plot the interaction model between duration and condition in the data space. Make sure you set the method and se arguments of geom_smooth().
+
+# interaction plot
+ggplot(data=mario_kart, aes(x=duration, y=totalPr, color=cond)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se=FALSE)
+  
+
