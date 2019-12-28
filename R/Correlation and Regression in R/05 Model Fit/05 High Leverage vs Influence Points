@@ -1,0 +1,41 @@
+High leverage points
+Not all points of high leverage are influential. While the high leverage observation corresponding to Bobby Scales in the previous exercise is influential, the three observations for players with OBP and SLG values of 0 are not influential.
+This is because they happen to lie right near the regression anyway. Thus, while their extremely low OBP gives them the power to exert influence over the slope of the regression line, their low SLG prevents them from using it.
+
+The linear model, mod, is available in your workspace. Use a combination of augment(), arrange() with two arguments, and head() to find the top 6 observations with the highest leverage but the lowest Cook's distance.
+
+# Rank high leverage points
+mod %>%
+  augment() %>%
+  arrange(desc(.hat)) %>%
+  head()
+
+# A tibble: 6 x 9
+    SLG   OBP .fitted .se.fit  .resid   .hat .sigma  .cooksd .std.resid
+  <dbl> <dbl>   <dbl>   <dbl>   <dbl>  <dbl>  <dbl>    <dbl>      <dbl>
+1 0     0     -0.0374 0.00996  0.0374 0.0194 0.0715 0.00277       0.529
+2 0     0     -0.0374 0.00996  0.0374 0.0194 0.0715 0.00277       0.529
+3 0     0     -0.0374 0.00996  0.0374 0.0194 0.0715 0.00277       0.529
+4 0.308 0.55   0.690  0.00916 -0.382  0.0164 0.0701 0.243        -5.39 
+5 0     0.037  0.0115 0.00877 -0.0115 0.0150 0.0715 0.000202     -0.162
+6 0.038 0.038  0.0128 0.00874  0.0252 0.0149 0.0715 0.000953      0.354
+
+
+
+
+
+
+# Rank high influence points
+> mod %>%
+    augment() %>%
+    arrange(desc(.cooksd)) %>%
+    head()
+# A tibble: 6 x 9
+    SLG   OBP .fitted .se.fit .resid    .hat .sigma .cooksd .std.resid
+  <dbl> <dbl>   <dbl>   <dbl>  <dbl>   <dbl>  <dbl>   <dbl>      <dbl>
+1 0.308 0.55   0.690  0.00916 -0.382 0.0164  0.0701  0.243       -5.39
+2 0.833 0.385  0.472  0.00419  0.361 0.00344 0.0703  0.0441       5.06
+3 0.8   0.455  0.565  0.00619  0.235 0.00749 0.0710  0.0411       3.30
+4 0.379 0.133  0.139  0.00579  0.240 0.00656 0.0710  0.0376       3.37
+5 0.786 0.438  0.542  0.00568  0.244 0.00631 0.0710  0.0371       3.42
+6 0.231 0.077  0.0645 0.00751  0.167 0.0110  0.0713  0.0306       2.34
