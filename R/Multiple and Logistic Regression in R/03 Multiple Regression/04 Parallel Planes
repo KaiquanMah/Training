@@ -1,0 +1,66 @@
+Visualizing parallel planes
+By including the duration, starting price, and condition variables in our model, we now have two explanatory variables and one categorical variable. Our model now takes the geometric form of two parallel planes!
+The first plane corresponds to the model output when the condition of the item is new, while the second plane corresponds to the model output when the condition of the item is used. The planes have the same slopes along both the duration and starting price axes—it is the z-intercept that is different.
+Once again we have stored the x and y vectors for you. Since we now have two planes, there are matrix objects plane0 and plane1 stored for you as well.
+
+Use plot_ly to draw 3D scatterplot for totalPr as a function of duration, startPr, and cond by mapping the z variable to the response and the x and y variables to the explanatory variables. Duration should be on the x-axis and starting price should be on the y-axis. Use color to represent cond.
+Use add_surface() (twice) to draw two planes through the cloud of points, one for new MarioKarts and another for used ones. Use the objects plane0 and plane1.
+
+>     head(plane0)
+         [,1]     [,2]     [,3]     [,4]     [,5]     [,6]     [,7]     [,8]
+[1,] 52.69075 52.89162 53.09248 53.29335 53.49421 53.69508 53.89594 54.09681
+[2,] 52.60519 52.80605 53.00692 53.20778 53.40865 53.60951 53.81038 54.01124
+[3,] 52.51962 52.72049 52.92135 53.12222 53.32308 53.52395 53.72481 53.92568
+[4,] 52.43406 52.63493 52.83579 53.03666 53.23752 53.43839 53.63925 53.84012
+[5,] 52.34850 52.54936 52.75023 52.95109 53.15196 53.35282 53.55369 53.75455
+[6,] 52.26293 52.46380 52.66466 52.86553 53.06639 53.26726 53.46812 53.66899
+...
+        [,65]    [,66]    [,67]    [,68]    [,69]    [,70]
+[1,] 65.54611 65.74697 65.94784 66.14870 66.34957 66.55043
+[2,] 65.46054 65.66141 65.86227 66.06314 66.26400 66.46487
+[3,] 65.37498 65.57584 65.77671 65.97757 66.17844 66.37930
+[4,] 65.28942 65.49028 65.69115 65.89201 66.09288 66.29374
+[5,] 65.20385 65.40472 65.60558 65.80645 66.00731 66.20818
+[6,] 65.11829 65.31916 65.52002 65.72088 65.92175 66.12261
+
+
+
+
+
+
+# draw the 3D scatterplot
+p <- plot_ly(data = mario_kart, z = ~totalPr, x = ~duration, y = ~startPr, opacity = 0.6) %>%
+  add_markers(color = ~cond) 
+
+
+# draw two planes
+p %>%
+  add_surface(x = ~x, y = ~y, z = ~plane0, showscale = FALSE) %>%
+  add_surface(x = ~x, y = ~y, z = ~plane1, showscale = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+Parallel plane interpretation
+The coefficients from our parallel planes model is shown below.
+
+Call:
+lm(formula = totalPr ~ duration + startPr + cond, data = mario_kart)
+
+Coefficients:
+(Intercept)     duration      startPr     condUsed  
+    53.3448      -0.6560       0.1982      -8.9493  
+Choose the right interpretation of β3 (the coefficient on condUsed):
+
+#yes The expected premium for new (relative to used) MarioKarts is $8.95, after controlling for the duration and starting price of the auction.
+
+The expected premium for used (relative to new) MarioKarts is $8.95, after controlling for the duration and starting price of the auction.
+For each additional day the auction lasts, the expected final price declines by $8.95, after controlling for starting price and condition.
+
