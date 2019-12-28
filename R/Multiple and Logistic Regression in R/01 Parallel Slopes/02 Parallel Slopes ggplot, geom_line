@@ -1,0 +1,56 @@
+Using geom_line() and augment()
+Parallel slopes models are so-named because we can visualize these models in the data space as not one line, but two parallel lines. To do this, we'll draw two things:
+a scatterplot showing the data, with color separating the points into groups
+a line for each value of the categorical variable
+
+Our plotting strategy is to compute the fitted values, plot these, and connect the points to form a line. The augment() function from the broom package provides an easy way to add the fitted values to our data frame, and the geom_line() function can then use that data frame to plot the points and connect them.
+Note that this approach has the added benefit of automatically coloring the lines appropriately to match the data.
+You already know how to use ggplot() and geom_point() to make the scatterplot. The only twist is that now you'll pass your augment()-ed model as the data argument in your ggplot() call. When you add your geom_line(), instead of letting the y aesthetic inherit its values from the ggplot() call, you can set it to the .fitted column of the augment()-ed model. This has the advantage of automatically coloring the lines for you.
+
+
+The parallel slopes model mod relating total price to the number of wheels and condition is already in your workspace.
+augment() the model mod and explore the returned data frame using glimpse(). Notice the new variables that have been created.
+Draw the scatterplot and save it as data_space by passing the augment()-ed model to ggplot() and using geom_point().
+Use geom_line() once to add two parallel lines corresponding to our model.
+
+> mod
+Call:
+lm(formula = totalPr ~ wheels + cond, data = mario_kart)
+
+Coefficients:
+(Intercept)       wheels     condused  
+     42.370        7.233       -5.585
+
+
+
+
+# Augment the model
+augmented_mod <- augment(mod)
+glimpse(augmented_mod)
+Observations: 141
+Variables: 10
+$ totalPr    <dbl> 51.55, 37.04, 45.50, 44.00, 71.00, 45.00, 37.02, 53.99, ...
+$ wheels     <int> 1, 1, 1, 1, 2, 0, 0, 2, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2,...
+$ cond       <fct> new, used, new, new, new, new, used, new, used, used, ne...
+$ .fitted    <dbl> 49.60260, 44.01777, 49.60260, 49.60260, 56.83544, 42.369...
+$ .se.fit    <dbl> 0.7087865, 0.5465195, 0.7087865, 0.7087865, 0.6764502, 1...
+$ .resid     <dbl> 1.9473995, -6.9777674, -4.1026005, -5.6026005, 14.164559...
+$ .hat       <dbl> 0.02103158, 0.01250410, 0.02103158, 0.02103158, 0.019156...
+$ .sigma     <dbl> 4.902339, 4.868399, 4.892414, 4.881308, 4.750591, 4.8998...
+$ .cooksd    <dbl> 1.161354e-03, 8.712334e-03, 5.154337e-03, 9.612441e-03, ...
+$ .std.resid <dbl> 0.40270893, -1.43671086, -0.84838977, -1.15857953, 2.926...
+
+
+
+# scatterplot, with color
+data_space <- ggplot(augmented_mod, aes(x = wheels, y = totalPr, color = cond)) + 
+  geom_point()
+  
+# single call to geom_line()
+data_space + 
+  geom_line(aes(y = .fitted))
+  
+  
+Thinking geometrically is great way to get your head around how linear models work.
+
+  
