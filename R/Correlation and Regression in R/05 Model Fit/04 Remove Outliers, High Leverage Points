@@ -15,15 +15,123 @@ nontrivial_players <- mlbBat10 %>%
   group_by(name) %>%
   filter(OBP<0.5 & AB>=10)
 
+> nontrivial_players
+# A tibble: 736 x 19
+# Groups:   name [692]
+   name  team  position     G    AB     R     H  `2B`  `3B`    HR   RBI    TB
+   <fct> <fct> <fct>    <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+ 1 I Su~ SEA   OF         162   680    74   214    30     3     6    43   268
+ 2 D Je~ NYY   SS         157   663   111   179    30     3    10    67   245
+ 3 M Yo~ TEX   3B         157   656    99   186    36     3    21    91   291
+ 4 J Pi~ CWS   OF         160   651    96   179    18     3     1    47   206
+ 5 R We~ MIL   2B         160   651   112   175    32     4    29    83   302
+ 6 M Sc~ BOS   SS         150   632    92   174    38     0    11    56   245
+ 7 N Ma~ BAL   OF         160   629    79   187    45     3    12    60   274
+ 8 D Sp~ MIN   OF         153   629    85   166    24    10     3    58   219
+ 9 R Ca~ NYY   2B         160   626   103   200    41     3    29   109   334
+10 B Ph~ CIN   2B         155   626   100   172    33     5    18    59   269
+# ... with 726 more rows, and 7 more variables: BB <dbl>, SO <dbl>, SB <dbl>,
+#   CS <dbl>, OBP <dbl>, SLG <dbl>, AVG <dbl>
+
+
+
+
+
 
 # Fit model to new data
 mod_cleaner <- lm(SLG ~ OBP, data=nontrivial_players)
+> mod_cleaner
+Call:
+lm(formula = SLG ~ OBP, data = nontrivial_players)
+
+Coefficients:
+(Intercept)          OBP  
+   -0.04333      1.34582
+
+
+
+
+
+
+
 
 # View model summary
+> summary(mod)
+Call:
+lm(formula = SLG ~ OBP, data = filter(mlbBat10, AB >= 10))
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.38249 -0.04085 -0.00202  0.03927  0.36089 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -0.037446   0.009957  -3.761 0.000183 ***
+OBP          1.323522   0.033408  39.617  < 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.0715 on 735 degrees of freedom
+Multiple R-squared:  0.6811,	Adjusted R-squared:  0.6806 
+F-statistic:  1570 on 1 and 735 DF,  p-value: < 2.2e-16
+
+
+
+
 summary(mod_cleaner)
+> summary(mod_cleaner)
+Call:
+lm(formula = SLG ~ OBP, data = nontrivial_players)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.31383 -0.04165 -0.00261  0.03992  0.35819 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -0.043326   0.009823  -4.411 1.18e-05 ***
+OBP          1.345816   0.033012  40.768  < 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.07011 on 734 degrees of freedom
+Multiple R-squared:  0.6937,	Adjusted R-squared:  0.6932 
+F-statistic:  1662 on 1 and 734 DF,  p-value: < 2.2e-16
+
+
+
+
+
+
+
+
+
+
+
+
 
 #understand model's resid
 augment(mod_cleaner)
+> augment(mod_cleaner)
+# A tibble: 736 x 9
+     SLG   OBP .fitted .se.fit  .resid    .hat .sigma   .cooksd .std.resid
+   <dbl> <dbl>   <dbl>   <dbl>   <dbl>   <dbl>  <dbl>     <dbl>      <dbl>
+ 1 0.394 0.359   0.440 0.00351 -0.0458 0.00251 0.0701 0.000538      -0.654
+ 2 0.37  0.34    0.414 0.00312 -0.0443 0.00198 0.0701 0.000396      -0.632
+ 3 0.444 0.33    0.401 0.00295  0.0432 0.00177 0.0701 0.000337       0.617
+ 4 0.316 0.341   0.416 0.00314 -0.0996 0.00200 0.0701 0.00203       -1.42 
+ 5 0.464 0.366   0.449 0.00367  0.0148 0.00274 0.0702 0.0000610      0.211
+ 6 0.388 0.333   0.405 0.00300 -0.0168 0.00183 0.0702 0.0000528     -0.240
+ 7 0.436 0.37    0.455 0.00376 -0.0186 0.00288 0.0702 0.000102      -0.266
+ 8 0.348 0.331   0.402 0.00296 -0.0541 0.00179 0.0701 0.000534      -0.773
+ 9 0.534 0.381   0.469 0.00404  0.0646 0.00331 0.0701 0.00141        0.922
+10 0.43  0.332   0.403 0.00298  0.0265 0.00181 0.0702 0.000130       0.379
+# ... with 726 more rows
+
+
+
+
+
 
 
 
@@ -31,7 +139,7 @@ augment(mod_cleaner)
 ggplot(nontrivial_players, aes(x=OBP, y=SLG)) +
   geom_point() +
   geom_abline(data=coef(mod_cleaner),
-              aes(intercept='(intercept)', slope=OBP)
+              aes(intercept='(intercept)', slope=`OBP`)
               )
               
 
@@ -39,4 +147,63 @@ ggplot(nontrivial_players, aes(x=OBP, y=SLG)) +
 ggplot(nontrivial_players, aes(x=OBP, y=SLG)) +
   geom_point() +
   geom_abline(intercept=-0.043326, slope=1.345816)
+              
+
+> coef(mod_cleaner)
+(Intercept)         OBP 
+-0.04332616  1.34581604
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+New solution
+# 1. removed group_by
+# Create nontrivial_players
+nontrivial_players <- mlbBat10 %>%
+  filter(OBP<0.5 & AB>=10)
+
+
+# Fit model to new data
+mod_cleaner <- lm(SLG ~ OBP, data=nontrivial_players)
+
+# View model summary
+summary(mod)
+summary(mod_cleaner)
+
+
+
+#understand model's resid
+augment(mod_cleaner)
+
+
+
+# 2. updated from geom_abline to geom_smooth
+# Visualize new model
+ggplot(data = nontrivial_players, aes(x = OBP, y = SLG)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+
               
