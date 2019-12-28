@@ -1,0 +1,172 @@
+R-squared vs. adjusted R-squared
+Two common measures of how well a model fits to data are R2 (the coefficient of determination) and the adjusted R2. The former measures the percentage of the variability in the response variable that is explained by the model. To compute this, we define
+R2 = 1 − SSE/SST,
+where SSE and SST are the sum of the squared residuals, and the total sum of the squares, respectively. One issue with this measure is that the SSE can only decrease as new variable are added to the model, while the SST depends only on the response variable and therefore is not affected by changes to the model. This means that you can increase R2 by adding any additional variable to your model—even random noise.
+
+The adjusted R2 includes a term that penalizes a model for each additional explanatory variable (where p is the number of explanatory variables).
+R2 adj = 1 − SSE/SST ⋅ (n−1)/(n−p−1),
+We can see both measures in the output of the summary() function on our model object.
+
+Use summary() to compute R2 and adjusted R2 on the model object called mod.
+Use mutate() and rnorm() to add a new variable called noise to the mario_kart data set that consists of random noise. Save the new dataframe as mario_kart_noisy.
+Use lm() to fit a model that includes wheels, cond, and the random noise term.
+Use summary() to compute R2 and adjusted R2 on the new model object. Did the value of R2 increase? What about adjusted R2?
+https://www.rdocumentation.org/packages/compositions/versions/1.40-3/topics/rnorm
+
+> glimpse(mario_kart)
+Observations: 141
+Variables: 12
+$ ID         <dbl> 150377422259, 260483376854, 320432342985, 280405224677, ...
+$ duration   <int> 3, 7, 3, 3, 1, 3, 1, 1, 3, 7, 1, 1, 1, 1, 7, 7, 3, 3, 1,...
+$ nBids      <int> 20, 13, 16, 18, 20, 19, 13, 15, 29, 8, 15, 15, 13, 16, 6...
+$ cond       <fct> new, used, new, new, new, new, used, new, used, used, ne...
+$ startPr    <dbl> 0.99, 0.99, 0.99, 0.99, 0.01, 0.99, 0.01, 1.00, 0.99, 19...
+$ shipPr     <dbl> 4.00, 3.99, 3.50, 0.00, 0.00, 4.00, 0.00, 2.99, 4.00, 4....
+$ totalPr    <dbl> 51.55, 37.04, 45.50, 44.00, 71.00, 45.00, 37.02, 53.99, ...
+$ shipSp     <fct> standard, firstClass, firstClass, standard, media, stand...
+$ sellerRate <int> 1580, 365, 998, 7, 820, 270144, 7284, 4858, 27, 201, 485...
+$ stockPhoto <fct> yes, yes, no, yes, yes, yes, yes, yes, yes, no, yes, yes...
+$ wheels     <int> 1, 1, 1, 1, 2, 0, 0, 2, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2,...
+$ title      <fct> "~~ Wii MARIO KART &amp; WHEEL ~ NINTENDO Wii ~ BRAND NE...
+
+
+> glimpse(mario_kart_noisy)
+Observations: 141
+Variables: 13
+$ ID         <dbl> 150377422259, 260483376854, 320432342985, 280405224677, ...
+$ duration   <int> 3, 7, 3, 3, 1, 3, 1, 1, 3, 7, 1, 1, 1, 1, 7, 7, 3, 3, 1,...
+$ nBids      <int> 20, 13, 16, 18, 20, 19, 13, 15, 29, 8, 15, 15, 13, 16, 6...
+$ cond       <fct> new, used, new, new, new, new, used, new, used, used, ne...
+$ startPr    <dbl> 0.99, 0.99, 0.99, 0.99, 0.01, 0.99, 0.01, 1.00, 0.99, 19...
+$ shipPr     <dbl> 4.00, 3.99, 3.50, 0.00, 0.00, 4.00, 0.00, 2.99, 4.00, 4....
+$ totalPr    <dbl> 51.55, 37.04, 45.50, 44.00, 71.00, 45.00, 37.02, 53.99, ...
+$ shipSp     <fct> standard, firstClass, firstClass, standard, media, stand...
+$ sellerRate <int> 1580, 365, 998, 7, 820, 270144, 7284, 4858, 27, 201, 485...
+$ stockPhoto <fct> yes, yes, no, yes, yes, yes, yes, yes, yes, no, yes, yes...
+$ wheels     <int> 1, 1, 1, 1, 2, 0, 0, 2, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2,...
+$ title      <fct> "~~ Wii MARIO KART &amp; WHEEL ~ NINTENDO Wii ~ BRAND NE...
+$ noise      <dbl> -0.62645381, 0.18364332, -0.83562861, 1.59528080, 0.3295...
+
+
+
+
+# R^2 and adjusted R^2
+summary(mod)
+
+Call:
+lm(formula = totalPr ~ wheels + cond, data = mario_kart)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-11.0078  -3.0754  -0.8254   2.9822  14.1646 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  42.3698     1.0651  39.780  < 2e-16 ***
+wheels        7.2328     0.5419  13.347  < 2e-16 ***
+condused     -5.5848     0.9245  -6.041 1.35e-08 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 4.887 on 138 degrees of freedom
+Multiple R-squared:  0.7165,	Adjusted R-squared:  0.7124 
+F-statistic: 174.4 on 2 and 138 DF,  p-value: < 2.2e-16
+
+
+
+
+
+
+# add random noise
+mario_kart_noisy <- mario_kart %>%
+  mutate(noise = rnorm(nrow(mario_kart)))
+
+# compute new model
+mod2 <- lm(formula = totalPr ~ wheels + cond + noise, data = mario_kart_noisy)
+
+
+# new R^2 and adjusted R^2
+summary(mod2)
+Call:
+lm(formula = totalPr ~ wheels + cond + noise, data = mario_kart_noisy)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-11.7225  -3.1021  -0.9504   3.3531  12.7307 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  42.7934     1.1083  38.612  < 2e-16 ***
+wheels        7.0785     0.5525  12.811  < 2e-16 ***
+condused     -5.8921     0.9501  -6.202 6.17e-09 ***
+noise        -0.5386     0.4026  -1.338    0.183    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 4.873 on 137 degrees of freedom
+Multiple R-squared:  0.7202,	Adjusted R-squared:  0.714 
+F-statistic: 117.5 on 3 and 137 DF,  p-value: < 2.2e-16
+
+#R2 and adjusted R2 increased slightly
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Prediction
+Once we have fit a regression model, we can use it to make predictions for unseen observations or retrieve the fitted values. Here, we explore two methods for doing the latter.
+A traditional way to return the fitted values (i.e. the y^'s) is to run the predict() function on the model object. This will return a vector of the fitted values. Note that predict() will take an optional newdata argument that will allow you to make predictions for observations that are not in the original data.
+A newer alternative is the augment() function from the broom package, which returns a data.frame with the response varible (y), the relevant explanatory variables (the x's), the fitted value (y^) and some information about the residuals (e). augment() will also take a newdata argument that allows you to make predictions.
+
+The fitted model mod is already in your environment.
+Compute the fitted values of the model as a vector using predict().
+Compute the fitted values of the model as one column in a data.frame using augment().
+
+# return a vector
+predict(mod)
+
+       1        2        3        4        5        6        7        8 
+49.60260 44.01777 49.60260 49.60260 56.83544 42.36976 36.78493 56.83544 
+...
+     137      138      139      140      141 
+36.78493 51.25061 49.60260 36.78493 56.83544
+
+
+
+# return a data frame
+augment(mod)
+
+    totalPr wheels cond  .fitted   .se.fit       .resid       .hat   .sigma
+1     51.55      1  new 49.60260 0.7087865   1.94739955 0.02103158 4.902339
+2     37.04      1 used 44.01777 0.5465195  -6.97776738 0.01250410 4.868399
+3     45.50      1  new 49.60260 0.7087865  -4.10260045 0.02103158 4.892414
+4     44.00      1  new 49.60260 0.7087865  -5.60260045 0.02103158 4.881308
+5     71.00      2  new 56.83544 0.6764502  14.16455915 0.01915635 4.750591
+6     45.00      0  new 42.36976 1.0651119   2.63023994 0.04749321 4.899816
+...
+
+         .cooksd   .std.resid
+1   1.161354e-03  0.402708933
+2   8.712334e-03 -1.436710863
+3   5.154337e-03 -0.848389768
+4   9.612441e-03 -1.158579529
+5   5.574926e-02  2.926332759
+6   5.053659e-03  0.551419180
+...
+
+
