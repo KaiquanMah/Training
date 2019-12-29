@@ -1,0 +1,107 @@
+pwr package Help Docs exploration
+The pwr package has been loaded for you. Use the console to look at the documentation for the pwr.t.test() function. The list of arguments are specialized for a t-test and include the ability to specify the alternative hypothesis.
+If you'd like, take some time to explore the different pwr package functions and read about their inputs.
+
+What does a call to any pwr.*() function yield?
+pwr-package
+
+Basic Functions For Power Analysis Pwr
+Power calculations along the lines of Cohen (1988) using in particular the same notations for effect sizes. Examples from the book are given.
+This package contains functions for basic power calculations using effect sizes and notations from Cohen (1988) : pwr.p.test: test for one proportion (ES=h) pwr.2p.test: test for two proportions (ES=h) pwr.2p2n.test: test for two proportions (ES=h, unequal sample sizes) pwr.t.test: one sample and two samples (equal sizes) t tests for means (ES=d) pwr.t2n.test: two samples (different sizes) t test for means (ES=d) pwr.anova.test: test for one-way balanced anova (ES=f) pwr.r.test: correlation test (ES=r) pwr.chisq.test: chi-squared test (ES=w) pwr.f2.test: test for the general linear model (ES=f2) ES.h: computing effect size h for proportions tests ES.w1: computing effect size w for the goodness of fit chi-squared test ES.w2: computing effect size w for the association chi-squared test cohen.ES: computing effect sizes for all the previous tests corresponding to conventional effect sizes (small, medium, large)
+
+See Also
+power.t.test,power.prop.test,power.anova.test
+
+
+
+#not A vector containing the thing to be calculated.
+#not A data frame of the power, sample size, and other inputs.
+#not An object of class "integer".
+
+#yes An object of class "power.htest".
+A call to any pwr.*() function returns an object of class power.htest, which can then be manipulated in the same way as many different R objects.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Power & Sample Size Calculations
+One key part of designing an experiment is knowing the required sample size you'll need to be able to test your hypothesis.
+The pwr package provides a handy function, pwr.t.test(), which will calculate that for you. However, you do need to know your desired significance level (often 0.05), if the test is one- or two-sided, if the data is from one sample, two samples, or paired, the effect size, and the power. Some of this information will be given to you or can be reasoned from the design.
+A power or sample size calculation is usually different each time you conduct one, and the details of the calculation strongly depend on what kind of experiment you're designing and what your end goals are.
+
+Load the pwr package.
+Calculate power using an effect size of 0.35, a sample size of 100 in each group, and a significance level of 0.10.
+# Load the pwr package
+library(pwr)
+
+# Calculate power
+pwr.t.test(n = 100, 
+           d = 0.35,
+           sig.level = 0.10,
+           type = "two.sample", 
+           alternative = "two.sided",
+           power = NULL)
+
+     Two-sample t test power calculation 
+
+              n = 100
+              d = 0.35
+      sig.level = 0.1
+          power = 0.7943532
+    alternative = two.sided
+
+NOTE: n is number in *each* group
+
+
+
+
+Calculate the sample size needed with an effect size of 0.25, a significance level of 0.05, and a power of 0.8.
+# Calculate sample size
+pwr.t.test(n = NULL, 
+           d = 0.25, 
+           sig.level = 0.05, 
+           type = "one.sample", alternative = "greater", 
+           power = 0.8)
+
+     One-sample t test power calculation 
+
+              n = 100.2877
+              d = 0.25
+      sig.level = 0.05
+          power = 0.8
+    alternative = greater
+
+Because this sample size calculation was for a one-sided test, we only need 101 subjects, not 101 in each group. As you design experiments in the future, the pwr package includes functions for calculating power and sample size for a variety of different tests, including ANOVA (more on that in the next chapter!)
+
+
+
+
+
+
+
+> pwr.t.test(n = NULL, 
+             d = 0.35,
+             sig.level = 0.10,
+             type = "two.sample", 
+             alternative = "two.sided",
+             power = 0.8)
+
+     Two-sample t test power calculation 
+
+              n = 101.6177
+              d = 0.35
+      sig.level = 0.1
+          power = 0.8
+    alternative = two.sided
+
+NOTE: n is number in *each* group
+
