@@ -1,0 +1,67 @@
+How does loan purpose affect amount funded?
+In the last exercise, we pared the purpose variable down to a more reasonable 4 categories and called it purpose_recode. As a data scientist at Lending Club, we might want to design an experiment where we examine how the loan purpose influences the amount funded, which is the money actually issued to the applicant.
+Remember that for an ANOVA test, the null hypothesis will be that all of the mean funded amounts are equal across the levels of purpose_recode. The alternative hypothesis is that at least one level of purpose_recode has a different mean. We will not be sure which, however, without some post hoc analysis, so it will be helpful to know how ANOVA results get stored as an object in R.
+
+Use lm() to look at how the purpose_recode variable affects funded_amnt. Save the model as an object called purpose_recode_model.
+Usesummary() to examine purpose_recode_model. These are the results of the linear regression.
+Call anova() on purpose_recode_model. Save as an object called purpose_recode_anova. Print it to the console by typing it.
+Finally, examine the class of purpose_recode_anova.
+
+
+# Build a linear regression model, purpose_recode_model
+purpose_recode_model <- lm(funded_amnt ~ purpose_recode, data = lendingclub)
+
+# Examine results of purpose_recode_model
+summary(purpose_recode_model)
+
+Call:
+lm(formula = funded_amnt ~ purpose_recode, data = lendingclub)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-14472  -6251  -1322   4678  25761 
+
+Coefficients:
+                               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                      9888.1     1248.9   7.917 4.69e-15 ***
+purpose_recodedebt_related       5433.5     1270.5   4.277 2.02e-05 ***
+purpose_recodehome_related       4845.0     1501.0   3.228  0.00127 ** 
+purpose_recodelife_change        4095.3     2197.2   1.864  0.06254 .  
+purpose_recodeother              -649.3     1598.3  -0.406  0.68461    
+purpose_recoderenewable_energy  -1796.4     4943.3  -0.363  0.71636    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 8284 on 1494 degrees of freedom
+Multiple R-squared:  0.03473,	Adjusted R-squared:  0.0315 
+F-statistic: 10.75 on 5 and 1494 DF,  p-value: 3.598e-10
+
+
+
+
+# Get anova results and save as purpose_recode_anova
+purpose_recode_anova <- anova(purpose_recode_model)
+
+# Print purpose_recode_anova
+purpose_recode_anova
+
+
+Analysis of Variance Table
+
+Response: funded_amnt
+                 Df     Sum Sq   Mean Sq F value    Pr(>F)    
+purpose_recode    5 3.6888e+09 737756668   10.75 3.598e-10 ***
+Residuals      1494 1.0253e+11  68629950                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+
+
+
+# Examine class of purpose_recode_anova
+class(purpose_recode_anova)
+[1] "anova"      "data.frame"
+
+Based on the very small p-value, purpose_recode_anova's results indicate that there is evidence to support the hypothesis that the mean loan amounts are different for at least one combination of purpose_recode's levels. You also saw that the ANOVA results are saved as a data frame, which is nice in case you need to access results later. Loans aren't issued in a vacuum, however, and it's likely that more than just purpose influences the amount funded.
+
+
