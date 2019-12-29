@@ -1,0 +1,36 @@
+Randomization
+Randomization of subjects in an experiment helps spread any variability that exists naturally between subjects evenly across groups. For ToothGrowth, an example of effective randomization would be randomly assigning male and female guinea pigs into different experimental groups, ideally canceling out any existing differences that naturally exist between male and female guinea pigs.
+In the experiment that yielded the ToothGrowth dataset, guinea pigs were randomized to receive Vitamin C either through orange juice or ascorbic acid, indicated in the dataset by the supp variable. It's natural to wonder if there is a difference in tooth length by supplement type - a question that a t-test can also answer!
+
+Starting with this exercise, you should use t.test() and other modeling functions with formula notation:
+t.test(outcome ~ explanatory_variable, data = dataset)
+
+This can be read: "test outcome by explanatory_variable in my dataset." The default test for t.test() is a two-sided t-test.
+You no longer have to explicitly declare dataset$outcome, because the data argument is specified.
+
+Conduct the proper test to determine if there is a difference in tooth length based on supplement type, and save the results as an object ToothGrowth_ttest.
+Load the broom package.
+Tidy the ToothGrowth_ttest with tidy(). This will print the results to the console.
+
+> str(ToothGrowth)
+'data.frame':	60 obs. of  3 variables:
+ $ len : num  4.2 11.5 7.3 5.8 6.4 10 11.2 11.2 5.2 7 ...
+ $ supp: Factor w/ 2 levels "OJ","VC": 2 2 2 2 2 2 2 2 2 2 ...
+ $ dose: num  0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 ...
+ 
+# Perform a t-test
+ToothGrowth_ttest <- t.test(len ~ supp, data = ToothGrowth)
+
+# Load broom
+library(broom)
+
+# Tidy ToothGrowth_ttest
+tidy(ToothGrowth_ttest)
+# A tibble: 1 x 10
+  estimate estimate1 estimate2 statistic p.value parameter conf.low conf.high
+     <dbl>     <dbl>     <dbl>     <dbl>   <dbl>     <dbl>    <dbl>     <dbl>
+1     3.70      20.7      17.0      1.92  0.0606      55.3   -0.171      7.57
+# ... with 2 more variables: method <chr>, alternative <chr>
+
+Given the p-value of around 0.06, there seems to be no evidence to support the hypothesis that there's a difference in mean tooth length by supplement type, or, more simply, that there is no difference in mean tooth length by supplement type. Generally in most experiments, any p-value above 0.05 will offer no evidence to support the given hypothesis.
+
