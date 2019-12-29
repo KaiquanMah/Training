@@ -1,0 +1,80 @@
+Exploratory Data Analysis (EDA) Lending Club
+A sample of 1500 observations from the Lending Club dataset has been loaded for you and is called lendingclub. Let's do some EDA on the data, in hopes that we'll learn what the dataset contains. We'll use functions from dplyr and ggplot2 to explore the data.
+
+Use glimpse() from dplyr to look at the variable names, types, and some observations.
+#Examine the variables with glimpse()
+glimpse(lendingclub)
+
+Observations: 1,500
+Variables: 12
+$ member_id           <int> 55096114, 1555332, 1009151, 69524202, 72128084,...
+$ loan_amnt           <int> 11000, 10000, 13000, 5000, 18000, 14000, 8000, ...
+$ funded_amnt         <int> 11000, 10000, 13000, 5000, 18000, 14000, 8000, ...
+$ term                <fct> 36 months, 36 months, 60 months, 36 months, 36 ...
+$ int_rate            <dbl> 12.69, 6.62, 10.99, 12.05, 5.32, 16.99, 13.11, ...
+$ emp_length          <fct> 10+ years, 10+ years, 3 years, 10+ years, 10+ y...
+$ home_ownership      <fct> RENT, MORTGAGE, MORTGAGE, MORTGAGE, MORTGAGE, M...
+$ annual_inc          <dbl> 51000, 40000, 78204, 51000, 96000, 47000, 40000...
+$ verification_status <fct> Not Verified, Verified, Not Verified, Not Verif...
+$ loan_status         <fct> Current, Fully Paid, Fully Paid, Current, Curre...
+$ purpose             <fct> debt_consolidation, debt_consolidation, home_im...
+$ grade               <fct> C, A, B, C, A, D, C, A, D, B, C, B, E, C, A, C,...
+
+
+
+
+Pipe the dataset into summarize() and find the median loan amount, mean interest rate, and mean annual income. No need to name these outputs anything.
+# with naming
+# Find median loan_amnt and mean int_rate, annual_inc with summarize()
+lendingclub %>%
+  summarise(median_loan = median(loan_amnt),
+            mean_int = mean(int_rate),
+            mean_inc = mean(annual_inc))
+  median_loan mean_int mean_inc
+1       13000 13.31472 75736.03
+
+
+# without naming
+# Find median loan_amnt and mean int_rate, annual_inc with summarize()
+lendingclub %>%
+  summarize(median(loan_amnt),
+            mean(int_rate),
+            mean(annual_inc))
+
+
+
+
+
+
+
+
+Use ggplot2 to build a bar chart of counts of responses to the purpose variable. The axes have been flipped for you using coord_flip() so the labels are easier to read.
+# Use ggplot2 to build a bar chart of purpose
+#	coord_flip() transposes the chart to show x-axis on the y-axis, and y-axis on the x-axis
+ggplot(lendingclub, aes(x=purpose)) +
+    geom_bar() +
+	coord_flip()
+
+
+
+
+
+Run the code to use recode(), creating the purpose_recode variable, which takes purpose and pares it down to a more manageable number of levels; we're creating 4 (debt_related, big_purchase, home_related, life_change.)
+# Use recode() to create the new purpose_recode variable
+lendingclub$purpose_recode <- lendingclub$purpose %>% 
+    recode( 
+          "credit_card" = "debt_related", 
+          "debt_consolidation" = "debt_related",
+          "medical" = "debt_related",
+          "car" = "big_purchase", 
+          "major_purchase" = "big_purchase", 
+          "vacation" = "big_purchase",
+          "moving" = "life_change", 
+          "small_business" = "life_change", 
+          "wedding" = "life_change",
+          "house" = "home_related", 
+          "home_improvement" = "home_related"
+          )
+
+You can see that the original purpose variable had quite a few levels, which were very detailed. By using recode() here, you created purpose_recode, which has a much more manageable 4 general levels that describe the purpose for people's loans.
+
