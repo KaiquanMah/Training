@@ -1,0 +1,89 @@
+Parallel lines with location
+In real estate, a common mantra is that the three most important factors in determining the price of a property are "location, location, and location." If location drives up property values and rents, then we might imagine that location would increase a restaurant's costs, which would result in them having higher prices. In many parts of New York, the east side (east of 5th Avenue) is more developed and perhaps more expensive. [This is increasingly less true, but was more true at the time these data were collected.]
+Let's expand our model into a parallel slopes model by including the East variable in addition to Food.
+Use lm() to fit a parallel slopes model for Price as a function of Food and East. Interpret the coefficients and the fit of the model. Can you explain the meaning of the coefficient on East in simple terms? Did the coefficient on Food change from the previous model? If so, why? Did it change by a lot or just a little?
+
+Identify the statement that is FALSE:
+#true Each additional rating point of food quality is associated with a $2.88 increase in the expected price of meal, after controlling for location.
+#true The premium for an Italian restaurant in NYC associated with being on the east side of 5th Avenue is $1.46, after controlling for the quality of the food.
+
+#false The change in the coefficient of food from $2.94 in the simple linear model to $2.88 in this model has profound practical implications for restaurant owners.
+
+> lm(Price ~ Food, data=nyc)
+Call:
+lm(formula = Price ~ Food, data = nyc)
+
+Coefficients:
+(Intercept)         Food  
+    -17.832        2.939
+    
+    
+> lm(Price ~ Food + East, data=nyc)
+
+Call:
+lm(formula = Price ~ Food + East, data = nyc)
+
+Coefficients:
+(Intercept)         Food         East  
+    -17.430        2.875        1.459
+
+
+
+
+
+
+
+
+
+
+
+
+A plane in 3D
+One reason that many people go to a restaurant—apart from the food—is that they don't have to cook or clean up. Many people appreciate the experience of being waited upon, and we can all agree that the quality of the service at restaurants varies widely. Are people willing to pay more for better restaurant Service? More interestingly, are they willing to pay more for better service, after controlling for the quality of the food?
+Multiple regression gives us a way to reason about these questions. Fit the model with Food and Service and interpret the coefficients and fit. Did the coefficient on Food change from the previous model? What do the coefficients on Food and Service tell you about how these restaurants set prices?
+Next, let's visually assess our model using plotly. The x and y vectors, as well as the plane matrix, have been created for you.
+
+Use lm() to fit a multiple regression model for Price as a function of Food and Service.
+Use plot_ly to draw 3D scatterplot for Price as a function of Food and Service by mapping the z variable to the response and the x and y variables to the explanatory variables. Place the food quality on the x-axis and service rating on the y-axis.
+Use add_surface() to draw a plane through the cloud of points using the object plane.
+
+>   head(plane)
+         [,1]     [,2]     [,3]     [,4]     [,5]     [,6]     [,7]     [,8]
+[1,] 26.62474 26.97251 27.32029 27.66806 28.01584 28.36361 28.71139 29.05917
+[2,] 26.89939 27.24717 27.59495 27.94272 28.29050 28.63827 28.98605 29.33383
+[3,] 27.17405 27.52183 27.86961 28.21738 28.56516 28.91293 29.26071 29.60848
+[4,] 27.44871 27.79649 28.14427 28.49204 28.83982 29.18759 29.53537 29.88314
+[5,] 27.72337 28.07115 28.41893 28.76670 29.11448 29.46225 29.81003 30.15780
+[6,] 27.99803 28.34581 28.69358 29.04136 29.38914 29.73691 30.08469 30.43246
+...
+        [,49]    [,50]
+[1,] 43.31797 43.66575
+[2,] 43.59263 43.94041
+[3,] 43.86729 44.21507
+[4,] 44.14195 44.48973
+[5,] 44.41661 44.76438
+[6,] 44.69127 45.03904
+
+
+
+
+
+# fit model
+lm(Price ~ Food + Service, data=nyc)
+Call:
+lm(formula = Price ~ Food + Service, data = nyc)
+
+Coefficients:
+(Intercept)         Food      Service  
+    -21.159        1.495        1.704
+    
+# draw 3D scatterplot
+p <- plot_ly(data = nyc, z = ~Price, x = ~Food, y = ~Service, opacity = 0.6) %>%
+  add_markers() 
+
+# draw a plane
+p %>%
+  add_surface(x = ~x, y = ~y, z = ~plane, showscale = FALSE) 
+  
+Is it surprising how service affects the price of a meal?
+
