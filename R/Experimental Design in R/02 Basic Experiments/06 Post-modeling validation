@@ -1,0 +1,27 @@
+Post-modeling validation plots + variance
+In the last exercise, we found that int_rate does differ by grade. Now we should validate this model, which for linear regression means examining the Residuals vs. Fitted and Normal Q-Q plots.
+If you call plot() on a model object in R, it will automatically plot both of those plots plus two more. You'll interpret these plots to evaluate model fit. We discussed how to do this in the video.
+Another assumption of ANOVA and linear modeling is homogeneity of variance. Homogeneity means "same", and here that would mean that the variance of int_rate is the same for each level of grade. We can test for homogeneity of variances using bartlett.test(), which takes a formula and a dataset as inputs.
+
+Run the first line of code with par() so the plots will output in a 2 by 2 grid.
+Call plot() on grade_aov (which has been created for you) to produce the model diagnostic plots.
+Test for homogeneity of variances using bartlett.test().
+
+
+# For a 2x2 grid of plots:
+par(mfrow=c(2, 2))
+
+# Plot grade_aov
+#Residuals vs. Fitted plot
+#Normal Q-Q plot
+plot(grade_aov)
+
+# Bartlett's test for homogeneity of variance
+bartlett.test(int_rate ~ grade, data=lendingclub)
+
+	Bartlett test of homogeneity of variances
+
+data:  int_rate by grade
+Bartlett's K-squared = 78.549, df = 6, p-value = 7.121e-15
+
+The residuals on this model are okay, though the residuals on G have a much smaller range than any other level of grade (the dots are far less spread out.) The Q-Q plot, however, shows that the residuals are fairly normal. However, given the highly significant p-value from Bartlett's test, the assumption of homogeneity of variances is violated, which is one of the assumptions of an ANOVA model. Therefore, ANOVA might not be the best choice for this experiment. It happens!
