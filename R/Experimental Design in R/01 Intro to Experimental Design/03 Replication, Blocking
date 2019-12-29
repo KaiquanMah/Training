@@ -1,0 +1,69 @@
+Replication
+Recall that replication means you need to conduct an experiment with an adequate number of subjects to achieve an acceptable statistical power. Sample size and power will be discussed in more detail later in this chapter.
+Let's examine the ToothGrowth dataset to make sure they followed the principle of replication. We'll use dplyr to do some exploratory data analysis (EDA). The data has already been loaded for you.
+
+When using dplyr functions, we can utilize the pipe operator, %>%, to chain functions together. An example using mtcars:
+data(mtcars)
+
+mtcars %>%
+    count(cyl)
+count() groups mtcars by cyl and then counts how many there are of each number of cylinders.
+
+Load the dplyr package.
+Use count() to determine how many guinea pigs were given each supplement and dose.
+
+# Load dplyr
+library(dplyr)
+
+# Count number of observations for each combination of supp and dose
+ToothGrowth %>% 
+    count(supp, dose)
+
+# A tibble: 6 x 3
+  supp   dose     n
+  <fct> <dbl> <int>
+1 OJ      0.5    10
+2 OJ      1      10
+3 OJ      2      10
+4 VC      0.5    10
+5 VC      1      10
+6 VC      2      10
+
+
+
+
+
+
+
+
+
+
+Blocking
+Though this is not true, suppose the supplement type is actually a nuisance factor we'd like to control for by blocking, and we're actually only interested in the effect of the dose of Vitamin C on guinea pig tooth growth.
+If we block by supplement type, we create groups that are more similar, in that they'll have the same supplement type, allowing us to examine only the effect of dose on tooth length.
+We'll use the aov() function to examine this. aov() creates a linear regression model by calling lm() and examining results with anova() all in one function call. To use aov(), we'll still need functional notation, as with the randomization exercise, but this time the formula should be len ~ dose + supp to indicate we've blocked by supplement type. (We'll cover aov() and anova() in more detail in the next chapter.)
+ggplot2 is loaded for you.
+
+Make a boxplot to visually examine if the tooth length is different by dose. dose has been converted to a factor variable for you.
+Use aov() to detect the effect of dose and supp on len. Save as a model object called ToothGrowth_aov.
+Examine ToothGrowth_aov with summary() to determine if dose has a significant effect on tooth length.
+
+# Create a boxplot with geom_boxplot()
+ggplot(ToothGrowth, aes(x = dose, y = len)) + 
+    geom_boxplot()
+
+# Create ToothGrowth_aov
+ToothGrowth_aov <- aov(len ~ dose + supp, data = ToothGrowth)
+
+# Examine ToothGrowth_aov with summary()
+summary(ToothGrowth_aov)
+            Df Sum Sq Mean Sq F value   Pr(>F)    
+dose         2 2426.4  1213.2   82.81  < 2e-16 ***
+supp         1  205.4   205.4   14.02 0.000429 ***
+Residuals   56  820.4    14.7                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+
+You have just designed your first Randomized Complete Block Design (RCBD) experiment. We'll learn more about this type of experiment in Chapter 3. Given the very small observed p-value for dose, it appears we have evidence to support the hypothesis that mean len is different by dose amount.
+
