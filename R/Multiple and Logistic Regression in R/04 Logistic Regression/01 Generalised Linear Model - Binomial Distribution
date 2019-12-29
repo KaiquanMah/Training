@@ -1,0 +1,82 @@
+Fitting a line to a binary response
+When our response variable is binary, a regression model has several limitations. Among the more obvious—and logically incongruous—is that the regression line extends infinitely in either direction. This means that even though our response variable y only takes on the values 0 and 1, our fitted values y^ can range anywhere from −∞ to ∞. This doesn't make sense.
+To see this in action, we'll fit a linear regression model to data about 55 students who applied to medical school. We want to understand how their undergraduate GPA relates to the probability they will be accepted by a particular school (Acceptance).
+
+The medical school acceptance data is loaded in your workspace as MedGPA.
+Create a scatterplot called data_space for Acceptance as a function of GPA. Use geom_jitter() to apply a small amount of jitter to the points in the y-direction by setting width = 0 and height = 0.05.
+Use geom_smooth() to add the simple linear regression line to data_space.
+
+# scatterplot with jitter
+data_space <- ggplot(MedGPA, aes(x=GPA, y=Acceptance)) + 
+  geom_jitter(width = 0, height = 0.05, alpha = 0.5)
+
+# linear regression line
+data_space + 
+  geom_smooth(method="lm", se=FALSE)
+
+
+
+
+
+
+
+
+
+
+Fitting a line to a binary response (2)
+In the previous exercise, we identified a major limitation to fitting a linear regression model when we have a binary response variable. However, it is not always inappropriate to do so. Note that our regression line only makes illogical predictions (i.e. y^<0 or y^>1) for students with very high or very low GPAs. For GPAs closer to average, the predictions seem fine.
+Moreover, the alternative logistic regression model — which we will fit next — is very similar to the linear regression model for observations near the average of the explanatory variable. It just so happens that the logistic curve is very straight near its middle. Thus, in these cases a linear regression model may still be acceptable, even for a binary response.
+
+Use filter() to find the subset of the observations in MedGPA whose GPAs are between 3.375 and 3.77, inclusive.
+Create a scatterplot called data_space for Acceptance as a function of GPA for only those observations. Use geom_jitter() to apply 0.05 jitter to the points in the y-direction and no jitter to the x direction.
+Use geom_smooth() to add only the simple linear regression line to data_space.
+
+# filter
+MedGPA_middle <- MedGPA %>%
+  filter(GPA >= 3.375 & GPA <= 3.77)
+
+# scatterplot with jitter
+data_space <- ggplot(MedGPA_middle, aes(x=GPA, y=Acceptance)) + 
+  geom_jitter(width = 0, height = 0.05, alpha = 0.5)
+
+# linear regression line
+data_space + 
+  geom_smooth(method="lm", se=FALSE)
+  
+  
+  
+  
+  
+
+
+
+
+
+Fitting a model
+Logistic regression is a special case of a broader class of generalized linear models, often known as GLMs. Specifying a logistic regression model is very similar to specify a regression model, with two important differences:
+
+We use the glm() function instead of lm()
+We specify the family argument and set it to binomial. This tells the GLM function that we want to fit a logistic regression model to our binary response. [The terminology stems from the assumption that our binary response follows a binomial distribution.]
+We still use the formula and data arguments with glm().
+https://en.wikipedia.org/wiki/Generalized_linear_model
+https://en.wikipedia.org/wiki/Binomial_distribution
+
+Note that the mathematical model is now:
+log(y1−y) = β0 + β1⋅x + ϵ,
+where ϵ is the error term.
+
+# fit model
+glm(Acceptance ~ GPA, data = MedGPA, family = binomial)
+
+Call:  glm(formula = Acceptance ~ GPA, family = binomial, data = MedGPA)
+
+Coefficients:
+(Intercept)          GPA  
+    -19.207        5.454  
+
+Degrees of Freedom: 54 Total (i.e. Null);  53 Residual
+Null Deviance:	    75.79 
+Residual Deviance: 56.84 	AIC: 60.84
+
+
+
