@@ -1,0 +1,54 @@
+Pre-modeling EDA
+Let's do some EDA with our experiment in mind. Lending Club has now asked you, their data scientist, to examine what effect their Lending Club-assigned loan grade variable has on the interest rate, int_rate. They're interested to see if the grade they assign the applicant during the process of applying for the loan affects the interest rate ultimately assigned to the applicant during the repayment process.
+The lendingclub data has been loaded for you, as has dplyr and ggplot2.
+
+Use summary() to look at the int_rate variable, and examine its range and interquartile range.
+# Examine the summary of int_rate
+summary(lendingclub$int_rate)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   5.32    9.99   12.99   13.31   16.29   26.77
+   
+   
+   
+Using dplyr, examine the mean, variance, and median of int_rate by grade.
+# Examine int_rate by grade
+lendingclub %>% 
+	group_by(grade) %>% 
+	summarize(mean = mean(int_rate), var = var(int_rate), median = median(int_rate))
+# A tibble: 7 x 4
+  grade  mean   var median
+  <fct> <dbl> <dbl>  <dbl>
+1 A      7.27 0.961   7.26
+2 B     10.9  2.08   11.0 
+3 C     14.0  1.42   14.0 
+4 D     17.4  1.62   17.6 
+5 E     20.1  2.71   20.0 
+6 F     23.6  2.87   23.5 
+7 G     26.1  0.198  25.9
+
+
+
+Use ggplot2 to create a boxplot of int_rate by grade.
+# Make a boxplot of int_rate by grade
+ggplot(data=lendingclub, aes(x=grade, y=int_rate)) +
+	geom_boxplot()
+  
+
+
+
+
+
+Save a linear model examining this experiment in an object called grade_aov. Print the results by calling summary().
+# Use aov() to create grade_aov plus call summary() to print results
+grade_aov <- aov(int_rate ~ grade, data = lendingclub)
+
+summary(grade_aov)
+
+              Df Sum Sq Mean Sq F value Pr(>F)    
+grade          6  27013    4502    2637 <2e-16 ***
+Residuals   1493   2549       2                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+You can see from the numeric summary and the boxplot that grade seems to heavily influence interest rate. Therefore, the linear model results indicating that int_rate is significantly different by grade are unsurprising.
+
