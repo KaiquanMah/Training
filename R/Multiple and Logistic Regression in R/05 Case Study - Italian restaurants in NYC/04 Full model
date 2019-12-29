@@ -1,0 +1,46 @@
+Full model
+One variable we haven't considered is Decor. Do people, on average, pay more for a meal in a restaurant with nicer decor? If so, does it still matter after controlling for the quality of food, service, and location?
+By adding a third numeric explanatory variable to our model, we lose the ability to visualize the model in even three dimensions. Our model is now a hyperplane -- or rather, parallel hyperplanes -- and while we won't go any further with the geometry, know that we can continue to add as many variables to our model as we want. As humans, our spatial visualization ability taps out after three numeric variables (maybe you could argue for four, but certainly no further), but neither the mathematical equation for the regression model, nor the formula specification for the model in R, is bothered by the higher dimensionality.
+Use lm() to fit a parallel planes model for Price as a function of Food, Service, Decor, and East.
+Notice the dramatic change in the value of the Service coefficient.
+https://en.wikipedia.org/wiki/Hyperplane
+
+Which of the following interpretations is invalid?
+
+#valid Since the quality of food, decor, and service were all strongly correlated, multicollinearity is the likely explanation.
+#valid Once we control for the quality of food, decor, and location, the additional information conveyed by service is negligible.
+
+#invalid Service is not an important factor in determining the price of a meal.
+
+
+> lm(Price ~ Food + Service + Decor + East, data=nyc)
+
+Call:
+lm(formula = Price ~ Food + Service + Decor + East, data = nyc)
+
+Coefficients:
+(Intercept)         Food      Service        Decor         East  
+ -24.023800     1.538120    -0.002727     1.910087     2.068050
+
+
+> lm(Price ~ Food + Service + East, data=nyc)
+
+Call:
+lm(formula = Price ~ Food + Service + East, data = nyc)
+
+Coefficients:
+(Intercept)         Food      Service         East  
+   -20.8155       1.4863       1.6647       0.9649
+   
+   
+   
+   
+   > lm(Price ~ Food + Decor + East, data=nyc)
+
+Call:
+lm(formula = Price ~ Food + Decor + East, data = nyc)
+
+Coefficients:
+(Intercept)         Food        Decor         East  
+    -24.027        1.536        1.909        2.067
+    
