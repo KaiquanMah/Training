@@ -1,0 +1,68 @@
+Parallel planes with location
+We have explored models that included the quality of both food and service, as well as location, but we haven't put these variables all into the same model. Let's now build a parallel planes model that incorporates all three variables.
+Examine the coefficients closely. Do they make sense based on what you understand about these data so far? How did the coefficients change from the previous models that you fit?
+
+# Price by Food and Service and East
+lm(Price ~ Food + Service + East, data=nyc)
+
+Call:
+lm(formula = Price ~ Food + Service + East, data = nyc)
+
+Coefficients:
+(Intercept)         Food      Service         East  
+   -20.8155       1.4863       1.6647       0.9649
+   
+Does it seem like location has a big impact on price?
+
+   
+   
+   
+   
+Interpretation of location coefficient
+The fitted coefficients from the parallel planes model are listed below.
+
+(Intercept)        Food     Service        East 
+-20.8154761   1.4862725   1.6646884   0.9648814 
+
+Reason about the magnitude of the East coefficient.
+Which of the following statements is FALSE?
+
+
+#true The premium for being on the East side of 5th Avenue is just less than a dollar, after controlling for the quality of food and service.
+#true The impact of location is relatively small, since one additional rating point of either food or service would result in a higher expected price than moving a restaurant from the West side to the East side.
+
+#false The expected price of a meal on the East side is about 96% of the cost of a meal on the West side, after controlling for the quality of food and service.
+   
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Impact of location
+The impact of location brings us to a modeling question: should we keep this variable in our model? In a later course, you will learn how we can conduct formal hypothesis tests to help us answer that question. In this course, we will focus on the size of the effect. Is the impact of location big or small?
+One way to think about this would be in terms of the practical significance. Is the value of the coefficient large enough to make a difference to your average person? The units are in dollars so in this case this question is not hard to grasp.
+Another way is to examine the impact of location in the context of the variability of the other variables. We can do this by building our parallel planes in 3D and seeing how far apart they are. Are the planes close together or far apart? Does the East variable clearly separate the data into two distinct groups? Or are the points all mixed up together?
+
+Use plot_ly to draw 3D scatterplot for Price as a function of Food, Service, and East by mapping the z variable to the response and the x and y variables to the numeric explanatory variables. Use color to indicate the value of East. Place Food on the x-axis and Service on the y-axis.
+Use add_surface() (twice) to draw two planes through the cloud of points, one for restaurants on the West side and another for restaurants on the East side. Use the objects plane0 and plane1.
+
+# draw 3D scatterplot
+p <- plot_ly(data = nyc, z = ~Price, x = ~Food, y = ~Service, opacity = 0.6) %>%
+  add_markers(color = ~factor(East)) 
+
+
+# draw two planes
+p %>%
+  add_surface(x = ~x, y = ~y, z = ~plane0, showscale = FALSE) %>%
+  add_surface(x = ~x, y = ~y, z = ~plane1, showscale = FALSE)
+
