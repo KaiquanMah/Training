@@ -1,0 +1,39 @@
+Multiple Factor Experiments
+We tested whether the purpose of a loan affects loan amount funded and found that it does. However, we also know that it's unlikely that loans are funded based only on their intended purpose. It's more likely that the company is looking at a holistic picture of an applicant before they decide to issue a loan.
+We can examine more than one explanatory factor in a multiple factor experiment. Like our experiments on ToothGrowth from Chapter 1, an experimenter can try and control two (or more!) different factors and see how they affect the outcome. We're using open data, so we can't quite control the factors here (they're submitted as someone fills out their loan application), but let's look at how a few other factors affect loan amount funded.
+
+Use aov() to build a linear model and ANOVA in one step, examining how purpose_recode and employment length (emp_length) affect the funded amount. Save as an object purpose_emp_aov and print the result out.
+The printed purpose_emp_aov does not show p-values, which we might be interested in. Display those by calling summary() on the aov object.
+
+# Use aov() to build purpose_emp_aov
+purpose_emp_aov <- aov(funded_amnt ~ purpose_recode + emp_length, data = lendingclub)
+
+# Print purpose_emp_aov to the console
+purpose_emp_aov
+
+Call:
+   aov(formula = funded_amnt ~ purpose_recode + emp_length, data = lendingclub)
+
+Terms:
+                purpose_recode   emp_length    Residuals
+Sum of Squares      3688783338   2044273211 100488872355
+Deg. of Freedom              5           11         1483
+
+Residual standard error: 8231.679
+Estimated effects may be unbalanced
+
+
+
+
+# Call summary() to see the p-values
+summary(purpose_emp_aov)
+
+                 Df    Sum Sq   Mean Sq F value   Pr(>F)    
+purpose_recode    5 3.689e+09 737756668  10.888 2.63e-10 ***
+emp_length       11 2.044e+09 185843019   2.743  0.00161 ** 
+Residuals      1483 1.005e+11  67760534                     
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Excellent! You could also perform Tukey's HSD test on this model, but given that emp_length has 12 levels, it'll be quite the output. If it was important to the experiment to know the answer, you'd definitely need to look at it.
+
