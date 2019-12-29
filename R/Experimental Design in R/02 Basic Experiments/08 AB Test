@@ -1,0 +1,101 @@
+Which post-A/B test test?
+We'll be testing the mean loan_amnt, which is the requested amount of money the loan applicants ask for, based on which color header (green or blue) that they saw on the Lending Club website.
+
+Which statistical test should we use after we've collected enough data?
+
+#not Kruskal-Wallis Rank Sum test
+This is a non-linear alternative to ANOVA, which is used to test the differences in 3+ groups, so perhaps not.
+#not Chi-Square Test
+Hmm, a chi-square test usually measures differences in counts of two or more categorical variables, so it's probably not the best test to utilize here.
+#not Linear Regression
+A linear regression could be used here, but we only have two groups, so it's not necessary.
+
+#yes T-test
+We'll be looking at the mean difference in the amount of loan the applicants asked for, so a t-test is appropriate.
+
+
+
+
+
+
+
+
+
+
+
+Sample size for A/B test
+We know now that we need to analyze our A/B test results with a t-test after we've collected data. We have two pretty important questions we need to answer before we do that: what's the effect size and what's the sample size required for this test?
+In this case, effect size was given to us. Lending Club is looking to detect the relatively small effect size of 0.2. We'll again use the pwr package and calculate sample size using an appropriate function to find out how many we'll need to recruit into each group, A and B.
+
+Use the correct function from the pwr package to calculate the required sample size for each group with d = 0.2, a power of 0.8, and a 0.05 significance level. Check the pwr help docs with ?pwr if you need help remembering which function to use and what arguments it takes.
+# Load the pwr package
+library(pwr)
+
+# Use the correct function from pwr to find the sample size
+pwr.t.test(d=0.2, 
+    n=NULL, 
+    alternative="two.sided", 
+    sig.level=0.05, 
+    power=0.8)
+
+     Two-sample t test power calculation 
+
+              n = 393.4057
+              d = 0.2
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided
+
+NOTE: n is number in *each* group
+
+You can see we need about 400 people per group to reach our desired power in this A/B test.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Basic A/B test
+Now that we know the sample size required, and we allowed the experiment to run long enough to get at least 400 people in each group, we can analyze our A/B test.
+Remember that when applicants were using the Lending Club website, they were randomly assigned to two groups, A or B, where A was shown a mint green website header and B was shown a light blue website header. Lending Club was interested to see if website header color choice influenced loan_amnt, the amount an applicant asked to borrow.
+
+A new dataset, lendingclub_ab is available in your workspace. The A/B test was run until there were 500 applicants in each group. Each applicant has been labeled as group A or B. Conduct the proper test to see if the mean of loan_amnt is different between the two groups.
+Create a boxplot of loan_amnt by Group using ggplot2.
+Conduct the two-sided t-test to test the A/B test results.
+
+# Plot the A/B test results
+ggplot(lendingclub_ab, aes(x=Group, y=loan_amnt)) + 
+	geom_boxplot()
+
+# Conduct a two-sided t-test
+t.test(loan_amnt ~ Group, 
+      data = lendingclub_ab,
+      alternative = c("two.sided"))
+
+	Welch Two Sample t-test
+
+data:  loan_amnt by Group
+t = -0.58112, df = 997.06, p-value = 0.5613
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -1377.1748   747.8748
+sample estimates:
+mean in group A mean in group B 
+       14723.15        15037.80
+       
+
+By looking at both the boxplot and the results of the t-test, it seems that there is no compelling evidence to support the hypothesis that there is a difference the two A/B test groups' mean loan_amnt, a result which you would use to help make data-driven decisions at Lending Club.
+
