@@ -1,0 +1,47 @@
+Which loan purpose mean is different?
+Before we examine other factors besides purpose_recode that might influence the amount of loan funded, let's examine which means of purpose_recode are different. This is the post-hoc test referred to in the last exercise.
+The result of that ANOVA test was statistically significant with a very low p-value. This means we can reject the null hypothesis and accept the alternative hypothesis that at least one mean was different. But which one?
+
+We should use Tukey's HSD test, which stands for Honest Significant Difference. To conduct Tukey's HSD test in R, you can use TukeyHSD():
+TukeyHSD(aov_model, "outcome_variable_name", conf.level = 0.9)
+This would conduct Tukey's HSD test on some aov_model, looking at a specific "outcome_variable_name", with a conf.level of 90%.
+
+
+Build a model using aov() that examines funded_amnt by purpose_recode. Save it as purpose_aov.
+Use TukeyHSD() to conduct the Tukey's HSD test on purpose_aov with a confidence level of 0.95. Save as an object called tukey_output.
+Tidy tukey_output with tidy() from the broom package (which has been loaded for you.)
+
+
+# Use aov() to build purpose_aov
+purpose_aov <- aov(funded_amnt ~ purpose_recode, data = lendingclub)
+
+# Conduct Tukey's HSD test to create tukey_output
+tukey_output <- TukeyHSD(purpose_aov,
+                          conf.level=0.95)
+
+# Tidy tukey_output to make sense of the results
+tidy(tukey_output)
+
+# A tibble: 15 x 6
+   term         comparison               estimate conf.low conf.high adj.p.value
+   <chr>        <chr>                       <dbl>    <dbl>     <dbl>       <dbl>
+ 1 purpose_rec~ debt_related-big_purcha~    5434.    1808.     9059.     2.91e-4
+ 2 purpose_rec~ home_related-big_purcha~    4845.     562.     9128.     1.61e-2
+ 3 purpose_rec~ life_change-big_purchase    4095.   -2174.    10365.     4.25e-1
+ 4 purpose_rec~ other-big_purchase          -649.   -5210.     3911.     9.99e-1
+ 5 purpose_rec~ renewable_energy-big_pu~   -1796.  -15902.    12309.     9.99e-1
+ 6 purpose_rec~ home_related-debt_relat~    -589.   -3056.     1879.     9.84e-1
+ 7 purpose_rec~ life_change-debt_related   -1338.   -6539.     3863.     9.78e-1
+ 8 purpose_rec~ other-debt_related         -6083.   -9005.    -3160.     5.32e-8
+ 9 purpose_rec~ renewable_energy-debt_r~   -7230.  -20894.     6434.     6.58e-1
+10 purpose_rec~ life_change-home_related    -750.   -6429.     4929.     9.99e-1
+11 purpose_rec~ other-home_related         -5494.   -9201.    -1787.     3.58e-4
+12 purpose_rec~ renewable_energy-home_r~   -6641.  -20494.     7212.     7.46e-1
+13 purpose_rec~ other-life_change          -4745.  -10636.     1147.     1.95e-1
+14 purpose_rec~ renewable_energy-life_c~   -5892.  -20482.     8698.     8.59e-1
+15 purpose_rec~ renewable_energy-other     -1147.  -15088.    12794.    10.00e-1
+
+
+Looking at the p-values for each comparison of the levels of purpose_recode, we can see that only a few of the mean differences are statistically significant, for example the differences in the means for the debt_related and big_purchase loan amounts. In this case, these tiny p-values are most likely to be due to large sample size, and further tests would be required to determine what's actually significant in the case of loans (known as the practical significance.)
+
+
