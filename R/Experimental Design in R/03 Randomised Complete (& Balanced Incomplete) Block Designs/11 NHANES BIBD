@@ -1,0 +1,46 @@
+NHANES BIBD
+Let's jump back into the NHANES data and pretend we have access to NHANES patients ages 18-45. Blocking the adults by race, stored in NHANES as ridreth1, we prescribe to our groups either no particular upper body weightlifting regimen, a weightlifting regimen, or a weightlifting regimen plus a prescribed daily vitamin supplement. This information is stored in a variable called weightlift_treat.
+Those funding the study decide they want it to be a BIBD where only 2 treatments appear in each block. The outcome, arm circumference, is stored as bmxarmc. The nhanes_final data is loaded for you.
+
+Calculate lambda where t = 3, k = 2, and r = 2. Does a BIBD exist here?
+Create weightlift_model and examine the results. The experiment evaluates the outcome bmxarmc, where the treatment is stored in weightlift_treat and subjects are blocked by ridreth1.
+
+# Calculate lambda
+lambda(t=3, k=2, r=2)
+[1] 1
+
+
+# Create weightlift_model & examine results
+# bmxarmc - y - arm circumference
+# weightlift_treat - x - prescribe to our groups either no particular upper body weightlifting regimen, a weightlifting regimen, or a weightlifting regimen plus a prescribed daily vitamin supplement
+# block on race
+weightlift_model <- aov(bmxarmc ~ weightlift_treat + ridreth1, data=nhanes_final)
+
+Call:
+   aov(formula = bmxarmc ~ weightlift_treat + ridreth1, data = nhanes_final)
+
+Terms:
+                weightlift_treat ridreth1 Residuals
+Sum of Squares              3.93  3364.19  69224.12
+Deg. of Freedom                1        4      2331
+
+Residual standard error: 5.449512
+Estimated effects may be unbalanced
+115 observations deleted due to missingness
+
+
+
+
+
+summary(weightlift_model)
+                   Df Sum Sq Mean Sq F value Pr(>F)    
+weightlift_treat    1      4     3.9   0.132  0.716    
+ridreth1            4   3364   841.0  28.321 <2e-16 ***
+Residuals        2331  69224    29.7                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+115 observations deleted due to missingness
+
+
+As it turns out, the weight lifting regimen doesn't seem to have a significant effect on arm circumference when the patient population is blocked by race.
+
