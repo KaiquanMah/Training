@@ -1,0 +1,157 @@
+Drawing RCBDs with Agricolae
+The agricolae package is very helpful when you want to "draw" out the design of an experiment for yourself using R. It can draw many different kinds of experiments, including a randomized complete block design. Here's an example of one:
+
+     [,1] [,2] [,3] [,4]
+[1,] "D"  "C"  "A"  "B" 
+[2,] "B"  "A"  "D"  "C" 
+[3,] "D"  "A"  "B"  "C" 
+[4,] "A"  "B"  "D"  "C"
+In this RCBD, we have 4 blocks (each row of the output). Inside of each block, each treatment "A", "B", "C", and "D" is used, because this is a complete design. So if these 4 blocks/rows of the output were four fields of a farmer's, they should give the first field the "D" treatment in the first season, then "C", then "A", then "B".
+
+Let's draw an RCBD design with 5 treatments and 4 blocks, which go in the r argument. The agricolae package has been loaded for you.
+
+
+
+Create the object called designs using the given code and print it to see all possible designs that agricolae can draw.
+# Create designs using ls()
+designs <- ls("package:agricolae", pattern = "design")
+
+designs
+> designs
+ [1] "design.ab"      "design.alpha"   "design.bib"     "design.crd"    
+ [5] "design.cyclic"  "design.dau"     "design.graeco"  "design.lattice"
+ [9] "design.lsd"     "design.rcbd"    "design.split"   "design.strip"  
+[13] "design.youden"
+
+
+
+
+ls
+List Objects
+ls and objects return a vector of character strings giving the names of the objects in the specified environment. When invoked with no argument at the top level prompt, ls shows what data sets and functions a user has defined. When invoked with no argument inside a function, ls returns the names of the function's local variables: this is useful in conjunction with browser.
+
+Usage
+ls(name, pos = -1L, envir = as.environment(pos),
+   all.names = FALSE, pattern, sorted = TRUE)
+objects(name, pos= -1L, envir = as.environment(pos),
+        all.names = FALSE, pattern, sorted = TRUE)
+
+Arguments
+name
+which environment to use in listing the available objects. Defaults to the current environment. Although called name for back compatibility, in fact this argument can specify the environment in any form; see the ‘Details’ section.
+
+pos
+an alternative argument to name for specifying the environment as a position in the search list. Mostly there for back compatibility.
+
+envir
+an alternative argument to name for specifying the environment. Mostly there for back compatibility.
+
+all.names
+a logical value. If TRUE, all object names are returned. If FALSE, names which begin with a . are omitted.
+
+pattern
+an optional regular expression. Only names matching pattern are returned. glob2rx can be used to convert wildcard patterns to regular expressions.
+
+sorted
+logical indicating if the resulting character should be sorted alphabetically. Note that this is part of ls() may take most of the time.
+
+
+Details
+The name argument can specify the environment from which object names are taken in one of several forms: as an integer (the position in the search list); as the character string name of an element in the search list; or as an explicit environment (including using sys.frame to access the currently active function calls). By default, the environment of the call to ls or objects is used. The pos and envir arguments are an alternative way to specify an environment, but are primarily there for back compatibility.
+Note that the order of strings for sorted = TRUE is locale dependent, see Sys.getlocale. If sorted = FALSE the order is arbitrary, depending if the environment is hashed, the order of insertion of objects, ….
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Use str() to examine the criteria for design.rcbd.
+# Use str() to view design.rcbd's criteria
+str(design.rcbd)
+
+function (trt, r, serie = 2, seed = 0, kinds = "Super-Duper", first = TRUE, 
+    continue = FALSE, randomization = TRUE)
+
+
+
+
+Build the treats and rep objects. treats should be a vector containing the letters A through E, created using LETTERS[1:5]. blocks should be equal to 4.
+# Build treats and rep
+treats <- LETTERS[1:5]
+> treats
+[1] "A" "B" "C" "D" "E"
+
+blocks <- 4
+> blocks
+[1] 4
+
+
+
+
+
+
+
+
+
+
+
+Create the my_design_rcbd object. The seed has been set for you, for reproducibility. View the sketch part of the object.
+
+design.rcbd
+Randomized Complete Block Design
+It generates Randomized Complete Block Design. "Random" uses the methods of number generation in R. The seed is by set.seed(seed, kinds).
+
+Usage
+design.rcbd(trt, r, serie = 2, seed = 0, kinds = "Super-Duper", first=TRUE,
+continue=FALSE,randomization=TRUE )
+
+Arguments
+trt
+Treatments
+
+r
+Replications or blocks
+
+serie
+number plot, 1: 11,12; 2: 101,102; 3: 1001,1002
+
+seed
+seed
+
+kinds
+method for to randomize
+
+first
+TRUE or FALSE - randomize rep 1
+
+continue
+TRUE or FALSE, continuous numbering of plot
+
+randomization
+TRUE or FALSE - randomize
+
+
+# Build my_design_rcbd and view the sketch
+my_design_rcbd <- design.rcbd(treats, r = blocks, seed = 42)
+my_design_rcbd$sketch
+
+
+     [,1] [,2] [,3] [,4] [,5]
+[1,] "D"  "E"  "A"  "C"  "B" 
+[2,] "B"  "C"  "A"  "E"  "D" 
+[3,] "C"  "D"  "A"  "E"  "B" 
+[4,] "A"  "C"  "B"  "D"  "E"
+
