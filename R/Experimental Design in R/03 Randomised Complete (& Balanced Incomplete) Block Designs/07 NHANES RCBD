@@ -1,0 +1,42 @@
+NHANES RCBD
+Recall that our blocked experiment involved a treatment wherein the doctor asks the patient to reduce their fat or calories in their diet, and we're testing the effect this has on weight (bmxwt). We plan to block by gender, which in the NHANES dataset is stored as riagendr. Recall that blocking is done to create experimental groups that are as similar as possible. Blocking this experiment by gender means that if we observe an effect of the treatment on bmxwt, it's more likely that the effect was actually due to the treatment versus the individual's gender.
+In your R code, you denote a blocked experiment by using a formula that looks like: outcome ~ treatment + blocking_factor in the appropriate modeling function.
+nhanes_final is available.
+
+Use aov() to create nhanes_rcbd. Recall that the treatment is stored in mcq365d and you're testing the outcome bmxwt, with the blocking factor riagendr.
+Examine the results of nhanes_rcbd with summary().
+Use dplyr functions to examine the mean weights by mcq365d and riagendr.
+
+# Use aov() to create nhanes_rcbd
+nhanes_rcbd <- aov(bmxwt ~ mcq365d + riagendr, data=nhanes_final)
+
+# Check results of nhanes_rcbd with summary()
+summary(nhanes_rcbd)
+
+              Df  Sum Sq Mean Sq F value Pr(>F)    
+mcq365d        1  228651  228651   568.8 <2e-16 ***
+riagendr       1  159706  159706   397.3 <2e-16 ***
+Residuals   5884 2365187     402                   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+
+
+# Print mean weights by mcq365d and riagendr
+nhanes_final %>% 
+	group_by(mcq365d, riagendr) %>% 
+	summarize(mean_wt = mean(bmxwt))
+
+# A tibble: 4 x 3
+# Groups:   mcq365d [2]
+  mcq365d riagendr mean_wt
+    <dbl> <fct>      <dbl>
+1       1 1           95.1
+2       1 2           86.7
+3       2 1           82.6
+4       2 2           71.3
+
+
+
+It's pretty clear that there truly is a mean difference in weight by gender, so blocking was a good call for this experiment. We also observed a statistically significant effect of the treatment on bmxwt, which we hope is actually a result of the treatment. Now that we have the RCBD down, let's tackle Balanced Incomplete Block Designs (BIBD).
+
