@@ -1,0 +1,25 @@
+Factorial Experiment with NYC SAT Scores
+Now we want to examine the effect of tutoring programs on the NYC schools' SAT Math score. As noted in the last exercise: the variable Tutoring_Program is simply yes or no, depending on if a school got a tutoring program implemented. For Percent_Black_HL and Percent_Tested_HL, HL stands for high/low. A 1 indicates less than 50% Black students or overall students tested, and a 2 indicates greater than 50% of both.
+Remember that because we intend to test all of the possible combinations of factor levels, we need to write the formula like: outcome ~ factor1 * factor2 * factor3.
+
+Use aov() to create a model to test how Percent_Tested_HL, Percent_Black_HL, and Tutoring_Program affect the outcome Average_Score_SAT_Math.
+Save the outcome as a model object, nyc_scores_factorial, and examine this with tidy().
+
+# Create nyc_scores_factorial and examine the results
+nyc_scores_factorial <- aov(Average_Score_SAT_Math ~ Percent_Tested_HL * Percent_Black_HL * Tutoring_Program, data=nyc_scores)
+
+tidy(nyc_scores_factorial)
+
+# A tibble: 8 x 6
+  term                                    df    sumsq meansq statistic   p.value
+  <chr>                                <dbl>    <dbl>  <dbl>     <dbl>     <dbl>
+1 Percent_Tested_HL                        1  476640. 4.77e5   145.     2.09e-28
+2 Percent_Black_HL                         1  155891. 1.56e5    47.5    2.41e-11
+3 Tutoring_Program                         1    2959. 2.96e3     0.902  3.43e- 1
+4 Percent_Tested_HL:Percent_Black_HL       1   87896. 8.79e4    26.8    3.76e- 7
+5 Percent_Tested_HL:Tutoring_Program       1    1599. 1.60e3     0.487  4.86e- 1
+6 Percent_Black_HL:Tutoring_Program        1    1726. 1.73e3     0.526  4.69e- 1
+7 Percent_Tested_HL:Percent_Black_HL:~     1    4996. 5.00e3     1.52   2.18e- 1
+8 Residuals                              367 1204547. 3.28e3    NA     NA
+
+We can see from the results that we can reject the null hypothesis that there is no difference in score based on tutoring program availability. We can also see from the low p-values that there are some interaction effects between the Percent Black and Percent Tested and the tutoring program. Next we need to check the model.
