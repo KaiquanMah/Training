@@ -1,0 +1,67 @@
+Graeco-Latin Square with NYC SAT Scores
+Recall that our Latin Square exercise in this chapter tested the effect of our tutoring program, blocked by Borough and Teacher_Education_Level.
+For our Graeco-Latin Square, say we also want to block out the known effect of Homework_Type, which indicates what kind of homework the student was given: individual only, small or large group homework, or some combination. We can add this as another blocking factor to create a Graeco-Latin Square experiment.
+
+Use lm() to test the changes in Average_Score_SAT_Math using the nyc_scores_gls data.
+Tidy nyc_scores_gls_lm with the appropriate broom function.
+Examine nyc_scores_gls_lm with anova().
+
+# Build nyc_scores_gls_lm
+nyc_scores_gls_lm <- lm(Average_Score_SAT_Math ~ Tutoring_Program + Borough + Teacher_Education_Level + Homework_Type,
+                        data = nyc_scores_gls)
+
+# Tidy the results with broom
+tidy(nyc_scores_gls_lm)
+
+# A tibble: 17 x 5
+   term                                     estimate std.error statistic p.value
+   <chr>                                       <dbl>     <dbl>     <dbl>   <dbl>
+ 1 (Intercept)                                386.        58.3    6.63   1.63e-4
+ 2 Tutoring_ProgramSAT Prep Class (after s~   -21.5       44.7   -0.481  6.43e-1
+ 3 Tutoring_ProgramSAT Prep Class (school ~    56.9       44.7    1.27   2.39e-1
+ 4 Tutoring_ProgramSmall Groups (2-3)          22.1       44.7    0.495  6.34e-1
+ 5 Tutoring_ProgramSmall Groups (4-6)         -17.3       44.7   -0.387  7.09e-1
+ 6 BoroughBrooklyn                             -2.40      44.7   -0.0537 9.58e-1
+ 7 BoroughManhattan                            47.1       44.7    1.05   3.23e-1
+ 8 BoroughQueens                               53.2       44.7    1.19   2.68e-1
+ 9 BoroughStaten Island                       121.        44.7    2.70   2.69e-2
+10 Teacher_Education_LevelCollege Student     -45.3       44.7   -1.01   3.40e-1
+11 Teacher_Education_LevelGrad Student        -43.6       44.7   -0.976  3.58e-1
+12 Teacher_Education_LevelMA                  -69.2       44.7   -1.55   1.60e-1
+13 Teacher_Education_LevelPhD                 -20.2       44.7   -0.452  6.63e-1
+14 Homework_TypeLarge Group                    91.8       44.7    2.05   7.40e-2
+15 Homework_TypeMix of Large Group/Individ~    39.2       44.7    0.877  4.06e-1
+16 Homework_TypeMix of Small Group/Individ~    50.3       44.7    1.13   2.93e-1
+17 Homework_TypeSmall Group                    -5.6       44.7   -0.125  9.03e-1
+
+
+
+
+
+# Examine the results with anova
+anova(nyc_scores_gls_lm)
+
+
+Analysis of Variance Table
+
+Response: Average_Score_SAT_Math
+                        Df Sum Sq Mean Sq F value Pr(>F)
+Tutoring_Program         4  20822  5205.4  1.0431 0.4424
+Borough                  4  50406 12601.4  2.5252 0.1233
+Teacher_Education_Level  4  13958  3489.4  0.6993 0.6137
+Homework_Type            4  31756  7939.0  1.5909 0.2668
+Residuals                8  39921  4990.2
+
+
+
+
+
+
+
+At the 0.05 significance level, do we have evidence to believe the tutoring program has an effect on math SAT scores, when blocked by Borough, Teacher_Education_Level, and Homework_Type?
+#not Yes! Given the p-value, we have reason to believe that the tutoring program had an effect on the Math score.
+
+
+#right Nope! Given the p-value, we have no reason to reject the null hypothesis.
+Bravo! It seems that here, when blocked out by all the other factors, our Tutoring program has no effect on the Math score.
+
