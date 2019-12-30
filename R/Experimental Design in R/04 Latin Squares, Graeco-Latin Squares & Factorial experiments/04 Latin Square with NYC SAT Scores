@@ -1,0 +1,62 @@
+Latin Square with NYC SAT Scores
+To execute a Latin Square design on this data, suppose we want to know the effect of our tutoring program, which includes one-on-one tutoring, two small groups, and an in and after-school SAT prep class. A new dataset nyc_scores_ls is available that represents this experiment. Feel free to explore the dataset in the console.
+We'll block by Borough and Teacher_Education_Level to reduce their known variance on the score outcome. Borough is a good blocking factor because schools in America are funded partly based on taxes paid in each city, so it will likely make a difference in the quality of education.
+
+Use lm() to test the changes in Average_Score_SAT_Math using nyc_scores_ls.
+Tidy nyc_scores_ls_lm with the appropriate broom function.
+Examine nyc_scores_ls_lm with anova().
+# Build nyc_scores_ls_lm
+nyc_scores_ls_lm <- lm(Average_Score_SAT_Math ~ Tutoring_Program + Borough + Teacher_Education_Level,
+                        data = nyc_scores_ls )
+
+# Tidy the results with broom
+tidy(nyc_scores_ls_lm)
+# A tibble: 13 x 5
+   term                                   estimate std.error statistic   p.value
+   <chr>                                     <dbl>     <dbl>     <dbl>     <dbl>
+ 1 (Intercept)                              377.        49.4    7.64     6.02e-6
+ 2 Tutoring_ProgramSAT Prep Class (after~    28.        43.3    0.647    5.30e-1
+ 3 Tutoring_ProgramSAT Prep Class (schoo~    12.6       43.3    0.291    7.76e-1
+ 4 Tutoring_ProgramSmall Groups (2-3)        59.9       43.3    1.38     1.92e-1
+ 5 Tutoring_ProgramSmall Groups (4-6)        13.5       43.3    0.312    7.61e-1
+ 6 BoroughBrooklyn                          -30.8       43.3   -0.711    4.90e-1
+ 7 BoroughManhattan                          10.8       43.3    0.249    8.07e-1
+ 8 BoroughQueens                             49.6       43.3    1.15     2.74e-1
+ 9 BoroughStaten Island                     105.        43.3    2.43     3.15e-2
+10 Teacher_Education_LevelCollege Student    -3.1       43.3   -0.0716   9.44e-1
+11 Teacher_Education_LevelGrad Student       30.4       43.3    0.702    4.96e-1
+12 Teacher_Education_LevelMA                 -4.40      43.3   -0.102    9.21e-1
+13 Teacher_Education_LevelPhD                 1.10      43.3    0.0254   9.80e-1
+
+
+
+
+
+
+# Examine the results with anova
+anova(nyc_scores_ls_lm)
+
+Analysis of Variance Table
+
+Response: Average_Score_SAT_Math
+                        Df Sum Sq Mean Sq F value  Pr(>F)  
+Tutoring_Program         4  10569  2642.3  0.5639 0.69352  
+Borough                  4  54948 13737.0  2.9318 0.06636 .
+Teacher_Education_Level  4   4196  1048.9  0.2239 0.91987  
+Residuals               12  56227  4685.6                  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+
+
+
+
+
+
+At the 0.05 significance level, do we have evidence to believe the tutoring program has an effect on math SAT scores, when blocked by Borough and Teacher_Education_Level?
+#not Yes! Given the p-value, we have reason to believe that the tutoring program had an effect on the Math score.
+
+#right Nope! Given the p-value, we have no reason to reject the null hypothesis.
+It seems that when we block for Borough of the school and Teacher_Education_Level, our Tutoring_Program isn't having a statistically significant effect on the Math SAT score.
+
+
