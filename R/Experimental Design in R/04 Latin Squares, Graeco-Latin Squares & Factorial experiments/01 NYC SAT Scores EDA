@@ -1,0 +1,96 @@
+NYC SAT Scores EDA
+Math is a subject the U.S. is consistently behind the rest of the world on, so our experiments will focus on Math score. While the original dataset is an open dataset downloaded from Kaggle, throughout this chapter I will add a few variables that will allow you to pretend you are an education researcher conducting experiments ideally aimed at raising students' scores, hopefully increasing the likelihood they will be admitted to colleges.
+Before diving into analyzing the experiments, we should do some EDA to make sure we fully understand the nyc_scores data. In this lesson, we'll do experiments where we block by Borough and Teacher_Education_Level, so let's examine math scores by those variables. The nyc_scores dataset has been loaded for you.
+https://www.kaggle.com/nycopendata/high-schools/data
+> glimpse(nyc_scores)
+Observations: 435
+Variables: 23
+$ School_ID                 <fct> 02M260, 06M211, 01M539, 02M294, 02M308, 0...
+$ School_Name               <fct> "Clinton School Writers and Artists", "In...
+$ Borough                   <fct> Manhattan, Manhattan, Manhattan, Manhatta...
+$ Building_Code             <fct> M933, M052, M022, M445, M445, M445, M056,...
+$ Street_Address            <fct> 425 West 33rd Street, 650 Academy Street,...
+$ City                      <fct> Manhattan, Manhattan, Manhattan, Manhatta...
+$ State                     <fct> NY, NY, NY, NY, NY, NY, NY, NY, NY, NY, N...
+$ Zip_Code                  <int> 10001, 10002, 10002, 10002, 10002, 10002,...
+$ Latitude                  <dbl> 40.75321, 40.86605, 40.71873, 40.71687, 4...
+$ Longitude                 <dbl> -73.99786, -73.92486, -73.97943, -73.9895...
+$ Phone_Number              <fct> 212-695-9114, 718-935-3660  , 212-677-519...
+$ Start_Time                <fct> , 8:30 AM, 8:15 AM, 8:00 AM, 8:30 AM, 8:0...
+$ End_Time                  <fct> , 3:00 PM, 4:00 PM, 2:45 PM, 3:00 PM, 3:3...
+$ Student_Enrollment        <int> NA, 87, 1735, 358, 383, 416, 255, 545, 32...
+$ Percent_White             <dbl> NA, 0.03, 0.29, 0.12, 0.03, 0.02, 0.04, 0...
+$ Percent_Black             <dbl> NA, 0.22, 0.13, 0.39, 0.28, 0.03, 0.24, 0...
+$ Percent_Hispanic          <dbl> NA, 0.68, 0.18, 0.41, 0.57, 0.06, 0.57, 0...
+$ Percent_Asian             <dbl> NA, 0.05, 0.39, 0.06, 0.09, 0.89, 0.13, 0...
+$ Average_Score_SAT_Math    <int> NA, NA, 657, 395, 418, 613, 410, 634, 389...
+$ Average_Score_SAT_Reading <int> NA, NA, 601, 411, 428, 453, 406, 641, 395...
+$ Average_Score_SAT_Writing <int> NA, NA, 601, 387, 415, 463, 381, 639, 381...
+$ Percent_Tested            <dbl> NA, NA, 0.91, 0.79, 0.65, 0.96, 0.60, 0.7...
+$ Teacher_Education_Level   <chr> "PhD", "MA", "BA", "MA", "PhD", "MA", "BA...
+
+
+Find the mean, variance, and median of Average_Score_SAT_Math by Borough using dplyr methods for EDA as we have used them throughout the course.
+# Mean, var, and median of Math score
+nyc_scores %>%
+    group_by(Borough) %>% 
+    summarise(mean = mean(Average_Score_SAT_Math, na.rm = TRUE),
+        var = var(Average_Score_SAT_Math, na.rm = TRUE),
+        median = median(Average_Score_SAT_Math, na.rm = TRUE))
+
+# A tibble: 5 x 4
+  Borough        mean   var median
+  <fct>         <dbl> <dbl>  <dbl>
+1 Bronx          404. 2727.   396.
+2 Brooklyn       416. 3658.   395 
+3 Manhattan      456. 7026.   433 
+4 Queens         462. 5168.   448 
+5 Staten Island  486. 6911.   466.
+
+
+Find the mean, variance, and median of Average_Score_SAT_Math by Teacher_Education_Level using dplyr EDA methods.
+# Mean, var, and median of Math score by Teacher Education Level
+nyc_scores %>%
+    group_by(Teacher_Education_Level) %>% 
+    summarise(mean = mean(Average_Score_SAT_Math, na.rm = TRUE),
+        var = var(Average_Score_SAT_Math, na.rm = TRUE),
+        median = median(Average_Score_SAT_Math, na.rm = TRUE))
+
+# A tibble: 5 x 4
+  Teacher_Education_Level  mean   var median
+  <chr>                   <dbl> <dbl>  <dbl>
+1 BA                       444. 7570.   415 
+2 College Student          432. 4749.   416 
+3 Grad Student             444. 5087.   416.
+4 MA                       422. 3809.   414.
+5 PhD                      424. 4849.   407
+
+
+
+
+Find the mean, variance, and median of Average_Score_SAT_Math by both Borough and Teacher_Education_Level using dplyr EDA methods.
+# Mean, var, and median of Math score by both
+nyc_scores %>%
+    group_by(Borough, Teacher_Education_Level) %>% 
+    summarise(mean = mean(Average_Score_SAT_Math, na.rm = TRUE),
+        var = var(Average_Score_SAT_Math, na.rm = TRUE),
+        median = median(Average_Score_SAT_Math, na.rm = TRUE))
+
+# A tibble: 25 x 5
+# Groups:   Borough [5]
+   Borough  Teacher_Education_Level  mean   var median
+   <fct>    <chr>                   <dbl> <dbl>  <dbl>
+ 1 Bronx    BA                       408. 5709.   392.
+ 2 Bronx    College Student          406.  621.   412.
+ 3 Bronx    Grad Student             410. 1660.   397 
+ 4 Bronx    MA                       403. 3533.   394.
+ 5 Bronx    PhD                      395.  619.   388.
+ 6 Brooklyn BA                       426. 5003.   396 
+ 7 Brooklyn College Student          416. 5948.   393 
+ 8 Brooklyn Grad Student             424. 2594.   399 
+ 9 Brooklyn MA                       407. 2368.   387 
+10 Brooklyn PhD                      411. 3575.   395 
+# ... with 15 more rows
+
+Now that we've examined the data, we can move on to cleaning it, the next important step before analysis.
+
