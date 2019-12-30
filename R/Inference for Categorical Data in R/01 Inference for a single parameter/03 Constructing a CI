@@ -1,0 +1,92 @@
+Constructing a CI
+You've seen one example of how p-hat can vary upon resampling, but we need to do this many many times to get a good estimate of its variability. Here you will compute a full bootstrap distribution to estimate the standard error (SE) that will be used to form a confidence interval. You'll use an additional verb from infer, calculate(), to streamline this process of calculating many statistics from many data sets.
+Take a moment to inspect the output of calculate. This function reduces your data frame to just two columns: one for the "stat"s and another for the "replicate" they correspond to.
+When you plot your bootstrap distribution, you'll find that it's bell-shaped. It's this shape that allows you to add and subtract two SEs to get a 95% interval.
+
+Create a bootstrap distribution called boot_dist using the following steps:
+specify that you're interested in the consci variable where success is indicated by having "High" confidence.
+generate 500 bootstrap replicates.
+calculate a proportion statistic by setting stat to "prop".
+
+# Create bootstrap distribution for proportion with High conf
+boot_dist <- gss2016 %>%
+  # Specify the response and success
+  specify(response = consci, success = "High") %>%
+  # Generate 500 bootstrap reps
+  generate(reps = 500, type = "bootstrap") %>%
+  # Calculate proportions
+  calculate(stat = "prop")
+
+# See the result
+boot_dist
+# A tibble: 500 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 0.407
+ 2         2 0.467
+ 3         3 0.447
+ 4         4 0.487
+ 5         5 0.44 
+ 6         6 0.507
+ 7         7 0.473
+ 8         8 0.473
+ 9         9 0.427
+10        10 0.427
+# ... with 490 more rows
+
+
+
+
+
+Visualize the bootstrap distribution of statistics in a density plot.
+# Plot bootstrap distribution of stat
+ggplot(boot_dist, aes(x=stat)) +
+  # Add density layer
+  geom_density()
+
+
+
+
+
+Compute the standard error by summarizeing the distribution with its standard deviation, sd(), then pull() it out and save it to SE.
+# Compute estimate of SE
+SE <- boot_dist %>%
+  summarize(se = sd(stat)) %>%
+  pull()
+
+> SE
+[1] 0.04019303
+
+
+
+
+Use that SE to construct an approximate 95% confidence interval around p_hat by adding and subtracting twice the standard error (this is the same p_hat that you calculated in a previous exercise).
+# Create CI
+c(p_hat - 2 * SE, p_hat + 2 * SE)
+
+> p_hat
+[1] 0.4333333
+> c(p_hat - 2 * SE, p_hat + 2 * SE)
+[1] 0.3529473 0.5137194
+
+You've moved from just describing the data set at hand with p_hat to quantifying how good of an estimate this is of the true proportion of all Americans.
+
+
+
+
+
+
+
+
+Why more bootstraps?
+If we had used 5000 instead of 500 bootstrap samples, which of the following would be true?
+
+#yes The bootstrap distribution would appear smoother.
+If your bootstrap distribution looks rough, you can always increase the number of bootstrap samples to see if you can get a smoother picture of its shape.
+
+
+#not The standard error would decrease.
+We don't know whether the standard error will decrease – we just know it will become more accurate!
+#not The standard error would increase.
+#not p_hat would be 10 times larger.
+
