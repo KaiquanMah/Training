@@ -1,0 +1,122 @@
+Dealing with Missing Test Scores
+If we want to use SAT scores as our outcome, we should examine missingness. Examine the pattern of missingness across all the variables in nyc_scores using miss_var_summary() from the naniar package. naniar integrates with Tidyverse code styling, including the pipe operator (%>%).
+There are 60 missing scores in each subject. Though there are many R packages which help with more advanced forms of imputation, such as MICE, Amelia, and mi, we will continue to use simputation and impute_median().
+Create a new dataset, nyc_scores_2 by imputing Math score by Borough, but note that impute_median() returns the imputed variable as type "impute". You'll convert the variable to the numeric in a separate step.
+simputation and dplyr are loaded.
+
+Load the naniar package.
+Examine the missingness of variables in nyc_scores by piping it to miss_var_summary().
+# Load naniar
+library(naniar)
+
+# Examine missingness with miss_var_summary()
+nyc_scores %>%
+  miss_var_summary()
+
+# A tibble: 22 x 3
+   variable                  n_miss pct_miss
+   <chr>                      <int>    <dbl>
+ 1 Average_Score_SAT_Math        60    13.8 
+ 2 Average_Score_SAT_Reading     60    13.8 
+ 3 Average_Score_SAT_Writing     60    13.8 
+ 4 Percent_Tested                49    11.3 
+ 5 Student_Enrollment             7     1.61
+ 6 Percent_White                  7     1.61
+ 7 Percent_Black                  7     1.61
+ 8 Percent_Hispanic               7     1.61
+ 9 Percent_Asian                  7     1.61
+10 School_ID                      0     0   
+# ... with 12 more rows
+
+
+
+
+
+
+Create nyc_scores_2 by imputing the Average Math SAT score by Borough (we're only using Math in our experiments.)
+https://www.rdocumentation.org/packages/simputation/versions/0.2.3/topics/impute_median
+# Examine missingness with md.pattern()
+md.pattern(nyc_scores)
+
+    School_ID School_Name Borough Building_Code Street_Address City State
+375         1           1       1             1              1    1     1
+ 11         1           1       1             1              1    1     1
+ 42         1           1       1             1              1    1     1
+  7         1           1       1             1              1    1     1
+            0           0       0             0              0    0     0
+    Zip_Code Latitude Longitude Phone_Number Start_Time End_Time
+375        1        1         1            1          1        1
+ 11        1        1         1            1          1        1
+ 42        1        1         1            1          1        1
+  7        1        1         1            1          1        1
+           0        0         0            0          0        0
+    Student_Enrollment Percent_White Percent_Black Percent_Hispanic
+375                  1             1             1                1
+ 11                  1             1             1                1
+ 42                  1             1             1                1
+  7                  0             0             0                0
+                     7             7             7                7
+    Percent_Asian Percent_Tested Average_Score_SAT_Math
+375             1              1                      1
+ 11             1              1                      0
+ 42             1              0                      0
+  7             0              0                      0
+                7             49                     60
+    Average_Score_SAT_Reading Average_Score_SAT_Writing    
+375                         1                         1   0
+ 11                         0                         0   3
+ 42                         0                         0   4
+  7                         0                         0   9
+                           60                        60 264
+                           
+                           
+
+# Impute the Math score by Borough
+nyc_scores_2 <- impute_median(dat=nyc_scores, Average_Score_SAT_Math ~ Borough)                           
+                           
+                
+                
+                
+                           
+Convert nyc_scores_2$Average_Score_SAT_Math to numeric.
+# Convert Math score to numeric
+nyc_scores_2$Average_Score_SAT_Math <- as.numeric(nyc_scores_2$Average_Score_SAT_Math)
+
+
+Use dplyr to examine the median and mean of math score before and after imputation.
+# Examine scores by Borough in both datasets, before and after imputation
+# Examine scores by Borough in both datasets, before and after imputation
+nyc_scores %>% 
+	group_by(Borough) %>% 
+	summarize(median = median(Average_Score_SAT_Math, na.rm = TRUE), 
+              mean = mean(Average_Score_SAT_Math, na.rm = TRUE))
+
+
+# A tibble: 5 x 3
+  Borough       median  mean
+  <fct>          <dbl> <dbl>
+1 Bronx           396.  404.
+2 Brooklyn        395   416.
+3 Manhattan       433   456.
+4 Queens          448   462.
+5 Staten Island   466.  486.
+
+
+
+nyc_scores_2  %>% 
+	group_by(Borough) %>% 
+	summarize(median = median(Average_Score_SAT_Math, na.rm = TRUE), 
+              mean = mean(Average_Score_SAT_Math, na.rm = TRUE))
+
+# A tibble: 5 x 3
+  Borough       median  mean
+  <fct>          <dbl> <dbl>
+1 Bronx           395   403.
+2 Brooklyn        399   418.
+3 Manhattan       418   446.
+4 Queens          448   460.
+5 Staten Island   466.  486.
+
+
+Did the median scores change before and after imputation? (Hint: they shouldn't have changed by much, but rounding may have offset them by an integer or two.)
+
