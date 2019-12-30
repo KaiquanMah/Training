@@ -1,0 +1,30 @@
+BIBD - cat's kidney function
+To be sure we truly understand what a BIBD looks like, let's build a dataset containing a BIBD from scratch.
+Say we want to test the difference between four different wet foods in cats' diets on their kidney function. Cat food, however, is expensive, so we'll only test 3 foods per block to save some money. Our cats will be blocked by color of cat, as we aren't interested in that as part of our experiment. The outcome will be measured blood creatinine level, an indicator of kidney function and dysfunction in cats and humans alike.
+
+The custom function lambda() has been loaded for you. Calculate lambda with t = 4, k = 3, and r = 3 to make sure a BIBD is possible.
+Run the code to assemble the dataset. You can see the order in which the food treatments are used in each block.
+Create cat_model with aov() according to the description of the experiment above and examine the results with summary(). Does type of wet food make a difference on creatinine levels?
+
+# Calculate lambda
+lambda(t=4, k=3, r=3)
+[1] 2
+
+# Build the data.frame
+creatinine <- c(1.98, 1.97, 2.35, 2.09, 1.87, 1.95, 2.08, 2.01, 1.84, 2.06, 1.97, 2.22)
+food <- as.factor(c("A", "C", "D", "A", "B", "C", "B", "C", "D", "A", "B", "D"))
+color <- as.factor(rep(c("Black", "White", "Orange", "Spotted"), each = 3))
+cat_experiment <- as.data.frame(cbind(creatinine, food, color))
+
+# Create cat_model and examine with summary()
+cat_model <- aov(creatinine ~ food + color, data=cat_experiment)
+summary(cat_model)
+            Df  Sum Sq  Mean Sq F value Pr(>F)
+food         1 0.01204 0.012042   0.530  0.485
+color        1 0.00697 0.006971   0.307  0.593
+Residuals    9 0.20461 0.022735
+
+
+It seems there are no differences by type of wet food in kidney function. Hopefully now you can see how a BIBD comes to life!
+
+
