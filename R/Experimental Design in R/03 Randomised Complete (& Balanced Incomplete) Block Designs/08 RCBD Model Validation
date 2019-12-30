@@ -1,0 +1,38 @@
+RCBD Model Validation
+As we did in the last chapter (and when building any model!) it's a good idea to validate the results. We'll examine the Residuals vs. Fitted and Normal Q-Q plots, though now we'll only see a Constant Leverage plot in place of the other two. A good model has a Q-Q plot showing an approximately normal distribution and no clear patterns across blocks or treatments in the others.
+We can also look at Interaction plots. We hope to see parallel lines, no matter which of the block or the treatment is on the x-axis. If they are, they satisfy a key assumption of the RCBD model called Additivity.
+The nhanes_rcbd model object from the last exercise has been loaded for you. Examine the results with summary(nhanes_rcbd) in the console if you need a refresher.
+
+
+Plot the nhanes_rcbd model object, being sure to set up a 2x2 grid of plots beforehand.
+https://stackoverflow.com/questions/30316580/r-generate-a-2x2-panel-with-four-plots-created-from-list
+# Set up the 2x2 plotting grid and plot nhanes_rcbd
+par(mfrow=c(2,2))
+plot(nhanes_rcbd)
+#Normal Q-Q plot showed a gentle quadratic curve increasing as we move from left to right
+#the result does not seem to satisfy the normality assumption
+
+
+Run the code to view the interaction plot between the treatment and gender and observe if the lines are parallel.
+# Run the code to view the interaction plots
+with(nhanes_final, interaction.plot(mcq365d, riagendr, bmxwt))
+#with the mean wt 'bmxwt' on the y-axis and treatment groups 'mcq365d' on the x-axis
+#separate lines based on the blocking gender variable 'riagendr'
+#bottom line is alittle steeper than the top line
+
+
+Run the code to view the interaction plot between gender and the treatment (it'll be a little different!) and observe if the lines are parallel.
+# Run the code to view the interaction plots
+with(nhanes_final, interaction.plot(riagendr, mcq365d, bmxwt))
+#with the mean wt 'bmxwt' on the y-axis and blocking gender variable 'riagendr' on the x-axis
+#separate lines based on the treatment groups 'mcq365d'
+#bottom line is alittle steeper than the top line
+
+
+
+Excellent! The initial diganostic plots show that this model is pretty good but not great - especially at the larger end of the data, the Q-Q plot shows the data might not be normal. 
+The interaction plots show nearly parallel lines, so we can move forward with this model.
+
+# seems like interactions plots deviating slightly from perfectly parallel lines still manage to satisfy the 'additivity' assumption of RCBD models
+
+
