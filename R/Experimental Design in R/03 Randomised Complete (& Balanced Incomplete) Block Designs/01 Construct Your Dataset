@@ -1,0 +1,34 @@
+NHANES dataset construction
+As downloaded from the NHANES website, the NHANES datasets are available only as separate .XPT files, a native format to SAS. Luckily for us, the haven package exists.
+Let's combine the NHANES Demographics, Medical Conditions, and Body Measures datasets, available in their raw .XPT format and accessible through the variables DEMO_file, MCQ_file, and BMX_file. Join all 3 datasets using the SEQN variable. A good way to do this is using Reduce(), which allows you to combine elements in a helpful way.
+https://wwwn.cdc.gov/nchs/nhanes/continuousnhanes/default.aspx?BeginYear=2015
+
+
+The joining code, which is provided for you does the following:
+Creates a list of all 3 datasets (nhanes_demo, nhanes_medical, nhanes_bodymeasures).
+Uses a custom function inside of Reduce() to inner join all 3 datasets with the "SEQN" variable.
+Saves this as the nhanes_combined dataset.
+
+> DEMO_file
+[1] "/usr/local/share/datasets/DEMO_I.XPT"
+> BMX_file
+[1] "/usr/local/share/datasets/BMX_I.XPT"
+> MCQ_file
+[1] "/usr/local/share/datasets/MCQ_I.XPT"
+
+
+
+# Load haven
+library(haven)
+
+# Import the three datasets using read_xpt()
+nhanes_demo <- read_xpt(DEMO_file)
+nhanes_bodymeasures <- read_xpt(BMX_file)
+nhanes_medical <- read_xpt(MCQ_file)
+
+# Merge the 3 datasets you just created to create nhanes_combined
+nhanes_combined <- list(nhanes_demo, nhanes_medical, nhanes_bodymeasures) %>%
+  Reduce(function(df1, df2) inner_join(df1, df2, by = "SEQN"), .)
+
+
+
