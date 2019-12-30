@@ -1,0 +1,69 @@
+Generating via bootstrap
+To assess your uncertainty in this estimate of the number of people that have "High" confidence in the scientific community, you need to calculate the standard error. Start by considering how different the data might look in just a single bootstrap sample.
+
+
+Using the gss2016 data, create a single bootstrap data set.
+specify the variable of interest (consci) and designate that "High" values constitute a success.
+generate just one bootstrap replicate.
+# Load the infer package
+library(infer)
+
+# Create single bootstrap data set
+boot1 <- gss2016 %>%
+  # Specify the response
+  specify(response = consci, success = "High") %>%
+  # Generate one bootstrap replicate
+  generate(reps = 1, type = "bootstrap")
+
+# See the result
+boot1
+
+Response: consci (factor)
+# A tibble: 150 x 2
+# Groups:   replicate [1]
+   replicate consci
+       <int> <fct> 
+ 1         1 Low   
+ 2         1 Low   
+ 3         1 High  
+ 4         1 Low   
+ 5         1 High  
+ 6         1 Low   
+ 7         1 Low   
+ 8         1 Low   
+ 9         1 Low   
+10         1 Low   
+# ... with 140 more rows
+
+
+
+
+
+
+
+
+Construct a bar plot of the distribution of consci.
+# Using boot1, plot consci
+ggplot(boot1, aes(x=consci)) +
+  # Add bar layer
+  geom_bar()
+
+
+
+
+
+
+
+
+
+
+
+Compute the sample proportion of people that reported having "High" confidence.
+# Compute proportion with high conf
+boot1 %>%
+  summarize(prop_high = mean(consci == "High")) %>%
+  pull()
+[1] 0.44
+
+You've essentially done the same exercise twice now, but this time, you plotted and summarized a synthetic data set. This is the power of the bootstrap: to mimic the sampling process to create similar, but slightly different, data sets.
+
