@@ -1,0 +1,42 @@
+Resampling NHANES data
+The NHANES data is collected on sampled units (people) specifically selected to represent the U.S. population. However, let's resample the nhanes_final dataset in different ways so we get a feel for the different sampling methods.
+We can conduct a simple random sample using sample_n() from dplyr. It takes as input a dataset and an integer of number of rows to sample.
+Stratified sampling can be done by combining group_by() and sample_n(). The function will sample n from each of the groups specified in the group_by().
+The sampling package's cluster() creates cluster samples. It takes in a dataset name, the variable in the set to be used as the cluster variable, passed as a vector with the name as a string (e.g. c("variable")), a number of clusters to select, and a method.
+
+
+Use sample_n() to select 2500 observations from nhanes_final and save as nhanes_srs.
+Create nhanes_stratified by using group_by() and sample_n(). Stratify by riagendr and select 2000 of each gender. Confirm that it worked by using count() to examine nhanes_stratified's gender variable.
+Load the sampling package. Use cluster() to divide nhanes_final by "indhhin2" into 6 clusters using the "srswor" method. Assign to nhanes_cluster.
+
+
+# Use sample_n() to create nhanes_srs
+nhanes_srs <- nhanes_final %>% sample_n(size=2500)
+
+
+
+
+
+# Create nhanes_stratified with group_by() and sample_n()
+nhanes_stratified <- nhanes_final %>% 
+  group_by(riagendr) %>% 
+	sample_n(size=2000)
+
+count(nhanes_stratified)
+# A tibble: 2 x 2
+# Groups:   riagendr [2]
+  riagendr     n
+     <int> <int>
+1        1  2000
+2        2  2000
+
+
+
+
+# Load sampling package and create nhanes_cluster with cluster()
+library(sampling)
+nhanes_cluster <- cluster(nhanes_final, c("indhhin2"), 6, method = "srswor")
+
+
+These are some basic sampling methods you can use on your data to create the different kinds of samples that may be necessary in an experiment.
+
