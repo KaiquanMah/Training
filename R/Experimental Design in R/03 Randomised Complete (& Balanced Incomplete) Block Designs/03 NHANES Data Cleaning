@@ -1,0 +1,39 @@
+NHANES Data Cleaning
+During data cleaning, we discovered that no one under the age of 16 was given the treatment. Recall that we're pretending that the variable that indicates if a doctor has ever advised them to reduce fat or calories in their diet is purposeful nutrition counseling, our treatment. Let's only keep patients who are greater than 16 years old in the dataset.
+You also may have noticed that the default settings in ggplot2 delete any observations with a missing dependent variable, in this case, body weight. One option for dealing with the missing weights, imputation, can be implemented using the simputation package. Imputation is a technique for dealing with missing values where you replace them either with a summary statistic, like mean or median, or use a model to predict a value to use.
+We'll use impute_median(), which takes a dataset and the variable to impute or formula to impute by as arguments. For example, impute_median(ToothGrowth, len ~ dose) would fill in any missing values in the variable len with the median value for len by dose. So, if a guinea pig who received a dose of 2.0 had a missing value for the len variable, it would be filled in with the median len for those guinea pigs with a dose of 2.0.
+
+
+Create nhanes_filter by using filter() to keep anyone older than 16 in the dataset, not including those who are 16. Age is stored in the ridageyr variable.
+Load simputation. Use impute_median() to fill in the missing observations of bmxwt in nhanes_filter, grouping by riagendr.
+Recode the nhanes_final$mcq365d variable by setting any observations with a value of 9 to 2 instead. Verify the recoding worked with count().
+
+# Filter to keep only those 16+
+nhanes_filter <- nhanes_combined  %>% filter(ridageyr > 16)
+
+# Load simputation & impute bmxwt (weight) by riagendr (age)
+library(simputation)
+nhanes_final <- impute_median(nhanes_filter, bmxwt ~ riagendr)
+
+
+
+> unique(nhanes_final$mcq365d)
+[1]  2  1 NA  9
+
+# Recode mcq365d with recode() & examine with count()
+nhanes_final$mcq365d <- recode(nhanes_final$mcq365d, 
+                               `1` = 1,
+                               `2` = 2,
+                               `9` = 2)
+
+nhanes_final %>% count(mcq365d)
+# A tibble: 2 x 2
+  mcq365d     n
+    <dbl> <int>
+1       1  1802
+2       2  4085
+
+
+Imputation is a powerful tool for dealing with missing data, but should be used with caution, as you can introduce bias into your data if you're not careful how you impute. Now that we have the dataset cleaned, we're ready to learn about RCBDs so we can analyze our experiment.
+
+
