@@ -1,0 +1,43 @@
+SE with different p
+You just saw the effect that sample size can have on inference, but that's not the only variable in play here. Let's return now to our full data set and see what happens to the SE when we consider a category that has a different population proportion, p.
+We've displayed here the plot that you made way back in exercise 4 to study the proportion of respondents that have "High" confidence in science. Notice this proportion is very close to .5. In this exercise, you'll be looking at the variable meta_region, which records whether or not the respondent lives in the pacific region of the US. These respondents were fairly rare, which allows you to study how SEs behave in a setting where the proportion is is very far from 0.5.
+
+Create a plot of meta_region to display how different the proportions are from the plot of consci.
+
+# Using gss2016, plot consci
+ggplot(gss2016, aes(x=consci)) +
+  # Add bar layer
+  geom_bar()
+  
+# Using gss2016, plot meta_region
+ggplot(gss2016, aes(x=meta_region)) +
+  # Add bar layer
+  geom_bar()
+
+
+
+
+
+Create the bootstrap distribution for the proportion of people that live in the "pacific" meta_region.
+# Specify the response for the bootstrap distribution
+boot_dist <- gss2016 %>%
+  specify(response=meta_region, success="pacific") %>%
+  generate(reps = 500, type = "bootstrap") %>%
+  calculate(stat = "prop")
+
+
+
+
+Summarize those bootstrap statistics with the standard deviation and save it to SE_low_p.
+Compare SE_low_p to the SE that you calculated back in exercise 4 for the proportion of respondents with high confidence in science (this is available in your environment as SE).
+# Calculate std error
+SE_low_p <- boot_dist %>%
+  summarise(se = sd(stat)) %>%
+  pull()
+
+# Compare SEs
+c(SE_low_p, SE)
+> c(SE_low_p, SE)
+[1] 0.02515353 0.04119781
+Oh, what a difference a proportion makes! It turns out that that SEs are highest when estimating proportions are close to 0.5.
+
