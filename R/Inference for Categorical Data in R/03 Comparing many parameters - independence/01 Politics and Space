@@ -1,0 +1,92 @@
+Politics and Space
+While the relationship between political party and military spending is no big surprise, what about the relationship between political party and another spending priority: space exploration?
+Start your exploration by simplifying the data set to include only people that identified as Republicans (Rep), Democrats (Dem), and Independents (Ind).
+
+Create a new data set called gss_party that is gss2016 with a filter applied to remove people who responded "Oth" to party.
+> glimpse(gss2016)
+Observations: 150
+Variables: 25
+$ id       <dbl> 2111, 62, 508, 1469, 184, 178, 971, 6, 2063, 2201, 1501, 1...
+$ year     <dbl> 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016...
+$ age      <fct> 61, 35, 21, 22, 32, 41, 25, 53, 41, 67, 55, 48, 21, 27, 56...
+$ class    <fct> MIDDLE CLASS, MIDDLE CLASS, MIDDLE CLASS, WORKING CLASS, W...
+$ degree   <fct> HIGH SCHOOL, HIGH SCHOOL, HIGH SCHOOL, HIGH SCHOOL, LT HIG...
+$ sex      <fct> FEMALE, MALE, FEMALE, MALE, MALE, FEMALE, MALE, FEMALE, FE...
+$ marital  <fct> MARRIED, WIDOWED, NEVER MARRIED, NEVER MARRIED, NEVER MARR...
+$ race     <fct> WHITE, BLACK, WHITE, WHITE, BLACK, OTHER, WHITE, WHITE, WH...
+$ region   <fct> central, eastern, eastern, mountain, pacific, pacific, cen...
+$ happy    <fct> HAPPY, UNHAPPY, UNHAPPY, HAPPY, UNHAPPY, HAPPY, UNHAPPY, H...
+$ relig    <fct> NONE, PROTESTANT, NONE, NONE, NONE, INTER-NONDENOMINATIONA...
+$ cappun   <fct> FAVOR, OPPOSE, OPPOSE, OPPOSE, OPPOSE, OPPOSE, OPPOSE, OPP...
+$ finalter <fct> STAYED SAME, STAYED SAME, BETTER, BETTER, STAYED SAME, BET...
+$ natspac  <fct> TOO LITTLE, ABOUT RIGHT, ABOUT RIGHT, TOO LITTLE, TOO MUCH...
+$ natarms  <fct> TOO LITTLE, TOO MUCH, TOO MUCH, TOO MUCH, TOO MUCH, TOO MU...
+$ conclerg <fct> ONLY SOME, A GREAT DEAL, ONLY SOME, ONLY SOME, ONLY SOME, ...
+$ confed   <fct> ONLY SOME, ONLY SOME, HARDLY ANY, ONLY SOME, HARDLY ANY, O...
+$ conpress <fct> ONLY SOME, ONLY SOME, HARDLY ANY, ONLY SOME, ONLY SOME, ON...
+$ conjudge <fct> ONLY SOME, HARDLY ANY, ONLY SOME, HARDLY ANY, A GREAT DEAL...
+$ consci   <fct> Low, High, High, High, High, High, High, High, High, Low, ...
+$ conlegis <fct> HARDLY ANY, HARDLY ANY, HARDLY ANY, HARDLY ANY, A GREAT DE...
+$ zodiac   <fct> VIRGO, CANCER, LEO, AQUARIUS, CANCER, AQUARIUS, TAURUS, SC...
+$ oversamp <dbl> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+$ postlife <fct> YES, YES, YES, NO, NO, YES, NO, YES, YES, YES, NO, NO, YES...
+$ party    <fct> Ind, Ind, Dem, Ind, Ind, Ind, Ind, Dem, Dem, Ind, Dem, Rep...
+> unique(gss2016$party)
+[1] Ind Dem Rep Oth
+Levels: Dem Ind Rep Oth
+
+
+
+
+# Subset data
+gss_party <- gss2016 %>%
+  # Filter out the "Oth"
+  filter(party != "Oth")
+
+
+
+
+
+
+Using gss_party, construct a stacked bar plot of party filled based on natspac. Modify the geometry so that the plot displays proportions.
+# Visualize distribution take 1
+gss_party %>%
+  ggplot(aes(x=party, fill=natspac)) +
+  # Add bar layer of proportions
+  geom_bar(position="fill")
+
+
+
+
+Construct a second plot that illustrates the same relationship but this time, modify the plot to display counts.
+# Visualize distribution take 2 
+gss_party %>%
+  ggplot(aes(x=party, fill=natspac)) +
+  # Add bar layer of proportions
+  geom_bar()
+
+
+The plot of proportions makes it clear that this story here is less clear cut. While thoughts on space exploration do differ slightly from party to party, do you think this difference is significant?
+
+
+
+
+
+
+
+
+
+
+
+Understanding contingency tables
+The bar plot of counts that you constructed is a visual representation of a contingency table.
+Which of the following is FALSE regarding contingency tables?
+
+They are a common method of displaying categorical data.
+They have one variable across the columns and another variable along the rows.
+They should be transformed to a tidy format for analysis.
+
+#not They have the variables across the columns and observations down the rows.
+Correct! That's a description of tidy data. Contingency tables are not tidy!
+
+
