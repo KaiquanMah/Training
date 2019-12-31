@@ -1,0 +1,102 @@
+SE with less data
+The less data that you have to make an estimate, the more uncertainty you will have in that estimate. This is reflected in the standard error. In this exercise you'll develop a feel for this relationship by looking at data sets of different sizes.
+Two new smaller data sets have been created for you from gss2016: gss2016_small, which contains 50 observations, and gss2016_smaller which contains just 10 observations.
+
+Using this gss2016_small, create a bootstrap distribution called boot_dist_small using the familiar steps:
+specify that you're interested in the consci variable where success is indicated by having "High" confidence.
+generate 500 bootstrap replicates.
+calculate the proportion for each.
+
+# Create bootstrap distribution for proportion
+boot_dist_small <- gss2016_small %>%
+  # specify the response and success
+  specify(response = consci, success = "High") %>%
+  # generate 500 bootstrap reps
+  generate(reps = 500, type = "bootstrap") %>%
+  # calculate the proportion
+  calculate(stat = "prop")
+
+> boot_dist_small
+# A tibble: 500 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1  0.34
+ 2         2  0.32
+ 3         3  0.44
+ 4         4  0.42
+ 5         5  0.46
+ 6         6  0.42
+ 7         7  0.34
+ 8         8  0.38
+ 9         9  0.3 
+10        10  0.44
+# ... with 490 more rows
+
+
+
+
+
+
+
+Summarize the boot_dist_small's SE with its standard deviation then pull it out and save it to SE_small_n.
+# Compute estimate of SE
+SE_small_n <- boot_dist_small %>%
+  summarise(se = sd(stat)) %>%
+  pull()
+  
+  > SE_small_n
+[1] 0.06786978
+  
+  
+
+Repeat this process of generating the bootstrap distribution for gss2016_smaller and save it to boot_dist_smaller. Save yourself some time by copying and pasting the previous code block and swapping the dataset name.
+# From previous steps
+boot_dist_small <- gss2016_small %>%
+  specify(response = consci, success = "High") %>%
+  generate(reps = 500, type = "bootstrap") %>%
+  calculate(stat = "prop")
+SE_small_n <- boot_dist_small %>%
+  summarize(se = sd(stat)) %>%
+  pull()
+
+# Generate bootstrap distribution for smaller data
+boot_dist_smaller <- gss2016_smaller %>%
+  specify(response = consci, success = "High") %>%
+  generate(reps = 500, type = "bootstrap") %>%
+  calculate(stat = "prop")
+
+# See the result
+glimpse(boot_dist_smaller)
+
+
+> boot_dist_smaller
+# A tibble: 500 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1   0.5
+ 2         2   0.3
+ 3         3   0.2
+ 4         4   0.4
+ 5         5   0.4
+ 6         6   0.6
+ 7         7   0.2
+ 8         8   0  
+ 9         9   0.2
+10        10   0.2
+# ... with 490 more rows
+
+
+
+Repeat this process of extracting the SE of boot_dist_smaller and save it to SE_smaller_n. Copy and paste comes in handy here again.
+Run the code to compare the two SEs and their respective sample sizes. How does sample size affect standard error?
+# Compute estimate of SE
+SE_smaller_n <- boot_dist_smaller %>%
+  summarise(se = sd(stat)) %>%
+  pull()
+
+> SE_smaller_n
+[1] 0.1546183
+
+
+This is a fundamental relationship that you've uncovered: the less data, the greater the standard error.
+
