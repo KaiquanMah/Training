@@ -1,0 +1,52 @@
+Goodness of fit test
+The null hypothesis in a goodness of fit test is a list of specific parameter values for each proportion. In your analysis, the equivalent hypothesis is that Benford's Law applies to the distribution of first digits of total vote counts at the city level. You could write this as:
+H0: p1=.30, p2=.18,…, p9=.05
+Where p1 is the height of the first bar in the Benford's bar plot. The alternate hypothesis is that at least one of these proportions is different; that the first digit distribution doesn't follow Benford's Law.
+
+In this exercise, you'll use simulation to build up the null distribution of the sorts of chi-squared statistics that you'd observe if in fact these counts did follow Benford's Law.
+
+
+Inspect p_benford by printing it to the screen.
+Starting with iran, compute the chi-squared statistic by using chisq_stat. Note that you must specify the variable in the data frame that will serve as your response as well as the vector of probabilities that you wish to compare them to.
+Construct a null distribution with 500 samples of the Chisq statistic via simulation under the point null hypothesis that the vector of proportions p is p_benford. Save the resulting statistics as null.
+
+# Inspect p_benford
+p_benford
+
+# Compute observed stat
+chi_obs_stat <- iran %>%
+  chisq_stat(response = first_digit, p = p_benford)
+[1] 21.11962
+
+
+# Form null distribution
+null <- iran %>%
+  # Specify the response
+  specify(response = first_digit) %>%
+  # Set up the null hypothesis
+  hypothesize(null = "point", p = p_benford) %>%
+  # Generate 500 reps
+  generate(reps=500, type="simulate") %>%
+  # Calculate statistics
+  calculate(stat="Chisq")
+
+# A tibble: 500 x 2
+   replicate  stat
+   <fct>     <dbl>
+ 1 1          9.20
+ 2 2          5.52
+ 3 3          6.44
+ 4 4          9.76
+ 5 5         10.1 
+ 6 6         21.5 
+ 7 7          7.20
+ 8 8          7.01
+ 9 9         17.9 
+10 10         6.98
+# ... with 490 more rows
+
+
+
+
+When looking at the null distribution, think to yourself that these are the sort of distances that you'd expect if the data were drawn from Benford's distribution.
+
