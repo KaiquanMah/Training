@@ -1,0 +1,71 @@
+A p-value two ways
+In this exercise you'll find out if the observed chi-squared statistic is unusually large under the following notion that,
+H0: Region is independent of Happy.
+The competing notion is the alternative hypothesis that there is an association between these variables. For the sake of comparison, you'll be finding the p-value first from the computational approach, then use the approximation.
+
+Generate a distribution of the "Chisq" statistic under a null hypothesis of independence between happy and region. Save this object to null.
+> unique(gss2016$region)
+[1] central  eastern  mountain pacific 
+Levels: pacific eastern central mountain
+
+> unique(gss2016$happy)
+[1] HAPPY   UNHAPPY
+Levels: HAPPY UNHAPPY
+
+df = (4-1)*(2-1) = 3*1 = 3
+
+
+# Generate null distribution
+null <- gss2016 %>%
+  # Specify variables
+  specify(happy ~ region, success = "HAPPY") %>%
+  # Set up null
+  hypothesize(null = "independence") %>%
+  # Generated 500 permuted data sets
+  generate(reps = 500, type = "permute") %>%
+  # Calculate statistics
+  calculate(stat = "Chisq")
+
+
+
+
+Create a density plot of null, add a vertical red line at chi_obs, and overlay the corresponding approximation from the Chi-squared distribution with the appropriate degrees of freedom.
+>   chi_obs
+[1] 0.2547647
+
+# Visualize null
+ggplot(null, aes(x = stat)) +
+  # Add density layer
+  geom_density() +
+  # Add red vertical line at obs stat
+  geom_vline(xintercept=chi_obs, color="red") +
+  # Overlay chisq approximation
+  stat_function(fun = dchisq, args = list(df = 3), color = "blue")
+
+
+
+
+
+
+
+Compute the permutation p-value.
+Compute the approximation p-value. Recall that pchisq() will return the left tail of the distribution. To return the right tail, add an argument lower.tail = FALSE.
+# Calculate computational pval
+null %>%
+  summarize(pval = mean(stat >= chi_obs))
+# A tibble: 1 x 1
+   pval
+  <dbl>
+1 0.974
+
+
+
+
+
+# Calculate approximate pval
+pchisq(chi_obs, df = 3, lower.tail = FALSE)
+[1] 0.9682987
+
+
+Potent p-values! Although they are very similar here, you'd be slightly better off using your computational p-value. The approximation becomes less accurate when cell counts are low, as they are here.
+
