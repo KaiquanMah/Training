@@ -1,0 +1,84 @@
+Testing Iowa
+You probably noticed that the bar plot of first digits is alarming: it looks quite different from what Benford's Law prescribes! Before you get ahead of yourself, though, realize that those bars each only contained a handful of counties, so you don't actually have that much data.
+This is a prime example of when a hypothesis test is handy. It can tell you if the structure that you see (in this case, the deviation from Benford's Law) could just be due to the random variability of your small sample, or if it's indicative of a systematic difference.
+
+Starting with iowa_county, compute the observed chi-squared statistic using chisq_stat().
+# Compute observed stat
+chi_obs_stat <- iowa_county %>%
+  chisq_stat(response=first_digit, p=p_benford)
+[1] 26.43951
+
+
+
+Form the null distribution of chi-squared statistics via simulation under the point null hypothesis that these data come from the probabilities specified by Benford's Law. Save this distribution to null.
+# Form null distribution
+null <- iowa_county %>%
+  # Specify the response
+  specify(response = first_digit) %>%
+  # Set up the null hypothesis
+  hypothesize(null = "point", p = p_benford) %>%
+  # Generate 500 reps
+  generate(reps=500, type="simulate") %>%
+  # Calculate statistics
+  calculate(stat="Chisq")
+
+
+
+
+
+
+
+Construct a density plot of the distribution of the null statistics and add a vertical line indicating the location of the chi_obs_stat.
+> null
+# A tibble: 500 x 2
+   replicate  stat
+   <fct>     <dbl>
+ 1 1          3.15
+ 2 2          7.26
+ 3 3         15.8 
+ 4 4          4.69
+ 5 5          2.76
+ 6 6          7.60
+ 7 7         12.2 
+ 8 8         15.2 
+ 9 9          4.74
+10 10        10.5 
+# ... with 490 more rows
+
+
+
+# Visualize null stat
+ggplot(null, aes(x=stat)) +
+  # Add density layer
+  geom_density() +
+  # Add vertical line at observed stat
+  geom_vline(xintercept=chi_obs_stat, color="red")
+  
+  
+  
+Well done … And also rather troubling! Is it reasonable to think that both Iran and Iowa had fraudulent elections?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fraud in Iowa?
+Based on the null distribution that you constructed in the last exercise and the p-value (which you can compute using null and chi_obs_stat in your workspace here), which of the following statements is FALSE?
+
+The low p-value indicates that if in fact there was election fraud in Iowa, there would be a very small probability of observing this data or more extreme.
+Because the observed statistic is far into the tails of the null distribution, this indicates that your data is inconsistent with the null hypothesis that Benford's Law applies to vote totals in Iowa.
+
+#false The high p-value indicates a high probability that that our null hypothesis (that Benford's Law applies to vote totals in Iowa) is true.
+Bingo! Not only was the p-value not high, this is also an invalid interpretation of a p-value. It is never the probability that the null is true.
+
