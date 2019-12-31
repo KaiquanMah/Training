@@ -1,0 +1,45 @@
+A p-value, two ways
+You've seen before how there are usually two ways to get to the null distribution: through computation and through a mathematical approximation. The chi-squared goodness of fit test is no exception. The approximation distribution is again the "Chi-squared distribution" with degrees of freedom equal to the number of categories minus one.
+In this exercise you'll compare these two approaches to calculate a p-value that measures the consistency of the distribution of the Iran first digits with Benford's Law. Note that the observed statistic that you created in the last exercise is saved in your work space as chi_obs_stat.
+
+Compute the degrees of freedom of the chi-squared approximation by taking the first_digit vector from the iran data then calculating the number of categories using the nlevels() function then subtracting one.
+Using null, plot the distribution of the chi-squared statistics using a density plot. Add a vertical line indicating the observed statistic, then overlay the curve of the chi-squared approximation with the degrees of freedom in blue.
+# Compute degrees of freedom
+degrees_of_freedom <- iran %>%
+  # Pull out first_digit vector
+  pull("first_digit") %>% 
+  # Calculate n levels and subtract 1
+  nlevels() - 1
+[1] 8
+
+
+# Plot both null dists
+ggplot(null, aes(x=stat)) +
+  # Add density layer
+  geom_density() +
+  # Add vertical line at obs stat
+  geom_vline(xintercept=chi_obs_stat, color="red") +
+  # Overlay chisq approx
+  stat_function(fun = dchisq, args = list(df = degrees_of_freedom), color = "blue")
+
+
+
+Compute the permutation p-value by summarizing the statistics with the proportion that are greater than the observed statistic.
+Compute the approximation p-value using the pchisq() function. Recall that this will return the area under the curve to the left of the observed value, so you'll need to modify it to return the right tail.
+# Permutation p-value
+null %>%
+  summarize(pval = mean(stat >= chi_obs_stat))
+# A tibble: 1 x 1
+   pval
+  <dbl>
+1  0.01
+  
+  
+# Approximation p-value
+pchisq(chi_obs_stat,df=degrees_of_freedom,lower.tail=FALSE)
+  X-squared 
+0.006836367
+
+Potent p-values! Although they are very similar here, you'd be slightly better off using your computational p-value. The approximation becomes less accurate when cell counts are low, as they are here.
+
+
