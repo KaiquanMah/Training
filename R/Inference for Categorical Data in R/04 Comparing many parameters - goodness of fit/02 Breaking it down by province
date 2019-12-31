@@ -1,0 +1,118 @@
+Breaking it down by province
+Although the overall vote totals are the most important, you can dig deeper into this data by utilizing the geographic information. In this exercise, you'll see how the results differed by province.
+Did Ahmadinejad win throughout the country, or were there provinces where the second place candidate came out on top? To answer this question, start by creating a province-level data set.
+
+Start with iran, group by province, then summarize with two variables: the sum of the votes of the first place candidate and the sum of the votes of the second place candidate. Name each new column with the name of the candidate.
+Inspect province_totals.
+Filter province_totals for every row where the second-place candidate got more votes than the first-place candidate.
+
+# Construct province-level dataset
+province_totals <- iran %>%
+  # Group by province
+  group_by(province) %>%
+  # Sum up votes for top two candidates
+  summarise(ahmadinejad = sum(ahmadinejad),
+            mousavi = sum(mousavi)) 
+
+   
+# Inspect data frame
+province_totals
+
+# A tibble: 30 x 3
+   province                   ahmadinejad mousavi
+   <chr>                            <dbl>   <dbl>
+ 1 Ardabil                         325911  302825
+ 2 Bushehr                         299357  177268
+ 3 Chahar Mahaal and Bakhtiar      359578  106099
+ 4 East Azerbaijan                1131111  837858
+ 5 Fars                           1758026  706764
+ 6 Gilan                           998573  453806
+ 7 Golestan                        515211  325806
+ 8 Hamadan                         765723  218481
+ 9 Hormozgan                       482990  241988
+10 Ilam                            199654   96826
+# ... with 20 more rows
+
+
+
+
+
+
+# Filter for won provinces won by #2
+province_totals %>%
+  filter(mousavi > ahmadinejad)
+  
+# A tibble: 2 x 3
+  province               ahmadinejad mousavi
+  <chr>                        <dbl>   <dbl>
+1 Sistan and Baluchestan      450269  507946
+2 West Azerbaijan             623946  656508
+
+It looks like Ahmadinejad did not have a clean sweep; there were two provinces that preferred Mousavi.
+
+
+
+
+
+
+
+
+
+Extracting the first digit I
+To address the question of voter fraud, begin by creating a new column of data containing the first digit of the total number of votes cast. For this, you'll need a custom function which we've created for you called get_first(). The core of this function is substr(), which will take a string and extract a section of it called a substring.
+Once you create a new variable containing only the first digit, you can get a sense of how close it follows Benford's Law by constructing a bar plot.
+
+Take a look at how get_first() works by simply typing the name of the function (with no parentheses). All it does is fiddle with the output from substr() so that it's a factor.
+Mutate a new column in the iran data frame called first_digit that contains the first digit of city by city total votes cast.
+Check to see that get_first() worked. From the iran data, select off the columns total_votes_cast and first_digit and print them to the screen.
+Construct a bar plot to visualize the distribution of the first digit.
+
+
+# Print get_first
+get_first
+
+function(x) {
+  x %>%
+    # Convert the numbers to strings
+    as.character() %>%
+    # Extract the first digit
+    substr(1, 1) %>%
+    # Make it a categorical variable, with levels from 1 to 9 
+    factor(levels = 1:9)
+}
+
+
+
+# Create first_digit variable
+iran <- iran %>%
+  mutate(first_digit = get_first(total_votes_cast))
+  
+  
+# Check if get_first worked
+iran %>%
+  select(total_votes_cast, first_digit)
+
+# A tibble: 366 x 2
+   total_votes_cast first_digit
+              <dbl> <fct>      
+ 1            56712 5          
+ 2            52643 5          
+ 3            75500 7          
+ 4            51911 5          
+ 5            71389 7          
+ 6           876919 8          
+ 7            35295 3          
+ 8            16375 1          
+ 9            72152 7          
+10            77459 7          
+# ... with 356 more rows
+
+
+# Construct bar plot
+ggplot(iran, aes(x=first_digit, fill=total_votes_cast)) +
+  # Add bar layer
+  geom_bar()
+  
+  
+This decaying distribution of first digits looks familiar, but is it a good fit for Benford's Law?
+
