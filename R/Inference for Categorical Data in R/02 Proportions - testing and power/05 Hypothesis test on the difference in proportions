@@ -1,0 +1,54 @@
+Hypothesis test on the difference in proportions
+In the last exercise you learned that about 52% of women favor the death penalty while about 63% of men do, a difference of about 11 percentage points. That seems like a large difference, but what if it's just due to chance and in fact there is no relationship between sex and support for the death penalty? Find out by testing the null hypothesis that sex and support for the death penalty are independent of one another.
+The statistic that you'll be using in this exercise is a "diff in props", which requires that you specify the order of the difference by adding an argument, order = c("FIRST", "SECOND"), where first and second refer to the group names. This results in the calculation: FIRST - SECOND.
+
+Set up an infer chain which ends with the calculation of many differences in proportions, calculated as the proportion of "FEMALE" that "FAVOR" minus the proportion of "MALE" that do. Save the result to null.
+# Create null distribution
+null <- gss2016 %>%
+  # Specify the response and explanatory as well as the success
+  specify(cappun ~ sex, success = "FAVOR") %>%
+  # Set up null hypothesis
+  hypothesize(null = "independence") %>%
+  # Generate 500 reps by permutation
+  generate(reps = 500, type = "permute") %>%
+  # Calculate the statistics
+  calculate(stat = "diff in props", order = c("FEMALE", "MALE"))
+
+
+
+
+
+Construct a density plot to visualize the statistics stored in the null distribution and add a vertical red line to indicate the observed test statistic d_hat that you calculated in the last exercise.
+# From previous step
+null <- gss2016 %>%
+  specify(cappun ~ sex, success = "FAVOR") %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "diff in props", order = c("FEMALE", "MALE"))
+  
+# Visualize null
+ggplot(null, aes(x= stat)) +
+  # Add density layer
+  geom_density() +
+  # Add red vertical line at obs stat
+  geom_vline(xintercept = d_hat, color = "red")
+
+
+
+
+
+
+Compute the two-tailed p-value.
+Compute the one-tailed p-value by summarizing the statistics column by the proportion of statistics that are less than or equal to d_hat.
+Double it to get the two-tailed p-value.
+# Compute two-tailed p-value
+null %>%
+  summarise(
+    one_tailed_pval = mean(stat <= d_hat),
+    two_tailed_pval = 2 * one_tailed_pval
+  ) %>%
+  pull(two_tailed_pval)
+[1] 0.308
+
+While that observed difference of 11% seemed large, it's actually somewhat close to the main hump of the null distribution. As a result, the p-value isn't very small.
+
