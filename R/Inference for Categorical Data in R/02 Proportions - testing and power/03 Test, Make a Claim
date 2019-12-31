@@ -1,0 +1,88 @@
+Testing a claim
+In the last exercise, you got a sense of what a single simulated p-hat might be if in fact the true proportion of believers was 0.75. That p-hat was likely different from the p-hat in gss2016, but was that a fluke or is there a systematic inconsistency between that claim and the data in the GSS?
+In this exercise, you'll settle this question.
+
+Extend your code for the last exercise to calculate() sample proportions of believers in 500 generated data sets. Save this collection of p-hats to null.
+# Generate null distribution
+null <- gss2016 %>%
+  specify(response = postlife, success = "YES") %>%
+  hypothesize(null = "point", p = 0.75) %>%
+  generate(reps = 500, type = "simulate") %>%
+  # Calculate proportions
+  calculate(stat = "prop")
+
+
+
+Visualize the null distribution by creating a density plot of the statistics. Using geom_vline(), add a vertical line at the value of p_hat (from the last exercise), colored "red".
+# Visualize null distribution
+ggplot(null, aes(x=stat)) +
+  # Add density layer
+  geom_density() +
+  # Add line at observed
+  geom_vline(xintercept = p_hat, color = "red")
+
+
+
+Compute the one-tailed p-value by finding the proportion of null values that are greater than or equal to your observed p_hat.
+Compute the two-tailed p-value (where the proportion of null values is equal to or more extreme than the observed p_hat) from this by multiplying by 2.
+> null %>%
+    summarise(
+      # Compute the one-tailed p-value
+      one_tailed_pval = mean(stat >= p_hat))
+# A tibble: 1 x 1
+  one_tailed_pval
+            <dbl>
+1           0.072
+
+
+
+
+
+null %>%
+  summarise(
+    # Compute the one-tailed p-value
+    one_tailed_pval = mean(stat >= p_hat),
+    # Compute the two-tailed p-value
+    two_tailed_pval = 2*one_tailed_pval
+  ) %>%
+  pull(two_tailed_pval)
+[1] 0.144
+
+
+One way to think about a p-value is as a measure of how far out an observed statistic is into the tails of a null distribution.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Making a decision
+It's common practice to conclude a hypothesis test by making a binary decision about the validity of the null hypothesis. Using an alpha level of .05, what is your decision regarding the null hypothesis?
+
+Remember, you can compute p-value by running this code in the console:
+null %>%
+  summarize(pval = 2 * mean(stat > p_hat)) %>%
+  pull()
+
+The p-value < alpha, thus the data is consistent with the null hypothesis so I fail to reject it as a reasonable explanation.
+The p-value < alpha, thus the data is inconsistent with the null hypothesis so I reject it as a reasonable explanation.
+The p-value > alpha, thus the data is inconsistent with the null hypothesis so I reject it as a reasonable explanation.
+
+#yes The p-value > alpha, thus the data is consistent with the null hypothesis so I fail to reject it as a reasonable explanation.
+Great! This data is consistent with a model in which ¾ of Americans believe in life after death.
+
+
+
+
