@@ -1,0 +1,72 @@
+From tidy to table to tidy
+The gss_party data set that you created is in a tidy format to facilitate visualization and analysis. In this exercise, you'll untidy the data to create a contingency table to display counts. As a data analyst, it's commonplace to be given data in a contingency table, so you'll also practice tidying it back up.
+
+
+Using gss_party, create a contingency table() of natspac and party and save it to Obs for observed table.
+# Create table of natspac and party
+Obs <- gss_party %>%
+  # Select columns of interest
+  select(natspac, party) %>%
+  # Create table
+  table()
+
+             party
+natspac       Dem Ind Rep
+  TOO LITTLE    8  13   9
+  ABOUT RIGHT  22  37  17
+  TOO MUCH     13  22   8
+
+
+
+Starting with your observed contingency table Obs, convert it to a tidy data frame and expand the counts.
+> # Convert table back to tidy df
+> Obs %>%
+    # Tidy the table
+    tidy()
+# A tibble: 9 x 3
+  natspac     party     n
+  <chr>       <chr> <int>
+1 TOO LITTLE  Dem       8
+2 ABOUT RIGHT Dem      22
+3 TOO MUCH    Dem      13
+4 TOO LITTLE  Ind      13
+5 ABOUT RIGHT Ind      37
+6 TOO MUCH    Ind      22
+7 TOO LITTLE  Rep       9
+8 ABOUT RIGHT Rep      17
+9 TOO MUCH    Rep       8
+
+
+
+
+
+# Convert table back to tidy df
+Obs %>%
+  # Tidy the table
+  tidy() %>%
+  # Expand out the counts
+  uncount(n)
+
+# A tibble: 149 x 2
+   natspac     party
+   <chr>       <chr>
+ 1 TOO LITTLE  Dem  
+ 2 TOO LITTLE  Dem  
+ 3 TOO LITTLE  Dem  
+ 4 TOO LITTLE  Dem  
+ 5 TOO LITTLE  Dem  
+ 6 TOO LITTLE  Dem  
+ 7 TOO LITTLE  Dem  
+ 8 TOO LITTLE  Dem  
+ 9 ABOUT RIGHT Dem  
+10 ABOUT RIGHT Dem  
+# ... with 139 more rows
+
+
+
+
+
+
+
+Tubular tabulation and tremendous tidying! It's important to keep an eye out of these two different, but related, representations of a data set.
+
