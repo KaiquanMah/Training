@@ -1,0 +1,108 @@
+Getting to know the Iowa data
+This exercise should feel familiar: introducing yourself to the dataset by acquainting yourself with its basic structure. Questions that you should be thinking about include: What do the rows refer to? What about the columns? What type of data to they contain? How does this compare to the iran data?
+After you've familiarized yourself with the iowa data, determine which of the following statements is FALSE.
+
+There are 1386 observations on 5 variables.
+Each row refers to candidate pair (President/Vice President) in a single county.
+There appear to be 14 distinct categories in the candidate column.
+
+#false The columns contain the name of the office, the candidate, the party, the county, and the votes cast, all of which are categorical data.
+Well done! Most, but not all, of those variables are categorical. Votes cast is numerical.
+
+
+> glimpse(iowa)
+Observations: 1,386
+Variables: 5
+$ office    <chr> "President/Vice President", "President/Vice President", "...
+$ candidate <chr> "Evan McMullin / Nathan Johnson", "Under Votes", "Gary Jo...
+$ party     <chr> "Nominated by Petition", NA, "Libertarian", NA, "Socialis...
+$ county    <chr> "Adair", "Adair", "Adair", "Adair", "Adair", "Adair", "Ad...
+$ votes     <dbl> 10, 32, 127, 5, 0, 10, 1133, 14, 3, 2461, 3848, 38, 5, 10...
+
+> unique(iowa$candidate)
+ [1] "Evan McMullin / Nathan Johnson"              
+ [2] "Under Votes"                                 
+ [3] "Gary Johnson / Bill Weld"                    
+ [4] "Over Votes"                                  
+ [5] "Gloria La Riva / Dennis J. Banks"            
+ [6] "Darrell L. Castle / Scott N. Bradley"        
+ [7] "Hillary Clinton / Tim Kaine"                 
+ [8] "Jill Stein / Ajamu Baraka"                   
+ [9] "Rocky Roque De La Fuente / Michael Steinberg"
+[10] "Donald Trump / Mike Pence"                   
+[11] "Total"                                       
+[12] "Write-In"                                    
+[13] "Lynn Kahn / Jay Stolba"                      
+[14] "Dan R. Vacek / Mark G. Elworth"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Extracting the first digit II
+There are different levels at which we could consider looking at vote totals. We could look at precincts, or counties, or states, and each level might give us a slightly different picture of what's going on.
+For this analysis, look at totals at the county level in Iowa and focus on the votes for the two major party candidates: Republicans Trump / Pence and Democrats Clinton / Kaine.
+
+Using the iowa data set, filter the rows so they contain only the two main party candidates, then group based on county and add up the votes to create a new column called dem_rep_votes. Save the resulting data frame to iowa_county.
+# Get Iowa county vote totals
+iowa_county <- iowa %>%
+  # Filter for rep/dem
+  filter(candidate %in% c("Donald Trump / Mike Pence", "Hillary Clinton / Tim Kaine")) %>%
+  # Group by county
+  group_by(county) %>%
+  # Compute total votes in each county
+  summarise(dem_rep_votes = sum(votes))
+  
+# See the result
+iowa_county
+# A tibble: 99 x 2
+   county     dem_rep_votes
+   <chr>              <dbl>
+ 1 Adair               3594
+ 2 Adams               1960
+ 3 Allamakee           6514
+ 4 Appanoose           5847
+ 5 Audubon             3216
+ 6 Benton             12910
+ 7 Black Hawk         59709
+ 8 Boone              13025
+ 9 Bremer             12564
+10 Buchanan            9480
+# ... with 89 more rows
+
+
+
+
+
+
+
+
+
+
+Extract the first digit from the dem_rep_votes column using the custom function, call it first_digit, and save it back over iowa_county.
+# Add first_digit
+iowa_county <- iowa_county %>%
+  mutate(first_digit = get_first(dem_rep_votes))
+  
+# See the result
+iowa_county
+
+
+
+Construct a bar plot of first_digit.
+# Using iowa_county, plot first_digit
+ggplot(iowa_county, aes(x=first_digit)) +
+  # Add bar layer
+  geom_bar()
+
+Now you have another distribution of first digits. How does this compare to Iran? How does this compare to Benford's Law?
+
