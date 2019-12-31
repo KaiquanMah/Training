@@ -1,0 +1,55 @@
+When the null is true - decision
+In the last exercise, the observed difference in proportions is comfortably in the middle of the null distribution. In this exercise, you'll come to a formal decision on if you should reject the null hypothesis, but instead of using p-values, you'll use the notion of a rejection region.
+The rejection region is the range of values of the statistic that would lead you to reject the null hypothesis. In a two-tailed test, there are two rejection regions. You know that the upper region should contain the largest 2.5% of the null statistics (when alpha = .05), so you can extract the cutoff value by finding the .975 quantile(). Similarly, the lower region contains the smallest 2.5% of the null statistics, which can also be found using quantile().
+
+Here's a quick look at how the quantile() function works for this simple data set x.
+x <- c(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
+quantile(x, probs = .5)
+quantile(x, probs = .8)
+
+Once you have the rejection region defined by the upper and lower cutoffs, you can make your decision regarding the null by checking if your observed statistic falls between those cutoffs (in which case you will fail to reject) or outside of them (in which case you will reject).
+
+
+Create an object called alpha that takes the value 0.05.
+Find the upper cutoff by starting with the null data frame, which has been carried over from the last exercise, and summarizing the stat column by finding the alpha / 2 quantile(). Save this value as lower. Next, find the 1 - alpha / 2 quantile() and save it to upper.
+Check if your observed value of d_hat is between() the lower and upper cutoffs to find whether you should fail to reject the null hypothesis.
+# Set alpha
+alpha <- 0.05
+
+# Find cutoffs
+lower <- null %>%
+  summarize(l = quantile(stat, probs = alpha/2)) %>%
+  pull()
+  
+upper <- null %>%
+  summarize(u = quantile(stat, probs = 1-alpha/2)) %>%
+  pull()
+
+
+> lower
+     2.5% 
+-0.158371
+
+> upper
+    97.5% 
+0.1402715
+
+
+# Is d_hat inside cutoffs?
+d_hat %>%
+  between(lower, upper)
+[1] TRUE
+  
+  
+
+
+Visualize the reject and fail to reject regions by starting with your null distribution from last time and adding one vertical blue line for each cutoff.
+# Visualize cutoffs
+ggplot(null, aes(x = stat)) +
+  geom_density() +
+  geom_vline(xintercept = d_hat, color = "red") +
+  # Add vertical blue line for lower cutoff
+  geom_vline(xintercept = lower, color = "blue") +
+  # Add vertical blue line for upper cutoff
+  geom_vline(xintercept = upper, color = "blue")
+
