@@ -1,0 +1,43 @@
+Hypothesis tests and confidence intervals
+As was mentioned at the very beginning of this chapter, there is a close link between hypothesis tests and confidence intervals. The former explores whether a particular hypothesis about the world is consistent with your data. The latter has no hypothesis, it simply quantifies your uncertainty in your point estimate by adding and subtracting the margin of error.
+
+In this exercise you will explore the duality by forming a confidence interval around the difference in proportions, d_hat. To get you started, here is the code that you used to form the null distribution:
+
+# Reference code for null distribution
+null <- gss2016 %>%
+   specify(cappun ~ sex, success = "FAVOR") %>%
+   hypothesize(null = "independence") %>%
+   generate(reps = 500, type = "permute") %>%
+   calculate(stat = "diff in props", order = c("FEMALE", "MALE"))`
+   
+
+
+Adapt the code used to form the null distribution for hypothesis test to form the bootstrap distribution for use in a confidence interval.
+Remove the hypothesis step.
+Change the generation type to "bootstrap".
+Save it as boot.
+
+# Create the bootstrap distribution
+boot <- gss2016 %>%
+  # Specify the variables and success
+  specify(cappun ~ sex, success = "FAVOR") %>%
+  # Generate 500 bootstrap reps
+  generate(reps = 500, type = "bootstrap") %>%
+  # Calculate statistics
+  calculate(stat = "diff in props", order = c("FEMALE", "MALE"))
+
+
+
+Compute the standard deviation, sd(), of the bootstrap distribution to estimate the standard error and save it as SE.
+Formulate the 95% confidence interval for d_hat by subtracting and adding 2 SEs.
+# Compute the standard error
+SE <- boot %>%
+  summarize(se = sd(stat)) %>%
+  pull()
+  
+# Form the CI (lower, upper)
+c(d_hat-2*SE, d_hat+2*SE)
+[1] -0.26097300  0.06168077
+
+Your CI included the value of zero, indicating that it is a plausible value. Since it's a plausible value, you wouldn't want to reject it - leading the same conclusion as the hypothesis test.
+
