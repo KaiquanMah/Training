@@ -1,0 +1,120 @@
+Building two null distributions
+To get a sense of the full distribution that the chi-squared test statistic can take under this hypothesis, you need to generate many more data sets.
+Do this by first adding onto your work from the previous exercise with the natspac variable, then conduct a second hypothesis test to see if party is independent of natarms. Once you have both null distributions, you can visualize them to see if they're consistent with your observed statistics.
+
+Extend your code from the previous exercise to generate 500 data sets under the null hypothesis that natspac is independent from party. Save this as null_spac.
+Create a density plot of null_spac and add a vertical red line to indicate the location of the observed statistic (saved in your workspace as chi_obs_spac).
+> unique(gss_party$party)
+[1] Ind Dem Rep
+Levels: Dem Ind Rep
+
+> unique(gss_party$natspac)
+[1] TOO LITTLE  ABOUT RIGHT TOO MUCH   
+Levels: TOO LITTLE ABOUT RIGHT TOO MUCH
+The contents of the variable null_spac aren't correct. Did you specify national space spending vs party, hypothesize independence, and generate 500 permutation replicates with chi-squared as the interesting statistic?
+
+
+
+# Create null_spac
+null_spac <- gss_party %>%
+  # Specify the variables of interest
+  specify(natspac ~ party) %>%
+  # Set up the null
+  hypothesize(null="independence") %>%
+  # Generate a single permuted data set
+  generate(reps=500, type="permute") %>%
+  calculate(stat = "Chisq")
+
+
+
+# Visualize H_0 and obs
+ggplot(null_spac, aes(x = stat)) +
+  geom_density() +
+  geom_vline(xintercept = chi_obs_spac, color = "red")
+  
+  
+
+
+> chi_obs_arms
+[1] 18.96998
+> chi_obs_spac
+[1] 1.32606
+
+
+
+
+
+
+
+
+
+Construct a similar null distribution under the hypothesis that natarms is independent from party using the "Chisq" statistic. Save this as null_arms.
+Create a density plot of null_arms and add a vertical red line to indicate the location of the observed statistic (saved in your workspace as chi_obs_arms).
+
+# Create null_spac
+null_arms <- gss_party %>%
+  # Specify the variables of interest
+  specify(natarms ~ party) %>%
+  # Set up the null
+  hypothesize(null="independence") %>%
+  # Generate a single permuted data set
+  generate(reps=500, type="permute") %>%
+  calculate(stat = "Chisq")
+
+
+
+# Visualize H_0 and obs
+ggplot(null_arms, aes(x = stat)) +
+  geom_density() +
+  geom_vline(xintercept = chi_obs_arms, color = "red")
+
+
+Notice that the statistic for the latter dataset, natarms and party, was far more into the tails of the null distribution than the statistic corresponding to the relationship between natspac and party.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Is the data consistent with the model?
+In general, it's a good idea to use two-tailed p-values, which you have calculated like this:
+
+# Compute two-tailed p-value
+null %>%
+  summarize(pval = 2 * mean(stat <= d_hat))
+
+In the case of the chi-squared, however, you compute only the right tail, which makes it a one-tailed test. This is the tail with statistics that are more common when the hypothesis of independence is false.
+Using the objects that you created in the previous exercise (null_spac, null_arms, chi_obs_spac, and chi_obs_arms), compute the p-values of these two hypothesis tests and use them to select the correct answer below. Note that you'll have to tweak the code above to be sure to include only the right (greater than) tail in your p-values.
+
+
+Since both p-values are above 0.05, we fail to reject the hypotheses that both military spending and spending on space exploration are independent of political party.
+The data set is inconsistent with the hypothesis that there is no relationship between both military spending and party as well as spending for space exploration and party.
+The data set is consistent with the hypothesis that there is no relationship between political party and military spending, but does suggestion a relationship between party and spending on space exploration.
+
+#yes The data set is consistent with the hypothesis that there is no relationship between political party and space exploration spending, but does suggestion a relationship between party and spending on the military.
+Yep! These it seems that spending on the military is a partisan issue, while spending on space exploration is not.
+
+
+# Compute 1-tailed (right-tailed) p-value for Chisq test
+null_spac %>%
+  summarise(chisq_pval = 1 - mean(stat <= chi_obs_spac))
+# A tibble: 1 x 1
+   pval
+  <dbl>
+1 0.854
+
+
+
+null_arms %>%
+  summarise(chisq_pval = 1- mean(stat <= chi_obs_arms))
+# A tibble: 1 x 1
+   pval
+  <dbl>
+1     0
