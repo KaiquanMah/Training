@@ -1,0 +1,42 @@
+Death penalty and gender
+While you're on the topic of death and the afterlife, take a look at another question from the GSS:
+Do you favor or oppose the death penalty for people convicted of murder?
+Your objective here is to explore if opinions on capital punishment (cappun) diverged between men and women in the gss2016 data.
+
+Construct a bar plot to visualize the distribution of cappun broken down by sex. To enable easy comparison, be sure you're plotting proportions instead of counts (recall this means you set the position of the bars so that they "fill" the plot).
+# Plot distribution of sex filled by cappun
+ggplot(gss2016, aes(x = sex, fill = cappun)) +
+  # Add bar layer
+  geom_bar(position = "fill")
+
+
+
+
+
+Compute the proportion that FAVOR for men and women respectively, then save that two-element vector to p_hats. pull() is used (here and elsewhere) to pull the values out of the data frame for subsequent computation.
+# Compute two proportions
+p_hats <- gss2016 %>%
+  # Group by sex
+  group_by(sex) %>%
+  # Calculate proportion that FAVOR
+  summarize(prop_favor = mean(cappun == "FAVOR")) %>%
+  pull()
+
+# See the result
+p_hats
+[1] 0.6271186 0.5274725
+
+
+
+Compute the difference in p_hats using the diff() function and save it to d_hat.
+# Compute difference in proportions
+d_hat <- diff(p_hats)
+
+# See the result
+d_hat
+[1] -0.09964612
+
+
+
+Unless you tell R otherwise, R will do operations like this alphabetically, so -0.09964612 is the proportion of (f)emales that favor minus the proportion of (m)ales.
+
