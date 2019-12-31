@@ -1,0 +1,132 @@
+When the null is true
+In this exercise, you will run an experiment: what happens when you conduct a hypothesis test when you know that the null hypothesis is true? You hope that you will retain the null hypothesis, but there's always a chance that you will make a statistical error.
+
+To begin the experiment, we have created a new explanatory variable called coinflip that captures the result of a fair coin toss for every subject. With that variable in hand you can pose the following null hypothesis:
+H0:pheads−ptails=0
+
+This claims that there is no difference in the proportions that favor the death penalty between the people that flipped "heads" and those that flipped "tails". Since coinflip was formed independently of cappun, we know that this null hypothesis is true. The question is: will your test reject or retain this null hypothesis?
+
+
+
+Inspect the new coinflip variable.
+Compute the proportions that FAVOR among both heads and tails values of coinflip using the dataset gssmod. Save this statistic to p_hats.
+> glimpse(gssmod)
+Observations: 150
+Variables: 26
+$ id       <dbl> 2111, 62, 508, 1469, 184, 178, 971, 6, 2063, 2201, 1501, 1...
+$ year     <dbl> 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016...
+$ age      <fct> 61, 35, 21, 22, 32, 41, 25, 53, 41, 67, 55, 48, 21, 27, 56...
+$ class    <fct> MIDDLE CLASS, MIDDLE CLASS, MIDDLE CLASS, WORKING CLASS, W...
+$ degree   <fct> HIGH SCHOOL, HIGH SCHOOL, HIGH SCHOOL, HIGH SCHOOL, LT HIG...
+$ sex      <fct> FEMALE, MALE, FEMALE, MALE, MALE, FEMALE, MALE, FEMALE, FE...
+$ marital  <fct> MARRIED, WIDOWED, NEVER MARRIED, NEVER MARRIED, NEVER MARR...
+$ race     <fct> WHITE, BLACK, WHITE, WHITE, BLACK, OTHER, WHITE, WHITE, WH...
+$ region   <fct> central, eastern, eastern, mountain, pacific, pacific, cen...
+$ happy    <fct> HAPPY, UNHAPPY, UNHAPPY, HAPPY, UNHAPPY, HAPPY, UNHAPPY, H...
+$ relig    <fct> NONE, PROTESTANT, NONE, NONE, NONE, INTER-NONDENOMINATIONA...
+$ cappun   <fct> FAVOR, OPPOSE, OPPOSE, OPPOSE, OPPOSE, OPPOSE, OPPOSE, OPP...
+$ finalter <fct> STAYED SAME, STAYED SAME, BETTER, BETTER, STAYED SAME, BET...
+$ natspac  <fct> TOO LITTLE, ABOUT RIGHT, ABOUT RIGHT, TOO LITTLE, TOO MUCH...
+$ natarms  <fct> TOO LITTLE, TOO MUCH, TOO MUCH, TOO MUCH, TOO MUCH, TOO MU...
+$ conclerg <fct> ONLY SOME, A GREAT DEAL, ONLY SOME, ONLY SOME, ONLY SOME, ...
+$ confed   <fct> ONLY SOME, ONLY SOME, HARDLY ANY, ONLY SOME, HARDLY ANY, O...
+$ conpress <fct> ONLY SOME, ONLY SOME, HARDLY ANY, ONLY SOME, ONLY SOME, ON...
+$ conjudge <fct> ONLY SOME, HARDLY ANY, ONLY SOME, HARDLY ANY, A GREAT DEAL...
+$ consci   <fct> Low, High, High, High, High, High, High, High, High, Low, ...
+$ conlegis <fct> HARDLY ANY, HARDLY ANY, HARDLY ANY, HARDLY ANY, A GREAT DE...
+$ zodiac   <fct> VIRGO, CANCER, LEO, AQUARIUS, CANCER, AQUARIUS, TAURUS, SC...
+$ oversamp <dbl> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+$ postlife <fct> YES, YES, YES, NO, NO, YES, NO, YES, YES, YES, NO, NO, YES...
+$ party    <fct> Ind, Ind, Dem, Ind, Ind, Ind, Ind, Dem, Dem, Ind, Dem, Rep...
+$ coinflip <chr> "heads", "heads", "tails", "tails", "tails", "heads", "tai...
+
+
+
+
+# Inspect coinflip
+gssmod %>%
+  select(coinflip)
+
+# A tibble: 150 x 1
+   coinflip
+   <chr>   
+ 1 heads   
+ 2 heads   
+ 3 tails   
+ 4 tails   
+ 5 tails   
+ 6 heads   
+ 7 tails   
+ 8 tails   
+ 9 tails   
+10 tails   
+# ... with 140 more rows
+
+
+
+
+
+
+
+# Compute two proportions
+p_hats <- gssmod %>%
+  group_by(coinflip) %>%
+  summarize(prop_favor = mean(cappun == "FAVOR")) %>%
+  pull()
+  
+# See the result
+p_hats
+[1] 0.6307692 0.5176471
+
+
+
+
+
+
+
+
+
+
+
+Compute your final test statistic, d_hat, as the difference in p_hats.
+# Compute difference in proportions
+d_hat <- diff(p_hats)
+> d_hat
+[1] -0.1131222
+
+
+
+
+
+Construct the null distribution of the difference in proportions under the null hypothesis that cappun and coinflip are independent and save it to null. Note that the order of the difference should be "heads" then "tails".
+# Form null distribution
+null <- gssmod %>%
+  # Specify the response and explanatory var and success
+  specify(cappun ~ coinflip, success="FAVOR") %>%
+  # Set up the null hypothesis
+  hypothesize(null="independence") %>%
+  # Generate 500 permuted data sets
+  generate(reps=500, type="permute") %>%
+  # Calculate statistics
+  calculate(stat="diff in props", order=c("heads","tails"))
+
+
+
+
+
+
+
+
+
+Visualize the distribution of the null statistics using a density plot and add a vertical red line at the value of your observed d_hat.
+# Visualize null
+ggplot(null, aes(x=stat)) +
+  # Add density layer
+  geom_density() +
+  # Add vertical red line at observed stat
+  geom_vline(xintercept=d_hat, color="red")
+
+
+Your experiment suggests that when there is no difference in proportions, it's still conceivable that we'd observe differences up to around +/- 0.2.
+
+
