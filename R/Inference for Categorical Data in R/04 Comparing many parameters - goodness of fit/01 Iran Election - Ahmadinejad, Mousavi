@@ -1,0 +1,86 @@
+Getting to know the Iran data
+An important first step is to get a sense of the nature of the your data set by asking questions like: What does each row refer to? What variables do I have recorded? What type of variables are there? What are the dimensions of my data set?
+Which of the following is FALSE regarding the iran data set?
+
+The data set has 9 variables on 366 observations.
+The variables contain vote counts for various candidates as well as categorical data for the city and province names.
+There appear to be four candidates represented in this data set.
+
+#not Each row refers to a single ballot cast.
+Correct! Each row refers to the total ballots for a particular city.
+
+
+> glimpse(iran)
+Observations: 366
+Variables: 9
+$ province         <chr> "East Azerbaijan", "East Azerbaijan", "East Azerba...
+$ city             <chr> "Azar Shahr", "Asko", "Ahar", "Bostan Abad", "Bona...
+$ ahmadinejad      <dbl> 37203, 32510, 47938, 38610, 36395, 435728, 20520, ...
+$ rezai            <dbl> 453, 481, 568, 281, 485, 9830, 166, 55, 442, 391, ...
+$ karrubi          <dbl> 138, 468, 173, 53, 190, 3513, 74, 46, 211, 126, 17...
+$ mousavi          <dbl> 18312, 18799, 26220, 12603, 33695, 419983, 14340, ...
+$ total_votes_cast <dbl> 56712, 52643, 75500, 51911, 71389, 876919, 35295, ...
+$ voided_votes     <dbl> 606, 385, 601, 364, 624, 7865, 195, 102, 634, 661,...
+$ legitimate_votes <dbl> 56106, 52258, 74899, 51547, 70765, 869054, 35100, ...
+
+
+
+
+
+
+Who won
+The iran data set contains all of the votes cast in this election, meaning that you can find the victor by computing the total number of votes for each candidate. In addition to answering the question of who won nationwide, you can also see how the results differed by province.
+Along the way, you'll use a very useful function called gather(). This allows you to reshape your dataframe by taking information stored in variable names and moving it to live in its own column.
+
+Using the iran data, compute the total votes for each candidate by summarize()ing each of the candidate count columns with their sum. Name each new column with the name of the candidate.
+Print totals to your screen.
+# Compute and save candidate totals
+totals <- iran %>%
+  summarise(ahmadinejad = sum(ahmadinejad),
+            rezai = sum(rezai),
+            karrubi = sum(karrubi),
+            mousavi = sum(mousavi))
+
+# Inspect totals
+totals
+# A tibble: 1 x 4
+  ahmadinejad  rezai karrubi  mousavi
+        <dbl>  <dbl>   <dbl>    <dbl>
+1    24515209 659281  328979 13225330
+
+
+
+
+
+
+gather() the candidate names into a new column alongside their respective votes. The names of the previous columns are called the key, which you should rename "candidate" and the contents are cells are the value, which you should rename "votes".
+Inspect the resulting data frame to understand its structure.
+# Gather data
+gathered_totals <- totals %>%
+  gather(key = "candidate", value = "votes")
+
+# Inspect gathered totals
+gathered_totals
+
+# A tibble: 4 x 2
+  candidate      votes
+  <chr>          <dbl>
+1 ahmadinejad 24515209
+2 rezai         659281
+3 karrubi       328979
+4 mousavi     13225330
+
+
+
+
+
+
+
+
+
+Use gathered_totals to construct a bar plot of votes to visualize the overall election outcome. Since you already have the totals for each candidate, you need to map candidate to the x, votes to the y, then add a geom_col() layer.
+# Plot total votes for each candidate
+ggplot(gathered_totals, aes(x=candidate, y=votes)) +
+  # Add col layer
+  geom_col()
+  
