@@ -1,0 +1,63 @@
+Generating from H0
+Imagine that when reading the newspaper, you come across someone who makes the following claim: "3/4 of all Americans believe in life after death". This can be interpreted as a point null hypothesis that the population proportion has a value of 0.75.
+Use this hypothesis to generate a single data set to explore.
+
+Using gss2016,
+Specify the variable of interest and what constitutes a success.
+Form a "point" null hypothesis that the true proportion is 0.75.
+Generate a single simulated data set under this null hypothesis.
+# Generate one data set under H0
+sim1 <- gss2016 %>%
+  # Specify the response and success
+  specify(response = postlife , success = "YES") %>%
+  # Hypothesize the null value of p
+  hypothesize(null = "point", p = 0.75) %>%
+  # Generate a single simulated dataset
+  generate(reps = 1, type = "simulate")
+
+# See the result
+sim1
+Response: postlife (factor)
+Null Hypothesis: point
+# A tibble: 150 x 2
+# Groups:   replicate [1]
+   postlife replicate
+   <fct>    <fct>    
+ 1 YES      1        
+ 2 YES      1        
+ 3 YES      1        
+ 4 YES      1        
+ 5 YES      1        
+ 6 NO       1        
+ 7 YES      1        
+ 8 NO       1        
+ 9 YES      1        
+10 NO       1        
+# ... with 140 more rows
+
+
+
+
+
+
+Using sim1, construct a bar plot to visualize the distribution of postlife.
+# Using sim1, plot postlife
+ggplot(sim1, aes(x=postlife)) +
+  # Add bar layer
+  geom_bar()
+
+
+
+
+
+
+
+Compute the proportion of simulated respondents in sim1 that believe in life after death.
+# Compute proportion that believe
+sim1 %>%
+  summarise(prop_yes = mean(postlife == "YES")) %>%
+  pull()
+[1] 0.7733333
+
+Spectacular simulation! The null hypothesis describes a theoretical world and with these tools, you can generate from that world as much data as you like.
+
