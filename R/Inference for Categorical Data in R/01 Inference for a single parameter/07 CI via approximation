@@ -1,0 +1,97 @@
+CI via approximation
+The approximation shortcut offers an alternative method of describing the sampling distribution. In this exercise, you will apply the approximation shortcut to build a confidence interval for the proportion of respondents that live in the pacific region.
+When building any confidence interval, note that you use three ingredients: the point estimate (here, p_hat), the SE, and the number of standard errors to add and subtract. For a sampling distribution that is bell-shaped, adding and subtracting two SEs corresponds to a confidence level of 95%. When you use the bootstrap, you can check that the distribution is bell-shaped because you have a have the bootstrap distribution to plot. When you use the approximation, you're flying blind – well, not quite blind, but you are dependent on the "rule of thumb" to ensure that you're working with a bell shape.
+
+Calculate the sample size, n (which is the number of rows).
+Calculated the observed statistic, p_hat, as the proportion of people in the "pacific" meta-region.
+
+> glimpse(gss2016)
+Observations: 150
+Variables: 26
+$ id          <dbl> 2111, 62, 508, 1469, 184, 178, 971, 6, 2063, 2201, 1501...
+$ year        <dbl> 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2016, 2...
+$ age         <fct> 61, 35, 21, 22, 32, 41, 25, 53, 41, 67, 55, 48, 21, 27,...
+$ class       <fct> MIDDLE CLASS, MIDDLE CLASS, MIDDLE CLASS, WORKING CLASS...
+$ degree      <fct> HIGH SCHOOL, HIGH SCHOOL, HIGH SCHOOL, HIGH SCHOOL, LT ...
+$ sex         <fct> FEMALE, MALE, FEMALE, MALE, MALE, FEMALE, MALE, FEMALE,...
+$ marital     <fct> MARRIED, WIDOWED, NEVER MARRIED, NEVER MARRIED, NEVER M...
+$ race        <fct> WHITE, BLACK, WHITE, WHITE, BLACK, OTHER, WHITE, WHITE,...
+$ region      <fct> central, eastern, eastern, mountain, pacific, pacific, ...
+$ happy       <fct> HAPPY, UNHAPPY, UNHAPPY, HAPPY, UNHAPPY, HAPPY, UNHAPPY...
+$ relig       <fct> NONE, PROTESTANT, NONE, NONE, NONE, INTER-NONDENOMINATI...
+$ cappun      <fct> FAVOR, OPPOSE, OPPOSE, OPPOSE, OPPOSE, OPPOSE, OPPOSE, ...
+$ finalter    <fct> STAYED SAME, STAYED SAME, BETTER, BETTER, STAYED SAME, ...
+$ natspac     <fct> TOO LITTLE, ABOUT RIGHT, ABOUT RIGHT, TOO LITTLE, TOO M...
+$ natarms     <fct> TOO LITTLE, TOO MUCH, TOO MUCH, TOO MUCH, TOO MUCH, TOO...
+$ conclerg    <fct> ONLY SOME, A GREAT DEAL, ONLY SOME, ONLY SOME, ONLY SOM...
+$ confed      <fct> ONLY SOME, ONLY SOME, HARDLY ANY, ONLY SOME, HARDLY ANY...
+$ conpress    <fct> ONLY SOME, ONLY SOME, HARDLY ANY, ONLY SOME, ONLY SOME,...
+$ conjudge    <fct> ONLY SOME, HARDLY ANY, ONLY SOME, HARDLY ANY, A GREAT D...
+$ consci      <fct> Low, High, High, High, High, High, High, High, High, Lo...
+$ conlegis    <fct> HARDLY ANY, HARDLY ANY, HARDLY ANY, HARDLY ANY, A GREAT...
+$ zodiac      <fct> VIRGO, CANCER, LEO, AQUARIUS, CANCER, AQUARIUS, TAURUS,...
+$ oversamp    <dbl> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+$ postlife    <fct> YES, YES, YES, NO, NO, YES, NO, YES, YES, YES, NO, NO, ...
+$ party       <fct> Ind, Ind, Dem, Ind, Ind, Ind, Ind, Dem, Dem, Ind, Dem, ...
+$ meta_region <fct> not_pacific, not_pacific, not_pacific, not_pacific, pac...
+
+# Calculate n as the number of rows
+n <- nrow(gss2016)
+> n
+[1] 150
+
+# Calculate p_hat as the proportion in pacific meta region
+p_hat <- gss2016 %>%
+  summarise(prop_pacific = mean(meta_region == "pacific")) %>%
+  pull()
+
+# See the result
+p_hat
+> p_hat
+[1] 0.1
+
+
+
+
+
+
+
+
+
+Check the rules-of-thumb for the normal distribution being a decent approximation.
+Calculate the standard error using the approximation formula p^×(1−p^)n−−−−−−√.
+Use SE_approx to form a confidence interval for p_hat. The limits should be two standard errors either side of p_hat.
+# Check conditions
+n * p_hat >= 10
+[1] TRUE
+
+n * (1 - p_hat) >= 10
+[1] TRUE
+
+
+# Calculate SE
+SE_approx <- sd(p_hat)
+> SE_approx
+[1] 0.0244949
+
+# Form 95% CI
+c(p_hat-2*SE_approx, p_hat+2*SE_approx)
+[1] 0.05101021 0.14898979
+
+You probably noticed: this approximation method gives you a similar answer to the computational approach. This is a recurring theme that you'll be seeing throughout this course.
+
+
+
+
+
+
+
+
+
+Methods compared
+Now you have seen two ways to construct a confidence interval for a proportion. Which of the following about the two methods is true?
+
+Once the rule-of-thumb condition is violated, the approximation method instantly becomes extremely inaccurate.
+In traditional surveys and scientific research, the bootstrap approach is more commonly used than the approximation approach.
+
+#yes At a very small sample size, both approaches will perform poorly. Inference on very small data sets is not recommended!
