@@ -1,0 +1,67 @@
+A single permuted Chi-sq
+The key to generating data under a null hypothesis of independence is permutation. Generate just a single data set to see what sort of chi-squared statistic you might observe when in fact these two variables are independent of one another.
+
+
+Using gss_party, first specify that you'd like to study natarms as a function of party, create a null hypothesis of independence, then generate a single data set via permutation. Save this as perm_1.
+# Create one permuted data set
+perm_1 <- gss_party %>%
+  # Specify the variables of interest
+  specify(natarms ~ party) %>%
+  # Set up the null
+  hypothesize(null="independence") %>%
+  # Generate a single permuted data set
+  generate(reps=1, type="permute")
+
+
+
+
+
+
+
+Using perm_1, visualize the relationship between natarms and party by constructing a stacked bar plot of counts.
+# Visualize permuted data
+ggplot(perm_1, aes(x=party, fill=natarms)) +
+  # Add bar layer
+  geom_bar()
+
+
+
+
+
+Calculate the chi-squared test statistic associated with by running the gss_party data through the chisq_stat() function and specifying the variables using the formula notation as you did in specify().
+
+chisq_stat
+Tidy Chi-Squared Test Statistic
+A shortcut wrapper function to get the observed test statistic for a chisq test. Uses chisq.test(), which applies a continuity correction.
+
+Usage
+chisq_stat(x, formula, response = NULL, explanatory = NULL, ...)
+
+Arguments
+x
+A data frame that can be coerced into a tibble.
+
+formula
+A formula with the response variable on the left and the explanatory on the right.
+
+response
+The variable name in x that will serve as the response. This is alternative to using the formula argument.
+
+explanatory
+The variable name in x that will serve as the explanatory variable.
+
+...
+Additional arguments for chisq.test().
+
+
+
+# Compute chi-squared stat
+gss_party %>%
+  chisq_stat(natarms ~ party)
+
+[1] 18.96998
+
+
+By permuting or shuffling one of the variables, you have generated a new data set (with an associated chi-squared statistic) under the null hypothesis that these variables are unrelated.
+
+
