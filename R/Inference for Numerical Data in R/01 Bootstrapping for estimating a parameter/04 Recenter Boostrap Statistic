@@ -1,0 +1,102 @@
+Test for median price of 1 BR apartments in Manhattan
+Let's turn our attention back to Manhattan apartments. We would like to evaluate whether this data provides evidence that the median rent of 1 BR apartments in Manhattan is greater than $2,500.
+
+Generate 15000 bootstrap samples centered at null. The specify, generate, and calculate steps are completed for you.
+Set a point null hypothesis with a median of 2500.
+n_replicates <- 15000
+
+# Generate 15000 bootstrap samples centered at null
+rent_med_ht <- manhattan %>%
+  specify(response = rent) %>%
+  # Use a point hypothesis with a median of 2500
+  hypothesize(null = "point", med = 2500) %>% 
+  generate(reps = n_replicates, type = "bootstrap") %>% 
+  calculate(stat = "median")
+  
+# See the result
+rent_med_ht
+Response: rent (integer)
+# A tibble: 15,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 2572.
+ 2         2 2500 
+ 3         3 2312.
+...
+
+
+
+
+
+Calculate the observed median rent.
+Summarize to calculate the median rent.
+Pull out the value.
+
+> manhattan
+# A tibble: 20 x 1
+    rent
+   <int>
+ 1  3850
+ 2  3800
+ 3  2350
+ 4  3200
+ 5  2150
+ 
+ rent_med_obs <- manhattan %>%
+  # Calculate observed median rent
+  summarise(median_rent = median(rent)) %>%
+  # Pull out the value
+  pull()
+  
+# See the result
+rent_med_obs
+[1] 2350
+
+
+
+
+
+
+
+Calculate the p-value as the proportion of bootstrap statistics greater than the observed statistic.
+Filter for rows where the bootstrap median is greater than or equal to the observed median.
+Summarize to calculate p_val as the number of rows in the filtered dataset divided by the number of replicates.
+
+rent_med_ht %>%
+  # Filter for bootstrap stat greater than or equal to observed stat
+  filter(stat >= rent_med_obs) %>%
+  # Calculate the p-value
+  summarize(p_val = n()/nrow(rent_med_ht))
+  
+# A tibble: 1 x 1
+  p_val
+  <dbl>
+1 0.948  
+  
+  
+Well, turns out the prices of 1 BR apartments in Manhattan aren't too bad ;)
+
+
+
+
+
+
+
+
+
+
+
+
+
+Conclude the hypothesis test on median
+The p-value you calculated in the previous exercise is available as rent_p_value. Recall the problem statement: We would like to evaluate whether this data provides evidence that the median rent of 1 BR apartments in Manhattan is greater than $2,500. What is the conclusion of the hypothesis test at the 5% significance level?
+
+We reject H0 since the p-value is above the significance level, and conclude that the data provide convincing evidence that median rent of 1 BR apartments in Manhattan is greater than $2500.
+We fail to reject H0 since the p-value is above the significance level, and conclude that the data provide convincing evidence that median rent of 1 BR apartments in Manhattan is greater than $2500.
+We reject H0 since the p-value is below the significance level, and conclude that the data do not provide convincing evidence that median rent of 1 BR apartments in Manhattan is greater than $2500.
+
+#yes We fail to reject H0 since the p-value is above the significance level, and conclude that the data do not provide convincing evidence that median rent of 1 BR apartments in Manhattan is greater than $2500.
+Correct! The p-value is above the significance level, so we fail to reject the null hypothesis, and conclude that the data do not provide convincing evidence for the alternative hypothesis.
+
+
+
