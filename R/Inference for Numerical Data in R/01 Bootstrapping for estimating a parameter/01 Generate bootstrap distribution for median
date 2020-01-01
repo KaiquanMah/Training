@@ -1,0 +1,43 @@
+Generate bootstrap distribution for median
+When building a bootstrap distribution for a single statistic, we first generate a series of bootstrap resamples, and then record the relevant statistic (in this case, the median) of each distribution.
+In this exercise, the tidyverse packages, including ggplot2 have been loaded for you, as has infer.
+
+Generate 15000 bootstrap distributions of rent in the manhattan data frame and record the median of each bootstrap distribution.
+Specify that rent is the response variable.
+Generate 15000 bootstrap replicates.
+Calculate the median of each distribution.
+# Generate bootstrap distribution of medians
+rent_med_ci <- manhattan %>%
+  # Specify the variable of interest
+  specify(response = rent) %>%  
+  # Generate 15000 bootstrap samples
+  generate(reps = 15000, type = "bootstrap") %>% 
+  # Calculate the median of each bootstrap sample
+  calculate(stat = "median")
+  
+# View its structure
+str(rent_med_ci)
+Classes 'infer', 'tbl_df', 'tbl' and 'data.frame':	15000 obs. of  2 variables:
+ $ replicate: int  1 2 3 4 5 6 7 8 9 10 ...
+ $ stat     : num  2160 2350 2324 2238 2422 ...
+ - attr(*, "response")= symbol rent
+ - attr(*, "response_type")= chr "integer"
+ - attr(*, "distr_param")= Named num 19
+  ..- attr(*, "names")= chr "df"
+ - attr(*, "theory_type")= chr "One sample t"
+ - attr(*, "generate")= logi TRUE
+ - attr(*, "stat")= chr "median"
+
+
+
+
+
+Plot a histogram of the bootstrap medians.
+Using rent_med_ci, plot stat on the x axis.
+Add a histogram layer with a binwidth of 50.
+# Plot the rent_med_ci statistic
+ggplot(rent_med_ci, aes(stat)) +
+  # Make it a histogram with a binwidth of 50
+  geom_histogram(binwidth=50)
+  
+  
