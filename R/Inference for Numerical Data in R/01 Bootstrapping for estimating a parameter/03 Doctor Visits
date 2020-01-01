@@ -47,3 +47,143 @@ ncbirths %>%
   mean_visits
 1    12.10494  
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Average number of doctor's visits
+Next, we construct a bootstrap interval for the average number of doctor's visits during pregnancy.
+
+Filter ncbirths for rows where visits is not missing.
+# Filter for rows with non-missing visits
+ncbirths_complete_visits <- ncbirths %>%
+  filter(visits != 'NA')
+  
+# See the result
+glimpse(ncbirths_complete_visits)
+
+
+
+
+
+
+
+
+
+
+Generate 15000 bootstrap means of the number of visits.
+Specify visits as the variable of interest.
+Generate 15000 bootstrap replicates.
+Calculate the mean.
+
+# Generate 15000 bootstrap means
+visit_mean_ci <- ncbirths_complete_visits %>%
+  # Specify visits as the response
+  specify(response = visits) %>%
+  # Generate 15000 bootstrap replicates
+  generate(reps = 15000, type = "bootstrap") %>%
+  # Calculate the mean
+  calculate(stat = "mean")
+
+
+
+
+
+
+
+Calculate the 90% confidence interval via percentile method.
+Summarize to calculate appropriate quantiles of the bootstrap statistic.
+# Calculate the 90% CI via percentile method
+visit_mean_ci %>%
+  summarize(
+    l = quantile(stat, 0.05),
+    u = quantile(stat, 0.95)
+  )
+
+# A tibble: 1 x 2
+      l     u
+  <dbl> <dbl>
+1  11.9  12.3
+
+
+Quick mental check before you move on: How would you interpret this interval?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SD of number of doctor's visits
+Suppose now we're interested in the standard deviation of the number of doctor's visits throughout pregnancy.
+
+For the number of doctor's visits, generate 15000 bootstrap replicates and calculate their standard deviations.
+
+# Calculate 15000 bootstrap standard deviations of visits
+visit_sd_ci <- ncbirths_complete_visits %>%
+  specify(response=visits) %>%
+  generate(reps=15000, type="bootstrap") %>%
+  calculate(stat="sd")
+  
+# See the result
+visit_sd_ci
+Response: visits (integer)
+# A tibble: 15,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1  3.97
+ 2         2  3.94
+
+
+
+Calculate a 90% confidence interval for the bootstrap standard deviations using the percentile method.
+# Calculate the 90% CI via percentile method
+visit_sd_ci %>%
+  summarise(
+    l = quantile(stat, 0.05),
+    u = quantile(stat, 0.95)
+  )
