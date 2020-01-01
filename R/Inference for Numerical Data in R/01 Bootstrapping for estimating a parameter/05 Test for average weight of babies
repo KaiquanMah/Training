@@ -1,0 +1,52 @@
+Test for average weight of babies
+We'll wrap up inference on a single parameter of a numerical distribution by revisiting the ncbirths dataset, specifically the weight variable, indicating the birth weight of the baby. Do these data provide convincing evidence that the average birth weight of babies born in North Carolina is different than 7 pounds?
+
+
+Calculate 1500 bootstrap replicates of the mean weight. Use a point null hypothesis of weights being mu = 7 pounds.
+n_replicates <- 1500
+
+weight_mean_ht <- ncbirths %>%
+  # Specify weight as the response
+  specify(response=weight) %>%
+  # Set the hypothesis that weights are 7 pounds
+  hypothesize(null="point", mu=7) %>% 
+  # Generate 1500 bootstrap replicates
+  generate(reps=1500, type="bootstrap") %>% 
+  # Calculate the mean
+  calculate(stat="mean")
+
+
+
+
+Calculate the mean observed weight and pull out the value.
+# Calculate observed mean
+weight_mean_obs <- ncbirths %>%
+  # Summarize to calculate the mean observed weight
+  summarise(mean_weight = mean(weight)) %>% 
+  # Pull out the value
+  pull()
+
+
+
+Calculate the two-sided p-value.
+Filter for rows where the bootstrap median is greater than or equal to the observed median.
+Summarize to calculate one_sided_p_val as the number of rows in the filtered dataset divided by the number of replicates.
+Calculate two_sided_p_val from one_sided_p_val.
+
+# Calculate p-value
+weight_mean_ht %>%
+  # Filter on stat greater than or equal to weight_mean_obs
+  filter(stat >= weight_mean_obs) %>%
+  # p_val is twice the number of filtered rows divided by the total number of rows
+  summarize(
+    one_sided_p_val = n() / nrow(weight_mean_ht),
+    two_sided_p_val = 2 * one_sided_p_val
+  )
+
+
+# A tibble: 1 x 2
+  one_sided_p_val two_sided_p_val
+            <dbl>           <dbl>
+1          0.0113          0.0227
+
+
