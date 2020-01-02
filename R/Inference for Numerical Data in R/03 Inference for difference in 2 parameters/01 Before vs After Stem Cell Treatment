@@ -1,0 +1,66 @@
+Evaluating the effectiveness of stem cell treatment
+Now that we set out hypotheses, we can calculate the observed difference in means between the treatment and control groups. The stem.cell data frame gives us the pumping capacity of the heart before and after the experiment. So first we need to find the difference between these for each experimental unit, and then use these change values to calculate the observed difference in mean change between treatment and control groups.
+
+Add a column to stem.cell named change, equal to after minus before.
+>   glimpse(stem.cell)
+Observations: 18
+Variables: 3
+$ trmt   <fct> ctrl, ctrl, ctrl, ctrl, ctrl, ctrl, ctrl, ctrl, ctrl, esc, e...
+$ before <dbl> 35.25, 36.50, 39.75, 39.75, 41.75, 45.00, 47.00, 52.00, 52.0...
+$ after  <dbl> 29.50, 29.50, 36.25, 38.00, 37.50, 42.75, 39.00, 45.25, 52.2...
+
+>   unique(stem.cell$trmt)
+[1] ctrl esc 
+Levels: ctrl esc
+
+# Calculate difference between before and after
+stem.cell <- stem.cell %>%
+  mutate(change = after-before)
+  
+
+
+
+
+
+
+Calculate observed difference in means between treatment groups.
+Group by the treatment group, trmt.
+Summarize to calculate the mean change.
+Pull out the calculated value.
+Calculate the diff()erence between the two numbers.
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/diff
+
+#before the diff() function
+> diff_mean <- stem.cell %>%
+    # Group by treatment group
+    group_by(trmt) %>%
+    # Calculate mean change for each group
+    summarise(mean_change = mean(change)) %>% 
+    # Pull out the value
+    pull()
+> diff_mean
+[1] -4.333333  3.500000
+
+
+
+
+
+
+
+
+#after the diff() function
+# Calculate observed difference in means
+diff_mean <- stem.cell %>%
+  # Group by treatment group
+  group_by(trmt) %>%
+  # Calculate mean change for each group
+  summarise(mean_change = mean(change)) %>% 
+  # Pull out the value
+  pull() %>%
+  # Calculate difference
+  diff()
+  
+# See the result
+diff_mean
+[1] 7.833333
+
