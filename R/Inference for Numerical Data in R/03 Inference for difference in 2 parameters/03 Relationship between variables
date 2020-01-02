@@ -1,0 +1,134 @@
+Evaluating the relationship between smoking during pregnancy and birth weight
+The state of North Carolina released to the public a large data set containing information on births recorded in this state. This data set has been of interest to medical researchers who are studying the relation between habits and practices of expectant mothers and the birth of their children. ncbirths is a random sample of 1000 cases from this data set. We want to evaluate whether there is a difference between weights of babies born to smoker and non-smoker mothers.
+
+
+https://www.rdocumentation.org/packages/ursa/versions/3.8.8/topics/is.na
+Filter ncbirths for rows where habit is non-missing.
+# Filter for subjects with non-missing habit
+ncbirths_complete_habit <- ncbirths %>%
+  filter(!is.na(habit))
+
+
+
+
+
+
+Calculate observed difference in means between smoking habit groups.
+Group by the smoking habit group, habit.
+Summarize to calculate the mean weight.
+Pull out the calculated value.
+Calculate the difference between the two numbers.
+
+> glimpse(ncbirths)
+Observations: 1,000
+Variables: 13
+$ fage           <int> NA, NA, 19, 21, NA, NA, 18, 17, NA, 20, 30, NA, NA, ...
+$ mage           <int> 13, 14, 15, 15, 15, 15, 15, 15, 16, 16, 16, 16, 16, ...
+$ mature         <fct> younger mom, younger mom, younger mom, younger mom, ...
+$ weeks          <int> 39, 42, 37, 41, 39, 38, 37, 35, 38, 37, 45, 42, 40, ...
+$ premie         <fct> full term, full term, full term, full term, full ter...
+$ visits         <int> 10, 15, 11, 6, 9, 19, 12, 5, 9, 13, 9, 8, 4, 12, 15,...
+$ marital        <fct> married, married, married, married, married, married...
+$ gained         <int> 38, 20, 38, 34, 27, 22, 76, 15, NA, 52, 28, 34, 12, ...
+$ weight         <dbl> 7.63, 7.88, 6.63, 8.00, 6.38, 5.38, 8.44, 4.69, 8.81...
+$ lowbirthweight <fct> not low, not low, not low, not low, not low, low, no...
+$ gender         <fct> male, male, female, male, female, male, male, male, ...
+$ habit          <fct> nonsmoker, nonsmoker, nonsmoker, nonsmoker, nonsmoke...
+$ whitemom       <fct> not white, not white, white, white, not white, not w...
+
+
+
+ncbirths_complete_habit %>%
+    # Group by habit group
+    group_by(habit) %>%
+    # Calculate mean weight for each group
+    summarise(mean_weight = mean(weight))
+
+# A tibble: 2 x 2
+  habit     mean_weight
+  <fct>           <dbl>
+1 nonsmoker        7.14
+2 smoker           6.83
+
+# Calculate observed difference in means
+diff_mean_obs <- ncbirths_complete_habit %>%
+  # Group by habit group
+  group_by(habit) %>%
+  # Calculate mean weight for each group
+  summarise(mean_weight = mean(weight)) %>%
+  # Pull out the value
+  pull() %>%
+  # Calculate the difference
+  diff()
+
+> diff_mean_obs
+[1] -0.3155425
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Generate 1000 differences in means via randomization and store as diff_mean_ht
+Specify the model as birth weight versus smoking habit.
+Set the hypothesis that the variables are independent.
+Generate 1000 samples via permutation.
+Calculate the difference in means at each iteration. The order should have "nonsmoker"s first, then "smoker"s.
+
+n_replicates <- 1000
+
+# Generate 1000 differences in means via randomization
+diff_mean_ht <- ncbirths_complete_habit %>% 
+  # Specify weight vs. habit
+  specify(weight ~ habit) %>% 
+  # Null = no difference between means
+  hypothesize(null="independence") %>% 
+  # Shuffle labels 1000 times
+  generate(reps=n_replicates, type="permute") %>%
+  # Calculate test statistic, nonsmoker then smoker
+  calculate(stat="diff in means", order=c("nonsmoker", "smoker"))
+  
+
+
+
+
+
+
+
+
+
+
+
+Filter for rows where the bootstrap difference in means is less than or equal to the observed difference in means.
+Summarize to calculate one_sided_p_val as the number of rows in the filtered dataset divided by the number of replicates.
+Calculate two_sided_p_val from one_sided_p_val.
+# Calculate p-value
+diff_mean_ht %>%
+  # Identify simulated test statistics at least as extreme as observed
+  filter(stat <= diff_mean_obs) %>%
+  # Calculate p-value
+  summarise(
+    one_sided_p_val = n()/nrow(diff_mean_ht),
+    two_sided_p_val = 2*one_sided_p_val
+  )
+
+# A tibble: 1 x 2
+  one_sided_p_val two_sided_p_val
+            <dbl>           <dbl>
+1           0.014           0.028
+
+
+
+
+What does your p-value suggest about the relationship between smoking during pregnancy and birth weight?
+
