@@ -1,0 +1,96 @@
+Quantifying the relationship between smoking during pregnancy and birth weight
+Let's construct a bootstrap interval for the difference in mean weights of babies born to smoker and non-smoker mothers. The ncbirths_complete_habit data frame you created earlier is available to use.
+
+
+Generate 1500 bootstrap difference in means for birth weight by smoking habit.
+Specify birth weight versus smoking habit.
+Generate 1500 bootstrap replicates.
+Calculate the difference in means, with order nonsmoker then smoker.
+# Generate 1500 bootstrap difference in means
+diff_mean_ci <- ncbirths_complete_habit %>%
+  # Specify weight vs. habit
+  specify(weight ~ habit) %>%
+  # Generate 1500 bootstrap replicates
+  generate(reps=1500, type="bootstrap") %>%
+  # Calculate the difference in means, nonsmoker then smoker
+  calculate(stat="diff in means", order=c("nonsmoker", "smoker"))
+
+
+
+
+Calculate a 95% confidence interval for the bootstrap difference in mean birth weights using the percentile method.
+# Calculate the 95% CI via percentile method
+diff_mean_ci %>%
+  summarise(
+    l = quantile(stat, 0.025),
+    u = quantile(stat, 0.975)
+  )
+
+# A tibble: 1 x 2
+       l     u
+   <dbl> <dbl>
+1 0.0593 0.590
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Median lengths of pregnancies for smoking and non-smoking mothers
+Let's turn our attention to another variable, weeks, indicating the length of the pregnancy. Construct a bootstrap interval for the difference in median lengths of pregnancies of smoker and non-smoker mothers.
+
+
+Filter ncbirths for rows where smoking habit and length of pregnancy in weeks are both non-missing.
+# Filter for non-missing habit & non-missing weeks
+ncbirths_complete_habit_weeks <- ncbirths %>%
+  filter(!is.na(habit) & !is.na(weeks))
+
+
+Generate 1500 bootstrap difference in medians for pregnancy length in weeks by smoking habit.
+Specify pregnancy length in weeks versus smoking habit.
+Generate 1500 bootstrap replicates.
+Calculate the difference in medians, with order nonsmoker then smoker.
+# Generate 1500 bootstrap difference in medians
+diff_med_ci <- ncbirths_complete_habit_weeks %>%
+  # Specify weeks versus habit
+  specify(weeks ~ habit) %>%
+  # Generate 1500 bootstrap replicates
+  generate(reps=1500, type="bootstrap") %>%
+  # Calculate the difference in medians, nonsmoker then smoker
+  calculate(stat="diff in medians", order=c("nonsmoker", "smoker"))
+  
+  
+  
+  
+  
+  
+  
+  
+Calculate a 92% confidence interval for the bootstrap difference in median pregnancy length in weeks using the percentile method.
+# Calculate the 92% CI via percentile method
+diff_med_ci %>%
+  summarize(
+    l = quantile(stat, 0.04),
+    u = quantile(stat, 0.96)
+  )
+
+# A tibble: 1 x 2
+      l     u
+  <dbl> <dbl>
+1     0     1
+
+
+Quick mental check before you move on: What does 92% confident mean?
+
