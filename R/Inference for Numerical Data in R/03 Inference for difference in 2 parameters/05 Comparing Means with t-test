@@ -1,0 +1,146 @@
+Hourly pay vs. citizenship status
+Using the acs12 data, and specifically the variables income, hrs_work, and citizen, summarize, visualize, and compare the distributions of hourly pay rate for citizens and non-citizens.
+
+
+Filter acs12 for rows where hourly pay, hrly_pay, and U.S. citizenship status, citizen, are both non-missing.
+# Filter for non-missing hrly_pay and non-missing citizen
+acs12_complete_hrlypay_citizen <- acs12 %>%
+  filter(!is.na(hrly_pay) & !is.na(citizen))
+
+
+
+
+
+
+
+Get the number of rows in the full dataset, acs12.
+Get the number of rows in the filtered dataset, acs12_complete_hrlypay_citizen.
+Calculate the number of rows where at least one of hrly_pay and citizen was missing.
+Calculate the proportion of missing rows where at least one of hrly_pay and citizen was missing.
+# Get nuber of rows in full dataset
+n_all <- nrow(acs12)
+
+# Get number of rows in filtered dataset
+n_non_missing <- nrow(acs12_complete_hrlypay_citizen)
+
+# Calculate number missing
+n_missing <- acs12 %>%
+  filter(is.na(hrly_pay) | is.na(citizen)) %>%
+  nrow()
+
+
+# Calculate proportion missing
+prop_missing <- n_missing/n_all
+
+# See the result
+prop_missing
+[1] 0.5205
+
+> n_all
+[1] 2000
+> n_non_missing
+[1] 959
+> n_missing
+[1] 1041
+
+
+
+
+
+
+
+
+
+
+
+Group by U.S. citizenship status.
+Summarize to calculate the mean of hourly pay, the standard deviation of hourly pay, and the number of rows in that citizenship group.
+acs12_complete_hrlypay_citizen %>%
+  # Group by citizen
+  group_by(citizen) %>%
+  summarize(
+    # Calculate mean hourly pay
+    x_bar = mean(hrly_pay),
+    # Calculate std dev of hourly pay
+    s = sd(hrly_pay),
+    # Count number of rows
+    n = n()
+  )
+
+
+# A tibble: 2 x 4
+  citizen     x_bar     s     n
+  <chr>       <dbl> <dbl> <int>
+1 Citizen      18.5  24.7   901
+2 Non-citizen  21.2  34.5    58
+
+
+
+
+
+
+
+
+
+
+Plot a histogram of the hrly_pay, faceted by citizenship status.
+Using acs12_complete_hrlypay_citizen, plot hrly_pay on the x axis.
+Add a histogram layer with a binwidth of 5.
+
+# Using acs12_complete_hrlypay_citizen, plot hrly_pay
+ggplot(acs12_complete_hrlypay_citizen, aes(x=hrly_pay)) +
+  # Add a histogram layer
+  geom_histogram(binwidth=5) +
+  facet_grid(rows = vars(citizen))
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Estimating the difference of two means using a t-interval
+Earlier we used summary statistics and a visualization to compare the hourly pay of citizens vs. non-citizens. In this exercise we estimate the difference between the average hourly pay between these two groups.
+The acs12_complete_hrlypay_citizen is already loaded for you.
+
+Run a t-test to find a confidence interval for the difference in average hourly pay, hrly_pay between citizen and non-citizens, citizen in the acs12_complete_hrlypay_citizen dataset. Assign to test_results.
+# Construct 95% CI using a t-test
+test_results <- t.test(data=acs12_complete_hrlypay_citizen, hrly_pay ~ citizen)
+
+# See the results
+test_results
+
+	Welch Two Sample t-test
+
+data:  hrly_pay by citizen
+t = 0.58058, df = 60.827, p-value = 0.5637
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -6.53483 11.88170
+sample estimates:
+ mean in group no mean in group yes 
+         21.19494          18.52151
+         
+         
+         
+         
+         
