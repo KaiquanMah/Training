@@ -1,0 +1,71 @@
+Evaluating the effectiveness of stem cell treatment (cont.)
+Conduct the hypothesis test and compute the p-value for evaluating whether there is a difference between the mean heart pumping capacities of sheep's hearts in the control and treatment groups.
+Since we're testing for a difference, the order in which we subtract matters. We can specify it using the order argument in the calculate() function. For example, to achieve group1 - group2 use order = c("group1", "group2").
+
+Generate 1000 differences in means via randomization.
+Specify change versus treatment group.
+Use an independence hypothesis.
+Generate 1000 replicates via permutation.
+Calculate the difference in means (esc first, then ctrl).
+n_replicates <- 1000
+
+# Generate 1000 differences in means via randomization/permutation
+diff_mean_ht <- stem.cell %>%
+  # y ~ x
+  specify(change ~ trmt) %>% 
+  # Null = no difference between means
+  hypothesize(null = "independence") %>% 
+  # Shuffle labels 1000 times
+  generate(reps = n_replicates, type = "permute") %>% 
+  # Calculate test statistic
+  #https://www.rdocumentation.org/packages/infer/versions/0.5.0/topics/calculate
+  # stat can be "mean", "median", "sum", "sd", "prop", "count", "diff in means", "diff in medians", "diff in props", "Chisq", "F", "t", "z", "slope", and "correlation"
+  calculate(stat = "diff in means", order = c("esc", "ctrl"))
+  
+  
+  
+  
+  
+  
+
+Calculate the one-sided p-value.
+Filter for replicates where the simulated test statistic is at least as extreme as the observed statistic.
+Summarize to calculate the p-value as the number of rows in the filtered dataset divided by the number of replicates.
+
+diff_mean_ht %>%
+  # Filter for simulated test statistics at least as extreme as observed
+  filter(stat >= diff_mean) %>%
+  # Calculate p-value
+  summarise(p_val = n()/nrow(diff_mean_ht))
+  
+  # A tibble: 1 x 1
+  p_val
+  <dbl>
+1     0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Conclusion of the hypothesis test
+The p-value of the previous test was found to be 0.001. Suppose the significance level of the test is 1%. Fill in the blanks:
+"_ between the heart pumping capacities of sheep's hearts in the control and treatment groups."
+
+There is a difference
+There is no difference
+The data provide convincing evidence that there is no difference
+
+#yes The data provide convincing evidence of a difference
+
+
