@@ -1,0 +1,174 @@
+Estimate the median difference in textbook prices
+Suppose instead of the mean, we want to estimate the median difference in prices of the same textbook at the UCLA bookstore and on Amazon. You can't do this using a t-test, as the Central Limit Theorem only talks about means, not medians. You'll use an infer pipeline to estimate the median.
+
+For the price differences, generate 15000 bootstrap replicates and calculate their medians.
+# Calculate 15000 bootstrap medians of diff
+textdiff_med_ci <- textbooks %>%
+  specify(response=diff) %>%
+  generate(reps=15000, type="bootstrap") %>%
+  calculate(stat="median")
+
+Calculate a 95% confidence interval for the bootstrap median price differences using the percentile method.
+# Calculate the 95% CI via percentile method
+textdiff_med_ci %>%
+  summarise(
+    l = quantile(stat, 0.025),
+    u = quantile(stat, 0.975)
+  )
+
+# A tibble: 1 x 2
+      l     u
+  <dbl> <dbl>
+1  5.04  11.7
+
+
+Wunderbar! But not so fast… Take a moment to interpret this interval in a way that makes it clear where the textbooks can be found for cheaper, on average.
+
+
+
+
+
+
+Test for a difference in median test scores
+The High School and Beyond survey is conducted on high school seniors by the National Center of Education Statistics. We randomly sampled 200 observations from this survey, and these data are in the hsb2 data frame (which is already loaded for you). Among other variables, this data frame contains scores on math and science scores of each sampled student.
+
+>   glimpse(hsb2)
+Observations: 200
+Variables: 11
+$ id      <int> 70, 121, 86, 141, 172, 113, 50, 11, 84, 48, 75, 60, 95, 104...
+$ gender  <chr> "male", "female", "male", "male", "male", "male", "male", "...
+$ race    <chr> "white", "white", "white", "white", "white", "white", "afri...
+$ ses     <fct> low, middle, high, high, middle, middle, middle, middle, mi...
+$ schtyp  <fct> public, public, public, public, public, public, public, pub...
+$ prog    <fct> general, vocational, general, vocational, academic, academi...
+$ read    <int> 57, 68, 44, 63, 47, 44, 50, 34, 63, 57, 60, 57, 73, 54, 45,...
+$ write   <int> 52, 59, 33, 44, 52, 52, 59, 46, 57, 55, 46, 65, 60, 63, 57,...
+$ math    <int> 41, 53, 54, 47, 57, 51, 42, 45, 54, 52, 51, 51, 71, 57, 50,...
+$ science <int> 47, 63, 58, 53, 53, 63, 53, 39, 58, 50, 53, 63, 61, 55, 31,...
+$ socst   <int> 57, 61, 31, 56, 61, 61, 61, 36, 51, 51, 61, 61, 71, 46, 56,...
+
+
+Add a column to hsb2 named diff containing the math scores minus the science scores
+# Add a column, diff, of math minus science
+hsb2 <- hsb2 %>%
+  mutate(diff = math-science)
+  
+
+
+
+
+
+Specify diff as the response.
+Use a point null hypothesis of the score difference being med = 0.
+Generate 15000 bootstrap replicates.
+Calculate the median.
+n_replicates <- 15000
+
+# Generate 15000 bootstrap medians centered at null
+scorediff_med_ht <- hsb2 %>%
+  specify(response=diff) %>%
+  hypothesize(null="point", med=0) %>% 
+  generate(reps=n_replicates, type="bootstrap") %>% 
+  calculate(stat="median")
+
+
+
+> scorediff_med_ht
+Response: diff (integer)
+# A tibble: 15,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1    -1
+ 2         2    -1
+ 3         3     0
+ 4         4     1
+ 5         5     0
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+
+
+
+Calculate the median observed score difference and pull out the value.
+# Calculate observed median of differences
+scorediff_med_obs <- hsb2 %>%
+  summarise(median_diff = median(diff)) %>%
+  pull()
+
+> scorediff_med_obs
+[1] 1 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Calculate the two-sided p-value.
+Filter for rows where the bootstrap median is greater than or equal to the observed median.
+Summarize to calculate one_sided_p_val as the number of rows in the filtered dataset divided by the number of replicates.
+Calculate two_sided_p_val from one_sided_p_val.
+# Calculate two-sided p-value
+scorediff_med_ht %>%
+  filter(stat >= scorediff_med_obs) %>%
+  summarise(
+    one_sided_p_val = n()/nrow(scorediff_med_ht),
+    two_sided_p_val = 2*one_sided_p_val
+  )
+
+# A tibble: 1 x 2
+  one_sided_p_val two_sided_p_val
+            <dbl>           <dbl>
+1           0.263           0.526
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Interpret the p-value
+In the previous exercise, you conducted a hypothesis test to evaluate whether the median scores on math and science exams are different. The observed median difference and p-value that you calculated are in your workspace as scorediff_med_obs and scorediff_p_value.
+> scorediff_p_value
+# A tibble: 1 x 2
+  one_sided_p_val two_sided_p_val
+            <dbl>           <dbl>
+1           0.257           0.514
+
+> scorediff_med_obs
+[1] 1
+
+
+Which of the following is the correct definition of the p-value of this hypothesis test?
+
+The probability that there is no difference between the median math and science scores.
+The probability that the median math score is higher than the median science score.
+The probability of getting a random sample of 200 high school students where there is no difference between the median math and science scores, if in fact the median difference between their math and science test scores is at least 1.
+
+#yes The probability of getting a random sample of 200 high school students where the median difference between their math and science test scores is at least 1, if in fact there is no difference between the median math and science scores.
+Correct! A p-value is the probability of observing data at least as extreme as yours, given the null hypothesis is true.
+
+
+
+
