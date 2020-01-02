@@ -1,0 +1,92 @@
+Average commute time of Americans
+Each year since 2005, the US Census Bureau surveys about 3.5 million households with The American Community Survey (ACS). Data collected from the ACS have been crucial in government and policy decisions, helping to determine the allocation of federal and state funds each year. Data from the 2012 ACS is available in the acs12 dataset.
+When given one argument, t.test() tests whether the population mean of its input is different than 0. That is H0:μdiff=0 and HA:μdiff≠0. It also provides a 95% confidence interval.
+https://www.census.gov/programs-surveys/acs/
+
+> glimpse(acs12)
+Observations: 2,000
+Variables: 13
+$ income       <int> 60000, 0, NA, 0, 0, 1700, NA, NA, NA, 45000, NA, 8600,...
+$ employment   <fct> not in labor force, not in labor force, NA, not in lab...
+$ hrs_work     <int> 40, NA, NA, NA, NA, 40, NA, NA, NA, 84, NA, 23, NA, NA...
+$ race         <fct> white, white, white, white, white, other, white, other...
+$ age          <int> 68, 88, 12, 17, 77, 35, 11, 7, 6, 27, 8, 69, 69, 17, 1...
+$ gender       <fct> female, male, female, male, female, female, male, male...
+$ citizen      <fct> yes, yes, yes, yes, yes, yes, yes, yes, yes, yes, yes,...
+$ time_to_work <int> NA, NA, NA, NA, NA, 15, NA, NA, NA, 40, NA, 5, NA, NA,...
+$ lang         <fct> english, english, english, other, other, other, englis...
+$ married      <fct> no, no, no, no, no, yes, no, no, no, yes, no, no, yes,...
+$ edu          <fct> college, hs or lower, hs or lower, hs or lower, hs or ...
+$ disability   <fct> no, yes, no, no, yes, yes, no, yes, no, no, no, no, ye...
+$ birth_qrtr   <fct> jul thru sep, jan thru mar, oct thru dec, oct thru dec...
+
+> unique(acs12$employment)
+[1] not in labor force <NA>               employed           unemployed        
+Levels: not in labor force unemployed employed
+
+
+
+
+Filter the acs12 dataset for individuals whose employment status is "employed", and save this new dataset as acs12_emp.
+Use a t-test to construct a 95% confidence interval for the average commute time of Americans.
+# Filter for employed respondents
+acs12_emp <- acs12 %>%
+  filter(employment == "employed")
+
+
+
+# Construct 95% CI for avg time_to_work
+t.test(acs12_emp$time_to_work)
+
+	One Sample t-test
+
+data:  acs12_emp$time_to_work
+t = 32.635, df = 782, p-value < 2.2e-16
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 24.43369 27.56120
+sample estimates:
+mean of x 
+ 25.99745
+ 
+And now you now how long Americans need to travel to work, on average, with 95% confidence.
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Average number of hours worked
+Full-time employment is employment in which a person works a minimum number of hours defined as such by his/her employer. Companies in the United States commonly require 40 hours per week to be considered a full time employee. We will use data from the American Community Survey to estimate the number of hours Americans work.
+Use the acs12_emp dataset you created earlier; it's already loaded for you.
+
+Create a 95% confidence interval using the hrs_work column.
+Interpret the confidence interval. Is it likely the average number of hours Americans work is equal to 40?
+# Run a t-test on hrs_work and look at the CI
+t.test(acs12_emp$hrs_work)
+
+	One Sample t-test
+
+data:  acs12_emp$hrs_work
+t = 87.521, df = 842, p-value < 2.2e-16
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 38.05811 39.80429
+sample estimates:
+mean of x 
+  38.9312
+
+For this analysis, it would have made more sense to use a subset excluding part time workers.
+
