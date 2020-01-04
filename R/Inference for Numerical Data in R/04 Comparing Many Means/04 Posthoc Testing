@@ -1,0 +1,50 @@
+Calculate alpha*
+Which of the following is the correct modified significance value for the post hoc tests associated with ANOVA for evaluating whether there are differences between the average vocabulary scores across social classes?
+There are 4 social classes, and the original significance level was 5%.
+
+0.05
+0.05 / 4
+0.05 / 12
+
+#yes 0.05 / 6
+Bonferroni would be so proud! The correction factor for k classes is k∗(k−1)/2.
+
+
+
+
+
+
+
+
+
+
+Compare pairwise means
+Compare means of vocabulary scores using the pairwise.t.test() function for all pairings of social classes.
+
+Conduct a pairwise t-test on vocabulary scores and social class. Set p.adjust.method to "none" (we'll adjust the significance level, not the p-value).
+Tidy the result.
+Do the data provide convincing evidence of a difference in the average vocabulary scores of those who self identified as middle class and those who self identified as lower class?
+
+# Run a pairwise t-test on wordsum and class, without adjustment
+#https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/pairwise.t.test
+#https://stat.ethz.ch/R-manual/R-devel/library/stats/html/pairwise.t.test.html
+#helped https://www.r-bloggers.com/r-tutorial-series-one-way-anova-with-pairwise-comparisons/
+t_test_results <- pairwise.t.test(x=gss$wordsum, g=gss$class, p.adjust.method="none")
+
+# Tidy the result
+tidy(t_test_results)
+
+# A tibble: 6 x 3
+  group1  group2  p.value
+  <chr>   <chr>     <dbl>
+1 MIDDLE  LOWER  1.13e- 7
+2 UPPER   LOWER  4.75e- 2
+3 WORKING LOWER  3.06e- 2
+4 UPPER   MIDDLE 2.40e- 1
+5 WORKING MIDDLE 1.63e-12
+6 WORKING UPPER  3.67e- 1
+
+
+
+
+
