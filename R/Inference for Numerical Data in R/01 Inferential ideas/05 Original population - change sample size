@@ -1,0 +1,39 @@
+Original population - change sample size
+In order to understand the sampling distribution associated with the slope coefficient, it is valuable to visualize the impact changes in the sample and population have on the slope coefficient. Here, changing the sample size directly impacts how variable the slope is.
+
+
+From popdata, take random samples of size 50, replicated 100 times.
+Using many_samples, plot response vs. explanatory, grouped by replicate.
+Add a point layer.
+Add a smooth trend layer using linear regression, without a standard error ribbon.
+
+
+set.seed(4747)
+
+# Generate 100 random samples of size 50
+many_samples <- popdata %>%
+  rep_sample_n(reps=100, size=50)
+
+# Using many_samples, plot response vs. explanatory, grouped by replicate
+ggplot(many_samples, aes(x=explanatory, y=response, group=replicate)) + 
+  # Add a point layer
+  geom_point() + 
+  # Add a smooth  trend layer, using lin. reg., no ribbon 
+  geom_smooth(method="lm", se=FALSE)
+
+
+
+Edit the code for many samples to reduce the size from 50 to 10.
+set.seed(4747)
+
+# Edit the code to take samples of size 10
+many_samples <- popdata %>%
+  rep_sample_n(size = 10, reps = 100)
+
+# Draw the plot again; how is it different?
+ggplot(many_samples, aes(x = explanatory, y = response, group = replicate)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) 
+
+Stunning sample size shrinkage! When you used smaller sample sizes, there was more variation in the positions of each trend line.
+
