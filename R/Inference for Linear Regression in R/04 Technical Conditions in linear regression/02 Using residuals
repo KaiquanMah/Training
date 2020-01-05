@@ -1,0 +1,75 @@
+Using residuals (2)
+Now, you will calculate residuals from a data set that violates the technical conditions. For the linear model conditions to hold, the points should be scattered throughout the residual plot with no discernible pattern. Here the residuals reveal a violation of the technical conditions.
+
+
+Using hypdata_poor, draw a scatter plot of response versus explanatory.
+# Using hypdata_poor, draw a scatter plot of response vs. explanatory
+ggplot(hypdata_poor, aes(x=explanatory, y=response)) +
+  geom_point()
+
+
+Run a linear regression of response versus explanatory on hypdata_poor.
+Get the observation-level information from the model using augment.
+Using modeled_observations, plot residuals vs. fitted values and add a point layer.
+# Run a linear regression of response vs. explanatory
+model <- lm(response ~ explanatory, data=hypdata_poor)
+
+# Augment to get the observation-level information
+modeled_observations <- augment(model)
+
+# See the result
+modeled_observations
+# A tibble: 200 x 9
+   response explanatory .fitted .se.fit  .resid    .hat .sigma .cooksd
+      <dbl>       <dbl>   <dbl>   <dbl>   <dbl>   <dbl>  <dbl>   <dbl>
+ 1     19.1        2.14    18.6   0.319   0.465 0.00848   3.47 7.79e-5
+ 2     21.6        3.04    21.2   0.245   0.414 0.00503   3.47 3.64e-5
+ 3     19.2        2.48    19.6   0.272  -0.454 0.00618   3.47 5.39e-5
+ 4     20.6        2.91    20.8   0.245  -0.273 0.00501   3.47 1.58e-5
+ 5     21.8        3.12    21.4   0.248   0.402 0.00513   3.47 3.50e-5
+ 6     15.2        2.45    19.5   0.275  -4.29  0.00633   3.45 4.93e-3
+ 7     29.9        3.62    22.9   0.295   7.04  0.00727   3.43 1.53e-2
+ 8     33.7        3.70    23.1   0.307  10.6   0.00789   3.38 3.77e-2
+ 9     20.7        3.11    21.4   0.248  -0.765 0.00513   3.47 1.27e-4
+10     13.3        4.18    24.5   0.391 -11.2   0.0128    3.37 6.84e-2
+# ... with 190 more rows, and 1 more variable: .std.resid <dbl>
+
+
+# Using modeled_observations, draw a scatter plot 
+# of residuals vs. fitted values
+ggplot(modeled_observations, aes(x=.fitted, y=.resid)) +
+  geom_point()
+  
+  
+
+Primo work; poor model! This time, the relationship between response and explanatory shows increasing variability around the line. As the size of the fitted values increase, the absolute size of the residuals also increases.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Why do we need the LINE assumptions?
+So far, you have implemented two approaches for performing inference assessment to a linear model. The first way is given by the standard R output (lm) and is based on the t-distribution. The derivation of the t-distribution is based on the theory (i.e., the LINE conditions).
+The second method uses a randomization test which assumes that the observations are exchangeable under the null hypothesis. That is, when the null hypothesis (X is independent of Y) is true, the Y values can be swapped among the X values. The technical conditions in the randomization setting are linear relationship, independent observations, and equal variances. However, the normality assumption is not needed.
+What happens if inferences is performed when the technical conditions are violated?
+
+If the technical conditions are violated, the software will not compute a p-value.
+If the technical conditions are violated, the p-value will not represent the probability of the data given the null hypothesis is true.
+If the technical conditions are violated, the CI procedure will not capture the true parameter in 95% of samples.
+All of the above.
+
+#yes Some of the above.
+Yes, the probabilities for both the p-value and the CI are based an accurate sampling distribution.
+
+
