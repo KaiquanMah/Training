@@ -1,0 +1,104 @@
+Confidence intervals for the average response at specific values
+The previous two exercises gave CIs for the slope parameter. That is, based on the observed data, you provided an interval estimate of the plausible values for the true slope parameter in the population. Recall that the number 1 was in the CI for the slope, meaning 1 cannot be ruled out as a possible value for the true slope between Biological and Foster twins. There is no evidence to claim that there is a difference, on average, between the IQ scores of two twins in any given pair.
+When working with a linear regression model, you might also want to know the plausible values for the expected value of the response at a particular explanatory location. That is, what would you expect the IQ of a Foster twin to be given a Biological twin's IQ of 100?
+
+Call augment() on model to see the observation-level data in the model.
+model <- lm(Foster ~ Biological, data = twins)
+
+# Get observation-level values from the model
+augment(model)
+# A tibble: 27 x 9
+   Foster Biological .fitted .se.fit .resid   .hat .sigma  .cooksd .std.resid
+    <dbl>      <dbl>   <dbl>   <dbl>  <dbl>  <dbl>  <dbl>    <dbl>      <dbl>
+ 1     82         82    83.1    1.96  -1.13 0.0645   7.89 0.000781     -0.151
+ 2     80         90    90.3    1.57 -10.3  0.0414   7.59 0.0403       -1.37 
+ 3     88         91    91.2    1.54  -3.24 0.0399   7.86 0.00380      -0.428
+ 4    108        115   113.     2.41  -4.87 0.0973   7.82 0.0237       -0.664
+ 5    116        115   113.     2.41   3.13 0.0973   7.86 0.00978       0.426
+ 6    117        129   125.     3.57  -8.49 0.213    7.64 0.208        -1.24 
+ 7    132        131   127.     3.75   4.70 0.235    7.81 0.0744        0.696
+ 8     71         78    79.5    2.23  -8.52 0.0835   7.68 0.0604       -1.15 
+ 9     75         79    80.4    2.16  -5.42 0.0783   7.80 0.0227       -0.731
+10     93         82    83.1    1.96   9.87 0.0645   7.61 0.0601        1.32 
+# ... with 17 more rows
+
+
+
+
+
+
+
+Create a new twins dataset of Biological IQs to make predictions of Foster IQs on. Create a data.frame with a column named Biological, taking values as a sequence from 70 to 130 in steps of 15.
+Augment the model with the new dataset. Set augment()'s newdata argument to new_twins.
+# From previous step
+model <- lm(Foster ~ Biological, data = twins)
+
+# Create a dataframe of new observations
+new_twins <- data.frame(Biological = seq(70,130,15))
+> seq(70,130,15)
+[1]  70  85 100 115 130
+
+> new_twins
+  Biological
+1         70
+2         85
+3        100
+4        115
+5        130
+
+
+# Augment the model with the new dataset
+augmented_model <- augment(model, newdata=new_twins)
+
+# See the result
+augmented_model
+# A tibble: 5 x 3
+  Biological .fitted .se.fit
+       <dbl>   <dbl>   <dbl>
+1         70    72.3    2.85
+2         85    85.8    1.79
+3        100    99.4    1.55
+4        115   113.     2.41
+5        130   126.     3.66
+
+
+
+
+
+
+
+
+Calculate a confidence interval of the predicted IQs of the foster twin, based on the augmented model. This is the predicted value, .fitted, plus or minus the critical value times the standard error of the prediction, .se.fit.
+# From previous steps
+model <- lm(Foster ~ Biological, data = twins)
+new_twins <- data.frame(Biological = seq(70, 130, 15))
+augmented_model <- model %>% augment(newdata = new_twins)
+
+crit_val <- qt((1-alpha/2), df = nrow(twins) - 2)
+
+augmented_model %>%
+  # Calculate a confidence interval on the predicted values
+  mutate(
+    lower_mean_prediction = .fitted - crit_val*.se.fit,
+    upper_mean_prediction = .fitted + crit_val*.se.fit
+  )
+
+
+> crit_val <- qt((1-alpha/2), df = nrow(twins) - 2)
+> crit_val
+[1] 2.059539
+
+
+# A tibble: 5 x 5
+  Biological .fitted .se.fit lower_mean_prediction upper_mean_prediction
+       <dbl>   <dbl>   <dbl>                 <dbl>                 <dbl>
+1         70    72.3    2.85                  66.4                  78.2
+2         85    85.8    1.79                  82.1                  89.5
+3        100    99.4    1.55                  96.1                 103. 
+4        115   113.     2.41                 108.                  118. 
+5        130   126.     3.66                 119.                  134.
+
+
+Given a biological twin with an IQ of 100, the model predicts the foster twin's IQ to be 99.4, with a 95% confidence interval of 96.1 to 103.
+
+
