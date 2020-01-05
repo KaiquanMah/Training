@@ -1,0 +1,68 @@
+Comparing randomisation CIs and t-based CIs
+As with hypothesis testing, if technical conditions hold (technical conditions are discussed more in the next chapter), the CI created for the slope parameter in the t-distribution setting should be in line with the CI created using bootstrapping. Create a CI for the slope parameter and compare it to the one created using the bootstrap percentile interval from the previous chapter.
+Note that the bootstrap and t-intervals will not be exactly the same because they use different computational steps to arrive at the interval estimate.
+
+Calculate the confidence level and the lower and upper percentile cutoffs from alpha.
+alpha <- 0.05
+
+# Calculate the confidence level
+confidence_level <- 1-alpha
+
+# Calculate lower percentile cutoff
+p_lower <- alpha/2
+
+# ... and the upper one
+p_upper <- 1-alpha/2
+
+
+
+
+
+
+Tidy the linear regression model, including a confidence interval, and set the confidence level to confidence_level.
+Summarize the bootstrap replicates to calculate a confidence interval using quantiles of stat. Use p_lower and p_upper for the quantiles.
+
+# From previous step
+alpha <- 0.05
+confidence_level <- 1 - alpha
+p_lower <- alpha / 2
+p_upper <- 1 - alpha / 2
+
+# Tidy the model, including a confidence interval
+tidied_model <- lm(Foster ~ Biological, data = twins) %>% 
+   tidy(conf.int=TRUE, conf.level=confidence_level) 
+
+# Recall the t-confidence interval
+tidied_model %>%
+  filter(term == "Biological") %>%
+  select(conf.low, conf.high)
+
+
+# A tibble: 1 x 2
+  conf.low conf.high
+     <dbl>     <dbl>
+1    0.703      1.10
+
+
+
+
+
+
+
+
+# Create the bootstrap confidence interval
+boot_slope %>% 
+  summarize(
+    lower = quantile(stat, p_lower), 
+    upper = quantile(stat, p_upper)
+  )
+  
+  
+
+# A tibble: 1 x 2
+  lower upper
+  <dbl> <dbl>
+1 0.724  1.08
+
+The confidence interval is almost the same when calculated using bootstrap quantiles compared to the theoretical t-distrabution quantiles. That means that the theoretical assumptions hold up well.
+
