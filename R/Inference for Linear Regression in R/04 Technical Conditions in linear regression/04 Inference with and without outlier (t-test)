@@ -1,0 +1,31 @@
+Inference with and without outlier (t-test)
+Not only can one point change the estimated regression line, but it can also change the inferential analysis.
+The datasets with and without the outlier are provided as hypdata_outlier and hypdata_no_outlier respectively.
+
+Run a linear regression of response vs. explanatory on hypdata_outlier, and extract the coefficient-level information.
+Do the same for hypdata_no_outlier.
+Look at the output. How do the coefficients and p-values differ?
+
+# Model response vs. explanatory on hypdata_outlier and tidy it
+lm(response ~ explanatory, data=hypdata_outlier) %>% 
+  tidy()
+# A tibble: 2 x 5
+  term        estimate std.error statistic p.value
+  <chr>          <dbl>     <dbl>     <dbl>   <dbl>
+1 (Intercept)     2.71      7.52     0.361 0.719  
+2 explanatory     6.98      2.41     2.89  0.00428
+
+
+
+
+# Do the same on hypdata_no_outlier
+lm(response ~ explanatory, data=hypdata_no_outlier) %>% 
+  tidy()
+# A tibble: 2 x 5
+  term        estimate std.error statistic  p.value
+  <chr>          <dbl>     <dbl>     <dbl>    <dbl>
+1 (Intercept)    12.7      0.496      25.7 9.06e-65
+2 explanatory     2.78     0.160      17.4 1.02e-41  
+
+The models tell the same story as the scatter plots: the coefficients and p-values are wildly different.
+
