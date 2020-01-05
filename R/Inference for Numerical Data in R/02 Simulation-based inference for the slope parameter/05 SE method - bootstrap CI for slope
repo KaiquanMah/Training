@@ -1,0 +1,35 @@
+SE method - bootstrap CI for slope
+The twins study was used to weigh in on the question of whether IQ is a result of nature (your genes) or nurture (your environment). If IQ was purely a result of nature, what slope would you expect to see in your linear model?
+Recall that one way to create a confidence interval for a statistic is to calculate the statistic repeatedly under different bootstrap samples and to find the standard deviation associated with the bootstrapped statistics.
+The twins data is already loaded in your workspace.
+
+As with the previous exercise, use the infer steps on the twins data to specify a Foster vs. Biological model, generate 1000 bootstrapped replicates, and calculate the slope statistic.
+Calculate the confidence interval of stat as the mean plus or minus two standard deviations.
+
+set.seed(4747)
+
+# Calculate the slope statistic 
+# from 1000 bootstrap replicates of
+# the Foster vs. Biological model
+# of the twins dataset
+boot_slope <- twins %>%
+  specify(Foster ~ Biological) %>%
+  generate(reps=1000, type="bootstrap") %>%
+  calculate(stat="slope")
+
+
+# Create a confidence interval of stat
+# 2 std devs each side of the mean
+boot_slope %>% 
+  summarize(
+    lower = mean(stat) - 2*sd(stat),
+    upper = mean(stat) + 2*sd(stat)
+  )
+
+
+# A tibble: 1 x 2
+  lower upper
+  <dbl> <dbl>
+1 0.719  1.08
+
+
