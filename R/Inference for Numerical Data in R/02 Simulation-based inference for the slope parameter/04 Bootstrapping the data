@@ -1,0 +1,44 @@
+Bootstrapping the data
+Using the infer package with type = "bootstrap", you can repeatedly sample from the dataset to estimate the sampling distribution and standard error of the slope coefficient. Using the sampling distribution will allow you to directly find a confidence interval for the underlying population slope.
+
+
+Use the infer steps to bootstrap the twins data 1000 times. You don't have to hypothesize() because now you're creating confidence intervals, not hypothesis testing!
+Specify Foster versus Biological.
+Generate 1000 replicates by bootstrapping.
+Calculate the slope statistic.
+
+# Set the seed for reproducibility
+set.seed(4747)
+
+# Calculate 1000 bootstrapped slopes
+boot_slope <- twins %>%
+  # Specify Foster vs. Biological
+  specify(Foster ~ Biological) %>%
+  # Generate 1000 bootstrap replicates
+  generate(reps=1000, type="bootstrap") %>%
+  # Calculate the slope statistic
+  calculate(stat="slope")
+
+# See the result  
+boot_slope
+
+Response: Foster (numeric)
+Explanatory: Biological (numeric)
+# A tibble: 1,000 x 2
+   replicate  stat
+       <int> <dbl>
+ 1         1 0.946
+ 2         2 0.966
+ 3         3 0.870
+ 4         4 0.930
+ 5         5 0.807
+ 6         6 0.900
+ 7         7 0.862
+ 8         8 0.930
+ 9         9 0.768
+10        10 0.835
+# ... with 990 more rows
+
+
+Beautiful bootstrapping! Bootstrap replicates sample from the data with replacement, unlike permutation replicates.
+
