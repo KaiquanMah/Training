@@ -1,0 +1,105 @@
+Adjusting for non-linear relationship
+The next three examples work with datasets where the underlying data structure violates the linear regression technical conditions. For each example, you will apply a transformation to the data in order to create residual plots that look scattered.
+In this first example, it appears as though the variables are not linearly related.
+
+Run a linear regression of response versus explanatory on hypdata_nonlinear.
+Get the observation-level information from the model.
+Using modeled_observations, plot the residuals versus the fitted values.
+Add a point layer.
+Add a horizontal line at y = 0 using geom_hline() and setting yintercept to 0.
+
+# Run this to see how the model looks
+ggplot(hypdata_nonlinear, aes(x = explanatory, y = response)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+
+# Model response vs. explanatory 
+model <- lm(response ~ explanatory,data=hypdata_nonlinear)
+
+# Extract observation-level information
+modeled_observations <- augment(model)
+
+
+> augment(model)
+# A tibble: 100 x 9
+   response explanatory .fitted .se.fit .resid   .hat .sigma  .cooksd .std.resid
+      <dbl>       <dbl>   <dbl>   <dbl>  <dbl>  <dbl>  <dbl>    <dbl>      <dbl>
+ 1     11.6       0.195    10.8   0.250  0.868 0.0256   1.57 0.00414       0.562
+ 2     12.8       0.339    13.4   0.192 -0.559 0.0151   1.57 0.000992     -0.360
+ 3     15.0       0.515    16.6   0.157 -1.56  0.0100   1.57 0.00508      -1.00 
+ 4     15.1       0.452    15.4   0.163 -0.370 0.0109   1.57 0.000310     -0.237
+ 5     10.7       0.302    12.7   0.205 -2.03  0.0172   1.56 0.0150       -1.31 
+ 6     25.2       0.923    24.0   0.276  1.18  0.0310   1.57 0.00937       0.765
+ 7     13.4       0.465    15.7   0.161 -2.26  0.0106   1.56 0.0113       -1.45 
+ 8     26.0       0.927    24.1   0.277  1.88  0.0314   1.56 0.0242        1.22 
+ 9     16.1       0.547    17.2   0.157 -1.07  0.0100   1.57 0.00238      -0.686
+10     25.5       0.927    24.1   0.277  1.41  0.0314   1.57 0.0136        0.915
+# ... with 90 more rows
+
+
+
+# See the result
+modeled_observations
+
+# Using modeled_observations, plot residuals vs. fitted values
+ggplot(modeled_observations, aes(x=.fitted, y=.resid)) +
+  # Add a point layer
+  geom_point() + 
+  # Add horizontal line at y = 0
+  geom_hline(y=0, yintercept=0)
+
+
+
+
+
+
+
+
+
+
+
+Update the model add a quadratic term, I(explanatory^2), to the right-hand side of the formula.
+Rerun the code and look at how the plots change.
+
+
+# Run this to see how the model looks
+ggplot(hypdata_nonlinear, aes(x = explanatory + explanatory ^ 2, y = response)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+
+# Model response vs. explanatory plus explanatory squared
+model <- lm(response ~ explanatory + I(explanatory^2), data = hypdata_nonlinear)
+
+# Extract observation-level information
+modeled_observations <- augment(model)
+
+# See the result
+modeled_observations
+
+# A tibble: 100 x 10
+   response explanatory I.explanatory.2. .fitted .se.fit .resid   .hat .sigma
+      <dbl>       <dbl>         <I<dbl>>   <dbl>   <dbl>  <dbl>  <dbl>  <dbl>
+ 1     11.6       0.195           0.0380    11.2   0.171  0.455 0.0268   1.05
+ 2     12.8       0.339           0.115     12.6   0.146  0.226 0.0197   1.05
+ 3     15.0       0.515           0.265     15.3   0.155 -0.286 0.0221   1.05
+ 4     15.1       0.452           0.204     14.2   0.155  0.850 0.0219   1.04
+ 5     10.7       0.302           0.0915    12.2   0.145 -1.48  0.0195   1.04
+ 6     25.2       0.923           0.852     25.7   0.240 -0.543 0.0530   1.05
+ 7     13.4       0.465           0.217     14.4   0.155 -1.02  0.0221   1.04
+ 8     26.0       0.927           0.859     25.9   0.244  0.103 0.0549   1.05
+ 9     16.1       0.547           0.299     15.9   0.153  0.177 0.0216   1.05
+10     25.5       0.927           0.859     25.8   0.244 -0.368 0.0549   1.05
+# ... with 90 more rows, and 2 more variables: .cooksd <dbl>, .std.resid <dbl>
+
+
+# Using modeled_observations, plot residuals vs. fitted values
+ggplot(modeled_observations, aes(x = .fitted, y = .resid)) +
+  # Add a point layer
+  geom_point() + 
+  # Add horizontal line at y = 0
+  geom_hline(yintercept = 0)
+  
+  
+Emphatically quadratically amazing! Keep in mind that squaring the input variable is great for modeling data that are better fit by a curved line (and really, any time when y is a function of x and x ^ 2).
+
+  
