@@ -1,0 +1,111 @@
+First random sample, second random sample
+Now, you will dive in to understanding how linear models vary from sample to sample. Here two random samples from a population are plotted onto the scatterplot. The population data (called popdata) already exists and is pre-loaded, along with ggplot and dplyr.
+
+
+Using the whole dataset, popdata, plot response vs. explanatory.
+Add a point layer using geom_point().
+Add a smooth trend layer using geom_smooth(), with the linear regression method, "lm", and no standard error ribbon, se = FALSE.
+
+> glimpse(popdata)
+Observations: 1,000
+Variables: 2
+$ explanatory <dbl> -4.299772326, 0.185431494, -2.587328240, -0.433911956, ...
+$ response    <dbl> 27.79571, 39.18826, 39.31460, 42.60371, 46.37942, 40.20...
+
+
+# Using popdata, plot response vs. explanatory
+ggplot(popdata, aes(x = explanatory, y = response)) + 
+  # Add a point layer
+  geom_point() + 
+  # Add a smooth trend layer, using lin. reg., no ribbon
+  geom_smooth(method = "lm", se = FALSE) 
+
+
+
+
+
+
+
+
+
+Using sample_n() from dplyr, randomly sample 50 rows of popdata without replacement. Note that the function sample_n takes a random sample of observations (of the designated size) from the dataframe, without replacement.
+Do the same sampling again for sample2.
+Combine each random sample using bind_rows(). Pass it sample1 and sample2, and set .id to "replicate".
+
+# Set the random number generator seed for reproducibility
+set.seed(4747)
+
+# From popdata, randomly sample 50 rows without replacement
+sample1 <- popdata %>%
+   sample_n(size = 50)
+
+# Do the same again
+sample2 <- popdata %>%
+   sample_n(size = 50)
+
+# Combine both samples
+both_samples <- bind_rows(sample1, sample2, .id = "replicate")
+
+# See the result
+glimpse(both_samples)
+Observations: 100
+Variables: 3
+$ replicate   <chr> "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", ...
+$ explanatory <dbl> -3.0322454, -2.5578117, -6.3960146, -1.5946278, 3.75330...
+$ response    <dbl> 31.89871, 30.05016, 27.80663, 46.05538, 33.78182, 38.26...
+
+> head(both_samples)
+  replicate explanatory response
+1         1  -3.0322454 31.89871
+2         1  -2.5578117 30.05016
+3         1  -6.3960146 27.80663
+4         1  -1.5946278 46.05538
+5         1   3.7533061 33.78182
+6         1   0.8594484 38.26122
+
+> tail(both_samples)
+    replicate explanatory response
+95          2 -3.43851232 44.62005
+96          2  4.76619409 39.63810
+97          2  0.08065586 41.03646
+98          2 -3.27612024 27.94086
+99          2  6.83676168 46.63288
+100         2 -1.82078219 45.10344
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Using both_samples, plot response vs. explanatory, colored by replicate.
+Add a point layer.
+Add a smooth trend layer using linear regression, without a standard error ribbon.
+
+# From previous step
+set.seed(4747)
+both_samples <- bind_rows(
+  popdata %>% sample_n(size = 50), 
+  popdata %>% sample_n(size = 50), 
+  .id = "replicate"
+)
+
+# Using both_samples, plot response vs. explanatory, colored by replicate
+ggplot(both_samples, aes(x=explanatory, y=response, color=replicate)) + 
+  # Add a point layer
+  geom_point() + 
+  # Add a smooth trend layer, using lin. reg., no ribbon
+  geom_smooth(method="lm", se=FALSE)
+  
+The trend line from each sample was close to, but not exactly the same as, the trend line from the complete dataset.
+
