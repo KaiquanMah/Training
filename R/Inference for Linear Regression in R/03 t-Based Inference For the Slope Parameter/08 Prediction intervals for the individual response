@@ -1,0 +1,143 @@
+Prediction intervals for the individual response
+Along with an interval estimate for the expected value of the response, it is often desired to have an interval estimate for the actual individual responses. The formulation for the prediction is the same, but the predicted points are more variable around the line, so the standard error is calculated to be a larger value.
+As with the interval around the expected average values, the interval for predicted individual values is smaller in the middle than on the extremes due to the calculation of the regression line being more stable at the center. Note that the intervals for the average responses are much smaller than the intervals for the individual responses.
+You have already seen tidy(), to pull out coefficient-level information from a model, and augment() for observation-level information. glance() completes the triumvirate, giving you model-level information.
+The linear regression is provided as model and the predictions from the previous exercise are given as predictions.
+
+Find the natural variability of the points around the prediction line.
+Use glance() to get the model-level information from model.
+Pull out the sigma element.
+Calculate the standard error of the predictions as the square root of the sum of (twins_sigma squared and .se.fit squared).
+
+
+> twins_sigma <- model %>%
+    # Get model-level information
+    glance()
+> twins_sigma
+# A tibble: 1 x 11
+  r.squared adj.r.squared sigma statistic p.value    df logLik   AIC   BIC
+      <dbl>         <dbl> <dbl>     <dbl>   <dbl> <int>  <dbl> <dbl> <dbl>
+1     0.778         0.769  7.73      87.6 1.20e-9     2  -92.5  191.  195.
+# ... with 2 more variables: deviance <dbl>, df.residual <int>
+
+
+
+> predictions
+# A tibble: 5 x 5
+  Biological .fitted .se.fit lower_mean_prediction upper_mean_prediction
+       <dbl>   <dbl>   <dbl>                 <dbl>                 <dbl>
+1         70    72.3    2.85                  66.4                  78.2
+2         85    85.8    1.79                  82.1                  89.5
+3        100    99.4    1.55                  96.1                 103. 
+4        115   113.     2.41                 108.                  118. 
+5        130   126.     3.66                 119.                  134.
+
+
+
+twins_sigma <- model %>%
+  # Get model-level information
+  glance() %>%
+  # Pull out sigma
+  pull(sigma)
+
+> twins_sigma
+[1] 7.729252
+
+predictions %>%
+  # Calculate the std err of the predictions
+  mutate(std_err_of_predictions = sqrt((twins_sigma^2) + (.se.fit^2)))
+  
+
+# A tibble: 5 x 6
+  Biological .fitted .se.fit lower_mean_predi~ upper_mean_pred~ std_err_of_pred~
+       <dbl>   <dbl>   <dbl>             <dbl>            <dbl>            <dbl>
+1         70    72.3    2.85              66.4             78.2             8.24
+2         85    85.8    1.79              82.1             89.5             7.93
+3        100    99.4    1.55              96.1            103.              7.88
+4        115   113.     2.41             108.             118.              8.10
+5        130   126.     3.66             119.             134.              8.55
+
+
+
+
+
+
+
+
+
+
+
+
+critical_value has already been loaded into your workspace.
+Calculate the prediction interval for the foster twins' IQ as the model prediction, .fitted plus or minus the critical value times the standard error of the predictions.
+
+> critical_value
+[1] 2.059539
+
+# From previous step
+twins_sigma <- model %>% glance() %>% pull(sigma)
+predictions2 <- predictions %>%
+  mutate(std_err_of_predictions = sqrt(twins_sigma ^ 2 + .se.fit ^ 2))
+
+predictions3 <- predictions2 %>%
+  # Calculate the prediction intervals
+  mutate(
+    lower_response_prediction = .fitted - critical_value*std_err_of_predictions,
+    upper_response_prediction = .fitted + critical_value*std_err_of_predictions
+  )
+
+# See the result
+predictions3
+
+# A tibble: 5 x 8
+  Biological .fitted .se.fit lower_mean_pred~ upper_mean_pred~ std_err_of_pred~
+       <dbl>   <dbl>   <dbl>            <dbl>            <dbl>            <dbl>
+1         70    72.3    2.85             66.4             78.2             8.24
+2         85    85.8    1.79             82.1             89.5             7.93
+3        100    99.4    1.55             96.1            103.              7.88
+4        115   113.     2.41            108.             118.              8.10
+5        130   126.     3.66            119.             134.              8.55
+# ... with 2 more variables: lower_response_prediction <dbl>,
+#   upper_response_prediction <dbl>
+
+
+
+
+
+
+
+
+
+Update the plot to add a ribbon layer of prediction intervals.
+Use Biological on the x-axis, and make the y-axis go from lower_response_prediction (ymin) to upper_response_prediction (ymax).
+Use the predictions3 dataset.
+Set the transparency level, alpha, to 0.2.
+Use a fill color of "red".
+
+# From previous step3
+twins_sigma <- model %>% glance() %>% pull(sigma)
+predictions3 <- predictions %>%
+  mutate(
+    std_err_of_predictions = sqrt(twins_sigma ^ 2 + .se.fit ^ 2),
+    lower_response_prediction = .fitted - critical_value * std_err_of_predictions,
+    upper_response_prediction = .fitted + critical_value * std_err_of_predictions
+  )
+
+# Update the plot
+ggplot() + 
+  geom_point(aes(x = Biological, y = Foster), data = twins) +
+  geom_smooth(aes(x = Biological, y = Foster), data = twins, method = "lm") + 
+  # Add a ribbon layer
+  geom_ribbon(
+    # ... of lower_response_prediction to upper_response_prediction vs. Biological
+    aes(x=Biological, ymin=lower_response_prediction, ymax=upper_response_prediction), 
+    # ... using the predictions3 dataset
+    data=predictions3, 
+    # ... with transparency set to 0.2
+    alpha=0.2, 
+    # ... and fill color red
+    fill="red"
+  )
+  
+  
+  
