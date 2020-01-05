@@ -1,0 +1,97 @@
+SE of the slope
+The previous exercise generated 10 different slopes under a model of no (i.e., null) relationship between the explanatory and response variables. Now repeat the null slope calculations 1000 times to derive a null sampling distribution for the slope coefficient. The null sampling distribution will be used as a benchmark against which to compare the original data. Then, you'll calculate the mean and standard deviation of the null sampling distribution for the slope.
+
+
+Simulate 500 slopes.
+Use specify() to specify Foster vs. Biological (same formula as for a linear regression).
+Use hypothesize(), to set a null hypothesis of "independence".
+Use generate() to generate 500 replicates (reps) of type "permute".
+Use calculate() to calculate the summary statistic "slope".
+
+# Simulate 500 slopes with a permuted dataset
+perm_slope <- twins %>%
+  # Specify Foster vs. Biological
+  specify(Foster ~ Biological) %>%
+  # Use a null hypothesis of independence
+  hypothesize(null="independence") %>%
+  # Generate 500 permutation replicates
+  generate(reps=500, type="permute") %>%
+  # Calculate the slope statistic
+  calculate(stat="slope") 
+  
+
+
+
+
+
+
+
+
+
+Using the perm_slope data, plot the stat you calculated with a density geom.
+# Using perm_slope, plot stat
+ggplot(perm_slope, aes(x=stat)) + 
+  # Add a density layer
+  geom_density()
+
+
+
+
+
+Use ungroup() without arguments to ungroup the dataset.
+Use summarize() to calculate summary statistics.
+Calculate mean_stat as the mean of stat.
+Calculate std_err_stat as the standard error of stat, using sd().
+
+> perm_slope
+Response: Foster (numeric)
+Explanatory: Biological (numeric)
+Null Hypothesis:  independence 
+# A tibble: 500 x 2
+   replicate    stat
+       <int>   <dbl>
+ 1         1  0.241 
+ 2         2 -0.0211
+ 3         3  0.320 
+ 4         4  0.0303
+ 5         5  0.0494
+ 6         6  0.0373
+ 7         7 -0.179 
+ 8         8  0.162 
+ 9         9  0.341 
+10        10 -0.303 
+# ... with 490 more rows
+
+> perm_slope %>% 
+    # Ungroup the dataset
+    ungroup()
+
+#same results as above
+
+
+
+# From previous step
+perm_slope <- twins %>%
+  specify(Foster ~ Biological) %>%
+  hypothesize(null = "independence") %>%
+  generate(reps = 500, type = "permute") %>%
+  calculate(stat = "slope")
+
+perm_slope %>% 
+  # Ungroup the dataset
+  ungroup() %>% 
+  # Calculate summary statistics
+  summarise(
+    # Mean of stat
+    mean_stat = mean(stat), 
+    # Std error of stat
+    std_err_stat = sd(stat)
+  )
+  
+# A tibble: 1 x 2
+  mean_stat std_err_stat
+      <dbl>        <dbl>
+1   0.00692        0.191  
+
+Notice that the distribution of slopes is centered close to zero, and ranges from about -0.5 to 0.5.
+
