@@ -1,0 +1,114 @@
+Null sampling distribution of the slope
+In the previous chapter, you investigated the sampling distribution of the slope from a population where the slope was non-zero. Typically, however, to do inference, you will need to know the sampling distribution of the slope under the hypothesis that there is no relationship between the explanatory and response variables. Additionally, in most situations, you don't know the population from which the data came, so the null sampling distribution must be derived from only the original dataset.
+In the mid-20th century, a study was conducted that tracked down identical twins that were separated at birth: one child was raised in the home of their biological parents and the other in a foster home. In an attempt to answer the question of whether intelligence is the result of nature or nurture, both children were given IQ tests. The resulting data is given for the IQs of the foster twins (Foster is the response variable) and the IQs of the biological twins (Biological is the explanatory variable).
+In this exercise you'll use the pull() function. This function takes a data frame and returns a selected column as a vector (similar to $).
+
+
+Run a linear regression of Foster vs. Biological on the twins dataset.
+Tidy the result.
+Filter for rows where term equals "Biological".
+Use pull() to pull out the estimate column.
+
+> lm(Foster ~ Biological, data=twins) %>%
+    # Tidy the result
+    tidy()
+# A tibble: 2 x 5
+  term        estimate std.error statistic       p.value
+  <chr>          <dbl>     <dbl>     <dbl>         <dbl>
+1 (Intercept)    9.21     9.30       0.990 0.332        
+2 Biological     0.901    0.0963     9.36  0.00000000120
+
+
+
+> lm(Foster ~ Biological, data=twins) %>%
+    # Tidy the result
+    tidy() %>%   
+    # Filter for rows where term equal Biological
+    filter(term=="Biological")
+# A tibble: 1 x 5
+  term       estimate std.error statistic       p.value
+  <chr>         <dbl>     <dbl>     <dbl>         <dbl>
+1 Biological    0.901    0.0963      9.36 0.00000000120
+
+
+
+
+> lm(Foster ~ Biological, data=twins) %>%
+    # Tidy the result
+    tidy() %>%   
+    # Filter for rows where term equal Biological
+    filter(term=="Biological") %>%
+    # Pull out the estimate column
+    pull(estimate)
+[1] 0.901436
+
+
+
+
+
+library(infer)
+
+# Calculate the observed slope
+# Run a lin. reg. of Foster vs. Biological on the twins data
+obs_slope <- lm(Foster ~ Biological, data=twins) %>%
+  # Tidy the result
+  tidy() %>%   
+  # Filter for rows where term equal Biological
+  filter(term=="Biological") %>%
+  # Pull out the estimate column
+  pull(estimate) 
+
+# See the result
+obs_slope
+[1] 0.901436
+
+
+
+
+
+
+
+Simulate 10 slopes.
+Use specify() to specify Foster vs. Biological (same formula as for a linear regression).
+Use hypothesize(), to set a null hypothesis of "independence".
+Use generate() to generate 10 replicates (reps) of type "permute".
+Use calculate() to calculate the summary statistic "slope".
+
+library(infer)
+set.seed(4747) 
+
+# Simulate 10 slopes with a permuted dataset
+perm_slope <- twins %>%
+  # Specify Foster vs. Biological
+  specify(Foster ~ Biological) %>%
+  # Use a null hypothesis of independence
+  hypothesize(null="independence") %>%
+  # Generate 10 permutation replicates
+  generate(reps=10, type="permute") %>%
+  # Calculate the slope statistic
+  calculate(stat="slope")
+
+# See the result
+perm_slope
+
+
+Response: Foster (numeric)
+Explanatory: Biological (numeric)
+Null Hypothesis:  independence 
+# A tibble: 10 x 2
+   replicate    stat
+       <int>   <dbl>
+ 1         1  0.143 
+ 2         2  0.0710
+ 3         3 -0.456 
+ 4         4  0.0749
+ 5         5  0.297 
+ 6         6  0.0673
+ 7         7  0.140 
+ 8         8  0.164 
+ 9         9  0.0971
+10        10  0.184
+
+Having a range of slope estimates will let us measure the variation and calculate confidence intervals for that statistic.
+
+
