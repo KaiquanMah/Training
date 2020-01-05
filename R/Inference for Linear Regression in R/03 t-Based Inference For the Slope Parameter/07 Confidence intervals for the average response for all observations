@@ -1,0 +1,23 @@
+Confidence intervals for the average response for all observations
+The confidence interval for the average response can be computed for all observations in the dataset. Using augment() directly on the twins dataset gives predictions and standard errors for the Foster twin based on all the Biological observations.
+Note that the calculation of the regression line is more stable at the center, so predictions for the extreme values are more variable than predictions in the middle of the range of explanatory IQs.
+The foster twin IQ predictions that you calculated last time are provided as predictions. These predictions are shown in a plot using geom_smooth().
+
+Manually create what geom_smooth() does, using predictions. Provide the aesthetics and data to each geom.
+Add a point layer of Foster vs. Biological, using the data = twins dataset.
+Add a line layer of .fitted vs. Biological, using the data = predictions dataset. Color the line "blue".
+Add a ribbon layer with x mapped to Biological, ymin mapped to lower_mean_prediction and ymax mapped to upper_mean_prediction. Use the data = predictions dataset and set the transparency, alpha to 0.2.
+
+# This plot is shown
+ggplot(twins, aes(x = Biological, y = Foster)) + 
+  geom_point() +
+  geom_smooth(method = "lm") 
+
+ggplot() + 
+  # Add a point layer of Foster vs. Biological, using twins
+  geom_point(aes(x=Biological, y=Foster), data = twins) +
+  # Add a line layer of .fitted vs Biological, using predictions, colored blue
+  geom_line(aes(x=Biological, y=.fitted), data=predictions, color="blue") +
+  # Add a ribbon layer of lower_mean_prediction to upper_mean_prediction vs Biological, 
+  # using predictions, transparency of 0.2
+  geom_ribbon(aes(x=Biological, ymin=lower_mean_prediction, ymax=upper_mean_prediction), data=predictions, alpha=0.2)
