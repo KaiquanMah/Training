@@ -1,0 +1,84 @@
+How do the theoretical results play a role?
+Instead of simulating a null distribution (using permutations), the t-distribution can be used to calculate p-values and confidence intervals. The theoretical result provides a t-distribution fit for the sampling distribution of the standardized slope statistic. Why does it matter if the sampling distribution is accurate?
+
+If the distribution is wrong, the software will not compute a p-value.
+If the distribution is wrong, the p-value will not represent the probability of the data given the null hypothesis is true.
+If the distribution is wrong, the CI procedure will not capture the true parameter in 95% of samples.
+All of the above.
+
+#yes Some of the above.
+Right, the probabilities for BOTH the p-value and the CI are based on having an accurate sampling distribution. In this case, the sampling distribution used to calculate p-values and CIs is the t-distribution.
+
+
+
+
+
+t-statistic
+Using the permuted datasets (recall, the randomization forces the null hypothesis to be true), investigate the distribution of the standardized slope statistics (the slope, which has been divided by the standard error). Note that the distribution of the standardized slope is well described by a t-distribution.
+
+Filter twins_perm for rows where term equals "Biological_perm".
+Calculated the degrees of freedom of twins, as the number of its rows minus two.
+
+> glimpse(twins_perm)
+Observations: 1,000
+Variables: 6
+Groups: replicate [500]
+$ replicate <int> 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,...
+$ term      <chr> "(Intercept)", "Biological_perm", "(Intercept)", "Biologi...
+$ estimate  <dbl> 87.234264970, 0.082656372, 116.958709210, -0.229259677, 9...
+$ std.error <dbl> 19.6689474, 0.2037406, 19.2307166, 0.1992011, 19.7312100,...
+$ statistic <dbl> 4.435126262, 0.405694261, 6.081869540, -1.150895391, 4.74...
+$ p.value   <dbl> 1.611222e-04, 6.884186e-01, 2.348274e-06, 2.606646e-01, 7...
+
+# Look at the data
+twins_perm
+
+# A tibble: 1,000 x 6
+# Groups:   replicate [500]
+   replicate term            estimate std.error statistic     p.value
+       <int> <chr>              <dbl>     <dbl>     <dbl>       <dbl>
+ 1         1 (Intercept)      87.2       19.7      4.44   0.000161   
+ 2         1 Biological_perm   0.0827     0.204    0.406  0.688      
+ 3         2 (Intercept)     117.        19.2      6.08   0.00000235 
+ 4         2 Biological_perm  -0.229      0.199   -1.15   0.261      
+ 5         3 (Intercept)      93.6       19.7      4.74   0.0000724  
+ 6         3 Biological_perm   0.0159     0.204    0.0776 0.939      
+ 7         4 (Intercept)      87.7       19.7      4.46   0.000152   
+ 8         4 Biological_perm   0.0775     0.204    0.380  0.707      
+ 9         5 (Intercept)     124.        18.8      6.61   0.000000639
+10         5 Biological_perm  -0.307      0.195   -1.57   0.128      
+# ... with 990 more rows
+
+
+
+
+# Filter for Biological_perm
+biological_perm <- twins_perm %>%
+  filter(term=="Biological_perm")
+
+# Calculate degrees of freedom of twins
+degrees_of_freedom <- nrow(twins)-2
+
+> degrees_of_freedom
+[1] 25
+
+
+
+
+
+
+
+Using biological_perm, plot statistic.
+Add a histogram layer, mapping y to the special value ..density...
+Add a function statistic of the probability density function of the t-distribution.
+Set fun to dt.
+Set args to a list, with the element df equal to degrees_of_freedom.
+Set color to "red".
+
+# Using biological_perm, plot statistic
+ggplot(biological_perm, aes(x=statistic)) + 
+  # Add a histogram layer, with density on the y axis
+  #https://stackoverflow.com/questions/21061653/creating-a-density-histogram-in-ggplot2
+  geom_histogram(aes(y=..density..)) + 
+  # Add a t-distribution function stat, colored red
+  stat_function(fun = dt, args = list(df = degrees_of_freedom), color = "red")
