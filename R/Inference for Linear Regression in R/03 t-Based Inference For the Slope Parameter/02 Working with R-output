@@ -1,0 +1,100 @@
+Working with R-output (1)
+The p-value given by the lm output is a two-sided p-value by default. In the twin study, it might seem more reasonable to follow along the one-sided scientific hypothesis that the IQ scores of the twins are positively associated. Because the p-value is the probability of the observed data or more extreme, the two-sided test p-value is twice as big as the one-sided result. That is, to get a one-sided p-value from the two-sided output in R, divide the p-value by two.
+The linear regression model of Foster vs. Biological, model, is provided in the script.
+https://math.stackexchange.com/questions/1493880/two-tailed-hypothesis-test-why-do-we-multiply-p-value-by-two
+
+Get the Biological coefficient from the model.
+Tidy the model.
+Filter for the term "Biological".
+Add a column, one_sided_p_value, of the one-sided p-value.
+
+> biological_term
+# A tibble: 1 x 5
+  term       estimate std.error statistic       p.value
+  <chr>         <dbl>     <dbl>     <dbl>         <dbl>
+1 Biological    0.901    0.0963      9.36 0.00000000120
+
+
+model <- lm(Foster ~ Biological, data = twins)
+
+# Get the Biological model coefficient
+biological_term <- model %>% 
+  # Tidy the model
+  tidy() %>%
+  # Filter for term equal to "Biological"
+  filter(term=="Biological") 
+
+biological_term %>%
+  # Add a column of one-sided p-values
+  mutate(one_sided_p_value = p.value/2)
+  
+# A tibble: 1 x 6
+  term       estimate std.error statistic       p.value one_sided_p_value
+  <chr>         <dbl>     <dbl>     <dbl>         <dbl>             <dbl>
+1 Biological    0.901    0.0963      9.36 0.00000000120    0.000000000602  
+
+Dividing the p-value by two makes the test more powerful.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Working with R-output (2)
+In thinking about the scientific research question, if IQ is caused only by genetics, then we would expect the slope of the line between the two sets of twins to be 1. Testing the hypothesized slope value of 1 can be done by making a new test statistic which evaluates how far the observed slope is from the hypothesized value of 1.
+newt = (slope−1)/SE
+
+If the hypothesis that the slope equals one is true, then the new test statistic will have a t-distribution which we can use for calculating a p-value.
+The biological term from the model is available as biological_term.
+
+Calculate the degrees of freedom of the twins dataset.
+Calculate the two-sided p-value for the alternative hypothesis that the true slope is different than 1. Build up the calculation in stages.
+Calculate the test statistic as the slope estimate minus 1, all divided by the standard error.
+Calculate the one-sided p-value of the test statistic using the cumulative distribution function of the t-distribution, pt(), at the test_statistic, with the degrees of freedom you just calculated.
+Calculate the two-sided p-value as double the one-sided p-value.
+
+
+> biological_term
+# A tibble: 1 x 5
+  term       estimate std.error statistic       p.value
+  <chr>         <dbl>     <dbl>     <dbl>         <dbl>
+1 Biological    0.901    0.0963      9.36 0.00000000120
+
+
+# Calculate the degrees of freedom of twins
+degrees_of_freedom <- nrow(twins) - 2
+
+biological_term %>%
+  mutate(
+    # Calculate the test statistic
+    test_statistic = (estimate-1)/std.error,
+    # Calculate its one-sided p-value
+    one_sided_p_value_of_test_statistic = pt(test_statistic, degrees_of_freedom),
+    # ... and its two-sided p-value
+    two_sided_p_value_of_test_statistic = 2*one_sided_p_value_of_test_statistic
+  )
+
+
+# A tibble: 1 x 8
+  term       estimate std.error statistic       p.value test_statistic
+  <chr>         <dbl>     <dbl>     <dbl>         <dbl>          <dbl>
+1 Biological    0.901    0.0963      9.36 0.00000000120          -1.02
+  one_sided_p_value_of_test_statistic two_sided_p_value_of_test_statistic
+                                <dbl>                               <dbl>
+1                               0.158                               0.316
+
+
+The p-value of 0.31 suggests that we cannot reject the null hypothesis: the slope of the IQ line is not significantly different from 1.
+
+
+
+
+
