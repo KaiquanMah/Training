@@ -1,0 +1,89 @@
+Violation of LINE conditions (1)
+Which of the linear regression technical conditions are violated in the given figure?
+
+
+Independence of errors
+Normality of the response variable around the line
+Equal variability around the entire line
+No technical conditions are violated
+
+#yes Linearity
+Right! The variables do not show a linear relationship.
+
+
+
+
+
+
+
+
+
+Violation of LINE conditions (2)
+Which of the linear regression technical conditions are violated in the given figure?
+
+
+Linearity
+Independence of errors
+Normality of the response variable around the line
+No technical conditions are violated
+
+#yes Equal variability around the entire line
+Right! The variability around the line increases as the explanatory variable (X) increases.
+
+
+
+
+
+
+
+
+
+Using residuals (1)
+In the next few exercises, you will calculate residuals from a data set that complies with the linear regression technical conditions. For the linear model conditions to hold, the points should be scattered throughout the residual plot with no discernible pattern. Here, the residual plot looks like a scattering of points.
+> glimpse(hypdata_nice)
+Observations: 200
+Variables: 2
+$ explanatory <dbl> 2.140046, 3.037086, 2.482534, 2.913218, 3.117546, 2.452...
+$ response    <dbl> 19.03777, 21.44482, 19.20788, 20.62550, 21.66421, 15.98...
+
+Using hypdata_nice, draw a scatter plot of response versus explanatory.
+# Using hypdata_nice, draw a scatter plot of response vs. explanatory
+ggplot(hypdata_nice, aes(x=explanatory, y=response)) +
+  geom_point()
+
+
+Run a linear regression of response versus explanatory on hypdata_nice.
+Get the observation-level information from the model using augment.
+Using modeled_observations, plot .resid vs. .fitted and add a point layer.
+
+# Run a linear regression of response vs. explanatory
+model <- lm(response ~ explanatory, data=hypdata_nice)
+
+# Augment to get the observation-level information
+modeled_observations <- augment(model)
+
+# See the result
+modeled_observations
+
+# Using modeled_observations, draw a scatter plot of .resid vs. .fitx=.fittedted
+ggplot(modeled_observations, aes(x=.fitted, y=.resid)) +
+  geom_point()
+  
+> modeled_observations
+# A tibble: 200 x 9
+   response explanatory .fitted .se.fit .resid    .hat .sigma .cooksd .std.resid
+      <dbl>       <dbl>   <dbl>   <dbl>  <dbl>   <dbl>  <dbl>   <dbl>      <dbl>
+ 1     19.0        2.14    18.7   0.204  0.343 0.00848   2.22 1.04e-4     0.156 
+ 2     21.4        3.04    21.2   0.157  0.220 0.00503   2.22 2.53e-5     0.100 
+ 3     19.2        2.48    19.7   0.174 -0.453 0.00618   2.22 1.31e-4    -0.205 
+ 4     20.6        2.91    20.9   0.156 -0.250 0.00501   2.22 3.22e-5    -0.113 
+ 5     21.7        3.12    21.5   0.158  0.213 0.00513   2.22 2.41e-5     0.0966
+ 6     16.0        2.45    19.6   0.176 -3.59  0.00633   2.20 8.43e-3    -1.63  
+ 7     26.8        3.62    22.9   0.189  3.90  0.00727   2.20 1.15e-2     1.77  
+ 8     28.8        3.70    23.1   0.196  5.74  0.00789   2.18 2.71e-2     2.61  
+ 9     20.9        3.11    21.4   0.158 -0.537 0.00513   2.22 1.53e-4    -0.243 
+10     19.2        4.18    24.4   0.250 -5.28  0.0128    2.18 3.73e-2    -2.40  
+# ... with 190 more rows
+
+Remarkable residual plotting! There doesn't appear to be a trend between the fitted values and the residuals.
+
