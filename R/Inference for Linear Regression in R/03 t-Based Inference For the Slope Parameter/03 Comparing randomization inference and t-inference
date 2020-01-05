@@ -1,0 +1,56 @@
+Comparing randomization inference and t-inference
+When technical conditions (see next chapter) hold, the inference from the randomization test and the t-distribution test should give equivalent conclusions. They will not provide the exact same answer because they are based on different methods. But they should give p-values and confidence intervals that are reasonably close.
+
+
+Calculate the absolute value of the observed slope, obs_slope.
+Add a column to perm_slope of the absolute value of the slope in each permuted replicate. The slope column is called stat.
+In the call to summarize(), calculate the p-value as the proportion of absolute estimates of slope that are at least as extreme as the absolute observed estimate of slope.
+
+> obs_slope
+[1] 0.901436
+
+> perm_slope
+Response: Foster (numeric)
+Explanatory: Biological (numeric)
+Null Hypothesis:  independence 
+# A tibble: 1,000 x 2
+   replicate    stat
+       <int>   <dbl>
+ 1         1  0.143 
+ 2         2  0.0710
+ 3         3 -0.456 
+ 4         4  0.0749
+ 5         5  0.297 
+ 6         6  0.0673
+ 7         7  0.140 
+ 8         8  0.164 
+ 9         9  0.0971
+10        10  0.184 
+# ... with 990 more rows
+
+
+
+# The slope in the observed data and each permutation replicate
+obs_slope
+perm_slope
+
+# Calculate the absolute value of the observed slope
+abs_obs_slope <- abs(obs_slope)
+
+# Find the p-value
+perm_slope %>%
+  # Add a column for the absolute value of stat
+  mutate(stat = abs(stat)) %>%
+  summarise(
+    # Calculate prop'n permuted values at least as extreme as observed
+    p_value = mean(stat >= abs_obs_slope)
+  )
+
+
+# A tibble: 1 x 1
+  p_value
+    <dbl>
+1       0
+
+Perfect permutation-based p-value calculation! The absolute slope estimates in the permuted datasets were never greater than or equal to the absolute slope of the observed data.
+
