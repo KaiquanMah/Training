@@ -1,0 +1,67 @@
+Transformed model
+As you saw in the previous chapter, transforming the variables can often transform a model from one where the technical conditions are violated to one where the technical conditions hold. When technical conditions hold, you are able to accurately interpret the inferential output. In the two models below, note how the standard errors and p-values change (although in both settings the p-value is significant).
+
+
+Run a linear regression on price versus bed for the LAhomes dataset, then tidy the output.
+Do the same on log-transformed variables: log(price) versus log(bed).
+
+# Create a tidy model
+lm(price ~ bed, data = LAhomes) %>%
+  tidy()
+
+
+# A tibble: 2 x 5
+  term         estimate std.error statistic   p.value
+  <chr>           <dbl>     <dbl>     <dbl>     <dbl>
+1 (Intercept) -3104293.   170451.     -18.2 2.00e- 67
+2 bed          1573313.    55438.      28.4 1.60e-143
+
+
+
+# Create a tidy model using the log of both variables
+lm(log(price) ~ log(bed), data = LAhomes) %>%
+  tidy()
+
+# A tibble: 2 x 5
+  term        estimate std.error statistic   p.value
+  <chr>          <dbl>     <dbl>     <dbl>     <dbl>
+1 (Intercept)    12.0     0.0448     268.  0.       
+2 log(bed)        1.41    0.0436      32.3 2.04e-176
+
+Notice that the estimate for the size of the effect of bed on price and the p-value are both wildly different between the two models.
+
+
+
+
+
+
+
+
+
+Interpreting transformed coefficients
+Transforming variables is a powerful tool to use when running linear regressions. However the parameter estimates must be carefully interpreted in a model with transformed variables.
+Consider data collected by Andrew Bray at Reed College on characteristics of LA Homes in 2010. The model is given below, and your task is to provide the appropriate interpretation of the coefficient on log(sqft)?
+
+Note: you must be careful to avoid causative interpretations. Additional square footage does not necessarily cause the price of a specific house to go up. The interpretation of the coefficient describes the estimate of the average price of homes at a given square footage.
+You will need to run the linear model before answering the question:
+lm(log(price) ~ log(sqft), data = LAhomes) %>% tidy()
+
+
+> lm(log(price) ~ log(sqft), data = LAhomes) %>% tidy()
++ 
++ 
+# A tibble: 2 x 5
+  term        estimate std.error statistic  p.value
+  <chr>          <dbl>     <dbl>     <dbl>    <dbl>
+1 (Intercept)     2.70    0.144       18.8 1.97e-71
+2 log(sqft)       1.44    0.0195      73.8 0.
+
+
+Each additional square foot of house size produces an estimate of the average price which is $1.44 more.
+Each additional square foot of house size produces an estimate of the average price which is $1,442 more.
+Each additional square foot of house size produces an estimate of the average price which is 1.44% higher.
+Each additional 1% of square footage produces an estimate of the average price which is $1.44 more.
+
+#yes Each additional 1% of square footage produces an estimate of the average price which is 1.44% higher.
+Correct. Or you can always stick with interpreting one unit effects in the new transformed space of your variables: Each additional increase of one unit of log(sq ft) produces an estimate of log(price) which is increased by $1.44.
+
