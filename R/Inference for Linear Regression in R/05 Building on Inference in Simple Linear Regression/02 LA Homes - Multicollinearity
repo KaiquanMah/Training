@@ -1,0 +1,86 @@
+LA Homes, multicollinearity (1)
+In the next series of exercises, you will investigate how to interpret the sign (positive or negative) of the slope coefficient as well as the significance of the variables (p-value). You will continue to use the log transformed variables so that the technical conditions hold, but you will not be concerned here with the value of the coefficient.
+
+
+Run a linear regression on log price versus log sqft for the LAhomes dataset, then tidy the output.
+Look at the output. Is the relationship is positive or negative? Is relationship is significant?
+# Output the tidy model
+lm(log(price) ~ log(sqft), data = LAhomes) %>% 
+  tidy()
+
+# A tibble: 2 x 5
+  term        estimate std.error statistic  p.value
+  <chr>          <dbl>     <dbl>     <dbl>    <dbl>
+1 (Intercept)     2.70    0.144       18.8 1.97e-71
+2 log(sqft)       1.44    0.0195      73.8 0.
+
+The model shows that the area of the home has a significant positive relationship with the price.
+
+
+
+
+
+
+
+
+
+
+
+
+
+LA Homes, multicollinearity (2)
+Repeat the previous exercise, but this time regress the log transformed variable price on the new variable bath which records the number of bathrooms in a home.
+
+
+Run a linear regression on log price versus log bath for the LAhomes dataset, then tidy the output.
+Look at the output. Is the relationship is positive or negative? Is relationship is significant?
+
+# Output the tidy model
+lm(log(price) ~ log(bath), data = LAhomes) %>% 
+  tidy()
+
+
+# A tibble: 2 x 5
+  term        estimate std.error statistic   p.value
+  <chr>          <dbl>     <dbl>     <dbl>     <dbl>
+1 (Intercept)    12.2     0.0280     437.  0.       
+2 log(bath)       1.43    0.0306      46.6 9.66e-300
+
+
+The model shows that the number of bathrooms also has a significant positive relationship with the price of the home.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+LA Homes, multicollinearity (3)
+Now, regress the log transformed variable price on the log transformed variables sqft AND bath. The model is a three dimensional linear regression model where you are predicting price as a plane (think of a piece of paper) above the axes including both sqft and bath.
+
+Run a tidy lm on the log transformed variables price and both of sqft and bath from the dataset LAhomes. Use the formula: log(price) ~ log(sqft) + log(bath).
+Now look at the coefficients separately. What happened to the signs of each of the coefficients? What happened to the significance of each of the coefficients?
+
+# Output the tidy model
+lm(log(price) ~ log(sqft) + log(bath), data = LAhomes) %>% 
+  tidy()
+  
+# A tibble: 3 x 5
+  term        estimate std.error statistic   p.value
+  <chr>          <dbl>     <dbl>     <dbl>     <dbl>
+1 (Intercept)   2.51      0.262      9.60  2.96e- 21
+2 log(sqft)     1.47      0.0395    37.2   1.19e-218
+3 log(bath)    -0.0390    0.0453    -0.862 3.89e-  1
+
+
+The model still predicts that the square footage of the home has a significant positive relationship with price. However, now the number of bathrooms no longer has a significant relationship with the price. (Note also that the sign of the coefficient has changed.)
+
