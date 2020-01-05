@@ -1,0 +1,46 @@
+Estimation with and without outlier
+The data provided in this exercise (hypdata_outlier) has an extreme outlier. A plot is shown of the dataset, and a linear regression model of response versus explanatory. You will remove the outlying point to see how one observation can affect the estimate of the line.
+
+
+Filter hypdata_outlier to remove the outlier.
+Update the plot, p, to add another smooth layer (use geom_smooth).
+Like the other ribbon, the update should use the linear regression method, and not draw the ribbon.
+Unlike the other ribbon, the update should use the data = hypdata_no_outlier and be colored red.
+For now, just use the smooth curve, and not the confidence bounds (se = FALSE).
+
+> glimpse(hypdata_outlier)
+Observations: 200
+Variables: 2
+$ explanatory <dbl> 2.140046, 3.037086, 2.482534, 2.913218, 3.117546, 2.452...
+$ response    <dbl> 19.03777, 21.44482, 19.20788, 20.62550, 21.66421, 15.98...
+
+
+> hypdata_no_outlier <- hypdata_outlier %>%
+    filter(response <100)
+
+> glimpse(hypdata_no_outlier)
+Observations: 199
+Variables: 2
+$ explanatory <dbl> 2.140046, 3.037086, 2.482534, 2.913218, 3.117546, 2.452...
+$ response    <dbl> 19.03777, 21.44482, 19.20788, 20.62550, 21.66421, 15.98...
+
+
+# This plot is shown
+p <- ggplot(hypdata_outlier, aes(x = explanatory, y = response)) + 
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) 
+
+# Filter to remove the outlier
+hypdata_no_outlier <- hypdata_outlier %>%
+  filter(response <100)
+
+
+
+p +
+  # Add another smooth lin .reg. layer, no ribbon, 
+  # hypdata_no_outlier data, colored red
+  geom_smooth(method="lm", se=FALSE, color="red", data=hypdata_no_outlier)
+
+
+With the outlier removed, the linear regression has a much better fit to the rest of the dataset.
+
