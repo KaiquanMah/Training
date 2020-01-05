@@ -1,0 +1,96 @@
+CI using t-theory
+In previous courses, you have created confidence intervals with the formula of statistic plus/minus some number of standard errors. With bootstrapping, we typically use two standard errors. With t-based theory, we use the specific t-multiplier.
+Create a CI for the slope parameter using both the default tidy() call as well as mutate() to calculate the confidence interval bounds explicitly. Note that the two methods should give exactly the same CI values because they are using the same computations.
+alpha has been set to 0.05 and the degrees of freedom of the twins dataset is given to you.
+
+
+Calculate the confidence level as one minus alpha.
+Calculate the upper percentile cutoff from alpha.
+Calculate the critical value from the inverse cumulative density function of the t-distribution, qt(). Pass it the upper percentile cutoff and the degrees of freedom.
+
+alpha <- 0.05
+degrees_of_freedom <- nrow(twins) - 2
+
+# Calculate the confidence level
+confidence_level <- 1-alpha
+
+# Calculate the upper percentile cutoff
+#FOR a 2-sided test
+p_upper <- 1-alpha/2
+
+# Find the critical value from the t-distribution
+critical_value <- qt(p_upper, degrees_of_freedom)
+
+
+
+
+
+
+
+
+Tidy the linear regression model, including a confidence interval by setting conf.int to TRUE, and setting the confidence level, conf.level, to confidence_level.
+Manually calculate the same confidence interval as the estimate plus or minus the critical value times the standard error.
+
+
+> tidied_model <- lm(Foster ~ Biological, data = twins) %>% 
+    # Tidy the model, with a confidence interval
+    tidy()
+> tidied_model
+# A tibble: 2 x 5
+  term        estimate std.error statistic       p.value
+  <chr>          <dbl>     <dbl>     <dbl>         <dbl>
+1 (Intercept)    9.21     9.30       0.990 0.332        
+2 Biological     0.901    0.0963     9.36  0.00000000120
+
+
+
+
+> tidied_model <- lm(Foster ~ Biological, data = twins) %>% 
+    # Tidy the model, with a confidence interval
+    tidy(conf.int=TRUE, conf.level=confidence_level)
+
+
+
+> tidied_model
+# A tibble: 2 x 7
+  term        estimate std.error statistic       p.value conf.low conf.high
+  <chr>          <dbl>     <dbl>     <dbl>         <dbl>    <dbl>     <dbl>
+1 (Intercept)    9.21     9.30       0.990 0.332           -9.95      28.4 
+2 Biological     0.901    0.0963     9.36  0.00000000120    0.703      1.10
+
+
+
+
+
+
+
+# From previous step
+alpha <- 0.05
+degrees_of_freedom <- nrow(twins) - 2
+confidence_level <- 1 - alpha
+p_upper <- 1 - alpha / 2
+critical_value <- qt(p_upper, df = degrees_of_freedom)
+
+tidied_model <- lm(Foster ~ Biological, data = twins) %>% 
+  # Tidy the model, with a confidence interval
+  tidy(conf.int=TRUE, conf.level=confidence_level) 
+
+tidied_model %>%
+  # Manually calculate the same interval
+  mutate(
+    lower = estimate - critical_value*std.error,
+    upper = estimate + critical_value*std.error
+  )
+
+# A tibble: 2 x 9
+  term        estimate std.error statistic       p.value conf.low conf.high
+  <chr>          <dbl>     <dbl>     <dbl>         <dbl>    <dbl>     <dbl>
+1 (Intercept)    9.21     9.30       0.990 0.332           -9.95      28.4 
+2 Biological     0.901    0.0963     9.36  0.00000000120    0.703      1.10
+   lower upper
+   <dbl> <dbl>
+1 -9.95  28.4 
+2  0.703  1.10
+
+Twice the fun! For real-world usage, you should use tidy() to calcualte the confidence intervals. Using mutate() makes it clearer how the calculation is performed.
+
