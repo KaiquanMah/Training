@@ -1,0 +1,97 @@
+Regression output: example I
+The following code provides two equivalent methods for calculating the most important pieces of the linear model output. Recall that the p-value is the probability of the observed data (or more extreme) given the null hypothesis is true. As with inference in other settings, you will need the sampling distribution for the statistic (here the slope) assuming the null hypothesis is true. You will generate the null sampling distribution in later chapters, but for now, assume that the null sampling distribution is correct. Additionally, notice that the standard error of the slope and intercept estimates describe the variability of those estimates.
+
+
+Load the mosaicData package and load the RailTrail data. The RailTrail data contains information about the number of users of a trail in Florence, MA and the weather for each day.
+Using the lm() function, run a linear model regressing the volume of riders on the hightemp for the day. Assign the output of the lm() function to the object ride_lm.
+Use the summary() function on the linear model output to see the inferential analysis (including the p-value for the slope).
+Additionally, tidy() the linear model output to make it easier to use later.
+
+
+> glimpse(RailTrail)
+Observations: 90
+Variables: 11
+$ hightemp   <int> 83, 73, 74, 95, 44, 69, 66, 66, 80, 79, 78, 65, 41, 59, ...
+$ lowtemp    <int> 50, 49, 52, 61, 52, 54, 39, 38, 55, 45, 55, 48, 49, 35, ...
+$ avgtemp    <dbl> 66.5, 61.0, 63.0, 78.0, 48.0, 61.5, 52.5, 52.0, 67.5, 62...
+$ spring     <int> 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1,...
+$ summer     <int> 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0,...
+$ fall       <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,...
+$ cloudcover <dbl> 7.6, 6.3, 7.5, 2.6, 10.0, 6.6, 2.4, 0.0, 3.8, 4.1, 8.5, ...
+$ precip     <dbl> 0.00, 0.29, 0.32, 0.00, 0.14, 0.02, 0.00, 0.00, 0.00, 0....
+$ volume     <int> 501, 419, 397, 385, 200, 375, 417, 629, 533, 547, 432, 4...
+$ weekday    <lgl> TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE,...
+$ dayType    <chr> "weekday", "weekday", "weekday", "weekend", "weekday", "...
+
+# Load the mosaicData package and the RailTrail data
+library(mosaicData)
+data(RailTrail)
+
+
+# Fit a linear model
+ride_lm <- lm(volume ~ hightemp, data=RailTrail)
+
+# View the summary of your model
+summary(ride_lm)
+
+Call:
+lm(formula = volume ~ hightemp, data = RailTrail)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-254.562  -57.800    8.737   57.352  314.035 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  -17.079     59.395  -0.288    0.774    
+hightemp       5.702      0.848   6.724 1.71e-09 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 104.2 on 88 degrees of freedom
+Multiple R-squared:  0.3394,	Adjusted R-squared:  0.3319 
+F-statistic: 45.21 on 1 and 88 DF,  p-value: 1.705e-09
+
+
+
+
+# Print the tidy model output
+tidy(ride_lm)
+
+# A tibble: 2 x 5
+  term        estimate std.error statistic       p.value
+  <chr>          <dbl>     <dbl>     <dbl>         <dbl>
+1 (Intercept)   -17.1     59.4      -0.288 0.774        
+2 hightemp        5.70     0.848     6.72  0.00000000171
+
+
+Marvellous model summarizing! tidy() provides the coefficient-level information of a model as a data frame. This makes it easier to program against compared to summary(). glance() and augment() do the same for model-level and observation-level information, respectively.
+
+
+
+
+> glance(ride_lm)
+# A tibble: 1 x 11
+  r.squared adj.r.squared sigma statistic p.value    df logLik   AIC   BIC
+      <dbl>         <dbl> <dbl>     <dbl>   <dbl> <int>  <dbl> <dbl> <dbl>
+1     0.339         0.332  104.      45.2 1.71e-9     2  -545. 1096. 1103.
+# ... with 2 more variables: deviance <dbl>, df.residual <int>
+
+> augment(ride_lm)
+# A tibble: 90 x 9
+   volume hightemp .fitted .se.fit  .resid   .hat .sigma     .cooksd .std.resid
+    <int>    <int>   <dbl>   <dbl>   <dbl>  <dbl>  <dbl>       <dbl>      <dbl>
+ 1    501       83    456.    16.3   44.8  0.0244   105. 0.00237         0.436 
+ 2    419       73    399.    11.5   19.8  0.0123   105. 0.000228        0.192 
+ 3    397       74    405.    11.8   -7.86 0.0129   105. 0.0000376      -0.0759
+ 4    385       95    525.    24.8 -140.   0.0565   104. 0.0569         -1.38  
+ 5    200       44    234.    23.8  -33.8  0.0520   105. 0.00304        -0.333 
+ 6    375       69    376.    11.0   -1.35 0.0111   105. 0.000000954    -0.0130
+ 7    417       66    359.    11.2   57.8  0.0116   105. 0.00183         0.558 
+ 8    629       66    359.    11.2  270.   0.0116   101. 0.0400          2.60  
+ 9    533       80    439.    14.5   93.9  0.0194   104. 0.00819         0.910 
+10    547       79    433.    14.0  114.   0.0180   104. 0.0111          1.10  
+# ... with 80 more rows
+
+
+
