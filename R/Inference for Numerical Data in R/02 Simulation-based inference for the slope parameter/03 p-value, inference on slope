@@ -1,0 +1,120 @@
+p-value
+Now that you have created the null sampling distribution, you can use it to find the p-value associated with the original slope statistic from the twins data. Although you might first consider this to be a one-sided research question, instead, use the absolute value function for practice performing two-sided tests on a slope coefficient.
+You can calculate the proportion of TRUE values in a logical vector using mean(). For example, given a numeric vector x, the proportion of cases where x is greater than or equal to 10 can be calculated using mean(x >= 10).
+
+Run a linear regression of Foster vs. Biological on the twins dataset.
+Tidy the result.
+Filter for rows where term equals "Biological".
+Use pull() to pull out the estimate column.
+Use abs() to calculate the absolute value of the slopes.
+
+> lm(Foster ~ Biological,data=twins)
+
+Call:
+lm(formula = Foster ~ Biological, data = twins)
+
+Coefficients:
+(Intercept)   Biological  
+      9.208        0.901
+      
+      
+> lm(Foster ~ Biological,data=twins) %>%
+    # Tidy the result
+    tidy()
+# A tibble: 2 x 5
+  term        estimate std.error statistic       p.value
+  <chr>          <dbl>     <dbl>     <dbl>         <dbl>
+1 (Intercept)    9.21     9.30       0.990 0.332        
+2 Biological     0.901    0.0963     9.36  0.00000000120
+
+
+# Run a lin. reg. of Foster vs. Biological on twins
+abs_obs_slope <- lm(Foster ~ Biological,data=twins) %>%
+  # Tidy the result
+  tidy() %>%   
+  # Filter for rows where term equals Biological
+  filter(term=="Biological") %>%
+  # Pull out the estimate
+  pull(estimate) %>%
+  # Take the absolute value
+  abs()
+
+[1] 0.901
+
+
+
+
+
+
+
+
+Mutate perm_slope to add a column, abs_perm_slope, equal to the absolute value of stat.
+Summarize to calculate p_value, equal to the proportion of rows where abs_perm_slope is greater than or equal to abs_obs_slope.
+> perm_slope
+Response: Foster (numeric)
+Explanatory: Biological (numeric)
+Null Hypothesis:  independence 
+# A tibble: 1,000 x 2
+   replicate    stat
+       <int>   <dbl>
+ 1         1  0.143 
+ 2         2  0.0710
+ 3         3 -0.456 
+ 4         4  0.0749
+ 5         5  0.297 
+ 6         6  0.0673
+ 7         7  0.140 
+ 8         8  0.164 
+ 9         9  0.0971
+10        10  0.184 
+# ... with 990 more rows
+
+
+# From previous step
+abs_obs_slope <- lm(Foster ~ Biological, data = twins) %>%
+  tidy() %>%   
+  filter(term == "Biological") %>%
+  pull(estimate) %>%
+  abs()
+
+# Compute the p-value  
+perm_slope %>% 
+  # Add a column of the absolute value of the slope
+  mutate(abs_perm_slope = abs(stat)) %>%
+  # Calculate a summary statistic
+  summarize(
+    # Get prop. cases where abs. permuted slope is greater than or equal to abs. observed slope
+    p_value = mean(abs_perm_slope >= abs_obs_slope)
+  )
+
+
+# A tibble: 1 x 1
+  p_value
+    <dbl>
+1       0
+
+
+Absolutely amazing! Notice that the permuted absolute slopes, abs_perm_slope were never greater than or equal to the observed absolute slope, abs_obs_slope.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inference on slope
+What can we conclude based on the p-value associated with the twins data?
+
+A biological twin's IQ being higher causes a foster twin's IQ to be higher.
+Biological twins' IQs are higher than foster twins' IQs, on average.
+Given the data, the probability of biological and foster twins' IQs being unrelated is close to zero.
+
+#yes If there were no association between foster and biological twin IQ (no nature) in the population, we would be extremely unlikely to have collected a sample of data like we did.
+Right! The data are unlikely under the null hypothesis assumption.
+
