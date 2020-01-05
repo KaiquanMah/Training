@@ -1,0 +1,95 @@
+Adjusting for non-normal errors
+In this last example, it appears as though the points are not normally distributed around the regression line. Again, note that the fix in this exercise has the effect of changing both the variability as well as modifying the linearity of the relationship.
+
+
+Run a linear regression of response versus explanatory on hypdata_nonnorm.
+Get the observation-level information from the model.
+Using modeled_observations, plot the residuals versus the fitted values.
+Add a point layer.
+Add a horizontal line at y = 0 using geom_hline() and setting yintercept to 0.
+
+# Run this to see how the model looks
+ggplot(hypdata_nonnorm, aes(x = explanatory, y = response)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+
+# Model response vs. explanatory 
+model <- lm(response ~ explanatory, data=hypdata_nonnorm)
+
+# Extract observation-level information
+modeled_observations <- augment(model)
+
+# See the result
+modeled_observations
+
+# A tibble: 100 x 9
+   response explanatory .fitted .se.fit  .resid   .hat .sigma .cooksd .std.resid
+      <dbl>       <dbl>   <dbl>   <dbl>   <dbl>  <dbl>  <dbl>   <dbl>      <dbl>
+ 1    191.        0.195    152.    20.7   38.7  0.0256   130. 1.20e-3     0.302 
+ 2    187.        0.339    195.    15.9   -7.97 0.0151   130. 2.94e-5    -0.0620
+ 3    172.        0.515    248.    13.0  -75.8  0.0100   130. 1.75e-3    -0.587 
+ 4    292.        0.452    229.    13.5   62.4  0.0109   130. 1.29e-3     0.484 
+ 5     43.7       0.302    184.    17.0 -141.   0.0172   130. 1.05e-2    -1.09  
+ 6    316.        0.923    371.    22.8  -55.0  0.0310   130. 2.97e-3    -0.431 
+ 7     94.4       0.465    233.    13.4 -139.   0.0106   130. 6.21e-3    -1.08  
+ 8    417.        0.927    372.    23.0   45.1  0.0314   130. 2.03e-3     0.354 
+ 9    235.        0.547    258.    13.0  -23.2  0.0100   130. 1.64e-4    -0.180 
+10    344.        0.927    372.    23.0  -28.4  0.0314   130. 8.00e-4    -0.222 
+# ... with 90 more rows
+
+
+# Using modeled_observations, plot residuals vs. fitted values
+ggplot(modeled_observations, aes(x=.fitted, y=.resid)) +
+  geom_point() +
+  geom_hline(y=0, yintercept=0)
+
+
+
+
+
+
+Update the model so that the left-hand side of the formula is the square root of response.
+Rerun the code and look at how the plots change.
+
+# Run this to see how the model looks
+ggplot(hypdata_nonnorm, aes(x = explanatory, y = sqrt(response))) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+
+# Model response vs. explanatory 
+model <- lm(sqrt(response) ~ explanatory, data = hypdata_nonnorm)
+
+# Extract observation-level information
+modeled_observations <- augment(model)
+
+# See the result
+modeled_observations
+
+# A tibble: 100 x 9
+   sqrt.response. explanatory .fitted .se.fit  .resid   .hat .sigma .cooksd
+            <dbl>       <dbl>   <dbl>   <dbl>   <dbl>  <dbl>  <dbl>   <dbl>
+ 1          13.8        0.195    11.8   0.671  2.04   0.0256   4.21 3.18e-3
+ 2          13.7        0.339    13.2   0.516  0.483  0.0151   4.22 1.03e-4
+ 3          13.1        0.515    15.0   0.421 -1.83   0.0100   4.22 9.69e-4
+ 4          17.1        0.452    14.3   0.438  2.75   0.0109   4.21 2.38e-3
+ 5           6.61       0.302    12.8   0.551 -6.23   0.0172   4.17 1.96e-2
+ 6          17.8        0.923    19.0   0.739 -1.25   0.0310   4.22 1.47e-3
+ 7           9.72       0.465    14.5   0.432 -4.74   0.0106   4.19 6.92e-3
+ 8          20.4        0.927    19.1   0.744  1.36   0.0314   4.22 1.77e-3
+ 9          15.3        0.547    15.3   0.420  0.0426 0.0100   4.22 5.26e-7
+10          18.5        0.927    19.1   0.744 -0.522  0.0314   4.22 2.59e-4
+# ... with 90 more rows, and 1 more variable: .std.resid <dbl>
+
+
+
+# Using modeled_observations, plot residuals vs. fitted values
+ggplot(modeled_observations, aes(x = .fitted, y = .resid)) +
+  # Add a point layer
+  geom_point() + 
+  # Add horizontal line at y = 0
+  geom_hline(yintercept = 0)
+  
+  
+It's hip to be a square root transformation! Keep in mind that using the square root transformation on the response is good for data where the data are not normal around the line (and really, when sqrt(y) is a function of x).
+
+  
