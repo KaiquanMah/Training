@@ -1,0 +1,91 @@
+Adjusting for non-constant errors
+In this next example, it appears as though the variance of the response variable increases as the explanatory variable increases. Note that the fix in this exercise has the effect of changing both the variability as well as modifying the linearity of the relationship.
+
+
+Run a linear regression of response versus explanatory on hypdata_nonequalvar.
+Get the observation-level information from the model.
+Using modeled_observations, plot the residuals versus the fitted values.
+Add a point layer.
+Add a horizontal line at y = 0 using geom_hline() and setting yintercept to 0.
+
+# Run this to see how the model looks
+ggplot(hypdata_nonequalvar, aes(x = explanatory, y = response)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+
+# Model response vs. explanatory 
+model <- lm(response ~ explanatory, data=hypdata_nonequalvar)
+
+# Extract observation-level information
+modeled_observations <- augment(model)
+
+# See the result
+modeled_observations
+
+# A tibble: 140 x 9
+   response explanatory .fitted .se.fit .resid    .hat .sigma .cooksd .std.resid
+      <dbl>       <dbl>   <dbl>   <dbl>  <dbl>   <dbl>  <dbl>   <dbl>      <dbl>
+ 1   127.          48.9    47.9    5.40  79.3  0.00889   57.0 8.67e-3      1.39 
+ 2    45.1         78.2   102.     8.93 -57.3  0.0243    57.2 1.28e-2     -1.01 
+ 3    15.5         39.5    30.4    7.38 -14.9  0.0166    57.4 5.81e-4     -0.262
+ 4    26.2         42.9    36.8    6.55 -10.5  0.0131    57.4 2.26e-4     -0.185
+ 5    17.8         79.9   105.     9.42 -87.7  0.0271    56.9 3.35e-2     -1.55 
+ 6    47.8         57.9    64.6    4.88 -16.8  0.00727   57.4 3.18e-4     -0.295
+ 7    14.2         35.1    22.3    8.55  -8.04 0.0223    57.4 2.31e-4     -0.142
+ 8   104.          50.7    51.2    5.16  53.2  0.00811   57.3 3.56e-3      0.933
+ 9   134.          62.6    73.3    5.33  61.1  0.00867   57.2 5.02e-3      1.07 
+10     3.21        63.3    74.6    5.43 -71.4  0.00901   57.1 7.14e-3     -1.25 
+# ... with 130 more rows
+
+
+# Using modeled_observations, plot residuals vs. fitted values
+ggplot(modeled_observations, aes(x=.fitted, y=.resid)) +
+  geom_point() +
+  geom_hline(y=0, yintercept=0)
+  
+
+
+
+
+
+Update the model so that the left-hand side of the formula is log(response).
+Rerun the code and look at how the plots change.
+# Run this to see how the model looks
+ggplot(hypdata_nonequalvar, aes(x = explanatory, y = log(response))) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+
+# Model log-response vs. explanatory 
+model <- lm(log(response) ~ explanatory, data = hypdata_nonequalvar)
+
+# Extract observation-level information
+modeled_observations <- augment(model)
+
+# See the result
+modeled_observations
+
+# A tibble: 140 x 9
+   log.response. explanatory .fitted .se.fit  .resid    .hat .sigma .cooksd
+           <dbl>       <dbl>   <dbl>   <dbl>   <dbl>   <dbl>  <dbl>   <dbl>
+ 1          4.85        48.9    3.44  0.0894  1.41   0.00889  0.944 1.00e-2
+ 2          3.81        78.2    4.32  0.148  -0.512  0.0243   0.951 3.73e-3
+ 3          2.74        39.5    3.15  0.122  -0.408  0.0166   0.951 1.58e-3
+ 4          3.27        42.9    3.25  0.109   0.0136 0.0131   0.952 1.39e-6
+ 5          2.88        79.9    4.37  0.156  -1.49   0.0271   0.943 3.54e-2
+ 6          3.87        57.9    3.71  0.0809  0.160  0.00727  0.952 1.05e-4
+ 7          2.65        35.1    3.02  0.142  -0.364  0.0223   0.951 1.72e-3
+ 8          4.65        50.7    3.49  0.0854  1.16   0.00811  0.947 6.16e-3
+ 9          4.90        62.6    3.85  0.0883  1.05   0.00867  0.948 5.42e-3
+10          1.17        63.3    3.87  0.0900 -2.70   0.00901  0.923 3.73e-2
+# ... with 130 more rows, and 1 more variable: .std.resid <dbl>
+
+
+# Using modeled_observations, plot residuals vs. fitted values
+ggplot(modeled_observations, aes(x = .fitted, y = .resid)) +
+  # Add a point layer
+  geom_point() + 
+  # Add horizontal line at y = 0
+  geom_hline(yintercept = 0)
+
+Keep in mind that using the log transformation on the response is good for data where the variance is unequal (and really, when ln(y) is a function of x).
+
