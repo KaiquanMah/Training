@@ -1,0 +1,49 @@
+Comparing language conversion rate (II)
+Next, you want to look at the conversion rate by the language that the marketing asset was shown in. While many of your users speak English, some prefer another language. Let's check to make sure marketing material translated well across languages.
+You can analyze metrics by specific demographics using .groupby(). Rather than looking at the overall conversion rate in the dataset, you instead group by language preference, which allows you to determine whether the marketing campaign was more effective in certain languages.
+
+Group the marketing DataFrame by language_displayed and count the number of unique users in the dataset.
+Group marketing by language_displayed again, this time calculating the number of unique users who converted.
+Calculate the conversion rate for all languages.
+
+
+
+# Group by language_displayed and count unique users
+total = marketing.groupby(['language_displayed']).nunique()
+In [7]: total
+Out[7]: 
+language_displayed
+Arabic       24
+English    7169
+German       74
+Spanish     120
+Name: user_id, dtype: int64
+
+
+# Group by language_displayed and count unique conversions
+subscribers = marketing[marketing['converted'] == True].groupby(['language_displayed']).nunique()
+In [8]: subscribers
+Out[8]: 
+language_displayed
+Arabic      12
+English    941
+German      53
+Spanish     24
+Name: user_id, dtype: int64
+
+
+# Calculate the conversion rate for all languages
+language_conversion_rate = subscribers/total
+print(language_conversion_rate)
+In [10]: print(language_conversion_rate)
+language_displayed
+Arabic     0.500000
+English    0.131260
+German     0.716216
+Spanish    0.200000
+Name: user_id, dtype: float64
+
+You'll notice the conversion rate is much lower for English and Spanish. You'll conduct a deeper investigation into the differences between conversion rate by language in the next chapter.
+
+
+
