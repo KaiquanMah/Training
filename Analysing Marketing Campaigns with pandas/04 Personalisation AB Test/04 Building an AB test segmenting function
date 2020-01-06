@@ -1,0 +1,36 @@
+Building an AB test segmenting function
+In the previous lesson, you observed that your personalization experiment is highly statistically significant. However, when running experiments, it is important to check how new features are affecting specific demographics. Sometimes features that are highly appealing to one group are less appealing to others.
+Since you want to segment our data multiple times, you will build a function ab_segmentation() that analyzes the impact of your A/B tests on segments of data that you can reuse each time you want to conduct this kind of analysis.
+Your function will take in a column name and run through each unique value in that column calculating lift and statistical significance.
+
+Build a for loop within our ab_segmentation() function that runs through each unique value in the user-inputted column name segment.
+Isolate the rows in marketing where the marketing channel is 'Email' and the user-inputted column segment equals subsegment.
+Print the results of the lift() and stats.ttest_ind() functions.
+
+In [2]:       marketing.columns.values
+Out[2]: 
+array(['user_id', 'date_served', 'marketing_channel', 'variant',
+       'converted', 'language_displayed', 'language_preferred',
+       'age_group', 'date_subscribed', 'date_canceled',
+       'subscribing_channel', 'is_retained', 'DoW', 'channel_code',
+       'is_correct_lang'], dtype=object)
+       
+def ab_segmentation(segment):
+  # Build a for loop for each subsegment in marketing
+  for subsegment in np.unique(marketing[segment].values):
+      print(subsegment)
+      
+      # Limit marketing to email and subsegment
+      email = marketing[(marketing['marketing_channel'] == 'Email') & (marketing[segment] == subsegment)]
+
+      subscribers = email.groupby(['user_id', 'variant'])['converted'].max()
+      subscribers = pd.DataFrame(subscribers.unstack(level=1)) 
+      control = subscribers['control'].dropna()
+      personalization = subscribers['personalization'].dropna()
+
+      print('lift:', lift(control, personalization)) 
+      print('t-statistic:', stats.ttest_ind(control, personalization), '\n\n')
+
+
+Now, you will practice using our sub-segment function.
+
