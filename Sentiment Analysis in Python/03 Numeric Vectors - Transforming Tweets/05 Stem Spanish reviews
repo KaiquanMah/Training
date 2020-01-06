@@ -1,0 +1,225 @@
+Stem Spanish reviews
+You will recall that in a previous chapter we used a language detection package to determine the language of different Amazon product reviews. In this exercise, you will first detect the languages in the non_english_reviews and then select only those in Spanish. Feel free to go back to the video discussing foreign language detection if you have forgotten some of the concepts.
+In the second step, you will create word tokens from the Spanish reviews and will stem them using a SnowBall stemmer for the Spanish language.
+
+Import the language detection package.
+Iterate over the rows of the non_english_reviews using the len() method and range() function.
+Use detect_langs() to detect the language of each review in the for loop.
+
+# Import the language detection package
+#from langdetect import detect_langs
+import langdetect
+
+# Loop over the rows of the dataset and append  
+languages = [] 
+for i in range(len(non_english_reviews)):
+    languages.append(langdetect.detect_langs(non_english_reviews.iloc[i, 1]))
+
+# Clean the list by splitting     
+languages = [str(lang).split(':')[0][1:] for lang in languages]
+# Assign the list to a new feature 
+non_english_reviews['language'] = languages
+
+# Select the Spanish ones
+non_english_reviews = non_english_reviews[non_english_reviews.language == 'es']
+
+
+
+
+
+
+Import the SnowballStemmer from the respective package.
+Create word tokens from the review column of the non_english_reviews.
+Use the Spanish stemmer you imported to stem the created list of tokens.
+
+# Import the required packages
+from nltk.stem.snowball import SnowballStemmer
+from nltk import word_tokenize
+
+# Import the Spanish SnowballStemmer
+SpanishStemmer = SnowballStemmer("spanish")
+
+# Create a list of tokens
+tokens = [word_tokenize(review) for review in non_english_reviews.review] 
+# Stem the list of tokens
+stemmed_tokens = [[SpanishStemmer.stem(word) for word in token] for token in tokens]
+
+# Print the first item of the stemmed tokenss
+stemmed_tokens[0]
+
+
+Out[1]: 
+['il',
+ 'grand',
+ 'ritorn',
+ '!',
+ ':',
+ 'e',
+ "'",
+ 'dai',
+ 'tempi',
+ 'del',
+ 'tour',
+ 'di',
+ '``',
+ 'empir',
+ "''",
+ 'che',
+ 'non',
+ 'vedev',
+ 'i',
+ 'queensrych',
+ 'così',
+ 'in',
+ 'gran',
+ 'form',
+ ',',
+ 'quest',
+ 'dvd',
+ 'per',
+ 'me',
+ 'è',
+ 'il',
+ 'miglior',
+ 'di',
+ 'tutt',
+ 'la',
+ 'lor',
+ 'carr',
+ ',',
+ 'e',
+ 'la',
+ 'consacrazion',
+ 'di',
+ 'una',
+ 'band',
+ ',',
+ 'dop',
+ 'quest',
+ 'dvd',
+ 'si',
+ 'può',
+ 'tranquill',
+ 'dir',
+ 'che',
+ 'i',
+ 'queenssrych',
+ 'son',
+ 'entrati',
+ 'nell',
+ 'stori',
+ 'del',
+ 'grand',
+ 'rock',
+ 'com',
+ 'i',
+ 'deep',
+ 'purpl',
+ ',',
+ 'led',
+ 'zeppelin',
+ 'e',
+ 'thin',
+ 'lizzy',
+ 'negli',
+ 'anni',
+ 'settanta.i',
+ 'queensrych',
+ 'sempr',
+ 'si',
+ 'son',
+ 'distinti',
+ 'dagli',
+ 'altri',
+ 'gruppi',
+ 'del',
+ 'lor',
+ 'gener',
+ ',',
+ 'geoff',
+ 'tat',
+ 'è',
+ 'uno',
+ 'dei',
+ 'più',
+ 'importanti',
+ 'vocalists',
+ 'di',
+ 'tutti',
+ 'i',
+ 'tempi.quest',
+ 'dvd',
+ 'è',
+ 'music',
+ 'e',
+ 'teatr',
+ ',',
+ 'la',
+ 'collaborazion',
+ 'più',
+ 'strett',
+ 'con',
+ 'pamel',
+ 'moor',
+ 'rend',
+ 'quest',
+ 'dvd',
+ 'imperdibile.un',
+ 'sol',
+ 'not',
+ 'negat',
+ ',',
+ 'purtropp',
+ 'nell',
+ 'composizion',
+ 'dell',
+ 'second',
+ 'part',
+ 'si',
+ 'sent',
+ "l'assenz",
+ 'di',
+ 'chris',
+ 'de',
+ 'garm',
+ ',',
+ 'mik',
+ 'ston',
+ 'è',
+ 'un',
+ 'grand',
+ 'chitarr',
+ ',',
+ 'ma',
+ 'chris',
+ 'de',
+ 'garm',
+ 'per',
+ 'me',
+ 'era',
+ 'fondamental',
+ 'per',
+ 'la',
+ 'band',
+ ',',
+ 'hann',
+ 'pers',
+ 'la',
+ 'part',
+ 'più',
+ 'melodoc',
+ ',',
+ 'che',
+ 'era',
+ 'a',
+ 'mio',
+ 'parer',
+ 'molt',
+ 'import',
+ 'in',
+ 'quest',
+ 'grupp',
+ '!']
+ 
+ 
+ 
