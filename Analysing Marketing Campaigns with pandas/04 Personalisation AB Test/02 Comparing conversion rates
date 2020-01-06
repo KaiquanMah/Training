@@ -1,0 +1,31 @@
+Comparing conversion rates
+Now that we know allocation is relatively even let's look at the conversion rate for the control and personalization. Since we chose conversion rate as our key metrics for this test, it is highly important that we evaluate whether or not conversion was higher in the personalization treatment compared with the control. While we will dive in deeper in subsequent exercises, measuring the difference between the key metric in the control and the treatment is the most important part of evaluating the success of an A/B test.
+The DataFrame email has been loaded in your workspace which contains only rows from the marketing DataFrame where marketing_channel is 'Email'.
+
+Group the email DataFrame by user_id and variant while selecting the maximum value of the converted column and store the results in subscribers.
+Drop missing values from the control column of subscribers_df.
+Drop missing values from the personalization column of subscribers_df.
+Calculate the conversion rate for both personalization and control using the appropriate function for each.
+
+# Group marketing by user_id and variant
+subscribers = email.groupby(['user_id', 
+                             'variant'])['converted'].max()
+subscribers_df = pd.DataFrame(subscribers.unstack(level=1)) 
+
+# Drop missing values from the control column
+control = subscribers_df['control'].dropna()
+
+# Drop missing values from the personalization column
+personalization = subscribers_df['personalization'].dropna()
+
+print('Control conversion rate:', np.mean(control))
+print('Personalization conversion rate:', np.mean(personalization))
+
+
+<script.py> output:
+    Control conversion rate: 0.2814814814814815
+    Personalization conversion rate: 0.3908450704225352
+
+
+Great job, you can see that personalization converted users at a higher rate than the control. Next, you will build a lift function to quantify by how much.
+
