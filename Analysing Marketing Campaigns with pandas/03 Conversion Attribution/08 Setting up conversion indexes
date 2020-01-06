@@ -1,0 +1,45 @@
+Setting up conversion indexes
+Now that you've determined that language is, in fact, the issue with House Ads conversion, stakeholders need to know how many subscribers they lost as a result of this bug.
+In this exercise, you will index non-English language conversion rates against English conversion rates in the time period before the language bug arose.
+
+Create a new DataFrame, house_ads_bug, that contains only the rows from house_ads with 'date_served' prior to '2018-01-11'.
+Use your conversion_rate() function on the house_ads_bug DataFrame and the 'language_displayed' column.
+Using the appropriate row, divide the Spanish, Arabic and German columns of lang_conv by the English column.
+
+# Calculate pre-error conversion rate
+house_ads_bug = house_ads[house_ads['date_served'] < '2018-01-11']
+lang_conv = conversion_rate(house_ads_bug, ['language_displayed'])
+
+In [2]: lang_conv
+Out[2]: 
+language_displayed
+Arabic     0.500000
+English    0.099093
+German     0.444444
+Spanish    0.166667
+Name: user_id, dtype: float64
+
+In [3]: lang_conv.loc['Spanish']
+Out[3]: 0.16666666666666666
+
+# Index other language conversion rate against English
+spanish_index = lang_conv.loc['Spanish']/lang_conv.loc['English']
+arabic_index = lang_conv.loc['Arabic']/lang_conv.loc['English']
+german_index = lang_conv.loc['German']/lang_conv.loc['English']
+
+print("Spanish index:", spanish_index)
+print("Arabic index:", arabic_index)
+print("German index:", german_index)
+
+<script.py> output:
+    Spanish index: 1.681924882629108
+    Arabic index: 5.045774647887324
+    German index: 4.485133020344287
+    
+    
+    
+Now that you've created indexes for each language compared with English, you can assess what conversion rate should have been during the rest of the month.
+
+
+
+
