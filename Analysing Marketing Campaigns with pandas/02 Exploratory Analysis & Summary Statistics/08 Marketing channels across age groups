@@ -1,0 +1,50 @@
+Marketing channels across age groups
+Some marketing stakeholders want to know if their marketing channels are reaching all users equally or if some marketing channels are serving specific age demographics.
+Within a marketing team, it is common to get requests that require quick analysis and visualization. The better you are at visualizing the results, the more likely that you will effectively communicate your findings to your stakeholders.
+In this exercise, you will create a grouped bar chart showing how many people each marketing channel reached by age group.
+
+Unstack channel_age with level = 1 and transform the result into a DataFrame.
+Plot channel_age as a grouped bar chart.
+Add a legend in the upper right and set the labels equal to channel_age_df.columns.values.
+
+
+channel_age = marketing.groupby(['marketing_channel', 'age_group'])\
+                                ['user_id'].count()
+
+# Unstack channel_age and transform it into a DataFrame
+channel_age_df = pd.DataFrame(channel_age.unstack(level = 1))
+
+In [3]: channel_age_df
+Out[3]: 
+age_group          0-18 years  19-24 years  24-30 years  30-36 years  36-45 years  45-55 years  55+ years
+marketing_channel                                                                                        
+Email                      93          111          120           60           63           65         53
+Facebook                  264          347          296          249          226          299        179
+House Ads                 694          761          681          699          589          678        631
+Instagram                 300          315          286          259          280          227        204
+Push                      186          145          183           86          193           82        118
+
+
+
+# Plot channel_age
+channel_age_df.plot(kind = 'bar')
+plt.title('Marketing channels by age group')
+plt.xlabel('Age Group')
+plt.ylabel('Users')
+# Add a legend to the plot
+plt.legend(loc = 'upper right', 
+           labels = channel_age_df.columns.values)
+plt.show()
+
+
+In [4]: channel_age_df.columns
+Out[4]: Index(['0-18 years', '19-24 years', '24-30 years', '30-36 years', '36-45 years', '45-55 years', '55+ years'], dtype='object', name='age_group')
+
+In [5]: channel_age_df.columns.values
+Out[5]: 
+array(['0-18 years', '19-24 years', '24-30 years', '30-36 years',
+       '36-45 years', '45-55 years', '55+ years'], dtype=object)
+       
+
+ As you can see, email is not reaching older age groups, and Facebook is not reaching many people under 18.
+
