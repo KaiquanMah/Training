@@ -1,0 +1,212 @@
+Daily Conversion Rate
+
+
+
+
+Creating daily conversion rate DataFrame
+To understand trends over time, you will create a new DataFrame that includes the conversion rate each day. You will follow essentially the same steps as before when you calculated the overall conversion rate, this time also grouping by the date a user subscribed.
+Looking at the daily conversion rate is crucial to contextualize whether the conversion rate on a particular day was good or bad. Additionally, looking at conversion rate over time can help to surface trends such as a conversion rate that appears to be going down over time. These kinds of trends are crucial to identify for your marketing stakeholders as early as possible.
+
+Group marketing by 'date_served' and calculate the unique number of user IDs.
+Select only the rows in marketing where converted equals True. Group the result by 'date_served' and calculate the unique number of user IDs.
+
+# Group by date_served and count unique users
+total = marketing.groupby(['date_served'])['user_id']\
+                     .nunique()
+
+# Group by date_served and calculate subscribers
+subscribers = marketing[marketing['converted'] == True]\
+                         .groupby(['date_served'])\
+                         ['user_id'].nunique()
+
+# Calculate the conversion rate for all languages
+daily_conversion_rate = subscribers/total
+
+You might notice it's difficult to identify trends using this DataFrame. In the next exercises you will plot your results to make interpretation easier.
+
+In [3]: daily_conversion_rate
+Out[3]: 
+date_served
+2018-01-01    0.099448
+2018-01-02    0.098930
+2018-01-03    0.103448
+2018-01-04    0.108359
+2018-01-05    0.125392
+2018-01-06    0.113636
+2018-01-07    0.141818
+2018-01-08    0.115385
+2018-01-09    0.125000
+2018-01-10    0.118694
+2018-01-11    0.080645
+2018-01-12    0.076412
+2018-01-13    0.084967
+2018-01-14    0.085246
+2018-01-15    0.113429
+2018-01-16    0.255155
+2018-01-17    0.219512
+2018-01-18    0.091195
+2018-01-19    0.059016
+2018-01-20    0.067524
+2018-01-21    0.087336
+2018-01-22    0.123596
+2018-01-23    0.122093
+2018-01-24    0.115789
+2018-01-25    0.125000
+2018-01-26    0.090090
+2018-01-27    0.065625
+2018-01-28    0.062500
+2018-01-29    0.059561
+2018-01-30    0.066246
+2018-01-31    0.052941
+Name: user_id, dtype: float64
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Setting up our data to visualize daily conversion
+When you want to understand how your campaign performed, it is essential to look at how key metrics changed throughout the campaign. Your key metrics can help you catch problems that may have happened during the campaign, such as a bug in the checkout system that led to a dip in conversion toward the end of your campaign. Metrics over time can also surface trends like gaining more subscribers over the weekends or on specific holidays.
+In this exercise, you will build upon the daily conversion rate DataFrame daily_conversion_rate you built in a previous exercise. Before you can begin visualizing, you need to transform your data into an easier format to use with pandas and matplotlib.
+
+Reset the index of daily_conversion_rate and use pd.DataFrame to convert the results into a DataFrame.
+Rename the daily_conversion_rate columns to 'date_served' and 'conversion_rate'.
+
+# Reset index to turn the results into a DataFrame
+daily_conversion_rate = pd.DataFrame(daily_conversion_rate.reset_index())
+#or 
+daily_conversion_rate = pd.DataFrame(daily_conversion_rate.reset_index(drop=False))
+
+
+In [2]: daily_conversion_rate
+Out[2]: 
+   date_served   user_id
+0   2018-01-01  0.099448
+1   2018-01-02  0.098930
+2   2018-01-03  0.103448
+3   2018-01-04  0.108359
+4   2018-01-05  0.125392
+5   2018-01-06  0.113636
+6   2018-01-07  0.141818
+7   2018-01-08  0.115385
+8   2018-01-09  0.125000
+9   2018-01-10  0.118694
+10  2018-01-11  0.080645
+11  2018-01-12  0.076412
+12  2018-01-13  0.084967
+13  2018-01-14  0.085246
+14  2018-01-15  0.113429
+15  2018-01-16  0.255155
+16  2018-01-17  0.219512
+17  2018-01-18  0.091195
+18  2018-01-19  0.059016
+19  2018-01-20  0.067524
+20  2018-01-21  0.087336
+21  2018-01-22  0.123596
+22  2018-01-23  0.122093
+23  2018-01-24  0.115789
+24  2018-01-25  0.125000
+25  2018-01-26  0.090090
+26  2018-01-27  0.065625
+27  2018-01-28  0.062500
+28  2018-01-29  0.059561
+29  2018-01-30  0.066246
+30  2018-01-31  0.052941
+
+
+
+
+
+
+# Rename columns
+daily_conversion_rate.columns = ['date_served', 
+                              'conversion_rate']
+
+In [5]: daily_conversion_rate
+Out[5]: 
+   date_served  conversion_rate
+0   2018-01-01         0.099448
+1   2018-01-02         0.098930
+2   2018-01-03         0.103448
+3   2018-01-04         0.108359
+4   2018-01-05         0.125392
+5   2018-01-06         0.113636
+6   2018-01-07         0.141818
+7   2018-01-08         0.115385
+8   2018-01-09         0.125000
+9   2018-01-10         0.118694
+10  2018-01-11         0.080645
+11  2018-01-12         0.076412
+12  2018-01-13         0.084967
+13  2018-01-14         0.085246
+14  2018-01-15         0.113429
+15  2018-01-16         0.255155
+16  2018-01-17         0.219512
+17  2018-01-18         0.091195
+18  2018-01-19         0.059016
+19  2018-01-20         0.067524
+20  2018-01-21         0.087336
+21  2018-01-22         0.123596
+22  2018-01-23         0.122093
+23  2018-01-24         0.115789
+24  2018-01-25         0.125000
+25  2018-01-26         0.090090
+26  2018-01-27         0.065625
+27  2018-01-28         0.062500
+28  2018-01-29         0.059561
+29  2018-01-30         0.066246
+30  2018-01-31         0.052941
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Visualise daily conversion rate
+Now that your formatted the data into a more manageable format for visualization, you will proceed to create a line chart. Strong visualization skills are crucial for a data scientist because it will allow you and your marketing stakeholders to derive deeper insights from the data. In this case, creating a line plot will make it much easier to notice peaks and valleys in our conversion rate over time as well as any overall trends.
+
+
+Create a line chart using the daily_conversion_rate DataFrame.
+Set the y-axis of your chart to begin at 0.
+Display the chart.
+https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas.DataFrame.plot.html
+
+# Create a line chart using daily_conversion_rate
+daily_conversion_rate.plot(x='date_subscribed', y='conversion_rate', kind='line')
+
+plt.title('Daily conversion rate\n', size = 16)
+plt.ylabel('Conversion rate (%)', size = 14)
+plt.xlabel('Date', size = 14)
+
+# Set the y-axis to begin at 0
+plt.ylim(0)
+
+# Display the plot
+plt.show()
+
