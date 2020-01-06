@@ -1,0 +1,133 @@
+Identify the language of a string
+Sometimes you might need to analyze the sentiment of non-English text. Your first task in such a case will be to identify the foreign language.
+In this exercise you will identify the language of a single string. A string called foreign has been created for you. Feel free to explore it in the IPython Shell.
+
+Import the required function from the language detection package.
+Detect the language of the foreign string.
+# Import the language detection function and package
+from langdetect import detect_langs
+
+# Detect the language of the foreign string
+print(detect_langs(foreign))
+<script.py> output:
+    [fr:0.9999963233700626]
+
+
+
+
+
+
+
+Detect language of a list of strings
+Now you will detect the language of each item in a list. A list called sentences has been created for you and it contains 3 sentences, each in a different language. They have been randomly extracted from the product reviews dataset.
+Iterate over the sentences in the list.
+Detect the language of each sentence and append the detected language to the empty list languages.
+
+from langdetect import detect_langs
+
+languages = []
+
+# Loop over the sentences in the list and detect their language
+for sentence in range(len(sentences)):
+    languages.append(detect_langs(sentences[sentence]))
+    
+print('The detected languages are: ', languages)
+
+In [1]: sentences
+Out[1]: 
+['La histoire rendu étai fidèle, excellent, et grand.',
+ 'Excelente muy recomendable.',
+ 'It had a leak from day one but the return and exchange process was very quick.']
+
+<script.py> output:
+    The detected languages are:  [[fr:0.9999967359937304], [es:0.9999947227826881], [en:0.9999980783972764]]
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Language detection of product reviews
+You will practice language detection on a small dataset called non_english_reviews. It is a sample of non-English reviews from the Amazon product reviews.
+You will iterate over the rows of the dataset, detecting the language of each row and appending it to an empty list. The list needs to be cleaned so that it only contains the language of the review such as 'en' for English instead of the regular output en:0.9987654. Remember that the language detection function might detect more than one language and the first item in the returned list is the most likely candidate. Finally, you will assign the list to a new column.
+The logic is the same as used in the slides and the exercise before but instead of applying the function to a list, you work with a dataset.
+
+
+Iterate over the rows of the non_english_reviews dataset.
+Inside the loop, detect the language of the second column of the dataset.
+Clean the string by splitting on a : inside the list comprehension expression.
+Finally, assign the cleaned list to a new column.
+
+In [1]: non_english_reviews
+Out[1]: 
+      score                                             review
+1249      1   Il grande ritorno!: E' dai tempi del tour di ...
+1259      1   La reencarnación vista por un científico: El ...
+1260      1   Excelente Libro / Amazing book!!: Este libro ...
+1261      1   Magnifico libro: Brian Weiss ha dejado una ma...
+1639      1   El libro mas completo que existe para nosotra...
+1745      1   Excelente!: Una excelente guía para todos aqu...
+2316      1   Nightwish is unique and rocks for eva: Moi to...
+2486      1   Palabras de aliento para tu caminar con Dios:...
+2760      0   Completement nul: Fait sur commande et ennuya...
+2903      1   fabuloso: mil gracias por el producto fabulos...
+2908      0   Geh: Blah blah, sexy girl, blah blah, fightin...
+3318      1   Excelentes botas.. excelentes boots: Excelent...
+3694      0   Why not Spanish ???: Alguien me puede decir p...
+4820      1   La mejor película de Moore: A mi juicio, esta...
+4914      0   De la poudre aux yeux: J'ai acheté un Sansa V...
+5720      1   C'est magnifique! il y a du vrai dans ce qui'...
+5875      1   Erreur: "Les Triplettes de Belleville" n'a pa...
+5901      1   Buen cargador: Product very good, I am of Ven...
+6234      1   5+ stars. LO MEJOR DE LO QUE HE LEIDO EN MI V...
+6631      0   certains bugs viennent tout gacher: le jeu es...
+7078      1   Variedad: Bueno tener este album debido a su ...
+7307      0   Disappointing. Does not deserve to be a 'clas...
+7888      0   Ich weiß ja nicht !: Also ich finde es ja tol...
+7983      1   1F4T: Cet album est chanté vraiment bien. Jea...
+8018      1   Exelente eleccion: Los mejores zapatos de fut...
+8340      1   Jean de Florette et Manon des sources: bien a...
+9265      1   Excelente: Manu es una de los mejores cantant...
+9422      0   DVD CON PROBLEMAS: ESTE DVD LLEGO EN BUEN TIE...
+9624      0   baaaaaadddddddd bookkkkkkk: por favor no gast...
+
+
+from langdetect import detect_langs
+languages = [] 
+
+# Loop over the rows of the dataset and append  
+for row in range(len(non_english_reviews)):
+    languages.append(detect_langs(non_english_reviews.iloc[row, 1]))
+
+# Clean the list by splitting     
+languages = [str(lang).split(':')[0][1:] for lang in languages]
+
+# Assign the list to a new feature 
+non_english_reviews['language'] = languages
+
+print(non_english_reviews.head())
+
+
+<script.py> output:
+          score                                             review language
+    1249      1   Il grande ritorno!: E' dai tempi del tour di ...       it
+    1259      1   La reencarnación vista por un científico: El ...       es
+    1260      1   Excelente Libro / Amazing book!!: Este libro ...       es
+    1261      1   Magnifico libro: Brian Weiss ha dejado una ma...       es
+    1639      1   El libro mas completo que existe para nosotra...       es
+    
+    
+You have succesfully built a new column in the dataset, which tells you in which language the respective review is written. This can be a very useful feature!
+
+    
