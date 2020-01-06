@@ -1,0 +1,57 @@
+Determining key metrics
+When running an A/B test when is the right time to determine key success metrics?
+
+
+Once all the data has come in, and we can see which metrics our test affected.
+I'll leave that to my marketing stakeholders.
+
+#yes When designing the experiment.
+Right. The earlier you define what success looks like, the better.
+
+
+
+
+
+
+
+
+
+
+
+Test allocation
+The email portion of this campaign was actually run as an A/B test. Half the emails sent out were generic upsells to your product while the other half contained personalized messaging around the users’ usage of the site.
+Before you begin analyzing the results, you will check to ensure users were allocated equally to the test and control groups.
+
+In [4]: email.columns.values
+Out[4]: 
+array(['user_id', 'date_served', 'marketing_channel', 'variant',
+       'converted', 'language_displayed', 'language_preferred',
+       'age_group', 'date_subscribed', 'date_canceled',
+       'subscribing_channel', 'is_retained', 'DoW', 'channel_code',
+       'is_correct_lang'], dtype=object)
+
+
+# Subset the DataFrame
+email = marketing[marketing['marketing_channel'] == 'Email']
+
+# Group the email DataFrame by variant 
+alloc = email.groupby(['variant'])['user_id'].nunique()
+
+
+In [6]: alloc
+Out[6]: 
+variant
+control            270
+personalization    284
+Name: user_id, dtype: int64
+
+
+# Plot a bar chart of the test allocation
+alloc.plot(kind='bar')
+plt.title('Personalization test allocation')
+plt.ylabel('# participants')
+plt.show()
+
+
+There's a slight difference in allocation, but it's within the expected range so you can continue with your analysis.
+
