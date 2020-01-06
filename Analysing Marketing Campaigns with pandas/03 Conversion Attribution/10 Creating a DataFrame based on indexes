@@ -1,0 +1,66 @@
+Creating a DataFrame based on indexes
+Now that you've created an index to compare English conversion rates against all other languages, you will build out a DataFrame that will estimate what daily conversion rates should have been if users were being served the correct language.
+An expected conversion DataFrame named converted has been created for you grouping house_ads by date and preferred language. It contains a count of unique users as well as the number of conversions for each language, each day.
+For example, you can access the number of Spanish-speaking users who received house ads using converted[('user_id','Spanish')].
+
+Use .loc to create the column english_conv_rate in converted with the English conversion rate between '2018-01-11' and '2018-01-31'.
+Create expected conversion columns for each language by multiplying english_conv_rate by each language index (spanish_index, arabic_index or german_index).
+Multiply each language's expected conversion rate by the number of users who should have received house ads.
+
+In [1]: converted
+Out[1]: 
+                   user_id                        converted                       
+language_preferred  Arabic English German Spanish    Arabic English German Spanish
+date_served                                                                       
+2018-01-01             2.0   171.0    5.0    11.0       2.0    13.0    1.0     0.0
+2018-01-02             3.0   200.0    5.0    10.0       0.0    14.0    3.0     0.0
+2018-01-03             2.0   179.0    3.0     8.0       0.0    15.0    1.0     1.0
+...
+
+
+In [4]: converted.columns.values
+Out[4]: 
+array([('user_id', 'Arabic'), ('user_id', 'English'),
+       ('user_id', 'German'), ('user_id', 'Spanish'),
+       ('converted', 'Arabic'), ('converted', 'English'),
+       ('converted', 'German'), ('converted', 'Spanish')], dtype=object)
+       
+       
+
+
+In [7]: converted['english_conv_rate']
+Out[7]: 
+date_served
+2018-01-01    NaN
+2018-01-02    NaN
+2018-01-03    NaN
+...
+2018-01-11    6.0
+...
+2018-01-29    3.0
+2018-01-30    4.0
+2018-01-31    4.0
+Name: english_conv_rate, dtype: float64
+
+
+
+
+
+converted.columns.values
+# Create English conversion rate column for affected period
+converted['english_conv_rate'] = converted.loc['2018-01-11':'2018-01-31']['converted']['English']
+
+# Create expected conversion rates for each language
+converted['expected_spanish_rate'] = converted['english_conv_rate']*spanish_index
+converted['expected_arabic_rate'] = converted['english_conv_rate']*arabic_index
+converted['expected_german_rate'] = converted['english_conv_rate']*german_index
+
+# Multiply number of users by the expected conversion rate
+converted['expected_spanish_conv'] = converted['expected_spanish_rate']*converted['user_id']['Spanish']/100
+converted['expected_arabic_conv'] = converted['expected_arabic_rate']*converted['user_id']['Arabic']/100
+converted['expected_german_conv'] = converted['expected_german_rate']*converted['user_id']['German']/100
+
+
+
+Now, you will assess how many subscribers you lost due to the language discrepancy.
+
