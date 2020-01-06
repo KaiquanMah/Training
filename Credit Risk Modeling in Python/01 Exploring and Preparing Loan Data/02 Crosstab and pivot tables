@@ -1,0 +1,76 @@
+Crosstab and pivot tables
+Often, financial data is viewed as a pivot table in spreadsheets like Excel.
+With cross tables, you get a high level view of selected columns and even aggregation like a count or average. For most credit risk models, especially for probability of default, columns like person_emp_length and person_home_ownership are common to begin investigating.
+You will be able to see how the values are populated throughout the data, and visualize them. For now, you need to check how loan_status is affected by factors like home ownership status, loan grade, and loan percentage of income.
+The data set cr_loan has been loaded in the workspace.
+
+Create a cross table of loan_intent and loan_status.
+# Create a cross table of the loan intent and loan status
+print(pd.crosstab(cr_loan['loan_intent'], cr_loan['loan_status'], margins = True))
+
+<script.py> output:
+    loan_status            0     1    All
+    loan_intent                          
+    DEBTCONSOLIDATION   3722  1490   5212
+    EDUCATION           5342  1111   6453
+    HOMEIMPROVEMENT     2664   941   3605
+    MEDICAL             4450  1621   6071
+    PERSONAL            4423  1098   5521
+    VENTURE             4872   847   5719
+    All                25473  7108  32581
+    
+    
+    
+    
+
+Create a cross table of home ownership grouped by loan_status and loan_grade.
+# Create a cross table of home ownership, loan status, and grade
+print(pd.crosstab(cr_loan['person_home_ownership'],[cr_loan['loan_status'],cr_loan['loan_grade']]))
+
+<script.py> output:
+    loan_status               0                            ...     1                        
+    loan_grade                A     B     C    D    E   F  ...     B    C     D    E   F   G
+    person_home_ownership                                  ...                              
+    MORTGAGE               5219  3729  1934  658  178  36  ...   324  321   553  161  61  31
+    OTHER                    23    29    11    9    2   0  ...     5    6    11    6   2   0
+    OWN                     860   770   464  264   26   7  ...    34   31    18   31   8   5
+    RENT                   3602  4222  2710  554  137  28  ...  1338  981  1559  423  99  27
+    
+    [4 rows x 14 columns]
+
+
+
+
+
+
+Create a cross table of home ownership, loan status, and average loan_percent_income.
+# Create a cross table of home ownership, loan status, and average percent income
+print(pd.crosstab(cr_loan['person_home_ownership'], cr_loan['loan_status'],
+              values=cr_loan['loan_percent_income'], aggfunc='mean'))
+
+<script.py> output:
+    loan_status                   0         1
+    person_home_ownership                    
+    MORTGAGE               0.146504  0.184882
+    OTHER                  0.143784  0.300000
+    OWN                    0.180013  0.297358
+    RENT                   0.144611  0.264859
+
+
+
+
+
+
+
+
+
+Create a boxplot of the loan's percent of the person's income grouped by loan_status.
+# Create a box plot of percentage income by loan status
+cr_loan.boxplot(column = ['loan_percent_income'], by = 'loan_status')
+plt.title('Average Percent Income by Loan Status')
+plt.suptitle('')
+plt.show()
+
+
+It looks like the average percentage of income for defaults is higher. This could indicate those recipients have a debt-to-income ratio that's already too high.
+
