@@ -1,0 +1,102 @@
+TfIdf on Twitter airline sentiment data
+You will now build features using the TfIdf method. You will continue to work with the tweets dataset.
+In this exercise, you will utilize what you have learned in previous lessons and remove stop words, use a token pattern and specify the n-grams.
+The final output will be a DataFrame, of which the columns are created using the TfidfVectorizer(). Such a DataFrame can directly be passed to a supervised learning model, which is what we will tackle in the next chapter.
+
+Import the required package to build a TfidfVectorizer and the default list of English stop words, ENGLISH_STOP_WORDS.
+Build a TfIdf vectorizer from the text column of the tweets dataset, specifying uni- and bi-grams as a choice of n-grams,tokens which include only alphanumeric characters, and the stop words should correspond to the ENGLISH_STOP_WORDS.
+Transform the vectorizer.
+Specify the column names in the DataFrame() function.
+
+#https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
+# Import the required vectorizer package and stop words list
+#from sklearn.feature_extraction.stop_words import ENGLISH_STOP_WORDS
+from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
+
+
+# Define the vectorizer and specify the arguments
+my_pattern = r'\b[^\d\W][^\d\W]+\b'
+vect = TfidfVectorizer(ngram_range=(1, 2), max_features=100, token_pattern=my_pattern, stop_words=ENGLISH_STOP_WORDS).fit(tweets.text)
+
+# Transform the vectorizer
+X_txt = vect.transform(tweets.text)
+
+# Transform to a data frame and specify the column names
+X=pd.DataFrame(X_txt.toarray(), columns=vect.get_feature_names())
+print('Top 5 rows of the DataFrame: ', X.head())
+
+
+<script.py> output:
+    Top 5 rows of the DataFrame:     agent  airline  airport       amp  austin  ...  wait  way  website  work  yes
+    0    0.0      0.0      0.0  0.000000     0.0  ...   0.0  0.0      0.0   0.0  0.0
+    1    0.0      0.0      0.0  0.000000     0.0  ...   0.0  0.0      0.0   0.0  0.0
+    2    0.0      0.0      0.0  0.000000     0.0  ...   0.0  0.0      0.0   0.0  0.0
+    3    0.0      0.0      0.0  0.633849     0.0  ...   0.0  0.0      0.0   0.0  0.0
+    4    0.0      0.0      0.0  0.000000     0.0  ...   0.0  0.0      0.0   0.0  0.0
+    
+    [5 rows x 100 columns]
+
+You now can succesfully apply two different methods to transform a text column of any kind to a numeric form. We need to implement this step in order to apply a supervised machine learning model to a sentiment analysis problem.
+
+
+
+
+
+
+
+
+
+
+
+Tfidf and a BOW on same data
+In this exercise, you will transform the review column of the Amazon product reviews using both a bag-of-words and a tfidf transformation.
+Build both vectorizers, specifying only the maximum number of features to be equal to 100. Create DataFrames after the transformation and print the top 5 rows of each.
+
+Import the BOW and Tfidf vectorizers.
+Build a BOW and a Tfidf vectorizer from the review column and limit the number of created features to 100.
+Transform the vector representations to DataFrames.
+
+
+
+# Import the required packages
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+# Build a BOW and tfidf vectorizers from the review column and with max of 100 features
+vect1 = CountVectorizer(max_features=100).fit(reviews.review)
+vect2 = TfidfVectorizer(max_features=100).fit(reviews.review) 
+
+# Transform the vectorizers
+X1 = vect1.transform(reviews.review)
+X2 = vect2.transform(reviews.review)
+# Create DataFrames from the vectorizers 
+X_df1 = pd.DataFrame(X1.toarray(), columns=vect1.get_feature_names())
+X_df2 = pd.DataFrame(X2.toarray(), columns=vect2.get_feature_names())
+print('Top 5 rows using BOW: \n', X_df1.head())
+print('Top 5 rows using tfidf: \n', X_df2.head())
+
+
+
+<script.py> output:
+    Top 5 rows using BOW: 
+        about  after  all  also  am  ...  with  work  would  you  your
+    0      0      0    1     0   0  ...     1     0      2    0     1
+    1      0      0    0     0   0  ...     0     0      1    1     0
+    2      0      0    3     0   0  ...     0     1      1    2     0
+    3      0      0    0     0   0  ...     0     0      0    0     0
+    4      0      1    0     0   0  ...     0     0      0    3     1
+    
+    [5 rows x 100 columns]
+    Top 5 rows using tfidf: 
+        about     after       all  also   am  ...      with      work     would       you      your
+    0    0.0  0.000000  0.138970   0.0  0.0  ...  0.113371  0.000000  0.306757  0.000000  0.175024
+    1    0.0  0.000000  0.000000   0.0  0.0  ...  0.000000  0.000000  0.139101  0.106279  0.000000
+    2    0.0  0.000000  0.285009   0.0  0.0  ...  0.000000  0.139218  0.104853  0.160223  0.000000
+    3    0.0  0.000000  0.000000   0.0  0.0  ...  0.000000  0.000000  0.000000  0.000000  0.000000
+    4    0.0  0.174214  0.000000   0.0  0.0  ...  0.000000  0.000000  0.000000  0.328184  0.163385
+    
+    [5 rows x 100 columns]
+    
+    
+You can now successfully transform text features into numeric ones using two different approaches. Which approach should you select? That usually depends on the context and on how well they perform when used with a machine learning model.
+
+    
