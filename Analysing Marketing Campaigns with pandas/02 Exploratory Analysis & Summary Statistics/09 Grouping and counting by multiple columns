@@ -1,0 +1,62 @@
+Grouping and counting by multiple columns
+Stakeholders have begun competing to see whose channel had the best retention rate from the campaign. You must first determine how many subscribers came from the campaign and how many of those subscribers have stayed on the service.
+It's important to identify how each marketing channel is performing because this will affect company strategy going forward. If one channel is outperforming others, it might signal the channel merits further investment.
+You will build on what we have learned about .groupby() in previous exercises, this time grouping by multiple columns.
+
+Use .groupby() to calculate subscribers by subscribing_channel and date_subscribed.
+# Count the subs by subscribing channel and day
+retention_total = marketing.groupby(['date_subscribed',
+                                     'subscribing_channel'])['user_id'].nunique()
+
+# Print results
+print(retention_total.head())
+<script.py> output:
+    date_subscribed  subscribing_channel
+    2018-01-01       Email                   1
+                     Facebook                8
+                     House Ads              16
+                     Instagram               8
+                     Push                    3
+    Name: user_id, dtype: int64
+    
+    
+
+
+
+
+
+
+
+
+Use .groupby() to calculate retained subscribers by subscribing_channel and date_subscribed.
+In [1]: marketing.columns.values
+Out[1]: 
+array(['user_id', 'date_served', 'marketing_channel', 'variant',
+       'converted', 'language_displayed', 'language_preferred',
+       'age_group', 'date_subscribed', 'date_canceled',
+       'subscribing_channel', 'is_retained', 'DoW', 'channel_code',
+       'is_correct_lang'], dtype=object)
+       
+       
+# Sum the retained subs by subscribing channel and date subscribed
+retention_subs = marketing[marketing['is_retained'] == True].groupby(['date_subscribed', 'subscribing_channel'])['user_id'].nunique()
+
+
+
+# Print results
+print(retention_subs.head())       
+
+<script.py> output:
+    date_subscribed  subscribing_channel
+    2018-01-01       Email                   1
+                     Facebook                7
+                     House Ads              11
+                     Instagram               6
+                     Push                    3
+    Name: user_id, dtype: int64
+
+
+
+
+You've practiced grouping and counting by multiple columns. Next, you will visualize the retention results.
+
