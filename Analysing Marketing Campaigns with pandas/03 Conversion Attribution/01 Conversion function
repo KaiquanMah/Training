@@ -1,0 +1,70 @@
+Building a conversion function
+You've been doing a lot of repetitive calculations. Anytime you notice repetition in your work, consider automation. The more of the low-variance work you can automate, the more time you will have to explore new and interesting data science topics at work. This will both impress your marketing stakeholders and be more fun!
+Since you know the format of the marketing DataFrame will remain the same over time, you can build a function to enable you to calculate conversion rate across any sub-segment you want on the fly.
+In this exercise, you will build a function that takes a DataFrame and list of column names and outputs the conversion rate across the column(s).
+
+Isolate rows in the user inputted dataframe where users were converted, then group by the list of user inputted column_names and count the number of unique converted users.
+Group the user inputted dataframe by the list of user inputted column_names and calculate the total number of users.
+Fill any missing values in conversion_rate with 0.
+
+def conversion_rate(dataframe, column_names):
+    # Total number of converted users
+    column_conv = dataframe[dataframe['converted'] == True].groupby(column_names)['user_id'].nunique()
+
+    # Total number users
+    column_total = dataframe.groupby(column_names)['user_id'].nunique()  
+    
+    # Conversion rate 
+    conversion_rate = column_conv/column_total
+    
+    # Fill missing values with 0
+    conversion_rate = conversion_rate.fillna(0)
+    return conversion_rate
+
+
+Next you'll test out your conversion rate function.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Test and visualize conversion function
+You've done the hard work of building your conversion rate function—now it's time to test it out! Automating your analyses can be time-consuming up front, but this is where it all pays off.
+In this exercise, you'll see how quickly you can calculate the conversion rate. A task that in previous lessons took multiple steps. By automating the repetitive parts of your work, you'll be able to spend more time doing complex analyses.
+
+Use your conversion_rate() function to calculate the conversion rate in marketing by date_served and age_group and store your results in age_group_conv.
+Unstack age_group_conv at level equal to 1 and wrap that in a call to pd.DataFrame() to create age_group_df.
+Create a line chart to display your results from age_group_df.
+
+# Calculate conversion rate by age_group
+age_group_conv = conversion_rate(marketing, ['date_served', 'age_group'])
+print(age_group_conv)
+
+# Unstack and create a DataFrame
+age_group_df = pd.DataFrame(age_group_conv.unstack(level=1))
+
+# Visualize conversion by age_group
+age_group_df.plot(kind="line")
+plt.title('Conversion rate by age group\n', size = 16)
+plt.ylabel('Conversion rate', size = 14)
+plt.xlabel('Age group', size = 14)
+plt.show()
+
+Calculating conversion rate is much faster when you create your own pre-built function
+
+
+
+
+
+
+
