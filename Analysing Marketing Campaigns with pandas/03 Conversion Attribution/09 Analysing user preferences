@@ -1,0 +1,15 @@
+Analysing user preferences
+To understand the true impact of the bug, it is crucial to determine how many subscribers we would have expected had there been no language error. This is crucial to understanding the scale of the problem and how important it is to prevent this kind of error in the future.
+In this step, you will create a new DataFrame that you can perform calculations on to determine the expected number of subscribers. This DataFrame will include how many users prefer each language by day. Once you have the DataFrame, you can begin calculating how many subscribers you would have expected to have had the language bug not occurred.
+
+Group house_ads by date_served and language_preferred.
+Use a dictionary within a call to .agg() to calculate the number of unique users and sums the number of converted users.
+Unstack converted at level = 1
+
+# Group house_ads by date and language
+converted = house_ads.groupby(['date_served', 'language_preferred'])\
+                        .agg({'user_id':'nunique',
+                              'converted':'sum'})
+
+# Unstack converted
+converted_df = pd.DataFrame(converted.unstack(level=1))
