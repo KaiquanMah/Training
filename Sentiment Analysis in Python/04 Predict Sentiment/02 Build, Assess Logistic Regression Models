@@ -1,0 +1,135 @@
+Build and assess a model: movies reviews
+In this problem, you will build a logistic regression model using the movies dataset. The score is stored in the label column and is 1 when the review is positive, and 0 when negative. The text review has been transformed, using BOW, to numeric columns.
+You have already built a classifier but evaluated it using the same data employed in the training step. Make sure you now assess the model using an unseen test dataset. How does the performance of the model change when evaluated on the test set?
+
+Import the function required for a train/test split.
+Perform the train/test split, specifying that 20% of the data should be used as a test set.
+Train a logistic regression model.
+Print out the accuracy of the model on the training and on the testing data.
+
+# Import the required packages
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+# Define the vector of labels and matrix of features
+y = movies.label
+X = movies.drop('label', axis=1)
+
+# Perform the train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Build a logistic regression model and print out the accuracy
+log_reg = LogisticRegression().fit(X_train, y_train)
+print('Accuracy on train set: ', log_reg.score(X_train, y_train))
+print('Accuracy on test set: ', log_reg.score(X_test, y_test))
+
+<script.py> output:
+    Accuracy on train set:  0.7861666666666667
+    Accuracy on test set:  0.7521652231845436
+
+Did you notice how the logistic regression's accuracy decreases when we evaluate it on the test set instead of on the training set? It's normal to observe a small drop but if the decrease is large, this could be a signal that your model will not generalize well and will do poorly when evaluating new movie reviews.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Performance metrics of Twitter data
+You will train a logistic regression model that predicts the sentiment of tweets and evaluate its performance on the test set using different metrics.
+A matrix X has been created for you. It contains features created with a BOW on the text column.
+The labels are stored in a vector called y. Vector y is 0 for negative tweets, 1 for neutral, and 2 for positive ones.
+Note that although we have 3 classes, it is still a classification problem. The accuracy still measures the proportion of correctly predicted instances. The confusion matrix will now be of size 3x3, each row will give the number of predicted cases for classes 2, 1, and 0, and each column - the true number of cases in class 2, 1, and 0.
+All required packages have been imported for you.
+
+Perform the train/test split, and stratify by y.
+Train a a logistic regression classifier.
+Predict the performance on the test set.
+Print the accuracy and confusion matrix obtained on the test set.
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=123, stratify=y)
+
+# Train a logistic regression
+log_reg = LogisticRegression().fit(X_train, y_train)
+
+# Make predictions on the test set
+y_predicted = log_reg.predict(X_test)
+
+# Print the performance metrics
+print('Accuracy score test set: ', accuracy_score(y_test, y_predicted))
+print('Confusion matrix test set: \n', confusion_matrix(y_test, y_predicted)/len(y_test))
+
+<script.py> output:
+    Accuracy score test set:  0.8213879408418657
+    Confusion matrix test set: 
+     [[0.56427759 0.05802048 0.01023891]
+     [0.02161547 0.15699659 0.02957907]
+     [0.00796359 0.05119454 0.10011377]]
+
+Although the sentiment category here has 3 classes instead of 2, the way we trained and evaluated the model is the same as with 2 classes. The accuracy on the test data was good and the confusion matrix can also show us which category we are bad at predicting.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Build and assess a model: product reviews data
+In this exercise, you will build a logistic regression using the reviews dataset, containing customers' reviews of Amazon products. The array y contains the sentiment : 1 if positive and 0 otherwise. The array X contains all numeric features created using a BOW approach. Feel free to explore them in the IPython Shell.
+Your task is to build a logistic regression model and calculate the accuracy and confusion matrix using the test data set.
+The logistic regression and train/test splitting functions have been imported for you.
+
+Import the accuracy score and confusion matrix functions.
+Split the data into training and testing, using 30% of it as a test set and set the random seed to 42.
+Train a logistic regression model.
+Print out the accuracy score and confusion matrix using the test data.
+
+# Import the accuracy and confusion matrix
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+# Split the data into training and testing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Build a logistic regression
+log_reg = LogisticRegression().fit(X_train, y_train)
+
+# Predict the labels 
+y_predict = log_reg.predict(X_test)
+
+# Print the performance metrics
+print('Accuracy score of test data: ', accuracy_score(y_test, y_predict))
+print('Confusion matrix of test data: \n', confusion_matrix(y_test, y_predict)/len(y_test))
+
+<script.py> output:
+    Accuracy score of test data:  0.7853333333333333
+    Confusion matrix of test data: 
+     [[0.39333333 0.11266667]
+     [0.102      0.392     ]]
+
+You have successfully built another logistic regression model and evaluated its performance on the test set. Is there any way we can improve the performance of the model? We will discuss that in our next video!
+
+
