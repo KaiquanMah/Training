@@ -1,0 +1,66 @@
+Assessing bug impact
+It's time to calculate how many subscribers were lost due to mistakenly serving users English rather than their preferred language. Once the team has an estimate of the impact of this error, they can determine whether it's worth putting additional checks in place to avoid this in the future—you might be thinking, of course, it's worth it to try to prevent errors! In a way, you're right, but every choice a company makes requires work and funding. The more information your team has, the better they will be able to evaluate this trade-off.
+The DataFrame converted has already been loaded for you. It contains expected subscribers columns for Spanish, Arabic and German language speakers named expected_spanish_conv, expected_arabic_conv and expected_german_conv respectively.
+
+Create the converted DataFrame by using .loc to select only rows where the date is between '2018-01-11' and '2018-01-31'.
+Sum the expected subscribers columns for each language in converted and store the results in expected_subs.
+Sum the actual subscribers for each language in converted and store the results in actual_subs.
+Subtract actual_subs from expected_subs to determine how many subscribers were lost due to the bug.
+
+
+In [6]: converted.columns.values
+Out[6]: 
+array([('user_id', 'Arabic'), ('user_id', 'English'),
+       ('user_id', 'German'), ('user_id', 'Spanish'),
+       ('converted', 'Arabic'), ('converted', 'English'),
+       ('converted', 'German'), ('converted', 'Spanish'),
+       ('english_conv_rate', ''), ('expected_spanish_rate', ''),
+       ('expected_arabic_rate', ''), ('expected_german_rate', ''),
+       ('expected_spanish_conv', ''), ('expected_arabic_conv', ''),
+       ('expected_german_conv', '')], dtype=object)
+       
+
+In [4]: converted
+Out[4]: 
+                   user_id                        converted  ... expected_arabic_rate expected_german_rate expected_spanish_conv expected_arabic_conv expected_german_conv
+language_preferred  Arabic English German Spanish    Arabic  ...                                                                                                          
+date_served                                                  ...                                                                                                          
+2018-01-11             7.0   133.0    2.0    13.0       0.0  ...            30.274648            26.910798              1.311901             2.119225             0.538216
+2018-01-12             3.0   129.0    4.0    11.0       0.0  ...            15.137324            13.455399              0.555035             0.454120             0.538216
+2018-01-13             6.0   121.0    5.0    16.0       0.0  ...            25.228873            22.425665              1.345540             1.513732             1.121283
+...
+
+
+
+
+
+
+# Use .loc to slice only the relevant dates
+converted = converted.loc['2018-01-11':'2018-01-31']
+
+
+# Sum expected subscribers for each language
+expected_subs = converted.expected_spanish_conv.sum() + converted.expected_arabic_conv.sum() + converted.expected_german_conv.sum()
+
+# Calculate how many subscribers we actually got
+actual_subs = converted.converted.Spanish.sum() + converted.converted.Arabic.sum() + converted.converted.German.sum()
+
+# Subtract how many subscribers we got despite the bug
+lost_subs = expected_subs-actual_subs
+
+print(lost_subs)
+<script.py> output:
+    32.14414319248826
+
+32 subscribers may not seem like many, but for a small company this can be vitally important, especially when expanding to new markets.
+
+
+
+
+
+In [14]: expected_subs
+Out[14]: 58.14414319248826
+
+In [15]: actual_subs
+Out[15]: 26.0
+
