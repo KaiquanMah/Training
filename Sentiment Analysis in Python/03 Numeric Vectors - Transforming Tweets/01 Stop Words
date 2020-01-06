@@ -1,0 +1,144 @@
+Word cloud of tweets
+Your task in this exercise is to plot a word cloud using a sample of Twitter data, expressing customers' sentiments about airlines. A string text_tweet has been created for you and it contains the messages of a 1000 customers shared on Twitter.
+In the first step, your are asked to build the word cloud without removing the stop words, and in the second step to build the same cloud after you have removed the stop words.
+Feel free to familiarize yourself with the text_tweet list.
+
+Import the word cloud function and package.
+Create and generate the word cloud, using the text_tweet vector.
+# Import the word cloud function 
+from wordcloud import WordCloud 
+
+# Create and generate a word cloud image
+my_cloud = WordCloud(background_color='white').generate(text_tweet)
+
+# Display the generated wordcloud image
+plt.imshow(my_cloud, interpolation='bilinear') 
+plt.axis("off")
+
+# Don't forget to show the final image
+plt.show()
+
+
+
+
+
+
+Define the default list of stop words and update it.
+Specify the stop words argument in the WordCloud function.
+# Import the word cloud function and stop words list
+from wordcloud import WordCloud, STOPWORDS 
+
+# Define and update the list of stopwords
+my_stop_words = STOPWORDS.update(['airline', 'airplane'])
+
+# Create and generate a word cloud image
+my_cloud = WordCloud(stopwords=my_stop_words).generate(text_tweet)
+
+# Display the generated wordcloud image
+plt.imshow(my_cloud, interpolation='bilinear') 
+plt.axis("off")
+# Don't forget to show the final image
+plt.show()
+
+Do you notice any changes in the first word cloud where you did not remove the stop words and the second one, where you removed them? If the change is not so obvious, perhaps the list of stop words needs to be enriched further.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Airline sentiment with stop words
+You are given a dataset, called tweets, which contains customers' reviews and sentiments about airlines. It consists of two columns: airline_sentiment and text where the sentiment can be positive, negative or neutral, and the text is the text of the tweet.
+In this exercise, you will create a BOW representation but will account for the stop words. Remember that stop words are not informative and you might want to remove them. That will result in a smaller vocabulary and eventually, fewer features. Keep in mind that we can enrich a default list of stop words with ones that are specific to our context.
+
+Import the default list of English stop words.
+Update the default list of stop words with the given list ['airline', 'airlines', '@'] to create my_stop_words.
+Specify the stop words argument in the vectorizer.
+
+# Import the stop words
+from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
+
+# Define the stop words
+my_stop_words = ENGLISH_STOP_WORDS.union(['airline', 'airlines', '@'])
+
+# Build and fit the vectorizer
+vect = CountVectorizer(stop_words=my_stop_words)
+vect.fit(tweets.text)
+
+# Create the bow representation
+X_review = vect.transform(tweets.text)
+# Create the data frame
+X_df = pd.DataFrame(X_review.toarray(), columns=vect.get_feature_names())
+print(X_df.head())
+
+<script.py> output:
+       00  000  000114  000419  0011  ...  zero  zfqmpgxvs6  zone  zsuztnaijq  zv2pt6trk9
+    0   0    0       0       0     0  ...     0           0     0           0           0
+    1   0    0       0       0     0  ...     0           0     0           0           0
+    2   0    0       0       0     0  ...     0           0     0           0           0
+    3   0    0       0       0     0  ...     0           0     0           0           0
+    4   0    0       0       0     0  ...     0           0     0           0           0
+    
+    [5 rows x 2867 columns]
+
+Did you notice that in this case the created features contain digits and other characters? Social media data can in general be quite messy and in a later video we will learn how to remove all digits and other characters and retain only more meaningful features.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Multiple text columns
+In this exercise, you will continue working with the airline Twitter data. A data set tweets has been imported for you.
+In some situations, you might have more than one text column in a dataset and you might want to create a numeric representation for each of the text columns. Here, besides the text column, which contains the body of the tweet, there is a second text column, called negativereason. It contains the reason the customer left a negative review.
+Your task is to build BOW representations for both columns and specify the required stop words.
+
+Import the vectorizer package and the default list of English stop words.
+Update the default list of English stop words and create the my_stop_words set.
+Specify the stop words argument in the first vectorizer to the updated set, and in the second vectorizer - the default set of English stop words.
+
+# Import the vectorizer and default English stop words list
+from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
+
+# Define the stop words
+my_stop_words = ENGLISH_STOP_WORDS.union(['airline', 'airlines', '@', 'am', 'pm'])
+ 
+# Build and fit the vectorizers
+vect1 = CountVectorizer(stop_words=my_stop_words)
+vect2 = CountVectorizer(stop_words=ENGLISH_STOP_WORDS) 
+vect1.fit(tweets.text)
+vect2.fit(tweets.negative_reason)
+
+# Print the last 15 features from the first, and all from second vectorizer
+print(vect1.get_feature_names()[-15:])
+print(vect2.get_feature_names())
+
+
+
+<script.py> output:
+    ['yesterday', 'yo', 'york', 'youcouldntmakethis', 'yr', 'ywg', 'yxe', 'yyj', 'yyz', 'zambia', 'zcbjyo6lsn', 'zcc82u', 'zero', 'zfqmpgxvs6', 'zone']
+    ['attendant', 'bad', 'booking', 'cancelled', 'complaints', 'customer', 'damaged', 'flight', 'issue', 'late', 'longlines', 'lost', 'luggage', 'problems', 'service', 'tell']
+    
+    
+We can have multiple text columns in a single dataset. In that case, we can transform each of them to numeric features separately, using different arguments in the CountVectorizer() function.
+
