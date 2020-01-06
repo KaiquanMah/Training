@@ -1,0 +1,66 @@
+Which statement about BOW is true?
+You were introduced to a bag-of-words(BOW) and some of its characteristics in the video. Which of the following statements about BOW is true?
+
+Bag-of-words preserves the word order and grammar rules.
+Bag-of-words describes the order and frequency of words or tokens within a corpus of documents.
+Bag-of-words can only be applied to a large document, not to shorter documents or single sentences.
+
+#yes Bag-of-words is a simple but effective method to build a vocabulary of all the words occurring in a document.
+That's correct! You'll next see how to apply this idea to sentiment analysis further.
+
+
+
+Your first BOW
+A bag-of-words is an approach to transform text to numeric form.
+In this exercise, you will apply a BOW to the annak list before moving on to a larger dataset in the next exercise.
+Your task will be to work with this list and apply a BOW using the CountVectorizer(). This transformation is your first step in being able to understand the sentiment of a text. Pay attention to words which might carry a strong sentiment.
+Remember that the output of a CountVectorizer() is a sparse matrix, which stores only entries which are non-zero. To look at the actual content of this matrix, we convert it to a dense array using the .toarray() method.
+Note that in this case you don't need to specify the max_features argument because the text is short.
+
+Import the count vectorizer function from sklearn.feature_extraction.text.
+Build and fit the vectorizer on the small dataset.
+Create the BOW representation with name anna_bow by calling the transform() method.
+Print the BOW result as a dense array.
+
+# Import the required function
+from sklearn.feature_extraction.text import CountVectorizer
+
+annak = ['Happy families are all alike;', 'every unhappy family is unhappy in its own way']
+
+# Build the vectorizer and fit it
+anna_vect = CountVectorizer()
+anna_vect.fit(annak)
+
+In [3]: anna_vect.fit(annak)
+Out[3]: 
+CountVectorizer(analyzer='word', binary=False, decode_error='strict',
+        dtype=<class 'numpy.int64'>, encoding='utf-8', input='content',
+        lowercase=True, max_df=1.0, max_features=None, min_df=1,
+        ngram_range=(1, 1), preprocessor=None, stop_words=None,
+        strip_accents=None, token_pattern='(?u)\\b\\w\\w+\\b',
+        tokenizer=None, vocabulary=None)
+        
+        
+
+# Create the bow representation
+anna_bow = anna_vect.transform(annak)
+In [2]: anna_bow
+Out[2]: 
+<2x13 sparse matrix of type '<class 'numpy.int64'>'
+	with 13 stored elements in Compressed Sparse Row format>
+
+
+
+
+# Print the bag-of-words result 
+print(anna_bow.toarray())
+
+<script.py> output:
+    [[1 1 1 0 1 0 1 0 0 0 0 0 0]
+     [0 0 0 1 0 1 0 1 1 1 1 2 1]]
+
+You have transformed the first sentence of Anna Karenina to an array counting the frequencies of each word. However, the output is not very readable, is it? We are still missing the names of the features. And does the approach change when we apply it to a larger dataset? We explore these problems in the next exercise.
+
+
+
+
