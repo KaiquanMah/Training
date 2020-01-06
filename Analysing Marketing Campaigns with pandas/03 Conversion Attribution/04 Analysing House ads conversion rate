@@ -1,0 +1,27 @@
+Analysing House ads conversion rate
+Now that you have confirmed that house ads conversion has been down since January 11, you will try to identify potential causes for the decrease.
+As a data scientist supporting a marketing team, you will run into fluctuating metrics all the time. It's vital to identify if the fluctuations are due to expected shifts in user behavior (i.e., differences across the day of the week) versus a larger problem in technical implementation or marketing strategy.
+In this exercise, we will begin by checking whether users are more likely to convert on weekends compared with weekdays and determine if that could be the cause for the changing house ads conversion rate.
+
+Add a day of week column to the marketing DataFrame using dt.dayofweek based on the 'date_served' column.
+Use conversion_rate to calculate conversion by the day of week and marketing channel and store the results in DoW_conversion.
+Create a line plot of the results, set the y-axis to begin at 0 and display the plot.
+
+# Add day of week column to marketing
+marketing['DoW_served'] = marketing['date_served'].dt.dayofweek
+
+# Calculate conversion rate by day of week
+DoW_conversion = conversion_rate(marketing, ['DoW_served', 'marketing_channel'])
+
+
+# Unstack channels
+DoW_df = pd.DataFrame(DoW_conversion.unstack(level=1))
+
+# Plot conversion rate by day of week
+DoW_df.plot(kind="line")
+plt.title('Conversion rate by day of week\n')
+plt.ylim(0)
+plt.show()
+
+As you can see, email is particularly high and may be reflective of a tracking error, but house ads appear stable across the week with a slight peak on Tuesday. You will investigate further
+
