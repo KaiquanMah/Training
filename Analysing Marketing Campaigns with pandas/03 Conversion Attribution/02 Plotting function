@@ -1,0 +1,61 @@
+Plotting function
+Now that you've looked at conversion rate by age, you want to see if that trend has changed over time. Marketing has been changing their strategy and wants to make sure that their new method isn't alienating age groups that are less comfortable with their product. However, to do so, you need to create a plotting function to make it easier to visualize your results.
+In this exercise, you will build a function to plot the results of your conversion rate function.
+
+Create a for loop for each column in the dataframe.
+Plot a line chart of the column by the DataFrame's index.
+Show the plot.
+
+def plotting_conv(dataframe):
+    for column in dataframe:
+        # Plot column by dataframe's index
+        plt.plot(dataframe.index, dataframe[column], kind='line')
+        plt.title('Daily ' + str(column) + ' conversion rate\n', 
+                  size = 16)
+        plt.ylabel('Conversion rate', size = 14)
+        plt.xlabel('Date', size = 14)
+        # Show plot
+        plt.show()  
+        plt.clf()
+
+Now, you can quickly generate plots for sub-segments of the dataset.
+
+
+
+
+
+
+
+
+
+Putting it all together
+Your marketing stakeholders have requested a report of the daily conversion rate for each age group, and they need it as soon as possible. They want you to refresh this report on a monthly cadence. This is a perfect opportunity to utilize your functions. Not only will the functions help you get this report out promptly today, but it will also help each month when it's time for a refresh of the data.
+Remember, conversion_rate() takes a DataFrame and a list of columns to calculate the conversion rate.
+
+Using your conversion_rate() function, create a new DataFrame called age_group_conv which contains conversion rate by date_served and age_group from the marketing DataFrame.
+Unstack age_group_conv to create a DataFrame with each age group as a column. This step has already been done for you.
+Use your plotting_conv() function to plot the conversion rates for each age group.
+
+# Calculate conversion rate by date served and age group
+age_group_conv = conversion_rate(marketing, ['date_served', 'age_group'])
+
+# Unstack age_group_conv and create a DataFrame
+age_group_df = pd.DataFrame(age_group_conv.unstack(level=1))
+
+In [4]: age_group_df
+Out[4]: 
+age_group    0-18 years  19-24 years  24-30 years  30-36 years  36-45 years  45-55 years  55+ years
+date_served                                                                                        
+2018-01-01     0.155172     0.196721     0.105263     0.040816     0.042553     0.022222   0.086957
+2018-01-02     0.180328     0.164384     0.114754     0.040000     0.043478     0.043478   0.024390
+2018-01-03     0.102041     0.208955     0.150943     0.042553     0.060000     0.047619   0.043478
+...
+2018-01-30     0.104167     0.061224     0.088889     0.052632     0.048780     0.024390   0.081081
+2018-01-31     0.102041     0.105263     0.057692     0.000000     0.035088     0.023256   0.026316
+
+
+# Plot the results
+plotting_conv(age_group_df)
+
+Creating functions can be difficult, but all this work will help you avoid tedious work down the line and allow you to focus on more advanced subjects.
+
