@@ -1,0 +1,56 @@
+Calibration curves
+You now know that the gradient boosted tree clf_gbt has the best overall performance. You need to check the calibration of the two models to see how stable the default prediction performance is across probabilities. You can use a chart of each model's calibration to check this by calling the calibration_curve() function.
+Calibration curves can require many lines of code in python, so you will go through each step slowly to add the different components.
+The two sets of predictions clf_logistic_preds and clf_gbt_preds have already been loaded into the workspace. Also, the output from calibration_curve() for each model has been loaded as: frac_of_pos_lr, mean_pred_val_lr, frac_of_pos_gbt, and mean_pred_val_gbt.
+
+Create a calibration curve plot() by starting with the perfect calibration guideline and label it 'Perfectly calibrated'. Then add the labels for the y-axis and x-axis in order.
+# Create the calibration curve plot with the guideline
+plt.plot([0, 1], [0, 1], 'k:', label='Perfectly calibrated')    
+plt.xlabel('Fraction of positives')
+plt.ylabel('Average Predicted Probability')
+plt.legend()
+plt.title('Calibration Curve')
+plt.show()
+
+
+
+
+
+
+
+Add a plot of the mean predicted values on the x-axis and fraction of positives on the y-axis for the logistic regression model to the plot of the guideline. Label this 'Logistic Regression'.
+# Add the calibration curve for the logistic regression to the plot
+plt.plot([0, 1], [0, 1], 'k:', label='Perfectly calibrated')
+plt.plot(mean_pred_val_lr, frac_of_pos_lr,
+         's-', label='%s' % 'Logistic Regression')
+plt.ylabel('Fraction of positives')
+plt.xlabel('Average Predicted Probability')
+plt.legend()
+plt.title('Calibration Curve')
+plt.show()
+
+
+
+
+
+
+
+
+
+
+Finally, add a plot of the mean predicted values on the x-axis and fraction of positives on the y-axis for the gradient boosted tree to the plot. Label this 'Gradient Boosted tree'.
+# Add the calibration curve for the gradient boosted tree
+plt.plot([0, 1], [0, 1], 'k:', label='Perfectly calibrated')
+
+plt.plot(mean_pred_val_lr, frac_of_pos_lr,
+         's-', label='%s' % 'Logistic Regression')
+plt.plot(mean_pred_val_gbt, frac_of_pos_gbt,
+         's-', label='%s' % 'Gradient Boosted tree')
+plt.ylabel('Fraction of positives')
+plt.xlabel('Average Predicted Probability')
+plt.legend()
+plt.title('Calibration Curve')
+plt.show()
+
+Expand the plot window and take a good look at this. Notice that for the logistic regression, the calibration for probabilities starts off great but then gets more erratic as it the average probability approaches 0.4. Something similar happens to the gradient boosted tree around 0.5, but the model eventually stabilizes. We will be focusing on only the gbt model from now on.
+
