@@ -1,0 +1,55 @@
+Total expected loss
+It's time to estimate the total expected loss given all your decisions. The data frame test_pred_df has the probability of default for each loan and that loan's value. Use these two values to calculate the expected loss for each loan. Then, you can sum those values and get the total expected loss.
+For this exercise, you will assume that the exposure is the full value of the loan, and the loss given default is 100%. This means that a default on each the loan is a loss of the entire amount.
+The data frame test_pred_df has been loaded into the workspace.
+
+Total expected loss = sum over all observations(PD x LGD x EAD)
+
+
+
+
+Print the top five rows of test_pred_df.
+Create a new column expected_loss for each loan by using the formula above.
+Calculate the total expected loss of the entire portfolio, rounded to two decimal places, and store it as tot_exp_loss.
+Print the total expected loss.
+
+In [1]: test_pred_df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 11784 entries, 0 to 11783
+Data columns (total 4 columns):
+true_loan_status      11784 non-null int64
+prob_default          11784 non-null float64
+loan_amnt             11784 non-null int64
+loss_given_default    11784 non-null float64
+dtypes: float64(2), int64(2)
+memory usage: 368.3 KB
+
+
+# Print the first five rows of the data frame
+print(test_pred_df.head())
+<script.py> output:
+       true_loan_status  prob_default  loan_amnt  loss_given_default
+    0                 1      0.982387      15000                 1.0
+    1                 1      0.975163      11200                 1.0
+    2                 0      0.003474      15000                 1.0
+    3                 0      0.005457      10800                 1.0
+    4                 1      0.119876       3000                 1.0
+
+
+
+
+# Calculate the bank's expected loss and assign it to a new column
+test_pred_df['expected_loss'] = test_pred_df['prob_default'] * test_pred_df['loss_given_default'] * test_pred_df['loan_amnt']
+
+# Calculate the total expected loss to two decimal places
+tot_exp_loss = round(np.sum(test_pred_df['expected_loss']),2)
+
+# Print the total expected loss
+print('Total expected loss: ', '${:,.2f}'.format(tot_exp_loss))
+<script.py> output:
+    Total expected loss:  $27,084,153.38
+
+
+This is the total expected loss for the entire portfolio using the gradient boosted tree. $27 million may seem like a lot, but the total expected loss would have been over $28 million with the logistic regression. Some losses are unavoidable, but your work here might have saved the company a million dollars!
+
+
