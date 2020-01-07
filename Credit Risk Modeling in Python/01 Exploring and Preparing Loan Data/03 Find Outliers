@@ -1,0 +1,168 @@
+Finding outliers with cross tables
+Now you need to find and remove outliers you suspect might be in the data. For this exercise, you can use cross tables and aggregate functions.
+Have a look at the person_emp_length column. You've used the aggfunc = 'mean' argument to see the average of a numeric column before, but to detect outliers you can use other functions like min and max.
+It may not be possible for a person to have an employment length of less than 0 or greater than 60. You can use cross tables to check the data and see if there are any instances of this!
+The data set cr_loan has been loaded in the workspace.
+
+Print the cross table of loan_status and person_home_ownership with the max person_emp_length.
+# Create the cross table for loan status, home ownership, and the max employment length
+print(pd.crosstab(cr_loan['loan_status'],
+                  cr_loan['person_home_ownership'],
+                  values=cr_loan['person_emp_length'], 
+                  aggfunc='max'))
+
+
+<script.py> output:
+    person_home_ownership  MORTGAGE  OTHER   OWN   RENT
+    loan_status                                        
+    0                         123.0   24.0  31.0   41.0
+    1                          34.0   11.0  17.0  123.0
+
+
+
+
+
+
+
+
+
+
+
+Create and array of indices for records with an employment length greater than 60. Store it as indices.
+# Create an array of indices where employment length is greater than 60
+indices = cr_loan[cr_loan['person_emp_length'] > 60].index
+
+In [3]: indices
+Out[3]: Int64Index([0, 210], dtype='int64')
+
+
+
+
+Drop the records from the data using the array indices and create a new dataframe called cr_loan_new.
+# Drop the records from the data based on the indices and create a new dataframe
+cr_loan_new = cr_loan.drop(indices)
+
+       cb_person_cred_hist_length  
+1                               2  
+2                               3  
+3                               2  
+...
+32578                          28  
+32579                          26  
+32580                          30  
+
+[32579 rows x 12 columns]
+
+
+
+
+
+
+Print the cross table from earlier, but instead use both min and max
+# Create the cross table from earlier and include minimum employment length
+print(pd.crosstab(cr_loan_new['loan_status'],
+                  cr_loan_new['person_home_ownership'],
+                  values=cr_loan_new['person_emp_length'], 
+                  aggfunc=['min','max']))
+
+                               min                      max                  
+    person_home_ownership MORTGAGE OTHER  OWN RENT MORTGAGE OTHER   OWN  RENT
+    loan_status                                                              
+    0                          0.0   0.0  0.0  0.0     38.0  24.0  31.0  41.0
+    1                          0.0   0.0  0.0  0.0     34.0  11.0  17.0  27.0
+
+
+Off to a great start! Generally with credit data, key columns like person_emp_length are of high quality, but there is always room for error. With this in mind, we build our intuition for detecting outliers!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Visualizing credit outliers
+You discovered outliers in person_emp_length where values greater than 60 were far above the norm. person_age is another column in which a person can use a common sense approach to say it is very unlikely that a person applying for a loan will be over 100 years old.
+Visualizing the data here can be another easy way to detect outliers. You can use other numeric columns like loan_amnt and loan_int_rate to create plots with person_age to search for outliers.
+The data set cr_loan has been loaded in the workspace.
+
+Create a scatter plot of person age on the x-axis and loan_amnt on the y-axis.
+# Create the scatter plot for age and amount
+plt.scatter(cr_loan['person_age'], cr_loan['loan_amnt'], c='blue', alpha=0.5)
+plt.xlabel("Person Age")
+plt.ylabel("Loan Amount")
+plt.show()
+
+
+
+
+Use the .drop() method from Pandas to remove the outliers and create cr_loan_new.
+Create a scatter plot of age on the x-axis and loan interest rate on the y-axis with a label for loan_status.
+#https://stackoverflow.com/questions/22591174/pandas-multiple-conditions-while-indexing-data-frame-unexpected-behavior
+#https://www.w3schools.com/python/python_conditions.asp
+# Use Pandas to drop the record from the data frame and create a new one
+# evaluate the conditions/expressions to give me a vector of T/F values
+#(cr_loan['person_emp_length'] > 60) | (cr_loan['person_age'] > 100)
+
+# then add in the original df which keeps only the observations/rows with the T value
+#cr_loan[(cr_loan['person_emp_length'] > 60) | (cr_loan['person_age'] > 100)]
+
+# then give me the index of these T observations
+cr_loan[(cr_loan['person_emp_length'] > 60) | (cr_loan['person_age'] > 100)].index
+
+# then drop only these T observations from the original df
+cr_loan_new = cr_loan.drop(cr_loan[(cr_loan['person_emp_length'] > 60) | (cr_loan['person_age'] > 100)].index)
+
+#commenting out the 'cr_loan_new' code above still resulted in a 'Did you correctly idenfity the outliers?' message
+#maybe there could be additional rules which were not explicitly stated in the 'instructions' section
+#indices = cr_loan[(cr_loan['person_emp_length'] > 60) | (cr_loan['person_age'] > 100)].index
+#cr_loan_new = cr_loan.drop(indices)
+
+
+# Create a scatter plot of age and interest rate
+colors = ["blue","red"]
+plt.scatter(cr_loan_new['person_age'], cr_loan_new['loan_int_rate'],
+            c = cr_loan_new['loan_status'],
+            cmap = matplotlib.colors.ListedColormap(colors),
+            alpha=0.5)
+plt.xlabel("Person Age")
+plt.ylabel("Loan Interest Rate")
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+#model ans
+#was evaluating only for age (below) instead of employment length + age (which I coded above based on the exercise narrative)
+# Use Pandas to drop the record from the data frame and create a new one
+cr_loan_new = cr_loan.drop(cr_loan[cr_loan['person_age'] > 100].index)
+
+# Create a scatter plot of age and interest rate
+colors = ["blue","red"]
+plt.scatter(cr_loan_new['person_age'], cr_loan_new['loan_int_rate'],
+            c = cr_loan_new['loan_status'],
+            cmap = matplotlib.colors.ListedColormap(colors),
+            alpha=0.5)
+plt.xlabel("Person Age")
+plt.ylabel("Loan Interest Rate")
+plt.show()
+
+
+Notice that in the last plot we have loan_status as a label for colors. This shows a different color depending on the class. In this case, it's loan default and non-default, and it looks like there are more defaults with high interest rates.
+
