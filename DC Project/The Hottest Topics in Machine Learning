@@ -11,3 +11,218 @@ To complete this Project you need to know some Python, pandas, and Natural Langu
 For this exercise in particular, you can find more information about loading a CSV file with the pandas library here. You can also look at a similar exercise here on loading CSV files. If you print the first few rows of data, you should see a table with 7 columns.
 
 
+
+1. Loading the NIPS papers
+The NIPS conference (Neural Information Processing Systems) is one of the most prestigious yearly events in the machine learning community. At each NIPS conference, a large number of research papers are published. Over 50,000 PDF files were automatically downloaded and processed to obtain a dataset on various machine learning techniques. These NIPS papers are stored in datasets/papers.csv. The CSV file contains information on the different NIPS papers that were published from 1987 until 2017 (30 years!). These papers discuss a wide variety of topics in machine learning, from neural networks to optimization methods and many more. The logo of NIPS (Neural Information Processing Systems)
+First, we will explore the CSV file to determine what type of data we can use for the analysis and how it is structured. A research paper typically consists of a title, an abstract and the main text. Other data such as figures and tables were not extracted from the PDF files. Each paper discusses a novel technique or improvement. In this analysis, we will focus on analyzing these papers with natural language processing methods.
+# Importing modules
+# -- YOUR CODE HERE --
+import pandas as pd
+
+# Read datasets/papers.csv into papers
+papers = pd.read_csv('datasets/papers.csv')
+
+# Print out the first rows of papers
+# -- YOUR CODE HERE --
+print(papers.head())
+
+
+     id  year                                              title event_type  \
+0     1  1987  Self-Organization of Associative Database and ...        NaN   
+1    10  1987  A Mean Field Theory of Layer IV of Visual Cort...        NaN   
+2   100  1988  Storing Covariance by the Associative Long-Ter...        NaN   
+3  1000  1994  Bayesian Query Construction for Neural Network...        NaN   
+4  1001  1994  Neural Network Ensembles, Cross Validation, an...        NaN   
+
+                                            pdf_name          abstract  \
+0  1-self-organization-of-associative-database-an...  Abstract Missing   
+1  10-a-mean-field-theory-of-layer-iv-of-visual-c...  Abstract Missing   
+2  100-storing-covariance-by-the-associative-long...  Abstract Missing   
+3  1000-bayesian-query-construction-for-neural-ne...  Abstract Missing   
+4  1001-neural-network-ensembles-cross-validation...  Abstract Missing   
+
+                                          paper_text  
+0  767\n\nSELF-ORGANIZATION OF ASSOCIATIVE DATABA...  
+1  683\n\nA MEAN FIELD THEORY OF LAYER IV OF VISU...  
+2  394\n\nSTORING COVARIANCE BY THE ASSOCIATIVE\n...  
+3  Bayesian Query Construction for Neural\nNetwor...  
+4  Neural Network Ensembles, Cross\nValidation, a...  
+
+
+
+
+
+
+
+
+
+
+
+Task 2: Instructions
+Clean the data for further analysis.
+•Remove the id, event_type and pdf_name columns.
+•Print the first rows of the DataFrame with the head method.
+
+If you print the first few rows of data, you should see a table with only 4 columns.
+Note that if you remove the required columns on the papers variable in-place, running the same code twice will result in an error! Click "Restart & Clear Output" in this Jupyter Notebook's "Kernel" dropdown menu if you run into this issue. Note that removing columns in-place does have the advantage that you don't create the same variable multiple times, which can have an impact on the available memory.
+
+
+
+2. Preparing the data for analysis
+For the analysis of the papers, we are only interested in the text data associated with the paper as well as the year the paper was published in.
+We will analyze this text data using natural language processing. Since the file contains some metadata such as id's and filenames, it is necessary to remove all the columns that do not contain useful text information.
+# Remove the columns
+# -- YOUR CODE HERE --
+print(papers.columns)
+papers=papers.drop(['id','event_type','pdf_name'], axis=1)
+print(papers.columns)
+
+# Print out the first rows of papers
+# -- YOUR CODE HERE --
+print(papers.head())
+
+
+
+Index(['id', 'year', 'title', 'event_type', 'pdf_name', 'abstract',
+       'paper_text'],
+      dtype='object')
+Index(['year', 'title', 'abstract', 'paper_text'], dtype='object')
+   year                                              title          abstract  \
+0  1987  Self-Organization of Associative Database and ...  Abstract Missing   
+1  1987  A Mean Field Theory of Layer IV of Visual Cort...  Abstract Missing   
+2  1988  Storing Covariance by the Associative Long-Ter...  Abstract Missing   
+3  1994  Bayesian Query Construction for Neural Network...  Abstract Missing   
+4  1994  Neural Network Ensembles, Cross Validation, an...  Abstract Missing   
+
+                                          paper_text  
+0  767\n\nSELF-ORGANIZATION OF ASSOCIATIVE DATABA...  
+1  683\n\nA MEAN FIELD THEORY OF LAYER IV OF VISU...  
+2  394\n\nSTORING COVARIANCE BY THE ASSOCIATIVE\n...  
+3  Bayesian Query Construction for Neural\nNetwor...  
+4  Neural Network Ensembles, Cross\nValidation, a...  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3: Instructions
+
+
+
+
+
+Visualise the number of papers per year.
+•Group the papers by year.
+•Count the number of papers per group (i.e. per year).
+•Visualise these counts per year in a bar plot.
+
+
+All of the instructions above can be achieved with 3 lines of code and with methods in the pandas library. The following is one of the approaches you can use.
+•Group the papers by the year variable with a groupby statement and load the result into groups.
+•Determine the size of each group of papers by applying the size statement and loading the result into counts.
+•Plot the counts as a barplot with the plot statement from the counts variable.
+
+You can learn more about grouping data in the 'Manipulating DataFrames with pandas' course. The plot methods in pandas are all based on the matplotlib library. More information on plotting can be found here.
+
+
+3. Plotting how machine learning has evolved over time
+In order to understand how the machine learning field has recently exploded in popularity, we will begin by visualizing the number of publications per year. 
+By looking at the number of published papers per year, we can understand the extent of the machine learning 'revolution'! Typically, this significant increase in popularity is attributed to the large amounts of compute power, data and improvements in algorithms.
+# Group the papers by year
+groups = papers.groupby(['year'])
+print("groups")
+print(groups)
+print("\n")
+
+# Determine the size of each group
+counts = groups.size()
+print("counts")
+print(counts)
+
+# Visualise the counts as a bar plot
+import matplotlib.pyplot as plt
+%matplotlib inline
+# -- YOUR CODE HERE --
+counts.plot(kind='bar', title='Count of papers per year', color='gray')
+
+
+
+
+
+
+groups
+<pandas.core.groupby.DataFrameGroupBy object at 0x7f9afa821cc0>
+
+
+counts
+year
+1987     90
+1988     94
+1989    101
+1990    143
+1991    144
+1992    127
+1993    158
+1994    140
+1995    152
+1996    152
+1997    150
+1998    151
+1999    150
+2000    152
+2001    197
+2002    207
+2003    198
+2004    207
+2005    207
+2006    204
+2007    217
+2008    250
+2009    262
+2010    292
+2011    306
+2012    368
+2013    360
+2014    411
+2015    403
+2016    569
+2017    679
+dtype: int64
+
+
+
+Out[8]:
+
+<matplotlib.axes._subplots.AxesSubplot at 0x7f9af823ce48>
+<plot>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
