@@ -1,0 +1,58 @@
+Visually scoring credit models
+Now, you want to visualize the performance of the model. In ROC charts, the X and Y axes are two metrics you've already looked at: the false positive rate (fall-out), and the true positive rate (sensitivity).
+
+You can create a ROC chart of it's performance with the following code:
+fallout, sensitivity, thresholds = roc_curve(y_test, prob_default)
+plt.plot(fallout, sensitivity)
+
+To calculate the AUC score, you use roc_auc_score().
+The credit data cr_loan_prep along with the data sets X_test and y_test have all been loaded into the workspace. A trained LogisticRegression() model named clf_logistic has also been loaded into the workspace.
+
+
+
+Create a set of predictions for probability of default and store them in preds.
+Print the accuracy score the model on the X and y test sets.
+Use roc_curve() on the test data and probabilities of default to create fallout and sensitivity Then, create a ROC curve plot with fallout on the x-axis.
+Compute the AUC of the model using test data and probabilities of default and store it in auc.
+
+
+# Create predictions and store them in a variable
+preds = clf_logistic.predict_proba(X_test)
+
+# Print the accuracy score the model
+print(clf_logistic.score(X_test, y_test))
+<script.py> output:
+    0.8025288526816021
+    
+# Plot the ROC curve of the probabilities of default
+prob_default = preds[:, 1]
+fallout, sensitivity, thresholds = roc_curve(y_test, prob_default)
+plt.plot(fallout, sensitivity, color = 'darkorange')
+plt.plot([0, 1], [0, 1], linestyle='--')
+plt.show()
+
+
+In [3]: prob_default
+Out[3]: 
+array([0.4457786 , 0.22344653, 0.28855826, ..., 0.52244951, 0.3704781 ,
+       0.12378554])
+
+In [4]: fallout, sensitivity, thresholds
+Out[4]: 
+(array([0.00000000e+00, 1.08719287e-04, 1.08719287e-04, ...,
+        9.95542509e-01, 9.95542509e-01, 1.00000000e+00]),
+ array([0.00000000e+00, 0.00000000e+00, 7.73395205e-04, ...,
+        9.99613302e-01, 1.00000000e+00, 1.00000000e+00]),
+ array([1.78648070e+00, 7.86480701e-01, 7.73222120e-01, ...,
+        2.19491398e-05, 1.83856114e-05, 5.26111040e-36]))
+
+
+
+# Compute the AUC and store it in a variable
+auc = roc_auc_score(y_test, prob_default)
+
+In [5]: auc
+Out[5]: 0.7643248801355148
+
+
+I wasn't worried about your .score() on this exercise! So the accuracy for this model is about 80% and the AUC score is 76%. Notice that what the ROC chart shows us is the tradeoff between all values of our false positive rate (fallout) and true positive rate (sensitivity).
