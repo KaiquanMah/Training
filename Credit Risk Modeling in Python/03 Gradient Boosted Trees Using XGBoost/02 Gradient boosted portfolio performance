@@ -1,0 +1,38 @@
+Gradient boosted portfolio performance
+At this point you've looked at predicting probability of default using both a LogisticRegression() and XGBClassifier(). You've looked at some scoring and have seen samples of the predictions, but what is the overall affect on portfolio performance? Try using expected loss as a scenario to express the importance of testing different models.
+A data frame called portfolio has been created to combine the probabilities of default for both models, the loss given default (assume 20% for now), and the loan_amnt which will be assumed to be the exposure at default.
+The data frame cr_loan_prep along with the X_train and y_train training sets have been loaded into the workspace.
+E(Loss) = PD X LGD X EAD
+
+Print the first five rows of portfolio.
+Create the expected_loss column for the gbt and lr model named gbt_expected_loss and lr_expected_loss.
+Print the sum of lr_expected_loss for the entire portfolio.
+Print the sum of gbt_expected_loss for the entire portfolio.
+
+
+# Print the first five rows of the portfolio data frame
+print(portfolio.head())
+
+In [1]: print(portfolio.head())
+   gbt_prob_default  lr_prob_default  lgd  loan_amnt
+0          0.940435         0.445779  0.2      15000
+1          0.922014         0.223447  0.2      11200
+2          0.021707         0.288558  0.2      15000
+3          0.026483         0.169358  0.2      10800
+4          0.064803         0.114182  0.2       3000
+
+
+# Create expected loss columns for each model using the formula
+portfolio['gbt_expected_loss'] = portfolio['gbt_prob_default'] * portfolio['lgd'] * portfolio['loan_amnt']
+portfolio['lr_expected_loss'] = portfolio['lr_prob_default'] * portfolio['lgd'] * portfolio['loan_amnt']
+
+# Print the sum of the expected loss for lr
+print('LR expected loss: ', np.sum(portfolio['lr_expected_loss']))
+    LR expected loss:  5596776.979852879
+
+# Print the sum of the expected loss for gbt
+print('GBT expected loss: ', np.sum(portfolio['gbt_expected_loss']))
+    GBT expected loss:  5447712.9423716515
+
+Great! It looks like the total expected loss for the XGBClassifier() model is quite a bit lower. When we talk about accuracy and precision, the goal is to generate models which have a low expected loss. Looking at a classification_report() helps as well.
+
