@@ -1,0 +1,89 @@
+Cross validating credit models
+Credit loans and their data change over time, and it won't always look like what's been loaded into the current test sets. So, you can use cross-validation to try several smaller training and test sets which are derived from the original X_train and y_train.
+Use the XGBoost function cv() to perform cross-validation. You will need to set up all the parameters for cv() to use on the test data.
+The data sets X_train, y_train are loaded in the workspace along with the trained model gbt, and the parameter dictionary params which will print once the exercise loads.
+
+Set the number of folds to 5 and the stopping to 10. Store them as n_folds and early_stopping.
+Create the matrix object DTrain using the training data.
+Use cv() on the parameters, folds, and early stopping objects. Store the results as cv_df.
+Print the contents of cv_df.
+
+# Set the values for number of folds and stopping iterations
+n_folds = 5
+early_stopping = 10
+
+# Create the DTrain matrix for XGBoost
+DTrain = xgb.DMatrix(X_train, label = y_train)
+
+# Create the data frame of cross validations
+cv_df = xgb.cv(params, DTrain, num_boost_round = 5, nfold=n_folds,
+            early_stopping_rounds=early_stopping)
+
+# Print the cross validations data frame
+print(cv_df)
+<script.py> output:
+       train-auc-mean  train-auc-std  test-auc-mean  test-auc-std
+    0        0.898182       0.001318       0.892519      0.004650
+    1        0.909256       0.002052       0.902780      0.005053
+    2        0.913621       0.002205       0.906834      0.004423
+    3        0.918600       0.001092       0.910779      0.005221
+    4        0.922251       0.001818       0.914193      0.004422
+    
+    
+#params
+The parameters dictionary contains:  {'objective': 'binary:logistic', 'seed': 123, 'eval_metric': 'auc'}
+
+Looks good! Do you see how the AUC for both train-auc-mean and test-auc-mean improves at each iteration of cross-validation? As the iterations progress the scores get better, but will they eventually reach 1.0?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Limits to cross-validation testing
+You can specify very large numbers for both nfold and num_boost_round if you want to perform an extreme amount of cross-validation. The data frame cv_results_big has already been loaded in the workspace and was created with the following code:
+cv = xgb.cv(params, DTrain, num_boost_round = 600, nfold=10,
+            shuffle = True)
+
+Here, cv() performed 600 iterations of cross-validation! The parameter shuffle tells the function to shuffle the records each time.
+Have a look at this data to see what the AUC are, and check to see if they reach 1.0 using cross validation. You should also plot the test AUC score to see the progression.
+The data frame cv_results_big has been loaded into the workspace.
+
+Print the first five rows of the CV results data frame.
+Print the average of the test set AUC from the CV results data frame rounded to two places.
+Plot a line plot of the test set AUC over the course of each iteration.
+
+
+# Print the first five rows of the CV results data frame
+print(cv_results_big.head())
+<script.py> output:
+       train-auc-mean  train-auc-std  test-auc-mean  test-auc-std
+    0        0.897568       0.000909       0.892900      0.008258
+    1        0.906985       0.002611       0.901162      0.007519
+    2        0.913678       0.001403       0.907910      0.007753
+    3        0.919123       0.000921       0.912130      0.007145
+    4        0.922864       0.001097       0.914962      0.006706
+
+
+# Calculate the mean of the test AUC scores
+print(np.mean(cv_results_big['test-auc-mean']).round(2))
+<script.py> output:
+    0.94
+
+# Plot the test AUC scores for each iteration
+plt.plot(cv_results_big['test-auc-mean'])
+plt.title('Test AUC Score Over 600 Iterations')
+plt.xlabel('Iteration Number')
+plt.ylabel('Test AUC Score')
+plt.show()
+
+Excellent! Notice that the test AUC score never quite reaches 1.0 and begins to decrease slightly after 100 iterations. This is because this much cross-validation can actually cause the model to become overfit. So, there is a limit to how much cross-validation you should to.
+
