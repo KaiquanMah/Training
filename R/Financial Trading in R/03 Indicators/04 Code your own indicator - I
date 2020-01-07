@@ -1,0 +1,41 @@
+Code your own indicator - I
+So far, you've used indicators that have been completely pre-written for you by using the add.indicator() function. Now it's time for you to write and apply your own indicator.
+
+Your indicator function will calculate the average of two different indicators to create an RSI of 3.5. Here's how:
+Take in a price series.
+Calculate RSI 3.
+Calculate RSI 4.
+Return the average of RSI 3 and RSI 4.
+
+This RSI can be thought of as an RSI 3.5, because it's longer than an RSI 3 and shorter than an RSI 4. By averaging, this indicator takes into account the impact of four days ago while still being faster than a simple RSI 4, and also removes the noise of both RSI 3 and RSI 4.
+In this exercise, you will create a function for this indicator called calc_RSI_avg() and add it to your strategy strategy.st. All relevant packages are also loaded for you.
+
+
+
+Create and name a function calc_RSI_avg with three arguments price, n1, and n2, in that order.
+Compute an RSI of lookback n1 named RSI_1.
+Compute an RSI of lookback n2 named RSI_2.
+Calculate the average of RSI_1 and RSI_2. Call this RSI_avg.
+Set the column name of RSI_avg to RSI_avg using colnames(), and return RSI_avg.
+Add this indicator to your strategy using inputs of n1 = 3 and n2 = 4. Label this indicator RSI_3_4.
+http://www.rdocumentation.org/packages/base/versions/3.3.1/topics/row%2Bcolnames
+
+# Write the calc_RSI_avg function
+calc_RSI_avg <- function(price, n1, n2) {
+  
+  # RSI 1 takes an input of the price and n1
+  RSI_1 <- RSI(price = price, n = n1)
+  
+  # RSI 2 takes an input of the price and n2
+  RSI_2 <- RSI(price = price, n = n2)
+  
+  # RSI_avg is the average of RSI_1 and RSI_2
+  RSI_avg <- (RSI_1 + RSI_2)/2
+  
+  # Your output of RSI_avg needs a column name of RSI_avg
+  colnames(RSI_avg) <- "RSI_avg"
+  return(RSI_avg)
+}
+
+# Add this function as RSI_3_4 to your strategy with n1 = 3 and n2 = 4
+add.indicator(strategy.st, name = "RSI", arguments = list(price = quote(Cl(mktdata)), n1 = 3, n2 = 4), label = "RSI_3_4")
