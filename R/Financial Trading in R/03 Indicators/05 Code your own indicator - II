@@ -1,0 +1,29 @@
+Code your own indicator - II
+While the RSI is decent, it is somewhat outdated as far as indicators go. In this exercise, you will code a simplified version of another indicator from scratch. The indicator is called the David Varadi Oscillator (DVO), originated by David Varadi, a quantitative research director.
+The purpose of this oscillator is similar to something like the RSI in that it attempts to find opportunities to buy a temporary dip and sell in a temporary uptrend. In addition to obligatory market data, an oscillator function takes in two lookback periods.
+First, the function computes a ratio between the closing price and average of high and low prices. Next, it applies an SMA to that quantity to smooth out noise, usually on a very small time frame, such as two days. Finally, it uses the runPercentRank() function to take a running percentage rank of this average ratio, and multiplies it by 100 to convert it to a 0-100 quantity.
+Think about the way that students get percentile scores after taking a standardized test (that is, if a student got an 800 on her math section, she might be in the 95th percentile nationally). runPercentRank() does the same thing, except over time. This indicator provides the rank for the latest observation when taken in the context over some past period that the user specifies. For example, if something has a runPercentRank value of .90 when using a lookback period of 126, it means it's in the 90th percentile when compared to itself and the past 125 observations.
+Your job is to implement this indicator and save it as DVO. Some of the necessary code has been provided, and the quantstrat, TTR, and quantmod packages are loaded into your workspace.
+https://www.rdocumentation.org/packages/TTR/versions/0.23-1/topics/runPercentRank
+
+
+Create and name a function, DVO, for the indicator described above. The three arguments for your function will be HLC, navg (default to 2), and percentlookback (default to 126).
+The ratio of the close (Cl()) of HLC divided by the average of the high (Hi()) and low (Lo()) prices is computed for you.
+Use SMA() to implement a moving average of this ratio, parameterized by the navg argument. Save this as avgratio.
+Use runPercentRank() to implement a percentage ranking system for avgratio.
+
+# Declare the DVO function
+DVO <- function(HLC, navg = 2, percentlookback = 126) {
+  
+  # Compute the ratio between closing prices to the average of high and low
+  ratio <- Cl(HLC)/((Hi(HLC) + Lo(HLC))/2)
+  
+  # Smooth out the ratio outputs using a moving average
+  avgratio <- SMA(ratio, n = navg)
+  
+  # Convert ratio into a 0-100 value using runPercentRank()
+  out <- runPercentRank(avgratio, n = percentlookback, exact.multiplier = 1) * 100
+  colnames(out) <- "DVO"
+  return(out)
+}
+
