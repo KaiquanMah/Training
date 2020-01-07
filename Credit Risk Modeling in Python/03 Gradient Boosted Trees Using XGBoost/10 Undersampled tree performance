@@ -1,0 +1,74 @@
+Undersampled tree performance
+You've undersampled the training set and trained a model on the undersampled set.
+The performance of the model's predictions not only impact the probability of default on the test set, but also on the scoring of new loan applications as they come in. You also now know that it is even more important that the recall of defaults be high, because a default predicted as non-default is more costly.
+The next crucial step is to compare the new model's performance to the original model. The original predictions are stored as gbt_preds and the new model's predictions stored as gbt2_preds.
+The model predictions gbt_preds and gbt2_preds are already stored in the workspace in addition to y_test.
+
+Print the classification_report() for both the old model and new model.
+# Check the classification reports
+target_names = ['Non-Default', 'Default']
+print(classification_report(y_test, gbt_preds, target_names=target_names))
+
+<script.py> output:
+                  precision    recall  f1-score   support
+    
+     Non-Default       0.93      0.99      0.96      9198
+         Default       0.95      0.73      0.83      2586
+    
+       micro avg       0.93      0.93      0.93     11784
+       macro avg       0.94      0.86      0.89     11784
+    weighted avg       0.93      0.93      0.93     11784
+    
+    
+    
+    
+print(classification_report(y_test, gbt2_preds, target_names=target_names))
+
+<script.py> output:  
+                  precision    recall  f1-score   support
+    
+     Non-Default       0.95      0.91      0.93      9198
+         Default       0.72      0.84      0.77      2586
+    
+       micro avg       0.89      0.89      0.89     11784
+       macro avg       0.83      0.87      0.85     11784
+    weighted avg       0.90      0.89      0.89     11784
+    
+    
+    
+
+
+Print a confusion_matrix() of the old and new model predictions.
+# Print the confusion matrix for both old and new models
+print(confusion_matrix(y_test,gbt_preds))
+<script.py> output:
+    [[9105   93]
+     [ 691 1895]]
+
+
+
+print(confusion_matrix(y_test,gbt2_preds))
+<script.py> output:
+    [[8338  860]
+     [ 426 2160]]
+     
+     
+     
+     
+     
+     
+     
+Print the roc_auc_score of the new model and old model.
+# Print and compare the AUC scores of the old and new models
+print(roc_auc_score(y_test, gbt_preds))
+print(roc_auc_score(y_test, gbt2_preds))
+
+
+<script.py> output:
+    0.8613405315086655
+    0.870884117348218
+    
+Looks like this is classified as a success! Undersampling the training data results in more false positives, but the recall for defaults and the AUC score are both higher than the original model. This means overall it predicts defaults much more accurately.
+
+    
+    
