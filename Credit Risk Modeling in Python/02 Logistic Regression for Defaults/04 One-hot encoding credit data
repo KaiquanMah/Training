@@ -1,0 +1,42 @@
+One-hot encoding credit data
+It's time to prepare the non-numeric columns so they can be added to your LogisticRegression() model.
+Once the new columns have been created using one-hot encoding, you can concatenate them with the numeric columns to create a new data frame which will be used throughout the rest of the course for predicting probability of default.
+Remember to only one-hot encode the non-numeric columns. Doing this to the numeric columns would create an incredibly wide data set!
+The credit loan data, cr_loan_clean, has already been loaded in the workspace.
+
+Create a data set for all the numeric columns called cred_num and one for the non-numeric columns called cred_str.
+Use one-hot encoding on cred_str to create a new data set called cred_str_onehot.
+Union cred_num with the new one-hot encoded data and store the results as cr_loan_prep.
+Print the columns of the new data set.
+
+
+# Create two data sets for numeric and non-numeric data
+cred_num = cr_loan_clean.select_dtypes(exclude=['object'])
+cred_str = cr_loan_clean.select_dtypes(include=['object'])
+
+# One-hot encode the non-numeric columns
+cred_str_onehot = pd.get_dummies(cred_str)
+
+# Union the one-hot encoded columns to the numeric ones
+cr_loan_prep = pd.concat([cred_num, cred_str_onehot], axis=1)
+
+# Print the columns in the new data set
+print(cr_loan_prep.columns)
+
+<script.py> output:
+    Index(['person_age', 'person_income', 'person_emp_length', 'loan_amnt', 'loan_int_rate', 'loan_status', 'loan_percent_income', 'cb_person_cred_hist_length', 'person_home_ownership_MORTGAGE',
+           'person_home_ownership_OTHER', 'person_home_ownership_OWN', 'person_home_ownership_RENT', 'loan_intent_DEBTCONSOLIDATION', 'loan_intent_EDUCATION', 'loan_intent_HOMEIMPROVEMENT',
+           'loan_intent_MEDICAL', 'loan_intent_PERSONAL', 'loan_intent_VENTURE', 'loan_grade_A', 'loan_grade_B', 'loan_grade_C', 'loan_grade_D', 'loan_grade_E', 'loan_grade_F', 'loan_grade_G',
+           'cb_person_default_on_file_N', 'cb_person_default_on_file_Y'],
+          dtype='object')
+
+Look at all those columns! If you've ever seen a credit scorecard, the column_name_value format should look familiar. If you haven't seen one, look up some pictures during your next break!
+
+
+
+
+
+
+
+
+
