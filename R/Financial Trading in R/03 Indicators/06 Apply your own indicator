@@ -1,0 +1,24 @@
+Apply your own indicator
+Great job! Now you have a better understanding of indicators as functions that anyone can write. It's time to apply the indicator you created in the previous exercise. To do so, you will make use of the applyIndicators() command.
+From debugging to subsetting, knowing how to step inside your strategy is a valuable piece of knowledge. Every so often, you might have an error in your strategy, and will want to track it down. Knowing how to use the applyIndicators() command will help you identify your errors. Furthermore, sometimes you may want to look at a small chunk of time in your strategy. This exercise will help train you to do this as well.
+In order to subset time series data, use brackets with the start date, forward slash symbol, and end date. Both dates are in the same format as the from and to arguments for getSymbols() that you used in the first chapter. The quantstrat, TTR, and quantmod packages have once again been loaded for you.
+https://www.rdocumentation.org/packages/quantstrat/versions/0.8.2/topics/applyIndicators
+
+Add the DVO indicator designed in the previous exercise with the default parameters. Label it DVO_2_126.
+Using applyIndicators(), create a temporary object test containing the indicators that you've already applied. Use the open, high, low, and close of SPY as your test market data.
+Subset your data between September 1, 2013 and September 5, 2013.
+
+# Add the DVO indicator to your strategy
+add.indicator(strategy = strategy.st, name = "DVO", 
+              arguments = list(HLC = quote(HLC(mktdata)), navg = 2, percentlookback = 126),
+              label = "DVO_2_126")
+
+# Use applyIndicators to test out your indicators
+test <- applyIndicators(strategy = strategy.st, mktdata = OHLC(SPY))
+
+# Subset your data between Sep. 1 and Sep. 5 of 2013
+test_subset <- test["2013-09-01/2013-09-05"]
+
+
+At this point you've succesfully coded your own indicator and added it to your strategy. In the next chapter, you'll learn how to generate signals from these indicators.
+
