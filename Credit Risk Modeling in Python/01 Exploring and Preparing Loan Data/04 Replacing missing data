@@ -1,0 +1,52 @@
+Replacing missing credit data
+Now, you should check for missing data. If you find missing data within loan_status, you would not be able to use the data for predicting probability of default because you wouldn't know if the loan was a default or not. Missing data within person_emp_length would not be as damaging, but would still cause training errors.
+So, check for missing data in the person_emp_length column and replace any missing values with the median.
+The data set cr_loan has been loaded in the workspace.
+
+Print an array of column names that contain missing data using .isnull().
+Print the top five rows of the data set that has missing data for person_emp_length.
+Replace the missing data with the median of all the employment length using .fillna().
+Create a histogram of the person_emp_length column to check the distribution.
+
+# Print a null value column array
+print(cr_loan.columns[cr_loan.isnull().any()])
+In [1]: print(cr_loan.columns[cr_loan.isnull().any()])
+Index(['person_emp_length', 'loan_int_rate'], dtype='object')
+
+
+
+
+# Print the top five rows with nulls for employment length
+print(cr_loan[cr_loan['person_emp_length'].isnull()].head())
+In [2]: print(cr_loan[cr_loan['person_emp_length'].isnull()].head())
+     person_age  person_income person_home_ownership  person_emp_length        loan_intent loan_grade  loan_amnt  loan_int_rate  loan_status  loan_percent_income cb_person_default_on_file  \
+103          22          12600              MORTGAGE                NaN           PERSONAL          A       2000           5.42            1                 0.16                         N   
+218          24         185000              MORTGAGE                NaN          EDUCATION          B      35000          12.42            0                 0.19                         N   
+375          24          16800              MORTGAGE                NaN  DEBTCONSOLIDATION          A       3900            NaN            1                 0.23                         N   
+403          25          52000                  RENT                NaN           PERSONAL          B      24000          10.74            1                 0.46                         N   
+404          22          17352              MORTGAGE                NaN          EDUCATION          C       2250          15.27            0                 0.13                         Y   
+
+         cb_person_cred_hist_length  
+    103                           4  
+    218                           2  
+    375                           3  
+    403                           2  
+    404                           3
+    
+    
+    
+    
+    
+    
+# Impute the null values with the median value for all employment lengths
+cr_loan['person_emp_length'].fillna((cr_loan['person_emp_length'].median()), inplace=True)
+
+    
+    
+# Create a histogram of employment length
+n, bins, patches = plt.hist(cr_loan['person_emp_length'], bins='auto', color='blue')
+plt.xlabel("Person Employment Length")
+plt.show()
+
+You can use several different functions like mean() and median() to replace missing data. The goal here is to keep as much of our data as we can! It's also important to check the distribution of that feature to see if it changed.
+
