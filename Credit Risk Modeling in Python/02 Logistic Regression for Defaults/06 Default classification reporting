@@ -1,0 +1,74 @@
+Default classification reporting
+It's time to take a closer look at the evaluation of the model. Here is where setting the threshold for probability of default will help you analyze the model's performance through classification reporting.
+Creating a data frame of the probabilities makes them easier to work with, because you can use all the power of pandas. Apply the threshold to the data and check the value counts for both classes of loan_status to see how many predictions of each are being created. This will help with insight into the scores from the classification report.
+The cr_loan_prep data set, trained logistic regression clf_logistic, true loan status values y_test, and predicted probabilities, preds are loaded in the workspace.
+
+Create a data frame of just the probabilities of default from preds called preds_df.
+Reassign loan_status values based on a threshold of 0.50 for probability of default in preds_df.
+Print the value counts of the number of rows for each loan_status.
+Print the classification report using y_test and preds_df.
+
+# Create a dataframe for the probabilities of default
+preds_df = pd.DataFrame(preds[:,1], columns = ['prob_default'])
+
+In [1]: preds_df = pd.DataFrame(preds[:,1], columns = ['prob_default'])
+
+In [2]: preds_df.head()
+Out[2]: 
+   prob_default
+0      0.445779
+1      0.223447
+2      0.288558
+3      0.169358
+4      0.114182
+
+
+
+# Reassign loan status based on the threshold
+preds_df['loan_status'] = preds_df['prob_default'].apply(lambda x: 1 if x > 0.5 else 0)
+
+In [3]: preds_df['loan_status'] = preds_df['prob_default'].apply(lambda x: 1 if x > 0.5 else 0)
+
+In [4]: preds_df.head()
+Out[4]: 
+   prob_default  loan_status
+0      0.445779            0
+1      0.223447            0
+2      0.288558            0
+3      0.169358            0
+4      0.114182            0
+
+
+
+
+
+
+
+
+
+# Print the row counts for each loan status
+print(preds_df['loan_status'].value_counts())
+
+<script.py> output:
+    0    11175
+    1      609
+    Name: loan_status, dtype: int64
+
+
+# Print the classification report
+target_names = ['Non-Default', 'Default']
+print(classification_report(y_test, preds_df['loan_status'], target_names=target_names))
+
+                  precision    recall  f1-score   support
+    
+     Non-Default       0.81      0.98      0.89      9198
+         Default       0.71      0.17      0.27      2586
+    
+       micro avg       0.80      0.80      0.80     11784
+       macro avg       0.76      0.57      0.58     11784
+    weighted avg       0.79      0.80      0.75     11784
+
+Well isn't this a surprise! It looks like almost all of our test set was predicted to be non-default. The recall for defaults is 0.16 meaning 16% of our true defaults were predicted correctly.
+
+
+
