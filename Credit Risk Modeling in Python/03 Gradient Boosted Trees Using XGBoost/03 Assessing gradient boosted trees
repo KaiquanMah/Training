@@ -1,0 +1,46 @@
+Assessing gradient boosted trees
+So you've now used XGBClassifier() models to predict probability of default. These models can also use the .predict() method for creating predictions that give the actual class for loan_status.
+You should check the model's initial performance by looking at the metrics from the classification_report(). Keep in mind that you have not set thresholds for these models yet.
+The data sets cr_loan_prep, X_test, and y_test have already been loaded in the workspace. The model clf_gbt has been loaded as well. The classification_report() for the logistic regression will print automatically.
+
+Predict the loan_status values for the X test data and store them in gbt_preds.
+Check the contents of gbt_preds to see predicted loan_status values not probabilities of default.
+Print a classification_report() of the model's performance against y_test.
+
+
+# Predict the labels for loan status
+gbt_preds = clf_gbt.predict(X_test)
+
+# Check the values created by the predict method
+print(gbt_preds)
+    [1 1 0 ... 0 0 0]
+
+
+# Print the classification report of the model
+target_names = ['Non-Default', 'Default']
+print(classification_report(y_test, gbt_preds, target_names=target_names))
+
+                  precision    recall  f1-score   support
+    
+     Non-Default       0.92      0.99      0.95      9198
+         Default       0.93      0.69      0.80      2586
+    
+       micro avg       0.92      0.92      0.92     11784
+       macro avg       0.93      0.84      0.87     11784
+    weighted avg       0.92      0.92      0.92     11784
+    
+
+Wow. Have a look at the precision and recall scores! Remember the low default recall values we were getting from the LogisticRegression()? This model already appears to have serious potential.
+
+
+
+vs
+Logistic regression classification report
+              precision    recall  f1-score   support
+
+ Non-Default       0.81      0.98      0.89      9198
+     Default       0.71      0.17      0.27      2586
+
+   micro avg       0.80      0.80      0.80     11784
+   macro avg       0.76      0.57      0.58     11784
+weighted avg       0.79      0.80      0.75     11784
