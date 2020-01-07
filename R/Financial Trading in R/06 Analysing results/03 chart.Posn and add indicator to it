@@ -1,0 +1,64 @@
+Using chart.Posn()
+One of the most enlightening things about a trading system is exploring what positions it took over the course of the trading simulation, as well as when it had its profits and drawdowns. Looking at a picture of the performance can deliver a great deal of insight in terms of refining similar trading systems in the future.
+In this exercise, you will use the chart.Posn() function. This generates a crisp and informative visualization of the performance of your trading system over the course of the simulation.
+Your portfolio strategy (portfolio.st) is preloaded into your environment.
+
+
+Use chart.Posn() to view your trading system's performance over the course of the simulation for SPY.
+# Use chart.Posn to view your system's performance on SPY
+chart.Posn(Portfolio = portfolio.st, Symbol = "SPY")
+
+As you can see, the chart.Posn command is an extremely useful way to visualize portfolio performance over time.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Adding an indicator to a chart.Posn() chart
+One of the more interesting things you can do with the chart.Posn() function is to superimpose indicators on top of it. This can help show what the strategy has actually been doing and why. However, in order to do this, you will need to recalculate the indicators outside the scope of your strategy. Once this is done, you simply add them to the chart.Posn plot.
+In this exercise, you will add the three indicators from your strategy to the chart.Posn plot you just created. The two moving averages (SMA50 and SMA200) will be superimposed on the price series, while the DVO_2_126 will have its own window.
+
+Begin by reproducing your SMA50, SMA200, and DVO_2_126 indicators for SPY outside of the strategy.
+Recreate the chart from the previous exercise using chart.Posn().
+Use add_TA() to overlay the SMA50 as a blue line on top of the price plot.
+Use add_TA() to overlay the SMA200 as a red line on top of the price plot.
+Use add_TA() to add the DVO_2_126 to your plot as a new window.
+
+# Compute the SMA50
+sma50 <- SMA(x = Cl(SPY), n = 50)
+
+# Compute the SMA200
+sma200 <- SMA(x = Cl(SPY), n = 200)
+
+# Compute the DVO_2_126 with an navg of 2 and a percentlookback of 126
+dvo <- DVO(HLC = HLC(SPY), navg = 2, percentlookback = 126)
+
+# Recreate the chart.Posn of the strategy from the previous exercise
+chart.Posn(Portfolio = portfolio.st, Symbol = "SPY")
+
+# Overlay the SMA50 on your plot as a blue line
+add_TA(sma50, on = 1, col = "blue")
+
+# Overlay the SMA200 on your plot as a red line
+add_TA(sma200, on = 1, col = "red")
+
+# Add the DVO_2_126 to the plot in a new window
+add_TA(dvo)
+
+
+The plot may look a bit complicated, but only because it contains so much vital information about your portfolio performance.
+
