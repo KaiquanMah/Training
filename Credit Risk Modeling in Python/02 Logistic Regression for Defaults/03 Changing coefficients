@@ -1,0 +1,47 @@
+Changing coefficients
+With this understanding of the coefficients of a LogisticRegression() model, have a closer look at them to see how they change depending on what columns are used for training. Will the column coefficients change from model to model?
+You should .fit() two different LogisticRegression() models on different groups of columns to check. You should also consider what the potential impact on the probability of default might be.
+The data set cr_loan_clean has already been loaded into the workspace along with the training sets X1_train, X2_train, and y_train.
+
+Check the first five rows of both X training sets.
+Train a logistic regression model, called clf_logistic1, with the X1 training set.
+Train a logistic regression model, called clf_logistic2, with the X2 training set.
+Print the coefficients for both logistic regression models.
+
+# Print the first five rows of each training set
+print(X1_train.head())
+print(X2_train.head())
+
+<script.py> output:
+           person_income  person_emp_length  loan_amnt
+    22105          72000                  3       9000
+    2296           21000                  2       3000
+    14465           4800                  0       1200
+    6311           92000                  0       6000
+    12541          96000                  1       7000
+           person_income  loan_percent_income  cb_person_cred_hist_length
+    22105          72000                 0.13                           6
+    2296           21000                 0.14                           2
+    14465           4800                 0.25                           2
+    6311           92000                 0.07                           3
+    12541          96000                 0.07                           4
+    
+    
+# Create and train a model on the first training data
+clf_logistic1 = LogisticRegression(solver='lbfgs').fit(X1_train, np.ravel(y_train))
+
+# Create and train a model on the second training data
+clf_logistic2 = LogisticRegression(solver='lbfgs').fit(X2_train, np.ravel(y_train))
+
+# Print the coefficients of each model
+print(clf_logistic1.coef_)
+print(clf_logistic2.coef_)
+
+
+<script.py> output:
+    [[-4.02643517e-05 -3.06659219e-08  1.06277246e-04]]
+    [[-2.17213449e-05  5.29012401e-10 -2.80735543e-09]]
+
+Interesting! Notice that the coefficient for the person_income changed when we changed the data from X1 to X2. This is a reason to keep most of the data like we did in chapter 1, because the models will learn differently depending on what data they're given!
+
+
