@@ -1,0 +1,77 @@
+Estimated value profiling
+The strategy table, strat_df, can be used to maximize the estimated portfolio value and minimize expected loss. Extending this table and creating some plots can be very helpful to this end.
+
+The strat_df data frame is loaded and has been enhanced already with the following columns:
+Column	                Description
+Num Accepted Loans	    The number of accepted loans based on the threshold
+Avg Loan Amnt	          The average loan amount of the entire test set
+Estimated value	        The estimated net value of non-defaults minus defaults
+
+
+Check the contents of the new strat_df by printing the entire data frame.
+# Print the contents of the strategy df
+print(strat_df)
+
+<script.py> output:
+        Acceptance Rate  Threshold  Bad Rate  Num Accepted Loans  Avg Loan Amnt  Estimated Value
+    0              1.00      1.000     0.219               11379        9556.28      61112391.49
+    1              0.95      0.992     0.179               10591        9556.28      64977180.47
+    2              0.90      0.976     0.132               10025        9556.28      70510056.35
+    3              0.85      0.804     0.083                9390        9556.28      74837713.31
+    4              0.80      0.254     0.061                8857        9556.28      74313895.38
+    5              0.75      0.178     0.052                8229        9556.28      70460210.80
+    6              0.70      0.138     0.043                7685        9556.28      67124170.79
+    7              0.65      0.111     0.036                7104        9556.28      62999890.58
+    8              0.60      0.093     0.030                6456        9556.28      57993623.06
+    9              0.55      0.078     0.027                5870        9556.28      53066213.97
+    10             0.50      0.066     0.023                5288        9556.28      48209062.64
+    11             0.45      0.055     0.020                4726        9556.28      43356460.11
+    12             0.40      0.045     0.017                4131        9556.28      38134774.93
+    13             0.35      0.037     0.014                3536        9556.28      32844857.91
+    14             0.30      0.030     0.010                2941        9556.28      27542919.09
+    15             0.25      0.022     0.008                2359        9556.28      22182572.29
+    16             0.20      0.015     0.005                1768        9556.28      16726548.01
+    17             0.15      0.008     0.001                1187        9556.28      11320617.75
+    18             0.10      0.004     0.000                 576        9556.28       5504417.28
+    19             0.05      0.002     0.000                 405        9556.28       3870293.40
+
+
+
+
+
+
+
+
+
+Create a line plot of the acceptance rate on the x-axis and estimated value from strat_df on the y-axis with axis labels for both x and y.
+# Create a line plot of estimated value
+plt.plot(strat_df['Acceptance Rate'],strat_df['Estimated Value'])
+plt.title('Estimated Value by Acceptance Rate')
+plt.xlabel('Acceptance Rate')
+plt.ylabel('Estimated Value')
+plt.axes().yaxis.grid()
+plt.show()
+
+
+
+
+
+
+
+Print the row with the highest 'Estimated Value' from strat_df.
+# Print the row with the max estimated value
+print(strat_df.loc[strat_df['Estimated Value'] == np.max(strat_df['Estimated Value'])])
+
+In [1]: np.max(strat_df['Estimated Value'])
+Out[1]: 74837713.31
+
+
+<script.py> output:
+       Acceptance Rate  Threshold  Bad Rate  Num Accepted Loans  Avg Loan Amnt  Estimated Value
+    3             0.85      0.804     0.083                9390        9556.28      74837713.31
+    
+Interesting! With our credit data and our estimated averag loan value, we clearly see that the acceptance rate 0.85 has the highest potential estimated value. Normally, the allowable bad rate is set, but we can use analyses like this to explore other options.
+
+    
+    
+     
