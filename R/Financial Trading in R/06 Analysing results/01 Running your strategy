@@ -1,0 +1,52 @@
+Running your strategy
+Congratulations on creating a strategy in quantstrat! To review, your strategy uses three separate indicators and five separate signals. The strategy requires both the threshold of the DVO_2_126 indicator to be under 20 and the SMA50 to be greater than the SMA200. The strategy sells when the DVO_2_126 crosses above 80, or the SMA50 crosses under the SMA200.
+
+For this strategy to work properly, you specified five separate signals:
+sigComparison for SMA50 being greater than SMA200;
+sigThreshold with cross set to FALSE for DVO_2_126 less than 20;
+sigFormula to tie them together and set cross to TRUE;
+sigCrossover with SMA50 less than SMA200; and
+sigThreshold with cross set to TRUE for DVO_2_126 greater than 80.
+
+The strategy invests $100,000 (your initeq) into each trade, and may have some small dollar cost averaging if the DVO_2_126 oscillates around 20 (though the effect is mostly negligible compared to the initial allocation).
+In this final chapter, you will learn how to view the actual results of your portfolio. But first, in order to generate the results, you need to run your strategy and fill in some more boilerplate code to make sure quantstrat records everything. The code in this exercise is code you will have to copy and paste in the future.
+
+
+
+
+https://www.rdocumentation.org/packages/quantstrat/versions/0.8.2/topics/applyStrategy
+Use applyStrategy() to apply your strategy (strategy.st) to your portfolio (portfolio.st). Save this to the object out.
+Run necessary functions to record the results of your strategy, including updatePortf() and setting the daterange as well as updateAcct() and updateEndEq().
+Based on this information, see if you can find the date of the last trade.
+
+
+# Use applyStrategy() to apply your strategy. Save this to out
+out <- applyStrategy(strategy = strategy.st, portfolios = portfolio.st)
+
+[1] "2003-11-04 00:00:00 SPY 1209 @ 82.8469578360576"
+[1] "2003-11-07 00:00:00 SPY -1209 @ 83.3550303566401"
+[1] "2003-11-11 00:00:00 SPY 1209 @ 82.1434723265441"
+...
+[1] "2015-12-10 00:00:00 SPY 487 @ 204.204684925897"
+[1] "2015-12-16 00:00:00 SPY -487 @ 205.149061519969"
+[1] "2015-12-21 00:00:00 SPY 493 @ 201.410004"
+[1] "2015-12-23 00:00:00 SPY -493 @ 204.690002"
+
+
+
+
+# Update your portfolio (portfolio.st)
+updatePortf(portfolio.st)
+daterange <- time(getPortfolio(portfolio.st)$summary)[-1]
+
+# Update your account (account.st)
+updateAcct(account.st, daterange)
+updateEndEq(account.st)
+
+
+
+
+
+You are on your way to seeing the results of your strategy. The date of the last trade was 2015-12-23 - can you see where this was printed in the output?
+
+
