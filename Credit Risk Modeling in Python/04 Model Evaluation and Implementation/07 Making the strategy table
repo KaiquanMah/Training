@@ -1,0 +1,106 @@
+Making the strategy table
+Before you implement a strategy, you should first create a strategy table containing all the possible acceptance rates you wish to look at along with their associated bad rates and threshold values. This way, you can begin to see each part of your strategy and how it affects your portfolio.
+Automatically calculating all of these values only requires a for loop, but requires many lines of python code. Don't worry, most of the code is already there. Remember the calculations for threshold and bad rate.
+The array accept_rates has already been populated and loaded into the workspace along with the data frames preds_df_gbt and test_pred_df. The arrays thresholds and bad_rates have not been populated.
+
+Print the contents of accept_rates.
+# Print accept rates
+print(accept_rates)
+<script.py> output:
+    [1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05]
+    
+
+
+
+
+Populate the arrays thresholds and bad_rates using a for loop. Calculate the threshold thresh, and store it in thresholds. Then reassign the loan_status values using thresh. After that, Create accepted_loans where loan_status is 0.
+In [1]:     preds_df_gbt.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 11784 entries, 0 to 11783
+Data columns (total 1 columns):
+prob_default    11784 non-null float32
+dtypes: float32(1)
+memory usage: 46.1 KB
+
+
+In [3]:     test_pred_df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 11784 entries, 0 to 11783
+Data columns (total 4 columns):
+true_loan_status    11784 non-null int64
+prob_default        11784 non-null float64
+loan_amnt           11784 non-null int64
+pred_loan_status    11784 non-null int64
+dtypes: float64(1), int64(3)
+memory usage: 368.3 KB
+
+
+# Populate the arrays for the strategy table with a for loop
+for rate in accept_rates:
+    accepted_loans.info()
+    # Calculate the threshold for the acceptance rate
+    thresh = np.quantile(preds_df_gbt['prob_default'], rate).round(3)
+    
+    # Add the threshold value to the list of thresholds
+    #thresholds.append(np.quantile(preds_df_gbt['prob_default'], rate).round(3))
+    thresholds.append(thresh)
+    
+    # Reassign the loan_status value using the threshold
+    test_pred_df['pred_loan_status'] = test_pred_df['prob_default'].apply(lambda x: 1 if x > thresh else 0)
+    
+    # Create a set of accepted loans using this acceptance rate
+    # and 'predicted loan status' of accepted/0
+    accepted_loans = test_pred_df[test_pred_df['pred_loan_status'] == 0]
+    
+    # Calculate and append the bad rate using the acceptance rate
+    # ie based on the loans predicted to be accepted under 'pred_loan_status' 0
+    # analyse 'true_loan_status' which looks at defaults/1
+    bad_rates.append(np.sum((accepted_loans['true_loan_status']) / len(accepted_loans['true_loan_status'])).round(3))
+
+
+
+
+
+
+
+
+
+
+
+
+Create the strategy table as a data frame and call it strat_df.
+Print the contents of strat_df.
+# Create a data frame of the strategy table
+strat_df = pd.DataFrame(zip(accept_rates, thresholds, bad_rates),
+                        columns = ['Acceptance Rate','Threshold','Bad Rate'])
+
+# Print the entire table
+print(strat_df)
+
+<script.py> output:
+        Acceptance Rate  Threshold  Bad Rate
+    0              1.00      1.000     0.219
+    1              0.95      0.992     0.179
+    2              0.90      0.976     0.132
+    3              0.85      0.804     0.083
+    4              0.80      0.254     0.061
+    5              0.75      0.178     0.052
+    6              0.70      0.138     0.043
+    7              0.65      0.111     0.036
+    8              0.60      0.093     0.030
+    9              0.55      0.078     0.027
+    10             0.50      0.066     0.023
+    11             0.45      0.055     0.020
+    12             0.40      0.045     0.017
+    13             0.35      0.037     0.014
+    14             0.30      0.030     0.010
+    15             0.25      0.022     0.008
+    16             0.20      0.015     0.005
+    17             0.15      0.008     0.001
+    18             0.10      0.004     0.000
+    19             0.05      0.002     0.000
+    
+
+
+That for loop was a lot of code, but look at this sweet strategy table we have now. This uses our specific predictions on the credit data, and can be used to see the acceptance rates, bad rates, and financial impact all at once. One of these values has the highest estimated value.
+
