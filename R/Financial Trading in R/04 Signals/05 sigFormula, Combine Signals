@@ -1,0 +1,86 @@
+Using sigFormula()
+The last signal function is a bit more open-ended. The sigFormula() function uses string evaluation to offer immense flexibility in combining various indicators and signals you already added to your strategy in order to create composite signals. While such catch-all functionality may seem complicated at first, with proper signal implementation and labeling, a sigFormula signal turns out to be the simplest of logical programming statements encapsulated in some quantstrat syntactical structuring.
+In this exercise, you will get a taste of what the sigFormula function can do by stepping through the logic manually. You will need to use the applyIndicators() and applySignals() functions.
+https://www.rdocumentation.org/packages/quantstrat/versions/0.8.2/topics/applyIndicators
+https://www.rdocumentation.org/packages/quantstrat/versions/0.8.2/topics/applySignals
+
+
+Use applyIndicators() with the open, high, low, and close of SPY to generate a dataset object called test_init.
+Use applySignals() with test_init to apply the signals you wrote in this chapter. Save this new dataset object as test.
+# Create your dataset: test
+test_init <- applyIndicators(strategy.st, 
+                             mktdata = OHLC(SPY))
+                             
+test <- applySignals(strategy = strategy.st, 
+                     mktdata = test_init)
+
+In the next exercise, you will have a closer look at the newly created test
+
+
+
+
+
+
+
+
+
+
+
+
+
+Combining signals - I
+In the previous exercise, you created a dataset test containing information about whether longfilter is equal to 1 AND longthreshold is equal to 1.
+Next, you'll want to create a signal when BOTH longfilter and longthreshold are equal to 1. You will learn how to do just this in the next exercise. For now, let's inspect the data set test which was created in the previous exercise. This data is loaded in your workspace.
+Have a look at test on October 8, 2013. Are longfilter and longthreshold both equal to 1 on that date?
+
+> test["2013-10-08"]
+           SPY.Open SPY.High SPY.Low SPY.Close SMA.SMA200 SMA.SMA50
+2013-10-08    167.4   167.62  165.36    165.48   159.8966  168.0646
+
+           DVO.DVO_2_126 longfilter filterexit longthreshold thresholdexit
+2013-10-08      3.174603          1         NA             1             0
+
+
+longfilter = 1, longthreshold = 0
+longfilter = 0, longthreshold = 1
+longfilter = 0, longthreshold = 0
+#yes longfilter = 1, longthreshold = 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+Combining signals - II
+In the previous exercise, you approximated a sigFormula signal by comparing the value of two other signals. In this final exercise, you will take this one step futher by using the sigFormula() function to generate a sigFormula signal.
+The goal of this exercise is simple. You want to enter into a position when both longfilter and longthreshold become true at the same time. The idea is this: You don't want to keep entering into a position for as long as conditions hold true, but you do want to hold a position when there's a pullback in an uptrending environment.
+Writing a sigFormula function is as simple as writing the argument of an "if statement" in base R inside the formula() function. In this case, you want to create a signal labeled longentry, which is true when both longfilter and longthreshold cross over to true at the same time.
+Once you complete this exercise, you will have a complete survey of how signals work in quantstrat!
+
+Use add.signal() to create a sigFormula signal is true when both longfilter and longthreshold are true.
+Set cross equal to TRUE.
+Label this new signal as longentry.
+
+# Add a sigFormula signal to your code specifying that both longfilter and longthreshold must be TRUE, label it longentry
+add.signal(strategy.st, 
+           name = "sigFormula",
+           
+           # Specify that longfilter and longthreshold must be TRUE
+           arguments = list(formula = "longfilter & longthreshold", 
+                            
+                            # Specify that cross must be TRUE
+                            cross = TRUE),
+           
+           # Label it longentry
+           label = "longentry")
+
+
+Perfect! You just added a customized signal using sigFormula to your strategy! In the next chapter, you'll learn how to use rules to act on these signals
+
