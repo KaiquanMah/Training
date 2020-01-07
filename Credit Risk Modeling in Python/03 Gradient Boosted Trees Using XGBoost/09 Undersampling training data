@@ -1,0 +1,125 @@
+Undersampling training data
+It's time to undersample the training set yourself with a few lines of code from Pandas. Once the undersampling is complete, you can check the value counts for loan_status to verify the results.
+
+X_y_train, count_nondefault, and count_default are already loaded in the workspace. They have been created using the following code:
+X_y_train = pd.concat([X_train.reset_index(drop = True),
+                       y_train.reset_index(drop = True)], axis = 1)
+count_nondefault, count_default = X_y_train['loan_status'].value_counts()
+
+The .value_counts() for the original training data will print automatically.
+0    13798
+1     3877
+Name: loan_status, dtype: int64
+
+
+Create data sets of non-defaults and defaults stored as nondefaults and defaults.
+Sample the nondefaults to the same number as count_default and store it as nondefaults_under.
+Concatenate nondefaults and defaults using .concat() and store it as X_y_train_under.
+Print the .value_counts() of loan status for the new data set.
+
+
+In [1]: count_default
+Out[1]: 3877
+
+In [3]: X_train.info()
+<class 'pandas.core.frame.DataFrame'>
+Int64Index: 17675 entries, 22105 to 19966
+Data columns (total 26 columns):
+person_age                        17675 non-null int64
+person_income                     17675 non-null int64
+person_emp_length                 17675 non-null int64
+loan_amnt                         17675 non-null int64
+loan_int_rate                     17675 non-null float64
+loan_percent_income               17675 non-null float64
+cb_person_cred_hist_length        17675 non-null int64
+person_home_ownership_MORTGAGE    17675 non-null int64
+person_home_ownership_OTHER       17675 non-null int64
+person_home_ownership_OWN         17675 non-null int64
+person_home_ownership_RENT        17675 non-null int64
+loan_intent_DEBTCONSOLIDATION     17675 non-null int64
+loan_intent_EDUCATION             17675 non-null int64
+loan_intent_HOMEIMPROVEMENT       17675 non-null int64
+loan_intent_MEDICAL               17675 non-null int64
+loan_intent_PERSONAL              17675 non-null int64
+loan_intent_VENTURE               17675 non-null int64
+loan_grade_A                      17675 non-null int64
+loan_grade_B                      17675 non-null int64
+loan_grade_C                      17675 non-null int64
+loan_grade_D                      17675 non-null int64
+loan_grade_E                      17675 non-null int64
+loan_grade_F                      17675 non-null int64
+loan_grade_G                      17675 non-null int64
+cb_person_default_on_file_N       17675 non-null int64
+cb_person_default_on_file_Y       17675 non-null int64
+dtypes: float64(2), int64(24)
+memory usage: 4.3 MB
+
+In [4]: X_train.head()
+Out[4]: 
+       person_age  person_income  person_emp_length  loan_amnt  loan_int_rate  loan_percent_income  ...  loan_grade_D  loan_grade_E  loan_grade_F  loan_grade_G  cb_person_default_on_file_N  \
+22105          30          72000                  3       9000          14.22                 0.13  ...             0             0             0             0                            0   
+2296           23          21000                  2       3000          12.68                 0.14  ...             0             0             0             0                            0   
+14465          22           4800                  0       1200          14.26                 0.25  ...             0             0             0             0                            0   
+6311           26          92000                  0       6000          15.58                 0.07  ...             1             0             0             0                            1   
+12541          21          96000                  1       7000          12.53                 0.07  ...             0             0             0             0                            1   
+
+       cb_person_default_on_file_Y  
+22105                            1  
+2296                             1  
+14465                            1  
+6311                             0  
+12541                            0  
+
+[5 rows x 26 columns]
+
+
+In [7]: y_train.info()
+<class 'pandas.core.frame.DataFrame'>
+Int64Index: 17675 entries, 22105 to 19966
+Data columns (total 1 columns):
+loan_status    17675 non-null int64
+dtypes: int64(1)
+memory usage: 916.2 KB
+
+
+
+
+
+# Create data sets for defaults and non-defaults
+nondefaults = X_train[y_train['loan_status'] == 0]
+defaults = X_train[y_train['loan_status'] == 1]
+y_train.info()
+
+# Undersample the non-defaults
+nondefaults_under = nondefaults.sample(count_default)
+
+# Concatenate the undersampled nondefaults with defaults
+X_y_train_under = pd.concat([nondefaults_under.reset_index(drop = True),
+                             defaults.reset_index(drop = True)], axis = 0)
+
+# Print the value counts for loan status
+print(X_y_train_under['loan_status'].value_counts())
+
+# Create data sets for defaults and non-defaults
+nondefaults = X_y_train[X_y_train['loan_status'] == 0]
+defaults = X_y_train[X_y_train['loan_status'] == 1]
+
+
+# Undersample the non-defaults
+nondefaults_under = nondefaults.sample(count_default)
+
+# Concatenate the undersampled nondefaults with defaults
+X_y_train_under = pd.concat([nondefaults_under.reset_index(drop = True),
+                             defaults.reset_index(drop = True)], axis = 0)
+
+# Print the value counts for loan status
+print(X_y_train_under['loan_status'].value_counts())
+<script.py> output:
+    1    3877
+    0    3877
+    Name: loan_status, dtype: int64
+    
+
+Now, our training set has an even number of defaults and non-defaults. Let's test out some machine learning models on this new undersampled data set and compare their performance to the models trained on the regular data set.
+
+    
