@@ -1,0 +1,72 @@
+Comparing model reports
+You've used logistic regression models and gradient boosted trees. It's time to compare these two to see which model will be used to make the final predictions.
+One of the easiest first steps for comparing different models' ability to predict the probability of default is to look at their metrics from the classification_report(). With this, you can see many different scoring metrics side-by-side for each model. Because the data and models are normally unbalanced with few defaults, focus on the metrics for defaults for now.
+The trained models clf_logistic and clf_gbt have been loaded into the workspace along with their predictions preds_df_lr and preds_df_gbt. A cutoff of 0.4 was used for each. The test set y_test is also available.
+
+Print the classification_report() for the logistic regression predictions.
+Print the classification_report() for the gradient boosted tree predictions.
+Print the macro average of the F-1 Score for the logistic regression using precision_recall_fscore_support().
+Print the macro average of the F-1 Score for the gradient boosted tree using precision_recall_fscore_support().
+
+In [2]: preds_df_lr.head()
+Out[2]: 
+   prob_default  loan_status
+0      0.445779            1
+1      0.223447            0
+2      0.288558            0
+3      0.169358            0
+4      0.114182            0
+
+In [3]: y_test.head()
+Out[3]: 
+       loan_status
+28606            1
+22585            1
+13888            0
+3145             0
+14882            1
+
+
+
+# Print the logistic regression classification report
+target_names = ['Non-Default', 'Default']
+print(classification_report(y_test, preds_df_lr['loan_status'], target_names=target_names))
+<script.py> output:
+                  precision    recall  f1-score   support
+    
+     Non-Default       0.86      0.92      0.89      9198
+         Default       0.62      0.46      0.53      2586
+    
+       micro avg       0.82      0.82      0.82     11784
+       macro avg       0.74      0.69      0.71     11784
+    weighted avg       0.81      0.82      0.81     11784
+
+
+
+# Print the gradient boosted tree classification report
+print(classification_report(y_test, preds_df_gbt['loan_status'], target_names=target_names))
+                  precision    recall  f1-score   support
+    
+     Non-Default       0.93      0.99      0.96      9198
+         Default       0.94      0.73      0.82      2586
+    
+       micro avg       0.93      0.93      0.93     11784
+       macro avg       0.93      0.86      0.89     11784
+    weighted avg       0.93      0.93      0.93     11784
+
+
+
+
+
+# Print the default F-1 scores for the logistic regression
+print(precision_recall_fscore_support(y_test,preds_df_lr['loan_status'], average = 'macro')[2])
+    0.7108943782814463
+
+# Print the default F-1 scores for the gradient boosted tree
+print(precision_recall_fscore_support(y_test,preds_df_gbt['loan_status'], average = 'macro')[2])
+    0.8909014142736051
+
+There is a noticeable difference between these two models. Do you see that the scores from the classification_report() are all higher for the gradient boosted tree? This means the tree model is better in all of these aspects. Let's check the ROC curve.
+
+
+
