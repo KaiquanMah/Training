@@ -1,0 +1,80 @@
+Acceptance rate impact
+Now, look at the loan_amnt of each loan to understand the impact on the portfolio for the acceptance rates. You can use cross tables with calculated values, like the average loan amount, of the new set of loans X_test. For this, you will multiply the number of each with an average loan_amnt value.
+
+When printing these values, try formatting them as currency so that the numbers look more realistic. After all, credit risk is all about money. This is accomplished with the following code:
+pd.options.display.float_format = '${:,.2f}'.format
+
+The predictions data frame test_pred_df, which now includes the loan_amnt column from X_test, has been loaded in the workspace.
+
+
+
+Print the summary statistics of the loan_amnt column using .describe().
+Calculate the average value of loan_amnt and store it as avg_loan.
+Set the formatting for pandas to '${:,.2f}'
+Print the cross table of the true loan status and predicted loan status multiplying each by avg_loan.
+
+In [1]: test_pred_df['loan_amnt'].head()
+Out[1]: 
+0    15000
+1    11200
+2    15000
+3    10800
+4     3000
+Name: loan_amnt, dtype: int64
+
+
+
+# Print the statistics of the loan amount column
+print(test_pred_df['loan_amnt'].describe())
+<script.py> output:
+    count    11784.000000
+    mean      9556.283944
+    std       6238.005674
+    min        500.000000
+    25%       5000.000000
+    50%       8000.000000
+    75%      12000.000000
+    max      35000.000000
+    Name: loan_amnt, dtype: float64
+
+    
+    
+    
+    
+    
+    
+# Store the average loan amount
+avg_loan = np.mean(test_pred_df['loan_amnt'])
+
+
+
+
+
+
+
+
+In [7]: test_pred_df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 11784 entries, 0 to 11783
+Data columns (total 4 columns):
+true_loan_status       11784 non-null int64
+prob_default           11784 non-null float64
+loan_amnt              11784 non-null int64
+pred_loan_status_15    11784 non-null int64
+dtypes: float64(1), int64(3)
+memory usage: 368.3 KB
+
+
+# Set the formatting for currency, and print the cross tab
+pd.options.display.float_format = '${:,.2f}'.format
+print(pd.crosstab(test_pred_df['true_loan_status'],
+                 test_pred_df['pred_loan_status_15']).apply(lambda x: x * avg_loan, axis = 0))
+                 
+<script.py> output:
+    pred_loan_status_15              0              1
+    true_loan_status                                 
+    0                   $87,812,693.16     $86,006.56
+    1                    $7,903,046.82 $16,809,503.46                 
+
+With this, we can see that our bad rate of about 8% represents an estimated loan value of about 7.9 million dollars. This may seem like a lot at first, but compare it to the total value of non-default loans! With this, we are ready to start talking about our acceptance strategy going forward.
+
