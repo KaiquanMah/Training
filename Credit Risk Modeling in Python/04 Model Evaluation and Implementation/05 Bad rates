@@ -1,0 +1,31 @@
+Bad rates
+With acceptance rate in mind, you can now analyze the bad rate within the accepted loans. This way you will be able to see the percentage of defaults that have been accepted.
+Think about the impact of the acceptance rate and bad rate. We set an acceptance rate to have fewer defaults in the portfolio because defaults are more costly. Will the bad rate be less than the percentage of defaults in the test data?
+The predictions data frame test_pred_df has been loaded into the workspace.
+
+Print the first five rows of the predictions data frame.
+Create a subset called accepted_loans which only contains loans where the predicted loan status is 0.
+Calculate the bad rate based on true_loan_status of the subset using sum() and .count().
+
+# Print the top 5 rows of the new data frame
+print(test_pred_df.head())
+<script.py> output:
+       true_loan_status  prob_default  pred_loan_status
+    0                 1      0.982387                 1
+    1                 1      0.975163                 1
+    2                 0      0.003474                 0
+    3                 0      0.005457                 0
+    4                 1      0.119876                 0
+    
+    
+# Create a subset of only accepted loans
+accepted_loans = test_pred_df[test_pred_df['pred_loan_status'] == 0]
+
+# Calculate the bad rate
+print(np.sum(accepted_loans['true_loan_status']) / accepted_loans['true_loan_status'].count())
+<script.py> output:
+    0.08256789137380191
+    
+This bad rate doesn't look half bad! The bad rate with the threshold set by the 85% quantile() is about 8%. This means that of all the loans we've decided to accept from the test set, only 8% were actual defaults! If we accepted all loans, the percentage of defaults would be around 22%.
+
+    
