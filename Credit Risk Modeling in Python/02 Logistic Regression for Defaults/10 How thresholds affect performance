@@ -1,0 +1,53 @@
+How thresholds affect performance
+Setting the threshold to 0.4 shows promising results for model evaluation. Now you can assess the financial impact using the default recall which is selected from the classification reporting using the function precision_recall_fscore_support().
+For this, you will estimate the amount of unexpected loss using the default recall to find what proportion of defaults you did not catch with the new threshold. This will be a dollar amount which tells you how much in losses you would have if all the unfound defaults were to default all at once.
+The average loan value, avg_loan_amnt has been calculated and made available in the workspace along with preds_df and y_test.
+
+Reassign the loan_status values using the threshold 0.4.
+Store the number of defaults in preds_df by selecting the second value from the value counts and store it as num_defaults.
+Get the default recall rate from the classification matrix and store it as default_recall
+Estimate the unexpected loss from the new default recall by multiplying 1 - default_recall by the average loan amount and number of default loans.
+
+# Reassign the values of loan status based on the new threshold
+preds_df['loan_status'] = preds_df['prob_default'].apply(lambda x: 1 if x > 0.4 else 0)
+
+# Store the number of loan defaults from the prediction data
+num_defaults = preds_df['loan_status'].value_counts()[1]
+
+In [9]: preds_df['loan_status'].value_counts()
+Out[9]: 
+0    9862
+1    1922
+Name: loan_status, dtype: int64
+
+In [8]: num_defaults
+Out[8]: 1922
+
+
+
+
+# Store the default recall from the classification report
+default_recall = precision_recall_fscore_support(y_test,preds_df['loan_status'])[1][1]
+
+In [11]: precision_recall_fscore_support(y_test,preds_df['loan_status'])
+Out[11]: 
+(array([0.85946056, 0.62434964]),
+ array([0.92150467, 0.46403712]),
+ array([0.88940189, 0.53238687]),
+ array([9198, 2586]))
+ 
+ In [10]: default_recall
+Out[10]: 0.46403712296983757
+
+
+
+ 
+
+# Calculate the estimated impact of the new default recall rate
+# amt x # defaults x P(default)
+print(avg_loan_amnt * num_defaults * (1 - default_recall))
+<script.py> output:
+    9872265.223119883
+    
+Nice Job! By our estimates, this loss would be around $9.8 million. That seems like a lot! Try rerunning this code with threshold values of 0.3 and 0.5. Do you see the estimated losses changing? How do we find a good threshold value based on these metrics alone?
+
