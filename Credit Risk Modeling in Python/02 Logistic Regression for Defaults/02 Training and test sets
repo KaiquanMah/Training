@@ -1,0 +1,31 @@
+Creating training and test sets
+You've just trained LogisticRegression() models on different columns.
+You know that the data should be separated into training and test sets. test_train_split() is used to create both at the same time. The training set is used to make predictions, while the test set is used for evaluation. Without evaluating the model, you have no way to tell how well it will perform on new loan data.
+In addition to the intercept_, which is an attribute of the model, LogisticRegression() models also have the .coef_ attribute. This shows how important each training column is for predicting the probability of default.
+The data set cr_loan_clean is already loaded in the workspace.
+
+Create the data set X using interest rate, employment length, and income. Create the y set using loan status.
+Use train_test_split() to create the training and test sets from X and y.
+Create and train a LogisticRegression() model and store it as clf_logistic.
+Print the coefficients of the model using .coef_.
+
+
+# Create the X and y data sets
+X = cr_loan_clean[['loan_int_rate','person_emp_length','person_income']]
+y = cr_loan_clean[['loan_status']]
+
+# Use test_train_split to create the training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.4, random_state=123)
+
+# Create and fit the logistic regression model
+clf_logistic = LogisticRegression(solver='lbfgs').fit(X_train, np.ravel(y_train))
+
+# Print the models coefficients
+print(clf_logistic.coef_)
+
+<script.py> output:
+    [[ 1.28517496e-09 -2.27622202e-09 -2.17211991e-05]]
+    
+Nicely done! Do you see that three columns were used for training and there are three values in .coef_? This tells you how important each column, or feature, was for predicting. The more positive the value, the more it predicts defaults. Look at the value for loan_int_rate.
+
+    
