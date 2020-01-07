@@ -1,0 +1,66 @@
+Removing missing data
+You replaced missing data in person_emp_length, but in the previous exercise you saw that loan_int_rate has missing data as well.
+Similar to having missing data within loan_status, having missing data within loan_int_rate will make predictions difficult.
+Because interest rates are set by your company, having missing data in this column is very strange. It's possible that data ingestion issues created errors, but you cannot know for sure. For now, it's best to .drop() these records before moving forward.
+The data set cr_loan has been loaded in the workspace.
+
+Print the number of records that contain missing data for interest rate.
+Create an array of indices for rows that contain missing interest rate called indices.
+Drop the records with missing interest rate data and save the results to cr_loan_clean.
+
+# Print the number of nulls
+print(cr_loan[cr_loan.columns[cr_loan.isnull().any()]].isnull().sum())
+<script.py> output:
+    person_emp_length     895
+    loan_int_rate        3115
+    dtype: int64
+    
+    
+    
+    
+# Store the array on indices
+indices = cr_loan[cr_loan['loan_int_rate'].isnull()].index
+
+
+In [4]: indices
+Out[4]: 
+Int64Index([   38,    49,    56,    58,    61,    69,    70,    82,    83,    85,
+            ...
+            32498, 32503, 32525, 32528, 32539, 32540, 32545, 32546, 32562, 32563], dtype='int64', length=3115)
+   
+   
+# Save the new data without missing data
+cr_loan_clean = cr_loan.drop(indices)
+
+
+Now that the missing data and outliers have been processed, the data is ready for modeling! More often than not, financial data is fairly tidy, but it's always good to practice preparing data for analytical work.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Missing data intuition
+Here's an intuition check! When handling missing data, you have three options: keep, replace, and remove.
+You've been looking at numeric columns, but what about a non-numeric column? How would you handle missing data in the column person_home_ownership which has string values?
+The object ownership_table has already been created to show how many records occur in each unique value of person_home_ownership with the following code:
+
+# Count the number of records for each unique value
+cr_loan['person_home_ownership'].value_counts()
+
+ownership_table and cr_loan are already loaded in the workspace.
+Remove the records, they aren't going to be useful for prediction anyway.
+Replace the data with the most frequently occurring value, Rent.
+Keep the missing values because we don't know what to choose.
+
+#yes Replace the data with the value Other.
+You're right! We already have an all-inclusive class within person_home_ownership that stores all other types of home ownership as Other. With this, we eliminate missing data without affecting the data as a whole.
+
