@@ -1,0 +1,44 @@
+Visualising column importance
+When the model is trained on different sets of columns it changes the performance, but does the importance for the same column change depending on which group it's in?
+
+The data sets X2 and X3 have been created with the following code:
+X2 = cr_loan_prep[['loan_int_rate','person_emp_length']]
+X3 = cr_loan_prep[['person_income','loan_int_rate','loan_percent_income']]
+
+Understanding how different columns are used to arrive at a loan_status prediction is very important for model interpretability.
+The data sets cr_loan_prep, X2_train, X2_test, X3_train, X3_test, y_train, y_test are loaded in the workspace.
+
+
+
+Create and train a XGBClassifier() model on X2_train and call it clf_gbt2.
+Plot the column importances for the columns that clf_gbt2 trained on.
+# Train a model on the X data with 2 columns
+clf_gbt2 = xgb.XGBClassifier().fit(X2_train,np.ravel(y_train))
+
+# Plot the column importance for this model
+xgb.plot_importance(clf_gbt2, importance_type = 'weight')
+plt.show()
+
+In [3]: print(clf_gbt2.get_booster().get_score(importance_type = 'weight'))
+{'loan_int_rate': 456, 'person_emp_length': 233}
+
+
+
+
+
+
+
+Create and train another XGBClassifier() model on X3_train and call it clf_gbt3.
+Plot the column importances for the columns that clf_gbt3 trained on.
+# Train a model on the X data with 3 columns
+clf_gbt3 = xgb.XGBClassifier().fit(X3_train,np.ravel(y_train))
+
+# Plot the column importance for this model
+xgb.plot_importance(clf_gbt3, importance_type = 'weight')
+plt.show()
+
+
+In [6]: print(clf_gbt3.get_booster().get_score(importance_type = 'weight'))
+{'loan_percent_income': 146, 'loan_int_rate': 195, 'person_income': 315}
+Very good! Take a closer look at the plots. Did you notice that the importance of loan_int_rate went from 456 to 195? Initially, this was the most important column, but person_income ended up taking the top spot here.
+
