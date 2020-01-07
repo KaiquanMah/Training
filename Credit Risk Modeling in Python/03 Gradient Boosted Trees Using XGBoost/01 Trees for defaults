@@ -1,0 +1,34 @@
+Trees for defaults
+You will now train a gradient boosted tree model on the credit data, and see a sample of some of the predictions. Do you remember when you first looked at the predictions of the logistic regression model? They didn't look good. Do you think this model be different?
+The credit data cr_loan_prep, the training sets X_train and y_train, and the test data X_test is available in the workspace. The XGBoost package is loaded as xgb.
+
+Create and train a gradient boosted tree using XGBClassifier() and name it clf_gbt.
+Predict probabilities of default on the test data and store the results in gbt_preds.
+Create two data frames, preds_df and true_df, to store the first five predictions and true loan_status values.
+Concatenate and print the data frames true_df and preds_df in order, and check the model's results.
+
+# Train a model
+import xgboost as xgb
+clf_gbt = xgb.XGBClassifier().fit(X_train, np.ravel(y_train))
+
+# Predict with a model
+gbt_preds = clf_gbt.predict_proba(X_test)
+
+# Create dataframes of first five predictions, and first five true labels
+preds_df = pd.DataFrame(gbt_preds[:,1][0:5], columns = ['prob_default'])
+true_df = y_test.head()
+
+# Concatenate and print the two data frames for comparison
+print(pd.concat([true_df.reset_index(drop = True), preds_df], axis = 1))
+
+
+<script.py> output:
+       loan_status  prob_default
+    0            1      0.940435
+    1            1      0.922014
+    2            0      0.021707
+    3            0      0.026483
+    4            1      0.064803
+
+Interesting! The predictions don't look the same as with the LogisticRegression(), do they? Notice that this model is already accurately predicting the probability of default for some loans with a true value of 1 in loan_status.
+
