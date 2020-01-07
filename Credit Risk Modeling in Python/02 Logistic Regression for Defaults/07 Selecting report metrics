@@ -1,0 +1,60 @@
+Selecting report metrics
+The classification_report() has many different metrics within it, but you may not always want to print out the full report. Sometimes you just want specific values to compare models or use for other purposes.
+There is a function within scikit-learn that pulls out the values for you. That function is precision_recall_fscore_support() and it takes in the same parameters as classification_report.
+
+It is imported and used like this:
+# Import function
+from sklearn.metrics import precision_recall_fscore_support
+# Select all non-averaged values from the report
+precision_recall_fscore_support(y_true,predicted_values)
+
+The cr_loan_prep data set along with the predictions in preds_df have already been loaded in the workspace.
+
+
+
+Print the classification report for y_test and predicted loan status.
+# Print the classification report
+target_names = ['Non-Default', 'Default']
+print(classification_report(y_test, preds_df['loan_status'], target_names=target_names))
+
+
+<script.py> output:
+                  precision    recall  f1-score   support
+    
+     Non-Default       0.81      0.98      0.89      9198
+         Default       0.71      0.17      0.27      2586
+    
+       micro avg       0.80      0.80      0.80     11784
+       macro avg       0.76      0.57      0.58     11784
+    weighted avg       0.79      0.80      0.75     11784
+    
+
+
+
+
+
+
+Print all the non-average values using precision_recall_fscore_support().
+# Print all the non-average values from the report
+print(precision_recall_fscore_support(y_test, preds_df['loan_status']))
+
+<script.py> output:
+    (array([0.80742729, 0.71264368]), array([0.98097412, 0.16782676]), array([0.8857802 , 0.27167449]), array([9198, 2586]))
+
+
+
+
+
+
+
+
+Print only the first two values from the report by subsetting the string with [].
+# Print the first two numbers from the report
+print(precision_recall_fscore_support(y_test, preds_df['loan_status'])[0])
+
+<script.py> output:
+    [0.80742729 0.71264368]
+    
+Great! Now we know how to pull out specific values from the report to either store later for comparison, or use to check against portfolio performance. Remember the impact of recall for defaults? This way, you can store that value for later calculations.
+
+    
