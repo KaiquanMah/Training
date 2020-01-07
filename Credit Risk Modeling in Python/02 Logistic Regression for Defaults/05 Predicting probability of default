@@ -1,0 +1,37 @@
+Predicting probability of default
+All of the data processing is complete and it's time to begin creating predictions for probability of default. You want to train a LogisticRegression() model on the data, and examine how it predicts the probability of default.
+So that you can better grasp what the model produces with predict_proba, you should look at an example record alongside the predicted probability of default. How do the first five predictions look against the actual values of loan_status?
+The data set cr_loan_prep along with X_train, X_test, y_train, and y_test have already been loaded in the workspace.
+
+Train a logistic regression model on the training data and store it as clf_logistic.
+Use predict_proba() on the test data to create the predictions and store them in preds.
+Create two data frames, preds_df and true_df, to store the first five predictions and true loan_status values.
+Print the true_df and preds_df as one set using .concat().
+
+# Train the logistic regression model on the training data
+clf_logistic = LogisticRegression(solver='lbfgs').fit(X_train, np.ravel(y_train))
+
+# Create predictions of probability for loan status using test data
+preds = clf_logistic.predict_proba(X_test)
+
+# Create dataframes of first five predictions, and first five true labels
+preds_df = pd.DataFrame(preds[:,1][0:5], columns = ['prob_default'])
+true_df = y_test.head()
+
+# Concatenate and print the two data frames for comparison
+print(pd.concat([true_df.reset_index(drop = True), preds_df], axis = 1))
+
+
+<script.py> output:
+       loan_status  prob_default
+    0            1      0.445779
+    1            1      0.223447
+    2            0      0.288558
+    3            0      0.169358
+    4            1      0.114182
+
+
+
+Neat! We have some predictions now, but they don't look very accurate do they? It looks like most of the rows with loan_status at 1 have a low probability of default. How good are the rest of the predictions? Next, let's see if we can determine how accurate the entire model is.
+
+
