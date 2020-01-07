@@ -1,0 +1,32 @@
+Column importance and default prediction
+When using multiple training sets with many different groups of columns, it's important to keep and eye on which columns matter and which do not. It can be expensive or time-consuming to maintain a set of columns even though they might not have any impact on loan_status.
+
+The X data for this exercise was created with the following code:
+X = cr_loan_prep[['person_income','loan_int_rate',
+                  'loan_percent_income','loan_amnt',
+                  'person_home_ownership_MORTGAGE','loan_grade_F']]
+
+Train an XGBClassifier() model on this data, and check the column importance to see how each one performs to predict loan_status.
+The cr_loan_pret data set along with X_train and y_train have been loaded in the workspace.
+
+
+Create and train a XGBClassifier() model on the X_train and y_train training sets and store it as clf_gbt.
+Print the column importances for the columns in clf_gbt by using .get_booster() and .get_score().
+# Create and train the model on the training data
+clf_gbt = xgb.XGBClassifier().fit(X_train,np.ravel(y_train))
+
+# Print the column importances from the model
+print(clf_gbt.get_booster().get_score(importance_type = 'weight'))
+
+In [2]: clf_gbt.get_booster()
+Out[2]: <xgboost.core.Booster at 0x7fe949071c50>
+In [3]: clf_gbt.get_booster().get_score
+Out[3]: <bound method Booster.get_score of <xgboost.core.Booster object at 0x7fe949071c50>>
+
+<script.py> output:
+    {'loan_percent_income': 121, 'loan_int_rate': 183, 'person_income': 278, 'person_home_ownership_MORTGAGE': 39, 'loan_amnt': 47, 'loan_grade_F': 6}
+    
+    
+That's how you do it! So, the importance for loan_grade_F is only 6 in this case. This could be because there are so few of the F-grade loans. While the F-grade loans don't add much to predictions here, they might affect the importance of other training columns.
+
+
