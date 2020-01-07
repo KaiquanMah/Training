@@ -1,0 +1,97 @@
+Logistic regression basics
+You've now cleaned up the data and created the new data set cr_loan_clean.
+Think back to the final scatter plot from chapter 1 which showed more defaults with high loan_int_rate. Interest rates are easy to understand, but what how useful are they for predicting the probability of default?
+Since you haven't tried predicting the probability of default yet, test out creating and training a logistic regression model with just loan_int_rate. Also check the model's internal parameters, which are like settings, to see the structure of the model with this one column.
+The data cr_loan_clean has already been loaded in the workspace.
+
+Create the X and y sets using the loan_int_rate and loan_status columns.
+Create and fit a logistic regression model to the training data and call it clf_logistic_single.
+Print the parameters of the model with .get_params().
+Check the intercept of the model with the .intercept_ attribute.
+
+
+In [1]: cr_loan_clean.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 29459 entries, 0 to 29458
+Data columns (total 12 columns):
+person_age                    29459 non-null int64
+person_income                 29459 non-null int64
+person_home_ownership         29459 non-null object
+person_emp_length             29459 non-null int64
+loan_intent                   29459 non-null object
+loan_grade                    29459 non-null object
+loan_amnt                     29459 non-null int64
+loan_int_rate                 29459 non-null float64
+loan_status                   29459 non-null int64
+loan_percent_income           29459 non-null float64
+cb_person_default_on_file     29459 non-null object
+cb_person_cred_hist_length    29459 non-null int64
+dtypes: float64(2), int64(6), object(4)
+memory usage: 2.7+ MB
+
+
+# Create the X and y data sets
+X = cr_loan_clean[['loan_int_rate']]
+y = cr_loan_clean[['loan_status']]
+
+# Create and fit a logistic regression model
+clf_logistic_single = LogisticRegression()
+clf_logistic_single.fit(X, np.ravel(y))
+
+# Print the parameters of the model
+print(clf_logistic_single.get_params())
+
+# Print the intercept of the model
+print(clf_logistic_single.intercept_)
+
+
+
+<script.py> output:
+    {'C': 1.0, 'class_weight': None, 'dual': False, 'fit_intercept': True, 'intercept_scaling': 1, 'max_iter': 100, 'multi_class': 'warn', 'n_jobs': None, 'penalty': 'l2', 'random_state': None, 'solver': 'warn', 'tol': 0.0001, 'verbose': 0, 'warm_start': False}
+    [-4.43672624]
+    
+You're on your way to making predictions! Notice that the model was able to fit to the data, and establish some parameters internally. It's even produced an .intercept_ value like in the lecture. What if you use more than one column?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Multivariate logistic regression
+Generally, you won't use only loan_int_rate to predict the probability of default. You will want to use all the data you have to make predictions.
+With this in mind, try training a new model with different columns, called features, from the cr_loan_clean data. Will this model differ from the first one? For this, you can easily check the .intercept_ of the logistic regression. Remember that this is the y-intercept of the function and the overall log-odds of non-default.
+The cr_loan_clean data has been loaded in the workspace along with the previous model clf_logistic_single.
+
+Create a new X data set with loan_int_rate and person_emp_length. Store it as X_multi.
+Create a y data set with just loan_status.
+Create and .fit() a LogisticRegression() model on the new X data. Store it as clf_logistic_multi.
+Print the .intercept_ value of the model
+
+# Create X data for the model
+X_multi = cr_loan_clean[['loan_int_rate','person_emp_length']]
+
+# Create a set of y data for training
+y = cr_loan_clean[['loan_status']]
+
+# Create and train a new logistic regression
+clf_logistic_multi = LogisticRegression(solver='lbfgs').fit(X_multi, np.ravel(y))
+
+# Print the intercept of the model
+print(clf_logistic_multi.intercept_)
+
+<script.py> output:
+    [-4.21645549]
+
+Great! Take a closer look at each model's .intercept_ value. The values have changed! The new clf_logistic_multi model has an .intercept_ value closer to zero. This means the log odds of a non-default is approaching zero.
+
