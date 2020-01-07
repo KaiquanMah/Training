@@ -1,0 +1,70 @@
+Using sigThreshold - I
+In the next two exercises, you will focus on the sigThreshold signal. The sigThreshold signal is mainly used for comparing an indicator to a fixed number, which usually has applications for bounded oscillators, or perhaps rolling statistical scores (for example, for a trading strategy that might choose to go long when a ratio of mean to standard deviation is at -2, or vice versa). Whereas sigComparison and sigCrossover deal with quantities that are usually based off of an indicator that takes values in the same general area as prices, sigThreshold exists specifically to cover those situations outside the bounds of indicators that take values similar to prices.
+Furthermore, the sigThreshold() function takes the cross argument, which specifies whether it will function similarly to sigComparison (cross = FALSE) or sigCrossover (cross = TRUE), respectively. In this exercise, you will implement a variant of sigThreshold that functions similarly to sigComparison.
+Your job will be to implement a sigThreshold that checks whether or not DVO_2_126 is under 20. This signal will serve as one of the two switches that need to be "on" in order to enter into a long position in the strategy.
+https://www.rdocumentation.org/packages/quantstrat/versions/0.8.2/topics/sigThreshold
+
+
+Use add.signal() to add a sigThreshold signal specifying that the DVO_2_126 must be under 20.
+Set cross equal to FALSE.
+Label this signal longthreshold.
+# Implement a sigThreshold which specifies that DVO_2_126 must be less than 20, label it longthreshold
+add.signal(strategy.st, 
+           name = "sigThreshold", 
+           
+           # Use the DVO_2_126 column
+           arguments = list(column = "DVO_2_126", 
+                            
+                            # The threshold is 20
+                            threshold = 20, 
+                            
+                            # We want the oscillator to be under this value
+                            relationship = "lt", 
+                            
+                            # We're interested in every instance that the oscillator is less than 20
+                            cross = FALSE), 
+           
+           # Label it longthreshold
+           label = "longthreshold")
+
+Well done! You just added your first sigThreshold signal to your strategy.
+
+
+
+
+
+
+
+
+
+
+Using sigThreshold() - II
+In this exercise, you will implement a signal to exit a position given a certain threshold value of the DVO. While there are two entry signals that are both necessary but neither sufficient on its own, the two exit signals (this one and the one you implemented in an earlier exercise) are both sufficient on their own (but neither necessary in the existence of the other) to exit a position.
+In this exercise, you will again use sigThreshold(), this time counting when the DVO_2_126 crosses above a threshold of 80. To mimic a sigCrossover signal, set cross equal to TRUE Label this signal thresholdexit.
+
+Use add.signal() to add a sigThreshold signal specifying that the DVO_2_126 must be above 80.
+This time, set cross equal to TRUE.
+Label this signal thresholdexit.
+
+# Add a sigThreshold signal to your strategy that specifies that DVO_2_126 must cross above 80 and label it thresholdexit
+add.signal(strategy.st, 
+           name = "sigThreshold", 
+           
+           # Reference the column of DVO_2_126
+           arguments = list(column = "DVO_2_126", 
+                            
+                            # Set a threshold of 80
+                            threshold = 80, 
+                            
+                            # The oscillator must be greater than 80
+                            relationship = "gt", 
+                            
+                            # We are interested only in the cross
+                            cross = TRUE), 
+           
+           # Label it thresholdexit
+           label = "thresholdexit")
+
+
+Perfect! Your strategy now has two distinct sigThreshold signals and is becoming much more robust.
+
