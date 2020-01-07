@@ -1,0 +1,64 @@
+Thresholds and confusion matrices
+You've looked at setting thresholds for defaults, but how does this impact overall performance? To do this, you can start by looking at the effects with confusion matrices.
+Set different values for the threshold on probability of default, and use a confusion matrix to see how the changing values affect the model's performance.
+The data frame of predictions, preds_df, as well as the model clf_logistic have been loaded in the workspace.
+      
+            PREDICT
+ACTUAL      NEG   POS
+NEG         TN    FP      PRECISION0 = TN / (TN+FN)
+POS         FN    TP      PRECISION1 = TP / (TP+FP)
+
+RECALL0 = TN / (TN+FP), RECALL1 = TP / (TP+FN)
+
+
+
+Reassign values of loan_status using a threshold of 0.5 for probability of default within preds_df.
+Print the confusion matrix of the y_test data and the new loan status values.
+In [1]: preds_df.head()
+Out[1]: 
+   prob_default  loan_status
+0      0.445779            1
+1      0.223447            0
+2      0.288558            0
+3      0.169358            0
+4      0.114182            0
+
+# Set the threshold for defaults to 0.5
+preds_df['loan_status'] = preds_df['prob_default'].apply(lambda x: 1 if x > 0.5 else 0)
+
+# Print the confusion matrix
+print(confusion_matrix(y_test,preds_df['loan_status']))
+
+<script.py> output:
+    [[9023  175]
+     [2152  434]]
+
+
+
+
+
+
+Reassign values of loan_status using a threshold of 0.4 for probability of default within preds_df.
+Print the confusion matrix of the y_test data and the new loan status values.
+# Set the threshold for defaults to 0.4
+preds_df['loan_status'] = preds_df['prob_default'].apply(lambda x: 1 if x > 0.4 else 0)
+
+
+# Print the confusion matrix
+print(confusion_matrix(y_test,preds_df['loan_status']))
+<script.py> output:
+    [[8476  722]
+     [1386 1200]]
+
+
+
+
+
+
+
+
+
+Based on the confusion matrices you just created, calculate the default recall for each. Using these values, answer the following: which threshold gives us the highest value for default recall?
+0.4
+Correct! The value for default recall at this threshold is actually pretty high! You can check out the non-default recalls as well to see how the threshold affected those values.
+
