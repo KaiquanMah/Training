@@ -1,0 +1,84 @@
+Comparing with ROCs
+You should use ROC charts and AUC scores to compare the two models. Sometimes, visuals can really help you and potential business users understand the differences between the various models under consideration.
+With the graph in mind, you will be more equipped to make a decision. The lift is how far the curve is from the random prediction. The AUC is the area between the curve and the random prediction. The model with more lift, and a higher AUC, is the one that's better at making predictions accurately.
+The trained models clf_logistic and clf_gbt have been loaded into the workspace. The predictions for the probability of default clf_logistic_preds and clf_gbt_preds have been loaded as well.
+
+Calculate the fallout, sensitivity, and thresholds for the logistic regression and gradient boosted tree.
+Plot the ROC chart for the lr then gbt using the fallout on the x-axis and sensitivity on the y-axis for each model.
+
+In [2]: y_test.head()
+Out[2]: 
+       loan_status
+28606            1
+22585            1
+13888            0
+3145             0
+14882            1
+
+In [3]: clf_gbt_preds[:5]
+Out[3]: 
+array([0.9823872 , 0.9751634 , 0.00347357, 0.00545715, 0.11987627],
+      dtype=float32)
+      
+      
+
+
+# ROC chart components
+fallout_lr, sensitivity_lr, thresholds_lr = roc_curve(y_test, clf_logistic_preds)
+In [6]: fallout_lr, sensitivity_lr, thresholds_lr
+Out[6]: 
+(array([0.00000000e+00, 1.08719287e-04, 1.08719287e-04, ...,
+        9.95542509e-01, 9.95542509e-01, 1.00000000e+00]),
+ array([0.00000000e+00, 0.00000000e+00, 7.73395205e-04, ...,
+        9.99613302e-01, 1.00000000e+00, 1.00000000e+00]),
+ array([1.78648070e+00, 7.86480701e-01, 7.73222120e-01, ...,
+        2.19491398e-05, 1.83856114e-05, 5.26111040e-36]))
+        
+        
+        
+
+
+fallout_gbt, sensitivity_gbt, thresholds_gbt = roc_curve(y_test, clf_gbt_preds)
+In [7]: fallout_gbt, sensitivity_gbt, thresholds_gbt
+Out[7]: 
+(array([0.        , 0.        , 0.        , ..., 0.99173733, 0.99195477,
+        1.        ]),
+ array([0.00000000e+00, 3.86697602e-04, 8.54601701e-02, ...,
+        1.00000000e+00, 1.00000000e+00, 1.00000000e+00]),
+ array([1.9995570e+00, 9.9955708e-01, 9.9608290e-01, ..., 7.6419080e-04,
+        7.6145172e-04, 3.5378276e-04], dtype=float32))
+
+
+# ROC Chart with both
+plt.plot(fallout_lr, sensitivity_lr, color = 'blue', label='%s' % 'Logistic Regression')
+plt.plot(fallout_gbt, sensitivity_gbt, color = 'green', label='%s' % 'GBT')
+plt.plot([0, 1], [0, 1], linestyle='--', label='%s' % 'Random Prediction')
+plt.title("ROC Chart for LR and GBT on the Probability of Default")
+plt.xlabel('Fall-out')
+plt.ylabel('Sensitivity')
+plt.legend()
+plt.show()
+
+
+
+
+
+
+
+
+
+
+Print the AUC for the logistic regression.
+Print the AUC for the gradient boosted tree.
+# Print the logistic regression AUC with formatting
+print("Logistic Regression AUC Score: %0.2f" % roc_auc_score(y_test, clf_logistic_preds))
+
+# Print the gradient boosted tree AUC with formatting
+print("Gradient Boosted Tree AUC Score: %0.2f" % roc_auc_score(y_test, clf_gbt_preds))
+
+<script.py> output:
+    Logistic Regression AUC Score: 0.76
+    Gradient Boosted Tree AUC Score: 0.94
+
+Look at the ROC curve for the gradient boosted tree. Not only is the lift much higher, the calculated AUC score is also quite a bit higher. It's beginning to look like the gradient boosted tree is best. Let's check the calibration to be sure.
+
