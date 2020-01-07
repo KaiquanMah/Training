@@ -1,0 +1,89 @@
+Acceptance rates
+Setting an acceptance rate and calculating the threshold for that rate can be used to set the percentage of new loans you want to accept. For this exercise, assume the test data is a fresh batch of new loans. You will need to use the quantile() function from numpy to calculate the threshold.
+The threshold should be used to assign new loan_status values. Does the number of defaults and non-defaults in the data change?
+The trained model clf_gbt and the data frame of it's predictions, test_pred_df, are available.
+
+Print the summary statistics of prob_default within the data frame of predictions using .describe().
+Calculate the threshold for a 85% acceptance rate using quantile() and store it as threshold_85.
+Create a new column called pred_loan_status based on threshold_85.
+Print the value counts of the new values in pred_loan_status.
+
+# Check the statistics of the probabilities of default
+print(test_pred_df['prob_default'].describe())
+In [1]: print(test_pred_df['prob_default'].describe())
+count    11784.000000
+mean         0.216866
+std          0.333038
+min          0.000354
+25%          0.022246
+50%          0.065633
+75%          0.177804
+max          0.999557
+
+
+# Calculate the threshold for a 85% acceptance rate
+threshold_85 = np.quantile(test_pred_df['prob_default'], 0.85)
+In [3]: threshold_85
+Out[3]: 0.8039963573217375
+
+
+
+# Apply acceptance rate threshold
+test_pred_df['pred_loan_status'] = test_pred_df['prob_default'].apply(lambda x: 1 if x > threshold_85 else 0)
+
+# Print the counts of loan status after the threshold
+print(test_pred_df['pred_loan_status'].value_counts())
+    0    10016
+    1     1768
+    Name: pred_loan_status, dtype: int64
+
+In the results of .describe() do you see how it's not until 75% that you start to see double-digit numbers? That's because the majority of our test set is non-default loans. Next let's look at how the acceptance rate and threshold split up the data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Visualizing quantiles of acceptance
+You know how quantile() works to compute a threshold, and you've seen an example of what it does to split the loans into accepted and rejected. What does this threshold look like for the test set, and how can you visualize it?
+To check this, you can create a histogram of the probabilities and add a reference line for the threshold. With this, you can visually show where the threshold exists in the distribution.
+The model predictions clf_gbt_preds have been loaded into the workspace.
+
+
+Create a histogram of the predicted probabilities clf_gbt_preds.
+Calculate the threshold for an acceptance rate of 85% using quantile(). Store this value as threshold.
+Plot the histogram again, except this time add a reference line using .axvline().
+
+# Plot the predicted probabilities of default
+plt.hist(clf_gbt_preds, color = 'blue', bins = 40)
+In [1]: clf_gbt_preds
+Out[1]: 
+array([0.9823872 , 0.9751634 , 0.00347357, ..., 0.10744166, 0.21788462,
+       0.10188529], dtype=float32)
+
+# Calculate the threshold with quantile
+threshold = np.quantile(clf_gbt_preds, 0.85)
+In [3]: threshold
+Out[3]: 0.8039963573217375
+
+# Add a reference line to the plot for the threshold
+plt.axvline(x = threshold, color = 'red')
+plt.show()
+
+
+Here, you can see where the threshold is on the range of predicted probabilities. Not only can you see how many loans will be accepted (left side), but also how many loans will be rejected (right side). I recommend that you re-run this code with different threshold values to better understand how this affects the acceptance rate.
+
