@@ -1,0 +1,54 @@
+Column selection and model performance
+Creating the training set from different combinations of columns affects the model and the importance values of the columns. Does a different selection of columns also affect the F-1 scores, the combination of the precision and recall, of the model? You can answer this question by training two different models on two different sets of columns, and checking the performance.
+Inaccurately predicting defaults as non-default can result in unexpected losses if the probability of default for these loans was very low. You can use the F-1 score for defaults to see how the models will accurately predict the defaults.
+The credit data, cr_loan_prep and the two training column sets X and X2 have been loaded in the workspace. The models gbt and gbt2 have already been trained.
+
+Use both gbt and gbt2 to predict loan_status and store the values in gbt_preds and gbt2_preds.
+Print the classification_report() of the first model.
+Print the classification_report() of the second model.
+
+# Predict the loan_status using each model
+gbt_preds = gbt.predict(X_test)
+gbt2_preds = gbt2.predict(X2_test)
+
+# Print the classification report of the first model
+target_names = ['Non-Default', 'Default']
+print(classification_report(y_test, gbt_preds, target_names=target_names))
+<script.py> output:
+                  precision    recall  f1-score   support
+    
+     Non-Default       0.90      0.95      0.92      9198
+         Default       0.79      0.61      0.69      2586
+    
+       micro avg       0.88      0.88      0.88     11784
+       macro avg       0.84      0.78      0.81     11784
+    weighted avg       0.87      0.88      0.87     11784
+    
+ 
+ 
+ 
+ 
+# Print the classification report of the second model
+print(classification_report(y_test, gbt2_preds, target_names=target_names))
+
+<script.py> output:   
+                  precision    recall  f1-score   support
+    
+     Non-Default       0.90      0.98      0.94      9198
+         Default       0.89      0.60      0.72      2586
+    
+       micro avg       0.90      0.90      0.90     11784
+       macro avg       0.89      0.79      0.83     11784
+    weighted avg       0.90      0.90      0.89     11784
+
+
+
+
+
+
+
+
+Have a look at the classification_report() for both models. What is the highest F-1 score for predicting defaults?
+0.72
+You're right! Originally, it looked like the selection of columns affected model accuracy the most, but now we see that the selection of columns also affects recall by quite a bit.
+
