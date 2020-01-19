@@ -1,0 +1,233 @@
+Install a conda package (I)
+Just as you can get help on conda as a whole, you can get help on commands within it. You will often use the command conda install; you can look at the corresponding help documentation using the terminal window. That is, run conda install --help and read through the output.
+How is the positional argument package_spec defined in the documentation for conda install?
+
+(base) $ conda install --help
+usage: conda install [-h] [--revision REVISION] [-n ENVIRONMENT | -p PATH]                     [-c CHANNEL] [--use-local] [--override-channels]
+                     [--repodata-fn REPODATA_FNS] [--strict-channel-priority]
+                     [--no-channel-priority] [--no-deps | --only-deps]
+                     [--no-pin] [--copy] [-C] [-k] [--offline] [-d] [--json]
+                     [-q] [-v] [-y] [--download-only] [--show-channel-urls]
+                     [--file FILE] [--force-reinstall]
+                     [--freeze-installed | --update-deps | -S | --update-all | --update-specs]
+                     [-m] [--clobber] [--dev]
+                     [package_spec [package_spec ...]]
+
+Installs a list of packages into a specified conda environment.
+
+    This command accepts a list of package specifications (e.g, bitarray=0.8)
+    and installs a set of packages consistent with those specifications and
+    compatible with the underlying environment. If full compatibility cannot
+    be assured, an error is reported and the environment is not changed.
+
+    Conda attempts to install the newest versions of the requestedpackages. To
+    accomplish this, it may update some packages that are already installed, or
+    install additional packages. To prevent existing packages fromupdating,
+    use the --freeze-installed option. This may force conda to install older
+    versions of the requested packages, and it does not prevent additional
+    dependency packages from being installed.
+
+    If you wish to skip dependency checking altogether, use the '--no-deps'
+    option. This may result in an environment with incompatible packages, so
+    this option must be used with great caution.
+
+    conda can also be called with a list of explicit conda packagefilenames
+    (e.g. ./lxml-3.2.0-py27_0.tar.bz2). Using conda in this mode implies the
+    --no-deps option, and should likewise be used with great caution. Explicit
+    filenames and package specifications cannot be mixed in a single command.
+
+Options:
+
+positional arguments:
+  package_spec          Packages to install or update in the conda
+                        environment.
+
+optional arguments:
+  -h, --help            Show this help message and exit.
+  --revision REVISION   Revert to the specified REVISION.
+  --file FILE           Read package versions from the given file.Repeated
+                        file specifications can be passed (e.g. --file=file1
+                        --file=file2).
+  --dev                 Use `sys.executable -m conda` in wrapper scripts
+                        instead of CONDA_EXE. This is mainly for use during
+                        tests where we test new conda source against old
+                        Python versions.
+
+Target Environment Specification:
+  -n ENVIRONMENT, --name ENVIRONMENT
+                        Name of environment.
+  -p PATH, --prefix PATH
+                        Full path to environment location (i.e. prefix).
+
+Channel Customization:
+  -c CHANNEL, --channel CHANNEL
+                        Additional channel to search for packages.These are
+                        URLs searched in the order they are given (including
+                        file:// for local directories). Then, the defaults or
+                        channels from .condarc are searched (unless
+                        --override-channels is given). You can use'defaults'
+                        to get the default packages for conda. Youcan also
+                        use any name and the .condarc channel_alias value will
+                        be prepended. The default channel_alias is
+                        http://conda.anaconda.org/.
+  --use-local           Use locally built packages. Identical to '-c local'.
+  --override-channels   Do not search default or .condarc channels. Requires
+                        --channel.
+  --repodata-fn REPODATA_FNS
+                        Specify name of repodata on remote server.Conda will
+                        try whatever you specify, but will ultimately fall
+                        back to repodata.json if your specs are not
+                        satisfiable with what you specify here. This is used
+                        to employ repodata that is reduced in timescope. You
+                        may pass this flagmore than once. Leftmostentries are
+                        tried first, and the fallback torepodata.json is added
+                        for you automatically.
+
+Solver Mode Modifiers:
+  --strict-channel-priority
+                        Packages in lower priority channels are not considered
+                        if a package with the same name appears ina higher
+                        priority channel.
+  --no-channel-priority
+                        Package version takes precedence over channel
+                        priority. Overrides the value given by `conda config
+                        --show channel_priority`.
+  --no-deps             Do not install, update, remove, or change
+                        dependencies. This WILL lead to broken environments
+                        and inconsistent behavior. Use at your ownrisk.
+  --only-deps           Only install dependencies.
+  --no-pin              Ignore pinned file.
+  --force-reinstall     Ensure that any user-requested package forthe current
+                        operation is uninstalled and reinstalled, even if that
+                        package already exists in the environment.
+  --freeze-installed, --no-update-deps
+                        Do not update or change already-installed
+                        dependencies.
+  --update-deps         Update dependencies.
+  -S, --satisfied-skip-solve
+                        Exit early and do not run the solver if the requested
+                        specs are satisfied. Also skips aggressiveupdates as
+                        configured by 'aggressive_update_packages'. Similar to
+                        the default behavior of 'pip install'.
+  --update-all, --all   Update all installed packages in the environment.
+  --update-specs        Update based on provided specifications.
+
+Package Linking and Install-time Options:
+  --copy                Install all packages using copies instead of hard- or
+                        soft-linking.
+  -m, --mkdir           Create the environment directory if necessary.
+  --clobber             Allow clobbering of overlapping file pathswithin
+                        packages, and suppress related warnings.
+
+Networking Options:
+  -C, --use-index-cache
+                        Use cache of channel index files, even if it has
+                        expired.
+  -k, --insecure        Allow conda to perform "insecure" SSL connections and
+                        transfers. Equivalent to setting 'ssl_verify' to
+                        'false'.
+  --offline             Offline mode. Don't connect to the Internet.
+
+Output, Prompt, and Flow Control Options:
+  -d, --dry-run         Only display what would have been done.
+  --json                Report all output as json. Suitable for using conda
+                        programmatically.
+  -q, --quiet           Do not display progress bar.
+  -v, --verbose         Can be used multiple times. Once for INFO,twice for
+                        DEBUG, three times for TRACE.
+  -y, --yes             Do not ask for confirmation.
+  --download-only       Solve an environment and ensure package caches are
+                        populated, but exit prior to unlinking andlinking
+                        packages into the prefix.
+  --show-channel-urls   Show channel urls. Overrides the value given by `conda
+                        config --show show_channel_urls`.
+
+Examples:
+
+    conda install -n myenv scipy
+    
+    
+
+
+Show packages installed into the conda environment.
+Packages to download onto the working system.
+Read package versions from the given file.
+
+#yes Packages to install into the conda environment.
+Good! Being able to use Conda's help documentation is very useful.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Install a conda package (II)
+Installing a package is largely a matter of listing the name(s) of packages to install after the command conda install. But there is more to it behind the scenes. The versions of packages to install (along with all their dependencies) must be compatible with all versions of other software currently installed. Often this "satisfiability" constraint depends on choosing a package version compatible with a particular version of Python that is installed. Conda is special among "package managers" in that it always guarantees this consistency; you will see the phrase "Solving environment..." during installation to indicate this computation.
+For example, you may simply instruct conda to install foo-lib. The tool first determines which operating system you are running, and then narrows the match to candidates made for this platform. Then, conda determines the version of Python on the system (say 3.7), and chooses the package version for -py37. But, beyond those simple limits, all dependencies are checked.
+Suppose foo-lib is available in versions 1.0, 1.1, 1.2, 2.0, 2.1, 2.2, 2.3, 3.0, 3.1 (for your platform and Python version). As a first goal, conda attempts to choose the latest version of foo-lib. However, maybe foo-lib depends on bar-lib, which itself is available in various versions (say 1 through 20 in its versioning scheme). It might be that foo-lib 3.1 is compatible with bar-lib versions 17, 18, and 19; but blob-lib (which is already installed) is compatible only with versions of bar-lib less than 17. Therefore, conda would examine the compatibility of foo-lib 3.0 as a fallback. In this hypothetical, foo-lib 3.0 is compatible with bar-lib 16, so that version is chosen (bar-lib is also updated to the latest compatible version 16 in the same command if an earlier version is currently installed).
+
+Visually (octagons mark chosen versions):
+
+Resolution of 'conda install foo-lib blob-lib'
+blob-lib 1.0 -> bar-lib 15 or 16
+foo-lib 3.0 -> bar-lib 15 or 16 or 17 or 18
+foo lib 3.1 -> bar-lib 17 or 18
+
+
+
+
+Install the package cytoolz using conda. (Press y when asked to proceed.)
+(base) $ conda install cytoolz
+Collecting package metadata (current_repodata.json): done
+Solving environment: done
+## Package Plan ##
+
+  environment location: /home/repl/miniconda
+
+  added / updated specs:
+    - cytoolz
+
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    cytoolz-0.10.1             |   py36h7b6447c_0         377 KB
+    ------------------------------------------------------------
+                                           Total:         377 KB
+
+The following NEW packages will be INSTALLED:
+
+  cytoolz            pkgs/main/linux-64::cytoolz-0.10.1-py36h7b6447c_0
+  toolz              pkgs/main/noarch::toolz-0.10.0-py_0
+
+
+Proceed ([y]/n)? y
+
+
+Downloading and Extracting Packages
+cytoolz-0.10.1       | 377 KB    |cytoolz-0.10.1       | 377 KB    | ##################################### | 100%
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
+
+Well done! Notice that executing "conda install" required solving the satisfiability problem(i.e., determining all compatible versions) to ensure compatible dependencies were installed. In this case, cytoolz required toolz as well.
+
