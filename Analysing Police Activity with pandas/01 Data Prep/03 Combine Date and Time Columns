@@ -1,0 +1,88 @@
+Combining object columns
+Currently, the date and time of each traffic stop are stored in separate object columns: stop_date and stop_time.
+In this exercise, you'll combine these two columns into a single column, and then convert it to datetime format. This will enable convenient date-based attributes that we'll use later in the course.
+
+Use a string method to concatenate stop_date and stop_time (separated by a space), and store the result in combined.
+Convert combined to datetime format, and store the result in a new column named stop_datetime.
+Examine the DataFrame .dtypes to confirm that stop_datetime is a datetime column.
+
+# Concatenate 'stop_date' and 'stop_time' (separated by a space)
+combined = ri.stop_date.str.cat(ri.stop_time, sep=' ')
+
+# Convert 'combined' to datetime format
+ri['stop_datetime'] = pd.to_datetime(combined)
+
+# Examine the data types of the DataFrame
+print(ri.dtypes)
+
+
+<script.py> output:
+    stop_date                     object
+    stop_time                     object
+    driver_gender                 object
+    driver_race                   object
+    violation_raw                 object
+    violation                     object
+    search_conducted                bool
+    search_type                   object
+    stop_outcome                  object
+    is_arrested                     bool
+    stop_duration                 object
+    drugs_related_stop              bool
+    district                      object
+    stop_datetime         datetime64[ns]
+    dtype: object
+    
+Excellent! Now we're ready to set the stop_datetime column as the index.
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+Setting the index
+The last step that you'll take in this chapter is to set the stop_datetime column as the DataFrame's index. By replacing the default index with a DatetimeIndex, you'll make it easier to analyze the dataset by date and time, which will come in handy later in the course!
+
+
+Set stop_datetime as the DataFrame index.
+Examine the index to verify that it is a DatetimeIndex.
+Examine the DataFrame columns to confirm that stop_datetime is no longer one of the columns.
+
+# Set 'stop_datetime' as the index
+ri.set_index('stop_datetime', inplace=True)
+
+# Examine the index
+print(ri.index)
+<script.py> output:
+    DatetimeIndex(['2005-01-04 12:55:00', '2005-01-23 23:15:00',
+                   '2005-02-17 04:15:00', '2005-02-20 17:15:00',
+                   '2005-02-24 01:20:00', '2005-03-14 10:00:00',
+                   '2005-03-29 21:55:00', '2005-04-04 21:25:00',
+                   '2005-07-14 11:20:00', '2005-07-14 19:55:00',
+                   ...
+                   '2015-12-31 13:23:00', '2015-12-31 18:59:00',
+                   '2015-12-31 19:13:00', '2015-12-31 20:20:00',
+                   '2015-12-31 20:50:00', '2015-12-31 21:21:00',
+                   '2015-12-31 21:59:00', '2015-12-31 22:04:00',
+                   '2015-12-31 22:09:00', '2015-12-31 22:47:00'],
+                  dtype='datetime64[ns]', name='stop_datetime', length=86536, freq=None)
+                  
+                  
+# Examine the columns
+print(ri.columns)
+<script.py> output:
+    Index(['stop_date', 'stop_time', 'driver_gender', 'driver_race',
+           'violation_raw', 'violation', 'search_conducted', 'search_type',
+           'stop_outcome', 'is_arrested', 'stop_duration', 'drugs_related_stop',
+           'district'],
+          dtype='object')
+          
+          
