@@ -1,0 +1,83 @@
+Converting stop durations to numbers
+In the traffic stops dataset, the stop_duration column tells you approximately how long the driver was detained by the officer. Unfortunately, the durations are stored as strings, such as '0-15 Min'. How can you make this data easier to analyze?
+In this exercise, you'll convert the stop durations to integers. Because the precise durations are not available, you'll have to estimate the numbers using reasonable values:
+Convert '0-15 Min' to 8
+Convert '16-30 Min' to 23
+Convert '30+ Min' to 45
+
+Print the unique values in the stop_duration column. (This has been done for you.)
+Create a dictionary called mapping that maps the stop_duration strings to the integers specified above.
+Convert the stop_duration strings to integers using the mapping, and store the results in a new column called stop_minutes.
+Print the unique values in the stop_minutes column, to verify that the durations were properly converted to integers.
+
+# Print the unique values in 'stop_duration'
+print(ri.stop_duration.unique())
+<script.py> output:
+    ['0-15 Min' '16-30 Min' '30+ Min']
+
+
+# Create a dictionary that maps strings to integers
+mapping = {'0-15 Min': 8,
+           '16-30 Min': 23,
+           '30+ Min': 45}
+
+
+# Convert the 'stop_duration' strings to integers using the 'mapping'
+ri['stop_minutes'] = ri.stop_duration.map(mapping)
+
+# Print the unique values in 'stop_minutes'
+print(ri.stop_minutes.unique())
+<script.py> output:
+    [ 8 23 45]
+
+Excellent! Next you'll analyze the stop length for each type of violation.
+
+
+
+
+
+
+
+
+
+
+
+
+Plotting stop length
+If you were stopped for a particular violation, how long might you expect to be detained?
+In this exercise, you'll visualize the average length of time drivers are stopped for each type of violation. Rather than using the violation column in this exercise, you'll use violation_raw since it contains more detailed descriptions of the violations.
+
+For each value in the violation_raw column, calculate the mean number of stop_minutes that a driver is detained.
+Save the resulting Series as a new object, stop_length.
+Sort stop_length by its values, and then visualize it using a horizontal bar plot.
+Display the plot.
+
+# Calculate the mean 'stop_minutes' for each value in 'violation_raw'
+print(ri.groupby('violation_raw').stop_minutes.mean())
+<script.py> output:
+    violation_raw
+    APB                                 17.967033
+    Call for Service                    22.124371
+    Equipment/Inspection Violation      11.445655
+    Motorist Assist/Courtesy            17.741463
+    Other Traffic Violation             13.844490
+    Registration Violation              13.736970
+    Seatbelt Violation                   9.662815
+    Special Detail/Directed Patrol      15.123632
+    Speeding                            10.581562
+    Suspicious Person                   14.910714
+    Violation of City/Town Ordinance    13.254144
+    Warrant                             24.055556
+    Name: stop_minutes, dtype: float64
+
+
+
+# Save the resulting Series as 'stop_length'
+stop_length = ri.groupby('violation_raw').stop_minutes.mean()
+
+# Sort 'stop_length' by its values and create a horizontal bar plot
+stop_length.sort_values().plot(kind='barh')
+
+# Display the plot
+plt.show()
+
