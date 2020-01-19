@@ -1,0 +1,112 @@
+Preparing the DataFrames
+In this exercise, you'll prepare the traffic stop and weather rating DataFrames so that they're ready to be merged:
+With the ri DataFrame, you'll move the stop_datetime index to a column since the index will be lost during the merge.
+With the weather DataFrame, you'll select the DATE and rating columns and put them in a new DataFrame.
+
+Reset the index of the ri DataFrame.
+Examine the head of ri to verify that stop_datetime is now a DataFrame column, and the index is now the default integer index.
+Create a new DataFrame named weather_rating that contains only the DATE and rating columns from the weather DataFrame.
+Examine the head of weather_rating to verify that it contains the proper columns.
+
+# Reset the index of 'ri'
+ri.reset_index(inplace=True)
+
+# Examine the head of 'ri'
+print(ri.head())
+<script.py> output:
+            stop_datetime   stop_date stop_time driver_gender driver_race  \
+    0 2005-01-04 12:55:00  2005-01-04     12:55             M       White   
+    1 2005-01-23 23:15:00  2005-01-23     23:15             M       White   
+    2 2005-02-17 04:15:00  2005-02-17     04:15             M       White   
+    3 2005-02-20 17:15:00  2005-02-20     17:15             M       White   
+    4 2005-02-24 01:20:00  2005-02-24     01:20             F       White   
+    
+                        violation_raw  violation  search_conducted search_type  \
+    0  Equipment/Inspection Violation  Equipment             False         NaN   
+    1                        Speeding   Speeding             False         NaN   
+    2                        Speeding   Speeding             False         NaN   
+    3                Call for Service      Other             False         NaN   
+    4                        Speeding   Speeding             False         NaN   
+    
+        stop_outcome  is_arrested stop_duration  drugs_related_stop district  \
+    0       Citation        False      0-15 Min               False  Zone X4   
+    1       Citation        False      0-15 Min               False  Zone K3   
+    2       Citation        False      0-15 Min               False  Zone X4   
+    3  Arrest Driver         True     16-30 Min               False  Zone X1   
+    4       Citation        False      0-15 Min               False  Zone X3 
+    
+       frisk  stop_minutes  
+    0  False             8  
+    1  False             8  
+    2  False             8  
+    3  False            23  
+    4  False             8      
+    
+    
+    
+    
+    
+    
+    
+# Create a DataFrame from the 'DATE' and 'rating' columns
+weather_rating = weather[['DATE', 'rating']]
+
+# Examine the head of 'weather_rating'
+print(weather_rating.head())
+<script.py> output:
+
+             DATE rating
+    0  2005-01-01    bad
+    1  2005-01-02    bad
+    2  2005-01-03    bad
+    3  2005-01-04    bad
+    4  2005-01-05    bad
+
+Great work! The ri and weather_rating DataFrames are now ready to be merged.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Merging the DataFrames
+In this exercise, you'll merge the ri and weather_rating DataFrames into a new DataFrame, ri_weather.
+The DataFrames will be joined using the stop_date column from ri and the DATE column from weather_rating. Thankfully the date formatting matches exactly, which is not always the case!
+Once the merge is complete, you'll set stop_datetime as the index, which is the column you saved in the previous exercise.
+
+Examine the shape of the ri DataFrame.
+Merge the ri and weather_rating DataFrames using a left join.
+Examine the shape of ri_weather to confirm that it has two more columns but the same number of rows as ri.
+Replace the index of ri_weather with the stop_datetime column.
+
+# Examine the shape of 'ri'
+print(ri.shape)
+
+# Merge 'ri' and 'weather_rating' using a left join
+ri_weather = pd.merge(left=ri, right=weather_rating, left_on='stop_date', right_on='DATE', how='left')
+
+# Examine the shape of 'ri_weather'
+print(ri_weather.shape)
+
+# Set 'stop_datetime' as the index of 'ri_weather'
+ri_weather.set_index('stop_datetime', inplace=True)
+
+<script.py> output:
+    (86536, 16)
+    (86536, 18)
+    
+Fantastic! In the next section, you'll use ri_weather to analyze the relationship between weather conditions and police behavior.
+
+
+
+
+
