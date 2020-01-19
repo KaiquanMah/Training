@@ -1,0 +1,62 @@
+Filtering by multiple conditions
+Which one of these commands would filter the ri DataFrame to only include female drivers who were stopped for a speeding violation?
+
+ri[(ri.driver_gender = 'F') & (ri.violation = 'Speeding')]
+ri[ri.driver_gender == 'F' & ri.violation == 'Speeding']
+ri[(ri.driver_gender == 'F') | (ri.violation == 'Speeding')]
+ri[(ri.driver_gender == 'F') and (ri.violation == 'Speeding')]
+
+#yes ri[(ri.driver_gender == 'F') & (ri.violation == 'Speeding')]
+Correct! We'll use this code to filter the DataFrame in the next exercise.
+
+
+
+
+
+
+
+
+
+
+Comparing speeding outcomes by gender
+When a driver is pulled over for speeding, many people believe that gender has an impact on whether the driver will receive a ticket or a warning. Can you find evidence of this in the dataset?
+First, you'll create two DataFrames of drivers who were stopped for speeding: one containing females and the other containing males.
+Then, for each gender, you'll use the stop_outcome column to calculate what percentage of stops resulted in a "Citation" (meaning a ticket) versus a "Warning".
+
+Create a DataFrame, female_and_speeding, that only includes female drivers who were stopped for speeding.
+Create a DataFrame, male_and_speeding, that only includes male drivers who were stopped for speeding.
+Count the stop outcomes for the female drivers and express them as proportions.
+Count the stop outcomes for the male drivers and express them as proportions.
+
+# Create a DataFrame of female drivers stopped for speeding
+female_and_speeding = ri[(ri.driver_gender == 'F') & (ri.violation == 'Speeding')]
+
+# Create a DataFrame of male drivers stopped for speeding
+male_and_speeding = ri[(ri.driver_gender == 'M') & (ri.violation == 'Speeding')]
+
+# Compute the stop outcomes for female drivers (as proportions)
+print(female_and_speeding.stop_outcome.value_counts(normalize=True))
+<script.py> output:
+    Citation            0.952192
+    Warning             0.040074
+    Arrest Driver       0.005752
+    N/D                 0.000959
+    Arrest Passenger    0.000639
+    No Action           0.000383
+    Name: stop_outcome, dtype: float64
+
+
+# Compute the stop outcomes for male drivers (as proportions)
+print(male_and_speeding.stop_outcome.value_counts(normalize=True))
+<script.py> output:
+    Citation            0.944595
+    Warning             0.036184
+    Arrest Driver       0.015895
+    Arrest Passenger    0.001281
+    No Action           0.001068
+    N/D                 0.000976
+    Name: stop_outcome, dtype: float64
+
+Interesting! The numbers are similar for males and females: about 95% of stops for speeding result in a ticket. Thus, the data fails to show that gender has an impact on who gets a ticket for speeding.
+
+
