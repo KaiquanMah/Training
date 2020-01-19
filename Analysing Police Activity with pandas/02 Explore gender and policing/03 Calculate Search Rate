@@ -1,0 +1,133 @@
+Calculating the search rate
+During a traffic stop, the police officer sometimes conducts a search of the vehicle. In this exercise, you'll calculate the percentage of all stops in the ri DataFrame that result in a vehicle search, also known as the search rate.
+
+
+Check the data type of search_conducted to confirm that it's a Boolean Series.
+Calculate the search rate by counting the Series values and expressing them as proportions.
+Calculate the search rate by taking the mean of the Series. (It should match the proportion of True values calculated above.)
+
+# Check the data type of 'search_conducted'
+print(ri.search_conducted.dtypes)
+<script.py> output:
+    bool
+
+# Calculate the search rate by counting the values
+print(ri.search_conducted.value_counts(normalize=True))
+<script.py> output:
+    False    0.961785
+    True     0.038215
+    Name: search_conducted, dtype: float64
+
+# Calculate the search rate by taking the mean
+print(ri.search_conducted.mean())
+<script.py> output:
+    0.0382153092354627
+Great! It looks like the search rate is about 3.8%. Next, you'll examine whether the search rate varies by driver gender.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Comparing search rates by gender
+In this exercise, you'll compare the rates at which female and male drivers are searched during a traffic stop. Remember that the vehicle search rate across all stops is about 3.8%.
+First, you'll filter the DataFrame by gender and calculate the search rate for each group separately. Then, you'll perform the same calculation for both genders at once using a .groupby().
+
+Filter the DataFrame to only include female drivers, and then calculate the search rate by taking the mean of search_conducted.
+# Calculate the search rate for female drivers
+print(ri[ri.driver_gender == 'F'].search_conducted.mean())
+<script.py> output:
+    0.019180617481282074
+    
+Filter the DataFrame to only include male drivers, and then repeat the search rate calculation.
+# Calculate the search rate for male drivers
+print(ri[ri.driver_gender == 'M'].search_conducted.mean())
+<script.py> output:
+    0.04542557598546892
+
+Group by driver gender to calculate the search rate for both groups simultaneously. (It should match the previous results.)
+# Calculate the search rate for both groups simultaneously
+print(ri.groupby('driver_gender').search_conducted.mean())
+<script.py> output:
+    driver_gender
+    F    0.019181
+    M    0.045426
+    Name: search_conducted, dtype: float64
+    
+
+Wow! Male drivers are searched more than twice as often as female drivers. Why might this be?
+
+
+
+
+
+
+
+
+
+
+
+
+
+Adding a second factor to the analysis
+Even though the search rate for males is much higher than for females, it's possible that the difference is mostly due to a second factor.
+For example, you might hypothesize that the search rate varies by violation type, and the difference in search rate between males and females is because they tend to commit different violations.
+You can test this hypothesis by examining the search rate for each combination of gender and violation. If the hypothesis was true, you would find that males and females are searched at about the same rate for each violation. Find out below if that's the case!
+
+Use a .groupby() to calculate the search rate for each combination of gender and violation. Are males and females searched at about the same rate for each violation?
+# Calculate the search rate for each combination of gender and violation
+print(ri.groupby(['driver_gender','violation']).search_conducted.mean())
+
+<script.py> output:
+    driver_gender  violation          
+    F              Equipment              0.039984
+                   Moving violation       0.039257
+                   Other                  0.041018
+                   Registration/plates    0.054924
+                   Seat belt              0.017301
+                   Speeding               0.008309
+    M              Equipment              0.071496
+                   Moving violation       0.061524
+                   Other                  0.046191
+                   Registration/plates    0.108802
+                   Seat belt              0.035119
+                   Speeding               0.027885
+    Name: search_conducted, dtype: float64
+    
+    
+    
+
+
+
+Reverse the ordering to group by violation before gender. The results may be easier to compare when presented this way.
+# Reverse the ordering to group by violation before gender
+print(ri.groupby(['violation','driver_gender']).search_conducted.mean())
+
+<script.py> output:
+    violation            driver_gender
+    Equipment            F                0.039984
+                         M                0.071496
+    Moving violation     F                0.039257
+                         M                0.061524
+    Other                F                0.041018
+                         M                0.046191
+    Registration/plates  F                0.054924
+                         M                0.108802
+    Seat belt            F                0.017301
+                         M                0.035119
+    Speeding             F                0.008309
+                         M                0.027885
+    Name: search_conducted, dtype: float64
+
+
+Great work! For all types of violations, the search rate is higher for males than for females, disproving our hypothesis.
+
