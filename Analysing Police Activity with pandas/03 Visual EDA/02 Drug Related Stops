@@ -1,0 +1,74 @@
+Plotting drug-related stops
+In a small portion of traffic stops, drugs are found in the vehicle during a search. In this exercise, you'll assess whether these drug-related stops are becoming more common over time.
+The Boolean column drugs_related_stop indicates whether drugs were found during a given stop. You'll calculate the annual drug rate by resampling this column, and then you'll use a line plot to visualize how the rate has changed over time.
+
+Calculate the annual rate of drug-related stops by resampling the drugs_related_stop column (on the 'A' frequency) and taking the mean.
+Save the annual drug rate Series as a new object, annual_drug_rate.
+Create a line plot of annual_drug_rate using the .plot() method.
+Display the plot using the .show() function.
+
+
+# Calculate the annual rate of drug-related stops
+print(ri.drugs_related_stop.resample('A').mean())
+<script.py> output:
+    stop_datetime
+    2005-12-31    0.006501
+    2006-12-31    0.007258
+    2007-12-31    0.007970
+    2008-12-31    0.007505
+    2009-12-31    0.009889
+    2010-12-31    0.010081
+    2011-12-31    0.009731
+    2012-12-31    0.009921
+    2013-12-31    0.013094
+    2014-12-31    0.013826
+    2015-12-31    0.012266
+    Freq: A-DEC, Name: drugs_related_stop, dtype: float64
+
+
+# Save the annual rate of drug-related stops
+annual_drug_rate = ri.drugs_related_stop.resample('A').mean()
+
+# Create a line plot of 'annual_drug_rate'
+annual_drug_rate.plot()
+
+# Display the plot
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Comparing drug and search rates
+As you saw in the last exercise, the rate of drug-related stops increased significantly between 2005 and 2015. You might hypothesize that the rate of vehicle searches was also increasing, which would have led to an increase in drug-related stops even if more drivers were not carrying drugs.
+You can test this hypothesis by calculating the annual search rate, and then plotting it against the annual drug rate. If the hypothesis is true, then you'll see both rates increasing over time.
+
+Calculate the annual search rate by resampling the search_conducted column, and save the result as annual_search_rate.
+Concatenate annual_drug_rate and annual_search_rate along the columns axis, and save the result as annual.
+Create subplots of the drug and search rates from the annual DataFrame.
+Display the subplots.
+
+# Calculate and save the annual search rate
+annual_search_rate = ri.search_conducted.resample('A').mean()
+
+# Concatenate 'annual_drug_rate' and 'annual_search_rate'
+annual = pd.concat([annual_drug_rate, annual_search_rate], axis=1)
+
+
+# Create subplots from 'annual'
+annual.plot(subplots=True)
+
+# Display the subplots
+plt.show()
+
+Wow! The rate of drug-related stops increased even though the search rate decreased, disproving our hypothesis.
+
