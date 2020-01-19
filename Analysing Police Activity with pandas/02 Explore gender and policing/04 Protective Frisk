@@ -1,0 +1,96 @@
+Counting protective frisks
+During a vehicle search, the police officer may pat down the driver to check if they have a weapon. This is known as a "protective frisk."
+In this exercise, you'll first check to see how many times "Protective Frisk" was the only search type. Then, you'll use a string method to locate all instances in which the driver was frisked.
+
+Count the search_type values to see how many times "Protective Frisk" was the only search type.
+Create a new column, frisk, that is True if search_type contains the string "Protective Frisk" and False otherwise.
+Check the data type of frisk to confirm that it's a Boolean Series.
+Take the sum of frisk to count the total number of frisks.
+# Count the 'search_type' values
+print(ri.search_type.value_counts())
+
+# Check if 'search_type' contains the string 'Protective Frisk'
+ri['frisk'] = ri.search_type.str.contains('Protective Frisk', na=False)
+<script.py> output:
+    Incident to Arrest                                          1290
+    Probable Cause                                               924
+    Inventory                                                    219
+    Reasonable Suspicion                                         214
+    Protective Frisk                                             164
+    Incident to Arrest,Inventory                                 123
+    Incident to Arrest,Probable Cause                            100
+    Probable Cause,Reasonable Suspicion                           54
+    Probable Cause,Protective Frisk                               35
+    Incident to Arrest,Inventory,Probable Cause                   35
+    Incident to Arrest,Protective Frisk                           33
+    Inventory,Probable Cause                                      25
+    Protective Frisk,Reasonable Suspicion                         19
+    Incident to Arrest,Inventory,Protective Frisk                 18
+    Incident to Arrest,Probable Cause,Protective Frisk            13
+    Inventory,Protective Frisk                                    12
+    Incident to Arrest,Reasonable Suspicion                        8
+    Incident to Arrest,Probable Cause,Reasonable Suspicion         5
+    Probable Cause,Protective Frisk,Reasonable Suspicion           5
+    Incident to Arrest,Inventory,Reasonable Suspicion              4
+    Inventory,Reasonable Suspicion                                 2
+    Incident to Arrest,Protective Frisk,Reasonable Suspicion       2
+    Inventory,Probable Cause,Protective Frisk                      1
+    Inventory,Protective Frisk,Reasonable Suspicion                1
+    Inventory,Probable Cause,Reasonable Suspicion                  1
+    Name: search_type, dtype: int64
+
+# Check the data type of 'frisk'
+print(ri.frisk.dtypes)
+<script.py> output:
+    bool
+
+# Take the sum of 'frisk'
+print(ri.frisk.sum())
+<script.py> output:
+    303
+Nice job! It looks like there were 303 drivers who were frisked. Next, you'll examine whether gender affects who is frisked.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Comparing frisk rates by gender
+In this exercise, you'll compare the rates at which female and male drivers are frisked during a search. Are males frisked more often than females, perhaps because police officers consider them to be higher risk?
+Before doing any calculations, it's important to filter the DataFrame to only include the relevant subset of data, namely stops in which a search was conducted.
+
+Create a DataFrame, searched, that only contains rows in which search_conducted is True.
+Take the mean of the frisk column to find out what percentage of searches included a frisk.
+Calculate the frisk rate for each gender using a .groupby().
+# Create a DataFrame of stops in which a search was conducted
+searched = ri[ri.search_conducted == True]
+
+
+# Calculate the overall frisk rate by taking the mean of 'frisk'
+print(searched.frisk.mean())
+<script.py> output:
+    0.09162382824312065
+    
+# Calculate the frisk rate for each gender
+print(searched.groupby('driver_gender').frisk.mean())
+<script.py> output:
+    driver_gender
+    F    0.074561
+    M    0.094353
+    Name: frisk, dtype: float64
+
+Interesting! The frisk rate is higher for males than for females, though we can't conclude that this difference is caused by the driver's gender.
+
