@@ -1,0 +1,42 @@
+Updating a script
+You certainly have the easy option to continue using the pd-2015 environment whenever you need to run the weekly_humidity.py script. Environments can be kept around as long as you like and will assure that all your old scripts (and notebooks, libraries, etc) continue to run the same way they always have.
+
+But quite likely you would like to update your script for your colleagues who use more recent versions of Python. Ideally, you would like them not to have to worry about this message:
+FutureWarning: pd.rolling_mean is deprecated for Series and will be removed in a future version, replace with 
+     Series.rolling(window=7,center=False).mean()
+  print(pd.rolling_mean(humidity, 7).tail(5))
+
+Happily, the warning itself pretty much tells you exactly how to update your script.
+
+
+
+
+
+Use the nano text editor to modify weekly_humidity.py so the last line is changed to:
+print(humidity.rolling(7).mean().tail(5))
+If you are more familiar with them, the editors vim and emacs are also installed in this session.
+
+
+
+
+Run the modified script in the active base environment that contains Panda 0.22. The FutureWarning should be gone now.
+(base) $ python weekly_humidity.py
+
+
+APIs do change over time. You should check whether your script, as modified, works in the older Pandas 0.17 installed in pd-2015. So, switch to the pd-2015 environment.
+(base) $ conda activate pd-2015
+
+
+Now, run the script in the current pd-2015 environment. You will notice that a new failure mode occurs now because Pandas 0.17 does not support the newer API you have used in your modified script.
+(pd-2015) $ python weekly_humidity.py
+weekly_humidity.py:6: FutureWarning: pd.rolling_mean is deprecatedfor Series and will be removed in a future version, replace with
+        Series.rolling(window=7,center=False).mean()
+  print(pd.rolling_mean(humidity, 7).tail(5))
+360    77.000000
+361    80.428571
+362    78.857143
+363    78.285714
+364    78.714286
+Name: Mean Humidity, dtype: float64
+
+
