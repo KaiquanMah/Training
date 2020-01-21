@@ -1,0 +1,40 @@
+From task to subtasks
+For this exercise, you will be using parallel computing to apply the function take_mean_age() that calculates the average athlete's age in a given year in the Olympics events dataset. The DataFrame athlete_events has been loaded for you and contains amongst others, two columns:
+Year: the year the Olympic event took place
+Age: the age of the Olympian
+
+You will be using the multiprocessor.Pool API which allows you to distribute your workload over several processes. The function parallel_apply() is defined in the sample code. It takes in as input the function being applied, the grouping used, and the number of cores needed for the analysis. Note that the @print_timing decorator is used to time each operation.
+Complete the code, so you apply take_mean_age with 1 core first, then 2 and finally 4 cores.
+
+# Function to apply a function over multiple cores
+@print_timing
+def parallel_apply(apply_func, groups, nb_cores):
+    with Pool(nb_cores) as p:
+        results = p.map(apply_func, groups)
+    return pd.concat(results)
+
+# Parallel apply using 1 core
+parallel_apply(take_mean_age, athlete_events.groupby('Year'), 1)
+
+# Parallel apply using 2 cores
+parallel_apply(take_mean_age, athlete_events.groupby('Year'), 2)
+
+# Parallel apply using 4 cores
+parallel_apply(take_mean_age, athlete_events.groupby('Year'), 4)
+
+# Parallel apply using 8 cores
+parallel_apply(take_mean_age, athlete_events.groupby('Year'), 8)
+
+# Parallel apply using 16 cores
+parallel_apply(take_mean_age, athlete_events.groupby('Year'), 16)
+
+<script.py> output:
+    Processing time: 925.7984161376953
+    Processing time: 630.0759315490723
+    Processing time: 323.87685775756836
+    Processing time: 324.70226287841797
+    Processing time: 227.73504257202148
+
+Great work! For educational purposes, we've used a little trick here to make sure the parallelized version runs faster. In reality, using parallel computing wouldn't make sense here since the computations are simple and the dataset is relatively small. Communication overhead costs the multiprocessing version its edge!
+
+
