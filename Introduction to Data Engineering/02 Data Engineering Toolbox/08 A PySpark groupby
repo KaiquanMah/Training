@@ -1,0 +1,99 @@
+A PySpark groupby
+You've seen how to use the dask framework and its DataFrame abstraction to do some calculations. However, as you've seen in the video, in the big data world Spark is probably a more popular choice for data processing.
+In this exercise, you'll use the PySpark package to handle a Spark DataFrame. The data is the same as in previous exercises: participants of Olympic events between 1896 and 2016.
+The Spark Dataframe, athlete_events_spark is available in your workspace.
+
+The methods you're going to use in this exercise are:
+.printSchema(): helps print the schema of a Spark DataFrame.
+.groupBy(): grouping statement for an aggregation.
+.mean(): take the mean over each group.
+.show(): show the results.
+
+
+
+
+
+Find out the type of athlete_events_spark.
+Find out the schema of athlete_events_spark.
+Print out the mean age of the Olympians, grouped by year. Notice that spark has not actually calculated anything yet. You can call this lazy evaluation.
+Take the previous result, and call .show() on the result to calculate the mean age.
+
+
+# Print the type of athlete_events_spark
+print(type(athlete_events_spark))
+
+<script.py> output:
+    <class 'pyspark.sql.dataframe.DataFrame'>
+
+
+
+
+# Print the schema of athlete_events_spark
+print(athlete_events_spark.printSchema())
+
+<script.py> output:
+    root
+     |-- ID: integer (nullable = true)
+     |-- Name: string (nullable = true)
+     |-- Sex: string (nullable = true)
+     |-- Age: integer (nullable = true)
+     |-- Height: string (nullable = true)
+     |-- Weight: string (nullable = true)
+     |-- Team: string (nullable = true)
+     |-- NOC: string (nullable = true)
+     |-- Games: string (nullable = true)
+     |-- Year: integer (nullable = true)
+     |-- Season: string (nullable = true)
+     |-- City: string (nullable = true)
+     |-- Sport: string (nullable = true)
+     |-- Event: string (nullable = true)
+     |-- Medal: string (nullable = true)
+    
+    None
+
+
+
+
+
+
+
+
+# Group by the Year, and find the mean Age
+print(athlete_events_spark.groupBy('Year').mean('Age'))
+
+# Group by the Year, and find the mean Age
+print(athlete_events_spark.groupBy('Year').mean('Age').show())
+
+
+
+<script.py> output:
+    DataFrame[Year: int, avg(Age): double]
+    +----+------------------+
+    |Year|          avg(Age)|
+    +----+------------------+
+    |1896|23.580645161290324|
+    |1924|28.373324544056253|
+    |2006|25.959151072569604|
+    |1908|26.970228384991845|
+    |1952|26.161546085232903|
+    |1956|25.926673567977915|
+    |1988|24.079431552931485|
+    |1994|24.422102596580114|
+    |1968|24.248045555448314|
+    |2014|25.987323655694134|
+    |1904| 26.69814995131451|
+    |2004|25.639514989213716|
+    |1932| 32.58207957204948|
+    |1996|24.915045018878885|
+    |1998|25.163197335553704|
+    |1960|25.168848457954294|
+    |2012| 25.96137770897833|
+    |1912| 27.53861997940268|
+    |2016| 26.20791934541204|
+    |1936|27.530328324986087|
+    +----+------------------+
+    only showing top 20 rows
+    
+    None
+
+
