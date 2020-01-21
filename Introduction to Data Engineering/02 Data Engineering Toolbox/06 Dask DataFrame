@@ -1,0 +1,142 @@
+Using a DataFrame
+In the previous exercise, you saw how to split up a task and use the low-level python multiprocessing.Pool API to do calculations on several processing units.
+It's essential to understand this on a lower level, but in reality, you'll never use this kind of APIs. A more convenient way to parallelize and apply over several groups is using the dask framework and its abstraction of the pandas DataFrame, for example.
+The pandas DataFrame, athlete_events, is available in your workspace.
+
+Create 4 partitions of the athletes_events DataFrame using dd.from_pandas().
+If you forgot the parameters of dd.from_pandas(), check out the slides again, or type help(dd.from_pandas) in the console!
+
+In [1]: help(dd.from_pandas)
+Help on function from_pandas in module dask.dataframe.io.io:
+
+from_pandas(data, npartitions=None, chunksize=None, sort=True, name=None)
+    Construct a Dask DataFrame from a Pandas DataFrame
+    
+    This splits an in-memory Pandas dataframe into several parts and constructs
+    a dask.dataframe from those parts on which Dask.dataframe can operate in
+    parallel.
+    
+    Note that, despite parallelism, Dask.dataframe may not always be faster
+    than Pandas.  We recommend that you stay with Pandas for as long as
+    possible before switching to Dask.dataframe.
+    
+    Parameters
+    ----------
+    data : pandas.DataFrame or pandas.Series
+        The DataFrame/Series with which to construct a Dask DataFrame/Series
+    npartitions : int, optional
+        The number of partitions of the index to create. Note that depending on
+        the size and index of the dataframe, the output may have fewer
+        partitions than requested.
+    chunksize : int, optional
+        The number of rows per index partition to use.
+    sort: bool
+        Sort input first to obtain cleanly divided partitions or don't sort and
+        don't get cleanly divided partitions
+    name: string, optional
+        An optional keyname for the dataframe.  Defaults to hashing the input
+    
+    Returns
+    -------
+    dask.DataFrame or dask.Series
+        A dask DataFrame/Series partitioned along the index
+    
+    Examples
+    --------
+    >>> df = pd.DataFrame(dict(a=list('aabbcc'), b=list(range(6))),
+    ...                   index=pd.date_range(start='20100101', periods=6))
+    >>> ddf = from_pandas(df, npartitions=3)
+    >>> ddf.divisions  # doctest: +NORMALIZE_WHITESPACE
+    (Timestamp('2010-01-01 00:00:00', freq='D'),
+     Timestamp('2010-01-03 00:00:00', freq='D'),
+     Timestamp('2010-01-05 00:00:00', freq='D'),
+     Timestamp('2010-01-06 00:00:00', freq='D'))
+    >>> ddf = from_pandas(df.a, npartitions=3)  # Works with Series too!
+    >>> ddf.divisions  # doctest: +NORMALIZE_WHITESPACE
+    (Timestamp('2010-01-01 00:00:00', freq='D'),
+     Timestamp('2010-01-03 00:00:00', freq='D'),
+     Timestamp('2010-01-05 00:00:00', freq='D'),
+     Timestamp('2010-01-06 00:00:00', freq='D'))
+    
+    Raises
+    ------
+    TypeError
+        If something other than a ``pandas.DataFrame`` or ``pandas.Series`` is
+        passed in.
+    
+    See Also
+    --------
+    from_array : Construct a dask.DataFrame from an array that has record dtype
+    read_csv : Construct a dask.DataFrame from a CSV file
+    
+    
+
+
+
+import dask.dataframe as dd
+# Set the number of partitions
+athlete_events_dask = dd.from_pandas(athlete_events, npartitions = 4)
+
+
+
+
+
+
+
+
+
+
+
+
+Print out the mean age for each Year. Remember dask uses lazy evaluation.
+import dask.dataframe as dd
+
+# Set the number of pratitions
+athlete_events_dask = dd.from_pandas(athlete_events, npartitions = 4)
+
+# Calculate the mean Age per Year
+print(athlete_events_dask.groupby('Year').Age.mean().compute())
+
+<script.py> output:
+    Year
+    1896    23.580645
+    1900    29.034031
+    1904    26.698150
+    1906    27.125253
+    1908    26.970228
+    1912    27.538620
+    1920    29.290978
+    1924    28.373325
+    1928    29.112557
+    1932    32.582080
+    1936    27.530328
+    1948    28.783947
+    1952    26.161546
+    1956    25.926674
+    1960    25.168848
+    1964    24.944397
+    1968    24.248046
+    1972    24.308607
+    1976    23.841818
+    1980    23.694743
+    1984    23.898347
+    1988    24.079432
+    1992    24.318895
+    1994    24.422103
+    1996    24.915045
+    1998    25.163197
+    2000    25.422504
+    2002    25.916281
+    2004    25.639515
+    2006    25.959151
+    2008    25.734118
+    2010    26.124262
+    2012    25.961378
+    2014    25.987324
+    2016    26.207919
+    Name: Age, dtype: float64
+
+Nice work! Using the DataFrame abstraction makes parallel computing easier. You'll see in the next video that this abstraction is often used in the big data world, for example in Apache Spark.
+
+
+
