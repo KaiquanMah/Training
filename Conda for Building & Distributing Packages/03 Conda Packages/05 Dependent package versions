@@ -1,0 +1,171 @@
+Dependent package versions
+The mortgage_forecasts package you wrote in the last chapter has been provided in your home directory.
+In this exercise you'll specify the dependent packages along with their compatible versions.
+
+This project is valid for both Python 2 and Python 3 and depends on the following packages
+Python: any version greater than 2.7
+Pandas: at least version 0.20
+Scipy: any version compatible with Pandas 0.20
+Statsmodels: any version compatible with the above restrictions
+
+
+
+Edit the meta.yaml file to add a nested run: key under requirements: on line 13 like this
+requirements:
+    run:
+        - python >=2.7
+        - pandas >=0.20
+        - statsmodels
+        - scipy
+
+$ pwd
+/home/repl/mortgage_forecasts
+$ ls
+LICENSE  meta.yaml  mortgage_forecasts  setup.py  version.py
+
+$ nano meta.yaml
+
+
+
+
+
+
+
+
+#failed when i added '-' in front of the run requirements bullet points
+$ cat meta.yaml
+{% set setup_py = load_setup_py_data() %}
+
+package:
+    name: 'mortgage_forecasts'
+    version: {{ setup_py.get('version') }}
+
+source:
+    path: ./
+
+build:
+    script: <command to install>
+
+requirements:
+    run:
+        - python >= 2.7
+        - pandas >= 0.20
+        - statsmodels
+        - scipy
+        # Packages that must be installed
+        # in the user's conda environment
+        # to run this package.
+
+    build:
+        # Packages used by setup.py
+        # to install this package.
+        # May also install compilers
+        # for non-python code.
+
+about:
+    license: {{ setup_py.get('license') }}
+    license_file: LICENSE
+    summary: {{ setup_py.get('description') }}
+
+
+
+
+
+
+
+
+
+
+
+
+#retry without '-' in front of the run requirements bullet points
+$ cat meta.yaml
+{% set setup_py = load_setup_py_data() %}
+
+package:
+    name: 'mortgage_forecasts'
+    version: {{ setup_py.get('version') }}
+
+source:
+    path: ./
+
+build:
+    script: <command to install>
+
+requirements:
+    run:
+        python >=2.7
+        pandas >=0.20
+        statsmodels
+        scipy
+        # Packages that must be installed
+        # in the user's conda environment
+        # to run this package.
+
+    build:
+        # Packages used by setup.py
+        # to install this package.
+        # May also install compilers
+        # for non-python code.
+
+about:
+    license: {{ setup_py.get('license') }}
+    license_file: LICENSE
+    summary: {{ setup_py.get('description') }}
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+The next step is to add the build requirements. The packages listed under build: are only those required to run python setup.py. In our case only python and setuptools are required.
+At line 20 you'll see the build requirements section. Add python and setuptools to the requirements like you did for the run section.
+
+
+$ nano meta.yaml
+
+$ cat meta.yaml
+{% set setup_py = load_setup_py_data() %}
+
+package:
+    name: 'mortgage_forecasts'
+    version: {{ setup_py.get('version') }}
+
+source:
+    path: ./
+
+build:
+    script: <command to install>
+
+requirements:
+    run:
+        python >=2.7
+        pandas >=0.20
+        statsmodels
+        scipy
+        # Packages that must be installed
+        # in the user's conda environment
+        # to run this package.
+
+    build:
+        python
+        setuptools
+        # Packages used by setup.py
+        # to install this package.
+        # May also install compilers
+        # for non-python code.
+
+about:
+    license: {{ setup_py.get('license') }}
+    license_file: LICENSE
+    summary: {{ setup_py.get('description') }}
