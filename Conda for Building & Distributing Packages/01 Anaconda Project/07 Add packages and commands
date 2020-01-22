@@ -1,0 +1,83 @@
+Add packages and commands
+Now the you have initialized the mortgage_rates project, it's time to add packages, downloads, and commands.
+
+
+Now it's time to add the required packages to the project and prepare the environment. This Python 3 based project will need to install Pandas for data processing and statsmodels to fit the autoregressive model and make predictions.
+All other dependencies of these packages, like NumPy and Scipy will be installed automatically. Run anaconda-project add-packages <package-names> with the following
+python=3
+pandas
+statsmodels
+
+$ ls
+anaconda-project.yml  forecast.py
+$ pwd
+/home/repl/mortgage_rates
+
+anaconda-project add-packages python=3
+anaconda-project add-packages pandas
+anaconda-project add-packages statsmodels
+
+
+
+
+
+
+
+
+
+
+
+
+Now it's time to add the URL to download the 30-year mortgage rates. In a project, files are downloaded automatically when a command is run. A download is defined through the add-download command which takes two arguments.
+anaconda-project add-download <ENV_VARIABLE> <DOWNLOAD_URL>
+The first argument <ENV_VARIABLE> is the shell variable name for the downloaded file and the second argument <DOWNLOAD_URL> is the full URL to the file.
+Your job is to add a download for https://goo.gl/jpbAsR with the variable name MORTGAGE_RATES. The link has been shortened for convenience.
+https://s3.amazonaws.com/assets.datacamp.com/production/course_6859/datasets/MORTGAGE30US.csv
+
+$ anaconda-project add-download MORTGAGE_RATES https://goo.gl/jpbAsR
+File downloaded to /home/repl/mortgage_rates/jpbAsR
+Added https://goo.gl/jpbAsR to the project file.
+
+
+
+
+
+
+
+
+
+
+
+In order to use the mortgage rates CSV file that will be automatically downloaded by Anaconda Project we have to access the MORTGAGE_RATES environment variable from our Python code. The file forecast.py is now in your mortgage_rates project directory. Edit the file so that line 9 reads
+MORTGAGE_RATES = os.environ["MORTGAGE_RATES"]
+This line uses the os Python module to access environment variables from the system shell.
+You can use nano, vi, vim, or emacs to the edit the file.
+
+nano forecast.py
+MORTGAGE_RATES = os.environ["MORTGAGE_RATES"]
+
+
+
+
+
+
+
+The script file is now ready and the next step is to register it as a command in your project. The script file is intended to be run as a command line tool and must be declared a Unix command with --type unix. Here's the anaconda-project command.
+anaconda-project add-command [flags] <name> <command-to-execute>
+The <name> is forecast and the <command-to-execute> is "python forecast.py".
+
+anaconda-project add-command forecast "python forecast.py"
+$ anaconda-project add-command forecast "python forecast.py"
+Is `forecast` a (B)okeh app, (N)otebook, or (C)ommand line? c
+Added a command 'forecast' to the project. Run it with `anaconda-project run forecast`.
+
+
+
+
+
+
+
+
+The project has now been completely specified and you can run the forecast command using anaconda-project run as you did before.
+anaconda-project run forecast
+
