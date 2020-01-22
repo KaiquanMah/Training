@@ -1,0 +1,224 @@
+Python versions and architectures
+So far you've been developing and building your mortgage_forecasts package on a 64-bit Linux virtual machine with Python 3. The package you built in the last exercise can only be installed on 64-bit Linux machines along with Python 3.6.
+The general practice is to run conda build separately on Windows, Mac, and Linux and with the popular minor revisions of Python (2.7, 3.5, 3.6, etc.). This step is necessary if you have architecture-specific build steps, like compiling Python C/C++ extensions, or incompatibility between Python 2 and Python 3 in both the build and run steps.
+Since your mortgage_forecasts project is cross-architecture and it works on Python 2 and Python 3 you'll convert it to a noarch Conda package.
+This means that only one package archive is required and can be installed with any version of Python on any architecture supported by Conda.
+https://docs.python.org/3/extending/building.html
+
+
+
+
+Edit meta.yaml to add the following line to the build: tag and before the script: tag.
+    noarch: python
+    number: 1
+By default the build number is 0, so by setting it to 1 we indicate that the Conda package is different from build 0, but the source has not changed. The mortage_forecasts source is still version 0.1.
+
+$ pwd
+/home/repl/mortgage_forecasts
+$ ls
+LICENSE  meta.yaml  mortgage_forecasts  setup.py  version.py
+
+$ cat meta.yaml
+{% set setup_py = load_setup_py_data() %}
+
+package:
+    name: 'mortgage_forecasts'
+    version: {{ setup_py.get('version') }}
+
+source:
+    path: ./
+
+build:
+    script: python setup.py install --single-version-externally-managed --record=record.txt
+
+requirements:
+    run:
+        - python >=2.7
+        - pandas >=0.20
+        - statsmodels
+        - scipy
+    build:
+        - python
+        - setuptools
+
+about:
+    license: {{ setup_py.get('license') }}
+    license_file: LICENSE
+    summary: {{ setup_py.get('description') }}
+    
+
+
+
+
+
+
+
+
+
+
+
+
+$ nano meta.yaml
+$ cat meta.yaml
+{% set setup_py = load_setup_py_data() %}
+
+package:
+    name: 'mortgage_forecasts'
+    version: {{ setup_py.get('version') }}
+
+source:
+    path: ./
+
+build:
+        noarch: python
+        number: 1
+        script: python setup.py install --single-version-externally-managed --record=record.txt
+
+requirements:
+    run:
+        - python >=2.7
+        - pandas >=0.20
+        - statsmodels
+        - scipy
+    build:
+        - python
+        - setuptools
+
+about:
+    license: {{ setup_py.get('license') }}
+    license_file: LICENSE
+    summary: {{ setup_py.get('description') }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Run conda build with the current directory . as the argument.
+conda build .
+
+$ conda build .
+Copying /home/repl/mortgage_forecasts to /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/work
+Adding in variants from internal_defaults
+INFO:conda_build.variants:Adding in variants from internal_defaults
+Attempting to finalize metadata for mortgage_forecasts
+INFO:conda_build.metadata:Attempting to finalize metadata for mortgage_forecasts
+Solving environment: ...working... done
+Solving environment: ...working... done
+BUILD START: ['mortgage_forecasts-0.1-py_1.tar.bz2']
+Solving environment: ...working... done
+Solving environment: ...working... done
+
+## Package Plan ##
+
+  environment location: /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac
+
+
+The following NEW packages will be INSTALLED:
+
+    ca-certificates: 2019.11.27-0
+    certifi:         2019.11.28-py36_0
+    libedit:         3.1-heed3624_0
+    libffi:          3.2.1-hd88cf55_4
+    libgcc-ng:       7.2.0-h7cc24e2_2
+    libstdcxx-ng:    7.2.0-h7a57d05_2
+    ncurses:         6.0-h9df7e31_2
+    openssl:         1.0.2n-hb7f436b_0
+    python:          3.6.4-hc3d631a_1
+    readline:        7.0-ha6073c6_4
+    setuptools:      42.0.2-py36_0
+    sqlite:          3.22.0-h1bed415_0
+    tk:              8.6.7-hc745277_3
+    xz:              5.2.4-h14c3975_4
+    zlib:            1.2.11-ha838bed_2
+
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+source tree in: /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/work
+running install
+running build
+running build_py
+creating build
+creating build/lib
+creating build/lib/mortgage_forecasts
+copying mortgage_forecasts/utils.py -> build/lib/mortgage_forecasts
+copying mortgage_forecasts/models.py -> build/lib/mortgage_forecasts
+copying mortgage_forecasts/__init__.py -> build/lib/mortgage_forecasts
+running install_lib
+creating /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac/lib/python3.6/site-packages/mortgage_forecasts
+copying build/lib/mortgage_forecasts/utils.py -> /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac/lib/python3.6/site-packages/mortgage_forecasts
+copying build/lib/mortgage_forecasts/models.py -> /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac/lib/python3.6/site-packages/mortgage_forecasts
+copying build/lib/mortgage_forecasts/__init__.py -> /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac/lib/python3.6/site-packages/mortgage_forecasts
+byte-compiling /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac/lib/python3.6/site-packages/mortgage_forecasts/utils.py to utils.cpython-36.pyc
+byte-compiling /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac/lib/python3.6/site-packages/mortgage_forecasts/models.py to models.cpython-36.pyc
+byte-compiling /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac/lib/python3.6/site-packages/mortgage_forecasts/__init__.py to __init__.cpython-36.pyc
+running install_egg_info
+running egg_info
+creating mortgage_forecasts.egg-info
+writing mortgage_forecasts.egg-info/PKG-INFO
+writing dependency_links to mortgage_forecasts.egg-info/dependency_links.txt
+writing top-level names to mortgage_forecasts.egg-info/top_level.txt
+writing manifest file 'mortgage_forecasts.egg-info/SOURCES.txt'
+reading manifest file 'mortgage_forecasts.egg-info/SOURCES.txt'
+writing manifest file 'mortgage_forecasts.egg-info/SOURCES.txt'
+Copying mortgage_forecasts.egg-info to /home/repl/miniconda/conda-bld/mortgage_forecasts_1579697468555/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac/lib/python3.6/site-packages/mortgage_forecasts-0.1-py3.6.egg-info
+running install_scripts
+writing list of installed files to 'record.txt'
+
+Resource usage statistics from building mortgage_forecasts:
+   Process count: 1
+   CPU time: Sys=0:00:00.0, User=0:00:00.0
+   Memory: 2.8M
+   Disk usage: 6.9K
+   Time elapsed: 0:00:01.0
+
+Packaging mortgage_forecasts
+INFO:conda_build.build:Packaging mortgage_forecasts
+Packaging mortgage_forecasts-0.1-py_1
+INFO:conda_build.build:Packaging mortgage_forecasts-0.1-py_1
+number of files: 7
+Fixing permissions
+Fixing permissions
+updating: mortgage_forecasts-0.1-py_1.tar.bz2
+/home/repl/miniconda/lib/python3.6/site-packages/conda_build/index.py:311: YAMLLoadWarning: calling yaml.load() without Loader=... isdeprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
+  recipe_json = yaml.load(recipe_text)
+TEST START: /home/repl/miniconda/conda-bld/noarch/mortgage_forecasts-0.1-py_1.tar.bz2
+Updating index at /home/repl/miniconda/conda-bld/linux-64 to make package installable with dependencies
+INFO:conda_build.build:Updating index at /home/repl/miniconda/conda-bld/linux-64 to make package installable with dependencies
+Updating index at /home/repl/miniconda/conda-bld/noarch to make package installable with dependencies
+INFO:conda_build.build:Updating index at /home/repl/miniconda/conda-bld/noarch to make package installable with dependencies
+Adding in variants from /tmp/tmppsml6wkz/info/recipe/conda_build_config.yaml
+INFO:conda_build.variants:Adding in variants from /tmp/tmppsml6wkz/info/recipe/conda_build_config.yaml
+Nothing to test for: /home/repl/miniconda/conda-bld/noarch/mortgage_forecasts-0.1-py_1.tar.bz2
+# Automatic uploading is disabled
+# If you want to upload package(s) to anaconda.org later, type:
+
+anaconda upload /home/repl/miniconda/conda-bld/noarch/mortgage_forecasts-0.1-py_1.tar.bz2
+
+# To have conda build upload to anaconda.org automatically, use
+# $ conda config --set anaconda_upload yes
+
+anaconda_upload is not set.  Not uploading wheels: []
+#####################################################
+Resource usage summary:
+
+Total time: 0:00:09.1
+CPU usage: sys=0:00:00.0, user=0:00:00.0
+Maximum memory usage observed: 2.8M
+Total disk usage observed (not including envs): 6.9K
+
