@@ -1,0 +1,123 @@
+The Conda recipe meta.yaml
+The mortgage_forecasts package you wrote in the last chapter has been provided in your home directory along with a template meta.yaml Conda recipe. There are 5 sections of this file:
+package defines the package name and version
+source provides the relative path (or Github repository) to the package source files
+build defines the command to install the package
+requirements specify the conda packages required to build and run the package
+about provides other important metadata like the license and description
+
+
+
+Inspect the meta.yaml file with nano, vim, emacs, cat, less or more.
+You'll see at the top of the file {% set setup_py = load_setup_py_data() %}. When the package is built metadata like the version number and license will be read directly from the setup.py file in the source path.
+Read the meta.yaml documentation for more details.
+https://conda.io/projects/conda-build/en/latest/resources/define-metadata.html
+
+
+
+
+$ cd mortgage_forecasts
+$ ls
+LICENSE  meta.yaml  mortgage_forecasts  setup.py  version.py
+$ cat meta.yaml
+{% set setup_py = load_setup_py_data() %}
+
+package:
+    name: 'mortgage_forecasts'
+    version: {{ setup_py.get('version') }}
+
+source:
+    path: ./
+
+build:
+    script: <command to install>
+
+requirements:
+    run:
+        # Packages that must be installed
+        # in the user's conda environment
+        # to run this package.
+
+    build:
+        # Packages used by setup.py
+        # to install this package.
+        # May also install compilers
+        # for non-python code.
+
+about:
+    license: {{ setup_py.get('license') }}
+    license_file: LICENSE
+    summary: {{ setup_py.get('description') }}
+
+
+
+
+
+
+
+
+
+
+$ cat setup.py
+from setuptools import setup, find_packages
+from version import find_version
+
+setup(
+        name = 'mortgage_forecasts',
+        author = 'Me',
+        description = '30-year mortgage rate models',
+        license = 'MIT',
+        version = find_version('mortgage_forecasts', '__init__.py'),
+        packages = find_packages()
+     )
+
+
+
+
+
+
+
+
+$ cat version.py
+import os
+import re
+import codecs
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+def read(*parts):
+    with codecs.open(os.path.join(here, *parts), 'r') as fp:
+        return fp.read()
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+    
+
+
+
+
+
+
+
+
+
+
+
+Why are there build: and run: sections in requirements:?
+#not These two sections define the same package versions.
+No, these sections serve different purposes.
+
+#not The build section is intended to be left empty.
+We need to import setuptools in the setup.py file
+
+#not Run requirements are determined from __ini__.py.
+Package versions must be specified in the Conda recipe, not the source.
+
+#yes Build packages are those required by setup.py.
+
+
