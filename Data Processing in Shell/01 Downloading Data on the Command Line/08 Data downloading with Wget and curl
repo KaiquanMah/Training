@@ -1,0 +1,86 @@
+Data downloading with Wget and curl
+To kick off a data analysis project, it's good practice to first consolidate all of our data into one place. Often times, this means downloading and pulling data from various locations such as HTTP servers and databases.
+While curl is handy for downloading a single file, it's somewhat unwieldy for handling multiple file downloads. In this capstone exercise, we will use both curl and Wget to download a series of monthly Spotify files, do some minor processing, and consolidate all downloaded files in our local directory.
+
+Download the zipped 201812SpotifyData data saved in the shortened (redirected) URL using curl. In the same step, rename file as Spotify201812.zip.
+Unzip Spotify201812.zip, delete the original zipped file, and rename the unzipped file to Spotify201812.csv to stay consistent.
+Use url_list.txt and Wget to download all 3 files: Spotify201809.csv, Spotify201810.csv, and Spotify201811.csv in one step, with an upper cap download speed of 2500KB/s.
+
+
+# Use curl, download and rename a single file from URL
+curl -o Spotify201812.zip -L https://assets.datacamp.com/production/repositories/4180/datasets/eb1d6a36fa3039e4e00064797e1a1600d267b135/201812SpotifyData.zip
+
+# Unzip, delete, then re-name to Spotify201812.csv
+unzip Spotify201812.zip && rm Spotify201812.zip
+mv 201812SpotifyData.csv Spotify201812.csv
+
+>  :; }
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 1944k  100 1944k    0     0  15.0M      0 --:--:-- --:--:-- --:--:-- 15.1M
+Archive:  Spotify201812.zip
+  inflating: 201812SpotifyData.csv
+   creating: __MACOSX/
+  inflating: __MACOSX/._201812SpotifyData.csv
+
+
+
+
+
+
+# View url_list.txt to verify content
+cat url_list.txt
+$ cat url_list.txt
+https://assets.datacamp.com/production/repositories/4180/datasets/6704d531266f9fb54f89200205198cabd592d03c/Spotify201811.csv
+https://assets.datacamp.com/production/repositories/4180/datasets/0441f2c68c64faf961fd8d73dc3363a6005679af/Spotify201810.csv
+https://assets.datacamp.com/production/repositories/4180/datasets/218a0674cd823751f0d5135bfe3814d56944a1bd/Spotify201809.csv
+
+
+# Use Wget, limit the download rate to 2500KB/s, download all files in url_list.txt
+wget --limit-rate=2500k -i url_list.txt
+
+# Take a look at all files downloaded
+ls
+
+>  :; }
+
+--2020-01-24 14:16:54--  https://assets.datacamp.com/production/repositories/4180/datasets/6704d531266f9fb54f89200205198cabd592d03c/Spotify201811.csv
+Resolving assets.datacamp.com (assets.datacamp.com)... 13.249.44.50, 13.249.44.52, 13.249.44.9, ...
+Connecting to assets.datacamp.com (assets.datacamp.com)|13.249.44.50|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 4592954 (4.4M) [text/csv]
+Saving to: 'Spotify201811.csv'
+
+Spotify201811.csv   100%[===================>]   4.38M  2.68MB/s    in 1.6s
+
+2020-01-24 14:16:56 (2.68 MB/s) - 'Spotify201811.csv' saved [4592954/4592954]
+
+--2020-01-24 14:16:56--  https://assets.datacamp.com/production/repositories/4180/datasets/0441f2c68c64faf961fd8d73dc3363a6005679af/Spotify201810.csv
+Reusing existing connection to assets.datacamp.com:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 5044292 (4.8M) [text/csv]
+Saving to: 'Spotify201810.csv'
+
+Spotify201810.csv   100%[===================>]   4.81M  2.61MB/s    in 1.8s
+
+2020-01-24 14:16:58 (2.61 MB/s) - 'Spotify201810.csv' saved [5044292/5044292]
+
+--2020-01-24 14:16:58--  https://assets.datacamp.com/production/repositories/4180/datasets/218a0674cd823751f0d5135bfe3814d56944a1bd/Spotify201809.csv
+Reusing existing connection to assets.datacamp.com:443.
+HTTP request sent, awaiting response... 200 OK
+Length: 4293170 (4.1M) [text/csv]
+Saving to: 'Spotify201809.csv'
+
+Spotify201809.csv   100%[===================>]   4.09M  2.51MB/s    in 1.6s
+
+2020-01-24 14:16:59 (2.51 MB/s) - 'Spotify201809.csv' saved [4293170/4293170]
+
+FINISHED --2020-01-24 14:16:59--
+Total wall clock time: 5.1s
+Downloaded: 3 files, 13M in 5.1s (2.60 MB/s)
+Spotify201809.csv  Spotify201811.csv  __MACOSX  bin
+Spotify201810.csv  Spotify201812.csv  backup    url_list.txt
+
+
+We downloaded 3 related data files to our local directory. Remember that by default, the download rate is in Bytes per second. In order to download in 2500KB/s, remember the unit KB/s is needed as well!
+
