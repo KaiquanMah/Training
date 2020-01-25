@@ -1,0 +1,47 @@
+Data processing with csvkit
+Once we have assembled a dataset, we still need to process and clean the data prior to more advanced analysis such as predictive modeling. In this capstone exercise, let's make use of various commands in csvkit for some common data processing and cleaning.
+The Excel file Spotify_201809_201810.xlsx contains two sheets (tabs), named Spotify201809 and Spotify201810. First, we will split the Excel file down to its individual sheets, preview summary statistics, remove some columns, and then stack the two sheets back together again to form one single csv file, ready for further analysis.
+
+Convert the Spotify201809 sheet into its own csv file named Spotify201809.csv.
+# Convert the Spotify201809 sheet into its own csv file 
+in2csv Spotify_201809_201810.xlsx --sheet "Spotify201809" > Spotify201809.csv
+
+# Check to confirm name and location of data file
+ls
+Spotify201809.csv         Spotify_201809_201810.xlsx  bin
+Spotify201810_subset.csv  backup
+
+
+
+
+
+
+
+
+Familiarize ourselves with the column names by printing a preview of the file using a function in csvkit.
+Find the column names for song track and popularity rank. Create a new CSV containing only these 2 columns.
+# Preview file preview using a csvkit function
+csvlook Spotify201809.csv
+| 7jnw8Rm7yzDorbVBOpDx55 |       0.395… |       0.530… |     170,959 | 0.544… |         0.000… |  10 |   0.033… |  -5.291… |  True |      0.040… | 177.615… |           3 |  0.908… |         11 |
+...
+| 0GL9zvG6O1fnChk0OUPrVs |       0.625… |       0.629… |     180,024 | 0.383… |         0.000… |   8 |   0.061… |  -7.994… |  True |      0.038… | 173.641… |           3 |  0.806… |          7 |
+| 4cxs5AswEQFck84HHfSbqn |       0.306… |       0.501… |     173,049 | 0.491… |         0.000… |  10 |   0.061… |  -6.504… |  True |      0.041… | 184.998… |           3 |  0.789… |         10 |
+| 5ZuJ2d39PBQvAV3malMMS4 |       0.492… |       0.665… |     201,052 | 0.728… |         0.000… |   9 |   0.080… |  -2.904… |  True |      0.030… |  96.364… |           1 |  0.740… |         10 |
+
+# Create a new csv with 2 columns: track_id and popularity
+csvcut -c "track_id","popularity" Spotify201809.csv > Spotify201809_subset.csv
+
+
+
+
+
+
+
+
+Stack Spotify201809_subset.csv and Spotify201810_subset.csv together to form 1 csv file and create a new column with either Sep2018 or Oct2018, depending on original file source. Leave the name of the new column to its default group.
+# While stacking the 2 files, create a data source column
+csvstack -g "Sep2018","Oct2018" Spotify201809_subset.csv Spotify201810_subset.csv > Spotify_all_rankings.csv
+
+
+We have gone through the steps for data conversion, processing, cleaning, and stacking. The data is now ready for more advanced analysis!
+
