@@ -1,0 +1,195 @@
+Joining local CSV files using SQL
+csvsql can be used to join CSV files together even when neither of them are in a database. Here, we have two CSV files Spotify_MusicAttributes.csv and Spotify_Popularity.csv that are both on song level but contain different attributes for each song. We can combine the two files together using a SQL-like JOIN, and we can do so, through the power of csvsql.
+
+
+Explore the data with the commands we have learned so far (e.g. csvstat, csvlook, etc). What is the column that Spotify_MusicAttributes.csv and Spotify_Popularity.csv have in common that can be used as the JOIN key?
+$ ls
+Spotify_MusicAttributes.csv  Spotify_Popularity.csv  backup  bin
+
+$ csvlook Spotify_MusicAttributes.csv
+| track_id               | danceability | duration_ms | instrumentalness | loudness |    tempo | time_signature |
+| ---------------------- | ------------ | ----------- | ---------------- | -------- | -------- | -------------- |
+| 118GQ70Sp6pMqn6w1oKuki |       0.787… |     124,016 |           0.784… | -10.457… | 119.988… |              4 |
+| 6S7cr72a7a8RVAXzDCRj6m |       0.777… |     128,016 |           0.812… | -12.181… | 119.979… |              4 |
+
+$ csvlook Spotify_Popularity.csv
+| track_id               | popularity |
+| ---------------------- | ---------- |
+| 118GQ70Sp6pMqn6w1oKuki |          7 |
+| 6S7cr72a7a8RVAXzDCRj6m |          7 |
+
+
+
+popularity
+time_signature
+id
+#yes track_id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Join Spotify_MusicAttributes.csv and Spotify_Popularity.csv together to form a new file Spotify_FullData.csv.
+#wrong ans
+sqlquery="SELECT * FROM fileA INNER JOIN fileB on fileA.track_id=fileB.track_id"
+csvsql --query "$sql_query" Spotify_MusicAttributes.csv Spotify_Popularity.csv > Spotify_FullData.csv
+csvstat Spotify_FullData.csv
+
+
+
+
+#right ans
+# Store SQL query as shell variable
+sql_query="SELECT ma.*, p.popularity FROM Spotify_MusicAttributes ma INNER JOIN Spotify_Popularity p ON ma.track_id = p.track_id"
+
+# Join 2 local csvs into a new csv using the saved SQL
+csvsql --query "$sql_query" Spotify_MusicAttributes.csv Spotify_Popularity.csv > Spotify_FullData.csv
+
+# Preview newly created file
+csvstat Spotify_FullData.csv
+
+
+>  :; }
+  1. "track_id"
+
+        Type of data:          Text
+        Contains null values:  False
+        Unique values:         24
+        Longest value:         22 characters
+        Most common values:    118GQ70Sp6pMqn6w1oKuki (1x)
+                               6S7cr72a7a8RVAXzDCRj6m (1x)
+                               7h2qWpMJzIVtiP30E8VDW4 (1x)
+                               3KVQFxJ5CWOcbxdpPYdi4o (1x)
+                               0JjNrI1xmsTfhaiU1R6OVc (1x)
+
+  2. "danceability"
+
+        Type of data:          Number
+        Contains null values:  False
+        Unique values:         16
+        Smallest value:        0.746
+        Largest value:         0.822
+        Sum:                   19.266
+        Mean:                  0.803
+        Median:                0.81
+        StDev:                 0.018
+        Most common values:    0.812 (4x)
+                               0.813 (3x)
+                               0.81 (3x)
+                               0.806 (2x)
+                               0.787 (1x)
+
+  3. "duration_ms"
+
+        Type of data:          Number
+        Contains null values:  False
+        Unique values:         8
+        Smallest value:        124,016
+        Largest value:         148,016
+        Sum:                   3,118,407
+        Mean:                  129,933.625
+        Median:                127,871.5
+        StDev:                 7,047.49
+        Most common values:    124,016 (8x)
+                               134,769 (5x)
+                               125,381 (3x)
+                               128,016 (2x)
+                               132,742 (2x)
+
+  4. "instrumentalness"
+
+        Type of data:          Number
+        Contains null values:  False
+        Unique values:         21
+        Smallest value:        0.738
+        Largest value:         0.966
+        Sum:                   21.386
+        Mean:                  0.891
+        Median:                0.915
+        StDev:                 0.061
+        Most common values:    0.938 (2x)
+                               0.915 (2x)
+                               0.917 (2x)
+                               0.784 (1x)
+                               0.812 (1x)
+
+  5. "loudness"
+
+        Type of data:          Number
+        Contains null values:  False
+        Unique values:         24
+        Smallest value:        -16.615
+        Largest value:         -7.382
+        Sum:                   -249.649
+        Mean:                  -10.402
+        Median:                -10.069
+        StDev:                 1.75
+        Most common values:    -10.457 (1x)
+                               -12.181 (1x)
+                               -8.86 (1x)
+                               -10.666 (1x)
+                               -9.83 (1x)
+
+  6. "tempo"
+
+        Type of data:          Number
+        Contains null values:  False
+        Unique values:         23
+        Smallest value:        119.901
+        Largest value:         124.032
+        Sum:                   2,911.054
+        Mean:                  121.294
+        Median:                120.058
+        StDev:                 1.548
+        Most common values:    119.988 (2x)
+                               119.979 (1x)
+                               123.973 (1x)
+                               122.001 (1x)
+                               120.079 (1x)
+
+  7. "time_signature"
+
+        Type of data:          Number
+        Contains null values:  False
+        Unique values:         1
+        Smallest value:        4
+        Largest value:         4
+        Sum:                   96
+        Mean:                  4
+        Median:                4
+        StDev:                 0
+        Most common values:    4 (24x)
+
+  8. "popularity"
+
+        Type of data:          Number
+        Contains null values:  False
+        Unique values:         2
+        Smallest value:        6
+        Largest value:         7
+        Sum:                   154
+        Mean:                  6.417
+        Median:                6
+        StDev:                 0.504
+        Most common values:    6 (14x)
+                               7 (10x)
+
+Row count: 24
+
+
+
+
+As our SQL queries get more complex, our practice of writing SQL queries into shell variables becomes more important to keep the scripting cleaner and more readable.
+
+
+
+
