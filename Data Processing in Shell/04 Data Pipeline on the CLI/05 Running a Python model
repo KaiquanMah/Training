@@ -1,0 +1,173 @@
+Running a Python model
+In the previous exercise, we installed the packages necessary to run a Python model script. In this exercise, we'll run a pre-written Python script create_model.py which will output two things: a Python model in a saved .pkl file and the predicted scores in a saved .csv file.
+
+
+Use pip to list and verify that the libraries specified in create_model.py have been installed.
+# Re-install requirements
+pip install -r requirements.txt
+
+Collecting numpy==1.15.4
+  Downloading https://files.pythonhosted.org/packages/86/04/bd774106ae0ae1ada68c67efe89f1a16b2aa373cc2db15d974002a9f136d/numpy-1.15.4-cp35-cp35m-manylinux1_x86_64.whl (13.8MB)
+     |████████████████████████████████| 13.8MB 23.9MB/s
+Requirement already satisfied: pandas==0.23.4 in /usr/local/lib/python3.5/dist-packages (from -r requirements.txt (line 2)) (0.23.4)
+Collecting python-dateutil==2.7.5
+  Downloading https://files.pythonhosted.org/packages/74/68/d87d9b36af36f44254a8d512cbfc48369103a3b9e474be9bdfe536abfc45/python_dateutil-2.7.5-py2.py3-none-any.whl (225kB)
+     |████████████████████████████████| 235kB 46.5MB/s
+Collecting pytz==2018.7
+  Downloading https://files.pythonhosted.org/packages/f8/0e/2365ddc010afb3d79147f1dd544e5ee24bf4ece58ab99b16fbb465ce6dc0/pytz-2018.7-py2.py3-none-any.whl (506kB)
+     |████████████████████████████████| 512kB 50.6MB/s
+Collecting scikit-learn==0.20.2
+  Downloading https://files.pythonhosted.org/packages/18/d9/bea927c86bf78d583d517f24cbc87606cb333bfb3a5c99cb85b547305f0f/scikit_learn-0.20.2-cp35-cp35m-manylinux1_x86_64.whl (5.3MB)
+     |████████████████████████████████| 5.3MB 36.1MB/s
+Collecting scipy==1.2.0
+  Downloading https://files.pythonhosted.org/packages/ab/19/c0ad5b9183ef97030edd6297d1726525ff2c369a09fbb6ea52a1e616ffd6/scipy-1.2.0-cp35-cp35m-manylinux1_x86_64.whl (26.5MB)
+     |████████████████████████████████| 26.5MB 40.2MB/s
+Collecting six==1.12.0
+  Downloading https://files.pythonhosted.org/packages/73/fb/00a976f728d0d1fecfe898238ce23f502a721c0ac0ecfedb80e0d88c64e9/six-1.12.0-py2.py3-none-any.whl
+Collecting sklearn==0.0
+  Downloading https://files.pythonhosted.org/packages/1e/7a/dbb3be0ce9bd5c8b7e3d87328e79063f8b263b2b1bfa4774cb1147bfcd3f/sklearn-0.0.tar.gz
+Building wheels for collected packages: sklearn
+  Building wheel for sklearn (setup.py) ... done
+  Created wheel for sklearn: filename=sklearn-0.0-py2.py3-none-any.whl size=2397sha256=009ea5388c4f244499eeab3e813b1d6fbd2a81b03fb128cd891604c9781bde4b
+  Stored in directory: /home/repl/.cache/pip/wheels/76/03/bb/589d421d27431bcd2c6da284d5f2286c8e3b2ea3cf1594c074
+Successfully built sklearn
+Installing collected packages: numpy, six, python-dateutil, pytz, scipy, scikit-learn, sklearn
+Successfully installed numpy-1.15.4 python-dateutil-2.7.5 pytz-2018.7 scikit-learn-0.20.2 scipy-1.2.0 six-1.12.0 sklearn-0.0
+WARNING: You are using pip version 19.3.1; however, version 20.0.2 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Preview Python model script for import dependencies
+cat create_model.py
+
+
+import pandas as pd
+import pickle
+from sklearn.ensemble import RandomForestClassifier
+
+df_train = pd.read_csv("trainexit.csv")
+df_train.dropna(inplace=True)
+df_train = df_train.drop(['PassengerId', 'Name', 'Cabin', 'Ticket'], axis=1)
+
+df_train = pd.get_dummies(df_train)
+df_train = df_train.drop(['Sex_female', 'Embarked_C'], axis=1)
+
+X = df_train.drop('Survived', axis = 1)
+y = df_train['Survived']
+
+model = RandomForestClassifier()
+model.fit(X, y)
+
+model_filename = 'model.pkl'
+with open(model_filename, 'wb') as f:
+    pickle.dump(model, f)
+
+
+
+
+
+
+
+
+# Verify that dependencies are installed
+pip list
+
+Package            Version
+------------------ ----------
+agate              1.6.1
+agate-dbf          0.2.1
+agate-excel        0.2.3
+agate-sql          0.5.4
+attrs              19.3.0
+Babel              2.7.0
+certifi            2019.11.28
+chardet            3.0.4
+csvkit             1.0.3
+dbfread            2.0.7
+et-xmlfile         1.0.1
+idna               2.8
+importlib-metadata 1.3.0
+isodate            0.6.0
+jdcal              1.4.1
+Jinja2             2.10.3
+jsonschema         3.1.1
+leather            0.3.3
+markdown2          2.3.8
+MarkupSafe         1.1.1
+more-itertools     8.0.2
+numpy              1.17.4
+openpyxl           2.6.4
+pandas             0.23.4
+parsedatetime      2.5
+pexpect            4.2.1
+pip                19.3.1
+protobackend       0.2.3
+protowhat          1.8.2
+ptyprocess         0.5.2
+pyrsistent         0.15.6
+python-dateutil    2.8.1
+python-slugify     4.0.0
+pytimeparse        1.1.8
+pytz               2019.3
+PyYAML             5.1
+requests           2.22.0
+scikit-learn       0.20.2
+scipy              1.2.0
+setuptools         44.0.0
+shellbackend       1.5.3
+shellwhat          1.2.0
+six                1.13.0
+sklearn            0.0
+SQLAlchemy         1.3.11
+terminado          0.6
+text-unidecode     1.3
+tornado            4.5.3
+urllib3            1.25.7
+virtualenv         16.7.7
+wheel              0.29.0
+xlrd               1.2.0
+zipp               0.6.0
+WARNING: You are using pip version 19.3.1; however, version 20.0.2 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Run the Python script create_model.py from the command line.
+# Execute Python model script, which outputs a pkl file
+python create_model.py
+/home/repl/.local/lib/python3.5/site-packages/sklearn/ensemble/forest.py:246: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+  
+  
+# Verify that the model.pkl file has been created 
+ls
+backup  bin  create_model.py  model.pkl  requirements.txt  trainexit.csv
+
+Success! Between last exercise and this one, we have gone through the entire process of installing dependencies and running a Python model, all on the command line!
+
