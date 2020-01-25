@@ -1,0 +1,72 @@
+Applying SQL to a local CSV file
+Sometimes the data manipulation we want to do is just easier to do with SQL. In this situation, we want to find the shortest duration song in Spotify_MusicAttributes.csv by applying the SQL below directly to the data file.
+SELECT * FROM Spotify_MusicAttributes ORDER BY duration_ms LIMIT 1
+
+Let's go through this step by step.
+Complete the command to apply the SQL query to Spotify_MusicAttributes.csv.
+# Preview CSV file
+ls
+Spotify_MusicAttributes.csv  backup  bin
+
+# Apply SQL query to Spotify_MusicAttributes.csv
+csvsql --query "SELECT * FROM Spotify_MusicAttributes ORDER BY duration_ms LIMIT 1" Spotify_MusicAttributes.csv
+track_id,danceability,duration_ms,instrumentalness,loudness,tempo,time_signature
+118GQ70Sp6pMqn6w1oKuki,0.787,124016.0,0.784,-10.457,119.988,4.0
+
+
+
+
+
+
+Further improve the output by piping the output to csvlook.
+# Reformat the output using csvlook 
+csvsql --query "SELECT * FROM Spotify_MusicAttributes ORDER BY duration_ms LIMIT 1" \
+	Spotify_MusicAttributes.csv | csvlook
+
+| track_id               | danceability | duration_ms | instrumentalness | loudness |   tempo | time_signature |
+| ---------------------- | ------------ | ----------- | ---------------- | -------- | ------- | -------------- |
+| 118GQ70Sp6pMqn6w1oKuki |        0.787 |     124,016 |            0.784 |  -10.457 | 119.988 |              4 |
+
+
+
+
+
+
+
+
+
+
+
+
+Instead of printing to console, re-direct output and save as new file: LongestSong.csv.
+# Re-direct output to new file: LongestSong.csv
+csvsql --query "SELECT * FROM Spotify_MusicAttributes ORDER BY duration_ms DESC LIMIT 1" \
+	Spotify_MusicAttributes.csv > LongestSong.csv
+    
+# Preview newly created file 
+csvlook LongestSong.csv
+
+| track_id               | danceability | duration_ms | instrumentalness | loudness |   tempo | time_signature |
+| ---------------------- | ------------ | ----------- | ---------------- | -------- | ------- | -------------- |
+| 08nyEVO684j7pcTAhEY2zJ |         0.81 |     148,016 |            0.917 |   -9.391 | 120.022 |              4 |
+
+
+
+
+
+
+
+# Re-direct output to new file: ShortestSong.csv
+csvsql --query "SELECT * FROM Spotify_MusicAttributes ORDER BY duration_ms  LIMIT 1" \
+	Spotify_MusicAttributes.csv > ShortestSong.csv
+    
+# Preview newly created file 
+csvlook ShortestSong.csv
+| track_id               | danceability | duration_ms | instrumentalness | loudness |   tempo | time_signature |
+| ---------------------- | ------------ | ----------- | ---------------- | -------- | ------- | -------------- |
+| 118GQ70Sp6pMqn6w1oKuki |        0.787 |     124,016 |            0.784 |  -10.457 | 119.988 |              4 |
+
+
+
+Please remember that while this is convenient, csvsql is computationally very expensive when used in this manner, so it should be applied judiciously.
+
