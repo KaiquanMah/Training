@@ -1,0 +1,79 @@
+Model production on the command line
+Often times, Python models, once perfected, need to be moved into production and run on a frequent basis. To save the data scientist's time, instead of running the model manually every day, the run process is automated.
+Automating and putting a Python model into production involves first installing all necessary library dependencies, running the Python model itself, and then setting a schedule for frequency of the runs. While it is possible to do all these steps separately using different languages and programs, consolidating all efforts into command line commands allows for more user control and easier automation.
+In this capstone exercise, we will practice how to set up an end-to-end Python script automation process step by step.
+
+
+Use pip to install the Python dependencies listed in the requirements.txt file.
+Now that the necessary Python dependencies have been installed, run the create_model.py script on the command line.
+We have verified that the Python model can be run. Next step is to automate this job so it runs every minute. Use CRONTAB to schedule a per minute run of the Python script create_model.py.
+Print the job scheduled in CRONTAB to verify that the CRON job is scheduled correctly.
+
+
+# Preview both Python script and requirements text file
+cat create_model.py
+cat requirements.txt
+
+
+$ cat create_model.py
+import pandas as pd
+import pickle
+from sklearn.ensemble import RandomForestClassifier
+
+df_train = pd.read_csv("trainexit.csv")
+df_train.dropna(inplace=True)
+df_train = df_train.drop(['PassengerId', 'Name', 'Cabin', 'Ticket'], axis=1)
+
+df_train = pd.get_dummies(df_train)
+df_train = df_train.drop(['Sex_female', 'Embarked_C'], axis=1)
+
+X = df_train.drop('Survived', axis = 1)
+y = df_train['Survived']
+
+model = RandomForestClassifier()
+model.fit(X, y)
+
+model_filename = 'model.pkl'
+with open(model_filename, 'wb') as f:
+    pickle.dump(model, f)
+    
+
+$ cat requirements.txt
+scikit-learn==0.20.2
+scipy==1.2.0
+sklearn==0.0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Pip install Python dependencies in requirements file
+pip install -r requirements.txt
+
+# Run Python script on command line
+python create_model.py
+/home/repl/.local/lib/python3.5/site-packages/sklearn/ensemble/forest.py:246: FutureWarning: The default value of n_estimators will change from 10 in version 0.20 to 100 in 0.22.
+  "10 in version 0.20 to 100 in 0.22.", FutureWarning)
+  
+  
+  
+# Add CRON job that runs create_model.py every minute
+echo "1 * * * * python create_model.py" | crontab
+
+# Verify that the CRON job has been scheduled via CRONTAB
+crontab -l
+1 * * * * python create_model.py
+
+Success! We have automated an entire pipeline that downloads Python dependencies, ingests data, trains a model, and outputs the model results. Awesome job!
+
