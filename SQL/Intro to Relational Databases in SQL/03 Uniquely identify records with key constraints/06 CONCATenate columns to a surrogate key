@@ -1,0 +1,86 @@
+CONCATenate columns to a surrogate key
+Another strategy to add a surrogate key to an existing table is to concatenate existing columns with the CONCAT() function.
+
+Let's think of the following example table:
+CREATE TABLE cars (
+ make varchar(64) NOT NULL,
+ model varchar(64) NOT NULL,
+ mpg integer NOT NULL
+)
+The table is populated with 10 rows of completely fictional data.
+Unfortunately, the table doesn't have a primary key yet. None of the columns consists of only unique values, so some columns can be combined to form a key.
+In the course of the following exercises, you will combine make and model into such a surrogate key.
+
+
+
+
+
+
+
+
+Count the number of distinct rows with a combination of the make and model columns.
+-- Count the number of distinct rows with columns make, model
+SELECT COUNT(DISTINCT(make, model))
+FROM cars;
+
+count
+10
+
+
+
+
+
+
+
+
+Add a new column id with the data type varchar(128).
+-- Add the id column
+ALTER TABLE cars
+ADD COLUMN id VARCHAR(128);
+
+
+
+
+
+
+
+
+
+
+
+Concatenate make and model into id using an UPDATE table_name SET column_name = ... query and the CONCAT() function.
+-- Update id with make + model
+UPDATE cars
+set id = CONCAT(make, model);
+
+
+
+
+
+
+
+
+
+
+Make id a primary key and name it id_pk.
+-- Make id a primary key
+ALTER TABLE cars
+ADD CONSTRAINT id_pk PRIMARY KEY (id);
+
+-- Have a look at the table
+SELECT * 
+FROM cars;
+
+make	model	mpg	id
+Subaru	Forester	24	SubaruForester
+Opel	Astra	45	OpelAstra
+Opel	Vectra	40	OpelVectra
+Ford	Avenger	30	FordAvenger
+Ford	Galaxy	30	FordGalaxy
+Toyota	Prius	50	ToyotaPrius
+Toyota	Speedster	30	ToyotaSpeedster
+Toyota	Galaxy	20	ToyotaGalaxy
+Mitsubishi	Forester	10	MitsubishiForester
+Mitsubishi	Galaxy	30	MitsubishiGalaxy
+
+
