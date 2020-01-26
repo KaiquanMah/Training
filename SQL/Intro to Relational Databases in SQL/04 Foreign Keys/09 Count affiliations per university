@@ -1,0 +1,57 @@
+Count affiliations per university
+Now that your data is ready for analysis, let's run some exemplary SQL queries on the database. You'll now use already known concepts such as grouping by columns and joining tables.
+In this exercise, you will find out which university has the most affiliations (through its professors). For that, you need both affiliations and professors tables, as the latter also holds the university_id.
+
+As a quick repetition, remember that joins have the following structure:
+SELECT table_a.column1, table_a.column2, table_b.column1, ... 
+FROM table_a
+JOIN table_b 
+ON table_a.column = table_b.column
+This results in a combination of table_a and table_b, but only with rows where table_a.column is equal to table_b.column.
+
+
+
+
+
+professors
+id	firstname	lastname	university_id
+1	Karl	Aberer	EPF
+2	Reza Shokrollah	Abhari	ETH
+3	Georges	Abou Jaoudé	EPF
+...
+
+affiliations
+function	organization_id	professor_id
+NA	CIHA	442
+Panel Member 	SNF Ambizione Program	1
+Member of Conseil Fondation IDIAP	Fondation IDIAP	1
+...
+
+
+Count the number of total affiliations by university.
+Sort the result by that count, in descending order.
+-- Count the total number of affiliations per university
+SELECT COUNT(*), professors.university_id 
+FROM affiliations
+JOIN professors
+ON affiliations.professor_id = professors.id
+-- Group by the university ids of professors
+GROUP BY university_id
+ORDER BY count DESC;
+
+
+count	university_id
+579	EPF
+273	USG
+162	UBE
+133	ETH
+75	UBA
+40	UFR
+36	UNE
+35	ULA
+33	UGE
+7	UZH
+4	USI
+
+As you can see, the count of affiliations is completely different from university to university.
+
