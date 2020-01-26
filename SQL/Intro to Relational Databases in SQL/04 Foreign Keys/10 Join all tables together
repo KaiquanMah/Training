@@ -1,0 +1,157 @@
+Join all the tables together
+In this last exercise, you will find the university city of the professor with the most affiliations in the sector "Media & communication".
+For this, you need to join all the tables, group by a column, and then use selection criteria to get only the rows in the correct sector.
+
+Join all tables in the database (starting with affiliations, professors, organizations, and universities) and look at the result.
+
+affiliations
+function	organization_id	professor_id
+NA	CIHA	442
+Panel Member 	SNF Ambizione Program	1
+Member of Conseil Fondation IDIAP	Fondation IDIAP	1
+...
+
+
+professors
+id	firstname	lastname	university_id
+1	Karl	Aberer	EPF
+2	Reza Shokrollah	Abhari	ETH
+3	Georges	Abou Jaoudé	EPF
+...
+
+
+organizations
+id	organization_sector
+2014 IARU Congress, Copenhagen, Denmark	Education & research
+42matters AG	Technology
+A*Star IMB Biopolis, Singapour	Education & research
+...
+
+
+universities
+id	university	university_city
+EPF	ETH Lausanne	Lausanne
+ETH	ETH Zürich	Zurich
+UBA	Uni Basel	Basel
+...
+
+
+
+
+-- Join all tables
+SELECT *
+FROM affiliations
+JOIN professors
+ON affiliations.professor_id = professors.id
+JOIN organizations
+ON affiliations.organization_id = organizations.id
+JOIN universities
+ON professors.university_id = universities.id;
+
+function	organization_id	professor_id	id	firstname	lastname	university_id	id	organization_sector	id	university	university_city
+NA	CIHA	442	442	Peter	Schneemann	UBE	CIHA	Not classifiable	UBE	Uni Bern	Bern
+Panel Member 	SNF Ambizione Program	1	1	Karl	Aberer	EPF	SNF Ambizione Program	Education & research	EPF	ETH Lausanne	Lausanne
+Member of Conseil Fondation IDIAP	Fondation IDIAP	1	1	Karl	Aberer	EPF	Fondation IDIAP	Education & research	EPF	ETH Lausanne	Lausanne
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Now group the result by organization sector, professor, and university city.
+Count the resulting number of rows.
+-- Group the table by organization sector, professor and university city
+SELECT COUNT(*), organizations.organization_sector, 
+professors.id, universities.university_city
+FROM affiliations
+JOIN professors
+ON affiliations.professor_id = professors.id
+JOIN organizations
+ON affiliations.organization_id = organizations.id
+JOIN universities
+ON professors.university_id = universities.id
+GROUP BY organizations.organization_sector, 
+         professors.id, 
+         universities.university_city;
+
+count	organization_sector	id	university_city
+1	Not classifiable	47	Basel
+2	Media & communication	361	Saint Gallen
+1	Education & research	140	Zurich
+...
+
+
+
+
+
+
+
+
+
+Only retain rows with "Media & communication" as organization sector, and sort the table by count, in descending order.
+-- Filter the table and sort it
+SELECT COUNT(*), organizations.organization_sector, 
+professors.id, universities.university_city
+FROM affiliations
+JOIN professors
+ON affiliations.professor_id = professors.id
+JOIN organizations
+ON affiliations.organization_id = organizations.id
+JOIN universities
+ON professors.university_id = universities.id
+AND organizations.organization_sector = 'Media & communication'
+GROUP BY organizations.organization_sector, 
+professors.id, universities.university_city
+ORDER BY COUNT DESC;
+
+count	organization_sector	id	university_city
+4	Media & communication	538	Lausanne
+3	Media & communication	365	Saint Gallen
+3	Media & communication	36	Lausanne
+2	Media & communication	329	Zurich
+2	Media & communication	523	Saint Gallen
+2	Media & communication	425	Lausanne
+2	Media & communication	505	Lausanne
+2	Media & communication	42	Saint Gallen
+2	Media & communication	361	Saint Gallen
+1	Media & communication	261	Lausanne
+1	Media & communication	293	Saint Gallen
+1	Media & communication	297	Basel
+1	Media & communication	323	Zurich
+1	Media & communication	337	Lausanne
+1	Media & communication	30	Lausanne
+1	Media & communication	368	Lausanne
+1	Media & communication	377	Lausanne
+1	Media & communication	379	Lausanne
+1	Media & communication	389	Lausanne
+1	Media & communication	403	Lausanne
+1	Media & communication	462	Lausanne
+1	Media & communication	473	Lausanne
+1	Media & communication	496	Saint Gallen
+1	Media & communication	499	Lausanne
+1	Media & communication	533	Zurich
+1	Media & communication	537	Lausanne
+1	Media & communication	343	Lausanne
+1	Media & communication	62	Lausanne
+1	Media & communication	88	Lausanne
+1	Media & communication	101	Lausanne
+1	Media & communication	173	Lausanne
+1	Media & communication	205	Basel
+1	Media & communication	213	Lausanne
+1	Media & communication	220	Lausanne
+1	Media & communication	258	Lausanne
+
+
+
+The professor with id 538 has the most affiliations in the "Media & communication" sector, and he or she lives in the city of Lausanne. Thanks to your database design, you can be sure that the data you've just queried is consistent. Of course, you could also put university_city and organization_sector in their own tables, making the data model even more formal. However, in database design, you have to strike a balance between modeling overhead, desired data consistency, and usability for queries like the one you've just wrote. Congratulations, you made it to the end!
+
