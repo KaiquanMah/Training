@@ -1,0 +1,57 @@
+Add foreign keys to the "affiliations" table
+At the moment, the affiliations table has the structure {firstname, lastname, function, organization}, as you can see in the preview at the bottom right. In the next three exercises, you're going to turn this table into the form {professor_id, organization_id, function}, with professor_id and organization_id being foreign keys that point to the respective tables.
+You're going to transform the affiliations table in-place, i.e., without creating a temporary table to cache your intermediate results.
+
+Add a professor_id column with integer data type to affiliations, and declare it to be a foreign key that references the id column in professors.
+professors
+id	firstname	lastname	university_id
+1	Karl	Aberer	EPF
+2	Reza Shokrollah	Abhari	ETH
+3	Georges	Abou Jaoudé	EPF
+...
+
+universities
+id	university	university_city
+EPF	ETH Lausanne	Lausanne
+ETH	ETH Zürich	Zurich
+UBA	Uni Basel	Basel
+...
+
+
+affiliations
+firstname	lastname	function	organization
+Karl	Aberer	Chairman of L3S Advisory Board	L3S Advisory Board
+Karl	Aberer	Member Conseil of Zeno-Karl Schindler Foundation	Zeno-Karl Schindler Foundation
+Karl	Aberer	Member of Conseil Fondation IDIAP	Fondation IDIAP
+...
+
+
+-- Add a professor_id column
+ALTER TABLE  affiliations
+ADD COLUMN professor_id INTEGER REFERENCES professors (id);
+
+
+
+
+
+
+
+
+
+Rename the organization column in affiliations to organization_id.
+-- Rename the organization column to organization_id
+ALTER TABLE affiliations
+RENAME COLUMN organization TO organization_id;
+
+
+
+
+
+
+Add a foreign key constraint on organization_id so that it references the id column in organizations.
+-- Add a foreign key on organization_id
+ALTER TABLE affiliations
+ADD CONSTRAINT affiliations_organization_fkey FOREIGN KEY (organization_id) REFERENCES organizations (id);
+
+Making organization_id a foreign key worked flawlessly because these organizations actually exist in the organizations table. That was only the first part, though. Now it's time to update professor_id in affiliations – so that it correctly refers to the corresponding professors.
+
