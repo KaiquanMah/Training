@@ -1,0 +1,53 @@
+Conforming with data types
+For demonstration purposes, I created a fictional database table that only holds three records. The columns have the data types date, integer, and text, respectively.
+
+CREATE TABLE transactions (
+ transaction_date date, 
+ amount integer,
+ fee text
+);
+Have a look at the contents of the transactions table.
+The transaction_date accepts date values. According to the PostgreSQL documentation, it accepts values in the form of YYYY-MM-DD, DD/MM/YY, and so forth.
+Both columns amount and fee appear to be numeric, however, the latter is modeled as text – which you will account for in the next exercise.
+https://www.postgresql.org/docs/10/datatype-datetime.html#DATATYPE-DATETIME-INPUT
+
+
+
+Execute the given sample code.
+-- Let's add a record to the table
+INSERT INTO transactions (transaction_date, amount, fee) 
+VALUES ('2018-24-09', 5454, '30');
+
+-- Doublecheck the contents
+SELECT *
+FROM transactions;
+
+
+date/time field value out of range: "2018-24-09"
+LINE 3: VALUES ('2018-24-09', 5454, '30');
+Check the first entry in the values of the InsertStmt. The checker expected to find '2018-09-24' in there.
+
+
+
+
+
+
+
+As it doesn't work, have a look at the error message and correct the statement accordingly – then execute it again.
+-- Let's add a record to the table
+INSERT INTO transactions (transaction_date, amount, fee) 
+VALUES ('2018-09-24', 5454, '30');
+
+-- Doublecheck the contents
+SELECT *
+FROM transactions;
+
+transaction_date	amount	fee
+1999-01-08	500	20
+2001-02-20	403	15
+2001-03-20	3430	35
+2018-09-24	5454	30
+
+You can see that data types provide certain restrictions on how data can be entered into a table. This may be tedious at the moment of insertion, but saves a lot of headache in the long run.
+
+
