@@ -1,0 +1,119 @@
+JOIN tables linked by a foreign key
+Let's join these two tables to analyze the data further!
+You might already know how SQL joins work from the Intro to SQL for Data Science course (last exercise) or from Joining Data in PostgreSQL.
+
+Here's a quick recap on how joins generally work:
+SELECT ...
+FROM table_a
+JOIN table_b
+ON ...
+WHERE ...
+While foreign keys and primary keys are not strictly necessary for join queries, they greatly help by telling you what to expect. For instance, you can be sure that records referenced from table A will always be present in table B – so a join from table A will always find something in table B. If not, the foreign key constraint would be violated.
+
+
+
+
+JOIN professors with universities on professors.university_id = universities.id, i.e., retain all records where the foreign key of professors is equal to the primary key of universities.
+Filter for university_city = 'Zurich'.
+
+professors
+id	firstname	lastname	university_id
+1	Karl	Aberer	EPF
+2	Reza Shokrollah	Abhari	ETH
+3	Georges	Abou Jaoudé	EPF
+...
+
+universities
+id	university	university_city
+EPF	ETH Lausanne	Lausanne
+ETH	ETH Zürich	Zurich
+UBA	Uni Basel	Basel
+...
+
+
+
+-- Select all professors working for universities in the city of Zurich
+SELECT professors.lastname, universities.id, universities.university_city
+FROM professors
+JOIN universities
+ON professors.university_id = universities.id
+WHERE universities.university_city = 'Zurich';
+
+
+lastname	id	university_city
+Abhari	ETH	Zurich
+Axhausen	ETH	Zurich
+Baschera	ETH	Zurich
+Basin	ETH	Zurich
+Bechtold	ETH	Zurich
+Boutellier	ETH	Zurich
+Bühler	UZH	Zurich
+Capkun	ETH	Zurich
+Carreira	ETH	Zurich
+Chen	ETH	Zurich
+D'Andrea	ETH	Zurich
+Diederich	ETH	Zurich
+Eberle	ETH	Zurich
+Ermanni	ETH	Zurich
+Faist	ETH	Zurich
+Fontana	ETH	Zurich
+Frossard	ETH	Zurich
+Gademann	UZH	Zurich
+Gramazio	ETH	Zurich
+Gross	ETH	Zurich
+Grote	ETH	Zurich
+Gruber	ETH	Zurich
+Gruissem	ETH	Zurich
+Gugerli	UZH	Zurich
+Guzzella	ETH	Zurich
+Günther	ETH	Zurich
+Hafen	ETH	Zurich
+Heinrich	ETH	Zurich
+Hellweg	ETH	Zurich
+Holdenrieder	ETH	Zurich
+Hungerbühler	ETH	Zurich
+Jackowski	UZH	Zurich
+Jenny	ETH	Zurich
+Kaufmann	ETH	Zurich
+Klumpner	ETH	Zurich
+Kohler	ETH	Zurich
+Krek	ETH	Zurich
+Lanzavecchia	ETH	Zurich
+Levine	ETH	Zurich
+Loeliger	ETH	Zurich
+Maurer	ETH	Zurich
+Meboldt	ETH	Zurich
+Meili	ETH	Zurich
+Menz	ETH	Zurich
+Morari	ETH	Zurich
+Morbidelli	ETH	Zurich
+Nelson	ETH	Zurich
+Neri	ETH	Zurich
+Poulikakos	ETH	Zurich
+Robertsson	ETH	Zurich
+Rudolf von Rohr	ETH	Zurich
+Saar	ETH	Zurich
+Schlüter	ETH	Zurich
+Schubert	ETH	Zurich
+Schulin	ETH	Zurich
+Schönsleben	ETH	Zurich
+Siegwart	ETH	Zurich
+Sornette	ETH	Zurich
+Stalder	ETH	Zurich
+Steinfeld	ETH	Zurich
+Szucs	UZH	Zurich
+Székely	ETH	Zurich
+Tröster	ETH	Zurich
+Vogel	ETH	Zurich
+Wegener	ETH	Zurich
+Weidmann	ETH	Zurich
+Wennemers	ETH	Zurich
+Widmayer	ETH	Zurich
+Widmer	ETH	Zurich
+Wolfrum	ETH	Zurich
+Wüest	ETH	Zurich
+von Krogh	ETH	Zurich
+
+
+First, the university belonging to each professor was attached with the JOIN operation. Then, only professors having "Zurich"" as university city were retained with the WHERE clause.
+
