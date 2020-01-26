@@ -1,0 +1,97 @@
+Query information_schema with SELECT
+information_schema is a meta-database that holds information about your current database. information_schema has multiple tables you can query with the known SELECT * FROM syntax:
+tables: information about all tables in your current database
+columns: information about all columns in all of the tables in your current database
+...
+
+In this exercise, you'll only need information from the 'public' schema, which is specified as the column table_schema of the tables and columns tables. The 'public' schema holds information about user-defined tables and databases. The other types of table_schema hold system information – for this course, you're only interested in user-defined stuff.
+Get information on all table names in the current database, while limiting your query to the 'public' table_schema.
+-- Query the right table in information_schema
+SELECT table_name 
+FROM information_schema.tables
+-- Specify the correct table_schema value
+WHERE table_schema = 'public';
+
+table_name
+university_professors
+
+
+firstname	lastname	university	university_shortname	university_city	function	organization	organization_sector
+Karl	Aberer	ETH Lausanne	EPF	Lausanne	Chairman of L3S Advisory Board	L3S Advisory Board	Education & research
+...
+1377 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Now have a look at the columns in university_professors by selecting all entries in information_schema.columns that correspond to that table.
+SELECT *
+FROM information_schema.columns 
+WHERE table_name = 'university_professors' 
+    AND table_schema = 'public';
+    
+table_catalog	table_schema	table_name	column_name	ordinal_position	column_default	is_nullable	data_type	character_maximum_length	character_octet_length	numeric_precision	numeric_precision_radix	numeric_scale	datetime_precision	interval_type	interval_precision	character_set_catalog	character_set_schema	character_set_name	collation_catalog	collation_schema	collation_name	domain_catalog	domain_schema	domain_name	udt_catalog	udt_schema	udt_name	scope_catalog	scope_schema	scope_name	maximum_cardinality	dtd_identifier	is_self_referencing	is_identity	identity_generation	identity_start	identity_increment	identity_maximum	identity_minimum	identity_cycle	is_generated	generation_expression	is_updatable
+university_affiliations	public	university_professors	firstname	1	null	YES	text	null	1073741824	null	null	null	null	null	null	null	null	null	null	null	null	null	null	null	university_affiliations	pg_catalog	text	null	null	null	null	1	NO	NO	null	null	null	null	null	NO	NEVER	null	YES
+    
+    
+-- Query the right table in information_schema to get columns
+SELECT column_name, data_type 
+FROM information_schema.columns 
+WHERE table_name = 'university_professors' 
+    AND table_schema = 'public';
+    
+column_name	data_type
+firstname	text
+lastname	text
+university	text
+university_shortname	text
+university_city	text
+function	text
+organization	text
+organization_sector	text
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Finally, print the first five rows of the university_professors table.
+-- Query the first five rows of our table
+SELECT * 
+FROM university_professors 
+LIMIT 5;
+
+firstname	lastname	university	university_shortname	university_city	function	organization	organization_sector
+Karl	Aberer	ETH Lausanne	EPF	Lausanne	Chairman of L3S Advisory Board	L3S Advisory Board	Education & research
+Karl	Aberer	ETH Lausanne	EPF	Lausanne	Member Conseil of Zeno-Karl Schindler Foundation	Zeno-Karl Schindler Foundation	Education & research
+Karl	Aberer	ETH Lausanne	EPF	Lausanne	Member of Conseil Fondation IDIAP	Fondation IDIAP	Education & research
+Karl	Aberer	ETH Lausanne	EPF	Lausanne	Panel Member 	SNF Ambizione Program	Education & research
+Reza Shokrollah	Abhari	ETH Zürich	ETH	Zurich	Aufsichtsratsmandat	PNE Wind AG	Energy, environment & mobility
+
+
+
+You're now familiar with the pre-existing university_professors table, which holds information on all kinds of entities. You'll migrate data from this table to other tables in the upcoming lessons.
+
