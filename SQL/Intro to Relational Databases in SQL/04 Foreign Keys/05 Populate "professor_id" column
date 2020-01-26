@@ -1,0 +1,81 @@
+Populate the "professor_id" column
+Now it's time to also populate professors_id. You'll take the ID directly from professors.
+
+
+Here's a way to update columns of a table based on values in another table:
+UPDATE table_a
+SET column_to_update = table_b.column_to_update_from
+FROM table_b
+WHERE condition1 AND condition2 AND ...;
+
+This query does the following:
+For each row in table_a, find the corresponding row in table_b where condition1, condition2, etc., are met.
+Set the value of column_to_update to the value of column_to_update_from (from that corresponding row).
+The conditions usually compare other columns of both tables, e.g. table_a.some_column = table_b.some_column. Of course, this query only makes sense if there is only one matching row in table_b.
+
+
+
+
+
+
+First, have a look at the current state of affiliations by fetching 10 rows and all columns.
+-- Have a look at the 10 first rows of affiliations
+SELECT *
+FROM affiliations
+LIMIT 10;
+
+
+
+firstname	lastname	function	organization_id	professor_id
+Karl	Aberer	Chairman of L3S Advisory Board	L3S Advisory Board	null
+Karl	Aberer	Member Conseil of Zeno-Karl Schindler Foundation	Zeno-Karl Schindler Foundation	null
+Karl	Aberer	Member of Conseil Fondation IDIAP	Fondation IDIAP	null
+Karl	Aberer	Panel Member 	SNF Ambizione Program	null
+Reza Shokrollah	Abhari	Aufsichtsratsmandat	PNE Wind AG	null
+Georges	Abou Jaoudé	Professeur invité (2 interventions d'une semaine)	Kazan Federal University, Russia	null
+Hugues	Abriel	NA	Cloetta Stiftung	null
+Daniel	Aebersold	NA	Berner Radium-Stiftung	null
+Daniel	Aebersold	NA	Janser Krebs-Stiftung	null
+Daniel	Aebersold	NA	SWAN Isotopen AG	null
+
+
+
+
+
+
+
+
+
+
+
+Update the professor_id column with the corresponding value of the id column in professors.
+"Corresponding" means rows in professors where the firstname and lastname are identical to the ones in affiliations.
+-- Set professor_id to professors.id where firstname, lastname correspond to rows in professors
+UPDATE affiliations
+SET professor_id = professors.ID
+FROM professors
+WHERE affiliations.firstname = professors.firstname AND affiliations.lastname = professors.lastname;
+
+
+
+Check out the first 10 rows and all columns of affiliations again. Have the professor_ids been correctly matched?
+-- Have a look at the 10 first rows of affiliations again
+SELECT *
+FROM affiliations
+LIMIT 10;
+
+firstname	lastname	function	organization_id	professor_id
+Peter	Schneemann	NA	CIHA	442
+Heinz	Zimmermann	Mitglied des Stiftungsrates	Stiftung zur Förderung des Schweizerischen Wirtschaftsarchivs am WWZ der Universität Basel	539
+Heinz	Zimmermann	Mitglied des Verwaltungsrates	Remaco AG, Basel	539
+Heinz	Zimmermann	Mitglied des Verwaltungsrates	Versicherung der Schweizer Ärzte, Bern	539
+Heinz	Zimmermann	Mitglied des Verwaltungsrates	vescore Solutions, St. Gallen	539
+Heinz	Zimmermann	Verwaltungsrat inkl. Präsidium Vorsorgestiftung	Viollier AG, Allschwil	539
+Klaus	Zuberbühler	Co-directeur	Tai Monkey Project (Côte d'Ivoire)	541
+Klaus	Zuberbühler	Directeur scientifique	Budongo Conservation Field Station (Ouganda)	541
+Klaus	Zuberbühler	Enseignement	Université St Andrews (UK) 	541
+Klaus	Zuberbühler	Membre du conseil scientifique	Max Planck Institute of Evolutionary Anthropology	541
+
+
+As you can see, the correct professors.id has been inserted into professor_id for each record, thanks to the matching firstname and lastname in both tables.
+
