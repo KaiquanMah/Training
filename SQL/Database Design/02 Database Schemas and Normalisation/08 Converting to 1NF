@@ -1,0 +1,47 @@
+Converting to 1NF
+In the next three exercises, you'll be working through different tables belonging to a car rental company. Your job is to explore different schemas and gradually increase the normalization of these schemas through the different normal forms. At this stage, we're not worried about relocating the data, but rearranging the tables.
+A table called customers has been loaded, which holds information about customers and the cars they have rented.
+
+
+customers
+customer_id	customer_name	cars_rented	invoice_id	premium_member	salutation
+1453	Kelly Brennan	4KL298	 4534	false	 Dr
+1454	Tom Nguyen	5PL4YY	 9832	false	 Mr
+1455	Georgia Kim	5H9OP5, 9PH8GF, 499ERW	 2903, 3490, 1021	true	 Ms
+1456	Jean Ford	4KL298, 9PH8GF	 7890, 4494	true	 Mrs
+
+
+
+
+Does the customers table meet 1NF criteria?
+Yes, all the records are unique.
+No, because the non-key columns such as don't depend on customer_id, the primary key.
+
+#CORRECT - No, because there are multiple values in cars_rented and invoice_id
+
+
+
+
+
+
+
+
+
+
+cars_rented holds one or more car_ids and invoice_id holds multiple values. Create a new table to hold individual car_ids and invoice_ids of the customer_ids who've rented those cars.
+Drop two columns from customers table to satisfy 1NF
+-- Create a new table to hold the cars rented by customers
+CREATE TABLE cust_rentals (
+  customer_id INT NOT NULL,
+  car_id VARCHAR(128) NULL,
+  invoice_id VARCHAR(128) NULL
+);
+
+-- Drop column from customers table to satisfy 1NF
+ALTER TABLE customers
+DROP COLUMN cars_rented,
+DROP COLUMN invoice_id;
+
+
+Great! We now have two tables: (1) customers which holds customer information and (2) cust_rentals which holds the car_ids rented by different customer_ids. This satisfies 1NF. In a real situation, we would need to fill the new table before dropping any columns.
+
