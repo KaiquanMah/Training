@@ -1,0 +1,52 @@
+Deciding fact and dimension tables
+Imagine that you love running and data. It's only natural that you begin collecting data on your weekly running routine. You're most concerned with tracking how long you are running each week. You also record the route and the distances of your runs. You gather this data and put it into one table called Runs with the following schema: 
+After learning about dimensional modeling, you decide to restructure the schema for the database. Runs has been pre-loaded for you.
+
+SELECT *
+FROM Runs
+
+duration_mins	week	month	year	park_name	city_name	distance_km	route_name
+24.5	3	May	2019	Prospect Park	Brooklyn	5	Simple Loop
+61	3	May	2019	Central Park	New York City	8	Resevoir Loop
+24.5	3	May	2019	Central Park	New York City	5	Lake Loop
+...
+
+
+
+Out of these possible answers, what would be the best way to organize the fact table and dimensional tables?
+A fact table holding week,month, year and foreign keys to dimension tables holding route details and duration details, respectively.
+A fact table holding route_name,park_name, distance_km,city_name, and foreign keys to dimension tables holding week details and duration details, respectively.
+
+#YES - A fact table holding duration_mins and foreign keys to dimension tables holding route details and week details, respectively.
+
+
+
+
+
+
+
+
+
+
+Create a dimension table called route that will hold the route information.
+Create a dimension table called week that will hold the week information.
+-- Create a route dimension table
+CREATE TABLE route(
+	route_id INTEGER PRIMARY KEY,
+    park_name VARCHAR(160) NOT NULL,
+    city_name VARCHAR(160) NOT NULL,
+    distance_km FLOAT NOT NULL,
+    route_name VARCHAR(160) NOT NULL
+);
+
+-- Create a week dimension table
+CREATE TABLE week(
+	week_id INTEGER PRIMARY KEY,
+    week INTEGER NOT NULL,
+    month VARCHAR(160) NOT NULL,
+    year INTEGER NOT NULL
+);
+
+
+Terrific tables! The primary keys route_id and week_id you created will be foreign keys in the fact table.
+
