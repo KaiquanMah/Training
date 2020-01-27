@@ -1,0 +1,59 @@
+Converting to 2NF
+Let's try normalizing a bit more. In the last exercise, you created a table holding customer_ids and car_ids. This has been expanded upon and the resulting table, customer_rentals, has been loaded for you. Since you've got 1NF down, it's time for 2NF.
+
+
+customer_rentals
+customer_id	car_id	start_date	end_date	model	manufacturer	type_car	condition	color
+1453	4KL298	2019-01-08	2019-01-10	 Golf 2017	 Volkswagen	 hatchback	 fair	 blue
+1454	5PL4YY	2019-03-18	2019-03-21	 Camaro 2019	 Chevrolet	 convertible	 excellent	 red
+1455	5H9OP5	2019-04-14	2019-04-14	 CRV 2018	 Honda	 SUV	 good	 grey
+1455	5H9OP5	2019-05-02	2019-05-16	 CRV 2018	 Honda	 SUV	 good	 grey
+1455	499ERW	2019-01-12	2019-01-13	 CRV 2018	 Honda	 SUV	 excellent	 black
+1456	4KL298	2019-02-17	2019-02-22	 Golf 2017	 Volkswagen	 hatchback	 fair	 blue
+1456	4KL298	2019-03-05	2019-03-20	 Golf 2017	 Volkswagen	 hatchback	 fair	 blue
+
+
+Why doesn't customer_rentals meet 2NF criteria?
+#NOT - Because the end_date doesn't depend on all the primary keys.
+Try again. end_date depends on the customer, the avaiability of the car, and when the renting started (e.g., the three primary keys).
+
+
+#NOT - Because there can only be at most two primary keys.
+Try again. A 2NF table can have more than two keys as long as a certain condition is met.
+
+
+#YES - Because there are non-key attributes describing the car that only depend on one primary key, car_id.
+
+
+
+
+
+
+
+
+
+
+Create a new table for the non-key columns that were conflicting with 2NF criteria.
+Drop those non-key columns from customer_rentals.
+-- Create a new table to satisfy 2NF
+CREATE TABLE cars (
+  car_id VARCHAR(256) NULL,
+  model VARCHAR(128),
+  manufacturer VARCHAR(128),
+  type_car VARCHAR(128),
+  condition VARCHAR(128),
+  color VARCHAR(128)
+);
+
+
+-- Drop columns in customer_rentals to satisfy 2NF
+ALTER TABLE customer_rentals
+DROP COLUMN model,
+DROP COLUMN manufacturer,
+DROP COLUMN type_car,
+DROP COLUMN condition,
+DROP COLUMN color;
+
+
+There we go! model, manufacturer, type_car, conditions, and colors depend on car_id, but are independent of the other two primary keys, customer_id and start_date. The customer or start date cannot change these attributes. Hence, we have put these columns in a new table and dropped them from customer_rentals.
+
