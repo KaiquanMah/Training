@@ -1,0 +1,44 @@
+Updating countries
+Going through the company data, you notice there are some inconsistencies in the store addresses. These probably occurred during data entry, where people fill in fields using different naming conventions. This can be especially seen in the country field, and you decide that countries should be represented by their abbreviations. The only countries in the database are Canada and the United States, which should be represented as USA and CA.
+In this exercise, you will compare the records that need to be updated in order to do this task on the star and snowflake schema. dim_store_star and dim_country_sf have been loaded.
+
+
+dim_store_star
+store_id	store_address	city	state	country
+798	23 Jeanne Ave	Montreal	Quebec	Canada
+799	56 University St	Quebec City	Quebec	Canada
+800	23 Verte Ave	Montreal	Quebec	Canada
+...
+
+
+
+
+dim_country_sf
+country_id	country
+1	Canada
+2	USA
+
+
+
+
+
+
+Output all the records that need to be updated in the star schema so that countries are represented by their abbreviations.
+-- Output records that need to be updated in the star schema
+SELECT * FROM dim_store_star
+WHERE country != 'USA' AND state !='CA';
+
+
+
+
+
+
+
+
+
+
+
+How many records would need to be updated in the snowflake schema?
+That's right! Only one record needs to be changed - Canada to CA. Updating is typically simpler in a snowflake schema because there are less records to update because redundant values are minimized to their own table (e.g., countries have their own table, dim_country_sf). Snowflake schemas are also better at enforcing naming conventions due to referential integrity. Note how there weren't any variations in how Canada and USA were referred to in the snowflake schema.
+
+
