@@ -1,0 +1,137 @@
+Querying the snowflake schema
+Imagine that you didn't have the data warehouse set up. Instead, you'll have to run this query on the company's operational database, which means you'll have to rewrite the previous query with the following snowflake schema:
+The tables in this schema have been loaded. Remember, our goal is to find the amount of money made from the novel genre in each state.
+
+
+dim_author_sf
+author_id	author
+7009	Agatha Christie
+7039	Aldous Huxley
+7069	Alice Walker
+...
+
+dim_genre_sf
+genre_id	genre
+10	mystery
+16	dystopia
+22	novel
+...
+
+
+dim_publisher_sf
+publisher_id	publisher
+1239	Harper Collins
+1292	Harcourt
+1345	Penguin Random House
+...
+
+
+dim_book_sf
+book_id	title	author_id	publisher_id	genre_id
+5550	Evil Under the Sun	7009	1239	10
+5551	A Murder is Announced	7009	1239	10
+5552	4.50 From Paddington	7009	1239	
+...
+
+
+
+
+
+
+fact_booksales
+sales_id	book_id	store_id	time_id	sales_amount	quantity
+88	5582	829	3951	5405.4	2340
+89	5611	804	2445	6177.6	2080
+90	5622	820	2083	2059.2	780
+...
+
+
+
+
+
+
+
+
+
+dim_store_sf
+store_id	store_address	city_id
+798	23 Jeanne Ave	300
+799	56 University St	288
+800	23 Verte Ave	300
+...
+
+dim_city_sf
+city_id	city	state_id
+300	Montreal	777
+288	Quebec City	777
+276	Toronto	754
+...
+
+dim_state_sf
+state_id	state	country_id
+777	Quebec	1
+754	Ontario	1
+731	British Columbia	1
+...
+
+dim_country_sf
+country_id	country
+1	Canada
+2	USA
+...
+
+
+
+
+
+
+
+
+
+Select state from the appropriate table and the total sales_amount.
+Complete the two JOINS to get the genre_id's.
+Complete the three JOINS to get the state_id's.
+Conditionally select for books with the genre novel.
+Group the results by state.
+
+
+
+-- Output each state and their total sales_amount
+SELECT dim_state_sf.state, SUM(sales_amount)
+FROM fact_booksales
+    -- Joins for genre
+    JOIN dim_book_sf on fact_booksales.book_id = dim_book_sf.book_id
+    JOIN dim_genre_sf on dim_book_sf.genre_id = dim_genre_sf.genre_id
+    -- Joins for state 
+    JOIN dim_store_sf on fact_booksales.store_id = dim_store_sf.store_id 
+    JOIN dim_city_sf on dim_store_sf.city_id = dim_city_sf.city_id
+	JOIN dim_state_sf on  dim_city_sf.state_id = dim_state_sf.state_id
+-- Get all books with in the novel genre and group the results by state
+WHERE  
+    dim_genre_sf.genre = 'novel'
+GROUP BY
+    dim_state_sf.state;
+
+
+
+state	sum
+British Columbia	374629.2
+California	583248.6
+Florida	295594.2
+Louisiana	176979
+Massachusetts	344671.8
+Michigan	82011.6
+New Jersey	272956.2
+New York	248529.6
+Ontario	402263.4
+Quebec	372134.4
+Texas	317730.6
+Utah	128812.2
+Vermont	216282
+Washington	272177.4
+
+
+
+
+This query was definetely more work than the previous one. It wouldn't be practical to have to think about all these joins if you're doing a lot of analytics.
+
