@@ -1,0 +1,68 @@
+Extending the book dimension
+In the video, we saw how the book dimension differed between the star and snowflake schema. The star schema's dimension table for books, dim_book_star, has been loaded and below is the snowflake schema of the book dimension. 
+In this exercise, you are going to extend the star schema to meet part of the snowflake schema's criteria. Specifically, you will create dim_author from the data provided in dim_book_star.
+
+
+dim_book_star
+book_id	title	author	publisher	genre
+5550	Evil Under the Sun	Agatha Christie	Harper Collins	mystery
+5551	A Murder is Announced	Agatha Christie	Harper Collins	mystery
+5552	4.50 From Paddington	Agatha Christie	Harper Collins	mystery
+...
+
+
+
+
+Create dim_author with a column for author.
+Insert all the distinct authors from dim_book_star into dim_author.
+-- Create dim_author with an author column
+CREATE TABLE dim_author (
+    author VARCHAR(256)  NOT NULL
+);
+
+-- Insert authors into the new table
+INSERT INTO dim_author
+SELECT DISTINCT author FROM dim_book_star;
+
+
+
+
+
+
+
+
+
+
+Alter dim_author to have a primary key called author_id.
+Output all the columns of dim_author.
+-- Add a primary key 
+ALTER TABLE dim_author 
+ADD COLUMN author_id SERIAL PRIMARY KEY;
+
+-- Output the new table
+SELECT * FROM dim_author;
+
+
+author	author_id
+Octavia E. Butler	1
+F. Scott Fitzgerald	2
+Beverly Cleary	3
+Barack Obama	4
+Alice Waters	5
+Agatha Christie	6
+Steven D. Levitt	7
+Alice Walker	8
+James Patterson	9
+H.G. Wells	10
+J.R.R. Tolkien	11
+Aldous Huxley	12
+Isaac Asimov	13
+George R.R. Martin	14
+Cecily von Ziegesar	15
+Stephenie Meyer	16
+Dan Brown	17
+David Foster Wallace	18
+
+
+Awesome! You've created a dimension table that succesfully meets the schema criteria - it has all the authors with no repeats and unique author_ids. If we were to continue completing the star schema, we would need to create tables for the other dimensions using similar code.
+
