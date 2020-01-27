@@ -1,0 +1,68 @@
+Querying the dimensional model
+Here it is! The schema reorganized using the dimensional model: 
+Let's try to run a query based on this schema. How about we try to find the number of minutes we ran in July, 2019? We'll break this up in two steps. First, we'll get the total number of minutes recorded in the database. Second, we'll narrow down that query to week_id's from July, 2019.
+
+
+week_dim
+week_id	week	month	year
+601	3	May	2019
+602	4	May	2019
+603	1	June	2019
+...
+
+runs_fact
+duration_mins	week_id	route_id
+24.5	601	101
+61	601	103
+24.5	601	104
+...
+
+
+route_dim
+route_id	park_name	city_name	distance_km	route_name
+101	Prospect Park	Brooklyn	5	Simple Loop
+102	Prospect Park	Brooklyn	10	Grove Run
+103	Central Park	New York City	8	Resevoir Loop
+...
+
+
+
+
+Calculate the sum of the duration_mins column.
+SELECT 
+	-- Select the sum of the duration of all runs
+	SUM(duration_mins)
+FROM 
+	runs_fact;
+
+sum
+1172.16
+
+
+
+
+
+
+
+
+
+
+
+Use the IN SQL function to check for multiple values for week_id
+Run a subquery on week_dim to get all the week_id's from July, 2019
+SELECT 
+	-- Get the total duration of all runs
+	SUM(duration_mins)
+FROM 
+	runs_fact
+-- Get all the week_id's that are from July, 2019
+INNER JOIN week_dim on runs_fact.week_id = week_dim.week_id
+WHERE month = 'July' and year = '2019';
+
+sum
+381.46
+
+
+
+Nice! It looks like you've run 381.46 minutes in July. Because of its structure, the dimensional model usually require queries involving more than one table.
+
