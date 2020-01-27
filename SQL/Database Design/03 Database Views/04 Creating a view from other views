@@ -1,0 +1,90 @@
+Creating a view from other views
+Views can be created from queries that include other views. This is useful when you have a complex schema, potentially due to normalization, because it helps reduce the JOINS needed. The biggest concern is keeping track of dependencies, specifically how any modifying or dropping of a view may affect other views.
+In the next few exercises, we'll continue using the Pitchfork reviews data. There are two views of interest in this exercise. top_25_2017 holds the top 25 highest scored reviews published in 2017 with columns reviewid,title, and score. artist_title returns a list of all reviewed titles and their respective artists with columns reviewid, title, and artist. From these views, we want to create a new view that gets the highest scoring artists of 2017.
+
+Create a view called top_artists_2017 with one column artist holding the top artists in 2017.
+Join the views top_25_2017 and artist_title.
+Output top_artists_2017.
+
+--ORIGINAL QUERY WHICH THE GRADING ENGINE did not recognise
+-- Create a view with the top artists in 2017
+CREATE VIEW top_artists_2017 AS
+-- with only one column holding the artist field
+SELECT artist_title.artist FROM top_25_2017
+INNER JOIN artist_title
+ON top_25_2017.reviewid = artist_title.reviewid;
+
+-- Output the new view
+SELECT * FROM top_artists_2017;
+
+
+
+
+-- subsequently clicked on the hint as the answer above would not go through
+-- there was conflicting information in the hint which I had to get
+--Query the top_artists_2017 and artist view to see their contents.
+--reviewid is a shared field between top_25_2017 and artist_title.
+
+
+--answer that went through changed the location of artist_title and top_25_2017 which failed at the grading engine previously
+-- Create a view with the top artists in 2017
+CREATE VIEW top_artists_2017 AS
+-- with only one column holding the artist field
+SELECT artist_title.artist FROM artist_title
+INNER JOIN top_25_2017
+ON artist_title.reviewid = top_25_2017.reviewid;
+
+-- Output the new view
+SELECT * FROM top_artists_2017;
+
+
+
+
+
+
+
+artist
+massive attack
+krallice
+uranium club
+liliput
+kleenex
+taso
+various artists
+little simz
+yotam avni
+brian eno
+the lox
+harry bertoia
+run the jewels
+steven warwick
+yasiin bey
+pete rock
+smoke dza
+various artists
+senyawa
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Which is the DROP command that would drop both top_25_2017 and top_artists_2017?
+#NOT - DROP VIEW top_25_2017 RESTRICT;
+#NOT - DROP VIEW top_artists_2017 RESTRICT;
+
+#NOT - DROP VIEW top_artists_2017 CASCADE;
+Try again. This statement would have no effect on top_25_2017 because there is not dependency in this direction.
+
+#YES - DROP VIEW top_25_2017 CASCADE;
+Because top_artists_2017 depends on top_25_2017, the CASCADE parameter indicates both should be dropped.
+
