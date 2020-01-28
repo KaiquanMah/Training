@@ -1,0 +1,62 @@
+Creating vertical partitions
+In the video, you learned about vertical partitioning and saw an example.
+For vertical partitioning, there is no specific syntax in PostgreSQL. You have to create a new table with particular columns and copy the data there. Afterward, you can drop the columns you want in the separate partition. If you need to access the full table, you can do so by using a JOIN clause.
+
+In this exercise and the next one, you'll be working with the example database called pagila. It's a database that is often used to showcase PostgreSQL features. The database contains several tables. We'll be working with the film table. In this exercise, we'll use the following columns:
+film_id: the unique identifier of the film
+long_description: a lengthy description of the film
+
+
+
+film
+film_id	title	long_description	rental_duration	rental_rate	length	replacement_cost	rating	release_year
+1	ACADEMY DINOSAUR	A Epic Drama of a Feminist And a Mad Scientist who must Battle a Teacher in The Canadian Rockies	6	0.99	86	20.99	PG	2019
+2	ACE GOLDFINGER	A Astounding Epistle of a Database Administrator And a Explorer who must Find a Car in Ancient China	3	4.99	48	12.99	G	2017
+3	ADAPTATION HOLES	A Astounding Reflection of a Lumberjack And a Car who must Sink a Lumberjack in A Baloon Factory	7	2.99	50	18.99	NC-17	2019
+...
+
+
+
+
+Create a new table film_descriptions containing 2 fields: film_id, which is of type INT, and long_description, which is of type TEXT.
+Occupy the new table with values from the film table.
+-- Create a new table called film_descriptions
+CREATE TABLE film_descriptions (
+    film_id INT,
+    long_description TEXT
+);
+
+-- Copy the descriptions from the film table
+INSERT INTO film_descriptions
+SELECT film_id, long_description FROM film;
+
+
+
+
+
+
+
+
+
+Drop the field long_description from the films table.
+Join the two resulting tables to view the original table.
+-- Drop the descriptions from the original table
+ALTER TABLE film
+DROP COLUMN long_description;
+
+-- Join to view the original table
+SELECT * 
+FROM film_descriptions 
+JOIN film ON film_descriptions.film_id=film.film_id;
+
+-- Method 2
+-- Join to create the original table
+SELECT * FROM film 
+JOIN film_descriptions USING(film_id);
+
+film_id	title	rental_duration	rental_rate	length	replacement_cost	rating	release_year	long_description
+1	ACADEMY DINOSAUR	6	0.99	86	20.99	PG	2019	A Epic Drama of a Feminist And a Mad Scientist who must Battle a Teacher in The Canadian Rockies
+2	ACE GOLDFINGER	3	4.99	48	12.99	G	2017	A Astounding Epistle of a Database Administrator And a Explorer who must Find a Car in Ancient China
+3	ADAPTATION HOLES	7	2.99	50	18.99	NC-17	2019	A Astounding Reflection of a Lumberjack And a Car who must Sink a Lumberjack in A Baloon Factory
+...
+
