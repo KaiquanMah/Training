@@ -1,0 +1,38 @@
+Working with NULL values
+A NULL value could mean 'zero' - if something doesn't happen, it can't be logged in a table. However, NULL can also mean 'unknown' or 'missing'. So consider if it is appropriate to replace them in your results. NULL values provide feedback on data quality. If you have NULL values, and you didn't expect to have any, then you have an issue with either how data is captured or how it's entered in the database.
+In this exercise, you'll practice filtering for NULL values, excluding them from results, and replacing them with alternative values.
+
+
+Use a shortcut to select all columns from grid. Then filter the results to only include rows where demand_loss_mw is unknown or missing.
+-- Retrieve all columns
+SELECT * 
+FROM grid 
+-- Return only rows where demand_loss_mw is missing or unknown  
+WHERE demand_loss_mw IS NULL;
+
+
+
+grid_id	description	event_year	event_date	restore_date	nerc_region	demand_loss_mw	affected_customers
+1	Severe Weather  Thunderstorms	2014	2014-06-30	2014-07-01	RFC	null	127000
+3	Fuel Supply Emergency  Coal	2014	2014-06-27	null	MRO	null	null
+4	Physical Attack  Vandalism	2014	2014-06-24	2014-06-24	SERC	null	null
+...
+
+
+
+
+
+
+Adapt your code to return rows where demand_loss_mw is not unknown or missing.
+-- Retrieve all columns
+SELECT * 
+FROM grid 
+-- Return rows where demand_loss_mw is not missing or unknown   
+WHERE demand_loss_mw IS NOT NULL;
+
+grid_id	description	event_year	event_date	restore_date	nerc_region	demand_loss_mw	affected_customers
+2	Severe Weather  Thunderstorms	2014	2014-06-30	2014-07-01	MRO	424	120000
+14	Severe Weather  Thunderstorms	2014	2014-06-07	2014-06-08	SERC	217	65000
+16	Severe Weather  Thunderstorms	2014	2014-06-05	2014-06-07	SERC	494	38500
+...
+
