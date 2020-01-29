@@ -1,0 +1,268 @@
+Grouping together
+In this final exercise, you will combine GROUP BY with aggregate functions such as MIN that you've seen earlier in this chapter.
+To conclude this chapter, we'll return to the eurovision table from the first chapter.
+
+
+Use MIN and MAX to retrieve the minimum and maximum values for the place and points columns respectively.
+-- Retrieve the minimum and maximum place values
+SELECT 
+  MIN(place) AS min_place, 
+  MAX(place) AS max_place, 
+  -- Retrieve the minimum and maximum points values
+  MIN(points) AS min_points, 
+  MAX(points) AS max_points 
+FROM 
+  eurovision;
+
+
+
+min_place	max_place	min_points	max_points
+1	28	0	387
+
+
+
+
+
+
+
+
+
+
+Let's obtain more insight from our results by adding a GROUP BY clause. Group the results by country.
+-- Retrieve the minimum and maximum place values
+SELECT 
+  MIN(place) AS min_place, 
+  MAX(place) AS max_place, 
+  -- Retrieve the minimum and maximum points values
+  MIN(points) AS min_points, 
+  MAX(points) AS max_points 
+FROM 
+  eurovision
+  -- Group by country
+GROUP BY
+  country;
+
+min_place	max_place	min_points	max_points
+2	17	43	167
+12	23	8	80
+2	12	54	198
+6	27	4	101
+1	8	96	221
+4	24	10	176
+1	26	1	167
+2	18	27	267
+5	19	7	157
+3	21	29	169
+5	22	2	170
+18	28	0	9
+1	24	7	195
+1	24	8	198
+1	25	18	292
+4	24	3	142
+3	14	36	136
+1	24	4	246
+1	20	12	252
+2	24	4	224
+1	22	3	218
+6	24	5	119
+1	24	4	172
+2	9	101	189
+1	24	5	176
+3	25	12	163
+9	19	16	97
+2	25	1	192
+2	22	22	207
+19	24	10	22
+11	22	20	44
+4	21	11	150
+1	26	3	387
+7	24	11	90
+2	22	12	120
+1	22	6	235
+1	16	37	266
+14	19	5	34
+1	14	60	298
+1	7	137	263
+13	21	8	48
+3	23	5	140
+6	23	1	97
+1	21	30	372
+8	25	0	128
+1	16	21	197
+1	19	30	280
+2	26	0	173
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The previous query results did not identify the country. Let's amend the query, returning the count of entries per country and the country column. Complete the aggregate section by finding the average place for each country.
+-- Obtain a count for each country
+SELECT 
+  COUNT(country) AS country_count, 
+  -- Retrieve the country column
+  country, 
+  -- Return the average of the Place column 
+  AVG(place) AS average_place, 
+  AVG(points) AS avg_points, 
+  MIN(points) AS min_points, 
+  MAX(points) AS max_points 
+FROM 
+  eurovision 
+GROUP BY 
+  country;
+
+
+
+country_count	country	average_place	avg_points	min_points	max_points
+14	Albania	10	81	43	167
+6	Andorra	17	26	8	80
+10	Armenia	6	122	54	198
+10	Austria	16	41	4	101
+9	Azerbaijan	3	150	96	221
+11	Belarus	14	56	10	176
+15	Belgium	13	58	1	167
+20	Bosnia and Herzegovina	9	98	27	267
+9	Bulgaria	12	62	7	157
+19	Croatia	11	68	29	169
+17	Cyprus	14	56	2	170
+3	Czech Republic	21	3	0	9
+19	Denmark	9	95	7	195
+18	Estonia	11	72	8	198
+16	Finland	13	76	18	292
+15	France	16	46	3	142
+9	Georgia	8	96	36	136
+15	Germany	12	76	4	246
+19	Greece	7	131	12	252
+11	Hungary	13	76	4	224
+18	Iceland	11	80	3	218
+18	Ireland	13	53	5	119
+19	Israel	12	68	4	172
+2	Italy	5	145	101	189
+16	Latvia	12	67	5	176
+15	Lithuania	13	60	12	163
+17	Macedonia	13	55	16	97
+18	Malta	12	65	1	192
+14	Moldova	10	85	22	207
+3	Monaco	21	15	10	22
+4	Montenegro	15	30	20	44
+15	Netherlands	14	47	11	150
+18	Norway	11	92	3	387
+13	Poland	14	42	11	90
+16	Portugal	14	49	12	120
+19	Romania	10	91	6	235
+18	Russia	6	134	37	266
+3	San Marino	16	23	5	34
+10	Serbia	6	145	60	298
+3	Serbia and Montenegro	3	221	137	263
+5	Slovakia	17	22	8	48
+16	Slovenia	13	50	5	140
+15	Spain	15	49	1	97
+20	Sweden	7	120	30	372
+14	Switzerland	16	37	0	128
+21	Turkey	7	107	21	197
+17	Ukraine	7	130	30	280
+15	United Kingdom	16	51	0	173
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Finally, our results are skewed by countries who only have one entry. Apply a filter so we only return rows where the country_count is greater than 5. Then arrange by avg_place in ascending order, and avg_points in descending order.
+SELECT 
+  country, 
+  COUNT (country) AS country_count, 
+  AVG (place) AS avg_place, 
+  AVG (points) AS avg_points, 
+  MIN (points) AS min_points, 
+  MAX (points) AS max_points 
+FROM 
+  eurovision 
+GROUP BY 
+  country 
+  -- The country column should only contain those with a count greater than 5
+HAVING 
+  COUNT(country) > 5 
+  -- Arrange columns in the correct order
+ORDER BY 
+  avg_place, 
+  avg_points DESC;
+
+country	country_count	avg_place	avg_points	min_points	max_points
+Azerbaijan	9	3	150	96	221
+Serbia	10	6	145	60	298
+Russia	18	6	134	37	266
+Armenia	10	6	122	54	198
+Greece	19	7	131	12	252
+Ukraine	17	7	130	30	280
+Sweden	20	7	120	30	372
+Turkey	21	7	107	21	197
+Georgia	9	8	96	36	136
+Bosnia and Herzegovina	20	9	98	27	267
+Denmark	19	9	95	7	195
+Romania	19	10	91	6	235
+Moldova	14	10	85	22	207
+Albania	14	10	81	43	167
+Norway	18	11	92	3	387
+Iceland	18	11	80	3	218
+Estonia	18	11	72	8	198
+Croatia	19	11	68	29	169
+Germany	15	12	76	4	246
+Israel	19	12	68	4	172
+Latvia	16	12	67	5	176
+Malta	18	12	65	1	192
+Bulgaria	9	12	62	7	157
+Finland	16	13	76	18	292
+Hungary	11	13	76	4	224
+Lithuania	15	13	60	12	163
+Belgium	15	13	58	1	167
+Macedonia	17	13	55	16	97
+Ireland	18	13	53	5	119
+Slovenia	16	13	50	5	140
+Cyprus	17	14	56	2	170
+Belarus	11	14	56	10	176
+Portugal	16	14	49	12	120
+Netherlands	15	14	47	11	150
+Poland	13	14	42	11	90
+Spain	15	15	49	1	97
+United Kingdom	15	16	51	0	173
+France	15	16	46	3	142
+Austria	10	16	41	4	101
+Switzerland	14	16	37	0	128
+Andorra	6	17	26	8	80
+
+
+
+
+A WHERE clause wouldn't work because we are applying the filter based on an aggregate value - in this example, the count of entries by each country. That completes this chapter. Now we move on to learning how to SELECT data from more than one table
+
