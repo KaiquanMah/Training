@@ -1,0 +1,158 @@
+Stuck in the middle with you
+You might be fortunate, and find that the interesting parts of your strings are at either end. However, chances are, you'll want to retrieve characters from somewhere around the middle. Let's see how to use RIGHT, LEN, CHARINDEX AND SUBSTRING to extract the interior portion of a text string. The description column can contain multiple reasons for power outages in each row. We want to extract any additional causes of outage whenever Weather appears in the description column.
+
+
+
+You can use CHARINDEX to find a specific character or pattern within a column. Edit the query to return the CHARINDEX of the string 'Weather' whenever it appears within the description column.
+-- Complete the query to find `Weather` within the description column
+SELECT 
+  description, 
+  CHARINDEX('Weather', description) 
+FROM 
+  grid
+WHERE description LIKE '%Weather%';
+
+description	
+Severe Weather  Thunderstorms	8
+Severe Weather  Thunderstorms	8
+Severe Weather  Heavy Winds	8
+Public Appeal due to Severe Weather  Cold	29
+Severe Weather  ThunderstormsHigh Winds	8
+Severe Weather  SnowIce	8
+Severe Weather  SnowIce	8
+Severe Weather  SnowIce	8
+Severe Weather  SnowIce	8
+Severe Weather  SnowIce	8
+Severe Weather  SnowIce	8
+Severe Weather  Ice	8
+Severe Weather  SnowIce	8
+Severe Weather  SnowIce	8
+Voltage Reduction Public Appeal Load Shed 100+MW due to Severe Weather  Cold	64
+Voltage Reduction due to Severe Weather  Cold	33
+Voltage Reduction Public Appeal Load Shed 100+MW due to Severe Weather  Cold	64
+Public Appeal due to Severe Weather  Cold	29
+...
+
+
+
+
+
+
+We now know where 'Weather' begins in the description column. But where does it end? We could manually count the number of characters, but, for longer strings, this is more work, especially when we can also find the length with LEN.
+-- Complete the query to find the length of `Weather'
+SELECT 
+  description, 
+  CHARINDEX('Weather', description) AS start_of_string,
+  LEN('Weather') AS length_of_string 
+FROM 
+  grid
+WHERE description LIKE '%Weather%'; 
+
+description	start_of_string	length_of_string
+Severe Weather  Thunderstorms	8	7
+Severe Weather  Heavy Winds	8	7
+Severe Weather	8	7
+Severe Weather  Thunderstorms	8	7
+Severe Weather  Wind	8	7
+Severe Weather  High Winds	8	7
+Severe Weather  Winter Storm	8	7
+Severe Weather  Winter Storm	8	7
+Public Appeal due to Severe Weather  Cold	29	7
+Severe Weather  ThunderstormsHigh Winds	8	7
+Severe Weather  SnowIce	8	7
+Severe Weather  SnowIce	8	7
+Severe Weather  SnowIce	8	7
+Severe Weather  SnowIce	8	7
+Severe Weather  SnowIce	8	7
+Severe Weather  SnowIce	8	7
+Severe Weather  Ice	8	7
+Severe Weather  SnowIce	8	7
+Severe Weather  SnowIce	8	7
+Voltage Reduction Public Appeal Load Shed 100+MW due to Severe Weather  Cold	64	7
+Voltage Reduction due to Severe Weather  Cold	33	7
+Public Appeal due to Severe Weather  Cold	29	7
+Fuel Supply Emergency due to Severe Weather  Cold	37	7
+Severe Weather  Cold	8	7
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Now we use SUBSTRING to return everything after Weather for the first ten rows. The start index here is 15, because the CHARINDEX for each row is 8, and the LEN of Weather is 7.
+-- Complete the substring function to begin extracting from the correct character in the description column
+--WORKED
+SELECT TOP (10)
+  description, 
+  CHARINDEX('Weather', description) AS start_of_string, 
+  LEN ('Weather') AS length_of_string, 
+  SUBSTRING(
+    description, 
+    15, 
+    LEN(description)
+  ) AS additional_description 
+FROM 
+  grid
+WHERE description LIKE '%Weather%';
+
+
+description	start_of_string	length_of_string	additional_description
+Severe Weather  Thunderstorms	8	7	  Thunderstorms
+Severe Weather  Thunderstorms	8	7	  Thunderstorms
+Severe Weather  Thunderstorms	8	7	  Thunderstorms
+Severe Weather  Thunderstorms	8	7	  Thunderstorms
+Severe Weather  Thunderstorms	8	7	  Thunderstorms
+Severe Weather  Thunderstorms	8	7	  Thunderstorms
+Severe Weather  Thunderstorms	8	7	  Thunderstorms
+Severe Weather  Thunderstorms	8	7	  Thunderstorms
+Severe Weather  Heavy Winds	8	7	  Heavy Winds
+Severe Weather  Thunderstorms	8	7	  Thunderstorms
+...
+
+
+
+
+
+
+--DIDNT WORK
+SELECT TOP (10)
+  description, 
+  CHARINDEX('Weather', description) AS start_of_string, 
+  LEN ('Weather') AS length_of_string, 
+  SUBSTRING(
+    description, 
+    SUM(start_of_string, length_of_string), 
+    LEN(description)
+  ) AS additional_description 
+FROM 
+  grid
+WHERE description LIKE '%Weather%';
+
+
+
+
+
+
+
+--DIDNT WORK
+SELECT TOP (10)
+  description, 
+  CHARINDEX('Weather', description) AS start_of_string, 
+  LEN ('Weather') AS length_of_string, 
+  SUBSTRING(
+    description, 
+    start_of_string + length_of_string, 
+    LEN(description)
+  ) AS additional_description 
+FROM 
+  grid
+WHERE description LIKE '%Weather%';
