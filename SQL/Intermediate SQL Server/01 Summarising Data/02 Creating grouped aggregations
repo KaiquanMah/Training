@@ -1,0 +1,95 @@
+Creating grouped aggregations
+You can calculate statistics for each group using GROUP BY. For example, you can calculate the maximum value for each state using the following query:
+SELECT State, MAX(DurationSeconds)
+FROM Incidents
+GROUP BY State
+To filter even further, for example, to find the values for states where the maximum value is greater than 10, you can use the HAVING clause.
+
+
+incidents
+IncidentDateTime	City	IncidentState	Country	Shape	DurationSeconds	Comments
+2005-10-31 18:00:00	poughkeepsie	ny	us	light	37800	Several bright lights moving erratically for extended periods of time&#44 including growing in size and brightness&#44 and disappearing.
+2005-10-31 18:30:00	linwood	nj	us	light	5	VERY bright apparent meteor over Southern New Jersey on 10/31 and 11/1 2005
+2005-10-31 19:00:00	clarksville	md	us	other	5	White ball shaped bright object whizzing across the holloween sky
+...
+
+
+
+
+
+
+Write a T-SQL query to calculate the average, minimum, and maximum values of the DurationSeconds column grouped by Shape. You need to select an additional column. What is it?
+-- Calculate the aggregations by Shape
+SELECT Shape,
+       AVG(DurationSeconds) AS Average, 
+       MIN(DurationSeconds) AS Minimum, 
+       MAX(DurationSeconds) AS Maximum
+FROM Incidents
+GROUP BY Shape
+
+
+Shape	Average	Minimum	Maximum
+unknown	2053.769722814499	1	259200
+disk	1445.3135593220338	1	253800
+sphere	903.3034398034398	1	46800
+circle	29999.86076672103	0.07999999821186066	10526400
+cone	1558.9565217391305	1	18000
+formation	459.11649483749545	1	5400
+chevron	1100.59375	2	21600
+rectangle	969.6132075471698	4	28800
+other	2620.983905579399	1	345600
+light	2050.7791762037373	1	604800
+changing	3191.6744186046512	2	172800
+null	18368.96402877698	1	2419200
+egg	558.9561403508771	1.5	7200
+triangle	886.8864696734059	1	172800
+NULL	1500.6666666666667	2	3600
+oval	23440.539792387543	1	6312000
+teardrop	3501.685185185185	2	172800
+diamond	1265.6971153846155	1	37800
+fireball	464.2863805970149	0.5	14400
+crescent	10	10	10
+cylinder	795.2417582417582	3	37800
+flash	1068.8019607844305	0.30000001192092896	25200
+cross	848.1333333333333	2	7200
+cigar	1736.4055555555556	1	172800
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Update the query to return only the records where the minimum of DurationSeconds column is greater than 1.
+-- Calculate the aggregations by Shape
+SELECT Shape,
+       AVG(DurationSeconds) AS Average, 
+       MIN(DurationSeconds) AS Minimum, 
+       MAX(DurationSeconds) AS Maximum
+FROM Incidents
+GROUP BY Shape
+-- Return records where minimum of DurationSeconds is greater than 1
+HAVING MIN(DurationSeconds) > 1
+
+
+Shape	Average	Minimum	Maximum
+chevron	1100.59375	2	21600
+rectangle	969.6132075471698	4	28800
+changing	3191.6744186046512	2	172800
+egg	558.9561403508771	1.5	7200
+NULL	1500.6666666666667	2	3600
+teardrop	3501.685185185185	2	172800
+crescent	10	10	10
+cylinder	795.2417582417582	3	37800
+cross	848.1333333333333	2	7200
+
+
+
