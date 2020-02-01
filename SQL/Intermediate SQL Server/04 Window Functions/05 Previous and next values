@@ -1,0 +1,29 @@
+Previous and next values
+What if you want to shift the values in a column by one row up or down? You can use the exact same steps as in the previous exercise but with two new functions, LEAD(), for the next value, and LAG(), for the previous value. So you follow these steps:
+First, create partitions
+Then, order by a certain column
+Finally, use the LEAD() and/or LAG() functions as per your requirement
+
+
+Write a T-SQL query that for each territory:
+Shifts the values in OrderDate one row down. Call this column PreviousOrder.
+Shifts the values in OrderDate one row up. Call this column NextOrder. You will need to PARTITION BY the territory
+
+
+SELECT TerritoryName, OrderDate, 
+       -- Specify the previous OrderDate in the window
+       LAG(OrderDate) 
+       -- Over the window, partition by territory & order by order date
+       OVER(PARTITION BY TerritoryName ORDER BY OrderDate) AS PreviousOrder,
+       -- Specify the next OrderDate in the window
+       LEAD(OrderDate) 
+       -- Create the partitions and arrange the rows
+       OVER(PARTITION BY TerritoryName ORDER BY OrderDate) AS NextOrder
+FROM Orders
+
+
+TerritoryName	OrderDate	PreviousOrder	NextOrder
+Australia	2015-02-23 09:00:00	null	2015-02-23 11:00:00
+Australia	2015-02-23 11:00:00	2015-02-23 09:00:00	2015-02-23 12:00:00
+Australia	2015-02-23 12:00:00	2015-02-23 11:00:00	2015-04-23 02:00:00
+...
