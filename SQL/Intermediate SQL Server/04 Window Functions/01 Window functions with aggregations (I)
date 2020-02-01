@@ -1,0 +1,40 @@
+Window functions with aggregations (I)
+To familiarize yourself with the window functions, you will work with the Orders table in this chapter. Recall that using OVER(), you can create a window for the entire table. To create partitions using a specific column, you need to use OVER() along with PARTITION BY.
+
+
+OrderID	OrderDate	TerritoryName	YearOrdered	ExpectedDeliveryDate	CustomerPurchaseOrderNumber	PickingCompletedWhen	OrderPrice
+40646	2015-01-01 01:00:00	Germany	2015	2015-01-02 00:00:00	15990	2015-01-01 11:00:00	13
+40648	2015-01-01 02:00:00	Southeast	2015	2015-01-02 00:00:00	11073	2015-01-01 11:00:00	45
+40662	2015-01-01 03:00:00	Southeast	2015	2015-01-02 00:00:00	12521	2015-01-01 12:00:00	20
+...
+
+Write a T-SQL query that returns the sum of OrderPrice by creating partitions for each TerritoryName.
+SELECT OrderID, TerritoryName, 
+       -- Total price for each partition
+       SUM(OrderPrice) 
+       -- Create the window and partitions
+       OVER(PARTITION BY TerritoryName) AS TotalPrice
+FROM Orders
+
+
+
+OrderID	TerritoryName	TotalPrice
+43706	Australia	1469
+43722	Australia	1469
+43729	Australia	1469
+47622	Australia	1469
+47671	Central	1633.5
+48643	Central	1633.5
+48693	Central	1633.5
+51348	France	907
+53630	France	907
+51296	France	907
+43695	Germany	786
+50392	Germany	786
+50372	Germany	786
+50308	Northeast	1820.7000000476837
+48634	Northeast	1820.7000000476837
+50424	Northeast	1820.7000000476837
+...
+
+
