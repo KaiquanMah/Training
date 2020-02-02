@@ -1,0 +1,51 @@
+Slide to the right
+Now let's see how FC Utrecht performs when they're the away team. You'll notice that the total for the season is at the bottom of the data set you queried. Depending on your results, this could be pretty long, and scrolling down is not very helpful.
+In this exercise, you will slightly modify the query from the previous exercise by sorting the data set in reverse order and calculating a backward running total from the CURRENT ROW to the end of the data set (earliest record).
+
+Complete the window function by:
+Assessing the running total of home goals scored by FC Utrecht.
+Assessing the running average of home goals scored.
+Ordering both the running average and running total by date, descending.
+
+
+SELECT 
+	-- Select the date, home goal, and away goals
+	date,
+    home_goal,
+    away_goal,
+    -- Create a running total and running average of home goals
+    SUM(home_goal) OVER(ORDER BY date DESC
+         ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING) AS running_total,
+    AVG(home_goal) OVER(ORDER BY date DESC
+         ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING) AS running_avg
+FROM match
+WHERE 
+	awayteam_id = 9908 
+    AND season = '2011/2012';
+
+
+
+
+date	home_goal	away_goal	running_total	running_avg
+2012-05-06	1	3	25	1.4705882352941176
+2012-04-21	0	2	24	1.5000000000000000
+2012-04-12	3	0	24	1.6000000000000000
+2012-03-25	3	1	21	1.5000000000000000
+2012-03-11	1	1	18	1.3846153846153846
+2012-02-26	1	0	17	1.4166666666666667
+2012-02-05	0	2	16	1.4545454545454545
+2012-01-28	2	0	16	1.6000000000000000
+2011-12-17	1	0	14	1.5555555555555556
+2011-11-25	2	0	13	1.6250000000000000
+2011-11-20	2	2	11	1.5714285714285714
+2011-10-30	3	1	9	1.5000000000000000
+2011-10-15	1	0	6	1.2000000000000000
+2011-09-24	1	0	5	1.2500000000000000
+2011-09-11	2	3	4	1.3333333333333333
+2011-08-20	2	1	2	1.00000000000000000000
+2011-08-06	0	0	0	0E-20
+
+
+
+Good job! You can reverse your calculations with your window functions to best suit your needs in an analysis.
+
