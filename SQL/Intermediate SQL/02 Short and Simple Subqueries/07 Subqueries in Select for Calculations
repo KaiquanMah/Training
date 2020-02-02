@@ -1,0 +1,44 @@
+Subqueries in Select for Calculations
+Subqueries in SELECT are a useful way to create calculated columns in a query. A subquery in SELECT can be treated as a single numeric value to use in your calculations. When writing queries in SELECT, it's important to remember that filtering the main query does not filter the subquery -- and vice versa.
+In the previous exercise, you created a column to compare each league's average total goals to the overall average goals in the 2013/2014 season. In this exercise, you will add a column that directly compares these values by subtracting the overall average from the subquery.
+
+
+Select the average goals scored in a match for each league in the main query.
+Select the average goals scored in a match overall for the 2013/2014 season in the subquery.
+Subtract the subquery from the average number of goals calculated for each league.
+Filter the main query so that only games from the 2013/2014 season are included.
+SELECT
+	-- Select the league name and average goals scored
+	l.name AS league,
+	ROUND(AVG(m.home_goal + m.away_goal),2) AS avg_goals,
+    -- Subtract the overall average from the league average
+	ROUND(AVG(m.home_goal + m.away_goal) - 
+		 (SELECT AVG(home_goal + away_goal)
+		  FROM match 
+          WHERE season = '2013/2014'),
+         2) AS diff
+FROM league AS l
+LEFT JOIN match AS m
+ON l.country_id = m.country_id
+-- Only include 2013/2014 results
+WHERE m.season = '2013/2014'
+GROUP BY l.name;
+
+
+
+league	avg_goals	diff
+Switzerland Super League	2.89	0.12
+Poland Ekstraklasa	2.64	-0.13
+Netherlands Eredivisie	3.20	0.43
+Scotland Premier League	2.75	-0.02
+France Ligue 1	2.46	-0.31
+Spain LIGA BBVA	2.75	-0.02
+Germany 1. Bundesliga	3.16	0.39
+Italy Serie A	2.72	-0.04
+Portugal Liga ZON Sagres	2.37	-0.40
+England Premier League	2.77	0.00
+Belgium Jupiler League	2.50	-0.27
+
+
+Good job! Games in the Netherlands tend to score the highest number of goals on average in this season. Why do you think that is?
+
