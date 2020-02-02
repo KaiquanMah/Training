@@ -1,0 +1,58 @@
+Add a subquery to the SELECT clause
+Subqueries in SELECT statements generate a single value that allow you to pass an aggregate value down a data frame. This is useful for performing calculations on data within your database.
+In the following exercise, you will construct a query that calculates the average number of goals per match in each country's league.
+
+
+In the subquery, select the average total goals by adding home_goal and away_goal.
+Filter the results so that only the average of goals in the 2013/2014 season is calculated.
+In the main query, select the average total goals by adding home_goal and away_goal. This calculates the average goals for each league.
+Filter the results in the main query the same way you filtered the subquery. Group the query by the league name.
+
+match
+id	country_id	season	stage	date	hometeam_id	awayteam_id	home_goal	away_goal
+757	1	2011/2012	1	2011-07-29	1773	8635	2	1
+758	1	2011/2012	1	2011-07-30	9998	9985	1	1
+759	1	2011/2012	1	2011-07-30	9987	9993	3	1
+...
+
+
+league
+id	country_id	name
+1	1	Belgium Jupiler League
+1729	1729	England Premier League
+4769	4769	France Ligue 1
+...
+
+
+
+
+SELECT 
+	l.name AS league,
+    -- Select and round the league's total goals
+    ROUND(AVG(m.home_goal + m.away_goal), 2) AS avg_goals,
+    -- Select & round the average total goals for the season
+    (SELECT ROUND(AVG(home_goal + away_goal), 2) 
+     FROM match
+     WHERE season = '2013/2014') AS overall_avg
+FROM league AS l
+LEFT JOIN match AS m
+ON l.country_id = m.country_id
+-- Filter for the 2013/2014 season
+WHERE season = '2013/2014'
+GROUP BY l.name;
+
+
+league	avg_goals	overall_avg
+Switzerland Super League	2.89	2.77
+Poland Ekstraklasa	2.64	2.77
+Netherlands Eredivisie	3.20	2.77
+Scotland Premier League	2.75	2.77
+France Ligue 1	2.46	2.77
+Spain LIGA BBVA	2.75	2.77
+Germany 1. Bundesliga	3.16	2.77
+Italy Serie A	2.72	2.77
+Portugal Liga ZON Sagres	2.37	2.77
+England Premier League	2.77	2.77
+Belgium Jupiler League	2.50	2.77
+
+
