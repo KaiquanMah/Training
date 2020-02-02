@@ -1,0 +1,69 @@
+Get team names with correlated subqueries
+Let's solve the same problem using correlated subqueries -- How do you get both the home and away team names into one final query result?
+This can easily be performed using correlated subqueries. But how might that impact the performance of your query? Complete the following steps and let's find out!
+Please note that your query will run more slowly than the previous exercise!
+
+
+
+Using a correlated subquery in the SELECT statement, match the team_api_id column from team to the hometeam_id from match.
+SELECT
+    m.date,
+   (SELECT team_long_name
+    FROM team AS t
+    -- Connect the team to the match table
+    WHERE m.hometeam_id = t.team_api_id) AS hometeam
+FROM match AS m;
+
+
+
+date	hometeam
+2011-07-29	Oud-Heverlee Leuven
+2011-07-30	RAEC Mons
+2011-07-30	KRC Genk
+2011-07-30	KAA Gent
+2011-07-30	Sporting Lokeren
+2011-07-30	KV Kortrijk
+2011-07-30	KV Mechelen
+2011-07-31	Club Brugge KV
+2011-10-16	Club Brugge KV
+2011-10-16	RSC Anderlecht
+...
+
+
+
+
+
+
+
+
+
+
+Create a second correlated subquery in SELECT, yielding the away team's name.
+Select the home and away goal columns from match in the main query.
+SELECT
+    m.date,
+    (SELECT team_long_name
+     FROM team AS t
+     WHERE t.team_api_id = m.hometeam_id) AS hometeam,
+    -- Connect the team to the match table
+    (SELECT team_long_name
+     FROM team AS t
+     WHERE t.team_api_id = m.awayteam_id) AS awayteam,
+    -- Select home and away goals
+     home_goal,
+     away_goal
+FROM match AS m;
+
+date	hometeam	awayteam	home_goal	away_goal
+2011-07-29	Oud-Heverlee Leuven	RSC Anderlecht	2	1
+2011-07-30	RAEC Mons	Standard de Liège	1	1
+2011-07-30	KRC Genk	Beerschot AC	3	1
+2011-07-30	KAA Gent	KSV Cercle Brugge	0	1
+2011-07-30	Sporting Lokeren	SV Zulte-Waregem	0	0
+2011-07-30	KV Kortrijk	Lierse SK	1	1
+...
+
+
+
+Fantastic work! The syntax here is much simpler, but if you're working with a large data set your query may take a while to run!
+
