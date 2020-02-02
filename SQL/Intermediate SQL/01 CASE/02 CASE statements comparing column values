@@ -1,0 +1,118 @@
+CASE statements comparing column values
+Barcelona is considered one of the strongest teams in Spain's soccer league.
+In this exercise, you will be creating a list of matches in the 2011/2012 season where Barcelona was the home team. You will do this using a CASE statement that compares the values of two columns to create a new group -- wins, losses, and ties.
+In 3 steps, you will build a query that identifies a match's winner, identifies the identity of the opponent, and finally filters for Barcelona as the home team. Completing a query in this order will allow you to watch your results take shape with each new piece of information.
+The matches_spain table currently contains Barcelona's matches from the 2011/2012 season, and has two key columns, hometeam_id and awayteam_id, that can be joined with the teams_spain table. However, you can only join teams_spain to one column at a time.
+
+
+Select the date of the match and create a CASE statement to identify matches as home wins, home losses, or ties.
+SELECT 
+	-- Select the date of the match
+	date,
+	-- Identify home wins, losses, or ties
+	CASE WHEN home_goal > away_goal THEN 'Home win!'
+         WHEN home_goal < away_goal THEN 'Home loss :(' 
+         ELSE 'Tie' 
+         END AS outcome
+FROM matches_spain;
+
+date	outcome
+2012-01-21	Home loss :(
+2012-01-22	Home win!
+2012-01-22	Home loss :(
+2012-01-23	Home win!
+2012-01-21	Tie
+2012-01-22	Tie
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Left join the teams_spain table team_api_id column to the matches_spain table awayteam_id. This allows us to retrieve the away team's identity.
+Select team_long_name from teams_spain as opponent and complete the CASE statement from Step 1.
+SELECT 
+	m.date,
+	--Select the team long name column and call it 'opponent'
+	t.team_long_name AS opponent, 
+	-- Complete the CASE statement with an alias
+	CASE WHEN m.home_goal > m.away_goal THEN 'Home win!'
+         WHEN m.home_goal < m.away_goal THEN 'Home loss :('
+         ELSE 'Tie' 
+         END AS outcome
+FROM matches_spain AS m
+-- Left join teams_spain onto matches_spain
+LEFT JOIN teams_spain AS t
+ON m.awayteam_id = t.team_api_id;
+
+
+date	opponent	outcome
+2014-10-19	Valencia CF	Home win!
+2014-09-28	Valencia CF	Tie
+2014-09-22	Valencia CF	Home loss :(
+2015-05-23	Valencia CF	Home loss :(
+2015-05-09	Valencia CF	Tie
+2015-04-30	Valencia CF	Tie
+2015-04-18	Valencia CF	Home win!
+...
+
+
+
+
+
+
+
+
+
+Complete the same CASE statement as the previous steps.
+Filter for matches where the home team is FC Barcelona (id = 8634).
+SELECT 
+	m.date,
+	t.team_long_name AS opponent,
+    -- Complete the CASE statement with an alias
+	CASE WHEN m.home_goal > m.away_goal THEN 'Barcelona win!'
+         WHEN m.home_goal < m.away_goal THEN 'Barcelona loss :(' 
+         ELSE 'Tie' 
+         END AS outcome 
+FROM matches_spain AS m
+LEFT JOIN teams_spain AS t 
+ON m.awayteam_id = t.team_api_id
+-- Filter for Barcelona as the home team
+WHERE m.hometeam_id = 8634; 
+
+
+date	opponent	outcome
+2011-10-29	RCD Mallorca	Barcelona win!
+2011-11-19	Real Zaragoza	Barcelona win!
+2011-12-03	Levante UD	Barcelona win!
+2011-11-29	Rayo Vallecano	Barcelona win!
+2012-01-15	Real Betis Balompié	Barcelona win!
+2011-08-29	Villarreal CF	Barcelona win!
+2012-05-02	Málaga CF	Barcelona win!
+2012-02-04	Real Sociedad	Barcelona win!
+2012-02-19	Valencia CF	Barcelona win!
+2012-03-03	Real Sporting de Gijón	Barcelona win!
+2012-03-20	Granada CF	Barcelona win!
+2012-03-31	Athletic Club de Bilbao	Barcelona win!
+2012-04-10	Getafe CF	Barcelona win!
+2012-04-21	Real Madrid CF	Barcelona loss :(
+2012-05-05	RCD Espanyol	Barcelona win!
+2011-09-17	CA Osasuna	Barcelona win!
+2011-09-24	Atlético Madrid	Barcelona win!
+2011-10-15	Racing Santander	Barcelona win!
+2011-10-22	Sevilla FC	Tie
+2012-08-19	Real Sociedad	Barcelona win!
+...
+
+
+Great job! Did you notice how often Barcelona tends to win matches?
+
