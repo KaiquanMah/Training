@@ -1,0 +1,68 @@
+Organizing with CTEs
+Previously, you modified a query based on a statement you completed in chapter 2 using common table expressions.
+This time, let's expand on the exercise by looking at details about matches with very high scores using CTEs. Just like a subquery in FROM, you can join tables inside a CTE.
+
+league
+id	country_id	name
+1	1	Belgium Jupiler League
+1729	1729	England Premier League
+4769	4769	France Ligue 1
+7809	7809	Germany 1. Bundesliga
+10257	10257	Italy Serie A
+13274	13274	Netherlands Eredivisie
+15722	15722	Poland Ekstraklasa
+17642	17642	Portugal Liga ZON Sagres
+19694	19694	Scotland Premier League
+21518	21518	Spain LIGA BBVA
+24558	24558	Switzerland Super League
+
+
+
+match
+id	country_id	season	stage	date	hometeam_id	awayteam_id	home_goal	away_goal
+757	1	2011/2012	1	2011-07-29	1773	8635	2	1
+758	1	2011/2012	1	2011-07-30	9998	9985	1	1
+759	1	2011/2012	1	2011-07-30	9987	9993	3	1
+760	1	2011/2012	1	2011-07-30	9991	9984	0	1
+761	1	2011/2012	1	2011-07-30	9994	10000	0	0
+762	1	2011/2012	1	2011-07-30	8571	9989	1	1
+...
+
+
+
+Declare your CTE, where you create a list of all matches with the league name.
+Select the league, date, home, and away goals from the CTE.
+Filter the main query for matches with 10 or more goals.
+-- Set up your CTE
+WITH match_list AS (
+  -- Select the league, date, home, and away goals
+    SELECT 
+  		l.name AS league, 
+     	m.date, 
+  		m.home_goal, 
+  		m.away_goal,
+       (m.home_goal + m.away_goal) AS total_goals
+    FROM match AS m
+    LEFT JOIN league as l ON m.country_id = l.id)
+
+-- Select the league, date, home, and away goals from the CTE
+SELECT league, date, home_goal, away_goal
+FROM match_list
+-- Filter by total goals
+WHERE total_goals >=10;
+
+
+league	date	home_goal	away_goal
+England Premier League	2011-08-28	8	2
+England Premier League	2012-12-29	7	3
+England Premier League	2013-05-19	5	5
+Germany 1. Bundesliga	2013-03-30	9	2
+Netherlands Eredivisie	2011-11-06	6	4
+Spain LIGA BBVA	2013-10-30	7	3
+Spain LIGA BBVA	2015-04-05	9	1
+Spain LIGA BBVA	2015-05-23	7	3
+Spain LIGA BBVA	2014-09-20	2	8
+
+
+Nice job! CTEs are much easier to read than multiple subqueries!
+
