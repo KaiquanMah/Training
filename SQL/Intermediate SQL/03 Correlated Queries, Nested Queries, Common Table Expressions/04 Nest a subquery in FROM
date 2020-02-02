@@ -1,0 +1,109 @@
+Nest a subquery in FROM
+What's the average number of matches per season where a team scored 5 or more goals? How does this differ by country?
+Let's use a nested, correlated subquery to perform this operation. In the real world, you will probably find that nesting multiple subqueries is a task you don't have to perform often. In some cases, however, you may find yourself struggling to properly group by the column you want, or to calculate information requiring multiple mathematical transformations (i.e., an AVG of a COUNT).
+Nesting subqueries and performing your transformations one step at a time, adding it to a subquery, and then performing the next set of transformations is often the easiest way to yield accurate information about your data. Let's get to it!
+
+Generate a list of matches where at least one team scored 5 or more goals.
+-- Select matches where a team scored 5+ goals
+SELECT
+	country_id,
+    season,
+	id
+FROM match
+WHERE home_goal >=5 OR away_goal >=5;
+
+country_id	season	id
+1	2011/2012	764
+1	2011/2012	766
+1	2011/2012	781
+1	2011/2012	791
+1	2011/2012	854
+1	2011/2012	877
+1	2011/2012	878
+...
+
+
+
+
+
+
+
+Turn the query from the previous step into a subquery in the FROM statement.
+COUNT the match ids generated in the previous step, and group the query by country_id and season.
+-- Count match ids
+SELECT
+    country_id,
+    season,
+    COUNT(id) AS matches
+-- Set up and alias the subquery
+FROM (
+	SELECT
+    	country_id,
+    	season,
+    	id
+	FROM match
+	WHERE home_goal >= 5 OR away_goal >= 5) AS subquery
+-- Group by country_id and season
+GROUP BY country_id, season;
+
+
+country_id	season	matches
+19694	2012/2013	5
+21518	2012/2013	23
+13274	2011/2012	24
+17642	2014/2015	12
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Finally, declare the same query from step 2 as a subquery in FROM with the alias outer_s. Left join it to the country table using the outer query's country_id column.
+Calculate an AVG of high scoring matches per season in the main query.
+SELECT
+	c.name AS country,
+    -- Calculate the average matches per season
+	AVG(matches) AS avg_seasonal_high_scores
+FROM country AS c
+-- Left join outer_s to country
+LEFT JOIN 
+  (
+  SELECT country_id, season,
+         COUNT(id) AS matches
+  FROM (
+    SELECT country_id, season, id
+	FROM match
+	WHERE home_goal >= 5 OR away_goal >= 5) AS inner_s
+  
+  -- Close parentheses and alias the subquery
+  GROUP BY country_id, season) AS outer_s
+ON c.id = outer_s.country_id
+GROUP BY country;
+
+
+
+country	avg_seasonal_high_scores
+Portugal	7.5000000000000000
+France	8.0000000000000000
+Scotland	8.0000000000000000
+Netherlands	21.0000000000000000
+Spain	22.0000000000000000
+Belgium	11.3333333333333333
+Italy	8.7500000000000000
+Germany	13.7500000000000000
+England	15.0000000000000000
+Switzerland	5.5000000000000000
+Poland	5.2500000000000000
+
+Great job!! This required quite a few steps, but you've got the hang of steps necessary to nest subqueries in FROM that you can apply to other parts of your query as well!
+
