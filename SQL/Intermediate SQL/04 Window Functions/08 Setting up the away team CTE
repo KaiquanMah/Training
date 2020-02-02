@@ -1,0 +1,52 @@
+Setting up the away team CTE
+Great job! Now that you have a query identifying the home team in a match, you will perform a similar set of steps to identify the away team. Just like the previous step, you will join the match and team tables. Each of these two queries will be declared as a Common Table Expression in the following step.
+The primary difference in this query is that you will be joining the tables on awayteam_id, and reversing the match outcomes in the CASE statement.
+When altering CASE statement logic in your own work, you can reverse either the logical condition (i.e., home_goal > away_goal) or the outcome in THEN -- just make sure you only reverse one of the two!
+
+Complete the CASE statement syntax.
+Fill out the logical operators identifying each match as a win, loss, or tie for Manchester United.
+Join the table on awayteam_id, and team_api_id.
+
+
+SELECT 
+	m.id, 
+    t.team_long_name,
+    -- Identify matches as home/away wins or ties
+	CASE WHEN m.home_goal > m.away_goal THEN 'MU Loss'
+		 WHEN m.home_goal < m.away_goal THEN 'MU Win'
+         ELSE 'Tie' 
+         END AS outcome
+-- Join team table to the match table
+FROM match AS m
+LEFT JOIN team AS t 
+ON m.awayteam_id = t.team_api_id
+WHERE 
+	-- Filter for 2014/2015 and Manchester United as the away team
+	season = '2014/2015'
+	AND t.team_long_name = 'Manchester United';
+
+
+id	team_long_name	outcome
+4026	Manchester United	MU Loss
+4039	Manchester United	MU Win
+4075	Manchester United	MU Win
+4089	Manchester United	Tie
+4117	Manchester United	Tie
+4126	Manchester United	Tie
+4136	Manchester United	Tie
+4155	Manchester United	MU Win
+4178	Manchester United	Tie
+4197	Manchester United	MU Loss
+4216	Manchester United	MU Win
+4230	Manchester United	Tie
+4241	Manchester United	MU Win
+4271	Manchester United	MU Loss
+4282	Manchester United	MU Loss
+4302	Manchester United	MU Win
+4324	Manchester United	Tie
+4342	Manchester United	MU Loss
+4378	Manchester United	Tie
+
+
+Great job! You correctly constructed a CASE statement to accurately identify matches as a win or loss for Manchester United. This will become your second common table expression.
+
