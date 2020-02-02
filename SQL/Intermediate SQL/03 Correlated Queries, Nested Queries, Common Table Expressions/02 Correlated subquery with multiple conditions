@@ -1,0 +1,109 @@
+Correlated subquery with multiple conditions
+Correlated subqueries are useful for matching data across multiple columns. In the previous exercise, you generated a list of matches with extremely high scores for each country. In this exercise, you're going to add an additional column for matching to answer the question -- what was the highest scoring match for each country, in each season?
+*Note: this query may take a while to load.
+
+Select the country_id, date, home_goal, and away_goal columns in the main query.
+Complete the subquery: Select the matches with the highest number of total goals.
+Match the subquery to the main query using country_id and season.
+Fill in the correct logical operator so that total goals equals the max goals recorded in the subquery.
+SELECT 
+	-- Select country ID, date, home, and away goals from match
+	main.country_id,
+    main.date,
+    main.home_goal,
+    main.away_goal
+FROM match AS main
+WHERE 
+	-- Filter for matches with the highest number of goals scored
+	(home_goal + away_goal) = 
+        (SELECT MAX(home_goal + sub.away_goal)
+         FROM match AS sub
+         WHERE main.country_id = sub.country_id
+               AND main.season = sub.season);
+
+
+country_id	date	home_goal	away_goal
+1	2011-10-29	4	5
+1	2012-11-17	2	6
+1	2012-12-09	1	7
+1	2013-01-19	2	6
+1	2012-08-19	2	6
+1	2014-04-19	2	4
+1	2014-04-26	4	2
+1	2015-01-17	1	7
+1	2014-09-13	3	5
+1729	2011-08-28	8	2
+1729	2012-12-29	7	3
+1729	2013-05-19	5	5
+1729	2013-12-14	6	3
+1729	2014-03-22	3	6
+1729	2014-08-30	3	6
+4769	2012-02-12	4	5
+4769	2012-10-28	4	4
+4769	2014-04-20	2	6
+4769	2014-04-20	4	4
+4769	2014-10-26	2	7
+7809	2012-03-10	7	1
+7809	2012-03-30	4	4
+7809	2011-08-20	5	3
+7809	2013-03-30	9	2
+7809	2013-11-09	5	3
+7809	2013-11-30	4	4
+7809	2014-03-02	6	2
+7809	2013-09-01	6	2
+7809	2013-09-14	6	2
+7809	2015-02-14	4	5
+7809	2014-10-25	4	5
+10257	2012-03-09	6	3
+10257	2012-04-01	5	4
+10257	2013-03-30	3	5
+10257	2014-04-13	3	5
+10257	2014-05-04	5	3
+10257	2014-09-14	4	5
+13274	2011-11-06	6	4
+13274	2012-10-28	6	3
+13274	2013-12-07	2	6
+13274	2015-05-17	4	5
+15722	2011-11-06	1	5
+15722	2011-08-06	6	0
+15722	2011-09-25	4	2
+15722	2013-05-12	4	4
+15722	2013-09-14	3	5
+15722	2014-09-20	6	2
+17642	2012-03-11	4	4
+17642	2012-11-25	3	5
+17642	2012-10-07	4	4
+17642	2013-09-28	3	4
+17642	2014-11-29	1	6
+17642	2015-02-15	3	4
+19694	2011-11-05	3	6
+19694	2012-09-29	5	4
+19694	2013-10-19	4	3
+19694	2013-12-21	3	4
+19694	2014-02-15	4	3
+19694	2014-05-03	5	2
+19694	2013-09-28	2	5
+19694	2015-01-01	6	2
+21518	2011-11-06	7	1
+21518	2011-12-17	2	6
+21518	2012-02-19	3	5
+21518	2012-03-20	5	3
+21518	2011-09-17	8	0
+21518	2011-09-24	6	2
+21518	2012-10-20	4	5
+21518	2013-10-30	7	3
+21518	2015-04-05	9	1
+21518	2015-05-23	7	3
+21518	2014-09-20	2	8
+24558	2012-05-12	6	3
+24558	2012-09-30	6	2
+24558	2014-02-16	5	3
+24558	2015-04-30	6	2
+24558	2015-05-03	2	6
+24558	2015-05-25	6	2
+
+
+
+
+Subqueries can be very useful for selecting data broken into multiple categories -- though you may have to wait for the data to load!
+
