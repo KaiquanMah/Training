@@ -1,0 +1,79 @@
+Basic Correlated Subqueries
+Correlated subqueries are subqueries that reference one or more columns in the main query. Correlated subqueries depend on information in the main query to run, and thus, cannot be executed on their own.
+Correlated subqueries are evaluated in SQL once per row of data retrieved -- a process that takes a lot more computing power and time than a simple subquery.
+In this exercise, you will practice using correlated subqueries to examine matches with scores that are extreme outliers for each country -- above 3 times the average score!
+
+
+Select the country_id, date, home_goal, and away_goal columns in the main query.
+Complete the AVG value in the subquery.
+Complete the subquery column references, so that country_id is matched in the main and subquery.
+
+SELECT 
+	-- Select country ID, date, home, and away goals from match
+	main.country_id,
+    main.date,
+    main.home_goal, 
+    main.away_goal
+FROM match AS main
+WHERE 
+	-- Filter the main query by the subquery
+	(home_goal + away_goal) > 
+        (SELECT AVG((sub.home_goal + sub.away_goal) * 3)
+         FROM match AS sub
+         -- Join the main query to the subquery in WHERE
+         WHERE main.country_id = sub.country_id);
+
+
+
+
+country_id	date	home_goal	away_goal
+1	2011-10-29	4	5
+1729	2011-08-28	8	2
+1729	2012-12-29	7	3
+1729	2013-05-19	5	5
+1729	2013-12-14	6	3
+1729	2014-03-22	3	6
+1729	2014-08-30	3	6
+4769	2011-10-15	5	3
+4769	2011-12-21	4	4
+4769	2012-02-12	4	5
+4769	2012-02-25	4	4
+4769	2011-09-21	2	6
+4769	2012-10-28	4	4
+4769	2014-04-20	2	6
+4769	2014-04-20	4	4
+4769	2014-10-26	2	7
+4769	2014-08-16	6	2
+4769	2015-04-24	3	5
+7809	2013-01-18	5	4
+7809	2013-03-30	9	2
+7809	2015-02-14	4	5
+7809	2014-10-25	4	5
+10257	2012-01-22	5	3
+10257	2012-02-01	4	4
+10257	2012-03-09	6	3
+10257	2012-04-01	5	4
+10257	2012-05-06	4	4
+10257	2013-03-30	3	5
+10257	2014-04-13	3	5
+10257	2014-05-04	5	3
+10257	2014-09-14	4	5
+10257	2014-10-26	6	2
+13274	2011-11-06	6	4
+15722	2013-05-12	4	4
+15722	2013-09-14	3	5
+15722	2014-09-20	6	2
+17642	2012-03-11	4	4
+17642	2012-11-25	3	5
+17642	2012-10-07	4	4
+19694	2011-11-05	3	6
+19694	2012-09-29	5	4
+21518	2012-10-20	4	5
+21518	2013-10-30	7	3
+21518	2015-04-05	9	1
+21518	2015-05-23	7	3
+21518	2014-09-20	2	8
+24558	2012-05-12	6	3
+
+Correlated subqueries take longer to produce results, but they often prevent you from having to create multiple subqueries.
+
