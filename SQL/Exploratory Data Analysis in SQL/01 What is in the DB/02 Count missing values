@@ -1,0 +1,67 @@
+Count missing values
+Which column of fortune500 has the most missing values? To find out, you'll need to check each column individually, although here we'll check just three.
+Course Note: While you're unlikely to encounter this issue during this exercise, note that if you run a query that takes more than a few seconds to execute, your session may expire or you may be disconnected from the server. You will not have this issue with any of the exercise solutions, so if your session expires or disconnects, there's an error with your query.
+
+
+fortune500
+rank	title	name	ticker	url	hq	sector	industry	employees	revenues	revenues_change	profits	profits_change	assets	equity
+1	Walmart	Wal-Mart Stores, Inc.	WMT  	http://www.walmart.com	Bentonville, AR	Retailing	General Merchandisers	2300000	485873	0.8	13643	-7.2	198825	77798
+2	Berkshire Hathaway	Berkshire Hathaway Inc.	BRKA 	http://www.berkshirehathaway.com	Omaha, NE	Financials	Insurance: Property and Casualty (Stock)	367700	223604	6.1	24074	0	620854	283001
+3	Apple	Apple, Inc.	AAPL 	http://www.apple.com	Cupertino, CA	Technology	Computers, Office Equipment	116000	215639	-7.7	45687	-14.4	321686	128249
+...
+
+
+
+
+First, figure out how many rows are in fortune500 by counting them.
+-- Select the count of the number of rows
+SELECT COUNT(*)
+  FROM fortune500;
+  
+count
+500  
+  
+  
+  
+  
+Subtract the count of the non-NULL ticker values from the total number of rows; alias the difference as missing.
+-- Select the count of ticker, 
+-- subtract from the total number of rows, 
+-- and alias as missing
+SELECT count(*) - count(ticker) AS missing
+  FROM fortune500;
+  
+missing
+32  
+
+
+
+
+
+Repeat for the profits_change column.
+-- Select the count of profits_change, 
+-- subtract from total number of rows, and alias as missing
+SELECT count(*) - count(profits_change) AS missing
+  FROM fortune500;
+
+missing
+63
+
+
+
+
+
+
+
+Repeat for the industry column.
+-- Select the count of profits_change, 
+-- subtract from total number of rows, and alias as missing
+SELECT count(*) - count(industry) AS missing
+  FROM fortune500;
+
+missing
+13
+
+Good work! Note that the result of a call to count(*) is labelled count in the result. 
+You can refer to this column with count in ORDER BY clauses without explicitly aliasing count(*) AS count.
+
