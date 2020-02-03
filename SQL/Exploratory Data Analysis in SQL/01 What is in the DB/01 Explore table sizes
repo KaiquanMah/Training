@@ -1,0 +1,138 @@
+Explore table sizes
+Let's start by exploring five related tables:
+stackoverflow: questions asked on Stack Overflow with certain tags
+company: information on companies related to tags in stackoverflow
+tag_company: links stackoverflow to company
+tag_type: type categories applied to tags in stackoverflow
+fortune500: information on top US companies
+Count the number of rows in a table with
+
+SELECT count(*) 
+  FROM tablename;
+Count the number of columns in a table by selecting a few rows and manually counting the columns in the result.
+Which table has the most rows? Which table has the most columns?
+
+
+
+
+
+stackoverflow
+id	tag	date	question_count	question_pct	unanswered_count	unanswered_pct
+1	paypal	2018-09-25	18050	0.001093757	8402	0.001751857
+2	amazon-elb	2018-09-25	1452	0.000088	561	0.000116972
+3	amazon-mws	2018-09-25	706	0.0000428	278	0.000058
+...
+
+
+
+
+company
+id	exchange	ticker	name	parent_id
+1	nasdaq	PYPL 	PayPal Holdings Incorporated	null
+2	nasdaq	AMZN 	Amazon.com Inc	null
+3	nasdaq	MSFT 	Microsoft Corp.	null
+...
+
+
+
+
+tag_company
+tag	company_id
+actionscript	10
+actionscript-3	10
+amazon	2
+amazon-api	2
+amazon-appstore	2
+amazon-cloudformation	12
+amazon-cloudfront	12
+amazon-cloudsearch	12
+...
+
+
+
+
+tag_type
+id	tag	type
+1	amazon-cloudformation	cloud
+2	amazon-cloudfront	cloud
+3	amazon-cloudsearch	cloud
+...
+
+
+
+
+fortune500
+rank	title	name	ticker	url	hq	sector	industry	employees	revenues	revenues_change	profits	profits_change	assets	equity
+1	Walmart	Wal-Mart Stores, Inc.	WMT  	http://www.walmart.com	Bentonville, AR	Retailing	General Merchandisers	2300000	485873	0.8	13643	-7.2	198825	77798
+2	Berkshire Hathaway	Berkshire Hathaway Inc.	BRKA 	http://www.berkshirehathaway.com	Omaha, NE	Financials	Insurance: Property and Casualty (Stock)	367700	223604	6.1	24074	0	620854	283001
+3	Apple	Apple, Inc.	AAPL 	http://www.apple.com	Cupertino, CA	Technology	Computers, Office Equipment	116000	215639	-7.7	45687	-14.4	321686	128249
+...
+
+
+
+
+
+
+SELECT COUNT(*)
+FROM stackoverflow;
+
+count
+45238
+
+
+
+SELECT COUNT(*)
+FROM company;
+
+count
+14
+
+
+
+
+SELECT COUNT(*)
+FROM tag_company;
+
+count
+56
+
+
+
+
+SELECT COUNT(*)
+FROM tag_type;
+
+count
+61
+
+
+
+
+SELECT COUNT(*)
+FROM fortune500;
+
+
+count
+500
+
+
+
+
+
+SELECT TABLE_NAME, COUNT(*)
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME IN ('stackoverflow', 'company', 'tag_company', 'tag_type', 'fortune500')
+GROUP BY TABLE_NAME
+
+table_name	count
+company	5
+fortune500	15
+stackoverflow	7
+tag_company	2
+tag_type	3
+
+
+
+#YES - stackoverflow has the most rows; fortune500 has the most columns
+
+
