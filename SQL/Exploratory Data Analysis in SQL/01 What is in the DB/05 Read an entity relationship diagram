@@ -1,0 +1,91 @@
+Read an entity relationship diagram
+The information you need is sometimes split across multiple tables in the database.
+What is the most common stackoverflow tag_type? What companies have a tag of that type?
+To generate a list of such companies, you'll need to join three tables together.
+Reference the entity relationship diagram as needed when determining which columns to use when joining tables.
+
+
+First, using the tag_type table, count the number of tags with each type.
+Order the results to find the most common tag type.
+-- Count the number of tags with each type
+-- To get the count for each type, what do you need to do?
+-- Order the results with the most common
+-- tag types listed first
+SELECT type, COUNT(*) AS count
+FROM tag_type
+GROUP BY type
+ORDER BY count desc;
+
+
+
+type	count
+cloud	31
+database	6
+payment	5
+mobile-os	4
+api	4
+company	4
+storage	2
+os	2
+spreadsheet	2
+identity	1
+
+
+
+
+
+
+
+
+
+Join the tag_company, company, and tag_type tables, keeping only mutually occurring records.
+Select company.name, tag_type.tag, and tag_type.type for tags with the most common type from the previous step.
+-- Select the 3 columns desired
+SELECT company.name, tag_type.tag, tag_type.type
+FROM company
+  	   -- Join to the tag_company table
+       INNER JOIN tag_company 
+       ON company.id = tag_company.company_id
+       -- Join to the tag_type table
+       INNER JOIN tag_type
+       ON tag_company.tag = tag_type.tag	
+  -- Filter to most common type
+  WHERE type='cloud';
+
+
+name	tag	type
+Amazon Web Services	amazon-cloudformation	cloud
+Amazon Web Services	amazon-cloudfront	cloud
+Amazon Web Services	amazon-cloudsearch	cloud
+Amazon Web Services	amazon-cloudwatch	cloud
+Amazon Web Services	amazon-cognito	cloud
+Amazon Web Services	amazon-data-pipeline	cloud
+Amazon Web Services	amazon-dynamodb	cloud
+Amazon Web Services	amazon-ebs	cloud
+Amazon Web Services	amazon-ec2	cloud
+Amazon Web Services	amazon-ecs	cloud
+Amazon Web Services	amazon-elastic-beanstalk	cloud
+Amazon Web Services	amazon-elasticache	cloud
+Amazon Web Services	amazon-elb	cloud
+Amazon Web Services	amazon-emr	cloud
+Amazon Web Services	amazon-glacier	cloud
+Amazon Web Services	amazon-kinesis	cloud
+Amazon Web Services	amazon-lambda	cloud
+Amazon Web Services	amazon-rds-aurora	cloud
+Amazon Web Services	amazon-rds	cloud
+Amazon Web Services	amazon-redshift	cloud
+Amazon Web Services	amazon-route53	cloud
+Amazon Web Services	amazon-s3	cloud
+Amazon Web Services	amazon-ses	cloud
+Amazon Web Services	amazon-simpledb	cloud
+Amazon Web Services	amazon-sns	cloud
+Amazon Web Services	amazon-sqs	cloud
+Amazon Web Services	amazon-swf	cloud
+Amazon Web Services	amazon-vpc	cloud
+Amazon Web Services	amazon-web-services	cloud
+Microsoft Corp.	azure	cloud
+Dropbox	dropbox	cloud
+
+
+Superb! You could combine these steps in a single query by using a subquery in the WHERE clause instead of the value 'cloud'.
+
