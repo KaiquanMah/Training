@@ -1,0 +1,187 @@
+Create a temp table to simplify a query
+The Stack Overflow data contains daily question counts through 2018-09-25 for all tags, but each tag has a different starting date in the data.
+Find out how many questions had each tag on the first date for which data for the tag is available, as well as how many questions had the tag on the last day. Also, compute the difference between these two values.
+To do this, first compute the minimum date for each tag.
+Then use the minimum dates to select the question_count on both the first and last day. To do this, join the temp table startdates to two different copies of the stackoverflow table: one for each column - first day and last day - aliased with different names.
+
+
+First, create a temporary table called startdates with each tag and the min() date for the tag in stackoverflow.
+-- To clear table if it already exists
+DROP TABLE IF EXISTS startdates;
+
+-- Create temp table syntax
+CREATE temp TABLE startdates AS
+-- Compute the minimum date for each what?
+SELECT tag,
+       MIN(date) AS mindate
+FROM stackoverflow
+-- What do you need to compute the min date for each tag?
+GROUP BY tag;
+ 
+-- Look at the table you created
+SELECT * 
+FROM startdates;
+
+
+tag	mindate
+amazon-route53	2016-01-01
+google-spreadsheet	2016-01-01
+dropbox	2016-01-01
+amazon-data-pipeline	2016-09-01
+amazon	2016-01-01
+amazon-sns	2016-09-01
+ios	2016-01-01
+amazon-web-services	2016-01-01
+amazon-cloudsearch	2016-01-01
+amazon-ses	2016-09-01
+cognos	2016-01-01
+amazon-ecs	2016-09-01
+ios9	2016-01-01
+amazon-ebs	2016-09-01
+dropbox-api	2016-01-01
+amazon-elb	2016-09-01
+amazon-emr	2016-09-01
+sql-server	2016-01-01
+amazon-cloudfront	2016-01-01
+amazon-cognito	2016-09-01
+amazon-cloudformation	2016-09-01
+amazon-mws	2016-09-01
+amazon-rds-aurora	2016-09-01
+amazon-dynamodb	2016-09-01
+excel	2016-01-01
+actionscript	2016-01-01
+applepayjs	2017-03-18
+paypal	2016-01-01
+amazon-simpledb	2016-09-01
+mongodb	2016-01-01
+amazon-cloudwatch	2016-09-01
+applepay	2017-03-18
+amazon-kinesis	2016-09-01
+osx	2016-01-01
+amazon-vpc	2016-09-01
+windows	2016-01-01
+amazon-sqs	2016-09-01
+azure	2016-01-01
+citrix	2016-01-01
+amazon-redshift	2016-09-01
+amazon-ec2	2016-01-01
+amazon-glacier	2016-09-01
+actionscript-3	2016-01-01
+amazon-swf	2016-09-01
+stripe-payments	2016-01-01
+amazon-lambda	2016-09-01
+amazon-elastic-beanstalk	2016-09-01
+android-pay	2017-03-17
+ios8	2016-01-01
+amazon-s3	2016-01-01
+amazon-elasticache	2016-09-01
+android	2016-01-01
+amazon-rds	2016-09-01
+
+
+
+
+
+
+
+
+
+
+
+Join startdates to stackoverflow twice using different table aliases.
+For each tag, select mindate, question_count on the mindate, and question_count on 2018-09-25 (the max date).
+Compute the change in question_count over time.
+-- To clear table if it already exists
+DROP TABLE IF EXISTS startdates;
+
+CREATE TEMP TABLE startdates AS
+SELECT tag, min(date) AS mindate
+FROM stackoverflow
+GROUP BY tag;
+ 
+-- Select tag (Remember the table name!) and mindate
+SELECT startdates.tag, 
+       startdates.mindate, 
+       -- Select question count on the min and max days
+	   so_min.question_count AS min_date_question_count,
+       so_max.question_count AS max_date_question_count,
+       -- Compute the change in question_count (max- min)
+       so_max.question_count - so_min.question_count AS change
+  FROM startdates
+       -- Join startdates to stackoverflow with alias so_min
+       INNER JOIN stackoverflow AS so_min
+          -- What needs to match between tables?
+          ON startdates.tag = so_min.tag
+         AND startdates.mindate = so_min.date
+       -- Join to stackoverflow again with alias so_max
+       INNER JOIN stackoverflow AS so_max
+       	  -- Again, what needs to match between tables?
+          ON startdates.tag = so_max.tag
+         AND so_max.date = '2018-09-25';
+
+
+
+
+tag	mindate	min_date_question_count	max_date_question_count	change
+paypal	2016-01-01	13296	18050	4754
+amazon-elb	2016-09-01	576	1452	876
+amazon-mws	2016-09-01	367	706	339
+amazon-swf	2016-09-01	167	232	65
+amazon-sns	2016-09-01	690	1400	710
+excel	2016-01-01	81384	177603	96219
+mongodb	2016-01-01	55510	104159	48649
+amazon-glacier	2016-09-01	118	192	74
+amazon-route53	2016-01-01	369	1098	729
+dropbox	2016-01-01	2319	3071	752
+azure	2016-01-01	25859	61259	35400
+sql-server	2016-01-01	151267	242484	91217
+amazon-cloudwatch	2016-09-01	334	1165	831
+amazon-redshift	2016-09-01	1448	3502	2054
+amazon-cognito	2016-09-01	547	2830	2283
+amazon-dynamodb	2016-09-01	2687	5985	3298
+ios9	2016-01-01	3147	4183	1036
+amazon-sqs	2016-09-01	855	1584	729
+dropbox-api	2016-01-01	1437	2072	635
+amazon-ses	2016-09-01	481	934	453
+amazon-emr	2016-09-01	557	3046	2489
+citrix	2016-01-01	465	597	132
+amazon-elastic-beanstalk	2016-09-01	281	5490	5209
+amazon-rds	2016-09-01	1156	2537	1381
+amazon-rds-aurora	2016-09-01	60	323	263
+android	2016-01-01	770606	1138658	368052
+amazon-cloudformation	2016-09-01	592	2516	1924
+ios	2016-01-01	397485	577421	179936
+android-pay	2017-03-17	444	490	46
+applepay	2017-03-18	222	357	135
+windows	2016-01-01	88874	124751	35877
+amazon-web-services	2016-01-01	22077	63939	41862
+google-spreadsheet	2016-01-01	6531	15685	9154
+amazon-cloudfront	2016-01-01	1099	2264	1165
+amazon-lambda	2016-09-01	158	8032	7874
+amazon-cloudsearch	2016-01-01	176	318	142
+amazon-ecs	2016-09-01	145	1074	929
+amazon-s3	2016-01-01	12015	25443	13428
+amazon-elasticache	2016-09-01	257	434	177
+amazon-simpledb	2016-09-01	374	392	18
+amazon-data-pipeline	2016-09-01	195	399	204
+amazon-ec2	2016-01-01	11632	22755	11123
+amazon-ebs	2016-09-01	257	338	81
+ios8	2016-01-01	9854	9399	-455
+amazon-kinesis	2016-09-01	259	766	507
+cognos	2016-01-01	616	848	232
+actionscript	2016-01-01	8761	9101	340
+amazon	2016-01-01	2994	3636	642
+osx	2016-01-01	62614	87485	24871
+stripe-payments	2016-01-01	1736	4964	3228
+actionscript-3	2016-01-01	39025	41149	2124
+amazon-vpc	2016-09-01	339	719	380
+applepayjs	2017-03-18	11	30	19
+
+
+
+
+
+
+Sensational! The main query here was already complicated, so creating the temporary table first helped simplify the analysis.
+
+
