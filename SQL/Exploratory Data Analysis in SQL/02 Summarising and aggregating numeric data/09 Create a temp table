@@ -1,0 +1,158 @@
+Create a temp table
+Find the Fortune 500 companies that have profits in the top 20% for their sector (compared to other Fortune 500 companies).
+
+To do this, first, find the 80th percentile of profit for each sector with
+percentile_disc(fraction) 
+WITHIN GROUP (ORDER BY sort_expression)
+and save the results in a temporary table.
+Then join fortune500 to the temporary table to select companies with profits greater than the 80th percentile cut-off.
+
+
+Create a temporary table called profit80 containing the sector and 80th percentile of profits for each sector.
+Alias the percentile column as pct80.
+-- To clear table if it already exists;
+-- fill in name of temp table
+DROP TABLE IF EXISTS profit80;
+
+-- Create the temporary table
+CREATE temp TABLE profit80 AS 
+  -- Select the two columns you need; alias as needed
+  SELECT sector, 
+         percentile_disc(0.8) WITHIN GROUP (ORDER BY profits) AS pct80
+  -- What table are you getting the data from?
+  FROM fortune500
+  -- What do you need to group by?
+  GROUP BY sector;
+   
+-- See what you created: select all columns and rows 
+-- from the table you created
+SELECT * 
+FROM profit80;
+
+
+sector	pct80
+Aerospace & Defense	4895
+Apparel	1074.1
+Business Services	1401
+Chemicals	1500
+Energy	1311
+Engineering & Construction	602.7
+Financials	3014
+Food & Drug Stores	2025.7
+Food, Beverages & Tobacco	6073
+Health Care	4965
+Hotels, Restaurants & Leisure	1670
+Household Products	2166
+Industrials	3695
+Materials	496
+Media	2755
+Motor Vehicles & Parts	4596
+Retailing	1228
+Technology	7266
+Telecommunications	8695
+Transportation	2676
+Wholesalers	605.9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Using the profit80 table you created in step 1, select companies that have profits greater than pct80.
+Select the title, sector, profits from fortune500, as well as the ratio of the company's profits to the 80th percentile profit.
+-- Code from previous step
+DROP TABLE IF EXISTS profit80;
+
+CREATE TEMP TABLE profit80 AS
+  SELECT sector, 
+         percentile_disc(0.8) WITHIN GROUP (ORDER BY profits) AS pct80
+  FROM fortune500 
+  GROUP BY sector;
+
+-- Select columns, aliasing as needed
+SELECT title, fortune500.sector, 
+       profits, profits/pct80 AS ratio
+-- What tables do you need to join?  
+FROM fortune500 
+LEFT JOIN profit80
+-- How are the tables joined?
+ON fortune500.sector=profit80.sector
+-- What rows do you want to select?
+--WHERE ratio>1;
+WHERE profits>pct80;
+
+
+
+
+title	sector	profits	ratio
+Walmart	Retailing	13643	11.1099348534201954
+Berkshire Hathaway	Financials	24074	7.9873921698739217
+Apple	Technology	45687	6.2877786952931462
+Exxon Mobil	Energy	7840	5.9801678108314264
+McKesson	Wholesalers	2258	3.7266875722066348
+UnitedHealth Group	Health Care	7017	1.4132930513595166
+CVS Health	Health Care	5317	1.0708962739174220
+General Motors	Motor Vehicles & Parts	9427	2.0511314186248912
+AT&T	Telecommunications	12976	1.4923519263944796
+AmerisourceBergen	Wholesalers	1427.9	2.3566595147714144
+General Electric	Industrials	8831	2.3899864682002706
+Verizon	Telecommunications	13127	1.5097182288671650
+Cardinal Health	Wholesalers	1427	2.3551741211421027
+Costco	Retailing	2350	1.9136807817589577
+Walgreens Boots Alliance	Food & Drug Stores	4173	2.0600286320778003
+Fannie Mae	Financials	12313	4.0852687458526875
+J.P. Morgan Chase	Financials	24733	8.2060384870603849
+Home Depot	Retailing	7957	6.4796416938110749
+Wells Fargo	Financials	21938	7.2786994027869940
+Bank of America Corp.	Financials	17906	5.9409422694094227
+Alphabet	Technology	19478	2.6807046518029177
+Microsoft	Technology	16798	2.3118634737131847
+Citigroup	Financials	14912	4.9475779694757797
+IBM	Technology	11872	1.6339113680154143
+Phillips 66	Energy	1555	1.1861174675819985
+Johnson & Johnson	Health Care	16540	3.3313192346424975
+Procter & Gamble	Household Products	10508	4.8513388734995383
+Valero Energy	Energy	2289	1.7459954233409611
+Target	Retailing	2737	2.2288273615635179
+Freddie Mac	Financials	7815	2.5928998009289980
+Lowe’s	Retailing	3093	2.5187296416938111
+PepsiCo	Food, Beverages & Tobacco	6329	1.0421537954882266
+UPS	Transportation	3431	1.2821375186846039
+Intel	Technology	10316	1.4197632810349573
+Prudential Financial	Financials	4368	1.4492368944923689
+United Technologies	Aerospace & Defense	5055	1.0326864147088866
+Disney	Media	9391	3.4087114337568058
+Pfizer	Health Care	7215	1.4531722054380665
+Lockheed Martin	Aerospace & Defense	5302	1.0831460674157303
+Sysco	Wholesalers	949.6	1.5672553226605050
+Cisco Systems	Technology	10739	1.4779796311588219
+Dow Chemical	Chemicals	4318	2.8786666666666667
+Coca-Cola	Food, Beverages & Tobacco	6527	1.0747571216861518
+Delta Air Lines	Transportation	4373	1.6341554559043348
+Honeywell International	Industrials	4809	1.3014884979702300
+Morgan Stanley	Financials	5979	1.9837425348374253
+Goldman Sachs Group	Financials	7398	2.4545454545454545
+Oracle	Technology	8901	1.2250206440957886
+American Express	Financials	5408	1.7942932979429330
+TJX	Retailing	2298.2	1.8714983713355049
+Nike	Apparel	3760	3.5006051578065357
+Gilead Sciences	Health Care	13501	2.7192346424974824
+3M	Industrials	5050	1.3667117726657645
+Time Warner	Media	3926	1.4250453720508167
+Facebook	Technology	10217	1.4061381778144784
+...
+
+
+
+Instead of creating a temporary table, you could do this in one step with a subquery. But if you'll use the same subquery multiple times, a temporary table can be a good option.
+
