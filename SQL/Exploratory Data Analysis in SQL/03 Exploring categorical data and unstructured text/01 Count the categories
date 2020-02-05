@@ -1,0 +1,86 @@
+Count the categories
+In this chapter, we'll be working mostly with the Evanston 311 data in table evanston311. This is data on help requests submitted to the city of Evanston, IL.
+This data has several character columns. Start by examining the most frequent values in some of these columns to get familiar with the common categories.
+
+evanston311
+id	priority	source	category	date_created	date_completed	street	house_num	zip	description
+1340563	NONE	gov.publicstuff.com	Fire Prevention - Inspection of a Commercial Property	2016-01-13 15:03:18+00:00	2016-01-19 16:51:26+00:00	Sheridan Road	606-612	60202	Please contact Debbie at Ext. 222
+1826017	MEDIUM	Iframe	Water Service - Question or Concern	2016-08-12 14:35:12+00:00	2016-08-27 07:00:27+00:00	Washington St	930	null	Last spring we called you to report that our sump pump that in the past 50 years has been used to eject laundry water from the basement, was running continuously since February.  You came twice to check on it including taking a water sample and 'listening' at the street shut off valve.  You did not detect a leak.   Since then we have had three plumbers in to look at the problem.  We scoped the sewer line, one listened at the interior shut off, and we turned off the building water to see if it affected the pumping.  All negative.  The sump pump continues to run every 90 seconds 24/7, and we have one flood when the pump was accidentally turned off.  This current drought has not affected it either.   We are not sure what you can do but  we know that we have a constant source of water entering the sump, which one of the plumbers said would probably rule out a sewer line leak.  We are a 20 unit condo building.  This water is coming from somewhere, but our water bill suggests it is not an internal leak, as well as the other tests.  We thought you should know.
+1849204	MEDIUM	Iframe	Trees-Fallen limb or tree	2016-08-22 09:07:45+00:00	2016-08-24 07:05:32+00:00	Lincoln St	1183-1223	null	This isn't about a fallen tree or tree limb but I didn't know how else to categorize it this.  The sidewalk on the north side of Lincoln Street, east and the North Shore Sanitary Canal and west of Chandler Newberger is becoming difficult to use because of the overgrowth bushes and weeds on the edge of the Canal Shores golf course.  The vegetation and branches are growing out over the sidewalk.  Please have a crew (from the City or the golf course) trim there to make the sidewalk more useable, especially now that kids are back in school, walking on this sidewalk to/from Orrington and Haven.  Thanks!
+1880254	MEDIUM	iOS	Ask A Question / Send A Message	2016-09-01 09:03:54+00:00	2016-09-01 16:52:40+00:00	Callan Ave	1–111	60202	Actually on back side of 621 Howard, growth in rain gutter
+1972582	MEDIUM	Iframe	Dead Animal on Public Property	2016-09-19 01:46:41+00:00	2016-09-27 11:28:50+00:00	Crain St	1524	null	This is not public property but I need help.   There's a raccoon in my back yard that I'm pretty sure has distemper.  It was staggering around and when I went out with a flashlight to see what was going on, it went under bushes on right side of my garage and I need help.   I cannot afford to hire a commercial wild animal removal service.   They charge over $100 and I simply don't have it.   If that raccoon has distemper, which I'm sure it has ( or maybe it has rabies -both distemper and rabies make animals stagger), it's a public health concern.   I live in a two flat and my upstairs neighbor has a child and I have cats, and there are lots of pets in this area.   Although pets should be vaccinated for distemper, not everyone does that, which means this sick raccoon could be a risk to people's pets, given that distemper is  an air borne disease.   I need help.   My phone number is 847-693-0038.   Again, I cannot afford to hire a service to remove it.   I called a few and they charge over $100 to remove a raccoon.  I don't have that and neither does my upstairs neighbor.   Please help me.  The raccoon is inside my back yard on the side of the garage where there are a lot of bushes, near the side door of the garage.   I will be home until 10am.   You can go into my back yard without my permission, please just get that poor, very sick raccoon.
+1840025	HIGH	gov.publicstuff.com	Traffic Signal/Traffic Signal Back Plate	2016-08-17 20:15:03+00:00	2016-08-31 08:45:14+00:00	Central Street	2830	60201	Some type of flashing signal of exit fire truck. proper background color of signage (white, not yellow) for not blocking fire exit drive. Police can not enforce due to wrong background color. Flashing signal needed for safety reasons, numerous close calls with on coming traffic while exiting the station with emergency lights on. Repainting of street stripping to light post east of Reese (where signage currently is) possible a highlighting color (Red, red &white). please contact Capt. Taylor for questions or clarification at ext. 5945 would like to meet on 8/23 in AM to discuss some solutions or possible ideas.
+...
+
+How many rows does each priority level have?
+-- Select the count of each level of priority
+SELECT priority, COUNT(*)
+FROM evanston311
+GROUP BY priority;
+
+priority	count
+MEDIUM	5745
+NONE	30081
+HIGH	88
+LOW	517
+
+
+
+
+
+How many distinct values of zip appear in at least 100 rows?
+-- Find values of zip that appear in at least 100 rows
+-- Also get the count of each value
+SELECT DISTINCT zip, COUNT(*)
+FROM evanston311
+GROUP BY zip
+HAVING COUNT(*) >= 100; 
+
+zip	count
+60201	19054
+60202	11165
+60208	255
+null	5528
+
+
+
+
+
+
+
+How many distinct values of source appear in at least 100 rows?
+-- Find values of source that appear in at least 100 rows
+-- Also get the count of each value
+SELECT DISTINCT source, COUNT(*)
+FROM evanston311
+GROUP BY source
+HAVING COUNT(*) >= 100;
+
+source	count
+Android	444
+Iframe	3670
+gov.publicstuff.com	30985
+iOS	1199
+
+
+
+
+
+
+
+Select the five most common values of street and the count of each.
+-- Find the 5 most common values of street and the count of each
+SELECT street, COUNT(*)
+FROM evanston311
+GROUP BY street
+ORDER BY count DESC
+LIMIT 5;
+
+street	count
+null	1699
+Chicago Avenue	1440
+Sherman Avenue	1276
+Central Street	1211
+Davis Street	1154
+
+
