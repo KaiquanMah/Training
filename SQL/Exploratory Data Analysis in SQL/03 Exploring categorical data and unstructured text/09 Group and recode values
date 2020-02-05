@@ -1,0 +1,200 @@
+Group and recode values
+There are almost 150 distinct values of evanston311.category. But some of these categories are similar, with the form "Main Category - Details". We can get a better sense of what requests are common if we aggregate by the main category.
+To do this, create a temporary table recode mapping distinct category values to new, standardized values. Make the standardized values the part of the category before a dash ('-'). Extract this value with the split_part() function:
+split_part(string text, delimiter text, field int)
+
+
+You'll also need to do some additional cleanup of a few cases that don't fit this pattern.
+Then the evanston311 table can be joined to recode to group requests by the new standardized category values.
+
+
+Create recode with a standardized column; use split_part() and then rtrim() to remove any remaining whitespace on the result of split_part().
+-- Fill in the command below with the name of the temp table
+DROP TABLE IF EXISTS recode;
+
+-- Create and name the temporary table
+CREATE temp TABLE recode AS
+-- Write the select query to generate the table 
+-- with distinct values of category and standardized values
+  SELECT DISTINCT category, 
+         RTRIM(split_part(category, '-', 1)) AS standardized
+    -- What table are you selecting the above values from?
+    FROM evanston311;
+    
+-- Look at a few values before the next step
+SELECT DISTINCT standardized 
+FROM recode
+WHERE standardized LIKE 'Trash%Cart'
+    OR standardized LIKE 'Snow%Removal%';
+
+
+standardized
+Snow Removal
+Snow Removal/Concerns
+Snow/Ice/Hazard Removal
+Trash Cart
+Trash Cart, Recycling Cart
+Trash, Recycling, Yard Waste Cart
+
+
+
+
+
+
+
+
+
+
+
+
+
+UPDATE standardized values LIKE 'Trash%Cart' to 'Trash Cart'.
+UPDATE standardized values of 'Snow Removal/Concerns' and 'Snow/Ice/Hazard Removal' to 'Snow Removal'.
+-- Code from previous step
+DROP TABLE IF EXISTS recode;
+
+CREATE TEMP TABLE recode AS
+  SELECT DISTINCT category, 
+         rtrim(split_part(category, '-', 1)) AS standardized
+    FROM evanston311;
+
+-- Update to group trash cart values
+UPDATE recode 
+   SET standardized='Trash Cart' 
+ WHERE standardized LIKE 'Trash%Cart';
+
+-- Update to group snow removal values
+UPDATE recode 
+   SET standardized='Snow Removal' 
+ WHERE standardized LIKE 'Snow Removal/Concerns'
+    OR standardized LIKE 'Snow/Ice/Hazard Removal';
+    
+-- Examine effect of updates
+SELECT DISTINCT standardized 
+  FROM recode
+ WHERE standardized LIKE 'Trash%Cart'
+    OR standardized LIKE 'Snow%Removal%';
+
+
+standardized
+Snow Removal
+Trash Cart
+
+
+
+
+
+
+
+
+
+UPDATE recode by setting standardized values of 'THIS REQUEST IS INACTIVE...Trash Cart', '(DO NOT USE) Water Bill', 'DO NOT USE Trash', and 'NO LONGER IN USE' to 'UNUSED'.
+-- Code from previous step
+DROP TABLE IF EXISTS recode;
+
+CREATE TEMP TABLE recode AS
+  SELECT DISTINCT category, 
+         rtrim(split_part(category, '-', 1)) AS standardized
+    FROM evanston311;
+  
+UPDATE recode SET standardized='Trash Cart' 
+ WHERE standardized LIKE 'Trash%Cart';
+
+UPDATE recode SET standardized='Snow Removal' 
+ WHERE standardized LIKE 'Snow%Removal%';
+
+-- Update to group unused/inactive values
+UPDATE recode 
+   SET standardized='UNUSED' 
+ WHERE standardized IN ('THIS REQUEST IS INACTIVE...Trash Cart', 
+               '(DO NOT USE) Water Bill', 
+               'DO NOT USE Trash',
+               'NO LONGER IN USE');
+
+
+-- Examine effect of updates
+SELECT DISTINCT standardized 
+  FROM recode
+ ORDER BY standardized;
+
+
+
+
+standardized
+ADA/Inclusion Aids
+Abandoned Bicycle on City Property
+Abandoned Vehicle
+Accessibility
+Advanced Disposal
+Alarm Registration
+Alleys
+Amplified Sounds and/or Music
+Animal Issue/Concern
+Animal Service
+Animals
+Ask A Question / Send A Message
+Bathroom Maintenance/City Parks
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+Now, join the evanston311 and recode tables to count the number of requests with each of the standardized values
+List the most common standardized values first.
+-- Code from previous step
+DROP TABLE IF EXISTS recode;
+CREATE TEMP TABLE recode AS
+  SELECT DISTINCT category, 
+         rtrim(split_part(category, '-', 1)) AS standardized
+  FROM evanston311;
+UPDATE recode SET standardized='Trash Cart' 
+ WHERE standardized LIKE 'Trash%Cart';
+UPDATE recode SET standardized='Snow Removal' 
+ WHERE standardized LIKE 'Snow%Removal%';
+UPDATE recode SET standardized='UNUSED' 
+ WHERE standardized IN ('THIS REQUEST IS INACTIVE...Trash Cart', 
+               '(DO NOT USE) Water Bill',
+               'DO NOT USE Trash', 'NO LONGER IN USE');
+
+-- Select the recoded categories and the count of each
+SELECT standardized, COUNT(*)
+-- From the original table and table with recoded values
+  FROM evanston311 
+       INNER JOIN recode 
+       -- What column do they have in common?
+       ON evanston311.category = recode.category 
+ -- What do you need to group by to count?
+ GROUP BY standardized
+ -- Display the most common val values first
+ ORDER BY count DESC;
+
+
+
+
+standardized	count
+Broken Parking Meter	6092
+Trash	3699
+Ask A Question / Send A Message	2595
+Trash Cart	1902
+Tree Evaluation	1879
+Rodents	1305
+Recycling	1224
+Dead Animal on Public Property	1057
+Child Seat Installation or Inspection	1028
+Fire Prevention	880
+Water Bill	878
+Pot Hole	849
+...
+
+
+
+
