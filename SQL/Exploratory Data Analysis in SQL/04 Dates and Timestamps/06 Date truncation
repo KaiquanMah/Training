@@ -1,0 +1,59 @@
+Date truncation
+Unlike date_part() or EXTRACT(), date_trunc() keeps date/time units larger than the field you specify as part of the date. So instead of just extracting one component of a timestamp, date_trunc() returns the specified unit and all larger ones as well.
+
+Recall the syntax:
+date_trunc('field', timestamp)
+Using date_trunc(), find the average number of Evanston 311 requests created per day for each month of the data. Ignore days with no requests when taking the average.
+
+
+
+Write a subquery to count the number of requests created per day.
+Select the month and average count per month from the daily_count subquery.
+-- Aggregate daily counts by month
+SELECT date_trunc('month', day) AS month,
+       AVG(count)
+-- Subquery to compute daily counts
+FROM (SELECT date_trunc('day', date_created) AS day,
+               COUNT(*) AS count
+      FROM evanston311
+      GROUP BY day) AS daily_count
+GROUP BY month
+ORDER BY month;
+
+
+
+month	avg
+2016-01-01 00:00:00+00:00	23.5161290322580645
+2016-02-01 00:00:00+00:00	30.7241379310344828
+2016-03-01 00:00:00+00:00	35.5483870967741935
+2016-04-01 00:00:00+00:00	37.3000000000000000
+2016-05-01 00:00:00+00:00	40.7666666666666667
+2016-06-01 00:00:00+00:00	44.0000000000000000
+2016-07-01 00:00:00+00:00	41.4838709677419355
+2016-08-01 00:00:00+00:00	46.5483870967741935
+2016-09-01 00:00:00+00:00	47.3333333333333333
+2016-10-01 00:00:00+00:00	35.8064516129032258
+2016-11-01 00:00:00+00:00	36.6206896551724138
+2016-12-01 00:00:00+00:00	29.3870967741935484
+2017-01-01 00:00:00+00:00	34.9032258064516129
+2017-02-01 00:00:00+00:00	32.7037037037037037
+2017-03-01 00:00:00+00:00	35.6333333333333333
+2017-04-01 00:00:00+00:00	42.2000000000000000
+2017-05-01 00:00:00+00:00	46.8064516129032258
+2017-06-01 00:00:00+00:00	69.4666666666666667
+2017-07-01 00:00:00+00:00	57.3225806451612903
+2017-08-01 00:00:00+00:00	53.7419354838709677
+2017-09-01 00:00:00+00:00	44.6666666666666667
+2017-10-01 00:00:00+00:00	41.5483870967741935
+2017-11-01 00:00:00+00:00	40.7000000000000000
+2017-12-01 00:00:00+00:00	36.3000000000000000
+2018-01-01 00:00:00+00:00	35.4827586206896552
+2018-02-01 00:00:00+00:00	30.5714285714285714
+2018-03-01 00:00:00+00:00	29.6774193548387097
+2018-04-01 00:00:00+00:00	35.1333333333333333
+2018-05-01 00:00:00+00:00	45.3548387096774194
+2018-06-01 00:00:00+00:00	44.4666666666666667
+
+
+You got it! This query ignores dates with no requests. You'll learn how to account for missing dates in an upcoming exercise.
+
