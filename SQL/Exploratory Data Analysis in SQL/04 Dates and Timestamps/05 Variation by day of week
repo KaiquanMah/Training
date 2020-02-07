@@ -1,0 +1,38 @@
+Variation by day of week
+Does the time required to complete a request vary by the day of the week on which the request was created?
+
+We can get the name of the day of the week by converting a timestamp to character data:
+to_char(date_created, 'day') 
+
+But character names for the days of the week sort in alphabetical, not chronological, order. To get the chronological order of days of the week with an integer value for each day, we can use:
+EXTRACT(DOW FROM date_created)
+DOW stands for "day of week."
+
+
+Select the name of the day of the week the request was created (date_created) as day.
+Select the mean time between the request completion (date_completed) and request creation as duration.
+Group by day (the name of the day of the week) and the integer value for the day of the week (use a function).
+Order by the integer value of the day of the week using the same function used in GROUP BY.
+
+-- Select name of the day of the week the request was created 
+SELECT to_char(date_created, 'day') AS day, 
+       -- Select avg time between request creation and completion
+       AVG(date_completed - date_created) AS duration
+FROM evanston311 
+-- Group by the name of the day of the week and 
+-- integer value of day of week the request was created
+GROUP BY day, EXTRACT(DOW FROM date_created)
+-- Order by integer value of the day of the week 
+-- the request was created
+ORDER BY EXTRACT(DOW FROM date_created);
+
+
+day	duration
+sunday   	9 days, 1:47:22.572982
+monday   	7 days, 0:56:40.041519
+tuesday  	7 days, 2:56:21.726767
+wednesday	7 days, 12:07:08.185632
+thursday 	7 days, 10:23:30.633975
+friday   	8 days, 10:44:09.025246
+saturday 	7 days, 14:37:00.356259
+
