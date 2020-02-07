@@ -1,0 +1,20 @@
+Custom aggregation periods
+Find the median number of Evanston 311 requests per day in each six month period from 2016-01-01 to 2018-06-30. Build the query following the three steps below.
+Recall that to aggregate data by non-standard date/time intervals, such as six months, you can use generate_series() to create bins with lower and upper bounds of time, and then summarize observations that fall in each bin.
+Remember: you can access the slides with an example of this type of query using the PDF icon link in the upper right corner of the screen.
+
+
+Use generate_series() to create bins of 6 month intervals. Recall that the upper bin values are exclusive, so the values need to be one day greater than the last day to be included in the bin.
+Notice how in the sample code, the first bin value of the upper bound is July 1st, and not June 30th.
+Use the same approach when creating the last bin values of the lower and upper bounds (i.e. for 2018).
+
+-- Generate 6 month bins covering 2016-01-01 to 2018-06-30
+
+-- Create lower bounds of bins
+SELECT generate_series('2016-01-01',  -- First bin lower value
+                       '2018-01-01',  -- Last bin lower value
+                       '6 month'::interval) AS lower,
+-- Create upper bounds of bins
+       (generate_series('2016-07-01',  -- First bin upper value
+                       '2018-07-01',  -- Last bin upper value
+                       '6 month'::interval) - '1 day'::interval) AS upper;
