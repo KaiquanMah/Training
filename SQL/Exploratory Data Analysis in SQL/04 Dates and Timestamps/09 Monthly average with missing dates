@@ -1,0 +1,73 @@
+Monthly average with missing dates
+Find the average number of Evanston 311 requests created per day for each month of the data.
+This time, do not ignore dates with no requests.
+
+
+Generate a series of dates from 2016-01-01 to 2018-06-30.
+Join the series to a subquery to count the number of requests created per day.
+Use date_trunc() to get months from date, which has all dates, NOT day.
+Use coalesce() to replace NULL count values with 0. Compute the average of this value.
+
+
+-- generate series with all days from 2016-01-01 to 2018-06-30
+WITH all_days AS 
+     (SELECT generate_series('2016-01-01',
+                             '2018-06-30',
+                             '1 day'::interval) AS date),
+     -- Subquery to compute daily counts
+     daily_count AS 
+     (SELECT date_trunc('day', date_created) AS day,
+             count(*) AS count
+        FROM evanston311
+       GROUP BY day)
+
+
+-- Aggregate daily counts by month using date_trunc
+SELECT date_trunc('month', date) AS month,
+       -- Use coalesce to replace NULL count values with 0
+       avg(coalesce(count, 0)) AS average
+  FROM all_days
+       LEFT JOIN daily_count
+       -- Joining condition
+       ON all_days.date=daily_count.day
+ GROUP BY month
+ ORDER BY month; 
+ 
+ 
+ 
+ month	average
+2016-01-01 00:00:00+00:00	23.5161290322580645
+2016-02-01 00:00:00+00:00	30.7241379310344828
+2016-03-01 00:00:00+00:00	35.5483870967741935
+2016-04-01 00:00:00+00:00	37.3000000000000000
+2016-05-01 00:00:00+00:00	39.4516129032258065
+2016-06-01 00:00:00+00:00	44.0000000000000000
+2016-07-01 00:00:00+00:00	41.4838709677419355
+2016-08-01 00:00:00+00:00	46.5483870967741935
+2016-09-01 00:00:00+00:00	47.3333333333333333
+2016-10-01 00:00:00+00:00	35.8064516129032258
+2016-11-01 00:00:00+00:00	35.4000000000000000
+2016-12-01 00:00:00+00:00	29.3870967741935484
+2017-01-01 00:00:00+00:00	34.9032258064516129
+2017-02-01 00:00:00+00:00	31.5357142857142857
+2017-03-01 00:00:00+00:00	34.4838709677419355
+2017-04-01 00:00:00+00:00	42.2000000000000000
+2017-05-01 00:00:00+00:00	46.8064516129032258
+2017-06-01 00:00:00+00:00	69.4666666666666667
+2017-07-01 00:00:00+00:00	57.3225806451612903
+2017-08-01 00:00:00+00:00	53.7419354838709677
+2017-09-01 00:00:00+00:00	44.6666666666666667
+2017-10-01 00:00:00+00:00	41.5483870967741935
+2017-11-01 00:00:00+00:00	40.7000000000000000
+2017-12-01 00:00:00+00:00	35.1290322580645161
+2018-01-01 00:00:00+00:00	33.1935483870967742
+2018-02-01 00:00:00+00:00	30.5714285714285714
+2018-03-01 00:00:00+00:00	29.6774193548387097
+2018-04-01 00:00:00+00:00	35.1333333333333333
+2018-05-01 00:00:00+00:00	45.3548387096774194
+2018-06-01 00:00:00+00:00	44.4666666666666667
+
+
+
+Well done. Because there are few days with no requests, including them doesn't change the averages much. But, including them is always the right way to compute accurate averages!
+
