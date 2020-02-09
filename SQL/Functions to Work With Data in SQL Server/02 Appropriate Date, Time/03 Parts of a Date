@@ -1,0 +1,96 @@
+Extracting parts from a date
+In this exercise, you will practice extracting date parts from a date, using SQL Server built-in functions. These functions are easy to apply and you can also use them in the WHERE clause, to restrict the results returned by the query.
+You will start by querying the voters table and create new columns by extracting the year, month, and day from the first_vote_date.
+
+
+Extract the year, month and day of the first vote.
+SELECT 
+	first_name,
+	last_name,
+	-- Extract the year of the first vote
+	YEAR(first_vote_date)  AS first_vote_year,
+    -- Extract the month of the first vote
+	MONTH(first_vote_date) AS first_vote_month,
+    -- Extract the day of the first vote
+	DAY(first_vote_date)   AS first_vote_day
+FROM voters;
+
+first_name	last_name	first_vote_year	first_vote_month	first_vote_day
+Carol	Rai	2015	3	9
+Ana	Price	2015	1	17
+Melissa	Richardson	2015	4	9
+Angela	Griffin	2015	12	30
+Grace	Henderson	2015	6	2
+Melody	Ramos	2013	1	8
+Clinton	Moreno	2013	1	19
+Kaylee	Cook	2013	9	17
+Dennis	Huang	2013	10	29
+Julia	Brooks	2015	7	16
+Devin	Henderson	2013	10	29
+Gabrielle	Cox	2015	9	25
+Jose	Wright	2015	8	16
+Seth	Martin	2013	11	9
+Clayton	Sharma	2013	12	28
+Amy	Huang	2015	2	16
+Michele	Suarez	2014	7	10
+Kurt	Jai	2015	2	27
+Sebastian	Rogers	2016	1	6
+...
+
+
+Restrict the query to show only the voters who started to vote after 2015.
+SELECT 
+	first_name,
+	last_name,
+   	-- Extract the year of the first vote
+	YEAR(first_vote_date)  AS first_vote_year,
+    -- Extract the month of the first vote
+	MONTH(first_vote_date) AS first_vote_month,
+    -- Extract the day of the first vote
+	DAY(first_vote_date)   AS first_vote_day
+FROM voters
+-- The year of the first vote should be greater than 2015
+WHERE YEAR(first_vote_date) > 2015;
+
+first_name	last_name	first_vote_year	first_vote_month	first_vote_day
+Sebastian	Rogers	2016	1	6
+Barbara	Zhao	2016	1	21
+Haley	Sanchez	2016	1	5
+Vincent	Zhao	2016	1	18
+Isabella	Evans	2016	1	16
+
+
+
+
+
+
+
+
+
+
+Restrict the query to show only the voters did not vote on the first day of the month.
+SELECT 
+	first_name,
+	last_name,
+   	-- Extract the year of the first vote
+	YEAR(first_vote_date)  AS first_vote_year,
+    -- Extract the month of the first vote
+	MONTH(first_vote_date) AS first_vote_month,
+    -- Extract the day of the first vote
+	DAY(first_vote_date)   AS first_vote_day
+FROM voters
+-- The year of the first vote should be greater than 2015
+WHERE YEAR(first_vote_date) > 2015
+-- The day should not be the first day of the month
+  AND DAY(first_vote_date) <> 1;
+
+first_name	last_name	first_vote_year	first_vote_month	first_vote_day
+Sebastian	Rogers	2016	1	6
+Barbara	Zhao	2016	1	21
+Haley	Sanchez	2016	1	5
+Vincent	Zhao	2016	1	18
+Isabella	Evans	2016	1	16
+
+
+You’re doing beautifully! The YEAR(), MONTH(), and DAY() functions are short, easy to use and can come in very handy in situations where data manipulation is needed.
+
