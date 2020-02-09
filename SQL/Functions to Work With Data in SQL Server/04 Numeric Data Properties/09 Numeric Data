@@ -1,0 +1,102 @@
+Working with numeric data
+In this exercise, you are going to use some common SQL Server functions to manipulate numeric data.
+You are going to use the ratings table, which stores information about each company that has been rated, their different cocoa beans and the rating per bean.
+You are going to find out information like the highest, lowest, average score received by each company (using functions like MAX(), MIN(), AVG()). Then, you will use some rounding functions to present this data with fewer decimals (ROUND(), CEILING(), FLOOR()).
+
+
+Select the number of cocoa flavors the company was rated on.
+Select the lowest, highest and the average rating that each company received.
+SELECT 
+	company, 
+    -- Select the number of cocoa flavors for each company
+	COUNT(*) AS flavors,
+    -- Select the minimum, maximum and average rating
+	MIN(rating) AS lowest_score,
+	MAX(rating) AS highest_score,
+	AVG(rating) AS avg_score	  
+FROM ratings
+GROUP BY company
+ORDER BY flavors DESC;
+
+
+company	flavors	lowest_score	highest_score	avg_score
+Soma	47	2.0000	4.0000	3.015957
+Bonnat	27	2.7500	5.0000	3.277777
+Fresco	26	2.0000	4.0000	3.423076
+Pralus	25	2.5000	3.7500	3.040000
+A. Morin	23	2.5000	4.0000	3.250000
+Arete	22	2.2500	3.7500	3.136363
+Domori	22	3.0000	3.5000	3.352272
+Guittard	22	2.7500	4.0000	3.272727
+Valrhona	21	2.5000	4.0000	3.250000
+...
+
+
+
+
+
+
+
+
+
+
+Round the average rating to 1 decimal and show it as a different column.
+SELECT 
+	company, 
+    -- Select the number of cocoa flavors for each company
+	COUNT(*) AS flavors,
+    -- Select the minimum, maximum and average rating
+	MIN(rating) AS lowest_score,  
+	MAX(rating) AS highest_score,   
+	AVG(rating) AS avg_score,
+    -- Round the average rating to 1 decimal
+    ROUND(AVG(rating), 1) AS round_avg_score	
+FROM ratings
+GROUP BY company
+ORDER BY flavors DESC;
+
+
+
+company	flavors	lowest_score	highest_score	avg_score	round_avg_score
+Soma	47	2.0000	4.0000	3.015957	3.000000
+Bonnat	27	2.7500	5.0000	3.277777	3.300000
+Fresco	26	2.0000	4.0000	3.423076	3.400000
+...
+
+
+
+
+
+
+
+
+
+
+
+Calculate the average rating received by each company and perform the following approximations:
+a. round-up to the next integer value
+b. round-down to the previous integer value.
+SELECT 
+	company, 
+    -- Select the number of cocoa flavors for each company
+	COUNT(*) AS flavors,
+    -- Select the minimum, maximum and average rating
+	MIN(rating) AS lowest_score,   
+	MAX(rating) AS highest_score,   
+	AVG(rating) AS avg_score,
+    -- Round the average rating to 1 decimal
+    ROUND(AVG(rating), 1) AS round_avg_score,
+    -- Round up and then down the aveg. rating to the next integer 
+    CEILING(AVG(rating)) AS round_up_avg_score,   
+	FLOOR(AVG(rating)) AS round_down_avg_score
+FROM ratings
+GROUP BY company
+ORDER BY flavors DESC;
+
+company	flavors	lowest_score	highest_score	avg_score	round_avg_score	round_up_avg_score	round_down_avg_score
+Soma	47	2.0000	4.0000	3.015957	3.000000	4	3
+Bonnat	27	2.7500	5.0000	3.277777	3.300000	4	3
+Fresco	26	2.0000	4.0000	3.423076	3.400000	4	3
+...
+
+
