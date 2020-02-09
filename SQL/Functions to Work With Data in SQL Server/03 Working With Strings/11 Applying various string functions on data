@@ -1,0 +1,97 @@
+Applying various string functions on data
+As you may have noticed, string functions are really useful for manipulating data. SQL Server offers a lot of built-in functions for string manipulation and some of them are quite fun to use. In this exercise, you are going to apply several string functions to the data from the voters table, to show it in a more presentable manner.
+You will get the chance to use functions like: LEN(), UPPER(), PATINDEX(), CONCAT(), REPLACE() and SUBSTRING().
+
+Remember: when searching for patterns within a string, these are the most helpful:
+pattern	  match
+%	        any string of zero or more characters
+_	        any single character
+[]	      any single character within the range specified in brackets
+
+
+
+Select only the voters whose first name has fewer than 5 characters and email address meets these conditions in the same time: (1) starts with the letter “j”, (2) the third letter is “a” and (3) is created at yahoo.com.
+SELECT
+	first_name,
+    last_name,
+	birthdate,
+	email,
+	country
+FROM voters
+   -- Select only voters with a first name less than 5 characters
+WHERE LEN(first_name) < 5
+   -- Look for the desired pattern in the email address
+	AND PATINDEX('j_a%@yahoo.com', email) > 0;
+
+
+first_name	last_name	birthdate	email	country
+Juan	Romero	1978-03-15	juan1@yahoo.com	Germany
+Joan	Ross	1992-06-22	joan8@yahoo.com	Switzerland
+Joan	Martin	1985-03-26	joan19@yahoo.com	Spain
+
+
+
+
+
+
+
+
+
+
+
+
+Concatenate the first name and last name in the same column and present it in this format: " *** Firstname LASTNAME *** ".
+SELECT
+    -- Concatenate the first and last name
+	CONCAT('***' , first_name, ' ', UPPER(last_name), '***') AS name,
+    last_name,
+	birthdate,
+	email,
+	country
+FROM voters
+   -- Select only voters with a first name less than 5 characters
+WHERE LEN(first_name) < 5
+   -- Look for this pattern in the email address: "j%[0-9]@yahoo.com"
+	AND PATINDEX('j_a%@yahoo.com', email) > 0;       
+
+
+name	last_name	birthdate	email	country
+***Juan ROMERO***	Romero	1978-03-15	juan1@yahoo.com	Germany
+***Joan ROSS***	Ross	1992-06-22	joan8@yahoo.com	Switzerland
+***Joan MARTIN***	Martin	1985-03-26	joan19@yahoo.com	Spain
+
+
+
+
+
+
+
+
+
+
+
+
+Mask the year part from the birthdate column, by replacing the last two digits with "XX" (1986-03-26 becomes 19XX-03-26).
+SELECT
+    -- Concatenate the first and last name
+	CONCAT('***' , first_name, ' ', UPPER(last_name), '***') AS name,
+    -- Mask the last two digits of the year
+    REPLACE(birthdate, SUBSTRING(CAST(birthdate AS varchar), 3, 2), 'XX') AS birthdate,
+	email,
+	country
+FROM voters
+   -- Select only voters with a first name less than 5 characters
+WHERE LEN(first_name) < 5
+   -- Look for this pattern in the email address: "j%[0-9]@yahoo.com"
+	AND PATINDEX('j_a%@yahoo.com', email) > 0;    
+
+
+
+name	birthdate	email	country
+***Juan ROMERO***	19XX-03-15	juan1@yahoo.com	Germany
+***Joan ROSS***	19XX-06-22	joan8@yahoo.com	Switzerland
+***Joan MARTIN***	19XX-03-26	joan19@yahoo.com	Spain
+
+
+No strings can tie you down! You made it through this chapter and you can work with string data like no other. Great work so far!
+
