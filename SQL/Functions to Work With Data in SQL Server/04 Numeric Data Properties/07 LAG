@@ -1,0 +1,60 @@
+Accessing values from the previous row
+By using the LAG() function in a query, you can access rows previous to the current one.
+This is the syntax: LAG(numeric_expression) OVER ([PARTITION BY column] ORDER BY column)
+
+
+In this exercise, you will use this function in your query. You will analyze the ratings of the chocolate bars produced by a company called "Fruition".
+This company produces chocolate with cocoa coming from different areas of the world.
+You want to check if there is a correlation between the percentage of cocoa and the score received, for the bars coming from the same location. For this, you will compare the cocoa percentage of each bar with the percentage of the bar that received the previous rating. Then, you will calculate the difference between these values and interpret the results.
+
+
+company	bean_origin	cocoa_percent	company_location	rating	bean_type	broad_bean_origin
+Amedei	Toscano Black	0.7000	Italy	2.7500	Blend	Unknown
+Amedei	Toscano Black	0.6600	Italy	2.7500	Blend	Unknown
+Bonnat	Trinite	0.7500	France	2.7500	Trinitario	Carribean
+Bonnat	Ocumare- Puerto Cabello	0.7500	France	2.7500	Unknown	Venezuela
+Bonnat	Maracaibo- El Rosario	0.7500	France	3.0000	Criollo	Venezuela
+Bonnat	Madagascar	0.7500	France	3.0000	Trinitario	Madagascar
+...
+
+
+
+
+Create a new column, showing the cocoa percentage of the chocolate bar that received a lower score, with cocoa coming from the same location (broad_bean_origin is the same).
+Create a new column with the difference between the current bar's cocoa percentage and the percentage of the previous bar.
+SELECT 
+	broad_bean_origin AS bean_origin,
+	rating,
+	cocoa_percent,
+    -- Retrieve the cocoa % of the bar with the previous rating
+	LAG(cocoa_percent) 
+		OVER(PARTITION BY broad_bean_origin ORDER BY rating) AS percent_lower_rating
+FROM ratings
+WHERE company = 'Fruition'
+ORDER BY broad_bean_origin, rating ASC;
+
+
+
+bean_origin	rating	cocoa_percent	percent_lower_rating
+Bolivia
+	3.7500	0.7400	null
+Costa Rica
+	1.5000	0.6600	null
+Costa Rica
+	3.0000	0.7000	0.6600
+Costa Rica
+	3.0000	0.7400	0.7000
+Dominican Republic
+	3.2500	0.7000	null
+Ecuador
+	3.2500	0.7500	null
+Peru
+	2.5000	0.7600	null
+Peru
+	3.2500	0.7000	0.7600
+Trinidad
+	2.0000	0.7000	null
+
+
+Great work, you are not lagging behind! Keep in mind, for LAG() as well as for the other analytic functions, you can create subsets of your data using the PARTITION BY column syntax in the OVER() clause and apply the function on these subsets.
+
