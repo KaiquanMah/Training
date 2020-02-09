@@ -1,0 +1,105 @@
+Getting the first and last value
+The analytical functions that return the first or last value from an ordered list prove to be very helpful in queries. In this exercise, you will get familiar with them. The syntax is:
+FIRST_VALUE(numeric_expression) OVER ([PARTITION BY column] ORDER BY column ROW_or_RANGE frame)
+LAST_VALUE(numeric_expression) OVER ([PARTITION BY column] ORDER BY column ROW_or_RANGE frame)
+You will write a query to retrieve all the voters from Spain and the USA. Then, you will add in your query some commands for retrieving the birth date of the youngest and the oldest voter from each country. You want to see these values on each row, to be able to compare them with the birth date of each voter.
+
+
+
+
+customer_id	first_name	last_name	birthdate	gender	email	country	first_vote_date	total_votes
+1	Carol	Rai	1989-01-15	F 	carol8@yahoo.com	Denmark	2015-03-09	136
+2	Ana	Price	1987-02-17	F 	ana0@gmail.com	France	2015-01-17	124
+3	Melissa	Richardson	1989-04-25	F 	melissa31@yahoo.com	Denmark	2015-04-09	145
+4	Angela	Griffin	1993-03-08	F 	angela23@gmail.com	Belgium	2015-12-30	52
+5	Grace	Henderson	1968-01-30	F 	grace52@yahoo.com	USA	2015-06-02	147
+6	Melody	Ramos	1969-01-30	F 	melody17@yahoo.com	USA	2013-01-08	90
+7	Clinton	Moreno	1990-05-05	M 	clinton3@yahoo.com	Denmark	2013-01-19	63
+8	Kaylee	Cook	1991-05-05	F 	kaylee18@yahoo.com	Switzerland	2013-09-17	58
+...
+
+
+
+
+
+Retrieve the birth date of the oldest voter from each country.
+Retrieve the birth date of the youngest voter from each country.
+SELECT 
+	first_name + ' ' + last_name AS name,
+	country,
+	birthdate,
+	-- Retrieve the birthdate of the oldest voter per country
+	FIRST_VALUE(birthdate) 
+	OVER (PARTITION BY country ORDER BY birthdate) AS oldest_voter,
+	-- Retrieve the birthdate of the youngest voter per country
+	LAST_VALUE(birthdate) 
+		OVER (PARTITION BY country ORDER BY birthdate ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+				) AS youngest_voter
+FROM voters
+WHERE country IN ('Spain', 'USA');
+
+
+
+
+name	country	birthdate	oldest_voter	youngest_voter
+Caroline Griffin	Spain	1981-03-20	1981-03-20	1988-03-21
+Christopher Jackson	Spain	1981-04-15	1981-03-20	1988-03-21
+Raul Raji	Spain	1981-04-25	1981-03-20	1988-03-21
+Karen Cai	Spain	1981-05-03	1981-03-20	1988-03-21
+Jose Scott	Spain	1981-05-13	1981-03-20	1988-03-21
+Nancy Garcia	Spain	1982-02-13	1981-03-20	1988-03-21
+Joshua Walker	Spain	1982-03-21	1981-03-20	1988-03-21
+Hector Romero	Spain	1982-04-25	1981-03-20	1988-03-21
+Tiffany Ye	Spain	1983-01-19	1981-03-20	1988-03-21
+Jada Rivera	Spain	1983-02-13	1981-03-20	1988-03-21
+Jacquelyn Romero	Spain	1983-03-21	1981-03-20	1988-03-21
+Marcus Jenkins	Spain	1983-05-01	1981-03-20	1988-03-21
+Bailey Young	Spain	1983-05-01	1981-03-20	1988-03-21
+Dennis Hu	Spain	1984-01-24	1981-03-20	1988-03-21
+Danny Ruiz	Spain	1984-02-13	1981-03-20	1988-03-21
+Carl Tang	Spain	1984-03-25	1981-03-20	1988-03-21
+Micah Sun	Spain	1984-05-01	1981-03-20	1988-03-21
+Antonio Alexander	Spain	1984-06-05	1981-03-20	1988-03-21
+Grant Raje	Spain	1985-01-14	1981-03-20	1988-03-21
+Alberto Martin	Spain	1985-01-24	1981-03-20	1988-03-21
+Darrell Shan	Spain	1985-02-13	1981-03-20	1988-03-21
+Arthur Vazquez	Spain	1985-02-25	1981-03-20	1988-03-21
+Joan Martin	Spain	1985-03-26	1981-03-20	1988-03-21
+Isabella Evans	Spain	1985-05-01	1981-03-20	1988-03-21
+Jeffery Zheng	Spain	1986-01-09	1981-03-20	1988-03-21
+Kristopher Gonzalez	Spain	1988-03-21	1981-03-20	1988-03-21
+Andrew Clark	USA	1954-02-13	1954-02-13	1972-03-11
+Kaylee Allen	USA	1956-03-10	1954-02-13	1972-03-11
+Daniel Martin	USA	1959-02-16	1954-02-13	1972-03-11
+Savannah Cox	USA	1959-03-15	1954-02-13	1972-03-11
+James Moore	USA	1959-05-15	1954-02-13	1972-03-11
+Charles Johnston	USA	1959-05-17	1954-02-13	1972-03-11
+Krista Ortega	USA	1960-05-17	1954-02-13	1972-03-11
+Leah Lu	USA	1961-03-10	1954-02-13	1972-03-11
+Savannah Evans	USA	1964-01-19	1954-02-13	1972-03-11
+Carolyn Ruiz	USA	1964-01-22	1954-02-13	1972-03-11
+Maria Brooks	USA	1964-02-14	1954-02-13	1972-03-11
+Victor Vazquez	USA	1964-02-22	1954-02-13	1972-03-11
+Gregory Nara	USA	1964-03-14	1954-02-13	1972-03-11
+Victoria Washington	USA	1964-04-05	1954-02-13	1972-03-11
+Xavier Hayes	USA	1964-04-21	1954-02-13	1972-03-11
+Patrick Murphy	USA	1965-01-22	1954-02-13	1972-03-11
+Melvin She	USA	1966-01-24	1954-02-13	1972-03-11
+Jan Cox	USA	1967-01-24	1954-02-13	1972-03-11
+Grace Henderson	USA	1968-01-30	1954-02-13	1972-03-11
+April Shen	USA	1969-01-09	1954-02-13	1972-03-11
+Melody Ramos	USA	1969-01-30	1954-02-13	1972-03-11
+Devin Henderson	USA	1970-01-30	1954-02-13	1972-03-11
+Troy Sanchez	USA	1970-03-10	1954-02-13	1972-03-11
+Kevin Yang	USA	1971-01-30	1954-02-13	1972-03-11
+Bruce Moreno	USA	1971-03-10	1954-02-13	1972-03-11
+Connor Ross	USA	1972-01-09	1954-02-13	1972-03-11
+Andrea Peterson	USA	1972-01-24	1954-02-13	1972-03-11
+Mariah Brooks	USA	1972-01-30	1954-02-13	1972-03-11
+Whitney Suri	USA	1972-01-30	1954-02-13	1972-03-11
+Jason Hayes	USA	1972-02-13	1954-02-13	1972-03-11
+Dennis Huang	USA	1972-03-11	1954-02-13	1972-03-11
+
+
+You're doing such a good job! The syntax for the analytic functions is not always easy, but you learned how they are used. Remember, if you want to split your data into groups, you can use the PARTITION BY clause. Also, if you want to function to be applied on all the rows in your partition, you can add this command in the OVER() clause: ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+
