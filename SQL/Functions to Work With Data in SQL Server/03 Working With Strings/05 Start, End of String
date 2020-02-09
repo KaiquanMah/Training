@@ -1,0 +1,177 @@
+Using the beginning or end of a string
+Sometimes you may need to take only certain parts of a string. If you know that those parts can be found at the beginning or the end of the string, remember that there are built-in functions that can help you with this task.
+You will use these functions in this exercise. The purpose is to create an alias for each voter from the voters table, as a combination of the first 3 letters from the first name, the last 3 letters from the last name, and the last 2 digits from the birthday.
+
+
+Select information from the voters table, including a new column called part1, containing only the first 3 letters from the first name.
+SELECT 
+	first_name,
+	last_name,
+	country,
+    -- Select only the first 3 characters from the first name
+	LEFT(first_name, 3) AS part1
+FROM voters;
+
+
+first_name	last_name	country	part1
+Carol	Rai	Denmark	Car
+Ana	Price	France	Ana
+Melissa	Richardson	Denmark	Mel
+Angela	Griffin	Belgium	Ang
+Grace	Henderson	USA	Gra
+Melody	Ramos	USA	Mel
+Clinton	Moreno	Denmark	Cli
+Kaylee	Cook	Switzerland	Kay
+Dennis	Huang	USA	Den
+Julia	Brooks	United Kingdom	Jul
+Devin	Henderson	USA	Dev
+Gabrielle	Cox	Germany	Gab
+Jose	Wright	Austria	Jos
+Seth	Martin	Mexico	Set
+Clayton	Sharma	Austria	Cla
+Amy	Huang	Austria	Amy
+Michele	Suarez	Austria	Mic
+Kurt	Jai	United Kingdom	Kur
+...
+
+
+
+
+
+
+
+
+Add a new column to the previous query, containing the last 3 letters from the last name.
+SELECT 
+	first_name,
+	last_name,
+	country,
+    -- Select only the first 3 characters from the first name
+	LEFT(first_name, 3) AS part1,
+    -- Select only the last 3 characters from the last name
+    RIGHT(last_name, 3) AS part2
+FROM voters;
+
+
+first_name	last_name	country	part1	part2
+Carol	Rai	Denmark	Car	Rai
+Ana	Price	France	Ana	ice
+Melissa	Richardson	Denmark	Mel	son
+Angela	Griffin	Belgium	Ang	fin
+...
+
+
+
+
+
+
+
+Add another column to the previous query, containing the last 2 digits from the birth date.
+SELECT 
+	first_name,
+	last_name,
+	country,
+    -- Select only the first 3 characters from the first name
+	LEFT(first_name, 3) AS part1,
+    -- Select only the last 3 characters from the last name
+    RIGHT(last_name, 3) AS part2,
+    -- Select only the last 2 digits from the birth date
+    RIGHT(birthdate, 2) AS part3
+FROM voters;
+
+
+first_name	last_name	country	part1	part2	part3
+Carol	Rai	Denmark	Car	Rai	15
+Ana	Price	France	Ana	ice	17
+Melissa	Richardson	Denmark	Mel	son	25
+Angela	Griffin	Belgium	Ang	fin	08
+Grace	Henderson	USA	Gra	son	30
+...
+
+
+
+
+
+
+
+Create an alias for each voter with the following parts: the first 3 letters from the first name concatenated with the last 3 letters from the last name, followed by the _ character and the last 2 digits from the birth date.
+SELECT 
+	first_name,
+	last_name,
+	country,
+    -- Select only the first 3 characters from the first name
+	LEFT(first_name, 3) AS part1,
+    -- Select only the last 3 characters from the last name
+    RIGHT(last_name, 3) AS part2,
+    -- Select only the last 2 digits from the birth date
+    RIGHT(birthdate, 2) AS part3,
+    -- Create the alias for each voter
+    LEFT(first_name, 3) + RIGHT(last_name, 3) + '_' + RIGHT(birthdate, 2) 
+FROM voters;
+
+
+first_name	last_name	country	part1	part2	part3	
+Carol	Rai	Denmark	Car	Rai	15	CarRai_15
+Ana	Price	France	Ana	ice	17	Anaice_17
+Melissa	Richardson	Denmark	Mel	son	25	Melson_25
+Angela	Griffin	Belgium	Ang	fin	08	Angfin_08
+Grace	Henderson	USA	Gra	son	30	Grason_30
+Melody	Ramos	USA	Mel	mos	30	Melmos_30
+Clinton	Moreno	Denmark	Cli	eno	05	Clieno_05
+Kaylee	Cook	Switzerland	Kay	ook	05	Kayook_05
+Dennis	Huang	USA	Den	ang	11	Denang_11
+Julia	Brooks	United Kingdom	Jul	oks	05	Juloks_05
+Devin	Henderson	USA	Dev	son	30	Devson_30
+Gabrielle	Cox	Germany	Gab	Cox	13	GabCox_13
+Jose	Wright	Austria	Jos	ght	22	Josght_22
+Seth	Martin	Mexico	Set	tin	03	Settin_03
+Clayton	Sharma	Austria	Cla	rma	03	Clarma_03
+Amy	Huang	Austria	Amy	ang	22	Amyang_22
+Michele	Suarez	Austria	Mic	rez	15	Micrez_15
+Kurt	Jai	United Kingdom	Kur	Jai	13	KurJai_13
+Sebastian	Rogers	Belgium	Seb	ers	21	Sebers_21
+Trisha	Ma	Denmark	Tri	Ma	17	TriMa_17
+Eugene	Zhu	China	Eug	Zhu	05	EugZhu_05
+Cedric	Lin	Belgium	Ced	Lin	20	CedLin_20
+Julie	Becker	Belgium	Jul	ker	21	Julker_21
+Sandra	He	Austria	San	He	13	SanHe_13
+George	Kapoor	Austria	Geo	oor	14	Geooor_14
+Alyssa	Bryant	Austria	Aly	ant	22	Alyant_22
+Richard	Baker	Denmark	Ric	ker	06	Ricker_06
+Cameron	Jones	United Kingdom	Cam	nes	10	Camnes_10
+Chloe	Rodriguez	Austria	Chl	uez	22	Chluez_22
+Nathan	Lopez	Denmark	Nat	pez	03	Natpez_03
+Justin	Li	China	Jus	Li	11	JusLi_11
+Emma	Bradley	United Kingdom	Emm	ley	11	Emmley_11
+Isabella	Roberts	Denmark	Isa	rts	13	Isarts_13
+Patrick	Murphy	USA	Pat	phy	22	Patphy_22
+Melissa	Butler	United Kingdom	Mel	ler	14	Meller_14
+Mathew	Sanz	Denmark	Mat	anz	22	Matanz_22
+Tabitha	Carlson	Switzerland	Tab	son	12	Tabson_12
+Lloyd	Saunders	Austria	Llo	ers	26	Lloers_26
+Blake	Miller	Switzerland	Bla	ler	25	Blaler_25
+Amanda	Ramirez	United Kingdom	Ama	rez	21	Amarez_21
+Jeffery	Zheng	Spain	Jef	eng	09	Jefeng_09
+Evelyn	Chandra	Switzerland	Eve	dra	05	Evedra_05
+Wesley	Yang	Germany	Wes	ang	10	Wesang_10
+Alexandra	Hill	Germany	Ale	ill	10	Aleill_10
+Jose	Scott	Spain	Jos	ott	13	Josott_13
+Jacquelyn	Navarro	Switzerland	Jac	rro	03	Jacrro_03
+Jessica	Gonzales	Belgium	Jes	les	11	Jesles_11
+Savannah	Cox	USA	Sav	Cox	15	SavCox_15
+Chase	Ward	Denmark	Cha	ard	01	Chaard_01
+Logan	Anderson	France	Log	son	25	Logson_25
+Louis	Hu	Austria	Lou	Hu	14	LouHu_14
+Juan	Romero	Germany	Jua	ero	15	Juaero_15
+Sean	Mitchell	Switzerland	Sea	ell	23	Seaell_23
+Melvin	She	USA	Mel	She	24	MelShe_24
+Morgan	Perry	Austria	Mor	rry	17	Morrry_17
+Xavier	Sanders	Switzerland	Xav	ers	03	Xavers_03
+Barbara	Zhao	United Kingdom	Bar	hao	14	Barhao_14
+Charles	Johnston	USA	Cha	ton	17	Chaton_17
+...
+
+
+
+Wonderful! Remember, the functions LEFT() and RIGHT() are great for extracting characters from the beginning or the end of a string. If the substring you are looking for is placed somewhere else, you can extract it with the SUBSTRING() function.
+
