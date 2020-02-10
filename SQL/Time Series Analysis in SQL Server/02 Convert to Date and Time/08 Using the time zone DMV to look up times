@@ -1,0 +1,27 @@
+Using the time zone DMV to look up times
+The SWITCHOFFSET() function has an undesirable limitation: you need to know the offset value yourself. You might memorize that US Eastern Standard Time is UTC -5:00 and Eastern Daylight Time is UTC -04:00, but knowing India Standard Time or Tuvalu Time might be a stretch.
+Fortunately, we have a Dynamic Management View (DMV) available to help us: sys.time_zone_info. This searches the set of time zones available on the operating system (in the Windows registry or /usr/share/zoneinfo on Linux or macOS).
+The 2016 Summer Olympics in Rio de Janeiro started at 11 PM UTC on August 8th, 2016. Starting with a string containing that date and time, we can see what time that was in other locales knowing only the time zone name but not its offset.
+
+
+Fill in the appropriate function call and offset value column, which is current_utc_offset.
+Fill in the correct Dynamic Management View call.
+Fill in the time zone for New Delhi, India, which is India Standard Time.
+DECLARE
+	@OlympicsUTC NVARCHAR(50) = N'2016-08-08 23:00:00';
+
+SELECT
+	-- Fill in the function call and offset value
+	SWITCHOFFSET(@OlympicsUTC, tzi.current_utc_offset) AS NewDelhiTime
+-- Fill in the DMV name
+FROM sys.time_zone_info AS tzi
+WHERE
+	-- Fill in the time zone name
+	tzi.name = N'India Standard Time';
+
+NewDelhiTime
+2016-08-09 04:30:00.0000000 +05:30
+
+
+NOTE: the sys.time_zone_info DMV returns the current offset from UTC, so 'Eastern Standard Time' will actually be 'Eastern Daylight Time' when the is_currently_dst flag is set.
+
