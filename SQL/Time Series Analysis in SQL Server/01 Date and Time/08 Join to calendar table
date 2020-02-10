@@ -1,0 +1,100 @@
+Join to calendar table
+In the prior exercise, we looked at a new table, dbo.Calendar. This table contains pre-calculated date information stretching from January 1st, 2000 through December 31st, 2049. Now we want to use this calendar table to filter another table, dbo.IncidentRollup.
+The Incident Rollup table contains artificially-generated data relating to security incidents at a fictitious company.
+You may recall from prerequisite courses how to join tables. Here's an example of joining to a calendar table:
+
+SELECT
+    t.Column1,
+    t.Column2
+FROM dbo.Table t
+    INNER JOIN dbo.Calendar c
+        ON t.Date = c.Date;
+
+
+IncidentRollup
+IncidentDate	IncidentTypeID	NumberOfIncidents
+2019-07-01	1	2
+2019-07-02	1	9
+2019-07-02	3	3
+2019-07-02	4	1
+2019-07-02	5	3
+2019-07-03	1	3
+2019-07-03	2	3
+2019-07-03	4	7
+2019-07-04	1	6
+2019-07-05	3	10
+...
+
+
+Calendar
+DateKey	Date	Day	DayOfWeek	DayName	IsWeekend	DayOfWeekInMonth	CalendarDayOfYear	WeekOfMonth	CalendarWeekOfYear	CalendarMonth	MonthName	CalendarQuarter	CalendarQuarterName	CalendarYear	FirstDayOfMonth	LastDayOfMonth	FirstDayOfWeek	LastDayOfWeek	FirstDayOfQuarter	LastDayOfQuarter	CalendarFirstDayOfYear	CalendarLastDayOfYear	FirstDayOfNextMonth	CalendarFirstDayOfNextYear	FiscalDayOfYear	FiscalWeekOfYear	FiscalMonth	FiscalQuarter	FiscalQuarterName	FiscalYear	FiscalFirstDayOfYear	FiscalLastDayOfYear	FiscalFirstDayOfNextYear
+20000101	2000-01-01	1	7	Saturday	true	1	1	1	1	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-01	2000-01-01	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	185	27	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000102	2000-01-02	2	1	Sunday	true	1	2	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	186	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000103	2000-01-03	3	2	Monday	false	1	3	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	187	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000104	2000-01-04	4	3	Tuesday	false	1	4	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	188	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000105	2000-01-05	5	4	Wednesday	false	1	5	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	189	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+...
+
+
+
+
+Fill in the blanks to determine which dates had type 3 incidents during the third fiscal quarter of FY2019.
+SELECT
+	ir.IncidentDate,
+	c.FiscalDayOfYear,
+	c.FiscalWeekOfYear
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+    -- Incident type 3
+	ir.IncidentTypeID = 3
+    -- Fiscal year 2019
+	AND c.FiscalYear = 2019
+    -- Fiscal quarter 3
+	AND c.FiscalQuarter = 3;
+
+
+
+IncidentDate	IncidentTypeID	NumberOfIncidents
+2019-07-01	1	2
+2019-07-02	1	9
+2019-07-02	3	3
+...
+
+
+
+
+
+
+
+Fill in the gaps in to determine type 4 incidents which happened on weekends in FY2019 after fiscal week 30.
+SELECT
+	ir.IncidentDate,
+	c.FiscalDayOfYear,
+	c.FiscalWeekOfYear
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+    -- Incident type 4
+	ir.IncidentTypeID = 4
+    -- Fiscal year 2019
+	AND c.FiscalYear = 2019
+    -- Beyond fiscal week of year 30
+	AND c.FiscalWeekOfYear > 30
+    -- Only return weekends
+	AND c.IsWeekend = 1;
+
+
+
+IncidentDate	FiscalDayOfYear	FiscalWeekOfYear
+2020-02-16	231	34
+2020-02-23	238	35
+2020-03-21	265	38
+2020-03-29	273	40
+2020-04-05	280	41
+2020-05-23	328	47
+2020-06-21	357	52
+2020-06-28	364	53
+
