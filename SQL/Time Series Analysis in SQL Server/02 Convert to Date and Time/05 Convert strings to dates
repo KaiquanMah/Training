@@ -1,0 +1,34 @@
+Convert strings to dates
+The CONVERT() function behaves similarly to CAST(). When translating strings to dates, the two functions do exactly the same work under the covers. Although we used all three parameters for CONVERT() during a prior exercise in Chapter 1, we will only need two parameters here: the data type and input expression.
+In this exercise, we will once again look at a table called dbo.Dates. This time around, we will get dates in from our German office. In order to handle German dates, we will need to use SET LANGUAGE to change the language in our current session to German. This affects date and time formats and system messages.
+Try querying the dbo.Dates table first to see how things differ from the prior exercise.
+
+
+Use the CONVERT() function to translate DateText into a date data type.
+Then use the CONVERT() function to translate DateText into a DATETIME2(7) data type.
+SET LANGUAGE 'GERMAN'
+
+SELECT
+	d.DateText AS String,
+	-- Convert to DATE
+	CONVERT(DATE, d.DateText) AS StringAsDate,
+	-- Convert to DATETIME2(7)
+	CONVERT(DATETIME2(7), d.DateText) AS StringAsDateTime2
+FROM dbo.Dates d;
+
+
+
+String	StringAsDate	StringAsDateTime2
+2019-04-01 18:08:19.290	2019-04-01	2019-04-01 18:08:19.290000
+2019-04-07 06:14:30	2019-04-07	2019-04-07 06:14:30
+2017-03-01	2017-03-01	2017-03-01 00:00:00
+21.06.1997	1997-06-21	1997-06-21 00:00:00
+17 Juni 2016	2016-06-17	2016-06-17 00:00:00
+2017-06-14 09:30:00.0068848	2017-06-14	2017-06-14 09:30:00.006884
+19970614	1997-06-14	1997-06-14 00:00:00
+2004-09-14T21:03:06Z	2004-09-14	2004-09-14 21:03:06
+
+
+
+In case you are curious, we could also use CAST() instead of CONVERT() in this example so long as we set the language to German first. In a real system, we could set the language back to our default after this query.
+
