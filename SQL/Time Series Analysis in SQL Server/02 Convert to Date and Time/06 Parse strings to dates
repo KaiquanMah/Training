@@ -1,0 +1,29 @@
+Parse strings to dates
+Changing our language for data loading is not always feasible. Instead of using the SET LANGUAGE syntax, we can instead use the PARSE() function to parse a string as a date type using a specific locale.
+We will once again use the dbo.Dates table, this time parsing all of the dates as German using the de-de locale.
+
+
+Parse DateText as dates using the German locale (de-de).
+Then, parse DateText as the data type DATETIME2(7), still using the German locale.
+SELECT
+	d.DateText AS String,
+	-- Parse as DATE using German
+	PARSE(d.DateText AS DATE USING 'de-DE') AS StringAsDate,
+	-- Parse as DATETIME2(7) using German
+	PARSE(d.DateText AS DATETIME2(7) USING 'de-DE') AS StringAsDateTime2
+FROM dbo.Dates d;
+
+
+String	StringAsDate	StringAsDateTime2
+2019-04-01 18:08:19.290	2019-04-01	2019-04-01 18:08:19.290000
+2019-04-07 06:14:30	2019-04-07	2019-04-07 06:14:30
+2017-03-01	2017-03-01	2017-03-01 00:00:00
+21.06.1997	1997-06-21	1997-06-21 00:00:00
+17 Juni 2016	2016-06-17	2016-06-17 00:00:00
+2017-06-14 09:30:00.0068848	2017-06-14	2017-06-14 09:30:00.006884
+2004-09-14T21:03:06Z	2004-09-14	2004-09-14 21:03:06
+
+
+You might have noticed that the row with the string 19970614 was removed from #Dates. It turns out that the PARSE() function has some difficulty with strings in YYYYMMDD format and will not consistently parse them correctly.
+
+
