@@ -1,0 +1,80 @@
+Try out a calendar table
+Calendar tables are also known in the warehousing world as date dimensions. A calendar table is a helpful utility table which you can use to perform date range calculations quickly and efficiently. This is especially true when dealing with fiscal years, which do not always align to a calendar year, or holidays which may not be on the same date every year.
+In our example company, the fiscal year starts on July 1 of the current calendar year, so Fiscal Year 2019 started on July 1, 2019 and goes through June 30, 2020. All of this information is in a table called dbo.Calendar.
+
+
+Calendar
+DateKey	Date	Day	DayOfWeek	DayName	IsWeekend	DayOfWeekInMonth	CalendarDayOfYear	WeekOfMonth	CalendarWeekOfYear	CalendarMonth	MonthName	CalendarQuarter	CalendarQuarterName	CalendarYear	FirstDayOfMonth	LastDayOfMonth	FirstDayOfWeek	LastDayOfWeek	FirstDayOfQuarter	LastDayOfQuarter	CalendarFirstDayOfYear	CalendarLastDayOfYear	FirstDayOfNextMonth	CalendarFirstDayOfNextYear	FiscalDayOfYear	FiscalWeekOfYear	FiscalMonth	FiscalQuarter	FiscalQuarterName	FiscalYear	FiscalFirstDayOfYear	FiscalLastDayOfYear	FiscalFirstDayOfNextYear
+20000101	2000-01-01	1	7	Saturday	true	1	1	1	1	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-01	2000-01-01	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	185	27	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000102	2000-01-02	2	1	Sunday	true	1	2	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	186	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000103	2000-01-03	3	2	Monday	false	1	3	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	187	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+...
+
+
+
+
+Find the dates of all Tuesdays in December covering the calendar years 2008 through 2010.
+-- Find Tuesdays in December for calendar years 2008-2010
+SELECT
+	c.Date
+FROM dbo.Calendar c
+WHERE
+	c.MonthName = 'December'
+	AND c.DayName = 'Tuesday'
+	AND c.CalendarYear BETWEEN 2008 AND 2010
+ORDER BY
+	c.Date;
+
+
+
+Date
+2008-12-02
+2008-12-09
+2008-12-16
+2008-12-23
+2008-12-30
+2009-12-01
+2009-12-08
+2009-12-15
+2009-12-22
+2009-12-29
+2010-12-07
+2010-12-14
+2010-12-21
+2010-12-28
+
+
+
+
+
+
+
+
+Find the dates for fiscal week 29 of fiscal year 2019.
+-- Find fiscal week 29 of fiscal year 2019
+SELECT
+	c.Date
+FROM dbo.Calendar c
+WHERE
+    -- Instead of month, use the fiscal week
+	c.FiscalWeekOfYear = 29
+    -- Instead of calendar year, use fiscal year
+	AND c.FiscalYear = 2019
+ORDER BY
+	c.Date ASC;
+
+
+Date
+2020-01-12
+2020-01-13
+2020-01-14
+2020-01-15
+2020-01-16
+2020-01-17
+2020-01-18
+
+
+
+
+Calendar tables let us pre-process complex calculations, like determining the fiscal week number of the year. We can also join them to regular tables.
+
