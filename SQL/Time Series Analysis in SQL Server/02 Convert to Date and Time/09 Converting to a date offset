@@ -1,0 +1,26 @@
+Converting to a date offset
+In addition to SWITCHOFFSET(), we can use the TODATETIMEOFFSET() to turn an existing date into a date type with an offset. If our starting time is in UTC, we will need to correct for time zone and then append an offset. To correct for the time zone, we can add or subtract hours (and minutes) manually.
+Closing ceremonies for the 2016 Summer Olympics in Rio de Janeiro began at 11 PM UTC on August 21st, 2016. Starting with a string containing that date and time, we can see what time that was in other locales. For the time in Phoenix, Arizona, you know that they observe Mountain Standard Time, which is UTC -7 year-round. The island chain of Tuvalu has its own time which is 720 minutes (12 hours) ahead of UTC.
+
+
+Fill in the time in Phoenix, Arizona, which, being Mountain Standard Time, was UTC -07:00.
+Fill in the time for Tuvalu, which is 12 hours ahead of UTC. Use the integer value 720; do not put quotes around the number.
+DECLARE
+	@OlympicsClosingUTC DATETIME2(0) = '2016-08-21 23:00:00';
+
+SELECT
+	-- Fill in 7 hours back and a -07:00 offset
+	TODATETIMEOFFSET(DATEADD(HOUR, -7, @OlympicsClosingUTC), '-07:00') AS PhoenixTime,
+	-- Fill in 12 hours forward and a 720 minute difference
+	TODATETIMEOFFSET(DATEADD(HOUR, 12, @OlympicsClosingUTC), '+12:00') AS TuvaluTime;
+  
+
+
+
+
+PhoenixTime	                          TuvaluTime
+2016-08-21 16:00:00.0000000 -07:00	  2016-08-22 11:00:00.0000000 +12:00
+
+
+The SWITCHOFFSET() function is better for these types of time zone conversions but TODATETIMEOFFSET() can do in a pinch. Where this function excels is taking normal dates in a database and converting them in preparation for storage as DATETIMEOFFSET types.
+
