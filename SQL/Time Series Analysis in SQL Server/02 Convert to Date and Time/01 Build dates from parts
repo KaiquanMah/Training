@@ -1,0 +1,80 @@
+Build dates from parts
+The DATEFROMPARTS() function allows us to turn a series of numbers representing date parts into a valid DATE data type. In this exercise, we will learn how to use DATEFROMPARTS() to build dates from components in a calendar table.
+Although the calendar table already has dates in it, this helps us visualize circumstances in which the base table has integer date components but no date value, which might happen when importing data from flat files directly into a database.
+
+
+Calendar
+DateKey	Date	Day	DayOfWeek	DayName	IsWeekend	DayOfWeekInMonth	CalendarDayOfYear	WeekOfMonth	CalendarWeekOfYear	CalendarMonth	MonthName	CalendarQuarter	CalendarQuarterName	CalendarYear	FirstDayOfMonth	LastDayOfMonth	FirstDayOfWeek	LastDayOfWeek	FirstDayOfQuarter	LastDayOfQuarter	CalendarFirstDayOfYear	CalendarLastDayOfYear	FirstDayOfNextMonth	CalendarFirstDayOfNextYear	FiscalDayOfYear	FiscalWeekOfYear	FiscalMonth	FiscalQuarter	FiscalQuarterName	FiscalYear	FiscalFirstDayOfYear	FiscalLastDayOfYear	FiscalFirstDayOfNextYear
+20000101	2000-01-01	1	7	Saturday	true	1	1	1	1	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-01	2000-01-01	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	185	27	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000102	2000-01-02	2	1	Sunday	true	1	2	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	186	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000103	2000-01-03	3	2	Monday	false	1	3	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	187	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+...
+
+
+
+
+Create dates from component parts in the calendar table: calendar year, calendar month, and the day of the month.
+-- Create dates from component parts on the calendar table
+SELECT TOP(10)
+	DATEFROMPARTS(c.CalendarYear, c.CalendarMonth, c.Day) AS CalendarDate
+FROM dbo.Calendar c
+WHERE
+	c.CalendarYear = 2017
+ORDER BY
+	c.FiscalDayOfYear ASC;
+
+
+CalendarDate
+2017-07-01
+2017-07-02
+2017-07-03
+2017-07-04
+2017-07-05
+2017-07-06
+2017-07-07
+2017-07-08
+2017-07-09
+2017-07-10
+
+
+
+
+
+
+
+
+
+
+
+
+Create dates from the component parts of the calendar table. Use the calendar year, calendar month, and day of month.
+SELECT TOP(10)
+	c.CalendarQuarterName,
+	c.MonthName,
+	c.CalendarDayOfYear
+FROM dbo.Calendar c
+WHERE
+	-- Create dates from component parts
+	DATEFROMPARTS(c.CalendarYear, c.CalendarMonth, c.Day) >= '2018-06-01'
+	AND c.DayName = 'Tuesday'
+ORDER BY
+	c.FiscalYear,
+	c.FiscalDayOfYear ASC;
+
+
+CalendarQuarterName	MonthName	CalendarDayOfYear
+Q2	June	156
+Q2	June	163
+Q2	June	170
+Q2	June	177
+Q3	July	184
+Q3	July	191
+Q3	July	198
+Q3	July	205
+Q3	July	212
+Q3	August	219
+
+ It is important to note that using DATEFROMPARTS() in the WHERE clause like this can lead to performance problems when dealing with larger data sets because we will need to check every value to determine whether the output of DATEFROMPARTS() matches our search argument. In other words, this operation is not 'SARGable' (a portmanteau meaning we are able to use a search argument) and therefore requires a table or index scan rather than a seek.
+ 
+ 
+ 
