@@ -1,0 +1,42 @@
+Cast strings to dates
+The CAST() function allows us to turn strings into date and time data types. In this example, we will review many of the formats CAST() can handle.
+Review the data in the dbo.Dates table which has been pre-loaded for you. Then use the CAST() function to convert these dates twice: once into a DATE type and once into a DATETIME2(7) type. Because one of the dates includes data down to the nanosecond, we cannot convert to a DATETIME type or any DATETIME2 type with less precision.
+NOTE: the CAST() function is language- and locale-specific, meaning that for a SQL Server instance configured for US English, it will translate 08/23/2008 as 2008-08-23 but it will fail on 23/08/2008, which a SQL Server with the French Canadian locale can handle.
+
+
+DateText
+2019-04-01 18:08:19.290
+2019-04-07 06:14:30
+2017-03-01
+April 4, 2016
+2017-06-14 09:30:00.0068848
+19970614
+2004-09-14T21:03:06Z
+
+
+
+
+
+Cast the input string DateText in the dbo.Dates temp table to the DATE data type.
+Cast the input string DateText in the dbo.Dates temp table to the DATETIME2(7) data type.
+SELECT
+	d.DateText AS String,
+	-- Cast as DATE
+	CAST(d.DateText AS DATE) AS StringAsDate,
+	-- Cast as DATETIME2(7)
+	CAST(d.DateText AS DATETIME2(7)) AS StringAsDateTime2
+FROM dbo.Dates d;
+
+
+String	StringAsDate	StringAsDateTime2
+2019-04-01 18:08:19.290	2019-04-01	2019-04-01 18:08:19.290000
+2019-04-07 06:14:30	2019-04-07	2019-04-07 06:14:30
+2017-03-01	2017-03-01	2017-03-01 00:00:00
+April 4, 2016	2016-04-04	2016-04-04 00:00:00
+2017-06-14 09:30:00.0068848	2017-06-14	2017-06-14 09:30:00.006884
+19970614	1997-06-14	1997-06-14 00:00:00
+2004-09-14T21:03:06Z	2004-09-14	2004-09-14 21:03:06
+
+
+Great! The CAST() function doesn't give us much flexibility in how we can ingest dates but it is the ANSI standard. Next, we will look at a T-SQL specific function, CONVERT().
+
