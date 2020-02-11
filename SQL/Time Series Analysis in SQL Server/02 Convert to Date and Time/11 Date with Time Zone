@@ -1,0 +1,59 @@
+Convert imported data to dates with time zones
+Now that we have seen the three type-safe conversion functions, we can begin to apply them against real data sets. In this scenario, we will parse data from the dbo.ImportedTime table. We used a different application to load data from this table and looked at it in a prior exercise. This time, we will retrieve data for all rows, not just the ones the importing application marked as valid.
+
+
+
+ImportedTime
+EventDate	TimeZone	IsValidDate
+20190408 8:00	Cen. Australia Standard Time	true
+20190408 08:00:00	US Eastern Standard Time	true
+2019-04-08 08:00:00	China Standard Time	true
+2019-04-08 8:00	Morocco Standard Time	true
+NOT VALID	Morocco Standard Time	false
+-49		false
+20190401 17:00	Made Up Time Zone	true
+
+
+
+Fill in the missing TRY function name inside the EventDates common table expression.
+Convert the EventDateOffset column to a date-time offset string, and then a localized date and time.
+Convert the EventDateOffset event dates to "UTC".
+Convert the EventDateOffset event dates to "US Eastern Standard Time" using AT TIME ZONE.
+
+WITH EventDates AS
+(
+    SELECT
+        -- Fill in the missing try-conversion function
+        TRY_CONVERT(DATETIME2(3), it.EventDate) AT TIME ZONE it.TimeZone AS EventDateOffset,
+        it.TimeZone
+    FROM dbo.ImportedTime it
+        INNER JOIN sys.time_zone_info tzi
+			ON it.TimeZone = tzi.name
+)
+
+
+SELECT
+    -- Fill in the approppriate event date to convert
+	CONVERT(NVARCHAR(50), ed.EventDateOffset) AS EventDateOffsetString,
+	CONVERT(DATETIME2(0), ed.EventDateOffset) AS EventDateLocal,
+	ed.TimeZone,
+    -- Convert from a DATETIMEOFFSET to DATETIME at UTC
+	CAST(ed.EventDateOffset AT TIME ZONE 'UTC' AS DATETIME2(0)) AS EventDateUTC,
+    -- Convert from a DATETIMEOFFSET to DATETIME with time zone
+	CAST(ed.EventDateOffset AT TIME ZONE 'US Eastern Standard Time'  AS DATETIME2(0)) AS EventDateUSEast
+FROM EventDates ed;
+
+
+
+
+
+EventDateOffsetString	          EventDateLocal	    TimeZone	                    EventDateUTC	      EventDateUSEast
+2019-04-08 08:00:00.000 +09:30	2019-04-08 08:00:00	Cen. Australia Standard Time	2019-04-07 22:30:00	2019-04-07 18:30:00
+2019-04-08 08:00:00.000 -04:00	2019-04-08 08:00:00	US Eastern Standard Time	    2019-04-08 12:00:00	2019-04-08 08:00:00
+2019-04-08 08:00:00.000 +08:00	2019-04-08 08:00:00	China Standard Time	          2019-04-08 00:00:00	2019-04-07 20:00:00
+2019-04-08 08:00:00.000 +01:00	2019-04-08 08:00:00	Morocco Standard Time	        2019-04-08 07:00:00	2019-04-08 03:00:00
+null                          	null	              Morocco Standard Time	        null          	    null
+
+
+There is no safe version of AT TIME ZONE, so we need to ensure that the time zones themselves are good. Also, once input values are known good, we are able to switch from TRY_CONVERT() to CONVERT().
+
