@@ -1,0 +1,34 @@
+Working with statistical aggregate functions
+SQL Server offers several aggregate functions for statistical purpose. The AVG() function generates the mean of a sample. STDEV() and STDEVP() give us the standard deviation of a sample and of a population, respectively. VAR() and VARP() give us the variance of a sample and a population, respectively. These are in addition to the aggregate functions we learned about in the previous exercise, including SUM(), COUNT(), MIN(), and MAX().
+In this exercise, we will look once more at incident rollup and incident type data, this time for quarter 2 of calendar year 2020. We would like to get an idea of how much spread there is in incident occurrence--that is, if we see a consistent number of incidents on a daily basis or if we see wider swings.
+
+
+Fill in the missing aggregate functions. For standard deviation and variance, use the sample functions rather than population functions.
+-- Fill in the missing function names
+SELECT
+	it.IncidentType,
+	AVG(ir.NumberOfIncidents) AS MeanNumberOfIncidents,
+	AVG(CAST(ir.NumberOfIncidents AS DECIMAL(4,2))) AS MeanNumberOfIncidents,
+	STDEV(ir.NumberOfIncidents) AS NumberOfIncidentsStandardDeviation,
+	VAR(ir.NumberOfIncidents) AS NumberOfIncidentsVariance,
+	COUNT(1) AS NumberOfRows
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.IncidentType it
+		ON ir.IncidentTypeID = it.IncidentTypeID
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+	c.CalendarQuarter = 2
+	AND c.CalendarYear = 2020
+GROUP BY
+it.IncidentType;
+
+
+IncidentType	MeanNumberOfIncidents	MeanNumberOfIncidents	NumberOfIncidentsStandardDeviation	NumberOfIncidentsVariance	NumberOfRows
+Clicked malicious link	4	4.666666	2.287647991569799	5.233333333333334	21
+Forgot key card	4	4.888888	2.6753004886185243	7.157232704402515	54
+Installed unapproved software	5	5.709677	2.979860716958616	8.879569892473118	31
+Left computer unlocked	5	5.634920	3.0283690239487813	9.171018945212495	63
+Ransomware installed	5	5.833333	1.8348478592697184	3.3666666666666685	6
+
+You may notice the two different values for mean, based on whether our input expression is an integer or a decimal value. Unlike standard deviation and variance, the mean in SQL Server will not automatically cast the input expression as a numeric type beforehand.
