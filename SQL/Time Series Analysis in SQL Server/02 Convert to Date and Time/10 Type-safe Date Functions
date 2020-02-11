@@ -1,0 +1,108 @@
+Try out type-safe date functions
+In this exercise, we will try out the TRY_CONVERT(), TRY_CAST(), and TRY_PARSE() set of functions. Each of these functions will safely parse string data and attempt to convert to another type, returning NULL if the conversion fails. Conversion to, e.g., a date type can fail for several reasons. If the input string is not a date, conversion will fail. If the input type is in a potentially ambiguous format, conversion might fail. An example of this is the date 04/01/2019 which has a different meaning in the United States (April 1, 2019) versus most European countries (January 4th, 2019).
+
+
+
+Fill in the blanks for data type, safe date conversion function, and input parameter.
+DECLARE
+	@GoodDateINTL NVARCHAR(30) = '2019-03-01 18:23:27.920',
+	@GoodDateDE NVARCHAR(30) = '13.4.2019',
+	@GoodDateUS NVARCHAR(30) = '4/13/2019',
+	@BadDate NVARCHAR(30) = N'SOME BAD DATE';
+
+SELECT
+	-- Fill in the correct data type based on our input
+	TRY_CONVERT(DATETIME2(3), @GoodDateINTL) AS GoodDateINTL,
+	-- Fill in the correct function
+	TRY_CONVERT(DATE, @GoodDateDE) AS GoodDateDE,
+	TRY_CONVERT(DATE, @GoodDateUS) AS GoodDateUS,
+	-- Fill in the correct input parameter for BadDate
+	TRY_CONVERT(DATETIME2(3), @BadDate) AS BadDate;
+
+
+GoodDateINTL	GoodDateDE	GoodDateUS	BadDate
+2019-03-01 18:23:27.920000	null	2019-04-13	null
+
+
+
+
+
+
+
+
+
+
+
+
+
+With the prior TRY_CONVERT() solution in mind, use TRY_CAST() to see how they compare.
+DECLARE
+	@GoodDateINTL NVARCHAR(30) = '2019-03-01 18:23:27.920',
+	@GoodDateDE NVARCHAR(30) = '13.4.2019',
+	@GoodDateUS NVARCHAR(30) = '4/13/2019',
+	@BadDate NVARCHAR(30) = N'SOME BAD DATE';
+
+-- The prior solution using TRY_CONVERT
+SELECT
+	TRY_CONVERT(DATETIME2(3), @GoodDateINTL) AS GoodDateINTL,
+	TRY_CONVERT(DATE, @GoodDateDE) AS GoodDateDE,
+	TRY_CONVERT(DATE, @GoodDateUS) AS GoodDateUS,
+	TRY_CONVERT(DATETIME2(3), @BadDate) AS BadDate;
+
+SELECT
+	-- Fill in the correct data type based on our input
+	TRY_CAST(@GoodDateINTL AS DATETIME2(3)) AS GoodDateINTL,
+	TRY_CAST(@GoodDateDE AS DATE) AS GoodDateDE,
+	TRY_CAST(@GoodDateUS AS DATE) AS GoodDateUS,
+	TRY_CAST(@BadDate AS DATETIME2(3)) AS BadDate;
+
+
+
+GoodDateINTL	GoodDateDE	GoodDateUS	BadDate
+2019-03-01 18:23:27.920000	null	2019-04-13	null
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+One of our good dates returns NULL. Use TRY_PARSE() and specify de-de for the German date and en-us for the US date.
+DECLARE
+	@GoodDateINTL NVARCHAR(30) = '2019-03-01 18:23:27.920',
+	@GoodDateDE NVARCHAR(30) = '13.4.2019',
+	@GoodDateUS NVARCHAR(30) = '4/13/2019',
+	@BadDate NVARCHAR(30) = N'SOME BAD DATE';
+
+-- The prior solution using TRY_CAST
+SELECT
+	TRY_CAST(@GoodDateINTL AS DATETIME2(3)) AS GoodDateINTL,
+	TRY_CAST(@GoodDateDE AS DATE) AS GoodDateDE,
+	TRY_CAST(@GoodDateUS AS DATE) AS GoodDateUS,
+	TRY_CAST(@BadDate AS DATETIME2(3)) AS BadDate;
+
+SELECT
+	TRY_PARSE(@GoodDateINTL AS DATETIME2(3)) AS GoodDateINTL,
+    -- Fill in the correct region based on our input
+	TRY_PARSE(@GoodDateDE AS DATE USING 'de-de') AS GoodDateDE,
+	TRY_PARSE(@GoodDateUS AS DATE USING 'us-us') AS GoodDateUS,
+    -- TRY_PARSE can't fix completely invalid dates
+	TRY_PARSE(@BadDate AS DATETIME2(3) USING 'sk-sk') AS BadDate;
+
+
+GoodDateINTL	GoodDateDE	GoodDateUS	BadDate
+2019-03-01 18:23:27.920000	2019-04-13	2019-04-13	null
+
+The three functions work similarly, but TRY_PARSE() looks particularly helpful. As we will find, that helpfulness comes with a cost.
+
