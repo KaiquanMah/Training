@@ -1,0 +1,130 @@
+Test type-safe conversion function performance
+In the last two exercises, we looked at the TRY_CAST(), TRY_CONVERT(), and TRY_PARSE() functions. These functions do not all perform equally well. In this exercise, you will run a performance test against all of the dates in our calendar table.
+To make it easier, we have pre-loaded dates in the dbo.Calendar table into a temp table called DateText, where there is a single NVARCHAR(50) column called DateText.
+For the first three steps, the instructions will be the same: fill in missing values and keep track of the amount of time each operation takes. You will then summarize your results in step 4.
+
+
+Calendar
+DateKey	Date	Day	DayOfWeek	DayName	IsWeekend	DayOfWeekInMonth	CalendarDayOfYear	WeekOfMonth	CalendarWeekOfYear	CalendarMonth	MonthName	CalendarQuarter	CalendarQuarterName	CalendarYear	FirstDayOfMonth	LastDayOfMonth	FirstDayOfWeek	LastDayOfWeek	FirstDayOfQuarter	LastDayOfQuarter	CalendarFirstDayOfYear	CalendarLastDayOfYear	FirstDayOfNextMonth	CalendarFirstDayOfNextYear	FiscalDayOfYear	FiscalWeekOfYear	FiscalMonth	FiscalQuarter	FiscalQuarterName	FiscalYear	FiscalFirstDayOfYear	FiscalLastDayOfYear	FiscalFirstDayOfNextYear
+20000101	2000-01-01	1	7	Saturday	true	1	1	1	1	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-01	2000-01-01	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	185	27	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000102	2000-01-02	2	1	Sunday	true	1	2	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	186	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000103	2000-01-03	3	2	Monday	false	1	3	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	187	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+...
+
+
+
+Fill in the correct conversion function based on its parameter signature.
+Use a function to retrieve the number of milliseconds for each operation.
+Fill in the blanks (in order of start time, then end time) and the date comparison function.
+-- Try out how fast the TRY_CAST() function is
+DECLARE @StartTimeCast DATETIME2(7) = SYSUTCDATETIME();
+
+SELECT TRY_CAST(DateText AS DATE) AS TestDate 
+FROM #DateText;
+
+DECLARE @EndTimeCast DATETIME2(7) = SYSUTCDATETIME();
+
+
+
+-- Determine how much time the conversion took by
+-- calculating the difference from start time to end time
+SELECT
+    DATEDIFF(MILLISECOND, @StartTimeCast, @EndTimeCast) AS ExecutionTimeCast;
+
+
+ExecutionTimeCast
+12
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fill in the correct conversion function based on its parameter signature.
+Use a function to retrieve the number of milliseconds for each operation.
+Fill in the blanks (in order of start time, then end time) and the date comparison function.
+-- Try out how fast the TRY_CONVERT() function is
+DECLARE @StartTimeConvert DATETIME2(7) = SYSUTCDATETIME();
+
+SELECT TRY_CONVERT(DATE, DateText) AS TestDate 
+FROM #DateText;
+
+DECLARE @EndTimeConvert DATETIME2(7) = SYSUTCDATETIME();
+
+-- Determine how much time the conversion took by
+-- calculating the difference from start time to end time
+-- Note that the start and end time parameters have changed
+SELECT
+    DATEDIFF(MILLISECOND, @StartTimeConvert, @EndTimeConvert) AS ExecutionTimeConvert;
+
+ExecutionTimeConvert
+8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fill in the correct conversion function based on its parameter signature.
+Use a function to retrieve the number of milliseconds for each operation.
+Fill in the blanks (in order of start time, then end time) and the date comparison function.
+-- Try out how fast the TRY_PARSE() function is
+DECLARE @StartTimeParse DATETIME2(7) = SYSUTCDATETIME();
+
+SELECT TRY_PARSE(DateText AS DATE) AS TestDate 
+FROM #DateText;
+
+DECLARE @EndTimeParse DATETIME2(7) = SYSUTCDATETIME();
+
+-- Determine how much time the conversion took by
+-- calculating the difference from start time to end time
+-- Note that the start and end time parameters have changed
+SELECT
+    DATEDIFF(MILLISECOND, @StartTimeParse, @EndTimeParse) AS ExecutionTimeParse;
+    
+ExecutionTimeParse
+692
+    
+    
+
+
+
+
+
+
+
+
+
+Based on what you have learned so far, how would you compare the performance of TRY_PARSE() versus TRY_CAST() and TRY_CONVERT()?
+TRY_PARSE() is faster than both TRY_CAST() and TRY_CONVERT().
+TRY_PARSE() is faster than TRY_CAST() but slower than TRY_CONVERT().
+TRY_PARSE() is faster than TRY_CONVERT() but slower than TRY_CAST().
+All three functions take approximately the same amount of time to complete.
+
+#YES - TRY_CAST() and TRY_CONVERT() are both faster than TRY_PARSE().
+Splendid! Although TRY_PARSE() is flexible and powerful, that comes at a major cost in performance. Use it only when necessary and where performance is not critical.
+
+
