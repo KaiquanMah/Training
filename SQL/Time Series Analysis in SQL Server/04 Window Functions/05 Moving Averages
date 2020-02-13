@@ -1,0 +1,84 @@
+Calculating moving averages
+Instead of looking at a running total from the beginning of time until now, management would like to see the average number of incidents over the past 7 days--that is, starting 6 days ago and ending on the current date. Because this is over a specified frame which changes over the course of our query, this is called a moving average.
+SQL Server does not have the ability to look at ranges of time in window functions, so we will need to assume that there is one row per day and use the ROWS clause.
+
+
+Fill in the correct window function to perform a moving average starting from 6 days ago through today.
+Fill in the window frame, including RANGE / ROWS, window frame preceding, and window frame following.
+SELECT
+	ir.IncidentDate,
+	ir.IncidentTypeID,
+	ir.NumberOfIncidents,
+    -- Fill in the correct window function
+	AVG(ir.NumberOfIncidents) OVER (
+		PARTITION BY ir.IncidentTypeID
+		ORDER BY ir.IncidentDate
+      	-- Fill in the three parts of the window frame
+		ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+	) AS MeanNumberOfIncidents
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+	c.CalendarYear = 2019
+	AND c.CalendarMonth IN (7, 8)
+	AND ir.IncidentTypeID = 1
+ORDER BY
+	ir.IncidentTypeID,
+	ir.IncidentDate;
+
+
+
+
+IncidentDate	IncidentTypeID	NumberOfIncidents	MeanNumberOfIncidents
+2019-07-01	1	2	2
+2019-07-02	1	9	5
+2019-07-03	1	3	4
+2019-07-04	1	6	5
+2019-07-06	1	7	5
+2019-07-07	1	3	5
+2019-07-08	1	3	4
+2019-07-09	1	1	4
+2019-07-11	1	9	4
+2019-07-13	1	3	4
+2019-07-15	1	8	4
+2019-07-16	1	2	4
+2019-07-18	1	3	4
+2019-07-19	1	6	4
+2019-07-20	1	2	4
+2019-07-21	1	3	3
+2019-07-22	1	2	3
+2019-07-23	1	3	3
+2019-07-24	1	1	2
+2019-07-25	1	6	3
+2019-07-26	1	6	3
+2019-07-27	1	4	3
+2019-07-29	1	3	3
+2019-07-30	1	3	3
+2019-07-31	1	6	4
+2019-08-01	1	8	5
+2019-08-02	1	7	5
+2019-08-04	1	9	5
+2019-08-05	1	9	6
+2019-08-06	1	6	6
+2019-08-07	1	6	7
+2019-08-08	1	6	7
+2019-08-11	1	4	6
+2019-08-13	1	10	7
+2019-08-14	1	5	6
+2019-08-16	1	6	6
+2019-08-17	1	5	6
+2019-08-19	1	9	6
+2019-08-20	1	6	6
+2019-08-22	1	3	6
+2019-08-23	1	1	5
+2019-08-26	1	5	5
+2019-08-27	1	9	5
+2019-08-28	1	3	5
+2019-08-29	1	3	4
+2019-08-30	1	2	3
+
+
+
+Excellent! It would be nice for T-SQL to include RANGE interval functions like RANGE BETWEEN '6' DAYS AND CURRENT ROW but that functionality does not exist. If we have gaps in the data, we can drive from the Calendar table and LEFT OUTER JOIN to IncidentRollup, filling in missing days with 0 values.
+
