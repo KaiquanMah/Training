@@ -1,0 +1,55 @@
+Downsample to a daily grain
+Rolling up data to a higher grain is a common analytical task. We may have a set of data with specific time stamps and a need to observe aggregated results. In SQL Server, there are several techniques available depending upon your desired grain.
+For these exercises, we will look at a fictional day spa. Spa management sent out coupons to potential new customers for the period June 16th through 20th of 2020 and would like to see if this campaign spurred on new visits.
+In this exercise, we will look at one of the simplest downsampling techniques: converting a DATETIME2 or DATETIME data type to a data type with just a date and no time component: the DATE type.
+
+
+DaySpaVisit
+CustomerID	CustomerVisitStart	CustomerVisitEnd	AmenityUseInMinutes
+1	2020-06-18 14:56:00	2020-06-18 17:49:00	139
+26	2020-06-16 12:04:00	2020-06-16 13:48:00	81
+82	2020-06-06 13:12:00	2020-06-06 15:15:00	92
+78	2020-07-14 21:13:00	2020-07-14 22:28:00	44
+40	2020-06-21 15:17:00	2020-06-21 15:39:00	20
+17	2020-07-16 20:29:00	2020-07-16 22:53:00	80
+...
+
+
+
+Downsample customer visit start times to the daily grain and aggregate results.
+SELECT
+	-- Downsample to a daily grain
+    -- Turn CustomerVisitStart into just a date
+	CAST(dsv.CustomerVisitStart AS DATE) AS Day,
+	SUM(dsv.AmenityUseInMinutes) AS AmenityUseInMinutes,
+	COUNT(1) AS NumberOfAttendees
+FROM dbo.DaySpaVisit dsv
+WHERE
+	dsv.CustomerVisitStart >= '2020-06-11'
+	AND dsv.CustomerVisitStart < '2020-06-23'
+GROUP BY
+	CAST(dsv.CustomerVisitStart AS DATE)
+ORDER BY
+	Day;
+
+
+
+Day	AmenityUseInMinutes	NumberOfAttendees
+2020-06-11	28796	328
+2020-06-12	30102	337
+2020-06-13	30585	341
+2020-06-14	29877	335
+2020-06-15	30608	338
+2020-06-16	29513	326
+2020-06-17	28872	326
+2020-06-18	29364	337
+2020-06-19	29009	323
+2020-06-20	29479	342
+2020-06-21	28895	326
+2020-06-22	29600	332
+
+
+
+Great job! It appears that management's tactic did not really shift demand. Maybe they targeted the wrong people?
+
+
