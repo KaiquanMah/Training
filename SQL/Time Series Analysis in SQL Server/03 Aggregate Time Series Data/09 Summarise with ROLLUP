@@ -1,0 +1,76 @@
+Generate a summary with ROLLUP
+The ROLLUP operator works best when your non-measure attributes are hierarchical. Otherwise, you may end up weird aggregation levels which don't make intuitive sense.
+In this scenario, we wish to aggregate the total number of security incidents in the IncidentRollup table. Management would like to see data aggregated by the combination of calendar year, calendar quarter, and calendar month. In addition, they would also like to see separate aggregate lines for calendar year plus calendar quarter as well as calendar year. Finally, they would like one more line for the grand total. We can do all of this in one operation.
+
+
+Calendar
+DateKey	Date	Day	DayOfWeek	DayName	IsWeekend	DayOfWeekInMonth	CalendarDayOfYear	WeekOfMonth	CalendarWeekOfYear	CalendarMonth	MonthName	CalendarQuarter	CalendarQuarterName	CalendarYear	FirstDayOfMonth	LastDayOfMonth	FirstDayOfWeek	LastDayOfWeek	FirstDayOfQuarter	LastDayOfQuarter	CalendarFirstDayOfYear	CalendarLastDayOfYear	FirstDayOfNextMonth	CalendarFirstDayOfNextYear	FiscalDayOfYear	FiscalWeekOfYear	FiscalMonth	FiscalQuarter	FiscalQuarterName	FiscalYear	FiscalFirstDayOfYear	FiscalLastDayOfYear	FiscalFirstDayOfNextYear
+20000101	2000-01-01	1	7	Saturday	true	1	1	1	1	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-01	2000-01-01	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	185	27	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000102	2000-01-02	2	1	Sunday	true	1	2	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	186	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+20000103	2000-01-03	3	2	Monday	false	1	3	2	2	1	January	1	Q1	2000	2000-01-01	2000-01-31	2000-01-02	2000-01-08	2000-01-01	2000-03-31	2000-01-01	2000-12-31	2000-02-01	2001-01-01	187	28	7	3	Q3	1999	1999-07-01	2000-06-30	2000-07-01
+...
+
+IncidentRollup
+IncidentDate	IncidentTypeID	NumberOfIncidents
+2019-07-01	1	2
+2019-07-02	1	9
+2019-07-02	3	3
+...
+
+
+
+
+
+
+Complete the definition for NumberOfIncidents by adding up the number of incidents over each range.
+Fill out the GROUP BY segment, including the WITH ROLLUP operator.
+SELECT
+	c.CalendarYear,
+	c.CalendarQuarterName,
+	c.CalendarMonth,
+    -- Include the sum of incidents by day over each range
+	SUM(ir.NumberOfIncidents) AS NumberOfIncidents
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+	ir.IncidentTypeID = 2
+GROUP BY
+	-- GROUP BY needs to include all non-aggregated columns
+	c.CalendarYear,
+	c.CalendarQuarterName,
+	c.CalendarMonth
+-- Fill in your grouping operator
+WITH ROLLUP
+ORDER BY
+	c.CalendarYear,
+	c.CalendarQuarterName,
+	c.CalendarMonth;
+  
+  
+  
+CalendarYear	CalendarQuarterName	CalendarMonth	NumberOfIncidents
+null	null	null	957
+2019	null	null	482
+2019	Q3	null	221
+2019	Q3	7	71
+2019	Q3	8	77
+2019	Q3	9	73
+2019	Q4	null	261
+2019	Q4	10	66
+2019	Q4	11	98
+2019	Q4	12	97
+2020	null	null	475
+2020	Q1	null	211
+2020	Q1	1	39
+2020	Q1	2	66
+2020	Q1	3	106
+2020	Q2	null	264
+2020	Q2	4	112
+2020	Q2	5	74
+2020	Q2	6	78
+
+  
+
+Between ROLLUP and our calendar table, we can see a quick report broken down to several layers of granularity.
+
