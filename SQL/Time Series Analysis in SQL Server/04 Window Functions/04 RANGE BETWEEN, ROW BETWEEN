@@ -1,0 +1,182 @@
+Investigating window frames
+In addition to the PARTITION BY and ORDER BY clauses, window functions can include frames which tell the database engine what we include as relevant to the window.
+Here we will look at the same query with four different frames and see how the results differ.
+
+
+Calculate a running total, which is the range which includes all preceding rows and ends with the current row.
+SELECT
+	ir.IncidentDate,
+	ir.IncidentTypeID,
+	ir.NumberOfIncidents,
+	SUM(ir.NumberOfIncidents) OVER (
+		PARTITION BY ir.IncidentTypeID
+		ORDER BY ir.IncidentDate
+      	-- Add the correct range / rows clause
+      	-- Add the correct window frame bound ("preceding"
+    	-- and "following" sections)
+		RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+	) AS NumberOfIncidents
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+	c.CalendarYear = 2019
+	AND c.CalendarMonth = 7
+	AND ir.IncidentTypeID IN (1, 2)
+ORDER BY
+	ir.IncidentTypeID,
+	ir.IncidentDate;
+  
+  
+IncidentDate	IncidentTypeID	NumberOfIncidents	NumberOfIncidents
+2019-07-01	1	2	2
+2019-07-02	1	9	11
+2019-07-03	1	3	14
+2019-07-04	1	6	20
+2019-07-06	1	7	27
+...  
+
+
+
+
+
+
+
+
+
+
+Calculate the sum across all rows. To do this, we want to include all preceding rows as well as all following rows.
+SELECT
+	ir.IncidentDate,
+	ir.IncidentTypeID,
+	ir.NumberOfIncidents,
+	SUM(ir.NumberOfIncidents) OVER (
+		PARTITION BY ir.IncidentTypeID
+		ORDER BY ir.IncidentDate
+      	-- Add the correct range / rows clause
+      	-- Add the correct window frame bound ("preceding"
+    	-- and "following" sections)
+		RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+	) AS NumberOfIncidents
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+	c.CalendarYear = 2019
+	AND c.CalendarMonth = 7
+	AND ir.IncidentTypeID IN (1, 2)
+ORDER BY
+	ir.IncidentDate,
+	ir.IncidentTypeID;
+
+
+
+
+
+
+IncidentDate	IncidentTypeID	NumberOfIncidents	NumberOfIncidents
+2019-07-01	1	2	104
+2019-07-02	1	9	104
+2019-07-03	1	3	104
+2019-07-03	2	3	71
+...
+
+
+
+
+
+
+
+
+Calculate the sum of the three preceding rows and the current row. Here, we look at rows rather than ranges.
+SELECT
+	ir.IncidentDate,
+	ir.IncidentTypeID,
+	ir.NumberOfIncidents,
+	SUM(ir.NumberOfIncidents) OVER (
+		PARTITION BY ir.IncidentTypeID
+		ORDER BY ir.IncidentDate
+      	-- Add the correct range / rows clause
+      	-- Add the correct window frame bound ("preceding"
+    	-- and "following" sections)
+		ROWS BETWEEN 3 PRECEDING AND CURRENT ROW
+	) AS NumberOfIncidents
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+	c.CalendarYear = 2019
+	AND c.CalendarMonth = 7
+	AND ir.IncidentTypeID IN (1, 2)
+ORDER BY
+	ir.IncidentTypeID,
+	ir.IncidentDate;
+
+
+
+
+IncidentDate	IncidentTypeID	NumberOfIncidents	NumberOfIncidents
+2019-07-01	1	2	2
+2019-07-02	1	9	11
+2019-07-03	1	3	14
+2019-07-04	1	6	20
+2019-07-06	1	7	25
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+Calculate the sum of the two preceding rows, the current row, and the two following rows.
+SELECT
+	ir.IncidentDate,
+	ir.IncidentTypeID,
+	ir.NumberOfIncidents,
+	SUM(ir.NumberOfIncidents) OVER (
+		PARTITION BY ir.IncidentTypeID
+		ORDER BY ir.IncidentDate
+      	-- Add the correct range / rows clause
+      	-- Add the correct window frame bound ("preceding"
+    	-- and "following" sections)
+		ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
+	) AS NumberOfIncidents
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+	c.CalendarYear = 2019
+	AND c.CalendarMonth = 7
+	AND ir.IncidentTypeID IN (1, 2)
+ORDER BY
+	ir.IncidentTypeID,
+	ir.IncidentDate;
+
+
+IncidentDate	IncidentTypeID	NumberOfIncidents	NumberOfIncidents
+2019-07-01	1	2	14
+2019-07-02	1	9	20
+2019-07-03	1	3	27
+2019-07-04	1	6	28
+2019-07-06	1	7	22
+...
+
+
+
+
+
+
+
+
+
+
+
+Splendid! With three small clauses, we can control the shapes of our windows and fine-tune answers. The next exercise will show how we can put this knowledge to good use.
+
