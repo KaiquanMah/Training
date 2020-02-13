@@ -1,0 +1,42 @@
+Aggregate window functions
+There are several aggregate window functions available to you. In this exercise, we will look at reviewing multiple aggregates over the same window.
+Our window this time will be the entire data set, meaning that our OVER() clause will remain empty.
+
+
+Fill in the correct aggregate function for each column in the result set.
+SELECT
+	ir.IncidentDate,
+	ir.NumberOfIncidents,
+    -- Fill in the correct aggregate functions
+    -- You do not need to fill in the OVER clause
+	SUM(ir.NumberOfIncidents) OVER () AS SumOfIncidents,
+	MIN(ir.NumberOfIncidents) OVER () AS LowestNumberOfIncidents,
+	MAX(ir.NumberOfIncidents) OVER () AS HighestNumberOfIncidents,
+	COUNT(ir.NumberOfIncidents) OVER () AS CountOfIncidents
+FROM dbo.IncidentRollup ir
+WHERE
+	ir.IncidentDate BETWEEN '2019-07-01' AND '2019-07-31'
+AND ir.IncidentTypeID = 3;
+
+
+
+IncidentDate	NumberOfIncidents	SumOfIncidents	LowestNumberOfIncidents	HighestNumberOfIncidents	CountOfIncidents
+2019-07-02	3	62	1	10	15
+2019-07-05	10	62	1	10	15
+2019-07-07	6	62	1	10	15
+2019-07-08	5	62	1	10	15
+2019-07-10	1	62	1	10	15
+2019-07-11	1	62	1	10	15
+2019-07-13	5	62	1	10	15
+2019-07-15	1	62	1	10	15
+2019-07-16	4	62	1	10	15
+2019-07-18	6	62	1	10	15
+2019-07-20	3	62	1	10	15
+2019-07-22	8	62	1	10	15
+2019-07-24	3	62	1	10	15
+2019-07-25	5	62	1	10	15
+2019-07-29	1	62	1	10	15
+
+
+As far as performance goes, SQL Server can return results just as quickly with 4 aggregate window functions as 1 so long as the windows are the same.
+
