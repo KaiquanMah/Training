@@ -1,0 +1,62 @@
+Generate custom groupings with GROUPING SETS
+The GROUPING SETS operator allows us to define the specific aggregation levels we desire.
+In this scenario, management would like to see something similar to a ROLLUP but without quite as much information. Instead of showing every level of aggregation in the hierarchy, management would like to see three levels: grand totals; by year; and by year, quarter, and month.
+
+
+Fill out the GROUP BY segment using GROUPING SETS. We want to see:
+One row for each combination of year, quarter, and month (in that hierarchical order)
+One row for each year
+One row with grand totals (that is, a blank group)
+SELECT
+    c.CalendarYear,
+	c.CalendarQuarterName,
+	c.CalendarMonth,
+	SUM(ir.NumberOfIncidents) AS NumberOfIncidents
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+	ir.IncidentTypeID = 2
+-- Fill in your grouping operator here
+GROUP BY GROUPING SETS
+(
+  	-- Group in hierarchical order:  year, quarter, month
+	(c.CalendarYear,
+	c.CalendarQuarterName,
+	c.CalendarMonth),
+  	-- Group by year
+	(c.CalendarYear),
+    -- This remains blank; it gives us the grand total
+	()
+)
+ORDER BY
+	c.CalendarYear,
+	c.CalendarQuarterName,
+	c.CalendarMonth;
+
+
+
+
+
+
+CalendarYear	CalendarQuarterName	CalendarMonth	NumberOfIncidents
+null	null	null	957
+2019	null	null	482
+2019	Q3	7	71
+2019	Q3	8	77
+2019	Q3	9	73
+2019	Q4	10	66
+2019	Q4	11	98
+2019	Q4	12	97
+2020	null	null	475
+2020	Q1	1	39
+2020	Q1	2	66
+2020	Q1	3	106
+2020	Q2	4	112
+2020	Q2	5	74
+2020	Q2	6	78
+
+
+
+Good job! This particular grouping is similar to ROLLUP, except we removed one level of aggregation. We can do a lot more with GROUPING SETS, though.
+
