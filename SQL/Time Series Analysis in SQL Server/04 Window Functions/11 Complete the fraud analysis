@@ -1,0 +1,79 @@
+Complete the fraud analysis
+So far, we have broken out day spa data into a stream of entrances and exits and ordered this stream chronologically. This stream contains two critical fields, StartOrdinal and StartOrEndOrdinal. StartOrdinal is the chronological ordering of all entrances. StartOrEndOrdinal contains all entrances and exits in order. Armed with these two pieces of information, we can find the maximum number of concurrent visits.
+The results from the prior exercise are now in a temporary table called #StartStopOrder.
+
+
+Fill out the HAVING clause to determine cases with more than 2 concurrent visitors.
+Fill out the ORDER BY clause to show management the worst offenders: those with the highest values for MaxConcurrentCustomerVisits.
+SELECT
+	s.CustomerID,
+	MAX(2 * s.StartOrdinal - s.StartOrEndOrdinal) AS MaxConcurrentCustomerVisits
+FROM #StartStopOrder s
+WHERE s.EntryCount = 1
+GROUP BY s.CustomerID
+HAVING MAX(2 * s.StartOrdinal - s.StartOrEndOrdinal) > 2
+ORDER BY MaxConcurrentCustomerVisits DESC;
+
+
+
+
+
+CustomerID	MaxConcurrentCustomerVisits
+79	4
+19	3
+25	3
+85	3
+16	3
+53	3
+71	3
+17	3
+31	3
+60	3
+83	3
+11	3
+54	3
+28	3
+74	3
+57	3
+23	3
+46	3
+69	3
+75	3
+89	3
+72	3
+78	3
+35	3
+86	3
+6	3
+55	3
+67	3
+81	3
+70	3
+30	3
+90	3
+41	3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Based on your analysis in the prior exercise, what is the extent of customer misuse of the guest pass policy?
+No customers used their guest passes at all: the maximum concurrency for any customer was 1.
+Customers used guest passes but nobody violated the policy: the maximum concurrency for any customer was 2.
+Some customers violated the policy in a minor way: the maximum concurrency for any customer was 3.
+Some customers were egregious in policy violations: the maximum concurrency for any customer was 5.
+
+#YES - Some customers violated the policy: the maximum concurrency for any customer was 4.
+Correct! One customer, ID 79, had 4 concurrent entries.
+
