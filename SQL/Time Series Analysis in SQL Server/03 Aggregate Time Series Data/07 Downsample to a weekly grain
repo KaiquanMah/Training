@@ -1,0 +1,68 @@
+Downsample to a weekly grain
+Management would like to see how well people have utilized the spa in 2020. They would like to see results by week, reviewing the total number of minutes of amenity usage, the number of attendees, and the customer with the largest customer ID that week to see if new customers are coming in.
+We can use functions in SQL Server to downsample to a fixed grain like this. One such function is DATEPART().
+
+
+Downsample the day spa visit data to a weekly grain.
+Find the customer with the largest customer ID for a given week.
+SELECT
+	-- Downsample to a weekly grain
+	DATEPART(WEEK, dsv.CustomerVisitStart) AS Week,
+	SUM(dsv.AmenityUseInMinutes) AS AmenityUseInMinutes,
+	-- Find the customer with the largest customer ID for that week
+	MAX(dsv.CustomerID) AS HighestCustomerID,
+	COUNT(1) AS NumberOfAttendees
+FROM dbo.DaySpaVisit dsv
+WHERE
+	dsv.CustomerVisitStart >= '2020-01-01'
+	AND dsv.CustomerVisitStart < '2021-01-01'
+GROUP BY
+	DATEPART(WEEK, dsv.CustomerVisitStart)
+ORDER BY
+	Week;
+
+
+Week	AmenityUseInMinutes	HighestCustomerID	NumberOfAttendees
+1	117002	90	1334
+2	206917	90	2348
+3	204806	90	2289
+4	206902	90	2319
+5	205809	90	2334
+6	206992	90	2316
+7	206435	90	2328
+8	205300	90	2321
+9	210065	90	2334
+10	207455	90	2312
+11	208575	90	2339
+12	208557	90	2323
+13	204293	90	2315
+14	211310	90	2351
+15	206128	90	2321
+16	206379	90	2298
+17	208190	90	2335
+18	205659	90	2344
+19	205358	90	2311
+20	210072	90	2341
+21	211837	90	2344
+22	208153	90	2300
+23	203517	90	2321
+24	205594	90	2339
+25	206722	90	2327
+26	209326	90	2330
+27	205072	90	2331
+28	205056	90	2294
+29	203780	90	2276
+30	195711	90	2145
+31	172861	90	1934
+32	138231	90	1554
+33	97191	90	1103
+34	65563	90	736
+35	37691	90	411
+36	8449	81	93
+37	2641	14	27
+38	2160	14	23
+
+
+
+With DATEPART() we were able to downsample our data further. And with a calendar table, we can make our work even easier.
+
