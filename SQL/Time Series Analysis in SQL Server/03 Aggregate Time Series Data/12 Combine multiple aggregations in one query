@@ -1,0 +1,76 @@
+Combine multiple aggregations in one query
+In the last three exercises, we walked through the ROLLUP, CUBE, and GROUPING SETS grouping operators. Of these three, GROUPING SETS is the most customizable, allowing you to build out exactly the levels of aggregation you want. GROUPING SETS makes no assumptions about hierarchy (unlike ROLLUP) and can remain manageable with a good number of columns (unlike CUBE).
+
+In this exercise, we want to test several conjectures with our data:
+We have seen fewer incidents per month since introducing training in November of 2019.
+More incidents occur on Tuesday than on other weekdays.
+More incidents occur on weekends than weekdays.
+
+
+
+Fill out the grouping sets based on our conjectures above. We want to see the following grouping sets in addition to our grand total:
+One set by calendar year and month
+One set by the day of the week
+One set by whether the date is a weekend or not
+
+SELECT
+	c.CalendarYear,
+	c.CalendarMonth,
+	c.DayOfWeek,
+	c.IsWeekend,
+	SUM(ir.NumberOfIncidents) AS NumberOfIncidents
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+GROUP BY GROUPING SETS
+(
+    -- Include each non-aggregated column at least once
+  	-- Calendar year and month
+	(c.CalendarYear,
+	c.CalendarMonth),
+  	-- Day of week
+	(c.DayOfWeek),
+  	-- Is weekend or not
+	(c.IsWeekend),
+    -- This remains empty; it gives us the grand total
+	()
+)
+ORDER BY
+	c.CalendarYear,
+	c.CalendarMonth,
+	c.DayOfWeek,
+	c.IsWeekend;
+  
+  
+  
+
+
+
+CalendarYear	CalendarMonth	DayOfWeek	IsWeekend	NumberOfIncidents
+null	null	null	null	3756
+null	null	null	false	2677
+null	null	null	true	1079
+null	null	1	null	536
+null	null	2	null	535
+null	null	3	null	539
+null	null	4	null	522
+null	null	5	null	586
+null	null	6	null	495
+null	null	7	null	543
+2019	7	null	null	315
+2019	8	null	null	331
+2019	9	null	null	372
+2019	10	null	null	319
+2019	11	null	null	356
+2019	12	null	null	311
+2020	1	null	null	229
+2020	2	null	null	310
+2020	3	null	null	284
+2020	4	null	null	312
+2020	5	null	null	309
+2020	6	null	null	308
+
+
+
+It looks like weekends (day 1 and day 7) are not appreciably worse than weekdays and that Tuesday (day 3) is not definitely worse than other weekdays. There might be something to the training conjecture, but we would need further analysis to see if the drop is just noise.
+
