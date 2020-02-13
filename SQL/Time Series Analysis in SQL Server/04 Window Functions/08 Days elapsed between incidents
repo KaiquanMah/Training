@@ -1,0 +1,78 @@
+Calculating days elapsed between incidents
+Something you might have noticed in the prior two exercises is that we don't always have incidents on every day of the week, so calling LAG() and LEAD() the "prior day" is a little misleading; it's really the "prior period." Someone in management noticed this as well and, at the end of July, wanted to know the number of days between incidents. To do this, we will calculate two values: the number of days since the prior incident and the number of days until the next incident.
+Recall that DATEDIFF() gives the difference between two dates. We can combine this with LAG() and LEAD() to get our results.
+
+
+Calculate the days since the last incident using a combination of DATEDIFF() and LAG() or LEAD().
+Calculate the days until the next incident using a combination of DATEDIFF() and LAG() or LEAD().
+NOTE: you will not need to use the NumberOfIncidents column in this exercise.
+SELECT
+	ir.IncidentDate,
+	ir.IncidentTypeID,
+    -- Fill in the days since last incident
+	DATEDIFF(DAY, LAG(ir.IncidentDate, 1) OVER (
+		PARTITION BY ir.IncidentTypeID
+		ORDER BY ir.IncidentDate
+	), ir.IncidentDate) AS DaysSinceLastIncident,
+    -- Fill in the days until next incident
+	DATEDIFF(DAY, ir.IncidentDate, LEAD(ir.IncidentDate, 1) OVER (
+		PARTITION BY ir.IncidentTypeID
+		ORDER BY ir.IncidentDate
+	)) AS DaysUntilNextIncident
+FROM dbo.IncidentRollup ir
+WHERE
+	ir.IncidentDate >= '2019-07-02'
+	AND ir.IncidentDate <= '2019-07-31'
+	AND ir.IncidentTypeID IN (1, 2)
+ORDER BY
+	ir.IncidentTypeID,
+	ir.IncidentDate;
+
+
+
+
+
+IncidentDate	IncidentTypeID	DaysSinceLastIncident	DaysUntilNextIncident
+2019-07-02	1	null	1
+2019-07-03	1	1	1
+2019-07-04	1	1	2
+2019-07-06	1	2	1
+2019-07-07	1	1	1
+2019-07-08	1	1	1
+2019-07-09	1	1	2
+2019-07-11	1	2	2
+2019-07-13	1	2	2
+2019-07-15	1	2	1
+2019-07-16	1	1	2
+2019-07-18	1	2	1
+2019-07-19	1	1	1
+2019-07-20	1	1	1
+2019-07-21	1	1	1
+2019-07-22	1	1	1
+2019-07-23	1	1	1
+2019-07-24	1	1	1
+2019-07-25	1	1	1
+2019-07-26	1	1	1
+2019-07-27	1	1	2
+2019-07-29	1	2	1
+2019-07-30	1	1	1
+2019-07-31	1	1	null
+2019-07-03	2	null	5
+2019-07-08	2	5	1
+2019-07-09	2	1	2
+2019-07-11	2	2	4
+2019-07-15	2	4	1
+2019-07-16	2	1	2
+2019-07-18	2	2	2
+2019-07-20	2	2	3
+2019-07-23	2	3	1
+2019-07-24	2	1	1
+2019-07-25	2	1	1
+2019-07-26	2	1	1
+2019-07-27	2	1	3
+2019-07-30	2	3	1
+2019-07-31	2	1	null
+
+
+Outstanding! As you might expect, the current row's DaysUntilNextIncident is the same as the next row's DaysSinceLastIncident, so we just calculated the same thing two different ways.
+
