@@ -1,0 +1,140 @@
+View all aggregations with CUBE
+The CUBE operator provides a cross aggregation of all combinations and can be a huge number of rows. This operator works best with non-hierarchical data where you are interested in independent aggregations as well as the combined aggregations.
+In this scenario, we wish to find the total number of security incidents in the IncidentRollup table but will not follow a proper hierarchy. Instead, we will focus on aggregating several unrelated attributes.
+
+
+Fill in the missing columns from dbo.Calendar in the SELECT clause.
+Fill out the GROUP BY segment, including the CUBE operator.
+SELECT
+	-- Use the ORDER BY clause as a guide for these columns
+    -- Don't forget that comma after the third column if you
+    -- copy from the ORDER BY clause!
+	ir.IncidentTypeID,
+	c.CalendarQuarterName,
+	c.WeekOfMonth,
+	SUM(ir.NumberOfIncidents) AS NumberOfIncidents
+FROM dbo.IncidentRollup ir
+	INNER JOIN dbo.Calendar c
+		ON ir.IncidentDate = c.Date
+WHERE
+	ir.IncidentTypeID IN (3, 4)
+GROUP BY
+	-- GROUP BY should include all non-aggregated columns
+	ir.IncidentTypeID,
+	c.CalendarQuarterName,
+	c.WeekOfMonth
+-- Fill in your grouping operator
+WITH CUBE
+ORDER BY
+	ir.IncidentTypeID,
+	c.CalendarQuarterName,
+	c.WeekOfMonth;
+
+
+
+IncidentTypeID	CalendarQuarterName	WeekOfMonth	NumberOfIncidents
+null	null	null	1241
+null	null	1	218
+null	null	2	295
+null	null	3	258
+null	null	4	303
+null	null	5	167
+null	Q1	null	264
+null	Q1	1	26
+null	Q1	2	75
+null	Q1	3	64
+null	Q1	4	52
+null	Q1	5	47
+null	Q2	null	275
+null	Q2	1	39
+null	Q2	2	58
+null	Q2	3	70
+null	Q2	4	66
+null	Q2	5	42
+null	Q3	null	368
+null	Q3	1	79
+null	Q3	2	97
+null	Q3	3	62
+null	Q3	4	87
+null	Q3	5	43
+null	Q4	null	334
+null	Q4	1	74
+null	Q4	2	65
+null	Q4	3	62
+null	Q4	4	98
+null	Q4	5	35
+3	null	null	757
+3	null	1	117
+3	null	2	179
+3	null	3	176
+3	null	4	197
+3	null	5	88
+3	Q1	null	143
+3	Q1	1	18
+3	Q1	2	40
+3	Q1	3	36
+3	Q1	4	26
+3	Q1	5	23
+3	Q2	null	177
+3	Q2	1	23
+3	Q2	2	40
+3	Q2	3	46
+3	Q2	4	50
+3	Q2	5	18
+3	Q3	null	234
+3	Q3	1	38
+3	Q3	2	62
+3	Q3	3	46
+3	Q3	4	60
+3	Q3	5	28
+3	Q4	null	203
+3	Q4	1	38
+3	Q4	2	37
+3	Q4	3	48
+3	Q4	4	61
+3	Q4	5	19
+4	null	null	484
+4	null	1	101
+4	null	2	116
+4	null	3	82
+4	null	4	106
+4	null	5	79
+4	Q1	null	121
+4	Q1	1	8
+4	Q1	2	35
+4	Q1	3	28
+4	Q1	4	26
+4	Q1	5	24
+4	Q2	null	98
+4	Q2	1	16
+4	Q2	2	18
+4	Q2	3	24
+4	Q2	4	16
+4	Q2	5	24
+4	Q3	null	134
+4	Q3	1	41
+4	Q3	2	35
+4	Q3	3	16
+4	Q3	4	27
+4	Q3	5	15
+4	Q4	null	131
+4	Q4	1	36
+4	Q4	2	28
+4	Q4	3	14
+4	Q4	4	37
+4	Q4	5	16
+
+
+
+
+
+In which quarter did we see the greatest number of incidents?
+Quarter 1
+Quarter 2
+Quarter 4
+
+#YES - Quarter 3
+
+
+Well done! The CUBE operator can spit out a large number of rows, making it hard to sift through the data. Now we will look at a better way of grouping.
+
