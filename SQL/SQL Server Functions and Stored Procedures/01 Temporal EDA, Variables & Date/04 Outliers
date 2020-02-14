@@ -1,0 +1,30 @@
+Find the outliers
+The previous exercise showed us that Saturday was the busiest day of the month for BikeShare rides. Do you wonder if there were any individual Saturday outliers that contributed to this?
+
+
+Use SUM() and DATEDIFF() to find the Total Ride Hours per day starting from seconds.
+Use CONVERT() to SELECT the date portion of StartDate.
+Use DATENAME() and CONVERT() to select the WEEKDAY.
+Use WHERE to only include Saturdays.
+SELECT
+	-- Calculate TotalRideHours using SUM() and DATEDIFF()
+  	SUM(DATEDIFF(SECOND, StartDate, EndDate))/ 3600 AS TotalRideHours,
+    -- Select the DATE portion of StartDate
+  	CONVERT(DATE, StartDate) AS DateOnly,
+    -- Select the WEEKDAY
+  	DATENAME(WEEKDAY, CONVERT(DATE, StartDate)) AS DayOfWeek 
+FROM CapitalBikeShare
+-- Only include Saturday
+WHERE DATENAME(WEEKDAY, StartDate) = 'Saturday' 
+GROUP BY CONVERT(DATE, StartDate);
+
+
+TotalRideHours	DateOnly	DayOfWeek
+369	2018-03-03	Saturday
+599	2018-03-10	Saturday
+346	2018-03-17	Saturday
+787	2018-03-24	Saturday
+1625	2018-03-31	Saturday
+
+Now you know how to use DATENAME(), DATEDIFF() and CONVERT() to find temporal outliers!
+
