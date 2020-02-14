@@ -1,0 +1,38 @@
+DECLARE & CAST
+Let's use DECLARE() and CAST() to combine a date variable and a time variable into a datetime variable.
+
+
+Create a time variable named @ShiftStartTime and set initial value to '08:00 AM'.
+Create a date variable named @StartDate and set it to the first StartDate from the BikeShare table.
+Create a datetime variable named `@ShiftStartDateTime.
+Change @StartDate and @ShiftStartTime to datetime data types and assign to @ShiftStartDateTime.
+
+-- Create @ShiftStartTime
+DECLARE @ShiftStartTime AS time = '08:00 AM'
+
+-- Create @StartDate
+DECLARE @StartDate AS date
+
+-- Set StartDate to the first StartDate from CapitalBikeShare
+SET 
+	@StartDate = (
+    	SELECT TOP 1 StartDate 
+    	FROM CapitalBikeShare 
+    	ORDER BY StartDate ASC
+		)
+
+-- Create ShiftStartDateTime
+DECLARE @ShiftStartDateTime AS datetime
+
+-- Cast StartDate and ShiftStartTime to datetime data types
+SET @ShiftStartDateTime = CAST(@StartDate AS datetime) + CAST(@ShiftStartTime AS datetime) 
+
+SELECT @ShiftStartDateTime
+
+
+2018-03-01 08:00:00
+
+
+
+You can now declare variables and set their values to a query result. Way to go!
+
