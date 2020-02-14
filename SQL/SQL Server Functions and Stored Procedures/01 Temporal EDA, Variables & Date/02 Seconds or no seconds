@@ -1,0 +1,27 @@
+Seconds or no seconds?
+In the video, you saw how DATEDIFF() can be used to calculate the trip time by finding the difference between Start and End time, but how do you know the dataset includes seconds in the transactions?
+Here, you'll use DATEPART() to see how many transactions have seconds greater than zero and how many have them equal to zero. Then you can evaluate if this is an appropriate amount. The CASE statement will segregate the dataset into two categories.
+
+
+Complete the first CASE statement, using DATEPART() to evaluate the SECOND date part of StartDate.
+Complete the second CASE statement in the GROUP BY the same way.
+SELECT
+	-- Count the number of IDs
+	COUNT(ID) AS Count,
+    -- Use DATEPART() to evaluate the SECOND part of StartDate
+    "StartDate" = CASE WHEN DATEPART(SECOND, StartDate) = 0 THEN 'SECONDS = 0'
+					   WHEN DATEPART(SECOND, StartDate) > 0 THEN 'SECONDS > 0' END
+FROM CapitalBikeShare
+GROUP BY
+    -- Use DATEPART() to Group By the CASE statement
+	CASE WHEN DATEPART(SECOND, StartDate) = 0 THEN 'SECONDS = 0'
+		 WHEN DATEPART(SECOND, StartDate) > 0 THEN 'SECONDS > 0' END
+
+
+
+Count	  StartDate
+835	    SECONDS = 0
+46965	  SECONDS > 0
+
+Now you can use CASE() and DATEPART() to categorize by the date parts of a datetime.
+
