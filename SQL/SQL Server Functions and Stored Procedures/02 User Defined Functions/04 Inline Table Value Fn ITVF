@@ -1,0 +1,27 @@
+Inline Table Value Fn ITVF
+Create an inline table value function that returns the number of rides and total ride duration for each StartStation where the StartDate of the ride is equal to the input parameter.
+
+Create a function named SumStationStats that has one input parameter of type datetime - @StartDate - and returns a TABLE data type.
+Calculate the total RideCount using COUNT() and ID.
+Calculate the TotalDuration using SUM() and DURATION.
+Group by StartStation.
+
+-- Create the function
+CREATE FUNCTION SumStationStats(@StartDate AS datetime)
+-- Specify return data type
+RETURNS TABLE
+AS
+RETURN
+SELECT
+	StartStation,
+    -- Use COUNT() to select RideCount
+	COUNT(ID) AS RideCount,
+    -- Use SUM() to calculate TotalDuration
+    SUM(Duration) AS TotalDuration
+FROM CapitalBikeShare
+WHERE CAST(StartDate as Date) = @StartDate
+-- Group by StartStation
+GROUP BY StartStation;
+
+
+
