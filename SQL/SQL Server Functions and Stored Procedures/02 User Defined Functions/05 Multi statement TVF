@@ -1,0 +1,36 @@
+Multi statement TVF
+Create a multi statement table value function that returns the trip count and average ride duration for each day for the month & year parameter values passed.
+
+Create a function CountTripAvgDuration() that returns a table variable named @DailyTripStats.
+Declare input parameters @Month and @Year.
+Insert the query results into the @DailyTripStats table variable.
+Use CAST to select and group by StartDate as a date data type.
+
+-- Create the function
+CREATE FUNCTION CountTripAvgDuration (@Month CHAR(2), @Year CHAR(4))
+-- Specify return variable
+RETURNS @DailyTripStats TABLE(
+	TripDate	date,
+	TripCount	int,
+	AvgDuration	numeric)
+AS
+BEGIN
+-- Insert query results into @DailyTripStats
+INSERT INTO @DailyTripStats
+SELECT
+    -- Cast StartDate as a date
+	CAST(StartDate AS DATE),
+    COUNT(ID),
+    AVG(Duration)
+FROM CapitalBikeShare
+WHERE
+	DATEPART(month, StartDate) = @Month AND
+    DATEPART(year, StartDate) = @Year
+-- Group by StartDate as a date
+GROUP BY CAST(StartDate AS DATE)
+-- Return
+RETURN
+END
+
+
+
