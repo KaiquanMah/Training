@@ -1,0 +1,28 @@
+CREATE PROCEDURE with OUTPUT
+Create a Stored Procedure named cuspSumRideHrsSingleDay in the dbo schema that accepts a date and returns the total ride hours for the date passed.
+
+Create a stored procedure called cuspSumRideHrsSingleDay in the dbo schema.
+Declare @DateParm as the input parameter and @RideHrsOut as the output parameter.
+Don't send the row count to the caller.
+Assign the query result to @RideHrsOut and include the RETURN keyword.
+
+-- Create the stored procedure
+CREATE PROCEDURE dbo.cuspSumRideHrsSingleDay
+    -- Declare the input parameter
+	@DateParm date,
+    -- Declare the output parameter
+	@RideHrsOut numeric OUTPUT
+AS
+-- Don't send the row count 
+SET NOCOUNT ON
+BEGIN
+-- Assign the query result to @RideHrsOut
+SELECT
+	@RideHrsOut = SUM(DATEDIFF(second, StartDate, EndDate))/3600
+FROM CapitalBikeShare
+-- Cast StartDate as date and compare with @DateParm
+WHERE CAST(StartDate AS date) = @DateParm
+RETURN
+END
+
+
