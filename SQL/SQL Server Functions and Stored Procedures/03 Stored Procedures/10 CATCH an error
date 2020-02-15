@@ -1,0 +1,30 @@
+CATCH an error
+Execute dbo.cuspRideSummaryDelete and pass an invalid @DateParm value of '1/32/2018' to see how the error is handled. The invalid date will be accepted by the nvarchar data type of @DateParm, but the error will occur when SQL attempts to convert it to a valid date when executing the stored procedure.
+
+DECLARE variable @ReturnCode as an integer and @ErrorOut as a nvarchar(max).
+Execute dbo.cuspRideSummaryDelete and pass '1/32/2018' as the @DateParm value.
+Assign @ErrorOut to the @Error parameter.
+Select both @ReturnCode and @ErrorOut to see their values.
+
+-- Create @ReturnCode
+DECLARE @ReturnCode INT
+-- Create @ErrorOut
+DECLARE @ErrorOut NVARCHAR(MAX)
+
+
+-- Execute the SP, storing the result in @ReturnCode
+EXEC @ReturnCode = dbo.cuspRideSummaryDelete
+    -- Specify @DateParm
+	@DateParm = '1/32/2018',
+    -- Assign @ErrorOut to @Error
+	@Error = @ErrorOut OUTPUT
+
+
+-- Select @ReturnCode and @ErrorOut
+SELECT
+	@ReturnCode AS ReturnCode,
+    @ErrorOut AS ErrorMessage;
+
+
+ReturnCode	ErrorMessage
+-6	        Error_Number: 241 Error_Severity: 16 Error_State: 1 Error_Message: Conversion failed when converting date and/or time from character string. Error_Line: 9
