@@ -1,0 +1,32 @@
+EXECUTE with OUTPUT & return value
+Store and display both the output parameter and return code when executing dbo.cuspRideSummaryDelete SP.
+
+Create integer variables named @ReturnStatus and @RowCount.
+Pass '3/1/2018' as the @DateParm value and execute dbo.cuspRideSummaryDelete SP.
+Select @ReturnStatus and @RowCount to understand the impact of the SP.
+
+-- Create @ReturnStatus
+DECLARE @ReturnStatus AS INT
+-- Create @RowCount
+DECLARE @RowCount AS INT
+
+
+-- Execute the SP, storing the result in @ReturnStatus
+EXEC @ReturnStatus = dbo.cuspRideSummaryDelete 
+    -- Specify @DateParm
+	@DateParm = '3/1/2018',
+    -- Specify RowCountOut
+	@RowCountOut = @RowCount OUTPUT
+
+
+-- Select the columns of interest
+SELECT
+	@ReturnStatus AS ReturnStatus,
+    @RowCount AS 'RowCount';
+    
+
+
+ReturnStatus	RowCount
+0	            1
+
+
