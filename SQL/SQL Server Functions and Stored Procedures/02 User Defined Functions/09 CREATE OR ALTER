@@ -1,0 +1,23 @@
+CREATE OR ALTER
+Change the SumStationStats function to enable SCHEMABINDING. Also change the parameter name to @EndDate and compare to EndDate of CapitalBikeShare table.
+
+Use CREATE OR ALTER keywords to update the SumStationStats function.
+Change the parameter name to @EndDate and data type to date.
+Compare the @EndDate to EndDate of the CapitalBikeShare table.
+Enable SCHEMABINDING.
+
+-- Update SumStationStats
+CREATE OR ALTER FUNCTION dbo.SumStationStats(@EndDate AS DATE)
+-- Enable SCHEMABINDING
+RETURNS TABLE WITH SCHEMABINDING
+AS
+RETURN
+SELECT
+	StartStation,
+    COUNT(ID) AS RideCount,
+    SUM(DURATION) AS TotalDuration
+FROM dbo.CapitalBikeShare
+-- Cast EndDate as date and compare to @EndDate
+WHERE CAST(EndDate AS Date) = @EndDate
+GROUP BY StartStation;
+
