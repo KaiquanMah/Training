@@ -1,0 +1,40 @@
+Your very own TRY..CATCH
+Alter dbo.cuspRideSummaryDelete to include an intentional error so we can see how the TRY CATCH block works.
+
+Incorrectly assign @DateParm a nvarchar(30) data type instead of a date.
+Include @Error as an optional OUTPUT parameter.
+Include the DELETE statement within the BEGIN TRY...END TRY block.
+Concatenate the ERROR_NUMBER(), ERROR_SEVERITY(), ERROR_STATE(), ERROR_MESSAGE(), ERROR_LINE() within the BEGIN CATCH...END CATCH block and SET to @Error.
+
+
+-- Alter the stored procedure
+CREATE OR ALTER PROCEDURE dbo.cuspRideSummaryDelete
+	-- (Incorrectly) specify @DateParm
+	@DateParm NVARCHAR(30),
+    -- Specify @Error
+	@Error NVARCHAR(max) = NULL OUTPUT
+AS
+SET NOCOUNT ON
+
+BEGIN
+  -- Start of the TRY block
+  BEGIN TRY
+  	  -- Delete
+      DELETE FROM RideSummary
+      WHERE Date = @DateParm
+  -- End of the TRY block
+  END TRY
+  -- Start of the CATCH block
+  BEGIN CATCH
+		SET @Error = 
+		'Error_Number: '+ CAST(ERROR_NUMBER() AS VARCHAR) +
+		'Error_Severity: '+ CAST(ERROR_SEVERITY() AS VARCHAR) +
+		'Error_State: ' + CAST(ERROR_STATE() AS VARCHAR) + 
+		'Error_Message: ' + ERROR_MESSAGE() + 
+		'Error_Line: ' + CAST(ERROR_LINE() AS VARCHAR)
+  -- End of the CATCH block
+  END CATCH
+END;
+
+Great Work! You know how to capture an error in an SP. Now let's see it in action!
+
