@@ -1,0 +1,27 @@
+Execute TVF into variable
+Remember the table value function you created earlier in this chapter named SumStationStats?. It accepts a datetime parameter and returns the ride count and total ride duration for each starting station where the start date matches the input parameter. Execute SumStationStats now and store the results in a table variable.
+
+Create a table variable named @StationStats with columns StartStation, RideCount, and TotalDuration.
+Execute the SumStationStats function and pass '3/15/2018' as the input parameter.
+Use INSERT INTO to populate the @StationStats table variable with the results of the function.
+Select all the records from the table variable.
+
+-- Create @StationStats
+DECLARE @StationStats TABLE(
+	StartStation nvarchar(100), 
+	RideCount int, 
+	TotalDuration numeric)
+
+
+-- Populate @StationStats with the results of the function
+INSERT INTO @StationStats
+SELECT TOP 10 *
+-- Execute SumStationStats with 3/15/2018
+FROM dbo.SumStationStats('3/15/2018') 
+ORDER BY RideCount DESC
+
+-- Select all the records from @StationStats
+SELECT * 
+FROM @StationStats
+
+
