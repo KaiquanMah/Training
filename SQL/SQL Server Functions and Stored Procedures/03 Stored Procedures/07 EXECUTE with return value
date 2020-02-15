@@ -1,0 +1,36 @@
+EXECUTE with return value
+Execute dbo.cuspRideSummaryUpdate to change the RideHours to 300 for '3/1/2018'. Store the return code from the stored procedure.
+
+Declare @ReturnStatus as an integer and assign its value to the result of dbo.cuspRideSummaryUpdate.
+Execute the stored procedure, setting @DateParm to '3/1/2018' and @RideHrs to 300.
+Select the @ReturnStatus to see its value as well as the '3/1/2018' record from RideSummary to see the impact of the SP update.
+
+
+
+RideSummary
+Date	      RideHours
+2018-03-01	388
+
+
+-- Create @ReturnStatus
+DECLARE @ReturnStatus AS int
+-- Execute the SP, storing the result in @ReturnStatus
+EXEC @ReturnStatus = dbo.cuspRideSummaryUpdate
+    -- Specify @DateParm
+	@DateParm = '3/1/2018',
+    -- Specify @RideHrs
+	@RideHrs = 300
+
+
+-- Select the columns of interest
+SELECT
+	@ReturnStatus AS ReturnStatus,
+    Date,
+    RideHours
+FROM dbo.RideSummary 
+WHERE Date = '3/1/2018';
+
+
+ReturnStatus	Date	        RideHours
+0	            2018-03-01	  300
+
