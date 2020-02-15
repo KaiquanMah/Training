@@ -1,0 +1,24 @@
+Multiple inputs one output
+Often times you will need to pass more than one parameter to a function. Create a function that accepts @StartDateParm and @EndDateParm and returns the total ride hours for all transactions that have a StartDate within the parameter values.
+
+Create a function named SumRideHrsDateRange with @StartDateParm and @EndDateParm as the input parameters of datetime data type.
+Specify the return data type to be numeric.
+Use a select statement to sum the difference between the StartDate and EndDate of the transactions.
+Only include transactions that have a StartDate greater than @StartDateParm and less than @EndDateParm.
+
+-- Create the function
+CREATE FUNCTION SumRideHrsDateRange (@StartDateParm DATETIME, @EndDateParm DATETIME)
+-- Specify return data type
+RETURNS NUMERIC
+AS
+BEGIN
+RETURN
+-- Sum the difference between StartDate and EndDate
+(SELECT SUM(DATEDIFF(second, StartDate, EndDate))/3600
+FROM CapitalBikeShare
+-- Include only the relevant transactions
+WHERE StartDate > @StartDateParm and StartDate < @EndDateParm)
+END
+
+
+
