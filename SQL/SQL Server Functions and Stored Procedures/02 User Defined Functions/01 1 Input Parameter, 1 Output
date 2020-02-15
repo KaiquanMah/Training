@@ -1,0 +1,36 @@
+One in one out
+Create a function named SumRideHrsSingleDay() which returns the total ride time in hours for the @DateParm parameter passed.
+
+
+CapitalBikeShare
+ID	Duration	StartDate	EndDate	StartStationNumber	StartStation	EndStationNumber	EndStation	BikeNumber	MemberType
+1004	471	2018-03-01 00:02:41	2018-03-01 00:10:32	31247	Jefferson Dr & 14th St SW	31244	4th & E St SW	W22781	Casual
+1005	868	2018-03-01 00:03:24	2018-03-01 00:17:52	31515	Fort Totten Metro	31408	Takoma Metro	W01419	Casual
+1008	600	2018-03-01 00:04:46	2018-03-01 00:14:46	31505	Eckington Pl & Q St NE	31228	8th & H St NW	W20051	Member
+...
+
+
+
+Define input parameter of type date - @DateParm and a return data type of numeric.
+Use BEGIN/END keywords.
+In your SELECT statement, SUM the difference between the StartDate and EndDate of the transactions that have the same StartDate value as the parameter passed.
+Use CAST to compare the date portion of StartDate to the @DateParm.
+-- Create SumRideHrsSingleDay
+CREATE FUNCTION SumRideHrsSingleDay (@DateParm DATE)
+-- Specify return data type
+RETURNS NUMERIC
+AS
+-- Begin
+BEGIN
+RETURN
+-- Add the difference between StartDate and EndDate
+(SELECT SUM(DATEDIFF(second, StartDate, EndDate))/3600
+FROM CapitalBikeShare
+ -- Only include transactions where StartDate = @DateParm
+WHERE CAST(StartDate AS DATE) = @DateParm)
+-- End
+END
+
+
+
+
