@@ -1,0 +1,75 @@
+STATISTICS IO Example 1
+Your sales company has just taken on a new regional manager for Western Europe. He has asked you to provide him daily updates on orders shipped to some key Western Europe capital cities. As this data is time sensitive, you want a robust query that is tuned to return the results as quickly as possible.
+You initially decide on a query that uses two sub-queries: one in the SELECT statement to get the count of orders and one using a filter condition with an IN operator.
+You will turn on the STATISTICS IO command to review the page read statistics.
+
+
+Turn on STATISTICS IO.
+SET STATISTICS IO ON -- Turn the IO command on
+
+
+
+
+Add the table used to count the number of orders.
+Add the filter operator for the second sub-query.
+-- Example 1
+SELECT CustomerID,
+       CompanyName,
+       (SELECT COUNT(*) 
+	    FROM Orders AS o -- Add table
+		WHERE c.CustomerID = o.CustomerID) CountOrders
+FROM Customers AS c
+WHERE CustomerID IN -- Add filter operator
+       (SELECT CustomerID 
+	    FROM Orders 
+		WHERE ShipCity IN
+            ('Berlin','Bern','Bruxelles','Helsinki',
+			'Lisboa','Madrid','Paris','London'));
+
+
+
+CustomerID	CompanyName	CountOrders
+ALFKI	Alfreds Futterkiste	6
+BOLID	Bolido Comidas preparadas	3
+BSBEV	B s Beverages	10
+CHOPS	Chop-suey Chinese	8
+CONSH	Consolidated Holdings	3
+EASTC	Eastern Connection	8
+FURIB	Furia Bacalhau e Frutos do Mar	8
+MAISD	Maison Dewey	7
+NORTS	North-South	3
+PRINI	Princesa Isabel Vinhos	5
+ROMEY	Romero y tomillo	5
+SEVES	Seven Seas Imports	9
+SPECD	Specialites du monde	4
+WILMK	Wilman Kala	7
+Showing 14 out of 14 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+From the STATISTICS IO output below, how many data pages from the Orders table were read from memory to complete the query?
+Table 'Customers'. Scan count 1, logical reads 2, physical reads 0,...
+Table 'Orders'. Scan count 2, logical reads 32, physical reads 0,...
+--SCAN COUNT ON TABLE
+--LOGICAL READ COUNT ON PAGE
+
+Two
+Zero
+One
+
+#YES - Thirty-two
+Excellent! logical reads for the Orders table indicates that thirty-two data pages were read from memory to complete the query.
+
+
+
