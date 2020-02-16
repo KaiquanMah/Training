@@ -1,0 +1,87 @@
+Column does not exist
+When using WHERE as a filter condition, it is important to think about the processing order in the query. In this exercise, you want a query that returns NBA players with average total rebounds of 12 or more per game. The following formula calculates average total rebounds from the PlayerStats table;
+AverageTotalRebounds = (DefensiveRebounds+OffensiveRebounds)/GamesPlayed
+
+The first query in Step 1 returns an error. Select Run Code to view the error. The second query, in Step 2, will give you the results you want, without error, by using a sub-query.
+Note that GamesPlayed is CAST AS numeric to ensure we get decimal points in our output, as opposed to whole numbers.
+
+
+
+Try to understand what the error is telling you when you run the first query, then comment out the query block on lines 2 and 9.
+-- First query
+
+SELECT PlayerName, 
+    Team, 
+    Position,
+    (DRebound+ORebound)/CAST(GamesPlayed AS numeric) AS AvgRebounds
+FROM PlayerStats
+WHERE AvgRebounds >= 12;
+
+('42S22', "[42S22] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Invalid column name 'AvgRebounds'. (207) (SQLExecDirectW)")
+
+
+
+-- First query
+/*
+SELECT PlayerName, 
+    Team, 
+    Position,
+    (DRebound+ORebound)/CAST(GamesPlayed AS numeric) AS AvgRebounds
+FROM PlayerStats
+WHERE AvgRebounds >= 12;
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+In the sub-query calculate average total rebounds in a new column, AvgRebounds.
+Add the new column to the SELECT statement.
+Apply a filter condition for 12 or more average total rebounds.
+
+-- Second query
+
+-- Add the new column to the select statement
+SELECT PlayerName, 
+       Team, 
+       Position, 
+       AvgRebounds -- Add the new column
+FROM
+     -- Sub-query starts here                             
+	(SELECT 
+      PlayerName, 
+      Team, 
+      Position,
+      -- Calculate average total rebounds
+     (DRebound+ORebound)/CAST(GamesPlayed AS numeric) AS AvgRebounds
+	 FROM PlayerStats) tr
+WHERE AvgRebounds >= 12; -- Filter rows
+
+
+
+
+PlayerName	Team	Position	AvgRebounds
+Dwight Howard	CHO	C	12.4938271604938271604
+Andre Drummond	DET	C	15.9871794871794871794
+DeAndre Jordan	LAC	C	15.2077922077922077922
+Karl-Anthony Towns	MIN	C	12.3414634146341463414
+DeMarcus Cousins	NOP	C	12.8541666666666666666
+
+Showing 5 out of 5 rows
+
+
+
+Nice work! A column specified in the SELECT statement must exist before a WHERE filter condition can be applied to it, in this case, AvgRebounds. You created this column in a sub-query which made it available for filtering with WHERE in the outer query.
+
+Looking at the results, it looks like Centers (Position = C) are the kings of rebounds.
+
