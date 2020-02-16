@@ -1,0 +1,289 @@
+Interrogating with INTERSECT
+INTERSECT and EXCEPT are very useful for data interrogation.
+The Earthquakes and NBA Season 2017-2018 databases both contain information on countries and cities. You are interested to know which countries are represented by players in the 2017-2018 NBA season and you believe you can get the results you require by querying the relevant tables across these two databases.
+Use the INTERSECT operator between queries, but be careful and think about the results. Although both tables contain a country name column to compare, these are separate databases and the data may be stored differently.
+
+
+PlayerStats
+PlayerName	Team	Position	GamesPlayed	MinutesPlayed	Points3	Points2	ORebound	DRebound	Assists	Steals	Blocks	TurnOvers	TotalPoints
+Luke Babbitt	ATL	SF	37	570	49	31	5	76	26	7	5	15	226
+Kent Bazemore	ATL	SG	65	1789	108	176	25	223	228	100	45	157	836
+Marco Belinelli	ATL	SG	52	1210	92	107	14	86	103	46	3	54	591
+...
+
+Players
+PlayerName	Age	Height_cm	Weight_kg	Country	College	DraftYear	DraftRound	DraftNumber
+Aaron Brooks	33	182.88	72.45	USA	Oregon	2007	1	26
+Aaron Gordon	22	205.74	99	USA	Arizona	2014	1	4
+Aaron Harrison	23	198.12	94.5	USA	Kentucky	null	null	null
+...
+
+Teams
+TeamCode	TeamName	City	State	Arena	ArenaCapacity
+BOS	Boston Celtics	Boston	MA	TD Garden	18624
+BRK	Brooklyn Nets	New York City	NY	Barclays Center	17732
+NYK	New York Knicks	New York City	NY	Madison Square Garden	19812
+...
+
+Nations
+CountryName	Code2	Code3	Capital	WorldBankRegion	UNContinentRegion	UNStatisticalRegion	Pop2016	Pop2017	Land_km2	Water_km2
+Afghanistan	AF	AFG	Kabul	South Asia	Asia	Southern Asia	34656032	35530081	652230	0
+Albania	AL	ALB	Tirana	Europe and Central Asia	Europe	Southern Europe	2926348	2930187	27398	1350
+Algeria	DZ	DZA	Algiers	Middle East and North Africa	Africa	Northern Africa	40606052	41318142	2381741	0
+...
+
+
+
+
+
+INTERSECT CountryName from a table in the Earthquakes database and Country from a table in the NBA Season 2017-2018 database.
+--ORIGINAL CODE
+SELECT CountryName 
+FROM Earthquakes -- Table from Earthquakes database
+
+INTERSECT -- Operator for the intersect between tables
+
+SELECT Country
+FROM Players; -- Table from NBA Season 2017-2018 database
+
+
+
+--Check the highlighted code. The checker expected to find Nations in there.
+--RELATIVE TO THE ORIGINAL EXERCISE INSTRUCTIONS ABOVE, IT SEEMS THAT THE EARTHQUAKES TABLE HAS BEEN REMOVED
+--AND INSTEAD WE NEED TO REFERENCE THE NATIONS TABLE NOW
+SELECT CountryName 
+FROM Nations -- Table from Earthquakes database
+
+INTERSECT -- Operator for the intersect between tables
+
+SELECT Country
+FROM Players; -- Table from NBA Season 2017-2018 database
+
+
+
+
+CountryName
+Argentina
+Australia
+Austria
+Bahamas
+Bosnia and Herzegovina
+Brazil
+Cameroon
+Canada
+China
+Croatia
+Czech Republic
+Dominican Republic
+Egypt
+Finland
+France
+Georgia
+Germany
+Greece
+Haiti
+Israel
+Italy
+Jamaica
+Latvia
+Lithuania
+Mali
+Montenegro
+New Zealand
+Poland
+Puerto Rico
+Russia
+Senegal
+Serbia
+Slovenia
+South Sudan
+Spain
+Sweden
+Switzerland
+Tunisia
+Turkey
+Ukraine
+United Kingdom
+
+Showing 41 out of 41 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+With one exception, all NBA teams are USA based, so why does USA not appear in the results? Are there no Americans playing in the NBA?
+
+To help get your answer, use the two queries below;
+Delete the query in the query console.
+Copy and paste one of the queries into the query console.
+Select Run Code to view the results.
+Repeat steps 1 to 4 for the other query.
+
+SELECT * 
+FROM Nations
+WHERE CountryName LIKE 'U%'
+
+SELECT *
+FROM Players
+WHERE Country LIKE 'U%'
+
+
+
+
+
+SELECT * 
+FROM Nations
+WHERE CountryName LIKE 'U%'
+
+CountryName	Code2	Code3	Capital	WorldBankRegion	UNContinentRegion	UNStatisticalRegion	Pop2016	Pop2017	Land_km2	Water_km2
+Uganda	UG	UGA	Kampala	Sub-Sahara Africa	Africa	Eastern Africa	41487965	42862958	197100	43938
+Ukraine	UA	UKR	Kiev	Europe and Central Asia	Europe	Eastern Europe	44438625	44222947	579300	24200
+United Arab Emirates	AE	ARE	Abu Dhabi	Middle East and North Africa	Asia	Western Asia	9269612	9400145	83600	0
+United Kingdom	GB	GBR	London	Europe and Central Asia	Europe	Northern Europe	65788574	66181585	241930	1680
+United States of America	US	USA	Washington D.C.	North America	Americas	Northern America	322179605	324459463	9147643	685924
+Uruguay	UY	URY	Montevideo	Latin America and Carribean	Americas	South America	3444006	3456750	175015	1200
+Uzbekistan	UZ	UZB	Tashkent	Europe and Central Asia	Asia	Central Asia	31446795	31910641	425400	22000
+US Virgin Islands	VI	VIR	Charlotte Amalie	Latin America and Carribean	Americas	Caribbean	104913	104901	346	1564
+('42S22', "[42S22] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]Invalid column name 'CountryName'. (207) (SQLExecDirectW)")
+Showing 8 out of 8 rows
+
+
+SELECT *
+FROM Players
+WHERE Country LIKE 'U%'
+
+PlayerName	Age	Height_cm	Weight_kg	Country	College	DraftYear	DraftRound	DraftNumber
+Aaron Brooks	33	182.88	72.45	USA	Oregon	2007	1	26
+Aaron Gordon	22	205.74	99	USA	Arizona	2014	1	4
+Aaron Harrison	23	198.12	94.5	USA	Kentucky	null	null	null
+Aaron Jackson	32	190.5	82.35	USA	None	null	null	null
+Adreian Payne	27	208.28	106.65	USA	Michigan State	2014	1	15
+Al Jefferson	33	208.28	126	USA	None	2004	1	15
+Alan Williams	25	203.2	119.25	USA	California-Santa Barbara	null	null	null
+Alec Burks	26	198.12	96.3	USA	Colorado	2011	1	12
+Alec Peters	23	205.74	105.75	USA	Valparaiso	2017	2	54
+Alex Caruso	24	195.58	83.7	USA	Texas A&M	null	null	null
+Alex Len	25	215.9	112.5	Ukraine	Maryland	2013	1	5
+Alex Poythress	24	205.74	105.75	USA	Kentucky	null	null	null
+Al-Farouq Aminu	27	205.74	99	USA	Wake Forest	2010	1	8
+Alfonzo McKinnie	25	203.2	96.75	USA	None	null	null	null
+Allen Crabbe	26	198.12	96.75	USA	California	2013	2	31
+Amir Johnson	31	205.74	108	USA	None	2005	2	56
+Andre Drummond	24	210.82	125.55	USA	Connecticut	2012	1	9
+Andre Iguodala	34	198.12	96.75	USA	Arizona	2004	1	9
+Andre Ingram	32	190.5	85.5	USA	American	null	null	null
+Andre Roberson	26	200.66	94.5	USA	Colorado	2013	1	26
+Andrew Harrison	23	198.12	95.85	USA	Kentucky	2015	2	44
+Andrew White	25	200.66	94.5	USA	Syracuse	null	null	null
+Anthony Brown	25	200.66	100.8	USA	Stanford	2015	2	34
+Anthony Davis	25	208.28	113.85	USA	Kentucky	2012	1	1
+Anthony Tolliver	33	203.2	108	USA	Creighton	null	null	null
+Antonio Blakeney	21	193.04	88.65	USA	Louisiana State	null	null	null
+Antonius Cleveland	24	198.12	87.75	USA	Southeast Missouri State	null	null	null
+Arron Afflalo	32	195.58	94.5	USA	UCLA	2007	1	27
+Austin Rivers	25	193.04	90	USA	Duke	2012	1	10
+Avery Bradley	27	187.96	81	USA	Texas	2010	1	19
+Bam Adebayo	20	208.28	114.75	USA	Kentucky	2017	1	14
+Ben McLemore	25	195.58	87.75	USA	Kansas	2013	1	7
+Ben Moore	23	203.2	99	USA	Southern Methodist	null	null	null
+Blake Griffin	29	208.28	112.95	USA	Oklahoma	2009	1	1
+Bobby Brown	33	187.96	78.75	USA	Cal State-Fullerton	null	null	null
+Bobby Portis	23	210.82	111.6	USA	Arkansas	2015	1	22
+Bradley Beal	25	195.58	93.15	USA	Florida	2012	1	3
+Brandan Wright	30	208.28	105.75	USA	North Carolina	2007	1	8
+Brandon Ingram	20	205.74	85.5	USA	Duke	2016	1	2
+Brandon Jennings	28	185.42	76.5	USA	None	2009	1	10
+Brandon Paul	27	193.04	90	USA	None	null	null	null
+Briante Weber	25	187.96	74.25	USA	Virginia Commonwealth	null	null	null
+Brice Johnson	24	208.28	103.5	USA	North Carolina	2016	1	25
+Brook Lopez	30	213.36	120.6	USA	Stanford	2008	1	10
+Bryn Forbes	24	190.5	85.5	USA	Michigan State	null	null	null
+C.J. Miles	31	198.12	101.25	USA	None	2005	2	34
+C.J. Williams	28	195.58	103.5	USA	North Carolina State	null	null	null
+Caleb Swanigan	21	203.2	112.5	USA	Purdue	2017	1	26
+Cameron Payne	23	190.5	83.25	USA	Murray State	2015	1	14
+Caris LeVert	23	200.66	91.35	USA	Michigan	2016	1	20
+Carmelo Anthony	34	203.2	108	USA	Syracuse	2003	1	3
+Chandler Parsons	29	208.28	103.5	USA	Florida	2011	2	38
+Channing Frye	35	210.82	114.75	USA	Arizona	2005	1	8
+Charles Cooke	23	195.58	88.2	USA	Dayton	null	null	null
+Chinanu Onuaku	21	208.28	110.25	USA	Louisville	2016	2	37
+Chris McCullough	23	205.74	96.75	USA	Syracuse	2015	1	29
+Chris Paul	33	182.88	78.75	USA	Wake Forest	2005	1	4
+CJ McCollum	26	190.5	85.5	USA	Lehigh	2013	1	10
+Cody Zeller	25	213.36	108	USA	Indiana	2013	1	4
+Cole Aldrich	29	210.82	113.85	USA	Kansas	2010	1	11
+Corey Brewer	32	205.74	83.7	USA	Florida	2007	1	7
+Courtney Lee	32	195.58	90	USA	Western Kentucky	2008	1	22
+D.J. Augustin	30	182.88	82.35	USA	Texas	2008	1	9
+D.J. Wilson	22	208.28	106.2	USA	Michigan	2017	1	17
+Dakari Johnson	22	213.36	114.75	USA	Kentucky	2015	2	48
+Damian Jones	23	213.36	110.25	USA	Vanderbilt	2016	1	30
+Damian Lillard	27	190.5	87.75	USA	Weber State	2012	1	6
+Damien Wilkins	38	198.12	97.65	USA	Georgia	null	null	null
+Damion Lee	25	198.12	94.5	USA	Louisville	null	null	null
+Damyean Dotson	24	195.58	94.5	USA	Houston	2017	2	44
+D'Angelo Russell	22	195.58	87.75	USA	Ohio State	2015	1	2
+Daniel Hamilton	22	200.66	87.75	USA	Connecticut	2016	2	56
+Danny Green	31	198.12	96.75	USA	North Carolina	2009	2	46
+Dante Cunningham	31	203.2	103.5	USA	Villanova	2009	2	33
+Danuel House	25	200.66	99	USA	Texas A&M	null	null	null
+Darius Miller	28	203.2	101.25	USA	Kentucky	2012	2	46
+Darrell Arthur	30	205.74	105.75	USA	Kansas	2008	1	27
+Darren Collison	30	187.96	83.25	USA	UCLA	2009	1	21
+Darrun Hilliard	25	198.12	99	USA	Villanova	2015	2	38
+David Nwaba	25	193.04	94.05	USA	None	null	null	null
+David Stockton	27	180.34	74.25	USA	Gonzaga	null	null	null
+David West	37	205.74	112.5	USA	Xavier	2003	1	18
+Davon Reed	23	198.12	94.5	USA	Miami (FL)	2017	2	32
+De'Aaron Fox	20	190.5	78.75	USA	Kentucky	2017	1	5
+DeAndre' Bembry	23	198.12	94.5	USA	Saint Joseph's	2016	1	21
+DeAndre Jordan	29	210.82	119.25	USA	Texas A&M	2008	2	35
+DeAndre Liggins	30	198.12	94.05	USA	Kentucky	2011	2	53
+Dejounte Murray	21	195.58	76.5	USA	Washington	2016	1	29
+Delon Wright	26	195.58	85.5	USA	Utah	2015	1	20
+DeMar DeRozan	28	200.66	99	USA	Southern California	2009	1	9
+DeMarcus Cousins	27	210.82	121.5	USA	Kentucky	2010	1	5
+DeMarre Carroll	31	203.2	96.75	USA	Missouri	2009	1	27
+Demetrius Jackson	23	185.42	90.45	USA	Notre Dame	2016	2	45
+Dennis Smith	20	190.5	87.75	USA	North Carolina State	2017	1	9
+Denzel Valentine	24	198.12	96.3	USA	Michigan State	2016	1	14
+Derrick Favors	26	208.28	119.25	USA	Georgia Tech	2010	1	3
+Derrick Jones	21	200.66	90	USA	Nevada-Las Vegas	null	null	null
+Derrick Rose	29	190.5	85.5	USA	Memphis	2008	1	1
+Derrick Walton	23	185.42	83.25	USA	Michigan	null	null	null
+Derrick White	23	193.04	85.5	USA	Colorado	2017	1	29
+
+Showing 100 out of 430 rows
+
+
+
+
+The outer query should be using the Code3 column from the Nations table, not CountryName.
+The original query contains filters on the Nations and Players tables for countries other than the USA.
+INTERSECT is not the correct operator to use. The correct operator to use for this question is EXCEPT.
+
+#YES - The values do not match. In the Nations table, the value for country name is stored as United States of America, and in the Players table, the value is stored as USA.
+Excellent! INTERSECT is being used correctly. However, although both tables contain names of countries, the way the values are stored is different. In the Nations table, the values are stored as United States of America and in the Players table, as USA. Therefore, there is no match, which is a good reason to perform a thorough data interrogation on all data sets before working with databases.
+
+
+
+
