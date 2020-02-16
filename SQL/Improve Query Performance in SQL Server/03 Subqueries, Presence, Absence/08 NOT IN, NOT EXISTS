@@ -1,0 +1,68 @@
+NOT IN and NOT EXISTS
+NOT IN and NOT EXISTS do the opposite of IN and EXISTS respectively. They are used to check if the data present in one table is absent in another.
+You are interested to know if there are some countries in the Nations table that do not appear in the Cities table. There may be many reasons for this. For example, all the city populations from a country may be too small to be listed, or there may be no city data for a particular country at the time the data was compiled.
+You will compare the queries using country codes.
+
+
+Add the operator to compare the outer query with the sub-query.
+Add the country code column to the sub-query.
+
+SELECT WorldBankRegion,
+       CountryName
+FROM Nations
+WHERE Code2 NOT IN -- Add the operator to compare queries
+	(SELECT CountryCode -- Country code column
+	 FROM Cities);
+
+
+WorldBankRegion	CountryName
+Europe and Central Asia	Isle of Man
+East Asia and Pacific	Macau
+Latin America and Carribean	Montserrat
+Latin America and Carribean	Puerto Rico
+Europe and Central Asia	Saint-Martin
+Sub-Sahara Africa	Sao Tome and Principe
+Showing 6 out of 6 rows
+
+
+
+
+
+
+
+
+
+
+
+Add the country capital column to the outer query.
+Add the operator to compare the outer query with the sub-query.
+Add the two country code columns being compared in the sub-query.
+
+SELECT WorldBankRegion,
+       CountryName,
+	   Code2,
+       Capital, -- Country capital column
+	   Pop2017
+FROM Nations AS n
+WHERE NOT EXISTS -- Add the operator to compare queries
+	(SELECT 1
+	 FROM Cities AS c
+	 WHERE n.Code2 = c.CountryCode); -- Columns being compared
+
+
+WorldBankRegion	CountryName	Code2	Capital	Pop2017
+Europe and Central Asia	Isle of Man	IM	Douglas	84287
+East Asia and Pacific	Macau	MO	Macau	622567
+Latin America and Carribean	Montserrat	MS	Plymouth	5177
+Latin America and Carribean	Puerto Rico	PR	San Juan	3663131
+Europe and Central Asia	Saint-Martin	MF	Marigot	40120
+Sub-Sahara Africa	Sao Tome and Principe	ST	Sao Tome	204327
+Showing 6 out of 6 rows
+
+
+
+
+Good job! NOT IN and NOT EXISTS are used to check if the data present in one table is absent in another.
+
+The reason Puerto Rico appears in the results is because all Puerto Rico cities are stored in the Cities table with a country code of US and the country code for Puerto Rico in the Nations table is PR. Therefore, there is no match.
+
