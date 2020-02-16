@@ -1,0 +1,50 @@
+Pickup locations by shift
+It's time to solve the second objective of the business case. What are the AvgFarePerKM, RideCount and TotalRideMin for each pickup location and shift within a NYC Borough?
+
+Create a stored procedure named cuspPickupZoneShiftStats that accepts @Borough nvarchar(30) as an input parameter and limits records with the matching Borough value.
+Calculate the 'Shift' by passing the hour of the PickupDate to the dbo.GetShiftNumber() function. Use the DATEPART function to select only the hour portion of the PickupDate.
+Group by PickupDate weekday, shift, and Zone.
+Sort by PickupDate weekday (with Monday first), shift, and TotalRideMin.
+
+
+-- Create the stored procedure
+CREATE PROCEDURE dbo.cuspPickupZoneShiftStats
+	-- Specify @Borough parameter
+	@Borough nvarchar(30)
+AS
+BEGIN
+
+
+SELECT
+	DATENAME(WEEKDAY, PickupDate) as 'Weekday',
+    -- Calculate the shift number
+	dbo.GetShiftNumber(DATEPART(HOUR, PickupDate)) as 'Shift',
+	Zone.Zone as 'Zone',
+	FORMAT(AVG(dbo.ConvertDollar(TotalAmount, .77)/dbo.ConvertMiletoKM(TripDistance)), 'c', 'de-de') AS 'AvgFarePerKM',
+	FORMAT(COUNT (ID),'n', 'de-de') as 'RideCount',
+	FORMAT(SUM(DATEDIFF(SECOND, PickupDate, DropOffDate))/60, 'n', 'de-de') as 'TotalRideMin'
+FROM YellowTripData
+INNER JOIN TaxiZoneLookup as Zone on PULocationID = Zone.LocationID 
+WHERE
+	dbo.ConvertMiletoKM(TripDistance) > 0 AND
+	Zone.Borough = @Borough
+GROUP BY
+	DATENAME(WEEKDAY, PickupDate),
+    -- Group by shift
+	dbo.GetShiftNumber(DATEPART(HOUR, PickupDate)),  
+	Zone.Zone
+ORDER BY CASE WHEN DATENAME(WEEKDAY, PickupDate) = 'Monday' THEN 1
+              WHEN DATENAME(WEEKDAY, PickupDate) = 'Tuesday' THEN 2
+              WHEN DATENAME(WEEKDAY, PickupDate) = 'Wednesday' THEN 3
+              WHEN DATENAME(WEEKDAY, PickupDate) = 'Thursday' THEN 4
+              WHEN DATENAME(WEEKDAY, PickupDate) = 'Friday' THEN 5
+              WHEN DATENAME(WEEKDAY, PickupDate) = 'Saturday' THEN 6
+              WHEN DATENAME(WEEKDAY, PickupDate) = 'Sunday' THEN 7 END,
+         -- Order by shift
+         dbo.GetShiftNumber(DATEPART(HOUR, PickupDate)),
+         SUM(DATEDIFF(SECOND, PickupDate, DropOffDate))/60 DESC
+
+
+END;
+
+
