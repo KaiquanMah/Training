@@ -1,0 +1,134 @@
+Sort operator in execution plans
+Execution plans can tell us if and where a query used an internal sorting operation. Internal sorting is often required when using an operator in a query that checks for and removes duplicate rows.
+You are given an execution plan of a query that returns all cities listed in the Earthquakes database. The query appends queries from the Nations and Cities tables. Use the following execution plan to determine if the appending operator used is UNION or UNION ALL
+
+SELECT   <-   hash match - UNION    <-     Table scan - cities
+                                    <-     sort - distinct sort        <-         Table scan - nations
+
+
+
+
+Add the operator that the execution plan indicates was used to append the queries.
+SELECT CityName AS NearCityName,
+	   CountryCode
+FROM Cities
+
+UNION -- Append queries
+
+SELECT Capital AS NearCityName,
+       Code2 AS CountryCode
+FROM Nations;
+
+
+
+
+
+NearCityName	CountryCode
+Basse-Terre	GP
+Buenos Aires	AR
+Douglas	IM
+Macau	MO
+Marigot	MF
+Monaco-Ville	MC
+Panama City	PA
+Plymouth	MS
+Port-au-Prince	HT
+Port-of-Spain	TT
+Port-Vila	VU
+Saint-Denis	RE
+Saint-Pierre	TF
+San Juan	PR
+Sao Tome	ST
+Sao Joao	BR
+Prince Rupert	CA
+Canar	EC
+Saipan	MP
+Liesveld	NL
+Orong	PH
+Fazalpur	PK
+Casper	US
+Glassboro	US
+Warmbad	ZA
+Remedios	CO
+Huamachuco	PE
+Alibunan	PH
+Dhadar	PK
+Lugovskiy	RU
+Talitsa	RU
+Zanzibar	TZ
+Holar	IS
+Bayanga	PH
+Comana	RO
+Kapenguria	KE
+Zorlentu Mare	RO
+Nalbandyan	AM
+Camapua	BR
+Belaya Glina	RU
+Saanen	CH
+Vaterstetten	DE
+Vohma	EE
+Poceirao	PT
+Fengshan	TW
+Shalu	TW
+Beachwood	US
+Cambre	ES
+Ambeloi	GR
+Moncalieri	IT
+San Marco In Lamis	IT
+Charo	MX
+Castro Marim	PT
+San Pablo	US
+Los Palmitos	CO
+Jepara	ID
+Dahegam	IN
+Navadwip	IN
+Forst	DE
+Konch	IN
+Udaipura	IN
+Saysain	PH
+Zorak	AM
+Wabana	CA
+Tunja	CO
+Halesowen	GB
+Martonvasar	HU
+Kamalapuram	IN
+Chalchihuites	MX
+Vadastrita	RO
+Pizhanka	RU
+Marbel	PH
+Erdaojiang	CN
+Pingzhuang	CN
+San Jose Del Guaviare	CO
+Cabaiguan	CU
+Lamu	KE
+Hamrun	MT
+Aricestii Zeletin	RO
+Otse	BW
+Sluknov	CZ
+Martorell	ES
+Sitarganj	IN
+Horgesti	RO
+Tivaouane	SN
+Milove	UA
+Narayanganj	BD
+Nihtaur	IN
+Altamira	MX
+Maltrata	MX
+Eidfjord	NO
+Magsingal	PH
+Biertan	RO
+Curug	RS
+Kipen	RU
+Vad	RU
+Alcanede	PT
+Ciocanesti	RO
+Ayan	RU
+Velikie Luki	RU
+Showing 100 out of 45032 rows
+
+
+
+
+
+Excellent!!! The UNION operator checks for and removes duplicates when appending queries. This requires an internal sorting. Be aware of the Sort operator in execution plans because it can be costly on a query, particularly if it is used unnecessarily.
+
