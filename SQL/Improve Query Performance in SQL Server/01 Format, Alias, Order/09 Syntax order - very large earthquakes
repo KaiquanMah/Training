@@ -1,0 +1,204 @@
+Syntax order - very large earthquakes
+When a query is executed it will stop at the first error it encounters and will return an error message. Because a query is processed in a stepped order the first error it stops at will be related to the processing order.
+FROM is processed first and checks that the queried table(s) exist in the database.
+WHERE is always processed after FROM if a row filtering condition is specified. Column(s) having the filtering condition applied must exist.
+SELECT is only processed once the data is ready to be extracted and displayed or returned to the user.
+
+
+Earthquakes
+Date	Time	latitude	longitude	depth	magnitude	place	NearestPop	Country
+22-May-60	19:11:20	-38.143	-73.407	25	9.5	Bio-Bio - Chile	Canete	CL
+28-Mar-64	3:36:16	60.908	-147.339	25	9.2	Southern Alaska	Palmer	US
+26-Dec-04	0:58:53	3.295	95.982	30	9.1	off the west coast of northern Sumatra	Meulaboh	ID
+...
+
+
+
+Nations
+CountryName	Code2	Code3	Capital	WorldBankRegion	UNContinentRegion	UNStatisticalRegion	Pop2016	Pop2017	Land_km2	Water_km2
+Afghanistan	AF	AFG	Kabul	South Asia	Asia	Southern Asia	34656032	35530081	652230	0
+Albania	AL	ALB	Tirana	Europe and Central Asia	Europe	Southern Europe	2926348	2930187	27398	1350
+Algeria	DZ	DZA	Algiers	Middle East and North Africa	Africa	Northern Africa	40606052	41318142	2381741	0
+...
+
+
+
+Cities
+CountryCode	CityName	Pop2017	Latitude	Longitude
+AD	Andorra La Vella	20430	42.5	1.5166667
+AD	Canillo	3292	42.5666667	1.6
+AD	Encamp	11224	42.5333333	1.5833333
+...
+
+This exercise has three queries—each contains errors. Your job is to find the errors and fix them.
+Note that the red text below the query result tab is a description of the error.
+
+
+
+
+
+
+
+
+
+
+
+Select Run Code and look at the error produced. 
+/*
+Returns the location of the epicenter of earthquakes with a 9+ magnitude
+*/
+
+-- Replace Countries with the correct table name
+SELECT n.CountryName AS Country
+	,e.NearestPop AS ClosestCity
+    ,e.Date
+    ,e.Magnitude
+FROM Countries AS n
+INNER JOIN Earthquakes AS e
+	ON n.Code2 = e.Country
+WHERE e.Magnitude >= 9
+ORDER BY e.Magnitude DESC;
+Fix the error and select Submit Answer.
+
+/*
+Returns the location of the epicenter of earthquakes with a 9+ magnitude
+*/
+
+-- Replace Countries with the correct table name
+SELECT n.CountryName AS Country
+	,e.NearestPop AS ClosestCity
+    ,e.Date
+    ,e.Magnitude
+FROM Nations AS n
+INNER JOIN Earthquakes AS e
+	ON n.Code2 = e.Country
+WHERE e.Magnitude >= 9
+ORDER BY e.Magnitude DESC;
+
+
+Country	ClosestCity	Date	Magnitude
+Chile	Canete	22-May-60	9.5
+United States of America	Palmer	28-Mar-64	9.2
+Indonesia	Meulaboh	26-Dec-04	9.1
+Japan	Ishinomaki	11-Mar-11	9.1
+Russia	Petropavlovsk-Kamchatskiy	4-Nov-52	9
+Showing 5 out of 5 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+Select Run Code and look at the error produced. 
+/*
+Returns the location of the epicenter of earthquakes with a 9+ magnitude
+*/
+
+-- Replace Magnatud with the correct column name
+SELECT n.CountryName AS Country
+	,e.NearestPop AS ClosestCity
+    ,e.Date
+    ,e.Magnitude
+FROM Nations AS n
+INNER JOIN Earthquakes AS e
+	ON n.Code2 = e.Country
+WHERE e.Magnatud >= 9
+ORDER BY e.Magnitude DESC;
+Fix the error and select Submit Answer.
+
+/*
+Returns the location of the epicenter of earthquakes with a 9+ magnitude
+*/
+
+-- Replace Magnatud with the correct column name
+SELECT n.CountryName AS Country
+	,e.NearestPop AS ClosestCity
+    ,e.Date
+    ,e.Magnitude
+FROM Nations AS n
+INNER JOIN Earthquakes AS e
+	ON n.Code2 = e.Country
+WHERE e.Magnitude >= 9
+ORDER BY e.Magnitude DESC;
+
+
+
+Country	ClosestCity	Date	Magnitude
+Chile	Canete	22-May-60	9.5
+United States of America	Palmer	28-Mar-64	9.2
+Indonesia	Meulaboh	26-Dec-04	9.1
+Japan	Ishinomaki	11-Mar-11	9.1
+Russia	Petropavlovsk-Kamchatskiy	4-Nov-52	9
+Showing 5 out of 5 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Select Run Code and look at the error produced.
+/*
+Location of the epicenter of earthquakes with a 9+ magnitude
+*/
+
+-- Replace City with the correct column name
+SELECT n.CountryName AS Country
+	,e.City AS ClosestCity
+    ,e.Date
+    ,e.Magnitude
+FROM Nations AS n
+INNER JOIN Earthquakes AS e
+	ON n.Code2 = e.Country
+WHERE e.Magnitude >= 9
+ORDER BY e.Magnitude DESC;
+Fix the error and select Submit Answer.
+
+/*
+Location of the epicenter of earthquakes with a 9+ magnitude
+*/
+
+-- Replace City with the correct column name
+SELECT n.CountryName AS Country
+	,e.NearestPop AS ClosestCity
+    ,e.Date
+    ,e.Magnitude
+FROM Nations AS n
+INNER JOIN Earthquakes AS e
+	ON n.Code2 = e.Country
+WHERE e.Magnitude >= 9
+ORDER BY e.Magnitude DESC;
+
+Country	ClosestCity	Date	Magnitude
+Chile	Canete	22-May-60	9.5
+United States of America	Palmer	28-Mar-64	9.2
+Indonesia	Meulaboh	26-Dec-04	9.1
+Japan	Ishinomaki	11-Mar-11	9.1
+Russia	Petropavlovsk-Kamchatskiy	4-Nov-52	9
+Showing 5 out of 5 rows
+
+
+Great work! If a query contains errors, the order of each error raised will be according to the query processing order.
+
+Look at the results, any earthquake over magnitude 9 is HUGE! It looks like we've had one every decade since 2000.
+
