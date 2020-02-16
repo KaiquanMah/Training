@@ -1,0 +1,256 @@
+Sub-query vs INNER JOIN
+Often the results from a correlated sub-query can be replicated using an INNER JOIN. Depending on what your requirements are, using an INNER JOIN may be more efficient because it only makes one pass through the data whereas the correlated sub-query must execute for each row in the outer query.
+You want to find out the 2017 population of the biggest city for every country in the world. You can get this information from the Earthquakes database with the Nations table as the outer query and Cities table in the sub-query.
+You will first create this query as a correlated sub-query then rewrite it using an INNER JOIN.
+
+
+Add the 2017 population column from the Cities table.
+Add the outer query country code column to the sub-query.
+Add the outer query table.
+SELECT
+	n.CountryName,
+	 (SELECT MAX(c.Pop2017) -- Add 2017 population column
+	 FROM Cities AS c 
+                       -- Outer query country code column
+	 WHERE c.CountryCode = n.Code2) AS BiggestCity
+FROM Nations AS n; -- Outer query table
+
+
+CountryName	BiggestCity
+Afghanistan	3043589
+Albania	374801
+Algeria	1980242
+American Samoa	3656
+Andorra	20430
+Angola	2776125
+Anguilla	1379
+Antigua and Barbuda	21926
+Argentina	1441007
+Armenia	1093499
+Aruba	29998
+Australia	4394585
+Austria	1569315
+Azerbaijan	1116513
+Bahamas	227936
+Bahrain	147097
+Bangladesh	6493177
+Barbados	98511
+Belarus	1742123
+Belgium	1019022
+Belize	61462
+Benin	690584
+Bermuda	1802
+Bhutan	114551
+Bolivia	900440
+Bosnia and Herzegovina	696726
+Botswana	208411
+Brazil	10021437
+British Virgin Islands	8449
+Brunei Darussalam	27285
+Bulgaria	1062065
+Burkina Faso	1031330
+Burundi	330539
+Cambodia	1573523
+Cameroon	1338144
+Canada	4612187
+Cape Verde	111611
+Cayman Islands	27340
+Central African Republic	684190
+Chad	1605696
+Chile	4837248
+China	14608512
+Colombia	7102602
+Comoros	42882
+Congo	1115773
+Democratic Republic of the Congo	7787832
+Cook Islands	13374
+Costa Rica	63094
+Ivory Coast	3692570
+Croatia	698967
+Cuba	2130000
+Cyprus	154018
+Czech Republic	1154508
+Denmark	1089958
+Djibouti	623891
+Dominica	16571
+Dominican Republic	2202016
+Ecuador	1952029
+Egypt	7734602
+El Salvador	526013
+Equatorial Guinea	173036
+Eritrea	563948
+Estonia	394023
+Ethiopia	2757807
+Fiji	88271
+Finland	558457
+France	2110694
+French Polynesia	29389
+Gabon	578156
+Gambia	218790
+Georgia	1049516
+Germany	3398362
+Ghana	1963460
+Gibraltar	26544
+Greece	729139
+Greenland	14799
+Grenada	33734
+Guam	1051
+Guatemala	973208
+Guernsey	18207
+Guinea	1871185
+Guinea-Bissau	388094
+Guyana	235017
+Haiti	1234750
+Vatican City	1000
+Honduras	850961
+Hong Kong	7448900
+Hungary	1708088
+Iceland	113907
+India	12692717
+Indonesia	8540306
+Iran	15232563
+Iraq	5672516
+Ireland	1024027
+Isle of Man	null
+Israel	714685
+Italy	2643736
+Jamaica	583999
+Japan	31480498
+Jordan	4007526
+Showing 100 out of 233 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Join the Nations table to the sub-query.
+Add the joining country code columns from the Nations table and sub-query.
+SELECT n.CountryName, 
+       c.BiggestCity 
+FROM Nations AS n
+INNER JOIN -- Join the Nations table and sub-query
+    (SELECT CountryCode, 
+     MAX(Pop2017) AS BiggestCity 
+     FROM Cities
+     GROUP BY CountryCode) AS c
+ON n.Code2 = c.CountryCode; -- Add the joining columns
+
+
+
+
+CountryName	BiggestCity
+Afghanistan	3043589
+Albania	374801
+Algeria	1980242
+American Samoa	3656
+Andorra	20430
+Angola	2776125
+Anguilla	1379
+Antigua and Barbuda	21926
+Argentina	1441007
+Armenia	1093499
+Aruba	29998
+Australia	4394585
+Austria	1569315
+Azerbaijan	1116513
+Bahamas	227936
+Bahrain	147097
+Bangladesh	6493177
+Barbados	98511
+Belarus	1742123
+Belgium	1019022
+Belize	61462
+Benin	690584
+Bermuda	1802
+Bhutan	114551
+Bolivia	900440
+Bosnia and Herzegovina	696726
+Botswana	208411
+Brazil	10021437
+British Virgin Islands	8449
+Brunei Darussalam	27285
+Bulgaria	1062065
+Burkina Faso	1031330
+Burundi	330539
+Cambodia	1573523
+Cameroon	1338144
+Canada	4612187
+Cape Verde	111611
+Cayman Islands	27340
+Central African Republic	684190
+Chad	1605696
+Chile	4837248
+China	14608512
+Colombia	7102602
+Comoros	42882
+Congo	1115773
+Democratic Republic of the Congo	7787832
+Cook Islands	13374
+Costa Rica	63094
+Ivory Coast	3692570
+Croatia	698967
+Cuba	2130000
+Cyprus	154018
+Czech Republic	1154508
+Denmark	1089958
+Djibouti	623891
+Dominica	16571
+Dominican Republic	2202016
+Ecuador	1952029
+Egypt	7734602
+El Salvador	526013
+Equatorial Guinea	173036
+Eritrea	563948
+Estonia	394023
+Ethiopia	2757807
+Fiji	88271
+Finland	558457
+France	2110694
+French Polynesia	29389
+Gabon	578156
+Gambia	218790
+Georgia	1049516
+Germany	3398362
+Ghana	1963460
+Gibraltar	26544
+Greece	729139
+Greenland	14799
+Grenada	33734
+Guam	1051
+Guatemala	973208
+Guernsey	18207
+Guinea	1871185
+Guinea-Bissau	388094
+Guyana	235017
+Haiti	1234750
+Vatican City	1000
+Honduras	850961
+Hong Kong	7448900
+Hungary	1708088
+Iceland	113907
+India	12692717
+Indonesia	8540306
+Iran	15232563
+Iraq	5672516
+Ireland	1024027
+Israel	714685
+Italy	2643736
+Jamaica	583999
+Japan	31480498
+Jordan	4007526
+Kazakhstan	1204820
+Showing 100 out of 227 rows
+
+
+
+
