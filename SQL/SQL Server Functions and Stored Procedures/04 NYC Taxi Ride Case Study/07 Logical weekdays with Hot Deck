@@ -1,0 +1,42 @@
+Logical weekdays with Hot Deck
+Calculate Total Fare Amount per Total Distance for each day of week. If the TripDistance is zero use the Hot Deck imputation function you created earlier in the chapter.
+
+Use DATENAME() and PickupDate to select the day of week.
+Use AVG() to calculate TotalAmount per TripDistance, and a CASE statement to select TripDistance if it's more than 0. If not, use dbo.GetTripDistanceHotDeck().
+Order by the PickupDate day of week, with 'Monday' appearing first.
+
+SELECT
+    -- Select the pickup day of week
+	DATENAME(weekday, PickupDate) as DayofWeek,
+    -- Calculate TotalAmount per TripDistance
+	CAST(AVG(TotalAmount/
+            -- Select TripDistance if it's more than 0
+			CASE WHEN TripDistance > 0 THEN TripDistance
+                 -- Use GetTripDistanceHotDeck()
+     			 ELSE dbo.GetTripDistanceHotDeck() END) as decimal(10,2)) as 'AvgFare'
+FROM YellowTripData
+GROUP BY DATENAME(weekday, PickupDate)
+-- Order by the PickupDate day of week
+ORDER BY
+     CASE WHEN DATENAME(weekday, PickupDate) = 'Monday' THEN 1
+          WHEN DATENAME(weekday, PickupDate) = 'Tuesday' THEN 2
+          WHEN DATENAME(weekday, PickupDate) = 'Wednesday' THEN 3
+          WHEN DATENAME(weekday, PickupDate) = 'Thursday' THEN 4
+          WHEN DATENAME(weekday, PickupDate) = 'Friday' THEN 5
+          WHEN DATENAME(weekday, PickupDate) = 'Saturday' THEN 6
+          WHEN DATENAME(weekday, PickupDate) = 'Sunday' THEN 7
+END ASC;
+
+
+
+DayofWeek	AvgFare
+Monday	8.80
+Tuesday	9.27
+Wednesday	8.74
+Thursday	8.25
+Friday	9.97
+Saturday	8.05
+Sunday	7.46
+
+How cool is that! You used your Hot Deck function in a calculation AND can sort by day of the week!
+
