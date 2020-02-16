@@ -1,0 +1,72 @@
+STATISTICS IO Example 2
+In the previous exercise, you were asked you to provide a new regional manager daily updates on orders shipped to Western Europe capital cities. You initially created a query that contained two sub-queries. You decide to do a rewrite and use an INNER JOIN.
+The STATISTICS IO command is turned on. You will need to turn it off after completing the query.
+
+
+Add the join operator.
+Add the shipping destination city column in the filter condition.
+-- Example 2
+SELECT c.CustomerID,
+       c.CompanyName,
+       COUNT(o.CustomerID)
+FROM Customers AS c
+INNER JOIN Orders AS o -- Join operator
+    ON c.CustomerID = o.CustomerID
+WHERE o.ShipCity IN -- Shipping destination column
+     ('Berlin','Bern','Bruxelles','Helsinki',
+	 'Lisboa','Madrid','Paris','London')
+GROUP BY c.CustomerID,
+         c.CompanyName;
+
+
+
+CustomerID	CompanyName	
+ALFKI	Alfreds Futterkiste	6
+BSBEV	B s Beverages	10
+BOLID	Bolido Comidas preparadas	3
+CHOPS	Chop-suey Chinese	8
+CONSH	Consolidated Holdings	3
+EASTC	Eastern Connection	8
+FURIB	Furia Bacalhau e Frutos do Mar	8
+MAISD	Maison Dewey	7
+NORTS	North-South	3
+PRINI	Princesa Isabel Vinhos	5
+ROMEY	Romero y tomillo	5
+SEVES	Seven Seas Imports	9
+SPECD	Specialites du monde	4
+WILMK	Wilman Kala	7
+Showing 14 out of 14 rows
+
+
+
+
+
+
+
+
+
+
+
+
+Turn off STATISTICS IO.
+SET STATISTICS IO OFF -- Turn the IO command off
+
+
+
+
+
+
+
+
+From the STATISTICS IO output below, how many data pages from the Orders table were read from memory to complete the query?
+Table 'Customers'. Scan count 1, logical reads 2, physical reads 0,...
+Table 'Orders'. Scan count 2, logical reads 16, physical reads 0,...
+
+Zero
+One
+Two
+
+#YES - Sixteen
+Great! Logical reads for the Orders table indicates sixteen data pages were read from memory to complete the query.
+
+
