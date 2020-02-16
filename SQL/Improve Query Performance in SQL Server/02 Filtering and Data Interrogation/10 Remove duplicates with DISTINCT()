@@ -1,0 +1,309 @@
+Remove duplicates with DISTINCT()
+You want to know the closest city to earthquakes with a magnitude of 8 or higher. You can get this information from the Earthquakes table. However, a simple query returns duplicate rows because some cities have experienced more than one magnitude 8 or higher earthquake.
+You can remove duplicates by using the DISTINCT() clause. Once you have your results, you would like to know how many times each city has experienced an earthquake of magnitude 8 or higher.
+Note that IS NOT NULL is being used because many earthquakes do not occur near any populated area, thankfully.
+
+
+Add the closest city and view the output of the query to confirm duplicated rows.
+SELECT NearestPop, -- Add the closest city
+		Country 
+FROM Earthquakes
+WHERE Magnitude >= 8
+	AND NearestPop IS NOT NULL
+ORDER BY NearestPop;
+
+NearestPop	Country
+Ambon	ID
+Antofagasta	CL
+Arteaga	MX
+Baiyin	CN
+Bengkulu	ID
+Biak	ID
+Biak	ID
+Bima	ID
+Calama	CL
+Caleta De Carquin	PE
+Camana	PE
+Canete	CL
+Canete	CL
+El Colomo	MX
+Esmeraldas	EC
+Gizo	SB
+Hihifo	TO
+Hovd	MN
+Illapel	CL
+Illapel	CL
+Iquique	CL
+Iquitos	PE
+Isangel	VU
+Isehara	JP
+Ishigaki	JP
+Ishinomaki	JP
+Kamaishi	JP
+Katha	MM
+Ketchikan	US
+Kokopo	PG
+Kungurtug	RU
+Kurilsk	RU
+Kushiro	JP
+Kushiro	JP
+La Ligua	CL
+Lae	PG
+Lahan	NP
+Lata	SB
+Leava	WF
+Luwuk	ID
+Maguling	PH
+Meulaboh	ID
+Meulaboh	ID
+Meulaboh	ID
+Milkovo	RU
+Misawa	JP
+Miyako	JP
+Moron	MN
+Nazca	PE
+Neiafu	TO
+Palmer	US
+Pangai	TO
+Panguna	PG
+Paramonga	PE
+Paredon	MX
+Pasni	PK
+Petropavlovsk-Kamchatskiy	RU
+Ponta Do Sol	PT
+Pundaguitan	PH
+Rabaul	PG
+Rurrenabaque	BO
+Samatau	WS
+San Vicente De Canete	PE
+Sentyabrskiy	RU
+Sentyabrskiy	RU
+Sentyabrskiy	RU
+Sentyabrskiy	RU
+Severo-Kurilsk	RU
+Shingu	JP
+Shingu	JP
+Sibolga	ID
+Sobolevo	RU
+Talisay	PH
+Tapalpa	MX
+Tezu	IN
+Tome	CL
+Tual	ID
+Tual	ID
+Vallenar	CL
+Valparaiso	CL
+Yuli	TW
+Yuzhno-Kurilsk	RU
+Showing 82 out of 82 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Add DISTINCT() to the column representing the closest city to remove duplicates.
+Add the filtering condition for earthquakes with a magnitude of 8 or more.
+SELECT DISTINCT(NearestPop),-- Remove duplicate city
+		Country
+FROM Earthquakes
+WHERE Magnitude >= 8 -- Add filter condition 
+	AND NearestPop IS NOT NULL
+ORDER BY NearestPop;
+
+
+NearestPop	Country
+Ambon	ID
+Antofagasta	CL
+Arteaga	MX
+Baiyin	CN
+Bengkulu	ID
+Biak	ID
+Bima	ID
+Calama	CL
+Caleta De Carquin	PE
+Camana	PE
+Canete	CL
+El Colomo	MX
+Esmeraldas	EC
+Gizo	SB
+Hihifo	TO
+Hovd	MN
+Illapel	CL
+Iquique	CL
+Iquitos	PE
+Isangel	VU
+Isehara	JP
+Ishigaki	JP
+Ishinomaki	JP
+Kamaishi	JP
+Katha	MM
+Ketchikan	US
+Kokopo	PG
+Kungurtug	RU
+Kurilsk	RU
+Kushiro	JP
+La Ligua	CL
+Lae	PG
+Lahan	NP
+Lata	SB
+Leava	WF
+Luwuk	ID
+Maguling	PH
+Meulaboh	ID
+Milkovo	RU
+Misawa	JP
+Miyako	JP
+Moron	MN
+Nazca	PE
+Neiafu	TO
+Palmer	US
+Pangai	TO
+Panguna	PG
+Paramonga	PE
+Paredon	MX
+Pasni	PK
+Petropavlovsk-Kamchatskiy	RU
+Ponta Do Sol	PT
+Pundaguitan	PH
+Rabaul	PG
+Rurrenabaque	BO
+Samatau	WS
+San Vicente De Canete	PE
+Sentyabrskiy	RU
+Severo-Kurilsk	RU
+Shingu	JP
+Sibolga	ID
+Sobolevo	RU
+Talisay	PH
+Tapalpa	MX
+Tezu	IN
+Tome	CL
+Tual	ID
+Vallenar	CL
+Valparaiso	CL
+Yuli	TW
+Yuzhno-Kurilsk	RU
+Showing 71 out of 71 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Get the number of cities near earthquakes of magnitude 8 or more.
+Add column groupings.
+SELECT NearestPop, 
+       Country, 
+       COUNT(NearestPop) NumEarthquakes -- Number of cities
+FROM Earthquakes
+WHERE Magnitude >= 8
+	AND Country IS NOT NULL
+GROUP BY NearestPop, Country -- Group columns
+ORDER BY NumEarthquakes DESC;
+
+
+NearestPop	Country	NumEarthquakes
+Sentyabrskiy	RU	4
+Meulaboh	ID	3
+Kushiro	JP	2
+Canete	CL	2
+Illapel	CL	2
+Biak	ID	2
+Tual	ID	2
+Shingu	JP	2
+Katha	MM	1
+Hovd	MN	1
+Moron	MN	1
+Arteaga	MX	1
+El Colomo	MX	1
+Paredon	MX	1
+Tapalpa	MX	1
+Lahan	NP	1
+Caleta De Carquin	PE	1
+Camana	PE	1
+Iquitos	PE	1
+Nazca	PE	1
+Paramonga	PE	1
+San Vicente De Canete	PE	1
+Kokopo	PG	1
+Lae	PG	1
+Panguna	PG	1
+Rabaul	PG	1
+Maguling	PH	1
+Pundaguitan	PH	1
+Talisay	PH	1
+Pasni	PK	1
+Ponta Do Sol	PT	1
+Kungurtug	RU	1
+Kurilsk	RU	1
+Milkovo	RU	1
+Petropavlovsk-Kamchatskiy	RU	1
+Tezu	IN	1
+Isehara	JP	1
+Ishigaki	JP	1
+Ishinomaki	JP	1
+Kamaishi	JP	1
+Bima	ID	1
+Luwuk	ID	1
+Rurrenabaque	BO	1
+Antofagasta	CL	1
+Calama	CL	1
+Iquique	CL	1
+La Ligua	CL	1
+Tome	CL	1
+Vallenar	CL	1
+Valparaiso	CL	1
+Baiyin	CN	1
+Esmeraldas	EC	1
+Ambon	ID	1
+Bengkulu	ID	1
+Misawa	JP	1
+Miyako	JP	1
+Sibolga	ID	1
+Severo-Kurilsk	RU	1
+Sobolevo	RU	1
+Yuzhno-Kurilsk	RU	1
+Gizo	SB	1
+Lata	SB	1
+Hihifo	TO	1
+Neiafu	TO	1
+Pangai	TO	1
+Yuli	TW	1
+Ketchikan	US	1
+Palmer	US	1
+Isangel	VU	1
+Leava	WF	1
+Samatau	WS	1
+null	
+	0
+Showing 72 out of 72 rows
+
+
+Nice! You can use DISTINCT() to remove duplicate rows. If you want to apply an aggregate function DISTINCT() is not required and you can just use GROUP BY instead.
+
+Check out the results of the query. Sentyabrskiy is in the Kuril Islands group, north of Japan. The islands are part of Russia.
+
