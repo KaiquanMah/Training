@@ -1,0 +1,85 @@
+CREATE FUNCTIONs
+Create three functions to help solve the business case:
+
+Convert distance from miles to kilometers.
+Convert currency based on exchange rate parameter.
+(These two functions should return a numeric value with precision of 18 and 2 decimal places.)
+Identify the driver shift based on the hour parameter value passed.
+
+
+
+
+
+
+
+
+Use CREATE FUNCTION to accept @Miles input parameter & return the distance converted to kilometers.
+-- Create the function
+CREATE FUNCTION dbo.ConvertMileToKm (@Miles numeric(18,2))
+-- Specify return data type
+RETURNS numeric(18,2)
+AS
+BEGIN
+
+
+RETURN
+	-- Convert Miles to Kilometers
+	(SELECT @Miles * 1.609)
+
+
+END;
+
+
+
+
+
+
+
+
+Create a function which accepts @DollarAmt and @ExchangeRate input parameters, multiplies them, and returns the result.
+-- Create the function
+CREATE FUNCTION dbo.ConvertDollar
+	-- Specify @DollarAmt parameter
+	(@DollarAmt numeric(18,2),
+     -- Specify ExchangeRate parameter
+     @ExchangeRate numeric(18,2))
+-- Specify return data type
+RETURNS numeric(18,2)
+AS
+BEGIN
+
+
+RETURN
+	-- Multiply @ExchangeRate and @DollarAmt
+	(SELECT @DollarAmt * @ExchangeRate)
+
+
+END;
+
+
+
+
+
+
+
+
+
+Create a function that returns the shift as an integer: 1st shift is 12am to 9am, 2nd is 9am to 5pm, 3rd is 5pm to 12am.
+-- Create the function
+CREATE FUNCTION dbo.GetShiftNumber (@Hour integer)
+-- Specify return data type
+RETURNS int
+AS
+BEGIN
+
+
+RETURN
+	-- 12am (0) to 9am (9) shift
+	(CASE WHEN @Hour >= 0 AND @Hour < 9 THEN 1
+     	  -- 9am (9) to 5pm (17) shift
+		  WHEN @Hour >= 9 AND @Hour < 17 THEN 2
+          -- 5pm (17) to 12am (24) shift
+	      WHEN @Hour >= 17 AND @Hour < 24 THEN 3 END)
+
+
+END;
