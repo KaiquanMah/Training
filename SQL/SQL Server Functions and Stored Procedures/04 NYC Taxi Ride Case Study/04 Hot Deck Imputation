@@ -1,0 +1,25 @@
+Hot Deck Imputation
+Create a function named dbo.GetTripDistanceHotDeck that returns a TripDistance value via Hot Deck methodology. TripDistance should have a precision of 18 and 4 decimal places.
+
+Create a function named dbo.GetTripDistanceHotDeck() that returns a numeric data type.
+Select the first TripDistance value from YellowTripData sample of 1000 records.
+The sample of 1000 records should only include those where TripDistance is more than zero.
+
+
+-- Create the function
+CREATE FUNCTION dbo.GetTripDistanceHotDeck()
+-- Specify return data type
+RETURNS NUMERIC(18,4)
+AS 
+BEGIN
+
+RETURN
+	-- Select the first TripDistance value
+	(SELECT TOP 1 TripDistance
+	FROM YellowTripData
+    -- Sample 1000 records
+	TABLESAMPLE(1000 rows)
+    -- Only include records where TripDistance is > 0
+	WHERE TripDistance > 0)
+	
+END;
