@@ -1,0 +1,20 @@
+Use EDA to find impossible scenarios
+Calculate how many YellowTripData records have each type of error discovered during EDA.
+
+Use CASE and COUNT to understand how many records contain the following errors:
+DropOffDate before PickupDate, DropOffDate before today, PickupDate before today, TripDistance is zero.
+
+SELECT
+	-- PickupDate is after today
+	COUNT (CASE WHEN PickupDate > GETDATE() THEN 1 END) AS 'FuturePickup',
+    -- DropOffDate is after today
+	COUNT (CASE WHEN DropOffDate > GETDATE() THEN 1 END) AS 'FutureDropOff',
+    -- PickupDate is after DropOffDate
+	COUNT (CASE WHEN PickupDate > DropOffDate THEN 1 END) AS 'PickupBeforeDropoff',
+    -- TripDistance is 0
+	COUNT (CASE WHEN TripDistance = 0 THEN 1 END) AS 'ZeroTripDistance'  
+FROM YellowTripData;
+
+
+FuturePickup	FutureDropOff	PickupBeforeDropoff	ZeroTripDistance
+1	              1	              1	                291
