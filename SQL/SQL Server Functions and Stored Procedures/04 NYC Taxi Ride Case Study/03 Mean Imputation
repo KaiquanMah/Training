@@ -1,0 +1,42 @@
+Mean Imputation
+Create a stored procedure that will apply mean imputation to the YellowTripData records with an incorrect TripDistance of zero. The average trip distance variable should have a precision of 18 and 4 decimal places.
+
+YellowTripData
+ID	EmpNum	PickupDate	DropoffDate	PassengerCount	TripDistance	RateCodeID	StoreFwdFlag	PULocationID	DOLocationID	PaymentType	FareAmount	FareExtra	MTATax	TipAmount	TollAmount	ImproveSurcharge	TotalAmount
+1	empA2246  	2017-01-01 00:03:24	2017-01-01 00:17:02	1	3.5	1	N	79	217	1	13.5	0.5	0.5	3.7	0	0.3	18.5
+2	empA2712  	2017-01-01 00:04:28	2017-01-01 00:15:22	1	2.4	1	N	142	229	2	10	0.5	0.5	0	0	0.3	11.3
+3	empA927   	2017-01-01 00:06:14	2017-01-01 00:29:33	1	15.4	1	N	132	145	1	43	0.5	0.5	7	0	0.3	51.3
+...
+
+
+Create a stored procedure named cuspImputeTripDistanceMean
+Create a numeric variable: @AvgTripDistance.
+Compute the average TripDistance for all records where TripDistance is greater than 0.
+Update the records in YellowTripData where TripDistance is 0 and set to @AvgTripDistance.
+
+-- Create the stored procedure
+CREATE PROCEDURE dbo.cuspImputeTripDistanceMean
+AS
+BEGIN
+
+
+-- Specify @AvgTripDistance variable
+DECLARE @AvgTripDistance AS numeric (18,4)
+
+-- Calculate the average trip distance
+SELECT @AvgTripDistance = AVG(TripDistance) 
+FROM YellowTripData
+-- Only include trip distances greater than 0
+WHERE TripDistance > 0
+
+-- Update the records where trip distance is 0
+UPDATE YellowTripData
+SET TripDistance =  @AvgTripDistance
+WHERE TripDistance = 0
+
+
+END;
+
+
+Great job! If you decide to use Mean imputation you've got the SP!
+
