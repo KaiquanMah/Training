@@ -1,0 +1,134 @@
+STATISTICS TIME in queries
+A friend is writing a training course on how the command STATISTICS TIME can be used to tune query performance and asks for your help to complete a presentation. He requires two queries that return NBA team details where the host city had a 2017 population of more than two million.
+NBA team details can be queried from the NBA Season 2017-2018 database and city populations can be queried by adding in tables from the Earthquakes database.
+Each query uses a different filter on the Teams table.
+
+Query 1
+Filters the Teams table using IN and three sub-queries
+Query 2
+Filters the Teams table using EXISTS
+
+Turn on STATISTICS TIME.
+SET STATISTICS TIME ON -- Turn the time command on
+
+
+
+
+
+For Query 1:
+Add the filter operator for each sub-query.
+Add the table from the Earthquakes database to the first query.
+-- FIRST TRY
+-- Query 1
+SELECT * 
+FROM Teams
+-- Sub-query 1
+WHERE City IN -- Sub-query filter operator
+      (SELECT CityName 
+       FROM Earthquakes) -- Table from Earthquakes database
+-- Sub-query 2
+   AND City IN -- Sub-query filter operator
+	   (SELECT CityName 
+	    FROM Cities
+		WHERE CountryCode IN ('US','CA'))
+-- Sub-query 3
+    AND City IN -- Sub-query filter operator
+        (SELECT CityName 
+         FROM Cities
+	     WHERE Pop2017 >2000000);
+
+
+
+
+-- Check the highlighted code. The checker expected to find Cities in there.
+-- SEEMS LIKE THE EXERCISE TABLE HAS CHANGED, YET THE INSTRUCTIONS REMAINED THE SAME
+-- SECOND TRY
+-- Query 1
+SELECT * 
+FROM Teams
+-- Sub-query 1
+WHERE City IN -- Sub-query filter operator
+      (SELECT CityName 
+       FROM Cities) -- Table from Earthquakes database
+-- Sub-query 2
+   AND City IN -- Sub-query filter operator
+	   (SELECT CityName 
+	    FROM Cities
+		WHERE CountryCode IN ('US','CA'))
+-- Sub-query 3
+    AND City IN -- Sub-query filter operator
+        (SELECT CityName 
+         FROM Cities
+	     WHERE Pop2017 >2000000);
+
+
+TeamCode	TeamName	City	State	Arena	ArenaCapacity
+CHI	Chicago Bulls	Chicago	IL	United Center	20917
+HOU	Houston Rockets	Houston	TX	Toyota Center	18055
+LAC	Los Angeles Clippers	Los Angeles	CA	Staples Center	19060
+LAL	Los Angeles Lakers	Los Angeles	CA	Staples Center	18997
+TOR	Toronto Raptors	Toronto	ON	Scotiabank Arena	19800
+Showing 5 out of 5 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+For Query 2
+Add the filter operator for the sub-query.
+Add the two city name columns being compared to the sub-query.
+
+-- Query 2
+SELECT * 
+FROM Teams AS t
+WHERE EXISTS -- Sub-query filter operator
+	(SELECT 1 
+     FROM Cities AS c
+     WHERE t.City = c.CityName -- Columns being compared
+        AND c.CountryCode IN ('US','CA')
+          AND c.Pop2017 > 2000000);
+
+
+TeamCode	TeamName	City	State	Arena	ArenaCapacity
+TOR	Toronto Raptors	Toronto	ON	Scotiabank Arena	19800
+CHI	Chicago Bulls	Chicago	IL	United Center	20917
+LAC	Los Angeles Clippers	Los Angeles	CA	Staples Center	19060
+LAL	Los Angeles Lakers	Los Angeles	CA	Staples Center	18997
+HOU	Houston Rockets	Houston	TX	Toyota Center	18055
+
+Showing 5 out of 5 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Turn off STATISTICS TIME.
+SET STATISTICS TIME OFF -- Turn the time command off
+
+Great work! Although the time statistics are not displayed in this exercise, in SSMS they are reported for every query executed between running SET STATISTICS TIME ON and SET STATISTICS TIME OFF.
+
