@@ -1,0 +1,38 @@
+Aliasing - team BMI
+A basketball statistician would like to know the average Body Mass Index (BMI) per NBA team, in particular, any team with an average BMI of 25 or more. To include Team in the query, you will need to join the Players table to the PlayerStats table. The query will require aliasing to:
+Easily identify joined tables and associated columns.
+Identify sub-queries.
+Avoid ambiguity in column names.
+Identify new columns.
+
+Alias the new average BMI column as AvgTeamBMI.
+Alias the PlayerStats table as ps.
+Alias the sub-query as p.
+The PlayerStats table and sub-query are joining on the column PlayerName. Add the aliases to the joining PlayerName columns.
+
+
+
+SELECT Team, 
+   ROUND(AVG(BMI),2) AS AvgTeamBMI -- Alias the new column
+FROM PlayerStats AS ps -- Alias PlayerStats table
+INNER JOIN
+		(SELECT PlayerName, Country,
+			Weight_kg/SQUARE(Height_cm/100) BMI
+		 FROM Players) AS p -- Alias the sub-query
+             -- Alias the joining columns
+	ON p.PlayerName = ps.PlayerName 
+GROUP BY Team
+HAVING AVG(BMI) >= 25;
+
+
+Team	AvgTeamBMI
+BOS	25.08
+CLE	25.08
+IND	25.02
+Showing 3 out of 3 rows
+
+
+Aliasing is a must when using joins because it avoids an error of trying to resolve which table each column is from. Anytime you create a new column it is good practice to give it an alias as it helps to indicate what information is in the column. Also, an alias is required if the column is referenced or used elsewhere in the query.
+
+Looking at what the query returned, a couple of teams might need to work a bit harder in the offseason!
+
