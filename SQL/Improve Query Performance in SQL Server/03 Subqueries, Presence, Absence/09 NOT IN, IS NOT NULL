@@ -1,0 +1,148 @@
+NOT IN with IS NOT NULL
+You want to know which country capitals have never been the closest city to recorded earthquakes. You decide to use NOT IN to compare Capital from the Nations table, in the outer query, with NearestPop, from the Earthquakes table, in a sub-query.
+
+Add the country capital name column to the outer query.
+Add the city name column to the sub-query.
+Check how many rows the query returns. Does this mean that earthquakes have been recorded near every capital city in the world?
+
+
+SELECT WorldBankRegion,
+       CountryName,
+       Capital -- Capital city name column
+FROM Nations
+WHERE Capital NOT IN
+	(SELECT NearestPop -- City name column
+     FROM Earthquakes);
+
+
+WorldBankRegion	CountryName	Capital
+Showing 0 out of 0 rows
+
+
+
+
+
+
+
+
+
+The column in the SELECT statement of the sub-query contains NULL values and will require a filter to remove the NULL values from the query.
+Add the WHERE filter condition to the sub-query to get the query working correctly.
+
+SELECT WorldBankRegion,
+       CountryName,
+       Capital
+FROM Nations
+WHERE Capital NOT IN
+	(SELECT NearestPop
+     FROM Earthquakes
+     WHERE NearestPop IS NOT NULL); -- filter condition
+
+
+
+WorldBankRegion	CountryName	Capital
+South Asia	India	New Delhi
+East Asia and Pacific	Indonesia	Jakarta
+East Asia and Pacific	East Timor	Dili
+Sub-Sahara Africa	Comoros	Moroni
+Europe and Central Asia	Tajikistan	Dushanbe
+East Asia and Pacific	New Caledonia	Noumea
+Europe and Central Asia	Czech Republic	Prague
+Sub-Sahara Africa	Ethiopia	Addis Ababa
+Sub-Sahara Africa	Tanzania	Dar es Salaam
+Latin America and Carribean	Haiti	Port-au-Prince
+Middle East and North Africa	Saudi Arabia	Riyadh
+Sub-Sahara Africa	Chad	N Djamena
+Sub-Sahara Africa	Angola	Luanda
+Latin America and Carribean	Saint Vincent and the Grenadines	Kingstown
+Europe and Central Asia	Bulgaria	Sofia
+Middle East and North Africa	Oman	Muscat
+East Asia and Pacific	Palau	Melekeok
+Latin America and Carribean	Suriname	Paramaribo
+Europe and Central Asia	Bosnia and Herzegovina	Sarajevo
+Sub-Sahara Africa	Rwanda	Kigali
+Europe and Central Asia	Malta	Valletta
+Sub-Sahara Africa	Mauritania	Nouakchott
+North America	United States of America	Washington D.C.
+Sub-Sahara Africa	Malawi	Lilongwe
+Europe and Central Asia	Monaco	Monaco-Ville
+Europe and Central Asia	Kazakhstan	Astana
+South Asia	Pakistan	Islamabad
+Sub-Sahara Africa	South Sudan	Juba-á
+East Asia and Pacific	Tokelau	Atafu
+East Asia and Pacific	Wallis and Futuna Islands	Mata Utu
+Europe and Central Asia	United Kingdom	London
+Sub-Sahara Africa	Cape Verde	Praia
+Latin America and Carribean	Guatemala	Guatemala City
+Sub-Sahara Africa	South Africa	Pretoria
+Latin America and Carribean	Mexico	Mexico City
+Europe and Central Asia	France	Paris
+Sub-Sahara Africa	Namibia	Windhoek
+Sub-Sahara Africa	Senegal	Dakar
+South Asia	Afghanistan	Kabul
+Latin America and Carribean	Jamaica	Kingston
+East Asia and Pacific	Laos	Vientiane
+Sub-Sahara Africa	Niger	Niamey
+Sub-Sahara Africa	Eritrea	Asmara
+Latin America and Carribean	Dominica	Roseau
+Europe and Central Asia	Cyprus	Nicosia
+East Asia and Pacific	Singapore	Singapore
+Sub-Sahara Africa	Somalia	Mogadishu
+Sub-Sahara Africa	Guinea-Bissau	Bissau
+Europe and Central Asia	Iceland	Reykjavik
+East Asia and Pacific	Macau	Macau
+Europe and Central Asia	Romania	Bucharest
+Europe and Central Asia	Vatican City	Vatican City
+East Asia and Pacific	Cambodia	Phnom Penh
+East Asia and Pacific	Federated States of Micronesia	Palikir
+East Asia and Pacific	American Samoa	Pago Pago
+Sub-Sahara Africa	Saint Helena	Jamestown
+Europe and Central Asia	Isle of Man	Douglas
+Europe and Central Asia	Slovenia	Ljubljana
+Middle East and North Africa	Egypt	Cairo
+East Asia and Pacific	Niue	Alofi
+Europe and Central Asia	Slovakia	Bratislava
+Europe and Central Asia	Croatia	Zagreb
+Europe and Central Asia	Italy	Rome
+Europe and Central Asia	Russia	Moscow
+Latin America and Carribean	Panama	Panama City
+Sub-Sahara Africa	Cameroon	Yaounde
+Latin America and Carribean	Venezuela	Caracas
+Latin America and Carribean	Dominican Republic	Santo Domingo
+Middle East and North Africa	Iraq	Baghdad
+Europe and Central Asia	Armenia	Yerevan
+Sub-Sahara Africa	Liberia	Monrovia
+North America	Saint Pierre and Miquelon	Saint Pierre
+Latin America and Carribean	British Virgin Islands	Road Town
+Sub-Sahara Africa	Kenya	Nairobi
+Latin America and Carribean	Turks and Caicos Islands	Cockburn Town
+Latin America and Carribean	Bahamas	Nassau
+Sub-Sahara Africa	Guinea	Conakry
+East Asia and Pacific	South Korea	Seoul
+Sub-Sahara Africa	Sudan	Khartoum
+Sub-Sahara Africa	Mauritius	Port Louis
+Europe and Central Asia	Estonia	Tallinn
+East Asia and Pacific	Kiribati	Bairiki
+Latin America and Carribean	Barbados	Bridgetown
+Latin America and Carribean	Cuba	Havana
+Latin America and Carribean	Grenada	Saint Georges
+East Asia and Pacific	Japan	Tokyo
+Sub-Sahara Africa	Seychelles	Victoria
+Europe and Central Asia	Portugal	Lisbon
+Sub-Sahara Africa	Central African Republic	Bangui
+East Asia and Pacific	Hong Kong	Hong Kong
+Middle East and North Africa	Kuwait	Kuwait City
+East Asia and Pacific	Australia	Canberra
+Middle East and North Africa	Lebanon	Beirut
+Latin America and Carribean	Nicaragua	Managua
+East Asia and Pacific	Mongolia	Ulaanbaatar
+Latin America and Carribean	Ecuador	Quito
+Sub-Sahara Africa	Sierra Leone	Freetown
+Europe and Central Asia	Spain	Madrid
+Sub-Sahara Africa	Congo	Brazzaville
+Latin America and Carribean	Costa Rica	San Jose
+Showing 100 out of 221 rows
+
+
+Nice! One major issue with using NOT IN is the way it handles NULL values. If the columns in the sub-query being evaluated for a non-match contain NULL values, no results are returned. A workaround to get the query working correctly is to use IS NOT NULL in a WHERE filter condition in the sub-query.
+
