@@ -1,0 +1,25 @@
+Ambiguous column names
+When joining tables, we use aliases in the SELECT statement to indicate the source tables of the selected columns, with each column name prefixed with the table name alias.
+The following query joins the Players and PlayerStats tables to return total points by PlayerName and Country for all players from Australia.
+
+SELECT PlayerName, p.Country,
+         SUM(ps.TotalPoints) AS TotalPoints  
+FROM PlayerStats ps
+INNER JOIN Players p
+   ON ps.PlayerName = p.PlayerName
+WHERE p.Country = 'Australia'
+GROUP BY p.PlayerName, p.Country
+
+Copy and paste the query into the console and select Run Code to view the results. The query returns an error which includes the words ... Ambiguous column name...
+Fix the query and run it. What was wrong with the original query?
+
+
+
+The INNER JOIN must also reference the Country column.
+An alias cannot be the same name as the aggregated column, i.e. TotalPoints.
+WHERE cannot process Australia because there are no Australians are in the NBA.
+
+#YES - PlayerName is in both the Players and PlayerStats tables. It requires an alias prefix.
+Great! The Players and PlayerStats tables both have the column PlayerName; this is what they are joining on. Therefore, the query needs to know which table to source the column. Adding an alias prefix to PlayerName in the SELECT statement resolves this.
+
+
