@@ -1,0 +1,135 @@
+Format for Germany
+Write a query to display the TotalDistance, TotalRideTime and TotalFare for each day and NYC Borough. Display the date, distance, ride time, and fare totals for German culture.
+
+Cast PickupDate as a date and display it as a German date.
+Display TotalDistance and TotalRideTime in the German format ('n' format type parameter).
+Display Total Fare as German currency ('c' format type parameter).
+
+SELECT
+    -- Cast PickupDate as a date and display as a German date
+	FORMAT(CAST(PickupDate AS date), 'd', 'de-de') AS 'PickupDate',
+	Zone.Borough,
+    -- Display TotalDistance in the German format
+	FORMAT(SUM(TripDistance), 'n', 'de-de') AS 'TotalDistance',
+    -- Display TotalRideTime in the German format
+	FORMAT(SUM(DATEDIFF(minute, PickupDate, DropoffDate)), 'n', 'de-de') AS 'TotalRideTime',
+    -- Display TotalFare in German currency
+	FORMAT(SUM(TotalAmount), 'c', 'de-de') AS 'TotalFare'
+FROM YellowTripData
+INNER JOIN TaxiZoneLookup AS Zone 
+ON PULocationID = Zone.LocationID 
+GROUP BY
+	CAST(PickupDate as date),
+    Zone.Borough 
+ORDER BY
+	CAST(PickupDate as date),
+    Zone.Borough;
+
+
+
+PickupDate	Borough	TotalDistance	TotalRideTime	TotalFare
+01.01.2017	Bronx	24,54	74,00	86,70 €
+01.01.2017	Brooklyn	169,31	648,00	738,81 €
+01.01.2017	EWR	1,40	0,00	50,00 €
+01.01.2017	Manhattan	3.029,29	12.528,00	15.385,22 €
+01.01.2017	Queens	973,55	2.046,00	3.604,28 €
+01.01.2017	Unknown	89,36	340,00	679,01 €
+02.01.2017	Bronx	1,74	7,00	61,60 €
+02.01.2017	Brooklyn	40,28	146,00	166,09 €
+02.01.2017	Manhattan	1.908,15	9.655,00	10.626,48 €
+02.01.2017	Queens	1.178,93	2.552,00	4.268,56 €
+02.01.2017	Unknown	64,01	188,00	382,80 €
+03.01.2017	Brooklyn	52,82	219,00	254,38 €
+03.01.2017	Manhattan	2.396,94	14.279,00	14.346,56 €
+03.01.2017	Queens	1.128,53	2.949,00	4.382,84 €
+03.01.2017	Unknown	54,52	257,00	358,07 €
+04.01.2017	Bronx	0,27	2,00	5,76 €
+04.01.2017	Brooklyn	49,76	215,00	262,76 €
+04.01.2017	Manhattan	2.456,81	13.751,00	15.384,27 €
+04.01.2017	Queens	954,46	2.748,00	3.628,24 €
+04.01.2017	Unknown	46,93	203,00	275,40 €
+05.01.2017	Bronx	5,30	37,00	34,15 €
+05.01.2017	Brooklyn	61,79	269,00	359,02 €
+05.01.2017	Manhattan	3.241,59	22.178,00	19.287,18 €
+05.01.2017	Queens	1.002,47	2.487,00	3.966,77 €
+05.01.2017	Unknown	75,32	1.033,00	422,53 €
+06.01.2017	Brooklyn	82,72	290,00	393,98 €
+06.01.2017	Manhattan	3.109,55	21.129,00	19.077,45 €
+06.01.2017	Queens	1.005,47	2.447,00	3.951,28 €
+06.01.2017	Unknown	58,36	1.710,00	381,47 €
+07.01.2017	Bronx	2,00	11,00	14,60 €
+07.01.2017	Brooklyn	98,79	407,00	478,24 €
+07.01.2017	Manhattan	2.720,22	15.834,00	15.817,75 €
+07.01.2017	Queens	596,27	1.469,00	2.156,78 €
+07.01.2017	Unknown	63,88	317,00	413,32 €
+08.01.2017	Brooklyn	63,34	225,00	314,15 €
+08.01.2017	Manhattan	2.732,95	13.346,00	15.145,06 €
+08.01.2017	Queens	1.127,10	2.598,00	4.281,21 €
+08.01.2017	Unknown	79,66	351,00	489,14 €
+09.01.2017	Bronx	1,30	11,00	9,30 €
+09.01.2017	Brooklyn	67,64	223,00	267,51 €
+09.01.2017	Manhattan	2.746,77	16.070,00	16.485,79 €
+09.01.2017	Queens	1.152,72	2.902,00	4.295,66 €
+09.01.2017	Unknown	96,88	456,00	576,29 €
+10.01.2017	Brooklyn	67,63	289,00	334,38 €
+10.01.2017	Manhattan	3.000,18	19.062,00	18.123,19 €
+10.01.2017	Queens	827,26	3.597,00	3.189,16 €
+10.01.2017	Unknown	41,97	251,00	340,96 €
+11.01.2017	Brooklyn	46,54	184,00	212,41 €
+11.01.2017	Manhattan	2.972,50	16.699,00	18.290,63 €
+11.01.2017	Queens	997,91	3.327,00	3.918,56 €
+11.01.2017	Unknown	42,12	218,00	258,22 €
+12.01.2017	Brooklyn	43,05	176,00	211,30 €
+12.01.2017	Manhattan	3.527,23	24.615,00	21.041,30 €
+12.01.2017	Queens	740,33	2.188,00	2.998,31 €
+12.01.2017	Unknown	73,47	426,00	751,20 €
+13.01.2017	Bronx	31,16	81,00	99,48 €
+13.01.2017	Brooklyn	102,85	392,00	498,60 €
+13.01.2017	Manhattan	3.404,38	21.500,00	21.240,70 €
+13.01.2017	Queens	962,45	3.253,00	4.016,53 €
+13.01.2017	Unknown	44,13	253,00	477,30 €
+14.01.2017	Brooklyn	96,26	414,00	489,67 €
+14.01.2017	Manhattan	3.564,13	20.551,00	20.406,19 €
+14.01.2017	Queens	808,29	2.231,00	3.065,52 €
+14.01.2017	Staten Island	31,85	56,00	134,38 €
+14.01.2017	Unknown	67,83	393,00	522,56 €
+15.01.2017	Brooklyn	88,43	397,00	450,81 €
+15.01.2017	Manhattan	3.302,92	14.944,00	17.785,31 €
+15.01.2017	Queens	846,65	2.210,00	3.282,83 €
+15.01.2017	Unknown	69,52	329,00	386,15 €
+16.01.2017	Bronx	3,22	15,00	25,95 €
+16.01.2017	Brooklyn	32,23	134,00	161,27 €
+16.01.2017	Manhattan	2.396,60	12.071,00	13.550,08 €
+16.01.2017	Queens	1.201,40	2.715,00	4.613,08 €
+16.01.2017	Unknown	96,99	328,00	788,64 €
+17.01.2017	Bronx	4,71	5,00	11,05 €
+17.01.2017	Brooklyn	18,63	101,00	118,10 €
+17.01.2017	Manhattan	2.822,04	17.898,00	18.065,41 €
+17.01.2017	Queens	1.007,06	2.850,00	3.941,99 €
+17.01.2017	Unknown	74,18	383,00	434,50 €
+18.01.2017	Brooklyn	100,12	403,00	467,84 €
+18.01.2017	Manhattan	3.160,95	20.223,00	19.302,52 €
+18.01.2017	Queens	931,67	2.663,00	3.756,01 €
+18.01.2017	Unknown	52,42	279,00	325,75 €
+19.01.2017	Bronx	1,70	8,00	12,60 €
+19.01.2017	Brooklyn	32,79	112,00	142,06 €
+19.01.2017	Manhattan	3.026,24	17.598,00	19.042,04 €
+19.01.2017	Queens	905,78	2.944,00	3.750,35 €
+19.01.2017	Unknown	90,53	324,00	600,26 €
+20.01.2017	Brooklyn	52,11	232,00	242,96 €
+20.01.2017	Manhattan	3.471,19	21.711,00	21.444,54 €
+20.01.2017	Queens	755,28	2.048,00	3.059,57 €
+20.01.2017	Unknown	39,69	254,00	275,59 €
+21.01.2017	Bronx	9,50	35,00	22,46 €
+21.01.2017	Brooklyn	43,25	191,00	216,52 €
+21.01.2017	Manhattan	3.227,82	17.132,00	18.999,92 €
+21.01.2017	Queens	634,00	1.636,00	2.286,52 €
+21.01.2017	Unknown	61,55	287,00	339,22 €
+22.01.2017	Brooklyn	103,79	1.542,00	493,13 €
+22.01.2017	EWR	0,00	1,00	114,35 €
+22.01.2017	Manhattan	3.025,99	20.152,00	16.265,89 €
+Showing 100 out of 147 rows
+
+
+It's important to be able to show users data in a format they are comfortable with.
+
