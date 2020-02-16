@@ -1,0 +1,35 @@
+Filtering with WHERE and HAVING
+WHERE and HAVING can be used as filters in the same query. But how we use them, where we use them and what we use them for is quite different.
+You want a query that returns the total points contribution of a teams Power Forwards where their total points contribution is greater than 3000.
+
+
+PlayerStats
+PlayerName	Team	Position	GamesPlayed	MinutesPlayed	Points3	Points2	ORebound	DRebound	Assists	Steals	Blocks	TurnOvers	TotalPoints
+Luke Babbitt	ATL	SF	37	570	49	31	5	76	26	7	5	15	226
+Kent Bazemore	ATL	SG	65	1789	108	176	25	223	228	100	45	157	836
+Marco Belinelli	ATL	SG	52	1210	92	107	14	86	103	46	3	54	591
+...
+
+
+
+
+Apply a filter condition for only rows where position equals Power Forward (PF).
+Apply a grouped row filter for total points greater than 3000.
+SELECT Team, 
+	SUM(TotalPoints) AS TotalPFPoints
+FROM PlayerStats
+-- Filter for only rows with power forwards
+WHERE Position = 'PF'
+GROUP BY Team
+-- Filter for total points greater than 3000
+HAVING SUM(TotalPoints) > 3000;
+
+
+Team	TotalPFPoints
+CLE	3097
+Showing 1 out of 1 rows
+
+Good job! WHERE is used as a filter condition on individual rows, in this case, Position = 'PF', and HAVING is used as a numeric filter condition on grouped rows and must be used with an aggregate function, in this case, SUM(TotalPoints) >3000.
+
+Looking at the results, Cleveland Cavaliers must've had some good Power Forwards that season.
+
