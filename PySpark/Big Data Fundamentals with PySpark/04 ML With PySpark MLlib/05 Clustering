@@ -1,0 +1,157 @@
+Loading and parsing the 5000 points data
+Clustering is the unsupervised learning task that involves grouping objects into clusters of high similarity. Unlike the supervised tasks, where data is labeled, clustering can be used to make sense of unlabeled data. PySpark MLlib includes the popular K-means algorithm for clustering. In this 3 part exercise, you'll find out how many clusters are there in a dataset containing 5000 rows and 2 columns. For this you'll first load the data into an RDD, parse the RDD based on the delimiter, run the KMeans model, evaluate the model and finally visualize the clusters.
+In the first part, you'll load the data into RDD, parse the RDD based on the delimiter and convert the string type of the data to an integer.
+Remember, you have a SparkContext sc available in your workspace. Also file_path variable (which is the path to the 5000_points.txt file) is already available in your workspace.
+
+
+Load the 5000_points dataset into a RDD named clusterRDD.
+Transform the clusterRDD by splitting the lines based on the tab ("\t").
+Transform the split RDD to create a list of integers for the two columns.
+Confirm that there are 5000 rows in the dataset.
+
+
+In [1]: file_path
+Out[1]: '/usr/local/share/datasets/5000_points.txt'
+
+
+
+# Load the dataset into a RDD
+clusterRDD = sc.textFile(file_path)
+
+# Split the RDD based on tab
+rdd_split = clusterRDD.map(lambda x: x.split('\t'))
+
+# Transform the split RDD by creating a list of integers
+rdd_split_int = rdd_split.map(lambda x: [int(x[0]), int(x[1])])
+
+# Count the number of rows in RDD 
+print("There are {} rows in the rdd_split_int dataset".format(rdd_split_int.count()))
+
+<script.py> output:
+    There are 5000 rows in the rdd_split_int dataset
+
+Good start! You have succesfully loaded the data into RDD for kmeans clustering.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+K-means training
+Now that the RDD is ready for training, in the second part of the exercise, you'll train the RDD with PySpark's MLlib's KMeans algorithm. The algorithm is somewhat naive--it clusters the data into k clusters, even if k is not the right number of clusters to use. Therefore, when using k-means clustering, the most important parameter is a target number of clusters to generate, k. In practice, you rarely know the “true” number of clusters in advance, so the best practice is to try several values of k until the average intracluster distance stops decreasing dramatically
+In this 2nd part, you'll test with k's ranging from 13 to 16 and use the elbow method to chose the correct k. The idea of the elbow method is to run k-means clustering on the dataset for a range of values of k, calculate Within Set Sum of Squared Error (WSSSE, this function is already provided to you) and select the best k based on the sudden drop in WSSSE. Finally, you'll retrain the model with the best k (15 in this case) and print the centroids (cluster centers).
+Remember, you already have a SparkContext sc and rdd_split_int RDD available in your workspace.
+
+
+Train the KMeans model with clusters from 13 to 16 and print the WSSSE for each cluster.
+Train the KMeans model again with the best cluster (k=15).
+Get the Cluster Centers (centroids) of KMeans model trained with k=15.
+
+
+
+# Train the model with clusters from 13 to 16 and compute WSSSE 
+for clst in range(13, 17):
+    model = KMeans.train(rdd_split_int, clst, seed=1)
+    WSSSE = rdd_split_int.map(lambda point: error(point)).reduce(lambda x, y: x + y)
+    print("The cluster {} has Within Set Sum of Squared Error {}".format(clst, WSSSE))
+
+
+<script.py> output:
+    The cluster 13 has Within Set Sum of Squared Error 249164132.49410182
+    The cluster 14 has Within Set Sum of Squared Error 209371154.24941802
+    The cluster 15 has Within Set Sum of Squared Error 169394691.52639425
+    The cluster 16 has Within Set Sum of Squared Error 202384225.6640126
+    
+    
+    
+
+# Train the model again with the best k 
+model = KMeans.train(rdd_split_int, k=15, seed=1)
+
+In [7]: model
+Out[7]: <pyspark.mllib.clustering.KMeansModel at 0x7f9fb266d208>
+
+
+
+
+# Get cluster centers
+cluster_centers = model.clusterCenters
+
+In [8]: cluster_centers
+Out[8]: 
+[array([670929.06818182, 862765.73295455]),
+ array([852058.45259939, 157685.52293578]),
+ array([858947.9713467 , 546259.65902579]),
+ array([398555.94857143, 404855.06857143]),
+ array([507818.31339031, 175610.41595442]),
+ array([801616.78164557, 321123.34177215]),
+ array([606574.95622896, 574455.16835017]),
+ array([320602.55, 161521.85]),
+ array([337565.11890244, 562157.17682927]),
+ array([167856.14071856, 347812.71556886]),
+ array([244654.8856305 , 847642.04105572]),
+ array([617601.91071429, 399504.21428571]),
+ array([139682.37572254, 558123.40462428]),
+ array([823421.2507837 , 731145.27272727]),
+ array([417799.69426752, 787001.99363057])]
+
+Great job on finding the best K with K-Means algorithm! For real world data, you should train the model with a wide range of K values.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Visualizing clusters
+After KMeans model training with an optimum K value (K = 15), in this final part of the exercise, you will visualize the clusters and their cluster centers (centroids) and see if they overlap with each other. For this, you'll first convert rdd_split_int RDD into spark DataFrame and then into Pandas DataFrame for plotting. Similarly, you'll convert cluster_centers into Pandas DataFrame. Once the DataFrames are created, you'll use matplotlib library to create scatter plots.
+Remember, you already have a SparkContext sc, rdd_split_int and cluster_centers variables available in your workspace.
+
+
+Convert rdd_split_int RDD into a Spark DataFrame.
+Convert Spark DataFrame into a Pandas DataFrame.
+Create a Pandas DataFrame from cluster_centers list.
+Create a scatter plot of the raw data and an overlaid scatter plot with centroids for k = 15.
+
+# Convert rdd_split_int RDD into Spark DataFrame
+rdd_split_int_df = spark.createDataFrame(rdd_split_int, schema=["col1", "col2"])
+
+# Convert Spark DataFrame into Pandas DataFrame
+rdd_split_int_df_pandas = rdd_split_int_df.toPandas()
+
+# Convert "cluster_centers" that you generated earlier into Pandas DataFrame
+cluster_centers_pandas = pd.DataFrame(cluster_centers, columns=["col1", "col2"])
+
+# Create an overlaid scatter plot
+plt.scatter(rdd_split_int_df_pandas["col1"], rdd_split_int_df_pandas["col2"])
+plt.scatter(cluster_centers_pandas["col1"], cluster_centers_pandas["col2"], color="red", marker="x")
+plt.show()
+
+Good job on the KMeans visualization plots. Do you think the cluster centers/centroids map to the original data?
+
+
