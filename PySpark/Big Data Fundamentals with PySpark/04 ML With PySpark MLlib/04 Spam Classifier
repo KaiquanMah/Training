@@ -1,0 +1,202 @@
+Loading spam and non-spam data
+Logistic Regression is a popular method to predict a categorical response. Probably one of the most common applications of the logistic regression is the message or email spam classification. In this 3-part exercise, you'll create an email spam classifier with logistic regression using Spark MLlib. Here are the brief steps for creating a spam classifier.
+
+Create an RDD of strings representing email.
+Run MLlib’s feature extraction algorithms to convert text into an RDD of vectors.
+Call a classification algorithm on the RDD of vectors to return a model object to classify new points.
+Evaluate the model on a test dataset using one of MLlib’s evaluation functions.
+In the first part of the exercise, you'll load the 'spam' and 'ham' (non-spam) files into RDDs, split the emails into individual words and look at the first element in each of the RDD.
+
+Remember, you have a SparkContext sc available in your workspace. Also file_path_spam variable (which is the path to the 'spam' file) and file_path_non_spam (which is the path to the 'non-spam' file) is already available in your workspace.
+
+
+
+Create two RDDS, one for 'spam' and one for 'non-spam (ham)'.
+Split each email in 'spam' and 'non-spam' RDDs into words.
+Print the first element in the split RDD of both 'spam' and 'non-spam'.
+
+
+In [1]: file_path_spam
+Out[1]: '/usr/local/share/datasets/spam'
+
+In [2]: file_path_non_spam
+Out[2]: '/usr/local/share/datasets/ham'
+
+
+# Load the datasets into RDDs
+spam_rdd = sc.textFile(file_path_spam)
+non_spam_rdd = sc.textFile(file_path_non_spam)
+
+# Split the email messages into words
+spam_words = spam_rdd.flatMap(lambda email: email.split(' '))
+['You', 'have', '1', 'new', 'message.', 'Please', 'call', ...]
+
+
+
+non_spam_words = non_spam_rdd.flatMap(lambda email: email.split(' '))
+['Rofl.', 'Its', 'true', 'to', 'its', 'name', ...]
+
+
+
+
+
+# Print the first element in the split RDD
+print("The first element in spam_words is", spam_words.first())
+print("The first element in non_spam_words is", non_spam_words.first())
+
+<script.py> output:
+    The first element in spam_words is You
+    The first element in non_spam_words is Rofl.
+
+
+Good job! The words in spam and non-spam RDDs may look familiar to you from your emails.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Feature hashing and LabelPoint
+After splitting the emails into words, our raw data set of 'spam' and 'non-spam' is currently composed of 1-line messages consisting of spam and non-spam messages. In order to classify these messages, we need to convert text into features.
+In the second part of the exercise, you'll first create a HashingTF() instance to map text to vectors of 200 features, then for each message in 'spam' and 'non-spam' files you'll split them into words, and each word is mapped to one feature. These are the features that will be used to decide whether a message is 'spam' or 'non-spam'. Next, you'll create labels for features. For a valid message, the label will be 0 (i.e. the message is not spam) and for a 'spam' message, the label will be 1 (i.e. the message is spam). Finally, you'll combine both the labeled datasets.
+Remember, you have a SparkContext sc available in your workspace. Also spam_words and non_spam_words variables are already available in your workspace.
+
+
+
+Create a HashingTF() instance to map email text to vectors of 200 features.
+Each message in 'spam' and 'non-spam' datasets are split into words, and each word is mapped to one feature.
+Label the features: 1 for spam, 0 for non-spam.
+Combine both the spam and non-spam samples into a single dataset.
+
+
+# Create a HashingTF instance with 200 features
+tf = HashingTF(numFeatures=200)
+
+# Map each word to one feature
+spam_features = tf.transform(spam_words)
+non_spam_features = tf.transform(non_spam_words)
+
+# Label the features: 1 for spam, 0 for non-spam
+spam_samples = spam_features.map(lambda features:LabeledPoint(1, features))
+non_spam_samples = non_spam_features.map(lambda features:LabeledPoint(0, features))
+
+# Combine the two datasets
+samples = spam_samples.join(non_spam_samples)
+
+
+
+
+
+In [4]: tf
+Out[4]: <pyspark.mllib.feature.HashingTF at 0x7f8341dde860>
+
+In [5]: spam_features
+Out[5]: PythonRDD[39] at RDD at PythonRDD.scala:49
+
+In [6]: non_spam_features
+Out[6]: PythonRDD[40] at RDD at PythonRDD.scala:49
+
+In [7]: spam_samples
+Out[7]: PythonRDD[41] at RDD at PythonRDD.scala:49
+
+In [8]: non_spam_samples
+Out[8]: PythonRDD[42] at RDD at PythonRDD.scala:49
+
+In [9]: samples
+Out[9]: PythonRDD[43] at RDD at PythonRDD.scala:49
+
+
+Feature hashing and LabeledPoints are quite powerful for text based classification in PySpark MLlib!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Logistic Regression model training
+After creating labels and features for the data, we’re ready to build a model that can learn from it (training). But before you train the model, you'll split the combined dataset into training and testing dataset because it can assign a probability of being spam to each data point. We can then decide to classify messages as spam or not, depending on how high the probability.
+In this final part of the exercise, you'll split the data into training and test, run Logistic Regression on the training data, apply the same HashingTF() feature transformation to get vectors on a positive example (spam) and a negative one (non-spam) and finally check the accuracy of the model trained.
+Remember, you have a SparkContext sc available in your workspace, as well as the samples variable.
+
+
+Split the combined data into training and test sets (80/20).
+Train the Logistic Regression (LBFGS variant) model with the training dataset.
+Create a prediction label from the trained model on the test dataset.
+Combine the labels in the test dataset with the labels in the prediction dataset.
+Calculate the accuracy of the trained model using original and predicted labels on the labels_and_preds.
+
+
+# Split the data into training and testing
+train_samples,test_samples = samples.randomSplit([0.8, 0.2])
+
+In [4]: train_samples
+Out[4]: PythonRDD[140] at RDD at PythonRDD.scala:49
+
+In [5]: test_samples
+Out[5]: PythonRDD[231] at RDD at PythonRDD.scala:49
+
+
+
+
+# Train the model
+model = LogisticRegressionWithLBFGS.train(train_samples)
+
+In [3]: model
+Out[3]: (weights=[0.0,-0.9173349322399339,0.0,0.0,0.0,-4.428130949620012,0.0,0.0,0.0,0.0,0.0,-1.6190301028527883,0.0,0.0,-2.3060583676471196,0.0,0.0,0.0,21.620720199864707,0.0,0.0,20.408253738148975,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-5.3757765413940675,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-32.55315870772009,0.0,0.0,0.0,-1.3435880702266871,0.0,0.0,0.0,0.0,0.0,-12.618433657824001,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,35.106527526878885,0.0,0.0,0.0,0.0,0.0,0.9659640958915877,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.9967812593019671,0.0,-16.139131475352215,-0.48300324613964307,0.0,0.0,0.0,-0.7807915948562335,0.0,-0.9940493296770959,0.0,0.0,-30.281830031700622,0.0,0.0,0.0,0.0,-51.968535263381995,11.17022319807994,0.0,0.0,6.43708444030606,2.961862854698874,-0.4454979647799155,0.6751828680814158,0.0,-14.269358938011662,0.0,-0.9661386008654137,-17.100980951859608,0.0,-0.7208449018024446,0.0,0.0,0.0,0.0,0.0,0.0,0.024887490959771,0.8421656411202143,-17.690416163282343,-16.765950888273213,0.0,0.0,-0.4997097782741548,0.0,0.0,-0.29108521019573236,0.0,0.0,0.0,0.0,0.0,5.007252384476814,-8.845208081641172,0.0,-0.29812262038942183,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.1291743039358093,0.0,0.0,0.0,0.0,1.2868551574057134,0.0,0.0,0.1669263575777715,0.0,-21.712674987870585,0.0,-0.6713389960405297,0.0,0.0,0.0,0.0,0.0,-0.08747532435934809,-0.554665701110803,-0.8210412755161308,-0.3458951424795401,0.0,0.0,-0.2623046282333323,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-10.96558184445995,-20.64915746631226,0.0,0.0,1.2927497009886337,0.0,-1.2134321225140186,16.302913017978636,0.0,0.0,0.0,0.0,0.35507888601105153,0.0,0.0,0.0,-0.33316435781534104,-17.100980951859608,5.007252384476814,0.0,0.0,0.0,1.6702104091971304], intercept=0.0)
+
+
+
+
+# Create a prediction label from the test data
+predictions = model.predict(test_samples.map(lambda x: x.features))
+
+# Combine original labels with the predicted labels
+labels_and_preds = test_samples.map(lambda x: x.label).zip(predictions)
+
+In [9]: predictions
+Out[9]: PythonRDD[418] at RDD at PythonRDD.scala:49
+
+In [10]: labels_and_preds
+Out[10]: org.apache.spark.api.java.JavaPairRDD@3151b6ab
+
+
+
+
+# Check the accuracy of the model on the test data
+accuracy = labels_and_preds.filter(lambda x: x[0] == x[1]).count() / float(test_samples.count())
+print("Model accuracy : {:.2f}".format(accuracy))
+
+Model accuracy : 0.74
+Congratulations! You sucessfully created a spam classifier in just a few steps. Your classifier predicted about 80% of the labels correctly. Can you think of a way to improve this accuracy?
+
+
+
+
+
+
+
