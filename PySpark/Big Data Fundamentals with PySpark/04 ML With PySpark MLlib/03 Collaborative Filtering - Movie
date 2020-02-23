@@ -1,0 +1,177 @@
+Loading Movie Lens dataset into RDDs
+Collaborative filtering is a technique for recommender systems wherein users' ratings and interactions with various products are used to recommend new ones. With the advent of Machine Learning and parallelized processing of data, Recommender systems have become widely popular in recent years, and are utilized in a variety of areas including movies, music, news, books, research articles, search queries, social tags. In this 3-part exercise, your goal is to develop a simple movie recommendation system using PySpark MLlib using a subset of MovieLens 100k dataset.
+In the first part, you'll first load the MovieLens data (ratings.csv) into RDD and from each line in the RDD which is formatted as userId,movieId,rating,timestamp, you'll need to map the MovieLens data to a Ratings object (userID, productID, rating) after removing timestamp column and finally you'll split the RDD into training and test RDDs.
+Remember, you have a SparkContext sc available in your workspace. Also file_path variable (which is the path to the ratings.csv file), and ALS class are already available in your workspace.
+https://grouplens.org/datasets/movielens/100k/
+
+
+Load the ratings.csv dataset into an RDD.
+Split the RDD using , as a delimiter.
+For each line of the RDD, using Rating() class create a tuple of userID, productID, rating.
+Randomly split the data into training data and test data (0.8 and 0.2).
+
+In [1]: file_path
+Out[1]: '/usr/local/share/datasets/ratings.csv'
+
+# Load the data into RDD
+data = sc.textFile(file_path)
+
+In [3]: data
+Out[3]: /usr/local/share/datasets/ratings.csv MapPartitionsRDD[1] at textFile at NativeMethodAccessorImpl.java:0
+
+
+
+
+
+# Split the RDD 
+ratings = data.map(lambda l: l.split(','))
+
+# Transform the ratings RDD 
+ratings_final = ratings.map(lambda line: Rating(int(line[0]), int(line[1]), float(line[2])))
+
+# Split the data into training and test
+training_data, test_data = ratings_final.randomSplit([0.8, 0.2])
+
+
+
+Good job with preprocessing the data. It's time to train the ALS model!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Model training and predictions
+After splitting the data into training and test data, in the second part of the exercise, you'll train the ALS algorithm using the training data. PySpark MLlib's ALS algorithm has the following mandatory parameters - rank (the number of latent factors in the model) and iterations (number of iterations to run). After training the ALS model, you can use the model to predict the ratings from the test data. For this, you will provide the user and item columns from the test dataset and finally print the first 2 rows of predictAll() output.
+Remember, you have SparkContext sc, training_data and test_data are already available in your workspace.
+
+
+Train ALS algorithm with training data and configured parameters (rank = 10 and iterations = 10).
+Drop the rating column in the test data.
+Test the model by predicting the rating from the test data.
+Print the first two rows of the predicted ratings.
+
+
+# Create the ALS model on the training data
+model = ALS.train(training_data, rank=10, iterations=10)
+
+In [2]: model
+Out[2]: 
+[Rating(user=96, product=1084, rating=4.534765365023493),
+ Rating(user=468, product=1084, rating=3.4906701255956007)]
+ 
+ 
+ 
+ 
+
+# Drop the ratings column 
+testdata_no_rating = test_data.map(lambda p: (p[0], p[1]))
+
+Out[3]: <pyspark.mllib.recommendation.MatrixFactorizationModel at 0x7f396f9280f0>
+
+
+
+
+# Predict the model  
+predictions = model.predictAll(testdata_no_rating)
+
+In [6]: predictions
+Out[6]: MapPartitionsRDD[447] at mapPartitions at PythonMLLibAPI.scala:1339
+
+
+
+
+# Print the first rows of the RDD
+predictions.take(2)
+
+In [7]: predictions.take(2)
+Out[7]: 
+[Rating(user=96, product=1084, rating=4.534765365023493),
+ Rating(user=468, product=1084, rating=3.4906701255956007)]
+
+Model training and predictions are neatly done. Let's find out how successful your model is in the next part.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Model evaluation using MSE
+After generating the predicted ratings from the test data using ALS model, in this final part of the exercise, you'll prepare the data for calculating Mean Square Error (MSE) of the model. The MSE is the average value of (original rating – predicted rating)^2 for all users and indicates the absolute fit of the model to the data. To do this, first, you'll organize both the ratings and prediction RDDs to make a tuple of ((user, product), rating)), then join the ratings RDD with prediction RDD and finally apply a squared difference function along with mean() to get the MSE.
+Remember, you have a SparkContext sc available in your workspace. Also, ratings_final and predictions RDD are already available in your workspace.
+
+
+Organize ratings RDD to make ((user, product), rating).
+Organize predictions RDD to make ((user, product), rating).
+Join the prediction RDD with the ratings RDD.
+Evaluate the model using MSE between original rating and predicted rating and print it.
+
+# Prepare ratings data
+rates = ratings_final.map(lambda r: ((r[0], r[1]), r[2]))
+
+In [7]: rates
+Out[7]: PythonRDD[926] at RDD at PythonRDD.scala:49
+
+
+
+
+# Prepare predictions map
+preds = predictions.map(lambda r: ((r[0], r[1]), r[2]))
+
+In [5]: preds
+Mean Squared Error of the model for the test data = 1.35
+Out[5]: PythonRDD[924] at RDD at PythonRDD.scala:49
+
+
+
+# Join the ratings data with predictions data
+rates_and_preds = rates.join(preds)
+
+In [6]: rates_and_preds
+Out[6]: PythonRDD[925] at RDD at PythonRDD.scala:49
+
+
+
+
+
+# Calculate and print MSE
+MSE = rates_and_preds.map(lambda r: (r[1][0] - r[1][1])**2).mean()
+print("Mean Squared Error of the model for the test data = {:.2f}".format(MSE))
+
+<script.py> output:
+    Mean Squared Error of the model for the test data = 1.35
+Hurray! You have successfully created a Movie Recommendation System using Apache Spark.
+
+
