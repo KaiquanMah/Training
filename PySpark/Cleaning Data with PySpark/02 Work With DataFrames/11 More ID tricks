@@ -1,0 +1,87 @@
+More ID tricks
+Once you define a Spark process, you'll likely want to use it many times. Depending on your needs, you may want to start your IDs at a certain value so there isn't overlap with previous runs of the Spark task. This behavior is similar to how IDs would behave in a relational database. You have been given the task to make sure that the IDs output from a monthly Spark task start at the highest value from the previous month.
+The spark session and two DataFrames, voter_df_march and voter_df_april, are available in your workspace. The pyspark.sql.functions library is available under the alias F.
+
+
+Determine the highest ROW_ID in voter_df_march and save it in the variable previous_max_ID. The statement .rdd.max()[0] will get the maximum ID.
+Add a ROW_ID column to voter_df_april starting at the value of previous_max_ID.
+Show the ROW_ID's from both Data Frames and compare.
+
+
+# Determine the highest ROW_ID and save it in previous_max_ID
+previous_max_ID = voter_df_march.select('ROW_ID').rdd.max()[0]
+
+# Add a ROW_ID column to voter_df_april starting at the desired value
+voter_df_april = voter_df_april.withColumn('ROW_ID', previous_max_ID + F.monotonically_increasing_id())
+
+# Show the ROW_ID from both DataFrames and compare
+voter_df_march.select('ROW_ID').show()
+
+
+
+
+    +-------------+
+    |       ROW_ID|
+    +-------------+
+    |   8589934592|
+    |  25769803776|
+    |  34359738368|
+    |  42949672960|
+    |  51539607552|
+    | 103079215104|
+    | 111669149696|
+    | 231928233984|
+    | 240518168576|
+    | 360777252864|
+    | 395136991232|
+    | 601295421440|
+    | 635655159808|
+    | 670014898176|
+    | 807453851648|
+    | 850403524608|
+    | 944892805120|
+    | 962072674304|
+    |1005022347264|
+    |1047972020224|
+    +-------------+
+    only showing top 20 rows
+    
+    
+    
+    
+    
+    
+    
+
+voter_df_april.select('ROW_ID').show()
+
+
+    +-------------+
+    |       ROW_ID|
+    +-------------+
+    |1717986918400|
+    |1735166787584|
+    |1743756722176|
+    |1752346656768|
+    |1760936591360|
+    |1812476198912|
+    |1821066133504|
+    |1941325217792|
+    |1949915152384|
+    |2070174236672|
+    |2104533975040|
+    |2310692405248|
+    |2345052143616|
+    |2379411881984|
+    |2516850835456|
+    |2559800508416|
+    |2654289788928|
+    |2671469658112|
+    |2714419331072|
+    |2757369004032|
+    +-------------+
+    only showing top 20 rows
+    
+    
+    Fantastic work! It's easy to forget that the output of a Spark method can often be modified before being assigned. This provides a lot of power and flexibility, especially when trying to migrate tasks from various technologies. Consider how you could use everything we've learned in this chapter to create a combination ID containing a name, a new ID, and perhaps a conditional value. When you are able to view your tasks as compositions of available functions, you can clean and modify your data in any way you see fit.
+
