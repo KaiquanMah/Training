@@ -1,0 +1,84 @@
+when() example
+The when() clause lets you conditionally modify a Data Frame based on its content. You'll want to modify our voter_df DataFrame to add a random number to any voting member that is defined as a "Councilmember".
+The voter_df DataFrame is defined and available to you. The pyspark.sql.functions library is available as F. You can use F.rand() to generate the random value.
+
+
+Add a column to voter_df named random_val with the results of the F.rand() method for any voter with the title Councilmember.
+Show some of the DataFrame rows, noting whether the .when() clause worked.
+
+
+In [1]: voter_df.show()
++----------+-------------+-------------------+
+|      DATE|        TITLE|         VOTER_NAME|
++----------+-------------+-------------------+
+|02/08/2017|Councilmember|  Jennifer S. Gates|
+|02/08/2017|Councilmember| Philip T. Kingston|
+|02/08/2017|        Mayor|Michael S. Rawlings|
+|02/08/2017|Councilmember|       Adam Medrano|
+|02/08/2017|Councilmember|       Casey Thomas|
+|02/08/2017|Councilmember|Carolyn King Arnold|
+|02/08/2017|Councilmember|       Scott Griggs|
+|02/08/2017|Councilmember|   B. Adam  McGough|
+|02/08/2017|Councilmember|       Lee Kleinman|
+|02/08/2017|Councilmember|      Sandy Greyson|
+|02/08/2017|Councilmember|  Jennifer S. Gates|
+|02/08/2017|Councilmember| Philip T. Kingston|
+|02/08/2017|        Mayor|Michael S. Rawlings|
+|02/08/2017|Councilmember|       Adam Medrano|
+|02/08/2017|Councilmember|       Casey Thomas|
+|02/08/2017|Councilmember|Carolyn King Arnold|
+|02/08/2017|Councilmember| Rickey D. Callahan|
+|01/11/2017|Councilmember|  Jennifer S. Gates|
+|04/25/2018|Councilmember|     Sandy  Greyson|
+|04/25/2018|Councilmember| Jennifer S.  Gates|
++----------+-------------+-------------------+
+only showing top 20 rows
+
+
+
+
+
+
+
+# Add a column to voter_df for any voter with the title **Councilmember**
+voter_df = voter_df.withColumn('random_val',
+                               when(voter_df.TITLE=='Councilmember', F.rand()))
+
+# Show some of the DataFrame rows, noting whether the when clause worked
+voter_df.show()
+
+
+
+
+
+<script.py> output:
+    +----------+-------------+-------------------+--------------------+
+    |      DATE|        TITLE|         VOTER_NAME|          random_val|
+    +----------+-------------+-------------------+--------------------+
+    |02/08/2017|Councilmember|  Jennifer S. Gates|  0.0336976380212578|
+    |02/08/2017|Councilmember| Philip T. Kingston|   0.814633461682858|
+    |02/08/2017|        Mayor|Michael S. Rawlings|                null|
+    |02/08/2017|Councilmember|       Adam Medrano| 0.10417943385382333|
+    |02/08/2017|Councilmember|       Casey Thomas|  0.6547003679782317|
+    |02/08/2017|Councilmember|Carolyn King Arnold| 0.16453450137236236|
+    |02/08/2017|Councilmember|       Scott Griggs|  0.2809941361262964|
+    |02/08/2017|Councilmember|   B. Adam  McGough|  0.5690372030610851|
+    |02/08/2017|Councilmember|       Lee Kleinman|  0.8855102450515276|
+    |02/08/2017|Councilmember|      Sandy Greyson|  0.8947317458384844|
+    |02/08/2017|Councilmember|  Jennifer S. Gates|  0.6008401666556477|
+    |02/08/2017|Councilmember| Philip T. Kingston| 0.21243362759055961|
+    |02/08/2017|        Mayor|Michael S. Rawlings|                null|
+    |02/08/2017|Councilmember|       Adam Medrano|  0.5436346826219064|
+    |02/08/2017|Councilmember|       Casey Thomas|0.007898872803200785|
+    |02/08/2017|Councilmember|Carolyn King Arnold|  0.5594339352880144|
+    |02/08/2017|Councilmember| Rickey D. Callahan|0.003287797941231796|
+    |01/11/2017|Councilmember|  Jennifer S. Gates| 0.12190432332436218|
+    |04/25/2018|Councilmember|     Sandy  Greyson|  0.6925808570783645|
+    |04/25/2018|Councilmember| Jennifer S.  Gates|  0.9728968545676927|
+    +----------+-------------+-------------------+--------------------+
+    only showing top 20 rows
+    
+    
+Great work! The .when() clause is simple enough to use, but is very powerful. Let's try some more examples.
+
+    
