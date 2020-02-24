@@ -1,0 +1,66 @@
+When() Otherwise()
+This requirement is similar to the last, but now you want to add multiple values based on the voter's position. Modify your voter_df DataFrame to add a random number to any voting member that is defined as a Councilmember. Use 2 for the Mayor and 0 for anything other position.
+The voter_df Data Frame is defined and available to you. The pyspark.sql.functions library is available as F. You can use F.rand() to generate the random value.
+
+
+Add a column to voter_df named random_val with the results of the F.rand() method for any voter with the title Councilmember. Set random_val to 2 for the Mayor. Set any other title to the value 0.
+Show some of the Data Frame rows, noting whether the clauses worked.
+Use the .filter clause to find 0 in random_val.
+
+
+# Add a column to voter_df for a voter based on their position
+voter_df = voter_df.withColumn('random_val',
+                               when(voter_df.TITLE == 'Councilmember', F.rand()) \
+                               .when(voter_df.TITLE == 'Mayor', 2) \
+                               .otherwise(0))
+
+# Show some of the DataFrame rows
+voter_df.take(5)
+
+
+In [13]: voter_df.take(5)
+Out[13]: 
+[Row(DATE='02/08/2017', TITLE='Councilmember', VOTER_NAME='Jennifer S. Gates', random_val=0.2217956653662153),
+ Row(DATE='02/08/2017', TITLE='Councilmember', VOTER_NAME='Philip T. Kingston', random_val=0.02156410284006971),
+ Row(DATE='02/08/2017', TITLE='Mayor', VOTER_NAME='Michael S. Rawlings', random_val=2.0),
+ Row(DATE='02/08/2017', TITLE='Councilmember', VOTER_NAME='Adam Medrano', random_val=0.49938903634268184),
+ Row(DATE='02/08/2017', TITLE='Councilmember', VOTER_NAME='Casey Thomas', random_val=0.5305648619487663)]
+ 
+ 
+ 
+ 
+ 
+# Use the .filter() clause with random_val
+voter_df.filter(voter_df.random_val == 0).show()
+
+
+
+<script.py> output:
+    +----------+--------------------+-----------------+----------+
+    |      DATE|               TITLE|       VOTER_NAME|random_val|
+    +----------+--------------------+-----------------+----------+
+    |04/25/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |04/25/2018|       Mayor Pro Tem|Dwaine R. Caraway|       0.0|
+    |06/20/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |06/20/2018|       Mayor Pro Tem|Dwaine R. Caraway|       0.0|
+    |06/20/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |06/20/2018|       Mayor Pro Tem|Dwaine R. Caraway|       0.0|
+    |08/15/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |08/15/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |09/18/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |09/18/2018|       Mayor Pro Tem|    Casey  Thomas|       0.0|
+    |04/25/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |04/25/2018|       Mayor Pro Tem|Dwaine R. Caraway|       0.0|
+    |04/11/2018|       Mayor Pro Tem|Dwaine R. Caraway|       0.0|
+    |04/11/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |04/11/2018|       Mayor Pro Tem|Dwaine R. Caraway|       0.0|
+    |04/11/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |04/11/2018|       Mayor Pro Tem|Dwaine R. Caraway|       0.0|
+    |06/13/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    |06/13/2018|       Mayor Pro Tem|Dwaine R. Caraway|       0.0|
+    |04/11/2018|Deputy Mayor Pro Tem|     Adam Medrano|       0.0|
+    +----------+--------------------+-----------------+----------+
+    only showing top 20 rows
+
+Congratulations! You've successfully used multiple when clauses and the otherwise clause to modify a Data Frame. When clauses can be useful for changing errant data in your Data Frames without extensive work. Make sure to consider using when / otherwise if you ever need to perform conditional steps on your data cleaning processes.
+
