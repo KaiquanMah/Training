@@ -1,0 +1,52 @@
+Adding an ID Field
+When working with data, you sometimes only want to access certain fields and perform various operations. In this case, find all the unique voter names from the DataFrame and add a unique ID number. Remember that Spark IDs are assigned based on the DataFrame partition - as such the ID values may be much greater than the actual number of rows in the DataFrame.
+With Spark's lazy processing, the IDs are not actually generated until an action is performed and can be somewhat random depending on the size of the dataset.
+The spark session and a Spark DataFrame df containing the DallasCouncilVotes.csv.gz file are available in your workspace. The pyspark.sql.functions library is available under the alias F.
+
+
+Select the unique entries from the column VOTER NAME and create a new DataFrame called voter_df.
+Count the rows in the voter_df DataFrame.
+Add a ROW_ID column using the appropriate Spark function.
+Show the rows with the 10 highest ROW_IDs.
+
+
+
+# Select all the unique council voters
+voter_df = df.select(df["VOTER NAME"]).distinct()
+
+# Count the rows in voter_df
+print("\nThere are %d rows in the voter_df DataFrame.\n" % voter_df.count())
+
+    There are 36 rows in the voter_df DataFrame.
+
+
+
+
+
+# Add a ROW_ID
+voter_df = voter_df.withColumn('ROW_ID', F.monotonically_increasing_id())
+
+# Show the rows with 10 highest IDs in the set
+voter_df.orderBy(voter_df.ROW_ID.desc()).show(10)
+
+
+    
+    +--------------------+-------------+
+    |          VOTER NAME|       ROW_ID|
+    +--------------------+-------------+
+    |        Lee Kleinman|1709396983808|
+    |  the  final  201...|1700807049217|
+    |         Erik Wilson|1700807049216|
+    |  the  final   20...|1683627180032|
+    | Carolyn King Arnold|1632087572480|
+    | Rickey D.  Callahan|1597727834112|
+    |   the   final  2...|1443109011456|
+    |    Monica R. Alonzo|1382979469312|
+    |     Lee M. Kleinman|1228360646656|
+    |   Jennifer S. Gates|1194000908288|
+    +--------------------+-------------+
+    only showing top 10 rows
+    
+
+Fantastic! You've used Spark functions to add an ID and have seen that these IDs are likely not sequential.
+
