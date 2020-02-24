@@ -1,0 +1,87 @@
+Modifying DataFrame columns
+Previously, you filtered out any rows that didn't conform to something generally resembling a name. Now based on your earlier work, your manager has asked you to create two new columns - first_name and last_name. She asks you to split the VOTER_NAME column into words on any space character. You'll treat the last word as the last_name, and all other words as the first_name. You'll be using some new functions in this exercise including .split(), .size(), and .getItem().
+Please note that these operations are always somewhat specific to the use case. Having your data conform to a format often matters more than the specific details of the format. Rarely is a data cleaning task meant just for one person - matching a defined format allows for easier sharing of the data later (ie, Paul doesn't need to worry about names - Mary already cleaned the dataset).
+The filtered voter DataFrame from your previous exercise is available as voter_df. The pyspark.sql.functions library is available under the alias F.
+
+
+Add a new column called splits holding the list of possible names.
+Use the getItem() method and create a new column called first_name.
+Get the last entry of the splits list and create a column called last_name.
+Drop the splits column and show the new voter_df.
+
+#method 1 - answer was not accepted
+# Add a new column called splits separated on whitespace
+voter_df = voter_df.withColumn('splits', F.split(voter_df.VOTER_NAME, '\s+'))
+
+# Create a new column called first_name based on the first item in splits
+#Remember python lists start at 0.
+voter_df = voter_df.withColumn('first_name', voter_df.splits.getItem(0))
+
+# Get the last entry of the splits list and create a column called last_name
+voter_df = voter_df.withColumn('last_name', voter_df.splits.getItem(F.size(voter_df['splits']) - 1))
+
+# Drop the splits column
+voter_df = voter_df.drop('splits')
+
+# Show the voter_df DataFrame
+voter_df.show()
+
+
+
+
+
+#method 2 - answer was accepted
+#differences was in F.size(voter_df['splits']) in method 1
+#vs F.size('splits') in method 2
+# Add a new column called splits separated on whitespace
+voter_df = voter_df.withColumn('splits', F.split(voter_df.VOTER_NAME, '\s+'))
+
+
+# Create a new column called first_name based on the first item in splits
+voter_df = voter_df.withColumn('first_name', voter_df.splits.getItem(0))
+
+# Get the last entry of the splits list and create a column called last_name
+voter_df = voter_df.withColumn('last_name', voter_df.splits.getItem(F.size('splits') - 1))
+
+
+
++----------+-------------+-------------------+----------+---------+--------------------+
+|      DATE|        TITLE|         VOTER_NAME|first_name|last_name|              splits|
++----------+-------------+-------------------+----------+---------+--------------------+
+|02/08/2017|Councilmember|  Jennifer S. Gates|  Jennifer|    Gates|[Jennifer, S., Ga...|
+|02/08/2017|Councilmember| Philip T. Kingston|    Philip| Kingston|[Philip, T., King...|
+|02/08/2017|        Mayor|Michael S. Rawlings|   Michael| Rawlings|[Michael, S., Raw...|
+|02/08/2017|Councilmember|       Adam Medrano|      Adam|  Medrano|     [Adam, Medrano]|
+|02/08/2017|Councilmember|       Casey Thomas|     Casey|   Thomas|     [Casey, Thomas]|
+|02/08/2017|Councilmember|Carolyn King Arnold|   Carolyn|   Arnold|[Carolyn, King, A...|
+|02/08/2017|Councilmember|       Scott Griggs|     Scott|   Griggs|     [Scott, Griggs]|
+|02/08/2017|Councilmember|   B. Adam  McGough|        B.|  McGough| [B., Adam, McGough]|
+|02/08/2017|Councilmember|       Lee Kleinman|       Lee| Kleinman|     [Lee, Kleinman]|
+|02/08/2017|Councilmember|      Sandy Greyson|     Sandy|  Greyson|    [Sandy, Greyson]|
+|02/08/2017|Councilmember|  Jennifer S. Gates|  Jennifer|    Gates|[Jennifer, S., Ga...|
+|02/08/2017|Councilmember| Philip T. Kingston|    Philip| Kingston|[Philip, T., King...|
+|02/08/2017|        Mayor|Michael S. Rawlings|   Michael| Rawlings|[Michael, S., Raw...|
+|02/08/2017|Councilmember|       Adam Medrano|      Adam|  Medrano|     [Adam, Medrano]|
+|02/08/2017|Councilmember|       Casey Thomas|     Casey|   Thomas|     [Casey, Thomas]|
+|02/08/2017|Councilmember|Carolyn King Arnold|   Carolyn|   Arnold|[Carolyn, King, A...|
+|02/08/2017|Councilmember| Rickey D. Callahan|    Rickey| Callahan|[Rickey, D., Call...|
+|01/11/2017|Councilmember|  Jennifer S. Gates|  Jennifer|    Gates|[Jennifer, S., Ga...|
+|04/25/2018|Councilmember|     Sandy  Greyson|     Sandy|  Greyson|    [Sandy, Greyson]|
+|04/25/2018|Councilmember| Jennifer S.  Gates|  Jennifer|    Gates|[Jennifer, S., Ga...|
++----------+-------------+-------------------+----------+---------+--------------------+
+only showing top 20 rows
+
+
+
+
+
+
+
+# Drop the splits column
+voter_df = voter_df.drop('splits')
+
+# Show the voter_df DataFrame
+voter_df.show()
+
+
+
