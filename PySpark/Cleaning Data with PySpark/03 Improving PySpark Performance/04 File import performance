@@ -1,0 +1,32 @@
+File import performance
+You've been given a large set of data to import into a Spark DataFrame. You'd like to test the difference in import speed by splitting up the file.
+You have two types of files available: departures_full.txt.gz and departures_xxx.txt.gz where xxx is 000 - 013. The same number of rows is split between each file.
+
+
+Import the departures_full.txt.gz file and the departures_xxx.txt.gz files into separate DataFrames.
+Run a count on each DataFrame and compare the run times.
+
+# Import the full and split files into DataFrames
+full_df = spark.read.csv("departures_full.txt.gz")
+split_df = spark.read.csv("departures_000.txt.gz")
+
+# Print the count and run time for each DataFrame
+start_time_a = time.time()
+print("Total rows in full DataFrame:\t%d" % full_df.count())
+print("Time to run: %f" % (time.time() - start_time_a))
+
+start_time_b = time.time()
+print("Total rows in split DataFrame:\t%d" % split_df.count())
+print("Time to run: %f" % (time.time() - start_time_b))
+
+
+<script.py> output:
+    Total rows in full DataFrame:	139359
+    Time to run: 0.646149
+    Total rows in split DataFrame:	10000
+    Time to run: 0.199464
+
+
+Awesome! The results should illustrate that using split files runs more quickly than using one large file for import. Note that in certain circumstances the results may be reversed. This is a side effect of running as a single node cluster. Depending on the tasks required and resources available, it may occasionally take longer than expected. If you perform multiple runs of the tasks, you should see the full file import as generally slower than the split file import.
+
+
