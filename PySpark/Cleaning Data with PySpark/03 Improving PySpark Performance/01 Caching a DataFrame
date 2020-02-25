@@ -1,0 +1,35 @@
+Caching a DataFrame
+You've been assigned a task that requires running several analysis operations on a DataFrame. You've learned that caching can improve performance when reusing DataFrames and would like to implement it.
+You'll be working with a new dataset consisting of airline departure information. It may have repetitive data and will need to be de-duplicated.
+The DataFrame departures_df is defined, but no actions have been performed.
+
+
+
+Cache the unique rows in the departures_df DataFrame.
+Perform a count query on departures_df, noting how long the operation takes.
+Count the rows again, noting the variance in time of a cached DataFrame.
+
+#start timer, cache df, then calculate amount of time
+start_time = time.time()
+
+# Add caching to the unique rows in departures_df
+departures_df = departures_df.distinct().cache()
+
+# Count the unique rows in departures_df, noting how long the operation takes
+print("Counting %d rows took %f seconds" % (departures_df.count(), time.time() - start_time))
+
+
+
+#from cached df, start timer, then calculate amount of time
+# Count the rows again, noting the variance in time of a cached DataFrame
+start_time = time.time()
+print("Counting %d rows again took %f seconds" % (departures_df.count(), time.time() - start_time))
+
+
+<script.py> output:
+    Counting 139358 rows took 3.306642 seconds
+    Counting 139358 rows again took 0.693318 seconds
+    
+    
+Congratulations! You've successfully implemented caching on a DataFrame. Consider why the first run takes longer even though you've told it to cache() the DataFrame. Remember that even though you've applied the caching transformation, it doesn't take effect until an action is run. The action instantiates the caching after the distinct() function completes. The second time, there is no need to recalculate anything so it returns almost immediately.
+
