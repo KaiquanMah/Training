@@ -1,0 +1,50 @@
+Reading Spark configurations
+You've recently configured a cluster via a cloud provider. Your only access is via the command shell or your python code. You'd like to verify some Spark settings to validate the configuration of the cluster.
+The spark object is available for use.
+
+
+Check the name of the Spark application instance ('spark.app.name').
+Determine the TCP port the driver runs on ('spark.driver.port').
+Determine how many partitions are configured for joins.
+Show the results.
+
+
+# Name of the Spark application instance
+app_name = spark.conf.get('spark.app.name')
+
+# Driver TCP port
+driver_tcp_port = spark.conf.get('spark.driver.port')
+
+# Number of join partitions
+#http://devslogics.blogspot.com/2016/02/spark-join-and-number-of-partitions.html
+num_partitions = spark.conf.get('spark.sql.shuffle.partitions')
+
+# Show the results
+print("Name: %s" % app_name)
+print("Driver TCP port: %s" % driver_tcp_port)
+print("Number of partitions: %s" % num_partitions)
+
+
+
+<script.py> output:
+    Name: pyspark-shell
+    Driver TCP port: 44483
+    Number of partitions: 200
+
+
+Nice work! Using the spark.conf object allows you to validate the settings of a cluster without having configured it initially. This can help you know what changes should be optimized for your needs.
+
+
+
+
+
+Additional readings
+What is the difference between Spark Standalone, YARN and local mode?
+https://stackoverflow.com/questions/40012093/what-is-the-difference-between-spark-standalone-yarn-and-local-mode
+
+
+Difference between spark standalone and local mode?
+https://stackoverflow.com/questions/40828302/difference-between-spark-standalone-and-local-mode?noredirect=1&lq=1
+
+
+
