@@ -1,0 +1,15 @@
+File size optimisation
+Consider if you're given 2 large data files on a cluster with 10 nodes. Each file contains 10M rows of roughly the same size. While working with your data, the responsiveness is acceptable but the initial read from the files takes a considerable period of time. Note that you are the only one who will use the data and it changes for each run.
+Which of the following is the best option to improve performance?
+
+#NOT - Split the 2 files into 8 files of 2.5M rows each.
+
+#NOT - Convert the files to parquet.
+Incorrect. Converting to Parquet format is faster, but given that the data is used for one process it is not an ideal optimization.
+
+#NOT - Split the files into 30 files containing a random number of rows.
+Incorrect. This could be better than the original configuration, but the random number of rows mean that some workers will be waiting while others are busy.
+
+#YES - Split the 2 files into 50 files of 400K rows each.
+Correct! Converting to a larger number of files with approximately equal quantity of rows lets Spark decide how best to read the data.
+
