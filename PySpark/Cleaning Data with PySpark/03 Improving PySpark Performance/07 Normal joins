@@ -1,0 +1,34 @@
+Normal joins
+You've been given two DataFrames to combine into a single useful DataFrame. Your first task is to combine the DataFrames normally and view the execution plan.
+The DataFrames flights_df and airports_df are available to you.
+
+
+Create a new DataFrame normal_df by joining flights_df with airports_df.
+Determine which type of join is used in the query plan.
+
+# Join the flights_df and aiports_df DataFrames
+normal_df = flights_df.join(airports_df, \
+    flights_df["Destination Airport"] == airports_df["IATA"] )
+
+# Show the query plan
+normal_df.explain()
+
+
+<script.py> output:
+    == Physical Plan ==
+    *(5) SortMergeJoin [Destination Airport#242], [IATA#259], Inner
+    :- *(2) Sort [Destination Airport#242 ASC NULLS FIRST], false, 0
+    :  +- Exchange hashpartitioning(Destination Airport#242, 500)
+    :     +- *(1) Project [Date (MM/DD/YYYY)#240, Flight Number#241, Destination Airport#242, Actual elapsed time (Minutes)#243]
+    :        +- *(1) Filter isnotnull(Destination Airport#242)
+    :           +- *(1) FileScan csv [Date (MM/DD/YYYY)#240,Flight Number#241,Destination Airport#242,Actual elapsed time (Minutes)#243] Batched: false, Format: CSV, Location: InMemoryFileIndex[file:/tmp/tmpj8y1ychh/AA_DFW_2018_Departures_Short.csv.gz], PartitionFilters: [], PushedFilters: [IsNotNull(Destination Airport)], ReadSchema: struct<Date (MM/DD/YYYY):string,Flight Number:string,Destination Airport:string,Actual elapsed ti...
+    +- *(4) Sort [IATA#259 ASC NULLS FIRST], false, 0
+       +- Exchange hashpartitioning(IATA#259, 500)
+          +- *(3) Project [AIRPORTNAME#258, IATA#259]
+             +- *(3) Filter isnotnull(IATA#259)
+                +- *(3) FileScan csv [AIRPORTNAME#258,IATA#259] Batched: false, Format: CSV, Location: InMemoryFileIndex[file:/tmp/tmpj8y1ychh/airportnames.txt.gz], PartitionFilters: [], PushedFilters: [IsNotNull(IATA)], ReadSchema: struct<AIRPORTNAME:string,IATA:string>
+
+
+Good work - You've implemented a basic join and examined the query plan. 
+Learning to parse a query plan will help you understand what Spark is doing and when.
+
