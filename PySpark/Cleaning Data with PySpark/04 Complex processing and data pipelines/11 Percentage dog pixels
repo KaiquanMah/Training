@@ -1,0 +1,69 @@
+Percentage dog pixels
+The final task for parsing the dog annotation data is to determine the percentage of pixels in each image that represents a dog (or dogs). You'll need to use the various techniques you've learned in this course to help calculate this information and add it as columns for later analysis.
+
+To calculate the percentage of pixels, first calculate the total number of pixels representing each dog then sum them for the image. You can calculate the bounding box with the formula:
+(Xend - Xstart) * (Yend - Ystart)
+NOTE: You can ignore the possibility of overlapping bounding boxes in this instance.
+
+For the percentage, calculate the total number of "dog" pixels divided by the total size of the image, multiplied by 100.
+The joined_df DataFrame is as you last used it. pyspark.sql.functions is aliased to F.
+
+
+
+
+
+Define a Python function to take a list of tuples (the dog objects) and calculate the total number of "dog" pixels per image.
+Create a UDF of the function and use it to create a new column called 'dog_pixels' on the DataFrame.
+Create another column, 'dog_percent', representing the percentage of 'dog_pixels' in the image. Make sure this is between 0-100%.
+Show the first 10 rows with more than 60% 'dog_pixels' in the image.
+
+
+In [1]: joined_df
+Out[1]: DataFrame[folder: string, filename: string, width: string, height: string, dogs: array<struct<breed:string,start_x:int,start_y:int,end_x:int,end_y:int>>]
+
+
+
+# Define a UDF to determine the number of pixels per image
+#The dog tuple looks like (breed, startx, starty, endx, endy). You can access the items by index, like a list.
+def dogPixelCount(doglist):
+  totalpixels = 0
+  for dog in doglist:
+    totalpixels += (dog[3] - dog[1]) * (dog[4] - dog[2])
+  return totalpixels
+
+
+# Define a UDF for the pixel count
+udfDogPixelCount = F.udf(dogPixelCount, IntegerType())
+joined_df = joined_df.withColumn('dog_pixels', udfDogPixelCount('dogs'))
+
+# Create a column representing the percentage of pixels
+joined_df = joined_df.withColumn('dog_percent', (joined_df.dog_pixels / (joined_df.width * joined_df.height)) * 100)
+
+# Show the first 10 annotations with more than 60% dog
+joined_df.where('dog_percent > 60').show(10)
+
+
+
+
+
+<script.py> output:
+    +--------+---------------+-----+------+--------------------+----------+-----------------+
+    |  folder|       filename|width|height|                dogs|dog_pixels|      dog_percent|
+    +--------+---------------+-----+------+--------------------+----------+-----------------+
+    |02110627|n02110627_12938|  200|   300|[[affenpinscher, ...|     49997|83.32833333333333|
+    |02104029|   n02104029_63|  500|   375|[[kuvasz, 0, 0, 4...|    163173|          87.0256|
+    |02105056| n02105056_2834|  500|   375|[[groenendael, 16...|    112574|60.03946666666666|
+    |02093647|  n02093647_541|  500|   333|[[Bedlington_terr...|    144640|86.87087087087087|
+    |02098413| n02098413_1355|  500|   375|[[Lhasa, 39, 1, 4...|    171120|           91.264|
+    |02093859| n02093859_2309|  330|   500|[[Kerry_blue_terr...|    131878|79.92606060606062|
+    |02109961| n02109961_1017|  475|   500|[[Eskimo_dog, 43,...|    189189|79.65852631578947|
+    |02108000| n02108000_3491|  600|   450|[[EntleBucher, 30...|    168667|62.46925925925926|
+    |02085782| n02085782_1731|  600|   449|[[Japanese_spanie...|    250125|92.84521158129176|
+    |02110185| n02110185_2736|  259|   500|[[Siberian_husky,...|    113088|87.32664092664093|
+    +--------+---------------+-----+------+--------------------+----------+-----------------+
+    only showing top 10 rows
+
+
+
+Congratulations! You've now used numerous techniques in Spark to perform the various steps of a data pipeline and answer some meaningful questions about the dataset.
+
