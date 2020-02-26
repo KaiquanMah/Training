@@ -1,0 +1,61 @@
+Removing invalid rows
+Now that you've successfully removed the commented rows, you have received some information about the general format of the data. There should be at minimum 5 tab separated columns in the DataFrame. Remember that your original DataFrame only has a single column, so you'll need to split the data on the tab (\t) characters.
+The DataFrame annotations_df is already available, with the commented rows removed. The spark.sql.functions library is available under the alias F. The initial number of rows available in the DataFrame is stored in the variable initial_count.
+
+
+Create a new variable tmp_fields using the annotations_df DataFrame column '_c0' splitting it on the tab character.
+Create a new column in annotations_df named 'colcount' representing the number of fields defined in the previous step.
+Filter out any rows from annotations_df containing fewer than 5 fields.
+Count the number of rows in the DataFrame and compare to the initial_count.
+
+
+# Split _c0 on the tab character and store the list in a variable
+#The pyspark.sql.functions.split() function requires the name of a column and the character to split on.
+tmp_fields = F.split(annotations_df['_c0'], "\t")
+
+In [12]: tmp_fields
+Out[12]: Column<b'split(_c0, \t)'>
+
+
+
+
+
+# Create the colcount column on the DataFrame
+#https://stackoverflow.com/questions/51553569/how-to-count-number-of-columns-in-spark-dataframe
+#count # of cols (df.columns.size)
+#count # of cols (df.columns.length)
+#count # of cols (len(df.columns))
+#Try using pyspark.sql.functions.size() to get the number of items in a list.
+annotations_df = annotations_df.withColumn('colcount', F.size(tmp_fields))
+
+In [14]: annotations_df
+Out[14]: DataFrame[_c0: string, colcount: int]
+
+
+
+
+# Remove any rows containing fewer than 5 fields
+annotations_df_filtered = annotations_df.filter(~ (annotations_df['colcount']<5))
+
+In [9]: annotations_df_filtered
+Out[9]: DataFrame[_c0: string, colcount: int]
+
+
+
+
+
+# Count the number of rows
+final_count = annotations_df_filtered.count()
+print("Initial count: %d\nFinal count: %d" % (initial_count, final_count))
+
+<script.py> output:
+    Initial count: 31378
+    Final count: 20580
+
+#Additional reading
+#https://allaboutscala.com/big-data/spark/
+
+
+
+Fantastic work! A big portion of data cleaning is removing data that simply doesn't fit the format needed. You will often have several filter steps within a given data pipeline to mold the data as needed.
+
