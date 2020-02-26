@@ -1,0 +1,68 @@
+Validate rows via join
+Another example of filtering data is using joins to remove invalid entries. You'll need to verify the folder names are as expected based on a given DataFrame named valid_folders_df. The DataFrame split_df is as you last left it with a group of split columns.
+The spark object is available, and pyspark.sql.functions is imported as F.
+
+
+Rename the _c0 column to folder on the valid_folders_df DataFrame.
+Count the number of rows in split_df.
+Join the two DataFrames on the folder name, and call the resulting DataFrame joined_df. Make sure to broadcast the smaller DataFrame.
+Check the number of rows remaining in the DataFrame and compare.
+
+In [1]: valid_folders_df.printSchema()
+root
+ |-- _c0: string (nullable = true)
+ 
+ In [2]: split_df.printSchema()
+root
+ |-- folder: string (nullable = true)
+ |-- filename: string (nullable = true)
+ |-- width: string (nullable = true)
+ |-- height: string (nullable = true)
+ |-- dog_list: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+
+
+
+# Rename the column in valid_folders_df
+valid_folders_df = valid_folders_df.withColumnRenamed('_c0', 'folder')
+
+In [6]: valid_folders_df
+Out[6]: DataFrame[folder: string]
+
+
+
+
+
+# Count the number of rows in split_df
+split_count = split_df.count()
+
+# Join the DataFrames
+#method 1 specifying broadcast without "=="
+joined_df = split_df.join(F.broadcast(valid_folders_df), "folder")
+#method 2 specifying "=="
+joined_df = split_df.join(F.broadcast(valid_folders_df), split_df.folder==valid_folders_df.folder)
+#method 3 removing broadcast
+joined_df = split_df.join(valid_folders_df, split_df.folder==valid_folders_df.folder)
+
+
+
+In [7]: joined_df
+Out[7]: DataFrame[folder: string, filename: string, width: string, height: string, dog_list: array<string>, folder: string]
+
+
+
+
+# Compare the number of rows remaining
+joined_count = joined_df.count()
+print("Before: %d\nAfter: %d" % (split_count, joined_count))
+
+
+
+<script.py> output:
+    Before: 20580
+    After: 19956
+
+Nicely done - using joins in this fashion drastically simplifies a validation task if your data permits it. The validation data doesn't necessarily need to be loaded from a file - it could be calculated on the fly, or based on a previous dataset. Optimizing these tasks will improve your overall data cleaning process.
+
+
+ 
