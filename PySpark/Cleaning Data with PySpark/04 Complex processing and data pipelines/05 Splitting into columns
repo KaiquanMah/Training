@@ -1,0 +1,42 @@
+Splitting into columns
+You've cleaned up your data considerably by removing the invalid rows from the DataFrame. Now you want to perform some further transformations by generating specific meaningful columns based on the DataFrame content.
+You have the spark context and the latest version of the annotations_df DataFrame. pyspark.sql.functions is available under the alias F.
+
+
+Split the content of the '_c0' column on the tab character and store in a variable called split_cols.
+Add the following columns based on the first four entries in the variable above: folder, filename, width, height on a DataFrame named split_df.
+Add the split_cols variable as a column.
+
+
+# Split the content of _c0 on the tab character (aka, '\t')
+split_cols = F.split(annotations_df['_c0'], '\t')
+
+
+In [2]: split_cols
+Out[2]: Column<b'split(_c0, \t)'>
+
+
+
+
+
+
+
+# Add the columns folder, filename, width, and height
+split_df = annotations_df.withColumn('folder', split_cols.getItem(0))
+split_df = split_df.withColumn('filename', split_cols.getItem(1))
+split_df = split_df.withColumn('width', split_cols.getItem(2))
+split_df = split_df.withColumn('height', split_cols.getItem(3))
+
+
+# Add split_cols as a column
+split_df = split_df.withColumn('split_cols', split_cols)
+
+In [3]: split_df
+Out[3]: DataFrame[_c0: string, colcount: int, folder: string, filename: string, width: string, height: string, split_cols: array<string>]
+
+
+
+Congratulations! We're getting close to the end of the course and things are getting more complex. You may be wondering why we're not using a schema instead to define the content layout. Spark's CSV parser can't handle advanced types (Arrays or Maps) so it wouldn't process correctly. In our example, we bypass using the types.
+
+
+
