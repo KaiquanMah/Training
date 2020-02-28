@@ -1,0 +1,44 @@
+Correcting Right Skew Data
+In the slides we showed how you might use log transforms to fix positively skewed data (data whose distribution is mostly to the left). To correct negative skew (data mostly to the right) you need to take an extra step called "reflecting" before you can apply the inverse of log, written as (1/log) to make the data look more like normal a normal distribution. Reflecting data uses the following formula to reflect each value: (xmax+1)–x.
+
+
+Use the aggregate function skewness() to verify that 'YEARBUILT' has negative skew.
+Use the withColumn() to create a new column 'Reflect_YearBuilt' and reflect the values of 'YEARBUILT'.
+Using 'Reflect_YearBuilt' column, create another column 'adj_yearbuilt' by taking 1/log() of the values.
+
+
+from pyspark.sql.functions import log
+
+# Compute the skewness
+print(df.agg({'YEARBUILT': 'skewness'}).collect())
+
+<script.py> output:
+    [Row(skewness(YEARBUILT)=-0.2455425013492729)]
+
+
+
+
+# Calculate the max year
+max_year = df.agg({'YEARBUILT': 'max'}).collect()[0][0]
+
+In [3]: max_year
+Out[3]: 2018
+
+
+
+
+# Create a new column of reflected data
+df = df.withColumn('Reflect_YearBuilt', (max_year + 1) - df['YEARBUILT'])
+
+# Create a new column based reflected data
+df = df.withColumn('adj_yearbuilt', 1 / log(df['Reflect_YearBuilt']))
+
+
+
+In [6]: df
+Out[6]: DataFrame[NO: bigint, MLSID: string, STREETNUMBERNUMERIC: bigint, STREETADDRESS: string, STREETNAME: string, POSTALCODE: bigint, STATEORPROVINCE: string, CITY: string, SALESCLOSEPRICE: bigint, LISTDATE: string, LISTPRICE: bigint, LISTTYPE: string, ORIGINALLISTPRICE: bigint, PRICEPERTSFT: double, FOUNDATIONSIZE: bigint, FENCE: string, MAPLETTER: string, LOTSIZEDIMENSIONS: string, SCHOOLDISTRICTNUMBER: string, DAYSONMARKET: bigint, OFFMARKETDATE: string, FIREPLACES: bigint, ROOMAREA4: string, ROOMTYPE: string, ROOF: string, ROOMFLOOR4: string, POTENTIALSHORTSALE: string, POOLDESCRIPTION: string, PDOM: bigint, GARAGEDESCRIPTION: string, SQFTABOVEGROUND: bigint, TAXES: bigint, ROOMFLOOR1: string, ROOMAREA1: string, TAXWITHASSESSMENTS: double, TAXYEAR: bigint, LIVINGAREA: bigint, UNITNUMBER: string, YEARBUILT: bigint, ZONING: string, STYLE: string, ACRES: double, COOLINGDESCRIPTION: string, APPLIANCES: string, BACKONMARKETDATE: double, ROOMFAMILYCHAR: string, ROOMAREA3: string, EXTERIOR: string, ROOMFLOOR3: string, ROOMFLOOR2: string, ROOMAREA2: string, DININGROOMDESCRIPTION: string, BASEMENT: string, BATHSFULL: bigint, BATHSHALF: bigint, BATHQUARTER: bigint, BATHSTHREEQUARTER: double, CLASS: string, BATHSTOTAL: bigint, BATHDESC: string, ROOMAREA5: string, ROOMFLOOR5: string, ROOMAREA6: string, ROOMFLOOR6: string, ROOMAREA7: string, ROOMFLOOR7: string, ROOMAREA8: string, ROOMFLOOR8: string, BEDROOMS: bigint, SQFTBELOWGROUND: bigint, ASSUMABLEMORTGAGE: string, ASSOCIATIONFEE: bigint, ASSESSMENTPENDING: string, ASSESSEDVALUATION: double, Reflect_YearBuilt: bigint, adj_yearbuilt: double]
+
+
+Adjusting variables is a complex task. 
+What you've seen here are only a few of the ways that you might try to make your data fit a normal distribution.
+
