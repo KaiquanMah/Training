@@ -1,0 +1,103 @@
+Bucketing
+If you are a homeowner its very important if a house has 1, 2, 3 or 4 bedrooms. But like bathrooms, once you hit a certain point you don't really care whether the house has 7 or 8. This example we'll look at how to figure out where are some good value points to bucket.
+
+
+Plot a distribution plot of the pandas dataframe sample_df using Seaborn distplot().
+Given it looks like there is a long tail of infrequent values after 5, create the bucket splits of 1, 2, 3, 4, 5+
+Create the transformer buck by instantiating Bucketizer() with the splits for setting the buckets, then set the input column as BEDROOMS and output column as bedrooms.
+Apply the Bucketizer transformation on df using transform() and assign the result to df_bucket. Then verify the results with show()
+
+In [1]: sample_df
+Out[1]: 
+      BEDROOMS
+0            3
+1            3
+2            3
+3            3
+4            3
+...
+20           4
+21           4
+22           3
+23           3
+24           4
+...
+29           5
+...        
+2474         3
+...
+2483         6
+2484         5
+2485         5
+...
+2503         4
+
+[2504 rows x 1 columns]
+
+
+
+In [2]: df
+Out[2]: DataFrame[NO: bigint, MLSID: string, STREETNUMBERNUMERIC: bigint, STREETADDRESS: string, STREETNAME: string, POSTALCODE: bigint, STATEORPROVINCE: string, CITY: string, SALESCLOSEPRICE: bigint, LISTDATE: timestamp, LISTPRICE: bigint, LISTTYPE: string, ORIGINALLISTPRICE: bigint, PRICEPERTSFT: double, FOUNDATIONSIZE: bigint, FENCE: string, MAPLETTER: string, LOTSIZEDIMENSIONS: string, SCHOOLDISTRICTNUMBER: string, DAYSONMARKET: bigint, OFFMARKETDATE: timestamp, FIREPLACES: bigint, ROOMAREA4: string, ROOMTYPE: string, ROOF: string, ROOMFLOOR4: string, POTENTIALSHORTSALE: string, POOLDESCRIPTION: string, PDOM: double, GARAGEDESCRIPTION: string, SQFTABOVEGROUND: bigint, TAXES: bigint, ROOMFLOOR1: string, ROOMAREA1: string, TAXWITHASSESSMENTS: double, TAXYEAR: bigint, LIVINGAREA: bigint, UNITNUMBER: string, YEARBUILT: bigint, ZONING: string, STYLE: string, ACRES: double, COOLINGDESCRIPTION: string, APPLIANCES: string, BACKONMARKETDATE: timestamp, ROOMFAMILYCHAR: string, ROOMAREA3: string, EXTERIOR: string, ROOMFLOOR3: string, ROOMFLOOR2: string, ROOMAREA2: string, DININGROOMDESCRIPTION: string, BASEMENT: string, BATHSFULL: bigint, BATHSHALF: bigint, BATHQUARTER: bigint, BATHSTHREEQUARTER: double, CLASS: string, BATHSTOTAL: bigint, BATHDESC: string, ROOMAREA5: string, ROOMFLOOR5: string, ROOMAREA6: string, ROOMFLOOR6: string, ROOMAREA7: string, ROOMFLOOR7: string, ROOMAREA8: string, ROOMFLOOR8: string, BEDROOMS: bigint, SQFTBELOWGROUND: bigint, ASSUMABLEMORTGAGE: string, ASSOCIATIONFEE: bigint, ASSESSMENTPENDING: string, ASSESSEDVALUATION: double, latitude: double, longitude: double]
+
+
+In [3]: df.show(3)
++---+-----+-------------------+--------------------+----------+----------+---------------+----------------+---------------+-------------------+---------+---------------+-----------------+------------+--------------+-----+---------+-----------------+--------------------+------------+-------------------+----------+---------+--------------------+--------------------+----------+------------------+---------------+----+--------------------+---------------+-----+----------+---------+------------------+-------+----------+----------+---------+------------------+--------------------+------------------+------------------+--------------------+----------------+--------------+---------+------------+----------+----------+---------+---------------------+--------------------+---------+---------+-----------+-----------------+-----+----------+--------------------+---------+----------+---------+----------+---------+----------+---------+----------+--------+---------------+-----------------+--------------+-----------------+-----------------+------------------+-----------+
+| NO|MLSID|STREETNUMBERNUMERIC|       STREETADDRESS|STREETNAME|POSTALCODE|STATEORPROVINCE|            CITY|SALESCLOSEPRICE|           LISTDATE|LISTPRICE|       LISTTYPE|ORIGINALLISTPRICE|PRICEPERTSFT|FOUNDATIONSIZE|FENCE|MAPLETTER|LOTSIZEDIMENSIONS|SCHOOLDISTRICTNUMBER|DAYSONMARKET|      OFFMARKETDATE|FIREPLACES|ROOMAREA4|            ROOMTYPE|                ROOF|ROOMFLOOR4|POTENTIALSHORTSALE|POOLDESCRIPTION|PDOM|   GARAGEDESCRIPTION|SQFTABOVEGROUND|TAXES|ROOMFLOOR1|ROOMAREA1|TAXWITHASSESSMENTS|TAXYEAR|LIVINGAREA|UNITNUMBER|YEARBUILT|            ZONING|               STYLE|             ACRES|COOLINGDESCRIPTION|          APPLIANCES|BACKONMARKETDATE|ROOMFAMILYCHAR|ROOMAREA3|    EXTERIOR|ROOMFLOOR3|ROOMFLOOR2|ROOMAREA2|DININGROOMDESCRIPTION|            BASEMENT|BATHSFULL|BATHSHALF|BATHQUARTER|BATHSTHREEQUARTER|CLASS|BATHSTOTAL|            BATHDESC|ROOMAREA5|ROOMFLOOR5|ROOMAREA6|ROOMFLOOR6|ROOMAREA7|ROOMFLOOR7|ROOMAREA8|ROOMFLOOR8|BEDROOMS|SQFTBELOWGROUND|ASSUMABLEMORTGAGE|ASSOCIATIONFEE|ASSESSMENTPENDING|ASSESSEDVALUATION|          latitude|  longitude|
++---+-----+-------------------+--------------------+----------+----------+---------------+----------------+---------------+-------------------+---------+---------------+-----------------+------------+--------------+-----+---------+-----------------+--------------------+------------+-------------------+----------+---------+--------------------+--------------------+----------+------------------+---------------+----+--------------------+---------------+-----+----------+---------+------------------+-------+----------+----------+---------+------------------+--------------------+------------------+------------------+--------------------+----------------+--------------+---------+------------+----------+----------+---------+---------------------+--------------------+---------+---------+-----------+-----------------+-----+----------+--------------------+---------+----------+---------+----------+---------+----------+---------+----------+--------+---------------+-----------------+--------------+-----------------+-----------------+------------------+-----------+
+|  1| RMLS|              11511|11511 Stillwater ...|Stillwater|     55042|             MN|LELM - Lake Elmo|         143000|2017-07-15 00:00:00|   139900|Exclusive Right|           139900|    145.9184|           980|Other|       C4|          279X200|    834 - Stillwater|          10|2017-07-30 00:00:00|         0|  12 x  9|Living Room, Dini...|                null|      Main|                No|           null|10.0|     Attached Garage|            980| 1858|      Main|  16 x 13|            1858.0|   2017|       980|      null|     1950|Residential-Single|      (SF) One Story|              1.28|           Central|Range, Dishwasher...|            null|          null|     null|       Vinyl|      null|      Main|   9 x  7|       Eat In Kitchen|                Full|        1|        1|          0|              0.0|   SF|         2|Main Floor 3/4 Ba...|  13 x 11|      Main|  10 x 10|      Main|     null|      null|     null|      null|       3|              0|             null|             0|          Unknown|              0.0|45.005846000000005| -92.872856|
+|  2| RMLS|              11200|     11200 31st St N|      31st|     55042|             MN|LELM - Lake Elmo|         190000|2017-10-09 00:00:00|   210000|Exclusive Right|           210000|     85.2783|          1144| null|       C1|          100x140|    834 - Stillwater|           4|2017-10-13 00:00:00|         0|    11x11|Living Room, Dini...|Asphalt Shingles,...|      Main|                No|           null| 4.0|Attached Garage, ...|           1268| 1640|      Main|    22x14|            1640.0|   2017|      2228|      null|     1971|Residential-Single|(SF) Split Entry ...|              0.32|           Central|Range, Microwave,...|            null|   Lower Level|    22x14|       Vinyl|     Lower|      Main|    11x12| Informal Dining R...|Full, Partial Fin...|        1|        0|          0|              2.0|   SF|         3|Main Floor Full B...|    15x11|      Main|    14x11|      Main|    10x11|      Main|    11x11|     Lower|       4|            960|             null|             0|          Unknown|              0.0|         44.994875| -92.879271|
+|  3| RMLS|               8583|8583 Stillwater B...|Stillwater|     55042|             MN|LELM - Lake Elmo|         225000|2017-06-26 00:00:00|   225000|Exclusive Right|           225000|    204.1742|          1102| None|       E1|          120x296|622 - North St Pa...|          28|2017-07-24 00:00:00|         0|    14x12|Living Room, Dini...|                null|      Main|                No|           None|28.0|     Attached Garage|           1102| 2390|      Main|    20x13|            2390.0|   2016|      1102|      null|     1949|Residential-Single|      (SF) One Story|0.8220000000000001|            Window|Range, Microwave,...|            null|          null|     null|Cement Board|      null|      Main|    18x11| Informal Dining Room|Full, Crawl Space...|        1|        0|          0|              0.0|   SF|         1|Main Floor Full Bath|    12x12|      Main|    12x12|      Main|     null|      null|     null|      null|       2|              0|    Not Assumable|             0|               No|              0.0|       44.99224807|-92.9327565|
++---+-----+-------------------+--------------------+----------+----------+---------------+----------------+---------------+-------------------+---------+---------------+-----------------+------------+--------------+-----+---------+-----------------+--------------------+------------+-------------------+----------+---------+--------------------+--------------------+----------+------------------+---------------+----+--------------------+---------------+-----+----------+---------+------------------+-------+----------+----------+---------+------------------+--------------------+------------------+------------------+--------------------+----------------+--------------+---------+------------+----------+----------+---------+---------------------+--------------------+---------+---------+-----------+-----------------+-----+----------+--------------------+---------+----------+---------+----------+---------+----------+---------+----------+--------+---------------+-----------------+--------------+-----------------+-----------------+------------------+-----------+
+only showing top 3 rows
+
+
+
+
+
+
+from pyspark.ml.feature import Bucketizer
+
+# Plot distribution of sample_df
+sns.distplot(sample_df, axlabel='BEDROOMS')
+plt.show()
+
+# Create the bucket splits and bucketizer
+splits = [0, 1, 2, 3, 4, 5, float('Inf')]
+buck = Bucketizer(splits=splits, inputCol='BEDROOMS', outputCol='bedrooms')
+
+# Apply the transformation to df: df_bucket
+df_bucket = buck.transform(df)
+
+# Display results
+df_bucket[['BEDROOMS', 'bedrooms']].show()
+
+
+<script.py> output:
+    +--------+--------+
+    |BEDROOMS|bedrooms|
+    +--------+--------+
+    |     3.0|     3.0|
+    |     4.0|     4.0|
+    |     2.0|     2.0|
+    |     2.0|     2.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     2.0|     2.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    |     3.0|     3.0|
+    +--------+--------+
+    only showing top 20 rows
+
+Being able to inspect a distribution plot is important if you are considering bucketing feature values together. Here we saw that after 5 bathrooms it was exceedingly rare, so we could combine either effects together in a 5+ value.
+
