@@ -6,7 +6,7 @@ Fundamentals of Database Systems (6th edition) by Elmasri and Navathe (E/N)
 Database System Concepts (6th edition) by Silberschatz, Korth, and Sudarshan (S/K/S)
 SQL For Web Nerds (dated, but still a good read) - http://philip.greenspun.com/sql/introduction.html
 
-#Syllabus
+### Syllabus
 Introduction To The Course
 The relational model
 Querying relational databases
