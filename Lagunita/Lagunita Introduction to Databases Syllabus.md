@@ -26,7 +26,7 @@ The following are a number of suggested pathways through the mini-courses, depen
 
 - Basic: INTRODUCTION AND RELATIONAL DATABASES, RELATIONAL ALGEBRA, SQL, RELATIONAL DESIGN THEORY, UNIFIED MODELING LANGUAGE (UML)
 - Extended version add: INDEXES AND TRANSACTIONS, CONSTRAINTS AND TRIGGERS, VIEWS AND AUTHORIZATION
-- Comprehensive version also add: ON-LINE ANALYTICAL PROCESSING, RECURSION IN SQL
+- Comprehensive version also added: ON-LINE ANALYTICAL PROCESSING, RECURSION IN SQL
 
 ### Semistructured Data
 
