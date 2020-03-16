@@ -1,0 +1,54 @@
+Assembling columns
+The final stage of data preparation is to consolidate all of the predictor columns into a single column.
+
+At present our data has the following predictor columns:
+mon, dom and dow
+carrier_idx (derived from carrier)
+org_idx (derived from org)
+km
+depart
+duration
+
+
+Import the class which will assemble the predictors.
+Create an assembler object that will allow you to merge the predictors columns into a single column.
+Use the assembler to generate a new consolidated column.
+
+
+# Import the necessary class
+from pyspark.ml.feature import VectorAssembler
+
+# Create an assembler object
+assembler = VectorAssembler(inputCols=[
+    'mon', 
+    'dom', 
+    'dow',
+    'carrier_idx',
+    'org_idx',
+    'km',
+    'depart',
+    'duration',
+], outputCol='features')
+
+# Consolidate predictor columns
+flights_assembled = assembler.transform(flights)
+
+# Check the resulting column
+flights_assembled.select('features', 'delay').show(5, truncate=False)
+
+
+
+<script.py> output:
+    +-----------------------------------------+-----+
+    |features                                 |delay|
+    +-----------------------------------------+-----+
+    |[0.0,22.0,2.0,0.0,0.0,509.0,16.33,82.0]  |30   |
+    |[2.0,20.0,4.0,0.0,1.0,542.0,6.17,82.0]   |-8   |
+    |[9.0,13.0,1.0,1.0,0.0,1989.0,10.33,195.0]|-5   |
+    |[5.0,2.0,1.0,0.0,1.0,885.0,7.98,102.0]   |2    |
+    |[7.0,2.0,6.0,1.0,0.0,1180.0,10.83,135.0] |54   |
+    +-----------------------------------------+-----+
+    only showing top 5 rows
+    
+    
+    
