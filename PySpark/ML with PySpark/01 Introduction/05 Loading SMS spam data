@@ -1,0 +1,62 @@
+Loading SMS spam data
+You've seen that it's possible to infer data types directly from the data. Sometimes it's convenient to have direct control over the column types. You do this by defining an explicit schema.
+
+The file sms.csv contains a selection of SMS messages which have been classified as either 'spam' or 'ham'. These data have been adapted from the UCI Machine Learning Repository. There are a total of 5574 SMS, of which 747 have been labelled as spam.
+https://archive.ics.uci.edu/ml/datasets/sms+spam+collection
+
+
+Notes on CSV format:
+no header record and
+fields are separated by a semicolon (this is not the default separator).
+
+Data dictionary:
+id — record identifier
+text — content of SMS message
+label — spam or ham (integer; 0 = ham and 1 = spam)
+
+
+
+
+
+
+
+Specify the data schema, giving columns names ("id", "text", and "label") and column types.
+Read data from a delimited file called "sms.csv".
+Print the schema for the resulting DataFrame.
+
+First few records from 'sms.csv':
+1;Sorry, I'll call later in meeting;0
+2;Dont worry. I guess he's busy.;0
+3;Call FREEPHONE 0800 542 0578 now!;1
+4;Win a 1000 cash prize or a prize worth 5000;1
+
+
+
+
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+
+# Specify column names and types
+schema = StructType([
+    StructField("id", IntegerType()),
+    StructField("text", StringType()),
+    StructField("label", IntegerType())
+])
+
+# Load data from a delimited file
+sms = spark.read.csv('sms.csv', sep=';', header=False, schema=schema)
+
+# Print schema of DataFrame
+sms.printSchema()
+
+
+
+<script.py> output:
+    root
+     |-- id: integer (nullable = true)
+     |-- text: string (nullable = true)
+     |-- label: integer (nullable = true)
+
+
+
+You now know how to initiate a Spark session and load data. In the next chapter you'll use the data you've just loaded to build a classification model.
+
