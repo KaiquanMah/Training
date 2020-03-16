@@ -1,0 +1,78 @@
+Loading flights data
+In this exercise you're going to load some airline flight data from a CSV file. To ensure that the exercise runs quickly these data have been trimmed down to only 50 000 records. You can get a larger dataset in the same format here.
+https://assets.datacamp.com/production/repositories/3918/datasets/e1c1a03124fb2199743429e9b7927df18da3eacf/flights-larger.csv
+
+
+Notes on CSV format:
+
+fields are separated by a comma (this is the default separator) and
+missing data are denoted by the string 'NA'.
+
+Data dictionary:
+mon — month (integer between 1 and 12)
+dom — day of month (integer between 1 and 31)
+dow — day of week (integer; 1 = Monday and 7 = Sunday)
+org — origin airport (IATA code)
+mile — distance (miles)
+carrier — carrier (IATA code)
+depart — departure time (decimal hour)
+duration — expected duration (minutes)
+delay — delay (minutes)
+pyspark has been imported for you and the session has been initialized.
+
+Note: The data have been aggressively down-sampled.
+
+
+
+Read data from a CSV file called 'flights.csv'. Assign data types to columns automatically. Deal with missing data.
+How many records are in the data?
+Take a look at the first five records.
+What data types have been assigned to the columns? Do these look correct?
+
+First few records from 'flights.csv':
+
+mon,dom,dow,carrier,flight,org,mile,depart,duration,delay
+11,20,6,US,19,JFK,2153,9.48,351,NA
+0,22,2,UA,1107,ORD,316,16.33,82,30
+2,20,4,UA,226,SFO,337,6.17,82,-8
+9,13,1,AA,419,ORD,1236,10.33,195,-5
+4,2,5,AA,325,ORD,258,8.92,65,NA
+
+
+
+
+
+
+
+
+
+# Read data from CSV file
+flights = spark.read.csv('flights.csv',
+                         sep=',',
+                         header=True,
+                         inferSchema=True,
+                         nullValue='NA')
+
+# Get number of records
+print("The data contain %d records." % flights.count())
+
+# View the first five records
+flights.show(5)
+
+# Check column data types
+flights.dtypes
+
+
+
+<script.py> output:
+    The data contain 50000 records.
+    +---+---+---+-------+------+---+----+------+--------+-----+
+    |mon|dom|dow|carrier|flight|org|mile|depart|duration|delay|
+    +---+---+---+-------+------+---+----+------+--------+-----+
+    | 11| 20|  6|     US|    19|JFK|2153|  9.48|     351| null|
+    |  0| 22|  2|     UA|  1107|ORD| 316| 16.33|      82|   30|
+    |  2| 20|  4|     UA|   226|SFO| 337|  6.17|      82|   -8|
+    |  9| 13|  1|     AA|   419|ORD|1236| 10.33|     195|   -5|
+    |  4|  2|  5|     AA|   325|ORD| 258|  8.92|      65| null|
+    +---+---+---+-------+------+---+----+------+--------+-----+
+    only showing top 5 rows
