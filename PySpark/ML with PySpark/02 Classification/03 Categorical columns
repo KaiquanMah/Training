@@ -1,0 +1,106 @@
+Categorical columns
+In the flights data there are two columns, carrier and org, which hold categorical data. You need to transform those columns into indexed numerical values.
+
+
+Import the appropriate class and create an indexer object to transform the carrier column from a string to an numeric index.
+Prepare the indexer object on the flight data.
+Use the prepared indexer to create the numeric index column.
+Repeat the process for the org column.
+
+
+from pyspark.ml.feature import StringIndexer
+
+# Create an indexer
+indexer = StringIndexer(inputCol='carrier', outputCol='carrier_idx')
+
+# Indexer identifies categories in the data
+indexer_model = indexer.fit(flights)
+
+# Indexer creates a new column with numeric index values
+flights_indexed = indexer_model.transform(flights)
+
+# Repeat the process for the other categorical feature
+flights_indexed = StringIndexer(inputCol='org', outputCol='org_idx').fit(flights_indexed).transform(flights_indexed)
+
+
+In [2]: flights_indexed
+Out[2]: DataFrame[mon: int, dom: int, dow: int, carrier: string, org: string, depart: double, duration: int, delay: int, km: double, label: int, carrier_idx: double, org_idx: double]
+
+In [3]: flights_indexed.show(10)
++---+---+---+-------+---+------+--------+-----+------+-----+-----------+-------+
+|mon|dom|dow|carrier|org|depart|duration|delay|    km|label|carrier_idx|org_idx|
++---+---+---+-------+---+------+--------+-----+------+-----+-----------+-------+
+|  0| 22|  2|     UA|ORD| 16.33|      82|   30| 509.0|    1|        0.0|    0.0|
+|  2| 20|  4|     UA|SFO|  6.17|      82|   -8| 542.0|    0|        0.0|    1.0|
+|  9| 13|  1|     AA|ORD| 10.33|     195|   -5|1989.0|    0|        1.0|    0.0|
+|  5|  2|  1|     UA|SFO|  7.98|     102|    2| 885.0|    0|        0.0|    1.0|
+|  7|  2|  6|     AA|ORD| 10.83|     135|   54|1180.0|    1|        1.0|    0.0|
+|  1| 16|  6|     UA|ORD|   8.0|     232|   -7|2317.0|    0|        0.0|    0.0|
+|  1| 22|  5|     UA|SJC|  7.98|     250|  -13|2943.0|    0|        0.0|    5.0|
+| 11|  8|  1|     OO|SFO|  7.77|      60|   88| 254.0|    1|        2.0|    1.0|
+|  4| 26|  1|     AA|SFO| 13.25|     210|  -10|2356.0|    0|        1.0|    1.0|
+|  4| 25|  0|     AA|ORD| 13.75|     160|   31|1574.0|    1|        1.0|    0.0|
++---+---+---+-------+---+------+--------+-----+------+-----+-----------+-------+
+only showing top 10 rows
+
+
+
+
+
+In [8]: flights_indexed.dropDuplicates(['carrier', 'carrier_idx']).select(['carrier', 'carrier_idx']).show()
++-------+-----------+
+|carrier|carrier_idx|
++-------+-----------+
+|     AQ|        8.0|
+|     UA|        0.0|
+|     OH|        5.0|
+|     B6|        4.0|
+|     US|        6.0|
+|     OO|        2.0|
+|     HA|        7.0|
+|     AA|        1.0|
+|     WN|        3.0|
++-------+-----------+
+
+
+
+
+In [12]: flights_indexed.dropDuplicates(['carrier', 'carrier_idx']).sort('carrier_idx', ascending=True).select(['carrier', 'carrier_idx']).show()
++-------+-----------+
+|carrier|carrier_idx|
++-------+-----------+
+|     UA|        0.0|
+|     AA|        1.0|
+|     OO|        2.0|
+|     WN|        3.0|
+|     B6|        4.0|
+|     OH|        5.0|
+|     US|        6.0|
+|     HA|        7.0|
+|     AQ|        8.0|
++-------+-----------+
+
+
+
+
+
+
+In [2]: flights_indexed.dropDuplicates(['org', 'org_idx']).sort('org_idx', ascending=True).select(['org', 'org_idx']).show()
++---+-------+
+|org|org_idx|
++---+-------+
+|ORD|    0.0|
+|SFO|    1.0|
+|JFK|    2.0|
+|LGA|    3.0|
+|SMF|    4.0|
+|SJC|    5.0|
+|TUS|    6.0|
+|OGG|    7.0|
++---+-------+
+
+
+Our Machine Learning model needs numbers not strings, so these transformations are vital!
+
+
+
