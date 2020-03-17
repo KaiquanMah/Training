@@ -1,0 +1,46 @@
+Evaluate the Decision Tree
+You can assess the quality of your model by evaluating how well it performs on the testing data. Because the model was not trained on these data, this represents an objective assessment of the model.
+
+A confusion matrix gives a useful breakdown of predictions versus known values. It has four cells which represent the counts of:
+True Negatives (TN) — model predicts negative outcome & known outcome is negative
+True Positives (TP) — model predicts positive outcome & known outcome is positive
+False Negatives (FN) — model predicts negative outcome but known outcome is positive
+False Positives (FP) — model predicts positive outcome but known outcome is negative.
+
+
+Create a confusion matrix by counting the combinations of label and prediction. Display the result.
+Count the number of True Negatives, True Positives, False Negatives and False Positives.
+Calculate the accuracy.
+
+
+# Create a confusion matrix
+prediction.groupBy('label', 'prediction').count().show()
+
+# Calculate the elements of the confusion matrix
+TN = prediction.filter('prediction = 0 AND label = prediction').count()
+TP = prediction.filter('prediction = 1 AND label = prediction').count()
+FN = prediction.filter('prediction = 0 AND label != prediction').count()
+FP = prediction.filter('prediction = 1 AND label != prediction').count()
+
+# Accuracy measures the proportion of correct predictions
+accuracy = (TN+TP)/(TN+TP+FN+FP)
+print(accuracy)
+
+
+<script.py> output:
+    +-----+----------+-----+
+    |label|prediction|count|
+    +-----+----------+-----+
+    |    1|       0.0|  154|
+    |    0|       0.0|  289|
+    |    1|       1.0|  328|
+    |    0|       1.0|  190|
+    +-----+----------+-----+
+    
+
+0.6420395421436004
+The accuracy is decent but there are a lot of false predictions. We can make this model better!
+
+
+    
+    
