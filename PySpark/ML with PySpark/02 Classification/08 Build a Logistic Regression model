@@ -1,0 +1,50 @@
+Build a Logistic Regression model
+You've already built a Decision Tree model using the flights data. Now you're going to create a Logistic Regression model on the same data.
+The objective is to predict whether a flight is likely to be delayed by at least 15 minutes (label 1) or not (label 0).
+Although you have a variety of predictors at your disposal, you'll only use the mon, depart and duration columns for the moment. These are numerical features which can immediately be used for a Logistic Regression model. You'll need to do a little more work before you can include categorical features. Stay tuned!
+The data have been split into training and testing sets and are available as flights_train and flights_test.
+
+
+Import the class for creating a Logistic Regression classifier.
+Create a classifier object and train it on the training data.
+Make predictions for the testing data and create a confusion matrix.
+
+
+First few rows from the flights DataFrame:
+
++---+------+--------+-----------------+-----+
+|mon|depart|duration|features         |label|
++---+------+--------+-----------------+-----+
+|0  |16.33 |82      |[0.0,16.33,82.0] |1    |
+|2  |6.17  |82      |[2.0,6.17,82.0]  |0    |
+|9  |10.33 |195     |[9.0,10.33,195.0]|0    |
+|5  |7.98  |102     |[5.0,7.98,102.0] |0    |
+|7  |10.83 |135     |[7.0,10.83,135.0]|1    |
++---+------+--------+-----------------+-----+
+only showing top 5 rows
+
+
+# Import the logistic regression class
+from pyspark.ml.classification import LogisticRegression
+
+# Create a classifier object and train on training data
+logistic = LogisticRegression().fit(flights_train)
+
+# Create predictions for the testing data and show confusion matrix
+prediction = logistic.transform(flights_test)
+prediction.groupBy('label', 'prediction').count().show()
+
+
+
+<script.py> output:
+    +-----+----------+-----+
+    |label|prediction|count|
+    +-----+----------+-----+
+    |    1|       0.0|  195|
+    |    0|       0.0|  288|
+    |    1|       1.0|  277|
+    |    0|       1.0|  201|
+    +-----+----------+-----+
+    
+    
+    
