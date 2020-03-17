@@ -1,0 +1,58 @@
+Interpreting coefficients
+Remember that origin airport, org, has eight possible values (ORD, SFO, JFK, LGA, SMF, SJC, TUS and OGG) which have been one-hot encoded to seven dummy variables in org_dummy.
+
+The values for km and org_dummy have been assembled into features, which has eight columns with sparse representation. Column indices in features are as follows:
+0 — km
+1 — ORD
+2 — SFO
+3 — JFK
+4 — LGA
+5 — SMF
+6 — SJC and
+7 — TUS.
+
+Note that OGG does not appear in this list because it is the reference level for the origin airport category.
+In this exercise you'll be using the intercept and coefficients attributes to interpret the model.
+The coefficients attribute is a list, where the first element indicates how flight duration changes with flight distance.
+
+
+Find the average speed in km per hour. This will be different to the value that you got earlier because your model is now more sophisticated.
+What's the average time on the ground at OGG?
+What's the average time on the ground at JFK?
+What's the average time on the ground at LGA?
+
+
+
+In [1]: regression.coefficients
+Out[1]: DenseVector([0.0743, 28.3996, 20.5519, 52.6789, 46.7108, 18.2874, 15.7218, 17.7379])
+
+
+# Average speed in km per hour
+avg_speed_hour = 60/regression.coefficients[0]
+print(avg_speed_hour)
+
+# Average minutes on ground at OGG
+inter = regression.intercept
+print(inter)
+
+# Average minutes on ground at JFK
+avg_ground_jfk = inter + regression.coefficients[3]
+print(avg_ground_jfk)
+
+# Average minutes on ground at LGA
+avg_ground_lga = inter + regression.coefficients[4]
+print(avg_ground_lga)
+
+
+
+
+<script.py> output:
+    807.3336599681242
+    15.856628374450773
+    68.53550999587868
+    62.56747182033072
+    
+    
+You're going to spend over an hour on the ground at JFK or LGA but only around 15 minutes at OGG.
+
+    
