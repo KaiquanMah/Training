@@ -1,0 +1,55 @@
+Evaluate the Logistic Regression model
+Accuracy is generally not a very reliable metric because it can be biased by the most common target class.
+
+There are two other useful metrics:
+precision and
+recall.
+
+Check the slides for this lesson to get the relevant expressions.
+Precision is the proportion of positive predictions which are correct. For all flights which are predicted to be delayed, what proportion is actually delayed?
+Recall is the proportion of positives outcomes which are correctly predicted. For all delayed flights, what proportion is correctly predicted by the model?
+The precision and recall are generally formulated in terms of the positive target class. But it's also possible to calculate weighted versions of these metrics which look at both target classes.
+The components of the confusion matrix are available as TN, TP, FN and FP, as well as the object prediction.
+
+
+Find the precision and recall.
+Create a multi-class evaluator and evaluate weighted precision.
+Create a binary evaluator and evaluate AUC using the "areaUnderROC" metric.
+
+
+
+First few predictions from the Logistic Regression model:
+
++-----+----------+----------------------------------------+
+|label|prediction|probability                             |
++-----+----------+----------------------------------------+
+|0    |1.0       |[0.48618640716970973,0.5138135928302903]|
+|1    |0.0       |[0.52242444215606,0.47757555784394007]  |
+|0    |0.0       |[0.5726551829113304,0.4273448170886696] |
+|0    |0.0       |[0.5149292596494213,0.4850707403505788] |
+|1    |0.0       |[0.5426764281965827,0.4573235718034173] |
++-----+----------+----------------------------------------+
+only showing top 5 rows
+
+
+from pyspark.ml.evaluation import MulticlassClassificationEvaluator, BinaryClassificationEvaluator
+
+# Calculate precision and recall
+precision = TP/(TP+FP)
+recall = TP/(TP+FN)
+print('precision = {:.2f}\nrecall    = {:.2f}'.format(precision, recall))
+
+# Find weighted precision
+multi_evaluator = MulticlassClassificationEvaluator()
+weighted_precision = multi_evaluator.evaluate(prediction, {multi_evaluator.metricName: "weightedPrecision"})
+
+
+multi_evaluator.evaluate(prediction, {multi_evaluator.metricName: "weightedRecall"})
+multi_evaluator.evaluate(prediction, {multi_evaluator.metricName: "accuracy"})
+multi_evaluator.evaluate(prediction, {multi_evaluator.metricName: "f1"})
+
+# Find AUC
+binary_evaluator = BinaryClassificationEvaluator()
+auc = binary_evaluator.evaluate(prediction, {binary_evaluator.metricName: "areaUnderROC"})
+
+
