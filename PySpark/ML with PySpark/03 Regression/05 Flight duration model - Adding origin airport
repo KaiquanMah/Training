@@ -1,0 +1,38 @@
+Flight duration model - Adding origin airport
+Some airports are busier than others. Some airports are bigger than others too. Flights departing from large or busy airports are likely to spend more time taxiing or waiting for their takeoff slot. So it stands to reason that the duration of a flight might depend not only on the distance being covered but also the airport from which the flight departs.
+You are going to make the regression model a little more sophisticated by including the departure airport as a predictor.
+These data have been split into training and testing sets and are available as flights_train and flights_test. The origin airport, stored in the org column, has been indexed into org_idx, which in turn has been one-hot encoded into org_dummy. The first few records are displayed in the terminal.
+
+Fit a linear regression model to the training data.
+Make predictions for the testing data.
+Calculate the RMSE for predictions on the testing data.
+
+
+Subset from the flights DataFrame:
+
++------+-------+-------------+----------------------+
+|km    |org_idx|org_dummy    |features              |
++------+-------+-------------+----------------------+
+|3465.0|2.0    |(7,[2],[1.0])|(8,[0,3],[3465.0,1.0])|
+|509.0 |0.0    |(7,[0],[1.0])|(8,[0,1],[509.0,1.0]) |
+|542.0 |1.0    |(7,[1],[1.0])|(8,[0,2],[542.0,1.0]) |
+|1989.0|0.0    |(7,[0],[1.0])|(8,[0,1],[1989.0,1.0])|
+|415.0 |0.0    |(7,[0],[1.0])|(8,[0,1],[415.0,1.0]) |
++------+-------+-------------+----------------------+
+only showing top 5 rows
+
+
+from pyspark.ml.regression import LinearRegression
+from pyspark.ml.evaluation import RegressionEvaluator
+
+# Create a regression object and train on training data
+regression = LinearRegression(labelCol='duration').fit(flights_train)
+
+# Create predictions for the testing data
+predictions = regression.transform(flights_test)
+
+# Calculate the RMSE on testing data
+RegressionEvaluator(labelCol='duration').evaluate(predictions)
+
+
+
