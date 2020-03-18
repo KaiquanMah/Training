@@ -1,0 +1,68 @@
+Flight duration model: More features!
+Let's add more features to our model. This will not necessarily result in a better model. Adding some features might improve the model. Adding other features might make it worse.
+More features will always make the model more complicated and difficult to interpret.
+
+These are the features you'll include in the next model:
+km
+org (origin airport, one-hot encoded, 8 levels)
+depart (departure time, binned in 3 hour intervals, one-hot encoded, 8 levels)
+dow (departure day of week, one-hot encoded, 7 levels) and
+mon (departure month, one-hot encoded, 12 levels).
+
+These have been assembled into the features column, which is a sparse representation of 32 columns (remember one-hot encoding produces a number of columns which is one fewer than the number of levels).
+The data are available as flights, randomly split into flights_train and flights_test. The object predictions is also available.
+
+
+
+
+
+Fit a linear regression model to the training data.
+Generate predictions for the testing data.
+Calculate the RMSE on the testing data.
+Look at the model coefficients. Are any of them zero?
+
+
+Subset from the flights DataFrame:
+
++--------------------------------------------+--------+
+|features                                    |duration|
++--------------------------------------------+--------+
+|(32,[0,3,11],[3465.0,1.0,1.0])              |351     |
+|(32,[0,1,13,17,21],[509.0,1.0,1.0,1.0,1.0]) |82      |
+|(32,[0,2,10,19,23],[542.0,1.0,1.0,1.0,1.0]) |82      |
+|(32,[0,1,11,16,30],[1989.0,1.0,1.0,1.0,1.0])|195     |
+|(32,[0,1,10,20,25],[415.0,1.0,1.0,1.0,1.0]) |65      |
++--------------------------------------------+--------+
+only showing top 5 rows
+
+
+
+
+from pyspark.ml.regression import LinearRegression
+from pyspark.ml.evaluation import RegressionEvaluator
+
+# Fit linear regression model to training data
+regression = LinearRegression(labelCol='duration').fit(flights_train)
+
+# Make predictions on testing data
+predictions = regression.transform(flights_test)
+
+# Calculate the RMSE on testing data
+rmse = RegressionEvaluator(labelCol=).evaluate(predictions)
+print("The test RMSE is", rmse)
+
+# Look at the model coefficients
+coeffs = regression.coefficients
+print(coeffs)
+
+
+<script.py> output:
+    The test RMSE is 9.932871937636765
+    
+    [0.07466666934355301,8.078881563529334,1.9653119764127,30.90058109033576,25.975255321620892,-4.673220904608639,-0.5071146737729627,-19.35458238364859,-20.553418861596572,-1.5250162109404266,2.902212223024328,6.9230292833642215,4.830665365251793,7.567402763210368,6.7482370748914215,0.5888385584814597,0.9652580580230514,-0.5645623742771357,-0.6200119406154614,-1.2240717932722625,-1.3845856065896651,-4.574194011951068,-6.482639010679108,-3.8632479519852603,-3.7540130731837587,-8.8096609834927,-6.500070642930037,-5.396616986276698,-5.1580203920599885,-9.682260059912322,-5.6441219946379695,-5.467775936528763]
+    
+    
+ With all those non-zero coefficients the model is a little hard to interpret!
+
+   
+    
