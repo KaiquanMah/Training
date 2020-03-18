@@ -1,1 +1,48 @@
+Flight duration model: Pipeline stages
+You're going to create the stages for the flights duration model pipeline. You will use these in the next exercise to build a pipeline and to create a regression model.
+
+
+Create an indexer to convert the 'org' column into an indexed column called 'org_idx'.
+Create a one-hot encoder to convert the 'org_idx' and 'dow' columns into dummy variable columns called 'org_dummy' and 'dow_dummy'.
+Create an assembler which will combine the 'km' column with the two dummy variable columns. The output column should be called 'features'.
+Create a linear regression object to predict flight duration.
+Note:: You might find it useful to revisit the slides from the lessons in the Slides panel next to the IPython Shell.
+
+
+
+The first few rows of the flights DataFrame:
+
++---+---+---+-------+------+---+------+--------+-----+------+
+|mon|dom|dow|carrier|flight|org|depart|duration|delay|km    |
++---+---+---+-------+------+---+------+--------+-----+------+
+|11 |20 |6  |US     |19    |JFK|9.48  |351     |null |3465.0|
+|0  |22 |2  |UA     |1107  |ORD|16.33 |82      |30   |509.0 |
+|2  |20 |4  |UA     |226   |SFO|6.17  |82      |-8   |542.0 |
+|9  |13 |1  |AA     |419   |ORD|10.33 |195     |-5   |1989.0|
+|4  |2  |5  |AA     |325   |ORD|8.92  |65      |null |415.0 |
++---+---+---+-------+------+---+------+--------+-----+------+
+only showing top 5 rows
+
+
+
+
+# Convert categorical strings to index values
+indexer = StringIndexer(inputCol='org',
+                        outputCol='org_idx')
+
+# One-hot encode index values
+onehot = OneHotEncoderEstimator(
+                                inputCols=['org_idx', 'dow'],
+                                outputCols=['org_dummy', 'dow_dummy']
+                               )
+
+# Assemble predictors into a single column
+assembler = VectorAssembler(inputCols=['km', 
+                                       'org_dummy', 
+                                       'dow_dummy'], 
+                            outputCol='features')
+
+# A linear regression object
+regression = LinearRegression(labelCol='duration')
+
 
