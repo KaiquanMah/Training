@@ -1,0 +1,54 @@
+Flight duration model: Pipeline model
+You're now ready to put those stages together in a pipeline.
+You'll construct the pipeline and then train the pipeline on the training data. This will apply each of the individual stages in the pipeline to the training data in turn. None of the stages will be exposed to the testing data at all: there will be no leakage!
+Once the entire pipeline has been trained it will then be used to make predictions on the testing data.
+The data are available as flights, which has been randomly split into flights_train and flights_test.
+
+
+Import the class for creating a pipeline.
+Create a pipeline object and specify the indexer, onehot, assembler and regression stages, in this order.
+Train the pipeline on the training data.
+Make predictions on the testing data.
+
+
+
+# Import class for creating a pipeline
+from pyspark.ml import Pipeline
+
+# Construct a pipeline
+pipeline = Pipeline(stages=[indexer,
+                            onehot, 
+                            assembler, 
+                            regression])
+
+# Train the pipeline on the training data
+pipeline = pipeline.fit(flights_train)
+
+# Make predictions on the testing data
+predictions = pipeline.transform(flights_test)
+
+
+
+
+In [3]: predictions
+Out[3]: DataFrame[mon: int, dom: int, dow: int, carrier: string, flight: int, org: string, depart: double, duration: int, delay: int, km: double, org_idx: double, org_dummy: vector, dow_dummy: vector, features: vector, prediction: double]
+
+In [4]: predictions.show(10)
++---+---+---+-------+------+---+------+--------+-----+------+-------+-------------+-------------+--------------------+------------------+
+|mon|dom|dow|carrier|flight|org|depart|duration|delay|    km|org_idx|    org_dummy|    dow_dummy|            features|        prediction|
++---+---+---+-------+------+---+------+--------+-----+------+-------+-------------+-------------+--------------------+------------------+
+|  0|  1|  2|     AA|   154|ORD| 17.25|     135|   49|1395.0|    0.0|(7,[0],[1.0])|(6,[2],[1.0])|(14,[0,1,10],[139...| 147.6807229685969|
+|  0|  1|  2|     AA|   392|ORD|  8.08|     120|    4|1180.0|    0.0|(7,[0],[1.0])|(6,[2],[1.0])|(14,[0,1,10],[118...|131.70787017778767|
+|  0|  1|  2|     AA|   895|ORD| 12.67|     160|   68|1429.0|    0.0|(7,[0],[1.0])|(6,[2],[1.0])|(14,[0,1,10],[142...| 150.2066624797016|
+|  0|  1|  2|     AA|  1561|ORD| 18.58|     275|   65|2971.0|    0.0|(7,[0],[1.0])|(6,[2],[1.0])|(14,[0,1,10],[297...|264.76544854215655|
+|  0|  1|  2|     AA|  1659|ORD| 21.08|      85|   29| 649.0|    0.0|(7,[0],[1.0])|(6,[2],[1.0])|(14,[0,1,10],[649...| 92.25863840141702|
+|  0|  1|  2|     AA|  1797|ORD| 11.67|      65| null| 415.0|    0.0|(7,[0],[1.0])|(6,[2],[1.0])|(14,[0,1,10],[415...| 74.87423117793163|
+|  0|  1|  2|     AA|  2073|ORD| 14.08|     270|   20|3335.0|    0.0|(7,[0],[1.0])|(6,[2],[1.0])|(14,[0,1,10],[333...| 291.8078597786893|
+|  0|  1|  2|     AA|  2078|ORD| 20.25|     275|   34|2971.0|    0.0|(7,[0],[1.0])|(6,[2],[1.0])|(14,[0,1,10],[297...|264.76544854215655|
+|  0|  1|  2|     AA|  2303|ORD|  6.75|     150|  102|1291.0|    0.0|(7,[0],[1.0])|(6,[2],[1.0])|(14,[0,1,10],[129...|139.95431975815896|
+|  0|  1|  2|     AQ|   245|OGG|  7.08|      34|   -2| 161.0|    7.0|    (7,[],[])|(6,[2],[1.0])|(14,[0,10],[161.0...| 27.60205167808057|
++---+---+---+-------+------+---+------+--------+-----+------+-------+-------------+-------------+--------------------+------------------+
+only showing top 10 rows
+
+
+
