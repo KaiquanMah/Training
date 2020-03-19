@@ -29,9 +29,22 @@ only showing top 5 rows
 from pyspark.ml.classification import DecisionTreeClassifier, GBTClassifier
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
 
+
 # Create model objects and train on training data
 tree = DecisionTreeClassifier().fit(flights_train)
 gbt = GBTClassifier().fit(flights_train)
+
+
+In [2]: tree
+Out[2]: 0.6743277851412024
+Out[3]: DecisionTreeClassificationModel (uid=DecisionTreeClassifier_d056a428e46e) of depth 5 with 27 nodes
+
+In [4]: gbt
+Out[4]: GBTClassificationModel (uid=GBTClassifier_678fd0067ca1) with 20 trees
+
+
+
+
 
 # Compare AUC on testing data
 evaluator = BinaryClassificationEvaluator()
@@ -39,11 +52,17 @@ evaluator.evaluate(tree.transform(flights_test))
 evaluator.evaluate(gbt.transform(flights_test))
 
 
-In [3]: evaluator.evaluate(tree.transform(flights_test))
-Out[3]: 0.6185722133675698
+In [6]: evaluator
+Out[6]: BinaryClassificationEvaluator_de770702edeb
 
-In [4]: evaluator.evaluate(gbt.transform(flights_test))
-Out[4]: 0.6722399566763098
+In [7]: evaluator.evaluate(tree.transform(flights_test))
+Out[7]: 0.6248300400891468
+
+In [8]: evaluator.evaluate(gbt.transform(flights_test))
+Out[8]: 0.6743277851412024
+
+
+
 
 
 
