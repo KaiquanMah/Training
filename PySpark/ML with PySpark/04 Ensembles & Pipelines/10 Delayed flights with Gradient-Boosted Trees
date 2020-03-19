@@ -1,0 +1,49 @@
+Delayed flights with Gradient-Boosted Trees
+You've previously built a classifier for flights likely to be delayed using a Decision Tree. In this exercise you'll compare a Decision Tree model to a Gradient-Boosted Trees model.
+The flights data have been randomly split into flights_train and flights_test.
+
+Import the classes required to create Decision Tree and Gradient-Boosted Tree classifiers.
+Create Decision Tree and Gradient-Boosted Tree classifiers. Train on the training data.
+Create an evaluator and calculate AUC on testing data for both classifiers. Which model performs better?
+Find the number of trees and the relative importance of features in the Gradient-Boosted Tree classifier.
+
+
+
+
+Subset of data from the flights DataFrame:
+
++---+------+--------+-----------------+-----+
+|mon|depart|duration|features         |label|
++---+------+--------+-----------------+-----+
+|0  |16.33 |82      |[0.0,16.33,82.0] |1    |
+|2  |6.17  |82      |[2.0,6.17,82.0]  |0    |
+|9  |10.33 |195     |[9.0,10.33,195.0]|0    |
+|5  |7.98  |102     |[5.0,7.98,102.0] |0    |
+|7  |10.83 |135     |[7.0,10.83,135.0]|1    |
++---+------+--------+-----------------+-----+
+only showing top 5 rows
+
+
+
+# Import the classes required
+from pyspark.ml.classification import DecisionTreeClassifier, GBTClassifier
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
+
+# Create model objects and train on training data
+tree = DecisionTreeClassifier().fit(flights_train)
+gbt = GBTClassifier().fit(flights_train)
+
+# Compare AUC on testing data
+evaluator = BinaryClassificationEvaluator()
+evaluator.evaluate(tree.transform(flights_test))
+evaluator.evaluate(gbt.transform(flights_test))
+
+# Find the number of trees and the relative importance of features
+print(len(gbt.trees))
+print(gbt.featureImportances)
+
+<script.py> output:
+    20
+    (3,[0,1,2],[0.30709631200307175,0.3185228991403511,0.3743807888565772])
+
+
