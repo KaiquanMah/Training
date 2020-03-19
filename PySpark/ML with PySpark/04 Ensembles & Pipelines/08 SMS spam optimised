@@ -1,0 +1,35 @@
+SMS spam optimised
+The pipeline you built earlier for the SMS spam model used the default parameters for all of the elements in the pipeline. It's very unlikely that these parameters will give a particularly good model though.
+In this exercise you'll set up a parameter grid which can be used with cross validation to choose a good set of parameters for the SMS spam classifier.
+
+The following are already defined:
+hasher — a HashingTF object and
+logistic — a LogisticRegression object.
+
+
+
+Create a parameter grid builder object.
+Add grid points for numFeatures and binary parameters to the HashingTF object, giving values 1024, 4096 and 16384, and True and False, respectively.
+Add grid points for regParam and elasticNetParam parameters to the LogisticRegression object, giving values of 0.01, 0.1, 1.0 and 10.0, and 0.0, 0.5, and 1.0 respectively.
+Build the parameter grid.
+
+
+# Create parameter grid
+params = ParamGridBuilder()
+
+# Add grid for hashing trick parameters
+params = params.addGrid(hasher.numFeatures, [1024, 4096, 16384]) \
+               .addGrid(hasher.binary, [True, False])
+
+# Add grid for logistic regression parameters
+params = params.addGrid(logistic.regParam, [0.01, 0.1, 1.0, 10.0]) \
+               .addGrid(logistic.elasticNetParam, [0.0, 0.5, 1.0])
+
+# Build parameter grid
+params = params.build()
+
+
+Using cross-validation on a pipeline makes it possible to optimise each stage in the workflow.
+
+
+
