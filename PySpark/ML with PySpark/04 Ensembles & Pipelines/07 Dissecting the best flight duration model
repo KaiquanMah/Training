@@ -1,0 +1,73 @@
+Dissecting the best flight duration model
+You just set up a CrossValidator to find good parameters for the linear regression model predicting flight duration.
+Now you're going to take a closer look at the resulting model, split out the stages and use it to make predictions on the testing data.
+
+The following have already been created:
+cv — a trained CrossValidatorModel object and
+evaluator — a RegressionEvaluator object.
+
+The flights data have been randomly split into flights_train and flights_test.
+
+
+
+Retrieve the best model.
+Look at the stages in the best model.
+Isolate the linear regression stage and extract its parameters.
+Use the best model to generate predictions on the testing data and calculate the RMSE.
+The default model has RMSE of 10.614372 on testing data.
+
+
+
+
+
+# Get the best model from cross validation
+best_model = cv.bestModel
+
+# Look at the stages in the best model
+print(best_model.stages)
+
+<script.py> output:
+    [StringIndexer_14299b2d5472, OneHotEncoderEstimator_9a650c117f1d, VectorAssembler_933acae88a6e, LinearRegression_9f5a93965597]
+    
+    
+    
+    
+# Get the parameters for the LinearRegression object in the best model
+#Did you extract the Linear Regression object from your best model? It's the 4th element.
+best_model.stages[3].extractParamMap()
+
+
+In [5]: best_model.stages[3].extractParamMap()
+Out[5]: 
+{Param(parent='LinearRegression_9f5a93965597', name='elasticNetParam', doc='the ElasticNet mixing parameter, in range [0, 1]. For alpha = 0, the penalty is an L2 penalty. For alpha = 1, it is an L1 penalty'): 0.0,
+ Param(parent='LinearRegression_9f5a93965597', name='predictionCol', doc='prediction column name'): 'prediction',
+ Param(parent='LinearRegression_9f5a93965597', name='featuresCol', doc='features column name'): 'features',
+ Param(parent='LinearRegression_9f5a93965597', name='maxIter', doc='maximum number of iterations (>= 0)'): 100,
+ Param(parent='LinearRegression_9f5a93965597', name='solver', doc='The solver algorithm for optimization. Supported options: auto, normal, l-bfgs. (Default auto)'): 'auto',
+ Param(parent='LinearRegression_9f5a93965597', name='aggregationDepth', doc='suggested depth for treeAggregate (>= 2)'): 2,
+ Param(parent='LinearRegression_9f5a93965597', name='labelCol', doc='label column name'): 'duration',
+ Param(parent='LinearRegression_9f5a93965597', name='fitIntercept', doc='whether to fit an intercept term'): True,
+ Param(parent='LinearRegression_9f5a93965597', name='regParam', doc='regularization parameter (>= 0)'): 0.01,
+ Param(parent='LinearRegression_9f5a93965597', name='epsilon', doc='The shape parameter to control the amount of robustness. Must be > 1.0.'): 1.35,
+ Param(parent='LinearRegression_9f5a93965597', name='loss', doc='The loss function to be optimized. Supported options: squaredError, huber. (Default squaredError)'): 'squaredError',
+ Param(parent='LinearRegression_9f5a93965597', name='standardization', doc='whether to standardize the training features before fitting the model'): True,
+ Param(parent='LinearRegression_9f5a93965597', name='tol', doc='the convergence tolerance for iterative algorithms (>= 0)'): 1e-06}
+
+
+
+
+
+
+
+# Generate predictions on testing data using the best model then calculate RMSE
+predictions = best_model.transform(flights_test)
+evaluator.evaluate(predictions)
+
+
+In [8]: predictions
+Out[8]: DataFrame[mon: int, dom: int, dow: int, carrier: string, flight: int, org: string, depart: double, duration: int, delay: int, km: double, org_idx: double, org_dummy: vector, features: vector, prediction: double]
+
+In [7]: evaluator.evaluate(predictions)
+Out[7]: 10.516377654959923
+
+
