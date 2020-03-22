@@ -1,0 +1,69 @@
+Identifying missing values
+The first step before missing value imputation is to identify if there are missing values in our data, and if so, from which group they arise.
+For the same restaurant_data data you encountered in the lesson, an employee erased by mistake the tips left in 65 tables. The question at stake is how many missing entries came from tables that smokers where present vs tables with no-smokers present.
+Your task is to group both datasets according to the smoker variable, count the number or present values and then calculate the difference.
+We're imputing tips to get you to practice the concepts taught in the lesson. From an ethical standpoint, you should not impute financial data in real life, as it could be considered fraud.
+
+
+In [1]: restaurant_nan
+Out[1]: 
+     total_bill   tip     sex smoker   day    time  size
+0         16.99  1.01  Female     No   Sun  Dinner     2
+1         10.34  1.66    Male     No   Sun  Dinner     3
+2         21.01  3.50    Male     No   Sun  Dinner     3
+3         23.68  3.31    Male     No   Sun  Dinner     2
+4         24.59   NaN  Female     No   Sun  Dinner     4
+..          ...   ...     ...    ...   ...     ...   ...
+239       29.03  5.92    Male     No   Sat  Dinner     3
+240       27.18  2.00  Female    Yes   Sat  Dinner     2
+241       22.67  2.00    Male    Yes   Sat  Dinner     2
+242       17.82  1.75    Male     No   Sat  Dinner     2
+243       18.78  3.00  Female     No  Thur  Dinner     2
+
+[244 rows x 7 columns]
+
+
+
+
+Group the data according to smoking status.
+Calculate the number of non-missing values in each group.
+Print the number of missing values in each group.
+
+
+# Group both objects according to smoke condition
+restaurant_nan_grouped = restaurant_nan.groupby('smoker')
+
+In [3]: restaurant_nan_grouped
+Out[3]: <pandas.core.groupby.groupby.DataFrameGroupBy object at 0x7fd656f70390>
+
+
+# Store the number of present values
+restaurant_nan_nval = restaurant_nan_grouped['tip'].count()
+
+In [5]: restaurant_nan_nval
+Out[5]: 
+smoker
+No     110
+Yes     69
+Name: tip, dtype: int64
+
+
+# Print the group-wise missing entries
+print(restaurant_nan_grouped['total_bill'].count() - restaurant_nan_nval)
+<script.py> output:
+    smoker
+    No     41
+    Yes    24
+    dtype: int64
+
+
+
+In [7]: restaurant_nan_grouped['total_bill'].count()
+Out[7]: 
+smoker
+No     151
+Yes     93
+Name: total_bill, dtype: int64
+
+Well done! You know how to compare two grouped objects in terms of group-wise missing values! Let's see how we can fill this gaps.
+
