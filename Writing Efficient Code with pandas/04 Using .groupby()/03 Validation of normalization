@@ -1,0 +1,76 @@
+Validation of normalization
+For this exercise, we will perform a z-score normalization and verify that it was performed correctly.
+A distinct characteristic of normalized values is that they have a mean equal to zero and standard deviation equal to one.
+After you apply the normalization transformation, you can group again on the same variable, and then check the mean and the standard deviation of each group.
+You will apply the normalization transformation to every numeric variable in the poker_grouped dataset, which is the poker_hands dataset grouped by Class.
+
+
+
+Apply the normalization transformation to the grouped object poker_grouped.
+zscore = lambda x: (x - x.mean()) / x.std()
+
+# Apply the transformation
+poker_trans = poker_grouped.transform(zscore)
+print(poker_trans.head())
+
+<script.py> output:
+             S1        R1        S2        R2        S3        R3        S4        R4        S5        R5
+    0 -1.380537  0.270364 -1.380537 -0.730297 -1.380537  0.631224 -1.380537  0.350823 -1.380537 -0.724286
+    1 -0.613572  0.495666 -0.613572  1.095445 -0.613572  0.039451 -0.613572  0.350823 -0.613572 -0.724286
+    2  0.153393  0.720969  0.153393 -0.730297  0.153393  0.631224  0.153393 -1.403293  0.153393 -0.724286
+    3  0.920358  0.270364  0.920358 -0.730297  0.920358 -1.735866  0.920358  1.227881  0.920358  1.267500
+    4  0.920358 -1.757363  0.920358  1.095445  0.920358  0.433966  0.920358 -0.526235  0.920358  0.905357
+
+
+
+
+
+
+
+
+Group poker_trans by class and print the mean and standard deviation to validate the normalization was done correctly
+zscore = lambda x: (x - x.mean()) / x.std()
+
+# Apply the transformation
+poker_trans = poker_grouped.transform(zscore)
+
+
+# Re-group the grouped object and print each group's means and standard deviation
+poker_regrouped = poker_trans.groupby(poker_hands['Class'])
+
+#3dp
+print(np.round(poker_regrouped.mean(), 3))
+print(poker_regrouped.std())
+
+
+<script.py> output:
+            S1   R1   S2   R2   S3   R3   S4   R4   S5   R5
+    Class                                                  
+    0     -0.0 -0.0  0.0 -0.0  0.0  0.0  0.0  0.0 -0.0  0.0
+    1      0.0  0.0 -0.0  0.0 -0.0  0.0  0.0  0.0 -0.0  0.0
+    2     -0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0
+    3      0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0 -0.0  0.0 -0.0
+    4     -0.0 -0.0 -0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0  0.0
+    5     -0.0 -0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0 -0.0  0.0
+    6     -0.0 -0.0 -0.0  0.0  0.0 -0.0  0.0  0.0 -0.0  0.0
+    7      0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0 -0.0
+    8     -0.0  0.0 -0.0  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0
+    9      0.0 -0.0  0.0 -0.0  0.0 -0.0  0.0  0.0  0.0 -0.0
+
+
+
+            S1   R1   S2   R2   S3   R3   S4   R4   S5   R5
+    Class                                                  
+    0      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+    1      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+    2      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+    3      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+    4      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+    5      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+    6      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+    7      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+    8      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+    9      1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+
+Well done! Now you know that the normalization was performed correctly, as the mean in every normalized group is 0 and the standard deviation is 1!
+
