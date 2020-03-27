@@ -1,0 +1,64 @@
+Composition and Inheritance II
+In this exercise, we will create another class TsvDataShell that inherits from our abstract class DataShell, which also uses composition in recycling functionality from pandas objects.
+Specifically, our new class will be able to read in TSV files, and also give us a description of the data it stores.
+
+
+Create abstract class DataShell, with class variable family set to 'DataShell', and with initialization method and instance variables. Create a second class, CsvDataShell, which inherits from DataShell, also with initialization method and instance variables. All this is already done for you.
+Create a third class, TsvDataShell, which inherits from DataShell. Define its initialization method, with self, name, and filepath as input arguments. In the method body, declare data as instance variable and set it to pd.read_table(filepath). Declare a second instance variable stats and set it to self.data.describe().
+Instantiate CsvDataShell as us_data_shell, passing"US" and us_life_expectancy as input. Finally, print us_data_shell.stats to explore its contents. This is already done for you.
+Finally, instantiate TsvDataShell as france_data_shell, passing "France" and france_life_expectancy as inputs. Finally, print france_data_shell.stats to explore its contents.
+
+
+# Define abstract class DataShell
+class DataShell:
+    family = 'DataShell'
+    def __init__(self, name, filepath): 
+        self.name = name
+        self.filepath = filepath
+
+
+# Define class CsvDataShell
+class CsvDataShell(DataShell):
+    def __init__(self, name, filepath):
+        self.data = pd.read_csv(filepath)
+        self.stats = self.data.describe()
+
+
+# Define class TsvDataShell
+class TsvDataShell(DataShell):
+    # Initialization method with arguments self, name, filepath
+    def __init__(self, name, filepath):
+        # Instance variable data
+        self.data = pd.read_table(filepath)
+        # Instance variable stats
+        self.stats = self.data.describe()
+
+
+# Instantiate CsvDataShell as us_data_shell, print us_data_shell.stats
+us_data_shell = CsvDataShell("US", us_life_expectancy)
+print(us_data_shell.stats)
+
+# Instantiate TsvDataShell as france_data_shell, print france_data_shell.stats
+france_data_shell = TsvDataShell("France", france_life_expectancy)
+print(france_data_shell.stats)
+
+
+<script.py> output:
+                  year  life_expectancy
+    count   117.000000       117.000000
+    mean   1956.752137        66.556684
+    std      34.398252         9.551079
+    min    1880.000000        39.410000
+    25%    1928.000000        58.500000
+    50%    1957.000000        69.599998
+    75%    1986.000000        74.772003
+    max    2015.000000        79.244003
+           country,code,year,life_expectancy
+    count                                200
+    unique                               200
+    top                France,FRA,1992,77.07
+    freq                                   1
+
+
+Congratulations on getting to the last interactive exercise! Before heading to the last video, compare the differences in printed output for us_data_shell and france_data_shell. Why might they be different?
+
