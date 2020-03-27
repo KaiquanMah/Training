@@ -1,0 +1,51 @@
+Composition and Inheritance I
+As you may have noticed, we have already been using composition in our classes, we just have not been explicit about it. More specifically, we have been relying on functionality from the pandas package.
+In this exercise, we will combine inheritance and composition as we define a class that 1) inherits from another class, and 2) uses functionality from other classes.
+
+
+Create abstract class DataShell, with class variable family set to 'DataShell', and with initialization method and instance variables; all this is already done for you.
+Create a second class, CsvDataShell, which inherits from DataShell.
+Define initialization method, with self, name, and filepath as input arguments. In the method body, declare data as instance variable and set it to pd.read_csv(filepath). Declare a second instance variable stats and set it to self.data.describe().
+Instantiate CsvDataShell as us_data_shell, passing "US" and us_life_expectancy as inputs. Finally, print us_data_shell.stats to explore its contents.
+
+
+# Define abstract class DataShell
+class DataShell:
+    # Class variable family
+    family = 'DataShell'
+    # Initialization method with arguments, and instance variables
+    def __init__(self, name, filepath): 
+        self.name = name
+        self.filepath = filepath
+
+
+# Define class CsvDataShell      
+class CsvDataShell(DataShell):
+    # Initialization method with arguments self, name, filepath
+    def __init__(self, name, filepath):
+        # Instance variable data
+        self.data = pd.read_csv(filepath)
+        # Instance variable stats
+        self.stats = self.data.describe()
+
+# Instantiate CsvDataShell as us_data_shell
+us_data_shell = CsvDataShell("US", us_life_expectancy)
+
+# Print us_data_shell.stats
+print(us_data_shell.stats)
+
+
+<script.py> output:
+                  year  life_expectancy
+    count   117.000000       117.000000
+    mean   1956.752137        66.556684
+    std      34.398252         9.551079
+    min    1880.000000        39.410000
+    25%    1928.000000        58.500000
+    50%    1957.000000        69.599998
+    75%    1986.000000        74.772003
+    max    2015.000000        79.244003
+
+
+Amazing! Now you now how to recycle code from other classes through both inheritance and composition! What other classes might you want to inherit from? What other code might you want to use composition with?
+
