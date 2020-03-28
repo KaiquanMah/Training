@@ -1,0 +1,85 @@
+Dataset dimensions
+The output from the previous exercise was a nested list, or more specifically a list of lists of strings.
+Next, we will define a function called flatten() to flatten this list of lists into a simple list.
+In this exercise, we will use generator expressions instead of list comprehensions.
+Generators remember which values they have already generated.
+This allows us to use the zip() function to elegantly pair the numbers we will extract from the matches variable.
+As zip() pairs numbers, the number generator will keep track of which numbers come next until it runs out of values.
+After we use zip() to pair up the number of rows and columns from each dataset description, we will use zip() again to match dataset names and dimensions.
+
+
+
+First, use flatten() to obtain each list from the list of lists.
+Then, extract each element from every list so that the strings can be combined into one final list.
+
+
+
+In [4]: matches
+Out[4]: 
+[['  :Number of Instances: 442\n',
+  '  :Number of Attributes: First 10 columns are numeric predictive values\n'],
+ ['    :Number of Instances: 506 \n',
+  '    :Number of Attributes: 13 numeric/categorical predictive. Median Value (attribute 14) is usually the target.\n'],
+ ['    :Number of Instances: 5620\n', '    :Number of Attributes: 64\n'],
+ ['    :Number of Instances: 150 (50 in each of three classes)\n',
+  '    :Number of Attributes: 4 numeric, predictive attributes and the class\n'],
+ ['    :Number of Instances: 178 (50 in each of three classes)\n',
+  '    :Number of Attributes: 13 numeric, predictive attributes and the class\n']]
+
+
+In [1]: filenames
+Out[1]: ('diabetes.txt', 'boston.txt', 'digits.txt', 'iris.txt', 'wine.txt')
+
+In [3]: number_generator
+Out[3]: <generator object <genexpr> at 0x7f5fedc13e60>
+
+
+
+
+def flatten(nested_list):
+    return (item 
+            # Obtain each list from the list of lists
+            for sublist in nested_list
+            # Obtain each element from each individual list
+            for item in sublist)
+
+number_generator = (int(substring) for string in flatten(matches)
+                    for substring in string.split() if substring.isdigit())
+pprint(dict(zip(filenames, zip(number_generator, number_generator))))
+
+
+<script.py> output:
+    {'boston.txt': (506, 13),
+     'diabetes.txt': (442, 10),
+     'digits.txt': (5620, 64),
+     'iris.txt': (150, 4),
+     'wine.txt': (178, 13)}
+
+Fantastic flattening! In this third coding exercise, we practiced using generator expressions instead of list comprehensions. Next, we'll continue on to learn about a new set of principles related to Python workflows.
+
+
+In [22]: pprint(list(number_generator))
+[442, 10, 506, 13, 5620, 64, 150, 4, 178, 13]
+
+In [23]: type(number_generator)
+Out[23]: generator
+
+
+
+
+
+
+
+trythislist = [1,2,3,4,5,6,7,8]
+zipped = zip(trythislist,trythislist)
+pprint(list(zipped))
+
+In [16]: print(zipped)
+<zip object at 0x7f5fed9eda88>
+
+In [17]: pprint(dict(zipped))
+{1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8}
+
+In [21]: pprint(list(zipped))
+[(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8)]
+
