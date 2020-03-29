@@ -1,0 +1,78 @@
+Build notebooks
+The first function we will define for our new Python package is called nbuild().
+
+nbuild() will
+Create a new notebook with the new_notebook() function from the v4 module of nbformat
+Read the file contents from a list of source files with the read_file() function that we have used in previous exercises
+Pass the file contents to the new_code_cell() or new_markdown_cell() functions from the v4 module of nbformat
+Assign a list of the resulting cells to the 'cells' key in the new notebook
+Return the notebook instance
+
+
+
+We've already imported nbformat and all of the above functions.
+With nbuild(), we will be able to create Jupyter notebooks from small, modular files!
+
+
+
+
+
+
+Create new code cells from the contents of files that end in .py.
+Create new markdown cells from the contents of all other files.
+
+def nbuild(filenames: List[str]) -> nbformat.notebooknode.NotebookNode:
+    """Create a Jupyter notebook from text files and Python scripts."""
+    nb = new_notebook()
+    nb.cells = [
+        # Create new code cells from files that end in .py
+        new_code_cell(Path(name).read_text()) 
+        if name.endswith(".py")
+        # Create new markdown cells from all other files
+        else new_markdown_cell(Path(name).read_text()) 
+        for name in filenames
+    ]
+    return nb
+    
+pprint(nbuild(["intro.md", "plot.py", "discussion.md"]))
+
+
+
+
+
+<script.py> output:
+    {'cells': [{'cell_type': 'markdown',
+                'metadata': {},
+                'source': '\n'
+                          '# Introduction\n'
+                          "Here's a nice plot made with the matplotlib plotting "
+                          'library.\n'},
+               {'cell_type': 'code',
+                'execution_count': None,
+                'metadata': {},
+                'outputs': [],
+                'source': '\n'
+                          'import numpy as np\n'
+                          'import matplotlib.pyplot as plt\n'
+                          'N = 50\n'
+                          'x = np.random.rand(N)\n'
+                          'y = np.random.rand(N)\n'
+                          'colors = np.random.rand(N)\n'
+                          'area = np.pi * (15 * np.random.rand(N))**2  # 0 to 15 '
+                          'point radii\n'
+                          'plt.scatter(x, y, s=area, c=colors, alpha=0.5)\n'
+                          'plt.show()\n'},
+               {'cell_type': 'markdown',
+                'metadata': {},
+                'source': '\n'
+                          '# Discussion\n'
+                          'As you can see, \n'
+                          'matplotlib is verbose, \n'
+                          'but is also easy to read and can make cool plots!\n'}],
+     'metadata': {},
+     'nbformat': 4,
+     'nbformat_minor': 4}
+
+
+Wow, the output is a little bit difficult to read. Jupyter notebooks, JSON files, and NotebookNode objects are all similar to Python dictionaries. The differences between JSON files and Python dictionaries are minimal, so becoming familiar with one will help you understand the other. Next, we will save the output of nbuild() as a notebook and write a function that will allow us to convert notebooks to (almost) any format!
+
