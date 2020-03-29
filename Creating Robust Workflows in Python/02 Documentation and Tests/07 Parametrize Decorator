@@ -1,0 +1,76 @@
+Parametrize Decorator
+Docstring examples are great, because they are included in Sphinx documentation and testable with doctest, but now we are ready to take our testing to the next level with pytest.
+
+Writing pytest tests
+is less cumbersome than writing docstring examples (no need for >>> or ...)
+allows us to leverage awesome features like the parametrize decorator.
+
+The arguments we will pass to parametrize are
+a name for the list of arguments and
+the list of arguments itself.
+
+
+
+
+
+In this exercise, we will define a test_nbuild() function to pass three different file types to the nbuild() function and confirm that the output notebook contains the input file in its first cell.
+We will use a custom function called show_test_output() to see the test output.
+
+# Fill in the decorator for the test_nbuild() function 
+@pytest.mark.parametrize("inputs", ["intro.md", "plot.py", "discussion.md"])
+# Pass the argument set to the test_nbuild() function
+def test_nbuild(inputs):
+    assert nbuild([inputs]).cells[0].source == Path(inputs).read_text()
+
+show_test_output(test_nbuild)
+
+
+
+
+<script.py> output:
+    ============================== test session starts ==============================
+    platform linux -- Python 3.6.7, pytest-5.3.2, py-1.8.1, pluggy-0.13.1
+    rootdir: /tmp/tmp3bhcgxjj
+    collected 3 items
+    
+    test_file.py ..F                                                          [100%]
+    
+    =================================== FAILURES ====================================
+    __________________________ test_nbuild[discussion.md] ___________________________
+    
+    inputs = 'discussion.md'
+    
+        @pytest.mark.parametrize("inputs", ["intro.md", "plot.py", "discussion.md"])
+        # Pass the argument set to the test_nbuild() function
+        def test_nbuild(inputs):
+    >       assert nbuild([inputs]).cells[0].source == Path(inputs).read_text()
+    
+    test_file.py:9: 
+    _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    nbuild.py:17: in nbuild
+        for name in filenames
+    nbuild.py:17: in <genexpr>
+        for name in filenames
+    /usr/lib/python3.6/pathlib.py:1196: in read_text
+        with self.open(mode='r', encoding=encoding, errors=errors) as f:
+    /usr/lib/python3.6/pathlib.py:1183: in open
+        opener=self._opener)
+    /usr/lib/python3.6/pathlib.py:1037: in _opener
+        return self._accessor.open(self, flags, mode)
+    _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+    
+    pathobj = PosixPath('discussion.md'), args = (524288, 438)
+    
+        @functools.wraps(strfunc)
+        def wrapped(pathobj, *args):
+    >       return strfunc(str(pathobj), *args)
+    E       FileNotFoundError: [Errno 2] No such file or directory: 'discussion.md'
+    
+    /usr/lib/python3.6/pathlib.py:387: FileNotFoundError
+    ========================== 1 failed, 2 passed in 0.16s ==========================
+
+
+
+
+Perfect parametrization! With pytest, we can make sure that our function works before we even create any output files! In addition to testing the best case scenarios, we should also prepare for the worst. In the next exercise, we will make sure that nbconv() raises a sensible error when it is misused.
+
