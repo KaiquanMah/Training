@@ -1,0 +1,82 @@
+Adding functionality to a child class
+You've just written a SocialMedia class that inherits functionality from Document. As of now, the SocialMedia class doesn't have any functionality different from Document. In this exercise, you will build features into SocialMedia to specialize it for use with Social Media data.
+
+For reference, the definition of Document can be seen below.
+class Document:
+    # Initialize a new Document instance
+    def __init__(self, text):
+        self.text = text
+        # Pre tokenize the document with non-public tokenize method
+        self.tokens = self._tokenize()
+        # Pre tokenize the document with non-public count_words
+        self.word_counts = self._count_words()
+
+    def _tokenize(self):
+        return tokenize(self.text)
+
+    # Non-public method to tally document's word counts
+    def _count_words(self):
+        # Use collections.Counter to count the document's tokens
+        return Counter(self.tokens)
+
+
+
+
+
+The function filter_word_counts() has been loaded in your session. Use help() to see its proper usage.
+Finish the _count_hashtags method using filter_word_counts() so that only words_counts starting with # remain.
+
+In [1]: help(filter_word_counts)
+Help on function filter_word_counts in module __main__:
+
+filter_word_counts(word_counts, first_char)
+    Filter Document.word_counts by the first character of the word
+    
+    :param word_counts: the word_counts attribute of a Document class instance
+    :param first_char: only keep word counts that start with this character
+    
+    >>> # How to filter to only words that start with 'A'
+    >>> filter_word_counts(document.word_counts, 'A')
+
+
+
+# Define a SocialMedia class that is a child of the `Document class`
+class SocialMedia(Document):
+    def __init__(self, text):
+        Document.__init__(self, text)
+        self.hashtag_counts = self._count_hashtags()
+        
+    def _count_hashtags(self):
+        # Filter attribute so only words starting with '#' remain
+        return filter_word_counts(self.word_counts, '#')
+
+
+
+
+
+
+
+
+
+Fill in the first line ofSocialMedia's __init__ method using the parent class to properly utilize inheritance.
+Properly call the _count_mentions method in __init__ to add a new feature to SocialMedia.
+
+# Define a SocialMedia class that is a child of the `Document class`
+class SocialMedia(Document):
+    def __init__(self, text):
+        Document.__init__(self, text)
+        self.hashtag_counts = self._count_hashtags()
+        self.mention_counts = self._count_mentions()
+        
+    def _count_hashtags(self):
+        # Filter attribute so only words starting with '#' remain
+        return filter_word_counts(self.word_counts, first_char='#')      
+    
+    def _count_mentions(self):
+        # Filter attribute so only words starting with '@' remain
+        return filter_word_counts(self.word_counts, first_char='@')
+
+
+Great job! You've now extended the functionality of SocialMedia beyond its parent Document.
+
+
