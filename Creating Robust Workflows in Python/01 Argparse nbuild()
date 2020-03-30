@@ -1,0 +1,43 @@
+Argparse nbuild()
+We will use the standard library argparse module to make a general command-line interface (CLI) function called argparse_cli() and apply this function to the nbuild() function from the previous chapter.
+
+If you do not remember how nbuild() works, call help(nbuild).
+In short, nbuild() returns a notebook object that contains one cell for each input file it receives.
+We want argparse_cli() to be able to handle an indeterminate number of shell arguments.
+To do this with argparse, we need to pass nargs='*' to the add_argument() method of an instance of the ArgumentParser class.
+We will use our CLI to pass shell arguments to nbuild(), so that we can focus on CLI design and not on how the shell arguments are used.
+
+
+
+
+Instantiate the parser object.
+Add an argument called in_files to the parser object.
+
+def argparse_cli(func: Callable) -> None:
+    # Instantiate the parser object
+    parser = argparse.ArgumentParser()
+    # Add an argument called in_files to the parser object
+    parser.add_argument("in_files", nargs="*")
+    args = parser.parse_args()
+    print(func(args.in_files))
+
+if __name__ == "__main__":
+    argparse_cli(nbuild)
+    
+
+
+In [1]: help(nbuild)
+Help on function nbuild in module __main__:
+
+nbuild(names:List[str]) -> nbformat.notebooknode.NotebookNode
+    Create a Jupyter notebook from text files and Python scripts
+    :param names: a list of source file names
+
+
+
+<script.py> output:
+    {'nbformat': 4, 
+     'nbformat_minor': 4, 
+     'metadata': {}, 
+     'cells': []}
+
