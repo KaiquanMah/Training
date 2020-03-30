@@ -1,0 +1,32 @@
+Commit modified files
+Since the previous exercise, we have made some changes and now we want to get a list of the files that have changed.
+We will include the list of changed files in our next commit message.
+A major advantage of GitPython is that it allows us to programmatically access information on the status of our repositories.
+Here, we will use the diff() method to obtain a list of files with changes since the latest commit.
+Our code should work regardless of how many or which files have been modified.
+For an example of how GitPython can be applied in the real world, take a look at the Gitone Python package.
+
+
+
+Use the diff() method to create a list of files changed since the last commit.
+Include only modified files, those with a change_type equal to "M", in the list.
+
+
+changed_files = [file.b_path
+                 # Iterate over items in the diff object
+                 for file in repo.index.diff(None)
+                 # Include only modified files
+                 .iter_change_type("M")]
+
+repo.index.add(changed_files)
+repo.index.commit(f"Modified {', '.join(changed_files)}")
+for number, commit in enumerate(repo.iter_commits()):
+    print(number, commit.message)
+
+
+<script.py> output:
+    0 Modified analysis.py, notes.md, plot.py
+    1 Added README.md, analysis.py, notes.md, plot.py
+
+Wow, you really know how to git things done! Adding and commiting changes are the most common tasks in git workflows. Diffs let us inspect the tracked and untracked changes since the latest commit. Version control is an important aspect of every workflow, so even though you've finished the last GitPython exercises, we will certainly return to git later in the course. In the next video, we will learn how to set up and track the libraries that our code needs to run.
+
