@@ -1,0 +1,36 @@
+Argparse main()
+Next, we'll create a __main__.py file to pass shell arguments to classify() or regress(), functions based on code we wrote in Chapter 1.
+
+We will provide default values for all arguments, so that the code can run even if no shell arguments are provided.
+
+To do this, we'll instantiate the ArgumentParser class from the argparse module as parser and use its add_argument() method to create arguments called dataset and model with the following defaults: diabetes and linear_model.Ridge.
+
+Setting nargs to ? means that each argument can accept either one value or none at all.
+
+We will create a keyword arguments (kwargs) variable and unpack kwargs into the classify() or regress() functions in the main() function's return statement.
+
+
+
+
+
+Set the default for the dataset argument of the main() function.
+Use args and the built-in dict function to create a dictionary called kwargs, which contains the two shell arguments.
+
+def main():
+    parser = argparse.ArgumentParser(description="Scikit datasets only!")
+    # Set the default for the dataset argument
+    parser.add_argument("dataset", nargs="?", default="diabetes")
+    parser.add_argument("model", nargs="?", default="linear_model.Ridge")
+    args = parser.parse_args()
+    # Create a dictionary of the shell arguments
+    kwargs = dict(dataset=args.dataset, model=args.model)
+    return (classify(**kwargs) if args.dataset in ("digits", "iris", "wine")
+            else regress(**kwargs) if args.dataset in ("boston", "diabetes")
+            else print(f"{args.dataset} is not a supported dataset!"))
+
+if __name__ == "__main__":
+    main()
+
+
+Magnificent main() function! In this exercise, we learned how to set up a command-line interface for an executable project. Even if you do not plan to run projects in a shell very often, being able to pass command-line arguments to a zipped project is pretty cool! This is a great example of enjoying the convenience of a single file without sacrificing modularity! In the next video, we will learn how to pass parameters to Jupyter notebooks using the papermill library.
+
