@@ -1,0 +1,32 @@
+Dask dataframe
+To practice working with Dask dataframes, we will
+
+read in a .csv file containing the diabetes dataset as Dask dataframe,
+create a new binary variable from the age column, and
+compute the means of all variables for the resulting two age groups.
+The code in this exercise could easily be adapted to work with a Pandas dataframe instead of a Dask dataframe.
+
+
+
+Read in a csv file using a dask.dataframe method.
+Compute the column means across the two age groups in bin_age.
+
+import dask.dataframe as dd
+
+# Read in a csv file using a dask.dataframe method
+df = dd.read_csv("diabetes.csv")
+
+df["bin_age"] = (df.age > 0).astype(int)
+
+# Compute the columns means in the two age groups
+print(df.groupby("bin_age").mean().compute())
+
+<script.py> output:
+                  age       sex       bmi       map        tc       ldl       hdl       tch       ltg       glu
+    bin_age                                                                                                    
+    0       -0.042991 -0.008306 -0.006153 -0.014011 -0.008585 -0.007124  0.002693 -0.006677 -0.009723 -0.011084
+    1        0.036184  0.006991  0.005178  0.011792  0.007226  0.005996 -0.002266  0.005620  0.008184  0.009329
+
+
+Perfect paralellization! In the penultimate exercise of this course, we used created and persisted a Dask dataframe. We also showed how we can end a method chain with compute() to obtain a result. In this course's final exercise, we will use joblib with a Dask backend to paralellize scikit-learn model training.
+
