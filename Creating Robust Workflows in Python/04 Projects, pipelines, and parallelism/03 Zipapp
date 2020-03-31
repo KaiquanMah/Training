@@ -1,0 +1,42 @@
+Zipapp
+In this exercise, we will
+
+zip up a project called myproject
+make the zipped project command-line executable
+create a __main__.py file in the zipped project
+all with a single call to the create_archive() function from the standard library zipapp module.
+
+The python interpreter we want to use is /usr/bin/env python,
+
+while the function we want __main__.py to run is called print_name_and_file():
+
+def print_name_and_file():
+    print(f"Name is {__name__}. File is {__file__}.")
+The print_name_and_file() function is in the mymodule.py file inside the top-level mypackage directory, as shown below:
+
+myproject
+└── mypackage
+    ├── __init__.py
+    └── mymodule.py
+
+
+
+
+Use the create_archive() function to zip up a project called myproject.
+Pass a string that points to the print_name_and_file() as the main argument to generate a __main__.py file.
+
+zipapp.create_archive(
+    # Zip up a project called "myproject"
+    "myproject",                    
+    interpreter="/usr/bin/env python",
+    # Generate a __main__.py file
+    main="mypackage.mymodule:print_name_and_file")
+
+print(subprocess.run([".venv/bin/python", "myproject.pyz"],
+                     stdout=-1).stdout.decode())
+                     
+<script.py> output:
+    Name is mypackage.mymodule. File is myproject.pyz/mypackage/mymodule.py.
+
+Awesome archiving! In this lesson, we created a __main__.py file for our .pyz file automatically, but if we want to pass shell arguments to our project, we will have to write our own __main__.py. That is exactly what we will do in the next exercise!
+
