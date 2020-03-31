@@ -1,0 +1,204 @@
+Parametrize notebooks
+To practice notebook parametrization, we will work with a Jupyter notebook called sklearn.ipynb.
+
+This notebook can run any scikit-learn model on any built-in scikit-learn dataset.
+
+The dataset and model that the notebook will use depend on the four parameters it receives.
+
+To find the parameter names, we will use papermill to look at the source attribute of an nbformat NotebookNode object cell.
+
+We will need the parameter names to create a dictionary of parameters that we will then use to execute the notebook.
+
+
+
+
+
+
+Use a nbformat function to find the default parameter names.
+Pass custom parameters as a dictionary to and run the notebook.
+
+# Read in the notebook to find the default parameter names
+pprint(nbformat.read("sklearn.ipynb", as_version=4).cells[0].source)
+keys = ["dataset_name", "model_type", "model_name", "hyperparameters"]
+vals = ["diabetes", "ensemble", "RandomForestRegressor",
+        dict(max_depth=3, n_estimators=100, random_state=0)]
+parameter_dictionary = dict(zip(keys, vals))
+
+# Execute the notebook with custom parameters
+pprint(pm.execute_notebook(
+    "sklearn.ipynb", "rf_diabetes.ipynb", 
+    kernel_name="python3", parameters=parameter_dictionary
+	))
+
+
+<script.py> output:
+    ("dataset_name = 'diabetes'\n"
+     "model_type = 'linear_model'\n"
+     "model_name = 'LinearRegression'\n"
+     'hyperparameters = None\n')
+    {'cells': [{'cell_type': 'code',
+                'execution_count': 1,
+                'metadata': {'papermill': {'duration': 0.064217,
+                                           'end_time': '2020-03-31T14:10:39.146657',
+                                           'exception': False,
+                                           'start_time': '2020-03-31T14:10:39.082440',
+                                           'status': 'completed'},
+                             'tags': ['parameters']},
+                'outputs': [],
+                'source': "dataset_name = 'diabetes'\n"
+                          "model_type = 'linear_model'\n"
+                          "model_name = 'LinearRegression'\n"
+                          'hyperparameters = None\n'},
+               {'cell_type': 'code',
+                'execution_count': 2,
+                'metadata': {'papermill': {'duration': 0.046346,
+                                           'end_time': '2020-03-31T14:10:39.233658',
+                                           'exception': False,
+                                           'start_time': '2020-03-31T14:10:39.187312',
+                                           'status': 'completed'},
+                             'tags': ['injected-parameters']},
+                'outputs': [],
+                'source': '# Parameters\n'
+                          'dataset_name = "diabetes"\n'
+                          'model_type = "ensemble"\n'
+                          'model_name = "RandomForestRegressor"\n'
+                          'hyperparameters = {"max_depth": 3, "n_estimators": 100, '
+                          '"random_state": 0}\n'},
+               {'cell_type': 'code',
+                'execution_count': 3,
+                'metadata': {'papermill': {'duration': 0.68581,
+                                           'end_time': '2020-03-31T14:10:39.954168',
+                                           'exception': False,
+                                           'start_time': '2020-03-31T14:10:39.268358',
+                                           'status': 'completed'},
+                             'tags': []},
+                'outputs': [],
+                'source': 'from importlib import import_module\n'
+                          'import matplotlib.pyplot as plt\n'
+                          'import scrapbook as sb\n'
+                          'from sklearn.metrics import r2_score, '
+                          'mean_squared_error\n'
+                          'from sklearn.model_selection import train_test_split\n'
+                          'from typing import Optional, Dict\n'},
+               {'cell_type': 'code',
+                'execution_count': 4,
+                'metadata': {'papermill': {'duration': 0.086105,
+                                           'end_time': '2020-03-31T14:10:40.103842',
+                                           'exception': False,
+                                           'start_time': '2020-03-31T14:10:40.017737',
+                                           'status': 'completed'},
+                             'tags': []},
+                'outputs': [],
+                'source': '\n'
+                          'class ScikitData:\n'
+                          '    def __init__(self, name: str) -> None:\n'
+                          '        self.data, self.target, self.feature_names, '
+                          'self.descr = (\n'
+                          "            getattr(import_module('sklearn.datasets'), "
+                          "'load_' + name)().get(x)\n"
+                          "            for x in ('data', 'target', "
+                          "'feature_names', 'DESCR'))\n"
+                          '        self.splits = train_test_split(self.data, '
+                          'self.target, train_size=0.6,\n'
+                          '                                       test_size=0.4, '
+                          'random_state=0)\n'},
+               {'cell_type': 'code',
+                'execution_count': 5,
+                'metadata': {'papermill': {'duration': 0.048868,
+                                           'end_time': '2020-03-31T14:10:40.188408',
+                                           'exception': False,
+                                           'start_time': '2020-03-31T14:10:40.139540',
+                                           'status': 'completed'},
+                             'tags': []},
+                'outputs': [],
+                'source': '\n'
+                          'def get_model(model_type: str, model_name: str, \n'
+                          '              hyperparameters: Optional[Dict] = None):\n'
+                          '\n'
+                          "    module = import_module('sklearn.'+model_type)\n"
+                          '    model = getattr(module, model_name)\n'
+                          '\n'
+                          '    return model(**hyperparameters) if hyperparameters '
+                          'else model()\n'},
+               {'cell_type': 'code',
+                'execution_count': 6,
+                'metadata': {'papermill': {'duration': 0.186538,
+                                           'end_time': '2020-03-31T14:10:40.409793',
+                                           'exception': False,
+                                           'start_time': '2020-03-31T14:10:40.223255',
+                                           'status': 'completed'},
+                             'tags': []},
+                'outputs': [],
+                'source': '\n'
+                          'diabetes = ScikitData(dataset_name)\n'
+                          '\n'
+                          'model = get_model(model_type=model_type, '
+                          'model_name=model_name)\n'
+                          '\n'
+                          'X_train, X_test, y_train, y_test = diabetes.splits\n'
+                          '\n'
+                          'model.fit(X_train, y_train)\n'
+                          '\n'
+                          'y_pred = model.predict(X_test)\n'},
+               {'cell_type': 'code',
+                'execution_count': 7,
+                'metadata': {'papermill': {'duration': 0.061828,
+                                           'end_time': '2020-03-31T14:10:40.507290',
+                                           'exception': False,
+                                           'start_time': '2020-03-31T14:10:40.445462',
+                                           'status': 'completed'},
+                             'tags': []},
+                'outputs': [{'data': {'application/scrapbook.scrap.json+json': {'data': 0.24158050729065927,
+                                                                                'encoder': 'json',
+                                                                                'name': 'r2',
+                                                                                'version': 1}},
+                             'metadata': {'scrapbook': {'data': True,
+                                                        'display': False,
+                                                        'name': 'r2'}},
+                             'output_type': 'display_data'},
+                            {'data': {'application/scrapbook.scrap.json+json': {'data': 3997.1536723163845,
+                                                                                'encoder': 'json',
+                                                                                'name': 'mse',
+                                                                                'version': 1}},
+                             'metadata': {'scrapbook': {'data': True,
+                                                        'display': False,
+                                                        'name': 'mse'}},
+                             'output_type': 'display_data'}],
+                'source': '\n'
+                          "#sb.glue('dataset_name', dataset_name)\n"
+                          "#sb.glue('model_type', model_type)\n"
+                          "#sb.glue('model_name', model_name)\n"
+                          "#sb.glue('hyperparameters', hyperparameters)\n"
+                          'sb.glue("r2", r2_score(y_test, y_pred))\n'
+                          'sb.glue("mse", mean_squared_error(y_test, y_pred))\n'}],
+     'metadata': {'kernelspec': {'display_name': 'Python 3',
+                                 'language': 'python',
+                                 'name': 'python3'},
+                  'language_info': {'codemirror_mode': {'name': 'ipython',
+                                                        'version': 3},
+                                    'file_extension': '.py',
+                                    'mimetype': 'text/x-python',
+                                    'name': 'python',
+                                    'nbconvert_exporter': 'python',
+                                    'pygments_lexer': 'ipython3',
+                                    'version': '3.6.7'},
+                  'papermill': {'duration': 3.139892,
+                                'end_time': '2020-03-31T14:10:40.960438',
+                                'environment_variables': {},
+                                'exception': None,
+                                'input_path': 'sklearn.ipynb',
+                                'output_path': 'rf_diabetes.ipynb',
+                                'parameters': {'dataset_name': 'diabetes',
+                                               'hyperparameters': {'max_depth': 3,
+                                                                   'n_estimators': 100,
+                                                                   'random_state': 0},
+                                               'model_name': 'RandomForestRegressor',
+                                               'model_type': 'ensemble'},
+                                'start_time': '2020-03-31T14:10:37.820546',
+                                'version': '1.2.1'}},
+     'nbformat': 4,
+     'nbformat_minor': 4}
+
+
+Nice notebook skills! In this exercise, we accessed a notebook cell and executed a notebook programmatically using papermill. In the next exercise, we will use scrapbook to programmatically access notebook data.
+
