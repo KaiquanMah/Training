@@ -1,0 +1,101 @@
+Creating a grandchild class
+In this exercise you will be using inheritance to create a Tweet class from your SocialMedia class. This new grandchild class of Document will be able to tackle Twitter specific details such as retweets.
+
+
+Complete the class statement so that Tweets inherits from SocialMedia. SocialMedia has already been loaded in your environment.
+Use super() to call the __init__ method of the parent class.
+Define retweet_text. Use help() to complete the call to filter_lines with the correct parameter name. filter_lines has already been loaded in your environment.
+return retweet_text from _process_retweets as an instance of SocialMedia.
+
+
+In [1]: help(filter_lines)
+Help on function filter_lines in module text_analyzer.text_utils:
+
+filter_lines(text, first_chars)
+    Filter lines by beginning characters (case sensitive)
+    
+    :param text:  multi-line text to filter
+    :param first_chars: required characters for line to start with to be returned
+    :return: text with only lines starting with first_chars included
+    
+    >>> text = 'humpty dumpty\nsat on a wall\nhumpty dumpty\nhad a great fall'
+    >>> filter_lines(text, 'h')
+    'humpty dumpty\nhumpty dumpty\nhad a great fall'
+    
+    >>> filter_lines(text, 'humpty')
+    'humpty dumpty\nhumpty dumpty'
+
+
+
+
+In [2]: help(SocialMedia)
+Help on class SocialMedia in module text_analyzer.social_media:
+
+class SocialMedia(text_analyzer.document.Document)
+ |  # Define a SocialMedia class that is a child of the Document class
+ |  
+ |  Method resolution order:
+ |      SocialMedia
+ |      text_analyzer.document.Document
+ |      builtins.object
+ |  
+ |  Methods defined here:
+ |  
+ |  __init__(self, text)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from text_analyzer.document.Document:
+ |  
+ |  plot_counts(self, attribute='word_counts', n_most_common=5)
+ |      Plot most common elements of a ``collections.Counter`` instance attribute
+ |      
+ |      :param attribute: name of ``Counter`` attribute to use as object to plot
+ |      :param n_most_common: number of elements to plot (using ``Counter.most_common()``)
+ |      :return: None; a plot is shown using matplotlib
+ |      
+ |      >>> doc = Document("duck duck goose is fun when you're the goose")
+ |      >>> doc.plot_counts('word_counts', n_most_common=5)  # same as default call
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from text_analyzer.document.Document:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ # Define a Tweet class that inherits from SocialMedia
+class Tweets(SocialMedia):
+    def __init__(self, text):
+        # Call parent's __init__ with super()
+        super().__init__(SocialMedia)
+        # Define retweets attribute with non-public method
+        self.retweets = self._process_retweets()
+
+
+    def _process_retweets(self):
+        # Filter tweet text to only include retweets
+        retweet_text = filter_lines(self.text, first_chars='RT')
+        # Return retweet_text as a SocialMedia object
+        return _process_retweets(SocialMedia(retweet_text))
+
+
+
+Good coding! Thanks to inheritance, your Tweets class now has all the functionality of Document, SocialMedia, and even more!
+
