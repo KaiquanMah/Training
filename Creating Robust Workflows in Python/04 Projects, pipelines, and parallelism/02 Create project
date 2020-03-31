@@ -1,0 +1,33 @@
+Create project
+In this project template exercise, we will first list the keys in a local cookiecutter.json file.
+The paths to the template directory and its cookiecutter.json are assigned to template_root and json_path variables, respectively.
+
+While template_root is a string, json_path is a pathlib.Path object.
+We will use the json module to obtain cookiecutter.json file contents as a Python dictionary and unpack this dictionary into a list to see its keys.
+We need to see the keys in the cookiecutter.json file to know how override the default project name in the template, because the key in the extra_context argument passed to the cookiecutter() function must match the corresponding key in cookiecutter.json.
+
+
+
+Use the json and pathlib modules to list keys in the local template's cookiecutter.json file.
+Call the cookiecutter() function without prompting for input via the interactive wizard.
+
+# Obtain keys from the local template's cookiecutter.json
+keys = [*json.load(json_path.open())]
+vals = "Your name here", "My Amazing Python Project"
+
+# Create a cookiecutter project without prompting for input
+main.cookiecutter(template_root.as_posix(), no_input=True,
+                  extra_context=dict(zip(keys, vals)))
+
+for path in pathlib.Path.cwd().glob("**"):
+    print(path)
+    
+<script.py> output:
+    /tmp/tmpjqxhe_8v
+    /tmp/tmpjqxhe_8v/my_amazing_python_project
+    /tmp/tmpjqxhe_8v/my_amazing_python_project/src
+    /tmp/tmpjqxhe_8v/my_amazing_python_project/src/my_amazing_python_project
+
+
+Terrific templating! In this lesson, we used the pathlib and json modules from the standard library to learn more about a local Cookiecutter template and then used the template to set up a project with a custom name. Projects templates are a powerful automation tool that can be combined with Make and Sphinx to save tremendous amounts of time and standardize project structure and contents.
+
