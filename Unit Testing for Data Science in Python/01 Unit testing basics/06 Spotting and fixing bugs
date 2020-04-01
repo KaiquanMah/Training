@@ -1,0 +1,79 @@
+Spotting and fixing bugs
+To find bugs in functions, you need to follow a four step procedure.
+Write unit tests.
+Run them.
+Read the test result report and spot the bugs.
+Fix the bugs.
+
+
+In a previous exercise, you wrote a unit test for the function convert_to_int(), which is supposed to convert a comma separated integer string like "2,081" to the integer 2081. You also ran the unit test and discovered that it is failing.
+In this exercise, you will read the test result report from that exercise in detail, and then spot and fix the bug. This would equip you with all basic skills to start using unit tests for your projects.
+The convert_to_int() function is defined in the file preprocessing_helpers.py. The unit test is available in the test module test_convert_to_int.py.
+
+
+
+
+
+
+
+
+
+Run the unit test in the test module test_convert_to_int.py in the IPython console. Read the test result report and spot the bug.
+Which of the following describes the bug in the function convert_to_int(), if any?
+
+
+In [1]: !pytest test_convert_to_int.py
+============================= test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmpk3lsr4nd
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 1 item                                                               
+
+test_convert_to_int.py F                                                 [100%]
+
+=================================== FAILURES ===================================
+________________________ test_on_string_with_one_comma _________________________
+
+    def test_on_string_with_one_comma():
+>     assert convert_to_int("2,081") == 2081
+E     AssertionError: assert '2081' == 2081
+E      +  where '2081' = convert_to_int('2,081')
+
+test_convert_to_int.py:7: AssertionError
+============================== 1 failed in 0.20s ===============================
+
+
+
+convert_to_int("2,081") is expected to return the string "2081", but it is actually returning the integer 2081.
+convert_to_int("2,081") is expected to return the integer 2081, but it is actually returning the string "2,081".
+The function convert_to_int() does not have a bug.
+
+#YES - convert_to_int("2,081") is expected to return the integer 2081, but it is actually returning the string "2081".
+
+
+
+
+
+
+
+
+
+
+
+
+
+Fix the convert_to_int() function so that it returns the integer 2081 instead of the string "2081" for the argument "2,081".
+def convert_to_int(string_with_comma):
+    # Fix this line so that it returns an int, not a str
+    return string_with_comma.replace(",", "")
+
+
+def convert_to_int(string_with_comma):
+    # Fix this line so that it returns an int, not a str
+    return int(string_with_comma.replace(",", ""))
+
+Good work! Your boss and colleagues are going to really appreciate your new skill of reading test result reports, and then spotting and fixing the bugs, because this would mean fewer bugs in the code base in the long term.
+
