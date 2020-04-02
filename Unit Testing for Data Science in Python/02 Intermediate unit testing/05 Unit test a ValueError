@@ -1,0 +1,78 @@
+Unit test a ValueError
+Sometimes, you want a function to raise an exception when called on bad arguments. This prevents the function from returning nonsense results or hard-to-interpret exceptions. This is an important behavior which should be unit tested.
+Remember the function split_into_training_and_testing_sets()? It takes a NumPy array containing housing area and prices as argument. The function randomly splits the array row wise into training and testing arrays in the ratio 3:1, and returns the resulting arrays in a tuple.
+If the argument array has only 1 row, the testing array will be empty. To avoid this situation, you want the function to not return anything, but raise a ValueError with the message "Argument data_array must have at least 2 rows, it actually has just 1".
+
+
+Fill in with the correct context manager that checks if split_into_training_and_testing_sets() raises a ValueError when called on test_argument, which is a NumPy array with a single row.
+import numpy as np
+import pytest
+from train import split_into_training_and_testing_sets
+
+def test_on_one_row():
+    test_argument = np.array([[1382.0, 390167.0]])
+    # Fill in with a context manager for checking ValueError
+    with pytest.raises(ValueError):
+      split_into_training_and_testing_sets(test_argument)
+
+
+
+
+Complete the with statement so that information about any raised ValueError will be stored in the variable exc_info.
+import numpy as np
+import pytest
+from train import split_into_training_and_testing_sets
+
+def test_on_one_row():
+    test_argument = np.array([[1382.0, 390167.0]])
+    # Store information about raised ValueError in exc_info
+    with pytest.raises(ValueError) as exc_info:
+      split_into_training_and_testing_sets(test_argument)
+
+
+
+
+
+Write an assert statement to check if the raised ValueError contains the correct message stored in the variable expected_error_msg.
+import numpy as np
+import pytest
+from train import split_into_training_and_testing_sets
+
+def test_on_one_row():
+    test_argument = np.array([[1382.0, 390167.0]])
+    # Store information about raised ValueError in exc_info
+    with pytest.raises(ValueError) as exc_info:
+      split_into_training_and_testing_sets(test_argument)
+    expected_error_msg = "Argument data_array must have at least 2 rows, it actually has just 1"
+    # Check if the raised ValueError contains the correct message
+    assert exc_info.match(expected_error_msg)
+
+
+
+
+
+
+
+The test test_on_one_row() was written to the test module test_split_into_training_and_testing_sets.py. Run the test in the IPython console and read the test result report. Does the test pass or fail?
+
+In [1]: !pytest test_split_into_training_and_testing_sets.py
+============================== test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmp7cxlh762
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 1 item                                                                
+
+test_split_into_training_and_testing_sets.py .                            [100%]
+
+=============================== 1 passed in 0.24s ===============================
+
+
+The test passes.
+The test fails because no ValueError is raised when split_into_training_and_testing_sets() is called on a NumPy array with 1 row.
+The test fails because the ValueError does not contain the correct error message.
+
+That's correct! Congratulations on writing your first unit test that checks for exceptions. In the next lesson, you will find out that it is good practice to include a few tests of this type for every function that you test.
+
