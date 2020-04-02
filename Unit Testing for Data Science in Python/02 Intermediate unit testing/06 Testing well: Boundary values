@@ -1,0 +1,94 @@
+Testing well: Boundary values
+Remember row_to_list()? It takes a row containing housing area and prices e.g. "2,041\t123,781\n" and returns the data as a list e.g. ["2,041", "123,781"].
+
+A row can be mapped to a 2-tuple (m, n), where m is the number of tab separators. n is 1 if the row has any missing values, and 0 otherwise.
+
+For example,
+
+"123\t456\n" → (1, 0).
+"\t456\n" → (1, 1).
+"\t456\t\n" → (2, 1).
+The function only returns a list for arguments mapping to (1, 0). All other tuples correspond to invalid rows, with either more than one tab or missing values. The function returns None in all these cases. See the plot.
+
+This mapping shows that the function has normal behavior at (1, 0), and special behavior everywhere else.
+
+
+
+Which are the boundary values for this function, according to the plot?
+#not - (1, 0).
+#not - (3, 0) and (3, 1).
+
+#not - (0, 0) and (2, 0).
+Yes, these two are boundary values because they mark the points separating the normal behavior and special behavior in the x direction. But what about the y direction?
+
+#yes - (0, 0), (2, 0) and (1, 1).
+
+
+
+
+
+
+Assign actual to the return value of row_to_list() on the argument "123\n", which is an instance of the boundary value (0, 0).
+import pytest
+from preprocessing_helpers import row_to_list
+
+def test_on_no_tab_no_missing_value():    # (0, 0) boundary value
+    # Assign actual to the return value for the argument "123\n"
+    actual = row_to_list("123\n")
+    assert actual is None, "Expected: None, Actual: {0}".format(actual)
+
+
+
+
+
+
+
+Complete the assert statement to check if row_to_list() indeed returns None for the instance "123\t4,567\t89\n" of the boundary value (2, 0).
+import pytest
+from preprocessing_helpers import row_to_list
+
+def test_on_no_tab_no_missing_value():    # (0, 0) boundary value
+    # Assign actual to the return value for the argument "123\n"
+    actual = row_to_list("123\n")
+    assert actual is None, "Expected: None, Actual: {0}".format(actual)
+    
+    
+def test_on_two_tabs_no_missing_value():    # (2, 0) boundary value
+    actual = row_to_list("123\t4,567\t89\n")
+    # Complete the assert statement
+    assert actual is None, "Expected: None, Actual: {0}".format(actual)
+
+
+
+
+
+
+
+
+
+
+
+In the test test_on_one_tab_with_missing_value(), format the failure message with the actual return value.
+import pytest
+from preprocessing_helpers import row_to_list
+
+def test_on_no_tab_no_missing_value():    # (0, 0) boundary value
+    # Assign actual to the return value for the argument "123\n"
+    actual = row_to_list("123\n")
+    assert actual is None, "Expected: None, Actual: {0}".format(actual)
+    
+    
+def test_on_two_tabs_no_missing_value():    # (2, 0) boundary value
+    actual = row_to_list("123\t4,567\t89\n")
+    # Complete the assert statement
+    assert actual is None, "Expected: None, Actual: {0}".format(actual)
+    
+    
+def test_on_one_tab_with_missing_value():    # (1, 1) boundary value
+    actual = row_to_list("\t4,567\n")
+    # Format the failure message
+    assert actual is None, "Expected: None, Actual: {0}".format(actual)
+
+
+Fantastic! You just wrote tests for all the boundary values of row_to_list(). In the next exercise, you will write tests for some special values of row_to_list().
+
