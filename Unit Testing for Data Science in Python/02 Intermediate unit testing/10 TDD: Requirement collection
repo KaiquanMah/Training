@@ -1,0 +1,108 @@
+TDD: Requirement collection
+What should convert_to_int() do if the arguments are not normal? In particular, there are three special argument types:
+Arguments that are missing a comma e.g. "178100,301".
+Arguments that have the comma in the wrong place e.g. "12,72,891".
+Float valued strings e.g. "23,816.92".
+
+
+Also, should convert_to_int() raise an exception for specific argument values?
+When your boss asked you to implement the function, she didn't say anything about these cases! But since you want to write tests for special and bad arguments as a part of TDD, you go and ask your boss.
+She says that convert_to_int() should return None for every special argument and there are no bad arguments for this function.
+pytest has been imported for you.
+
+
+
+
+Give a name to the test by using the standard name prefix that pytest expects followed by on_string_with_missing_comma.
+Assign actual to the actual return value for the argument "12,72,891".
+Complete the assert statement.
+
+# Give a name to the test for an argument with missing comma
+def test_on_string_with_missing_comma():
+    actual = convert_to_int("178100,301")
+    assert actual is None, "Expected: None, Actual: {0}".format(actual)
+    
+def test_on_string_with_incorrectly_placed_comma():
+    # Assign to the actual return value for the argument "12,72,891"
+    actual = convert_to_int("12,72,891")
+    assert actual is None, "Expected: None, Actual: {0}".format(actual)
+    
+def test_on_float_valued_string():
+    actual = convert_to_int("23,816.92")
+    # Complete the assert statement
+    assert actual is None, "Expected: None, Actual: {0}".format(actual)
+
+
+
+
+
+
+
+
+The tests for normal and special arguments have been written to a test module test_convert_to_int.py. Run it in the IPython console and read the test result report. What happens?
+
+In [1]: !pytest test_convert_to_int.py
+============================== test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmp3maon1bk
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 6 items                                                               
+
+test_convert_to_int.py FFFFFF                                             [100%]
+
+=================================== FAILURES ====================================
+______________________________ test_with_no_comma _______________________________
+
+    def test_with_no_comma():
+>       actual = convert_to_int("756")
+E       NameError: name 'convert_to_int' is not defined
+
+test_convert_to_int.py:5: NameError
+______________________________ test_with_one_comma ______________________________
+
+    def test_with_one_comma():
+>       actual = convert_to_int("2,081")
+E       NameError: name 'convert_to_int' is not defined
+
+test_convert_to_int.py:9: NameError
+_____________________________ test_with_two_commas ______________________________
+
+    def test_with_two_commas():
+>       actual = convert_to_int("1,034,891")
+E       NameError: name 'convert_to_int' is not defined
+
+test_convert_to_int.py:13: NameError
+_______________________ test_on_string_with_missing_comma _______________________
+
+    def test_on_string_with_missing_comma():
+>       actual = convert_to_int("178100,301")
+E       NameError: name 'convert_to_int' is not defined
+
+test_convert_to_int.py:17: NameError
+_________________ test_on_string_with_incorrectly_placed_comma __________________
+
+    def test_on_string_with_incorrectly_placed_comma():
+>       actual = convert_to_int("12,72,891")
+E       NameError: name 'convert_to_int' is not defined
+
+test_convert_to_int.py:21: NameError
+__________________________ test_on_float_valued_string __________________________
+
+    def test_on_float_valued_string():
+>       actual = convert_to_int("23,816.92")
+E       NameError: name 'convert_to_int' is not defined
+
+test_convert_to_int.py:25: NameError
+=============================== 6 failed in 0.30s ===============================
+
+
+
+All tests are passing.
+The test test_on_string_with_two_commas() is failing because the convert_to_int("1,034,891") returns None instead of the correct integer 1034891.
+
+#YES - All tests are failing with a NameError since convert_to_int() has not been implemented yet.
+Yes! In TDD, the first run of the tests always fails with a NameError or ImportError because the function does not exist yet. In the next exercise, you will implement the function and fix this. But before you move on, notice how thinking about special and bad arguments crystallized the requirements for the function. This will help us immensely in implementing the function in the coming exercise.
+
