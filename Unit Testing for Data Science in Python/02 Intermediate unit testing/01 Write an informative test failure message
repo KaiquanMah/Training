@@ -1,0 +1,84 @@
+Write an informative test failure message
+The test result reports become a lot easier to read when you make good use of the optional message argument of the assert statement.
+In a previous exercise, you wrote a test for the convert_to_int() function. The function takes an integer valued string with commas as thousand separators e.g. "2,081" as argument and should return the integer 2081.
+In this exercise, you will rewrite the test called test_on_string_with_one_comma() so that it prints an informative message if the test fails.
+
+
+Format the message string so that it shows the actual return value.
+import pytest
+
+from preprocessing_helpers import convert_to_int
+
+def test_on_string_with_one_comma():
+    test_argument = "2,081"
+    expected = 2081
+    actual = convert_to_int(test_argument)
+    # Format the string with the actual return value
+    message = "convert_to_int('2,081') should return the int 2081, but it actually returned {0}".format(actual)
+
+
+
+
+
+
+
+
+Write the assert statement that checks if actual is equal to expected and prints the message message if they are not equal.
+
+import pytest
+from preprocessing_helpers import convert_to_int
+
+def test_on_string_with_one_comma():
+    test_argument = "2,081"
+    expected = 2081
+    actual = convert_to_int(test_argument)
+    # Format the string with the actual return value
+    message = "convert_to_int('2,081') should return the int 2081, but it actually returned {0}".format(actual)
+    # Write the assert statement which prints message on failure
+    assert actual is expected, message
+
+
+
+
+
+
+The test that you wrote was written to a test module called test_convert_to_int.py. Run the test in the IPython console and read the test result report.
+Which of the following is true?
+
+
+In [1]: !pytest test_convert_to_int.py
+============================= test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmp4_57fo7w
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 1 item                                                               
+
+test_convert_to_int.py F                                                 [100%]
+
+=================================== FAILURES ===================================
+________________________ test_on_string_with_one_comma _________________________
+
+    def test_on_string_with_one_comma():
+        test_argument = "2,081"
+        expected = 2081
+        actual = convert_to_int(test_argument)
+        message = "convert_to_int('2,081') should return the int 2081, but it actually returned {0}".format(actual)
+>       assert actual == expected, message
+E       AssertionError: convert_to_int('2,081') should return the int 2081, but it actually returned None
+E       assert None == 2081
+
+test_convert_to_int.py:10: AssertionError
+============================== 1 failed in 0.30s ===============================
+
+
+
+The test passes.
+The test fails because convert_to_int("2,081") returns the string "2081" and not the integer 2081.
+The test fails because of a SyntaxError in the test code.
+
+#YES - The test fails because convert_to_int("2,081") returns None and not the integer 2081.
+That's right! It is a lot easier to understand the custom message that you wrote than the automatic messages that pytest prints. Therefore, it is recommended that you add custom failure messages to all assert statements that you write in the future.
+
