@@ -1,0 +1,99 @@
+Running test classes
+When you ran the !pytest command in the last exercise, the test test_on_six_rows() failed. This is a test for the function split_into_training_and_testing_sets(). This means that this function is broken.
+Short recap in case you forgot: this function takes a NumPy array containing housing area and prices as argument. The function randomly splits the argument array into training and testing arrays in the ratio 3:1, and returns the resulting arrays in a tuple.
+A quick look revealed that during the code update, someone inadvertently changed the split from 3:1 to 9:1. This has to be changed back and the unit tests for the function, which now lives in the test class TestSplitIntoTrainingAndTestingSets, needs to be run again. Are you up to the challenge?
+
+
+Fill in with a float between 0 and 1 so that num_training is approximately 34 of the number of rows in data_array.
+import numpy as np
+
+def split_into_training_and_testing_sets(data_array):
+    dim = data_array.ndim
+    if dim != 2:
+        raise ValueError("Argument data_array must be two dimensional. Got {0} dimensional array instead!".format(dim))
+    num_rows = data_array.shape[0]
+    if num_rows < 2:
+        raise ValueError("Argument data_array must have at least 2 rows, it actually has just {0}".format(num_rows))
+    # Fill in with the correct float
+    num_training = int(0.75 * data_array.shape[0])
+    permuted_indices = np.random.permutation(data_array.shape[0])
+    return data_array[permuted_indices[:num_training], :], data_array[permuted_indices[num_training:], :]
+    
+
+
+
+
+
+
+
+Now let's see if that modification fixed the broken function. The current working directory in the IPython console is the tests folder that contains all tests. The test class TestSplitIntoTrainingAndTestingSets resides in the test module tests/models/test_train.py.
+What is the correct command to run all the tests in this test class using node IDs?
+
+!pytest models::test_train.py::TestSplitIntoTrainingAndTestingSets
+!pytest -k "TestSplitIntoTrainingAndTestingSets"
+!pytest models/test_train.py/TestSplitIntoTrainingAndTestingSets
+
+#YES - !pytest models/test_train.py::TestSplitIntoTrainingAndTestingSets
+
+
+
+In [1]: !pytest models/test_train.py::TestSplitIntoTrainingAndTestingSets
+============================= test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmp7v8npbcf
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 2 items                                                              
+
+models/test_train.py ..                                                  [100%]
+
+============================== 2 passed in 0.28s ===============================
+
+
+
+
+
+
+
+
+What is the correct command to run only the previously failing test test_on_six_rows() using node IDs?
+
+!pytest models/test_train.py::test_on_six_rows
+!pytest test_on_six_rows
+
+#YES - !pytest models/test_train.py::TestSplitIntoTrainingAndTestingSets::test_on_six_rows
+
+
+
+In [2]: !pytest models/test_train.py::TestSplitIntoTrainingAndTestingSets::test_on_six_rows
+============================= test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmp7v8npbcf
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 1 item                                                               
+
+models/test_train.py .                                                   [100%]
+
+============================== 1 passed in 0.17s ===============================
+
+
+
+
+
+
+
+
+What is the correct command to run the tests in TestSplitIntoTrainingAndTestingSets using keyword expressions?
+
+!pytest models/test_train.py::TestSplitIntoTrainingAndTestingSets
+!pytest -x "TestSplitIntoTrainingAndTestingSets"
+!pytest -k "Test"
+
+#YES - !pytest -k "SplitInto"
+That's correct! The -k flag is really useful, because it helps you select tests and test classes by typing only a unique part of its name. This saves a lot of typing, and you must admit that TestSplitIntoTrainingAndTestingSets is a horrendously long name! In your projects, you will often run tests with the node IDs and the -k flag because you are often not interested in running all tests, but only a subset depending on the functions you are currently working on.
+
