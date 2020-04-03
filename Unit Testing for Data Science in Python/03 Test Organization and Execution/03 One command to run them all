@@ -1,0 +1,147 @@
+One command to run them all
+One of your colleagues pushed some changes to the functions row_to_list(), convert_to_int(), get_data_as_numpy_array() and split_into_training_and_testing_sets(). That means that you have to run all the tests again to figure out if something got broken as a result.
+The current working directory in the IPython console is the tests directory, which contains all the tests in the same layout as described in the video. You can, at any time, run the tests in the IPython console using the appropriate command.
+
+
+In the IPython console, what is the correct command for running all tests contained in the tests folder?
+!pytest -x
+!pytest tests
+pytest
+
+#YES - !pytest
+
+
+
+
+
+
+
+
+
+When you run all tests with the command !pytest, how many of them pass and how may fail?
+
+In [1]: !pytest
+============================= test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmps_wnah3g
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 16 items                                                             
+
+data/test_preprocessing_helpers.py .............                         [ 81%]
+features/test_as_numpy.py .                                              [ 87%]
+models/test_train.py F.                                                  [100%]
+
+=================================== FAILURES ===================================
+_____________ TestSplitIntoTrainingAndTestingSets.test_on_six_rows _____________
+
+self = <models.test_train.TestSplitIntoTrainingAndTestingSets object at 0x7f1b45ee33c8>
+
+    def test_on_six_rows(self):
+        test_input = np.array([[2081.0, 314942.0],
+                               [1059.0, 186606.0],
+                               [1148.0, 206186.0],
+                               [1506.0, 248419.0],
+                               [1210.0, 214114.0],
+                               [1697.0, 277794.0],
+                               ]
+                              )
+        expected_length_training_set = 4
+        expected_length_testing_set = 2
+        actual = split_into_training_and_testing_sets(test_input)
+>       assert actual[0].shape[0] == expected_length_training_set, \
+               "The actual number of rows in the training array is not 4"
+E       AssertionError: The actual number of rows in the training array is not 4
+E       assert 5 == 4
+
+models/test_train.py:21: AssertionError
+========================= 1 failed, 15 passed in 0.24s =========================
+
+
+
+Passing: 10, Failing: 6
+Passing 16, Failing: 0
+
+#YES - Passing: 15, Failing: 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+Assuming that you simply want to answer the binary question "Are all tests passing" without wasting time and resources, what is the correct command to run all tests till the first failure is encountered?
+In [2]: !pytest -x
+============================= test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmps_wnah3g
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 16 items                                                             
+
+data/test_preprocessing_helpers.py .............                         [ 81%]
+features/test_as_numpy.py .                                              [ 87%]
+models/test_train.py F
+
+=================================== FAILURES ===================================
+_____________ TestSplitIntoTrainingAndTestingSets.test_on_six_rows _____________
+
+self = <models.test_train.TestSplitIntoTrainingAndTestingSets object at 0x7f60742c4eb8>
+
+    def test_on_six_rows(self):
+        test_input = np.array([[2081.0, 314942.0],
+                               [1059.0, 186606.0],
+                               [1148.0, 206186.0],
+                               [1506.0, 248419.0],
+                               [1210.0, 214114.0],
+                               [1697.0, 277794.0],
+                               ]
+                              )
+        expected_length_training_set = 4
+        expected_length_testing_set = 2
+        actual = split_into_training_and_testing_sets(test_input)
+>       assert actual[0].shape[0] == expected_length_training_set, \
+               "The actual number of rows in the training array is not 4"
+E       AssertionError: The actual number of rows in the training array is not 4
+E       assert 5 == 4
+
+models/test_train.py:21: AssertionError
+========================= 1 failed, 14 passed in 0.27s =========================
+
+
+!pytest -k
+!pytest
+
+#YES - !pytest -x
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+When you ran the tests using the !pytest -x command, how many tests ran in total before test execution stopped because of the first failing test?
+
+15
+
+
+Well done! In real life, the !pytest or !pytest -x command is often used in CI servers. It can also be useful if there is a major update to the code base, which changes many application modules at the same time. Running all tests is the only way to check if anything was broken due to the update.
+
