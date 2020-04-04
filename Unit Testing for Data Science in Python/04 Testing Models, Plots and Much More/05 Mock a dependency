@@ -1,0 +1,148 @@
+Mock a dependency
+Mocking helps us replace a dependency with a MagicMock() object. Usually, the MagicMock() is programmed to be a bug-free version of the dependency. To verify whether the function under test works properly with the dependency, you simply check whether the MagicMock() is called with the correct arguments and in the right order.
+
+In the last exercise, you programmed a bug-free version of the dependency data.preprocessing_helpers.convert_to_int in the context of the test test_on_raw_data(), which applies preprocess() on a raw data file. The data file is printed out in the IPython console.
+
+pytest, unittest.mock.call, preprocess raw_and_clean_data_file and convert_to_int_bug_free has been imported for you.
+1,801	201,411
+1,767565,112
+2,002	333,209
+1990	782,911
+1,285	389129
+
+
+
+
+
+
+In the test test_on_raw_data(), add the correct argument that enables the use of the mocking fixture.
+# Add the correct argument to use the mocking fixture in this test
+def test_on_raw_data(self, raw_and_clean_data_file, mocker):
+    raw_path, clean_path = raw_and_clean_data_file
+
+
+
+
+
+
+Replace the dependency "data.preprocessing_helpers.convert_to_int" with the bug-free version convert_to_int_bug_free() by using the correct method and side effect.
+# Add the correct argument to use the mocking fixture in this test
+def test_on_raw_data(self, raw_and_clean_data_file, mocker):
+    raw_path, clean_path = raw_and_clean_data_file
+    # Replace the dependency with the bug-free mock
+    convert_to_int_mock = mocker.patch("data.preprocessing_helpers.convert_to_int",
+                                    side_effect=convert_to_int_bug_free)
+
+
+
+
+
+
+Use the correct attribute which returns the list of calls to the mock, and check if it was called with this sequence of arguments: "1,801", "201,411", "2,002", "333,209", "1990", "782,911", "1,285", "389129".
+# Add the correct argument to use the mocking fixture in this test
+def test_on_raw_data(self, raw_and_clean_data_file, mocker):
+    raw_path, clean_path = raw_and_clean_data_file
+    # Replace the dependency with the bug-free mock
+    convert_to_int_mock = mocker.patch("data.preprocessing_helpers.convert_to_int",
+                                       side_effect=convert_to_int_bug_free)
+    preprocess(raw_path, clean_path)
+    # Check if preprocess() called the dependency correctly
+    assert convert_to_int_mock.call_args_list == [call("1,801"), call("201,411"), call("2,002"), call("333,209"), call("1990"), call("782,911"), call("1,285"), call("389129")]
+    with open(clean_path, "r") as f:
+        lines = f.readlines()
+    first_line = lines[0]
+    assert first_line == "1801\\t201411\\n"
+    second_line = lines[1]
+    assert second_line == "2002\\t333209\\n" 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The test that you wrote was written to the test class TestPreprocess in the test module data/test_preprocessing_helpers.py. The same test module also contains the test class TestConvertToInt.
+Run the tests in TestPreprocess and TestConvertToInt. Based on the test result report, which of the following is correct?
+
+In [1]: !pytest -k 'TestPreprocess'
+============================== test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmpp9onefcl
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 21 items / 20 deselected / 1 selected                                 
+
+data/test_preprocessing_helpers.py .                                      [100%]
+
+======================= 1 passed, 20 deselected in 0.31s ========================
+
+
+
+
+
+
+
+In [2]: !pytest -k 'TestConvertToInt'
+============================== test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmpp9onefcl
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 21 items / 15 deselected / 6 selected                                 
+
+data/test_preprocessing_helpers.py .FF...                                 [100%]
+
+=================================== FAILURES ====================================
+_____________________ TestConvertToInt.test_with_one_comma ______________________
+
+self = <data.test_preprocessing_helpers.TestConvertToInt object at 0x7f2491439588>
+
+    def test_with_one_comma(self):
+        test_argument = "2,081"
+        expected = 2081
+        actual = convert_to_int(test_argument)
+>       assert actual == expected, "Expected: 2081, Actual: {0}".format(actual)
+E       AssertionError: Expected: 2081, Actual: None
+E       assert None == 2081
+
+data/test_preprocessing_helpers.py:48: AssertionError
+_____________________ TestConvertToInt.test_with_two_commas _____________________
+
+self = <data.test_preprocessing_helpers.TestConvertToInt object at 0x7f2491439ba8>
+
+    def test_with_two_commas(self):
+        test_argument = "1,034,891"
+        expected = 1034891
+        actual = convert_to_int(test_argument)
+>       assert actual == expected, "Expected: 1034891, Actual: {0}".format(actual)
+E       AssertionError: Expected: 1034891, Actual: None
+E       assert None == 1034891
+
+data/test_preprocessing_helpers.py:54: AssertionError
+================== 2 failed, 4 passed, 15 deselected in 0.23s ===================
+
+
+
+
+
+The tests for both convert_to_int() and preprocess() passes.
+The tests for convert_to_int() passes but the test for preprocess() fails.
+
+#YES - Some tests for convert_to_int() fail but the test for preprocess() passes.
+
+
+Wow! You are turning into a seasoned tester! The results tell us that preprocess() is defined correctly and is bug-free. 
+But one of its dependencies convert_to_int() has bugs. 
+This kind of precise result is only possible using mocking.
+
