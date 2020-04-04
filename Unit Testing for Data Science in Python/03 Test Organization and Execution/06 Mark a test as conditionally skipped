@@ -1,0 +1,72 @@
+Mark a test as conditionally skipped
+In Python 2, there was a built-in function called xrange(). In Python 3, xrange() was removed. Therefore, if any test uses xrange(), it's going to fail with a NameError in Python 3.
+Remember the function get_data_as_numpy_array()? You saw it in Chapter 2. It converted data in a preprocessed data file into a NumPy array.
+range() has been deliberately replaced with the obsolete xrange() in the function. Evil laughter! But no worries, it will be changed back after you're done with this exercise.
+
+You wrote a test called test_on_clean_file() for this function. This test currently resides in a test class TestGetDataAsNumpyArray inside the test module features/test_as_numpy.py.
+pytest, numpy as np and get_data_as_numpy_array() has been imported for you.
+
+
+
+Run the tests in the test class TestGetDataAsNumpyArray in the IPython console. What is the outcome?
+The test test_on_clean_file() passes.
+The test test_on_clean_file() fails with an AssertionError.
+
+#YES - The test test_on_clean_file() fails with a NameError because Python 3 does not recognize the xrange() function.
+
+
+
+
+
+Import the sys module.
+# Import the sys module
+import sys
+
+
+
+
+
+
+
+Mark the test test_on_clean_file() as skipped if the Python version is greater than 2.7.
+# Import the sys module
+import sys
+
+class TestGetDataAsNumpyArray(object):
+    # Mark as skipped if Python version is greater than 2.7
+    @pytest.mark.skipif(sys.version_info > (2, 7))
+    def test_on_clean_file(self):
+        expected = np.array([[2081.0, 314942.0],
+                             [1059.0, 186606.0],
+                             [1148.0, 206186.0]
+                             ]
+                            )
+        actual = get_data_as_numpy_array("example_clean_data.txt", num_columns=2)
+        message = "Expected return value: {0}, Actual return value: {1}".format(expected, actual)
+        assert actual == pytest.approx(expected), message
+
+
+
+
+Add the following reason for skipping the test: "Works only on Python 2.7 or lower".
+# Import the sys module
+import sys
+
+class TestGetDataAsNumpyArray(object):
+    # Add a reason for skipping the test
+    @pytest.mark.skipif(sys.version_info > (2, 7), reason="Works only on Python 2.7 or lower")
+    def test_on_clean_file(self):
+        expected = np.array([[2081.0, 314942.0],
+                             [1059.0, 186606.0],
+                             [1148.0, 206186.0]
+                             ]
+                            )
+        actual = get_data_as_numpy_array("example_clean_data.txt", num_columns=2)
+        message = "Expected return value: {0}, Actual return value: {1}".format(expected, actual)
+        assert actual == pytest.approx(expected), message
+
+
+
+
+Great job! You can use any boolean expression as the first argument of pytest.mark.skipif. One other common situation is to skip tests that won't run on particular platforms like Windows, Linux or Mac using the sys.platform attribute.
+
