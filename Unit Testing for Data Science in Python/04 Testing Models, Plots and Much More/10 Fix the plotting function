@@ -1,0 +1,53 @@
+Fix the plotting function
+In the last exercise, pytest saved the baseline images, actual images, and images containing the pixelwise difference in a temporary folder. The difference image for one of the tests test_on_almost_linear_data() is shown below.
+The black areas are where the actual image and the baseline matches. The white areas are where they don't match.
+This clearly tells us that something is wrong with the axis labels. Take a look at the plots section to see the baseline (plot 1/2) and the actual plot (plot 2/2). Based on that, it's your job to fix the plotting function.
+
+
+Fill in the axis labels xlabel and ylabel so that they match the baseline plot (plot 1/2).
+import matplotlib.pyplot as plt
+import numpy as np
+
+def get_plot_for_best_fit_line(slope, intercept, x_array, y_array, title):
+    fig, ax = plt.subplots()
+    ax.plot(x_array, y_array, ".")
+    ax.plot([0, np.max(x_array)], [intercept, slope * np.max(x_array) + intercept], "-")
+    # Fill in with axis labels so that they match the baseline
+    ax.set(xlabel='area (square feet)', ylabel='price (dollars)', title=title)
+    return fig
+
+
+
+
+
+
+
+
+Now that you have fixed the function, run all the tests in the tests directory, remembering that the current working directory in the IPython console is tests. What is the outcome?
+
+In [2]: !pytest
+============================= test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmpere0e_8t
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collecting 25 items                                                            
+collected 25 items                                                             
+
+data/test_preprocessing_helpers.py ..............                        [ 56%]
+features/test_as_numpy.py ..                                             [ 64%]
+models/test_train.py .......                                             [ 92%]
+visualization/test_plots.py ..                                           [100%]
+
+============================== 25 passed in 0.83s ==============================
+
+
+
+22 tests are passing and 3 are failing.
+24 tests are passing and 1 is failing.
+
+#YES - All 25 tests pass.
+That is amazing! The linear regression project is now well-tested with 25 tests and they are all passing, thanks to your efforts throughout the course. With the skills and techniques you learned here, you can now go and test your own data science projects!
+
