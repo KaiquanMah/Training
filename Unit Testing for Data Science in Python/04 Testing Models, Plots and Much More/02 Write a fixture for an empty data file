@@ -1,0 +1,143 @@
+Write a fixture for an empty data file
+When a function takes a data file as an argument, you need to write a fixture that takes care of creating and deleting that data file. This exercise will test your ability to write such a fixture.
+
+get_data_as_numpy_array() should return an empty numpy array if it gets an empty data file as an argument. To test this behavior, you need to write a fixture empty_file() that does the following.
+
+Creates an empty data file empty.txt relative to the current working directory in setup.
+Yields the path to the empty data file.
+Deletes the empty data file in teardown.
+The fixture will be used by the test test_on_empty_file(), which is available for you to see in the script.
+
+os, pytest, numpy as np and get_data_as_numpy_array have been imported for you.
+
+
+
+
+
+
+
+
+
+In the setup, assign the variable file_path to the correct string.
+After the setup, yield the variable file_path so that the test can use it.
+In the teardown, remove the file.
+
+@pytest.fixture
+def empty_file():
+    # Assign the file path "empty.txt" to the variable
+    file_path = "empty.txt"
+    open(file_path, "w").close()
+    # Yield the variable file_path
+    yield file_path
+    # Remove the file in the teardown
+    os.remove(file_path)
+    
+def test_on_empty_file(self, empty_file):
+    expected = np.empty((0, 2))
+    actual = get_data_as_numpy_array(empty_file, 2)
+    assert actual == pytest.approx(expected), "Expected: {0}, Actual: {1}".format(expected, actual)
+
+
+
+
+
+
+
+
+
+
+
+
+The test test_on_empty_file() was added to the test class TestGetDataAsNumpyArray, which lives in the test module tests/features/test_as_numpy.py. The fixture empty_file() was also written to this test module.
+Remembering that the current working directory in the IPython console is tests, run the test test_on_empty_file(). What is the outcome?
+
+In [4]: !pytest
+============================== test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmp2l521btc
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 21 items                                                              
+
+data/test_preprocessing_helpers.py ..............                         [ 66%]
+features/test_as_numpy.py ..                                              [ 76%]
+models/test_train.py ..xxx                                                [100%]
+
+========================= 18 passed, 3 xfailed in 0.21s =========================
+
+
+
+
+
+In [5]: !pytest features/test_as_numpy.py
+============================== test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmp2l521btc
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 2 items                                                               
+
+features/test_as_numpy.py ..                                              [100%]
+
+=============================== 2 passed in 0.25s ===============================
+
+
+
+
+
+
+In [7]: !pytest features/test_as_numpy.py::TestGetDataAsNumpyArray
+============================== test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmp2l521btc
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 2 items                                                               
+
+features/test_as_numpy.py ..                                              [100%]
+
+=============================== 2 passed in 0.17s ===============================
+
+
+
+
+
+
+
+
+
+In [8]: !pytest features/test_as_numpy.py::TestGetDataAsNumpyArray::test_on_empty_file
+============================== test session starts ==============================
+platform linux -- Python 3.6.7, pytest-5.2.2, py-1.8.1, pluggy-0.12.0
+Matplotlib: 3.1.1
+Freetype: 2.6.1
+rootdir: /tmp/tmp2l521btc
+plugins: mock-1.11.2, mpl-0.10
+collecting ... 
+collected 1 item                                                                
+
+features/test_as_numpy.py .                                               [100%]
+
+=============================== 1 passed in 0.17s ===============================
+
+
+
+
+
+
+
+The test fails because get_data_as_numpy_array() does not return an empty NumPy array, and instead returns None.
+The test fails with a NameError as Python 3 does not recognize the xrange() function.
+
+#YES - The test passes.
+
+
+
+Right you are! Notice that fixtures like empty_file() are quite reusable, since any function which accepts data files as arguments needs to be tested with an empty file.
+
