@@ -1,0 +1,102 @@
+String indexing and concatenation
+You are presented with one of the earliest known encryption techniques - Caesar cipher. It is based on a simple shift of each letter in a message by a certain number of positions down the given alphabet. For example, given the English alphabet, a shift of 1 for 'xyz' would imply 'yza' and vice versa in case of decryption. Notice that 'z' becomes 'a' in this case.
+Thus, encryption/decryption requires two arguments: text and an integer key denoting the shift (key = 1 for the example above).
+Your task is to create an encryption function given the English alphabet stored in the alphabet string.
+
+
+Fill in the blanks in the loop to create an encrypted text.
+Check the encryption function with the shift equals to 10 (it should return 'nkdkmkwz').
+
+In [25]:     encrypted_text = ''
+         text='t'
+         key=10
+
+In [26]:     for char in text.lower():
+                 # % divides and gives me the remainder
+                 idx = (alphabet.index(char) + key)
+
+In [27]: idx
+Out[27]: 29
+
+In [21]:     # Fill in the blanks to create an encrypted text
+             for char in text.lower():
+                 # % divides and gives me the remainder
+                 idx = (alphabet.index(char) + key) #% len(alphabet)
+                 encrypted_text = encrypted_text + alphabet[idx]
+Traceback (most recent call last):
+  File "<stdin>", line 5, in <module>
+    encrypted_text = encrypted_text + alphabet[idx]
+IndexError: string index out of range
+
+
+
+# Because the index would exceed the length of the alphabet string, we encounter the "string index out of range" error.
+# To solve this, we need the % or remainder sign to give us the remainder index number, which starts from a 0-index.
+
+
+
+def encrypt(text, key):
+  
+    encrypted_text = ''
+
+    # Fill in the blanks to create an encrypted text
+    for char in text.lower():
+        # % divides and gives me the remainder
+        idx = (alphabet.index(char) + key) % len(alphabet)
+        encrypted_text = encrypted_text + alphabet[idx]
+
+    return encrypted_text
+
+# Check the encryption function with the shift equals to 10
+print(encrypt("datacamp", 10))
+
+<script.py> output:
+    nkdkmkwz
+
+
+
+
+
+
+Great! Interestingly, decryption function is only different by the line you fixed in the for loop. What would be the corresponding change in the decrypt() function?
+idx = (alphabet.index(char) - key) % len(alphabet)
+idx = alphabet.indx(char) + key
+idx = (alphabet.indx(char) * key) % len(alphabet)
+
+
+#YES - idx = alphabet.index(char) - key
+Correct. It is enough to only subtract since Python allows negative indexing.
+
+
+
+
+In [5]: decrypted_text = ''
+        text='d'
+        key=10
+
+In [6]: 
+        for char in text.lower():
+             # % divides and gives me the remainder
+             idx = (alphabet.index(char) - key)
+
+In [7]: idx
+Out[7]: -7
+
+
+In [10]: 
+         # Fill in the blanks to create an encrypted text
+         for char in text.lower():
+              # % divides and gives me the remainder
+              idx = (alphabet.index(char) - key) #% len(alphabet)
+              decrypted_text = decrypted_text + alphabet[idx]
+
+In [11]: decrypted_text
+Out[11]: 't'
+
+
+In [12]: alphabet[-2]
+Out[12]: 'y'
+
+In [13]: alphabet[0]
+Out[13]: 'a'
+
