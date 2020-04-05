@@ -1,0 +1,59 @@
+Throw a dice
+Let's create an infinite generator! Your task is to define the simulate_dice_throws() generator. It generates the outcomes of a 6-sided dice tosses in the form of a dictionary out. Each key is a possible outcome (1, 2, 3, 4, 5, 6). Each value is a list: the first value is the amount of realizations of an outcome and the second, the ratio of realizations to the total number of tosses total.
+
+Tip: use the randint() function from the random module (already imported). It generates a random integer in the specified interval (e.g. randint(1, 2) can be 1 or 2).
+
+
+
+
+Simulate a single toss to get a new number.
+Update the number and the ratio of realization.
+Yield the updated dictionary.
+Create the generator and simulate 1000 tosses.
+
+
+def simulate_dice_throws():
+    total, out = 0, dict([(i, [0, 0]) for i in range(1, 7)])
+    while True:
+        # Simulate a single toss to get a new number
+        num = random.randint(1, 6)
+        total += 1
+        # Update the number and the ratio of realizations during every iteration
+        out[num][0] += 1
+        for j in range(1, 7):
+        	out[j][1] = round(out[j][0]/total, 2)
+        # Yield the updated dictionary
+        yield out
+
+# Create the generator and simulate 1000 tosses
+dice_simulator = simulate_dice_throws()
+for i in range(1, 1001):
+    print(str(i) + ': ' + str(next(dice_simulator)))
+
+
+
+In [3]: dice_simulator
+Out[3]: <generator object simulate_dice_throws at 0x7f657a7b1e08>
+
+<script.py> output:
+    1: {1: [0, 0.0], 2: [0, 0.0], 3: [0, 0.0], 4: [0, 0.0], 5: [0, 0.0], 6: [1, 1.0]}
+    2: {1: [1, 0.5], 2: [0, 0.0], 3: [0, 0.0], 4: [0, 0.0], 5: [0, 0.0], 6: [1, 0.5]}
+    3: {1: [2, 0.67], 2: [0, 0.0], 3: [0, 0.0], 4: [0, 0.0], 5: [0, 0.0], 6: [1, 0.33]}
+    4: {1: [2, 0.5], 2: [0, 0.0], 3: [0, 0.0], 4: [0, 0.0], 5: [0, 0.0], 6: [2, 0.5]}
+    5: {1: [2, 0.4], 2: [0, 0.0], 3: [1, 0.2], 4: [0, 0.0], 5: [0, 0.0], 6: [2, 0.4]}
+...
+    995: {1: [164, 0.16], 2: [171, 0.17], 3: [161, 0.16], 4: [165, 0.17], 5: [159, 0.16], 6: [175, 0.18]}
+    996: {1: [164, 0.16], 2: [171, 0.17], 3: [161, 0.16], 4: [165, 0.17], 5: [160, 0.16], 6: [175, 0.18]}
+    997: {1: [164, 0.16], 2: [171, 0.17], 3: [162, 0.16], 4: [165, 0.17], 5: [160, 0.16], 6: [175, 0.18]}
+    998: {1: [165, 0.17], 2: [171, 0.17], 3: [162, 0.16], 4: [165, 0.17], 5: [160, 0.16], 6: [175, 0.18]}
+    999: {1: [165, 0.17], 2: [172, 0.17], 3: [162, 0.16], 4: [165, 0.17], 5: [160, 0.16], 6: [175, 0.18]}
+    1000: {1: [166, 0.17], 
+           2: [172, 0.17], 
+           3: [162, 0.16], 
+           4: [165, 0.17], 
+           5: [160, 0.16], 
+           6: [175, 0.17]}
+
+
+Done it! As you can see from the output, the more you throw a dice, the more the ratios become equal. These values can be seen as probabilities of a single realization.
+
