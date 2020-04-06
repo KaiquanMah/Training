@@ -1,0 +1,90 @@
+BMI of villains
+Let's return to the heroes dataset containing the information on different comic book heroes. We added a bmi column to the dataset calculated as Weight divided by (Height/100)**2. This index helps define whether an individual has weight problems.
+Your task is to find out what is the mean value and standard deviation of the BMI index depending on the character's 'Alignment' and the 'Publisher' whom this character belongs to. However, you'll need to consider only those groups that have more than 10 valid observations of the BMI index.
+Tip: use .count() to calculate the number of valid observations.
+
+
+
+Group the data by the two factors specified above.
+Filter groups having more than 10 valid bmi observations.
+Group the filtered data again by the same factors.
+Calculate the mean and standard deviation of the BMI index.
+
+#attempt 1
+import numpy as np
+
+# Group the data by two factors specified in the context
+groups = heroes.groupby(['Alignment', 'Publisher'])
+
+# Filter groups having more than 10 valid bmi observations
+fheroes = (groups.count()>10)
+
+# Group the filtered data again by the same factors
+fgroups = fheroes.groupby(['Alignment', 'Publisher'])
+
+# Calculate the mean and standard deviation of the BMI index
+result = fgroups['bmi'].agg([np.mean, np.std])
+print(result)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#2nd attempt
+import numpy as np
+
+# Group the data by two factors specified in the context
+groups = heroes.groupby(['Publisher', 'Alignment'])
+
+In [21]: groups
+Out[21]: <pandas.core.groupby.generic.DataFrameGroupBy object at 0x7f9dba0f0198>
+
+
+
+# Filter groups having more than 10 valid bmi observations
+fheroes = groups.filter(lambda x: x['bmi'].count() > 10)
+
+In [22]: fheroes
+Out[22]: 
+                  name  Gender Eye color               Race        Hair color  ...      Publisher Skin color Alignment Weight         bmi
+0               A-Bomb    Male    yellow              Human           No Hair  ...  Marvel Comics        NaN      good  441.0  107.015458
+2             Abin Sur    Male      blue            Ungaran           No Hair  ...      DC Comics        red      good   90.0   26.296567
+3          Abomination    Male     green  Human / Radiation           No Hair  ...  Marvel Comics        NaN       bad  441.0  107.015458
+...
+732            Zatanna  Female      blue              Human             Black  ...      DC Comics        NaN      good   57.0   19.723183
+733               Zoom    Male       red                NaN             Brown  ...      DC Comics        NaN       bad   81.0   23.666910
+[575 rows x 11 columns]
+
+
+
+# Group the filtered data again by the same factors
+fgroups = fheroes.groupby(['Publisher', 'Alignment'])
+
+In [23]: fgroups
+Out[23]: <pandas.core.groupby.generic.DataFrameGroupBy object at 0x7f9dba0f0f28>
+
+
+
+# Calculate the mean and standard deviation of the BMI index
+result = fgroups['bmi'].agg([np.mean, np.std])
+print(result)
+
+<script.py> output:
+                                  mean         std
+    Publisher     Alignment                       
+    DC Comics     bad        71.460251  250.642060
+                  good       25.028215    6.879312
+    Marvel Comics bad        62.512261  258.935100
+                  good       28.968076   16.550686
+
+
+Magnificent! Interestingly, villains have quite a big BMI index in average (an individual is considered overweight when it is > 30), with a considerable standard deviation. Good characters are pretty normal (BMI index between 25 and 30 is considered normal).
+
