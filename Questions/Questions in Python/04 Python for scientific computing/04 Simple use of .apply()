@@ -1,0 +1,100 @@
+Simple use of .apply()
+Let's get some handful experience with .apply()!
+You are given the full scores dataset containing students' performance as well as their background information.
+Your task is to define the prevalence() function and apply it to the groups_to_consider columns of the scores DataFrame. This function should retrieve the most prevalent group/category for a given column (e.g. if the most prevalent category in the lunch column is standard, then prevalence() should return standard).
+The reduce() function from the functools module is already imported.
+Tip: pd.Series is an Iterable object. Therefore, you can use standard operations on it.
+
+
+Create a tuple list with unique items from passed object series and their counts.
+Extract a tuple with the highest counts using reduce().
+Return the item with the highest counts.
+Apply the prevalence function on the scores DataFrame using columns specified in groups_to_consider.
+
+
+   gender race/ethnicity parental level of education         lunch test preparation course  math score  reading score  writing score
+0  female        group E          associate's degree  free/reduced                    none          74             86             82
+1  female        group D                some college  free/reduced                    none          44             49             53
+2    male        group D            some high school  free/reduced                    none          54             46             43
+3  female        group B           bachelor's degree      standard                    none          88             95             92
+4    male        group C             master's degree      standard               completed          85             81             81
+
+
+
+
+
+In [1]: groups_to_consider
+Out[1]: 
+['gender',
+ 'race/ethnicity',
+ 'parental level of education',
+ 'lunch',
+ 'test preparation course']
+
+
+
+In [13]:     vals = list(scores['gender'])
+
+In [14]: vals
+Out[14]: 
+['female',
+ 'female',
+ 'male',
+ 'female',
+ 'male',
+ ...
+ ]
+
+
+In [15]:     itms = [(x, vals.count(x)) for x in set(vals)]
+
+In [16]: itms
+Out[16]: [('male', 48), ('female', 52)]
+
+
+# wrong iterable 'vals'
+In [17]:     res = reduce(lambda x, y: x if x[1] > y[1] else y, vals)
+In [18]: res
+Out[18]: 'female'
+
+
+#right iterable 'itms'
+In [21]:     res = reduce(lambda x, y: x if x[1] > y[1] else y, itms)
+In [22]: res
+Out[22]: ('female', 52)
+
+
+In [31]: type(res)
+Out[31]: tuple
+
+
+
+
+
+
+def prevalence(series):
+    vals = list(series)
+    # Create a tuple list with unique items and their counts
+    itms = [(x, vals.count(x)) for x in set(vals)]
+    # Extract a tuple with the highest counts using reduce()
+    res = reduce(lambda x, y: x if x[1] > y[1] else y, itms)
+    # Return the item with the highest counts
+    return res[0]
+
+# Apply the prevalence function on the scores DataFrame
+result = scores[groups_to_consider].apply(prevalence)
+print(result)
+
+
+
+<script.py> output:
+    gender                               female
+    race/ethnicity                      group C
+    parental level of education    some college
+    lunch                              standard
+    test preparation course                none
+    dtype: object
+
+
+Very well! Actually, we can use the mode() method instead defining the prevalence() function and using it instead of the apply() method (scores[groups_to_consider].mode()). However, it's always good to practice several approaches.
+
