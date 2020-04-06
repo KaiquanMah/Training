@@ -1,0 +1,52 @@
+NaN value imputation
+Let's try to impute some values. In the previous task you created a DataFrame fheroes where all the groups with insufficient amount of bmi observations were removed. Our bmi column has a lot of missing values (NaNs) though. Given two copies of the fheroes DataFrame (imp_globmean and imp_grpmean), your task is to impute the NaNs in the bmi column with the overall mean value and with the mean value per group defined by Publisher and Alignment factors, respectively.
+Tip: pandas Series and NumPy arrays have a special .fillna() method which substitutes all the encountered NaNs with a value specified as an argument.
+
+
+Define a lambda function that imputes NaN values in series.
+Impute NaNs in the bmi column of imp_globmean with the overall mean value.
+Impute NaNs in the bmi column of imp_grpmean with the mean value per group.
+
+
+# Define a lambda function that imputes NaN values in series
+impute = lambda series: series.fillna(series.mean())
+
+In [2]: impute
+Out[2]: <function __main__.<lambda>>
+
+
+# Impute NaNs in the bmi column of imp_globmean
+imp_globmean['bmi'] = impute(imp_globmean['bmi'])
+print("Global mean = " + str(fheroes['bmi'].mean()) + "\n")
+
+
+<script.py> output:
+    Global mean = 38.98033229674414
+    
+    
+    
+    
+    
+    
+groups = imp_grpmean.groupby(['Publisher', 'Alignment'])
+
+# Impute NaNs in the bmi column of imp_grpmean
+imp_grpmean['bmi'] = groups['bmi'].apply(impute)
+print(groups['bmi'].mean())
+
+
+<script.py> output:
+ 
+    Publisher      Alignment
+    DC Comics      bad          71.460251
+                   good         25.028215
+    Marvel Comics  bad          62.512261
+                   good         28.968076
+    Name: bmi, dtype: float64
+    
+    
+    
+Great! Imputation was successful! Grouping the data is a very useful technique required in almost any study dealing with complex datasets. Therefore, it is good to keep practicing!
+
+    
+    
