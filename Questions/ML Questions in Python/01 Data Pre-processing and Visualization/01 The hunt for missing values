@@ -1,0 +1,118 @@
+The hunt for missing values
+Questions about processing missing values are integral to any machine learning interview. If you are provided with a dataset with missing values, not addressing them will likely skew your results and lower your model's accuracy.
+In this exercise, you'll practice the first pre-processing step by finding and exploring ways to handle missing values using pandas and numpy on a customer loan dataset.
+The dataset, which you'll use for many of the exercises in this course, is saved to your workspace as loan_data.
+
+This is where you are in the pipeline:
+import, pre-process data
+
+
+
+Print out the features of loan_data along with the number of missing values.
+In [1]: loan_data.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 88910 entries, 0 to 88909
+Data columns (total 17 columns):
+Loan Status                     88910 non-null object
+Current Loan Amount             88910 non-null int64
+Term                            88910 non-null object
+Credit Score                    67572 non-null float64
+Years in current job            88910 non-null float64
+Home Ownership                  88910 non-null object
+Annual Income                   67572 non-null float64
+Purpose                         88910 non-null object
+Monthly Debt                    88910 non-null float64
+Years of Credit History         88910 non-null float64
+Months since last delinquent    40404 non-null float64
+Number of Open Accounts         88910 non-null int64
+Number of Credit Problems       88910 non-null int64
+Current Credit Balance          88910 non-null int64
+Maximum Open Credit             88910 non-null int64
+Bankruptcies                    88718 non-null float64
+Tax Liens                       88902 non-null float64
+dtypes: float64(8), int64(5), object(4)
+memory usage: 11.5+ MB
+
+
+
+# Import modules
+import numpy as np
+import pandas as pd
+
+# Print missing values
+print(loan_data.isna().sum())
+
+
+
+
+
+
+
+Drop the rows with missing values and print the percentage of rows remaining.
+# Drop rows with missing values
+dropNArows = loan_data.dropna(axis=0)
+
+# Print percentage of rows remaining
+print(dropNArows.shape[0]/loan_data.shape[0] * 100)
+
+<script.py> output:
+    34.347092565515695
+    
+    
+    
+    
+    
+    
+    
+Drop the columns with missing values and print the percentage of columns remaining.
+# Drop columns with missing values
+dropNAcols = loan_data.dropna(axis=1)
+
+# Print percentage of columns remaining
+print(dropNAcols.shape[1]/loan_data.shape[1] * 100)
+
+<script.py> output:
+    70.58823529411765
+    
+    
+    
+
+
+Impute loan_data's missing values with 0 into loan_data_filled
+Compare 'Credit Score' using .describe() before imputation using loan_data and after using loan_data_filled.
+
+# Fill missing values with zero
+loan_data_filled = loan_data.fillna(0)
+
+# Examine 'Credit Score' before
+print(loan_data['Credit Score'].describe())
+
+# Examine 'Credit Score' after
+print(loan_data_filled['Credit Score'].describe())
+
+
+<script.py> output:
+    count    67572.000000
+    mean       721.601951
+    std         27.427709
+    min        585.000000
+    25%        710.000000
+    50%        730.000000
+    75%        741.000000
+    max        751.000000
+    Name: Credit Score, dtype: float64
+
+
+
+    count    88910.000000
+    mean       548.420729
+    std        309.109970
+    min          0.000000
+    25%        632.000000
+    50%        719.000000
+    75%        739.000000
+    max        751.000000
+    Name: Credit Score, dtype: float64
+
+Great work! The important thing to notice here is that removing rows or columns in this case reduces the dataset way too much to be useful. In the next exercises, you'll examine why imputing might be an improvement with this dataset.
+
