@@ -1,0 +1,166 @@
+Simple imputation
+As you saw in the last exercise, deleting data can reduce your dataset by too much. In an interview context, this can lead to biased results of your machine learning model.
+A more dynamic way of handling missing values is by imputing them. There are a variety of ways of doing this in python, but in this exercise you will be using the SimpleImputer() function from the sklearn.impute module on loan_data.
+You will then use pandas and numpy to convert the imputed dataset into a DataFrame.
+
+Note that 2 steps are now added to the pipeline:
+Instantiate and Fit
+
+
+
+Subset loan_data's numeric columns and assign them to numeric_cols.
+# Import imputer module
+from sklearn.impute import SimpleImputer
+
+# Subset numeric features: numeric_cols
+numeric_cols = loan_data.select_dtypes(include=[np.number])
+
+
+
+
+
+
+
+
+
+Instantiate a simple imputation object with a mean imputation strategy.
+Fit and transform the data.
+# Import imputer module
+from sklearn.impute import SimpleImputer
+
+# Subset numeric features: numeric_cols
+numeric_cols = loan_data.select_dtypes(include=[np.number])
+
+# Impute with mean
+imp_mean = SimpleImputer(strategy='mean')
+loans_imp_mean = imp_mean.fit_transform(numeric_cols)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Convert the returned array back to a DataFrame.
+In [5]: numeric_cols
+Out[5]: 
+       Current Loan Amount  Credit Score  Years in current job  Annual Income  Monthly Debt  ...  Number of Credit Problems  Current Credit Balance  Maximum Open Credit  Bankruptcies  Tax Liens
+0                    12232         728.0                   1.0        46643.0        777.39  ...                          0                    6762                 7946           0.0        0.0
+1                    25014         733.0                  10.0        81099.0        892.09  ...                          0                   35706                77961           0.0        0.0
+...
+[88910 rows x 13 columns]
+
+In [6]: imp_mean
+Out[6]: 
+SimpleImputer(add_indicator=False, copy=True, fill_value=None,
+              missing_values=nan, strategy='mean', verbose=0)
+
+In [7]: loans_imp_mean
+Out[7]: 
+array([[1.2232e+04, 7.2800e+02, 1.0000e+00, ..., 7.9460e+03, 0.0000e+00,
+        0.0000e+00],
+       [2.5014e+04, 7.3300e+02, 1.0000e+01, ..., 7.7961e+04, 0.0000e+00,
+        0.0000e+00],
+       [1.6117e+04, 7.2400e+02, 9.0000e+00, ..., 1.4815e+04, 1.0000e+00,
+        0.0000e+00],
+       ...,
+       [2.4394e+04, 7.4600e+02, 5.0000e-01, ..., 5.3374e+04, 0.0000e+00,
+        0.0000e+00],
+       [5.0300e+03, 7.2200e+02, 5.0000e-01, ..., 1.8422e+04, 0.0000e+00,
+        0.0000e+00],
+       [1.8446e+04, 7.1800e+02, 6.0000e+00, ..., 2.1124e+04, 0.0000e+00,
+        1.0000e+00]])
+
+
+
+# Import imputer module
+from sklearn.impute import SimpleImputer
+
+# Subset numeric features: numeric_cols
+numeric_cols = loan_data.select_dtypes(include=[np.number])
+
+# Impute with mean
+imp_mean = SimpleImputer(strategy='mean')
+loans_imp_mean = imp_mean.fit_transform(numeric_cols)
+
+# Convert returned array to DataFrame
+loans_imp_meanDF = pd.DataFrame(loans_imp_mean, columns=numeric_cols.columns)
+
+
+
+In [8]: numeric_cols.columns
+Out[8]: 
+Index(['Current Loan Amount', 'Credit Score', 'Years in current job', 'Annual Income', 'Monthly Debt', 'Years of Credit History', 'Months since last delinquent', 'Number of Open Accounts',
+       'Number of Credit Problems', 'Current Credit Balance', 'Maximum Open Credit', 'Bankruptcies', 'Tax Liens'],
+      dtype='object')
+
+In [9]: loan_data.columns
+Out[9]: 
+Index(['Loan Status', 'Current Loan Amount', 'Term', 'Credit Score', 'Years in current job', 'Home Ownership', 'Annual Income', 'Purpose', 'Monthly Debt', 'Years of Credit History',
+       'Months since last delinquent', 'Number of Open Accounts', 'Number of Credit Problems', 'Current Credit Balance', 'Maximum Open Credit', 'Bankruptcies', 'Tax Liens'],
+      dtype='object')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Print the imputed DataFrame's information using the .info() function to check for missing values.
+# Import imputer module
+from sklearn.impute import SimpleImputer
+
+# Subset numeric features: numeric_cols
+numeric_cols = loan_data.select_dtypes(include=[np.number])
+
+# Impute with mean
+imp_mean = SimpleImputer(strategy='mean')
+loans_imp_mean = imp_mean.fit_transform(numeric_cols)
+
+# Convert returned array to DataFrame
+loans_imp_meanDF = pd.DataFrame(loans_imp_mean, columns=numeric_cols.columns)
+
+# Check the DataFrame's info
+print(loans_imp_meanDF.info())
+
+<script.py> output:
+    <class 'pandas.core.frame.DataFrame'>
+    RangeIndex: 88910 entries, 0 to 88909
+    Data columns (total 13 columns):
+    Current Loan Amount             88910 non-null float64
+    Credit Score                    88910 non-null float64
+    Years in current job            88910 non-null float64
+    Annual Income                   88910 non-null float64
+    Monthly Debt                    88910 non-null float64
+    Years of Credit History         88910 non-null float64
+    Months since last delinquent    88910 non-null float64
+    Number of Open Accounts         88910 non-null float64
+    Number of Credit Problems       88910 non-null float64
+    Current Credit Balance          88910 non-null float64
+    Maximum Open Credit             88910 non-null float64
+    Bankruptcies                    88910 non-null float64
+    Tax Liens                       88910 non-null float64
+    dtypes: float64(13)
+    memory usage: 8.8 MB
+    None
+
+
+Amazing work! You can cookie cutter the exercise code and just set the strategy keyword to 'median' to impute the median or 'most_frequent' to impute the mode, etc. Let's check out the last exercise in this lesson!
+
