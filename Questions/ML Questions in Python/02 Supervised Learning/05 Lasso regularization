@@ -1,0 +1,75 @@
+Lasso regularization
+In the previous lesson, you covered an important aspect of machine learning interview questions by practicing various feature selection techniques.
+In this exercise, you will build on your knowledge of feature selection and perform all the steps in the machine learning pipeline by trying out Lasso Regularization.
+All relevant packages have been imported for you, as well as the feature matrix X and target variable y. You've come a long way!
+You're now performing all of the steps in the machine learning pipeline - importing modules, preprocessing steps, instantiating estimators, train/test split, cross validating, tuning hyperparameters, then fitting, predicting and evaluating. You've come a long way!
+
+
+
+
+
+Import the functions needed for regular and cross-validated Lasso Regression, as well as mean squared error.
+# Import modules
+from sklearn.linear_model import Lasso, LassoCV
+from sklearn.metrics import mean_squared_error
+
+
+
+
+
+
+Split your data into training and testing data with 30% test size.
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=123, test_size=0.3)
+
+
+
+
+
+
+
+Instantiate a cross-validated lasso regression model setting 10-fold cross-validation and 10000 iterations, then fit it to your training data.
+# Import modules
+from sklearn.linear_model import Lasso, LassoCV
+from sklearn.metrics import mean_squared_error
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=123, test_size=0.3)
+
+# Instantiate cross-validated lasso, fit
+lasso_cv = LassoCV(alphas=None, cv=10, max_iter=10000)
+lasso_cv.fit(X_train, y_train) 
+
+
+
+
+
+
+
+
+
+Instantiate a lasso estimator passing the best alpha value from lasso_cv.
+Fit the model and print the mean squared error of your predictions.
+
+# Import modules
+from sklearn.linear_model import Lasso, LassoCV
+from sklearn.metrics import mean_squared_error
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=123, test_size=0.3)
+
+# Instantiate cross-validated lasso, fit
+lasso_cv = LassoCV(alphas=None, cv=10, max_iter=10000)
+lasso_cv.fit(X_train, y_train)
+
+# Instantiate lasso, fit, predict and print MSE
+lasso = Lasso(alpha = lasso_cv.alpha_)
+lasso.fit(X_train, y_train)
+print(mean_squared_error(y_true=y_test, y_pred=lasso.predict(X_test)))
+
+
+<script.py> output:
+    2924.5859832897386
+
+Awesome! Keep in mind the MSE of 2924, which is the average error using cross-validated lasso regression. Let's see if it can be improved or not by practicing cross-validated ridge regression!
+
