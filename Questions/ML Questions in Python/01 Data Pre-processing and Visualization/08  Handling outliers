@@ -1,0 +1,220 @@
+Handling outliers
+In the last exercise, you learned how visualizing outliers could come in handy in a machine learning interview. Another convenient way for handling outliers is by calculating the Z-score which gives a threshold for outliers approximately +/-3 standard deviations away from the mean.
+In this exercise, you will use the scipy.stats module to calculate the Z-score using the stats.zscore() function and the mstats.winsorize() function to replace outliers using a technique called Winsorizing.
+Recall from the video lesson that those points above and/or below 1.5 times the IQR should be suspected as possible outliers. For the last step in this exercise, that value is 2120.
+The relevant packages have been imported for you, and loan_data's numeric and categorical columns have been subset and saved as numeric_cols and categoric_cols, respectively.
+
+
+
+
+
+Create an index of rows to keep for absolute z-scores less than 3 on the numeric columns and use it to index and concatenate subsets.
+# Print: before dropping
+print(numeric_cols.mean())
+print(numeric_cols.median())
+print(numeric_cols.max())
+
+
+<script.py> output:
+    Current Loan Amount             11937.624913
+    Credit Score                      721.198303
+    Years in current job                5.721263
+    Annual Income                   72749.391817
+    Monthly Debt                      963.102059
+    Years of Credit History            18.315313
+    Months since last delinquent       35.576659
+    Number of Open Accounts            11.110348
+    Number of Credit Problems           0.160477
+    Current Credit Balance          15435.932752
+    Maximum Open Credit             33568.124339
+    Bankruptcies                        0.112488
+    Tax Liens                           0.028221
+    dtype: float64
+    
+    
+    Current Loan Amount             10201.000000
+    Credit Score                      725.000000
+    Years in current job                6.000000
+    Annual Income                   64168.000000
+    Monthly Debt                      843.925000
+    Years of Credit History            17.000000
+    Months since last delinquent       35.663021
+    Number of Open Accounts            10.000000
+    Number of Credit Problems           0.000000
+    Current Credit Balance          11039.000000
+    Maximum Open Credit             21780.500000
+    Bankruptcies                        0.000000
+    Tax Liens                           0.000000
+    dtype: float64
+    
+    
+    Current Loan Amount             3.587500e+04
+    Credit Score                    7.561877e+02
+    Years in current job            1.000000e+01
+    Annual Income                   8.713547e+06
+    Monthly Debt                    2.293912e+04
+    Years of Credit History         7.050000e+01
+    Months since last delinquent    1.760000e+02
+    Number of Open Accounts         7.600000e+01
+    Number of Credit Problems       1.500000e+01
+    Current Credit Balance          1.730472e+06
+    Maximum Open Credit             6.998809e+07
+    Bankruptcies                    7.000000e+00
+    Tax Liens                       1.500000e+01
+    dtype: float64
+    
+    
+    
+    
+    
+    
+#https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.zscore.html
+# Create index of rows to keep
+idx = (np.abs(stats.zscore(numeric_cols)) < 3).all(axis=1)
+
+# Concatenate numeric and categoric subsets
+ld_out_drop = pd.concat([numeric_cols.loc[idx], categoric_cols.loc[idx]], axis=1)
+
+# Print: after dropping
+print(ld_out_drop.mean())
+print(ld_out_drop.median())
+print(ld_out_drop.max())
+
+<script.py> output:
+    Current Loan Amount             11623.387031
+    Credit Score                      723.253084
+    Years in current job                5.704660
+    Annual Income                   68503.602998
+    Monthly Debt                      907.364200
+    Years of Credit History            17.861675
+    Months since last delinquent       35.643633
+    Number of Open Accounts            10.819309
+    Number of Credit Problems           0.111294
+    Current Credit Balance          13779.543486
+    Maximum Open Credit             27561.576801
+    Bankruptcies                        0.100024
+    Tax Liens                           0.000002
+    dtype: float64
+    
+    
+    Current Loan Amount             10127.000000
+    Credit Score                      725.267101
+    Years in current job                6.000000
+    Annual Income                   62775.000000
+    Monthly Debt                      821.385000
+    Years of Credit History            16.800000
+    Months since last delinquent       35.777246
+    Number of Open Accounts            10.000000
+    Number of Credit Problems           0.000000
+    Current Credit Balance          10804.500000
+    Maximum Open Credit             21336.500000
+    Bankruptcies                        0.000000
+    Tax Liens                           0.000000
+    dtype: float64
+    
+    
+    Current Loan Amount              35875.000000
+    Credit Score                       751.000000
+    Years in current job                10.000000
+    Annual Income                   231334.000000
+    Monthly Debt                      2875.310000
+    Years of Credit History             39.400000
+    Months since last delinquent        81.000000
+    Number of Open Accounts             26.000000
+    Number of Credit Problems            1.000000
+    Current Credit Balance           74407.000000
+    Maximum Open Credit             816326.000000
+    Bankruptcies                         1.000000
+    Tax Liens                            0.242268
+    dtype: float64
+    
+    
+
+
+
+
+
+
+
+
+
+Winsorize 'Monthly Debt' with 5% upper and lower limits and print the mean, median and max before and after.
+# Print: before winsorize
+print((loan_data['Monthly Debt']).mean())
+print((loan_data['Monthly Debt']).median())
+print((loan_data['Monthly Debt']).max())
+
+# Winsorize numeric columns
+debt_win = mstats.winsorize(loan_data['Monthly Debt'], limits=[0.05, 0.05])
+
+# Convert to DataFrame, reassign column name
+debt_out = pd.DataFrame(debt_win, columns=['Monthly Debt'])
+
+# Print: after winsorize
+print(debt_out.mean())
+print(debt_out.median())
+print(debt_out.max())
+
+
+<script.py> output:
+    963.1020592734226
+    843.925
+    22939.12
+    
+    Monthly Debt    935.371257
+    dtype: float64
+    Monthly Debt    843.925
+    dtype: float64
+    Monthly Debt    2115.52
+    dtype: float64
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Find the median of the values of Monthly Debt that are lower than 2120 and replace outliers with it.
+# Print: before replace with median
+print((loan_data['Monthly Debt']).mean())
+print((loan_data['Monthly Debt']).median())
+print((loan_data['Monthly Debt']).max())
+
+
+#https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.loc.html
+#Conditional that returns a boolean Series with column labels specified
+#df.loc[df['shield'] > 6, ['max_speed']]
+#            max_speed
+#sidewinder          7
+#df.loc[expresssion, ['colName']]
+#df.loc[expresssion, ['colName']].median()
+
+# Find median
+median = loan_data.loc[loan_data['Monthly Debt'] < 2120, 'Monthly Debt'].median()
+loan_data['Monthly Debt'] = np.where(loan_data['Monthly Debt'] > 2120, median, loan_data['Monthly Debt'])
+
+print((loan_data['Monthly Debt']).mean())
+print((loan_data['Monthly Debt']).median())
+print((loan_data['Monthly Debt']).max())
+
+
+<script.py> output:
+    963.1020592734226
+    843.925
+    22939.12
+    866.8290722078505
+    811.51
+    2119.72
+
+
+Great work! Notice how the median didn't change when you dropped or winsorized, but it did when you replaced outliers with the median in the last step. This is because only the right tail outliers got replaced causing the median to shift!
+
