@@ -1,0 +1,86 @@
+Z-score standardization
+In the last exercise, you calculated the Z-score to address outliers. In a machine learning interview, another question might be where else Z-scores are used. They are often used for scaling your data prior to creating a model.
+In this exercise you'll use a function from sklearn.preprocessing that was introduced in the video lesson to standardize the numeric feature columns in the loan_data dataset. Recall that this scales the data so that it has a mean of 0 and standard deviation of 1.
+The sklearn.preprocessing module has already been imported for you.
+
+Pipeline snapshot:
+instantiate > fit
+
+
+
+Create a subset of the numeric and categorical columns in loan_data.
+# Subset features
+numeric_cols = loan_data.select_dtypes(include=[np.number])
+categoric_cols = loan_data.select_dtypes(include=['object'])
+
+
+
+
+
+
+Instantiate a standard scaler object and assign it to scaler.
+# Subset features
+numeric_cols = loan_data.select_dtypes(include=[np.number])
+categoric_cols = loan_data.select_dtypes(include=[object])
+
+# Instantiate
+scaler = StandardScaler()
+
+
+
+
+
+
+
+
+Fit and transform the relevant columns with a call to the appropriate method, then convert the returned object back to a DataFrame.
+# Subset features
+numeric_cols = loan_data.select_dtypes(include=[np.number])
+categoric_cols = loan_data.select_dtypes(include=[object])
+
+# Instantiate
+scaler = StandardScaler()
+
+# Fit and transform, convert to DF
+numeric_cols_scaled = scaler.fit_transform(numeric_cols)
+numeric_cols_scaledDF = pd.DataFrame(numeric_cols_scaled, columns=numeric_cols.columns)
+
+
+
+
+
+
+
+
+
+Concatenate the categorical and scaled numeric columns.
+# Subset features
+numeric_cols = loan_data.select_dtypes(include=[np.number])
+categoric_cols = loan_data.select_dtypes(include=[object])
+
+# Instantiate
+scaler = StandardScaler()
+
+# Fit and transform, convert to DF
+numeric_cols_scaled = scaler.fit_transform(numeric_cols)
+numeric_cols_scaledDF = pd.DataFrame(numeric_cols_scaled, columns=numeric_cols.columns)
+
+# Concatenate categoric columns to scaled numeric columns
+final_DF = pd.concat([numeric_cols_scaledDF, categoric_cols], axis=1)
+print(final_DF.head())
+
+
+<script.py> output:
+       Current Loan Amount  Credit Score  Years in current job  Annual Income  Monthly Debt  ...  DTI Ratio  Loan Status        Term  Home Ownership            Purpose
+    0             0.032520      0.247199             -1.312259      -0.538958     -0.291924  ...   0.005854  Charged Off  Short Term            Rent  DebtConsolidation
+    1             1.444549      0.429818              1.189261       0.178414     -0.111538  ...  -0.013464  Charged Off   Long Term        Mortgage  DebtConsolidation
+    2             0.461696      0.101105              0.911314      -0.251747      0.440600  ...   0.019206  Charged Off  Short Term        Mortgage   HomeImprovements
+    3            -0.024483      0.685483             -0.756366      -0.798624      0.043751  ...   0.047898  Charged Off  Short Term            Rent  DebtConsolidation
+    4            -0.237359     -1.286794              1.189261      -0.531463     -0.720145  ...  -0.014430  Charged Off   Long Term        Mortgage   HomeImprovements
+    
+    [5 rows x 18 columns]
+
+
+Amazing work! If you want to try your hand at scaling the data so that it falls between 0 and 1, simply import MinMaxScaler from sklearn.preprocessing instead of StandardScaler and follow these exact steps. That wraps up this chapter on data preprocessing steps. See you in Chapter 2 for Supervised Learning!
+
+    
