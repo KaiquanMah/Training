@@ -1,0 +1,64 @@
+Ridge regularization
+In the last exercise you practiced performing lasso regularization. If you're asked about regularization techniques in a machine learning interview, know what differentiates the 2 norms. Lasso uses the L1 norm corresponding to the penalty parameter and the absolute value of the coefficients. Ridge regression performs L2 regularization, also known as L2-norm, which adds a penalty term to ordinary least squares using the penalty parameter and the sum of the squared coefficients.
+For this exercise, you'll practice regularization with Ridge on the diabetes DataFrame. The feature matrix and target array are saved to your workspace as X and y, respectively.
+Already imported for you are mean_squared_error from sklearn.metrics and train_test_split from sklearn.model_selection.
+
+
+
+
+
+
+Import the functions needed for regular and cross-validated Ridge Regression, as well as mean squared error.
+# Import modules
+from sklearn.linear_model import Ridge, RidgeCV
+from sklearn.metrics import mean_squared_error
+
+
+
+
+
+
+Split your data into training and testing data with 30% test size.
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=123, test_size=0.3)
+
+
+
+
+
+
+
+Instantiate a cross-validated ridge regression model object setting alphas to a list of 13 log scale values from -6 to 6 using np.logspace().
+Fit it to your training data.
+# Instantiate cross-validated ridge, fit
+ridge_cv = RidgeCV(alphas=np.logspace(-6, 6, 13))
+ridge_cv.fit(X_train, y_train)
+
+In [1]: np.logspace(-6, 6, 13)
+Out[1]: 
+array([1.e-06, 1.e-05, 1.e-04, 1.e-03, 1.e-02, 1.e-01, 1.e+00, 1.e+01,
+       1.e+02, 1.e+03, 1.e+04, 1.e+05, 1.e+06])
+       
+
+
+
+
+
+
+
+
+
+Instantiate a ridge estimator passing the best alpha value from ridge_cv.
+Fit the model and print the mean squared error of your predictions.
+# Instantiate ridge, fit, predict and print MSE
+ridge = Ridge(alpha = ridge_cv.alpha_)
+ridge.fit(X_train, y_train)
+print(mean_squared_error(y_true=y_test, y_pred=ridge.predict(X_test)))
+
+
+<script.py> output:
+    2970.874355984401
+
+
+Great job with regularization functions! If you want to try out ElasticNet on your own, you can check out its documentation here!
+https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNetCV.html
