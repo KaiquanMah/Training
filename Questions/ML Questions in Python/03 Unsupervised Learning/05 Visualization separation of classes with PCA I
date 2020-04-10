@@ -1,0 +1,96 @@
+Visualization separation of classes with PCA I
+A common question you may receive in a machine learning interview is visualizing dimensionality after PCA. In this exercise, you will do just that by plotting the first 2 principal components of loan_data in order to visualize the class separation between both components on whether the loan status has been fully paid or charged off.
+The loan_data dataset has been scaled and one-hot encoded, meaning categorical variables were turned into binary indicators, since features should be on the same scale as well as numeric prior to PCA.
+A PCA model with 2 PCs and setting up a plot with x and y labels and title has already been taken care of for you. You'll use a DataFrame called loan_data_PCA in the exercises. The possible values for the target variable Loan Status are 0 and 1. You'll be plotting PC1 on the x-axis and PC2 on the y-axis.
+Already imported for you are matplotlib.pyplot as plt, seaborn as sns, PCA from sklearn.decomposition.
+
+
+   principal component 1  principal component 2  Loan Status
+0               1.672383               0.074079            1
+1               1.092726              -0.233041            1
+2              -1.916015              -1.385713            1
+3               0.288960               0.434018            1
+4               0.063865              -0.124051            0
+
+
+
+
+In [1]: loan_data_PCA
+Out[1]: 
+     principal component 1  principal component 2  Loan Status
+0                 1.672383               0.074079            1
+1                 1.092726              -0.233041            1
+2                -1.916015              -1.385713            1
+3                 0.288960               0.434018            1
+...
+997              -1.149810              -1.084530            1
+998              -0.950817              -0.754095            1
+999               1.134114               0.235801            0
+
+[1000 rows x 3 columns]
+
+
+
+
+
+Assign the target variable values to the list targets.
+Pass the lists just created to the zip() function inside the for loop.
+Pass the instances where Loan Status is equal to target to indicesToKeep.
+targets = [0, 1]
+colors = ['r', 'b']
+
+# For loop to create plot
+for target, color in zip(targets, colors):
+    indicesToKeep = loan_data_PCA['Loan Status'] == target
+
+
+
+
+
+
+
+
+
+
+
+Pass the appropriate object as the rows argument to loan_data_PCA.loc[] which keeps the data points on the x-axis equal to the target.
+Pass the appropriate object as the column argument to loan_data_PCA.loc[]which keeps the data points on the y-axis equal to PC2.
+targets = [0, 1]
+colors = ['r', 'b']
+
+# For loop to create plot
+for target, color in zip(targets, colors):
+    indicesToKeep = loan_data_PCA['Loan Status'] == target
+    ax.scatter(loan_data_PCA.loc[indicesToKeep, 'principal component 1']
+               , loan_data_PCA.loc[indicesToKeep, 'principal component 2']
+               , c = color
+               , s = 50)
+
+
+
+
+
+
+
+
+Add a legend to the plot to label the different classes.
+targets = [0, 1]
+colors = ['r', 'b']
+
+# For loop to create plot
+for target, color in zip(targets,colors):
+    indicesToKeep = loan_data_PCA['Loan Status'] == target
+    ax.scatter(loan_data_PCA.loc[indicesToKeep, 'principal component 1']
+               , loan_data_PCA.loc[indicesToKeep, 'principal component 2']
+               , c = color
+               , s = 50)
+
+
+# Legend    
+ax.legend(targets)
+ax.grid()
+plt.show()
+
+Wow, nice job! It looks like there's not great separation between the classes Fully Paid and Charged Off. 
+Let's create a few more visualizations using loan_data to perhaps explain more...
+
