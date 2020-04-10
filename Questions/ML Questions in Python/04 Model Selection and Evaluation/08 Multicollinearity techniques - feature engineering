@@ -1,0 +1,141 @@
+Multicollinearity techniques - feature engineering
+Multicollinearity is a common issue that might affect your performance in any machine learning context. Knowing how to discuss this small detail could take your explanation of modeling from good to great and really set you apart in an interview.
+In this exercise, you'll practice creating a baseline model using Linear Regression on the diabetes dataset and explore some of the output metrics. Then you'll practice techniques to visually explore the correlation between the independent variables before finally perform feature engineering on 2 variables that are highly correlated.
+For the first two steps, use X_train, X_test, y_train, and y_test which have been imported to your workspace.
+Additionally, all relevant packages have been imported for you: pandas as pd, train_test_split from sklearn.model_selection, LinearRegression from sklearn.linear_model, mean_squared_error and r2_score from sklearn.metrics, matplotlib.pyplot as plt and seaborn as sns.
+
+
+Instantiate, fit, and predict a Linear Regression.
+Print the model coefficients, MSE, and r-squared.
+
+# Instantiate, fit, predict
+lin_mod = LinearRegression()
+lin_mod.fit(X_train, y_train)
+y_pred = lin_mod.predict(X_test)
+
+# Coefficient estimates
+print('Coefficients: \n', lin_mod.coef_)
+
+# Mean squared error
+print("Mean squared error: %.2f"
+      % mean_squared_error(y_test, y_pred))
+
+# Explained variance score
+print('R_squared score: %.2f' % r2_score(y_test, y_pred))
+
+<script.py> output:
+    Coefficients: 
+     [  10.45384922 -261.16601105  538.84541221  280.72544466 -855.21447839
+      472.17305267  166.51881384  309.88763264  684.0489522   102.37723262]
+    Mean squared error: 2926.80
+    R_squared score: 0.51
+    
+    
+    
+    
+    
+
+
+
+
+Create a correlation matrix, plot it to a heatmap.
+Print the matrix to explore the independent variable relationships.
+# Correlation matrix
+diab_corr = diabetes.corr()
+
+# Generate correlation heatmap
+ax = sns.heatmap(diab_corr, center=0, cmap=sns.diverging_palette(20,220, n=256), square=True)
+ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+plt.show()
+
+# Print correlations
+print(diab_corr)
+
+<script.py> output:
+                      age       sex       bmi        bp        s1  ...        s3        s4        s5        s6  progression
+    age          1.000000  0.173737  0.185085  0.335427  0.260061  ... -0.075181  0.203841  0.270777  0.301731     0.187889
+    sex          0.173737  1.000000  0.088161  0.241013  0.035277  ... -0.379090  0.332115  0.149918  0.208133     0.043062
+    bmi          0.185085  0.088161  1.000000  0.395415  0.249777  ... -0.366811  0.413807  0.446159  0.388680     0.586450
+    bp           0.335427  0.241013  0.395415  1.000000  0.242470  ... -0.178761  0.257653  0.393478  0.390429     0.441484
+    s1           0.260061  0.035277  0.249777  0.242470  1.000000  ...  0.051519  0.542207  0.515501  0.325717     0.212022
+    s2           0.219243  0.142637  0.261170  0.185558  0.896663  ... -0.196455  0.659817  0.318353  0.290600     0.174054
+    s3          -0.075181 -0.379090 -0.366811 -0.178761  0.051519  ...  1.000000 -0.738493 -0.398577 -0.273697    -0.394789
+    s4           0.203841  0.332115  0.413807  0.257653  0.542207  ... -0.738493  1.000000  0.617857  0.417212     0.430453
+    s5           0.270777  0.149918  0.446159  0.393478  0.515501  ... -0.398577  0.617857  1.000000  0.464670     0.565883
+    s6           0.301731  0.208133  0.388680  0.390429  0.325717  ... -0.273697  0.417212  0.464670  1.000000     0.382483
+    progression  0.187889  0.043062  0.586450  0.441484  0.212022  ... -0.394789  0.430453  0.565883  0.382483     1.000000
+    
+    [11 rows x 11 columns]
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+Engineer a new feature by combining s1 and s2 from diabetes, then remove them.
+Split your data into training and testing data with 30% test size and print the column names.
+# Feature engineering
+# create an interaction term between s1 and s2 which are multicollinear features
+diabetes['s1_s2'] = diabetes['s1'] * diabetes['s2']
+# remember to drop the original s1 and s2 features
+diabetes = diabetes.drop(['s1','s2'], axis=1)
+
+
+# Print variable names
+print(diabetes.columns)
+
+# Train/test split
+X2 = diabetes.drop('progression', axis=1)
+y2 = diabetes['progression']
+X_train2, X_test2, y_train2, y_test2 = train_test_split(X2, y2, test_size=0.3, random_state=123)
+
+<script.py> output:
+    Index(['age', 'sex', 'bmi', 'bp', 's3', 's4', 's5', 's6', 'progression', 's1_s2'], dtype='object')
+
+
+
+
+
+
+
+
+
+
+
+Instantiate, fit, and predict a Linear Regression.
+Print the model coefficients, MSE, and r-squared.
+# Instantiate, fit, predict
+lin_mod2 = LinearRegression()
+lin_mod2.fit(X_train2, y_train2)
+y_pred2 = lin_mod2.predict(X_test2)
+
+# Coefficient estimates
+print('Coefficients: \n', lin_mod2.coef_)
+
+# Mean squared error
+print("Mean squared error: %.2f"
+      % mean_squared_error(y_test2, y_pred2))
+
+# Explained variance score
+print('R_squared score: %.2f' % r2_score(y_test2, y_pred2))
+
+
+
+
+<script.py> output:
+    Coefficients: 
+     [  -2.33325625 -250.45569362  541.16674251  260.86592129 -338.13983816
+      -47.01999461  430.98561453   94.21041896 -283.69973876]
+    Mean squared error: 2910.42
+    R_squared score: 0.51
+    
+    
+    
+    That's great! Now you know how to get metrics from your baseline model, how to explore relationships visually, and how to use feature engineering to reduce multicollinearity. You got the same R-squared score, but the MSE was slightly lower! Trying different combinations of feature engineering would likely continue to improve the model.
+
