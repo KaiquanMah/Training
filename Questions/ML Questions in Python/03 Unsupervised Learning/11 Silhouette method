@@ -1,0 +1,59 @@
+Silhouette method
+In the last lesson, you got a taste of how different numbers of clusters affects the performance of your K-Means algorithm. This is especially poignant in the context of an interview, as the optimal number of clusters generates the best results.
+In this exercise, you will be using the silhouette_score() function from sklearn.metrics on K-Means algorithms ran on the diabetes DataFrame in order to perform the Silhouette method for finding the optimal number of clusters. Note you will be using euclidian distance when calculating the score as it ensures comparability between it and the Elbow method.
+The feature matrix X which you'll use to train the K-Means models has been created for you.
+You're at the same place in the pipeline as the last few exercises, but here you'll add predicting as well.
+
+
+
+
+
+Import the necessary modules to instantiate a K-means algorithm and get its silhouette score.
+# Import modules
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+
+
+Create the target matrix X by dropping the target variable progression.
+# Feature matrix
+X = diabetes.drop("progression", axis=1)
+
+
+
+
+Instantiate, fit and predict a K-Means object for each number of clusters ranging from 2 to 8.
+Print the silhouette score for each iteration of clustering.
+# Import modules
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+# Feature matrix
+X = diabetes.drop("progression", axis=1)
+
+# For loop
+for n_clusters in range(2,9):
+    kmeans = KMeans(n_clusters=n_clusters)
+    # Fit and predict your k-Means object
+    preds = kmeans.fit_predict(X)
+    score = silhouette_score(X, preds, metric='euclidean')
+    print ("For n_clusters = {}, silhouette score is {})".format(n_clusters, score))
+    
+
+
+
+
+<script.py> output:
+    For n_clusters = 2, silhouette score is 0.23698717031681765)
+    For n_clusters = 3, silhouette score is 0.15350479626184943)
+    For n_clusters = 4, silhouette score is 0.13714946834664585)
+    For n_clusters = 5, silhouette score is 0.14796446910935762)
+    For n_clusters = 6, silhouette score is 0.14498040843162452)
+    For n_clusters = 7, silhouette score is 0.13739193328044544)
+    For n_clusters = 8, silhouette score is 0.14310703600306912)
+    
+    
+    
+    
+    Great job! So the highest silhouette score for the diabetes dataset is with n_clusters=2. Let's see what the elbow method says!
+
