@@ -1,0 +1,60 @@
+A forest of decision trees
+For this exercise, you'll practice using the bootstrapped Decision Tree, otherwise known as the Random Forest. As you did in the previous exercise, you'll then compare its accuracy to a model where you've tuned hyperparameters with cross-validation.
+This time, you'll tune an additional hyperparameter, max_features, which lets your model decide how many features to use. When it is not set specifically, then it defaults to auto. Something to keep in mind for an interview is that Decision Trees consider all features by default, whereas Random Forests usually consider the square root of the number of features.
+The feature matrix X, target label y, and train_test_split from sklearn.model_selection have been imported for you.
+
+
+
+
+
+
+Import the correct function for a random forest classifier and split the data into train and test sets.
+Instantiate a random forest classifier, fit, predict, and print accuracy.
+# Import modules
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=123)
+
+# Instantiate, Fit, Predict
+loans_rf = RandomForestClassifier() 
+loans_rf.fit(X_train, y_train)
+y_pred = loans_rf.predict(X_test)
+
+# Evaluation metric
+print("Random Forest Accuracy: {}".format(accuracy_score(y_test,y_pred)))
+
+<script.py> output:
+    Random Forest Accuracy: 0.6666666666666666
+
+
+
+
+
+
+
+
+
+
+
+Import the correct function to perform cross-validated grid search.
+Perform the same steps, this time while performing cross-validated grid-search.
+# Import modules
+from sklearn.model_selection import GridSearchCV
+
+# Create the hyperparameter grid
+param_grid = {"criterion": ["gini"], "min_samples_split": [2, 10, 20], 
+              "max_depth": [None, 2, 5, 10],"max_features": [10, 20, 30]}
+
+# Instantiate classifier and GridSearchCV, fit
+loans_rf = RandomForestClassifier()
+rf_cv = GridSearchCV(loans_rf, param_grid, cv=5)
+fit = rf_cv.fit(X_train, y_train)
+
+# Print the optimal parameters and best score
+print("Tuned Random Forest Parameter: {}".format(rf_cv.best_params_))
+print("Tuned Random Forest Accuracy: {}".format(rf_cv.best_score_))
+
+
+
