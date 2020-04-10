@@ -1,0 +1,139 @@
+Multicollinearity techniques - PCA
+In the last exercise you used feature engineering to combine the s1 and s2 independent variables as s1_s2 since they displayed the highest correlation in the diabetes dataset.
+In this exercise, you'll perform PCA on diabetes to remove multicollinearity before you apply Linear Regression to it. Then, you'll compare the output metrics to those from the last exercise. Finally, you'll visualize what the correlation matrix and heatmap of the dataset looks like since PCA completely removes multicollinearity.
+
+
+Import the necessary modules to perform PCA.
+Instantiate and fit.
+Transform train and test separately.
+# Import
+from sklearn.decomposition import PCA
+
+# Instantiate
+pca = PCA()
+
+# Fit on train
+pca.fit(X_train)
+
+# Transform train and test
+X_trainPCA = pca.transform(X_train)
+X_testPCA = pca.transform(X_test)
+
+
+
+
+
+
+
+
+
+
+Instantiate, fit, and predict a Linear Regression to PCA transformed dataset.
+Print the model coefficients, MSE, and r-squared.
+# Import
+from sklearn.linear_model import LinearRegression
+
+# Instantiate, fit, predict
+LinRegr = LinearRegression()
+LinRegr.fit(X_trainPCA, y_train)
+predictions = LinRegr.predict(X_testPCA)
+
+# The coefficients
+print('Coefficients: \n', LinRegr.coef_)
+
+# The mean squared error
+print("Mean squared error: %.2f" % mean_squared_error(y_test, predictions))
+
+# Explained variance score: 1 is perfect prediction
+print('Variance score: %.2f' % r2_score(y_test, predictions))
+
+
+
+#initially without training and testing on PCA features
+LinRegr.fit(X_train, y_train)
+predictions = LinRegr.predict(X_test)
+
+<script.py> output:
+    Coefficients: 
+     [  10.45384922 -261.16601105  538.84541221  280.72544466 -855.21447839
+      472.17305267  166.51881384  309.88763264  684.0489522   102.37723262]
+    Mean squared error: 2926.80
+    Variance score: 0.51
+
+
+
+#subsequently after training and testing on PCA features
+LinRegr.fit(X_trainPCA, y_train)
+predictions = LinRegr.predict(X_testPCA)
+
+<script.py> output:
+    Coefficients: 
+     [  431.83041038  -293.77173602   253.57573406   568.70922969
+       -67.51943277  -186.26488336    71.89012557    47.21891689
+        93.98511769 -1130.48023791]
+    Mean squared error: 2926.80
+    Variance score: 0.51
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Create a correlation matrix, plot it to a heatmap.
+Print the matrix to explore the independent variable relationships.
+
+#from part 1
+In [5]: type(X_trainPCA)
+Out[5]: numpy.ndarray
+
+#from this part, ie part 3
+In [6]: X_trainPCA = pd.DataFrame(X_trainPCA)
+In [7]: type(X_trainPCA)
+Out[7]: pandas.core.frame.DataFrame
+
+
+
+# Correlation matrix
+X_trainPCA = pd.DataFrame(X_trainPCA)
+diab_corrPCA = X_trainPCA.corr()
+
+# Generate correlation heatmap
+ax = sns.heatmap(diab_corrPCA, center=0, cmap=sns.diverging_palette(20,220, n=256), square=True)
+ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+plt.show()
+
+# Print correlations
+print(diab_corrPCA)
+
+
+
+
+<script.py> output:
+                  0             1             2             3             4             5             6             7             8             9
+    0  1.000000e+00 -5.045868e-16 -3.357358e-16 -1.979303e-16 -2.495304e-16 -7.673629e-17  7.037942e-17  4.087068e-16 -1.074300e-16  1.830966e-15
+    1 -5.045868e-16  1.000000e+00 -1.348179e-16  5.481519e-17 -2.228328e-16 -5.211723e-17  5.245019e-16 -7.732858e-17 -7.639241e-16  4.870315e-15
+    2 -3.357358e-16 -1.348179e-16  1.000000e+00 -1.758913e-16 -4.473454e-16 -1.957838e-16 -1.306125e-16  2.457505e-16  5.604254e-16 -1.313468e-15
+    3 -1.979303e-16  5.481519e-17 -1.758913e-16  1.000000e+00  3.066714e-16  3.211316e-16  3.082036e-16  2.003617e-16  5.962989e-16  1.862186e-16
+    4 -2.495304e-16 -2.228328e-16 -4.473454e-16  3.066714e-16  1.000000e+00 -1.538557e-16  1.830444e-16  1.410005e-16 -4.054128e-16 -4.052438e-16
+    5 -7.673629e-17 -5.211723e-17 -1.957838e-16  3.211316e-16 -1.538557e-16  1.000000e+00 -5.707807e-16  2.352196e-16 -6.197660e-16  1.608854e-16
+    6  7.037942e-17  5.245019e-16 -1.306125e-16  3.082036e-16  1.830444e-16 -5.707807e-16  1.000000e+00 -2.963897e-16  3.955505e-17  1.031708e-15
+    7  4.087068e-16 -7.732858e-17  2.457505e-16  2.003617e-16  1.410005e-16  2.352196e-16 -2.963897e-16  1.000000e+00  2.245661e-16  1.321532e-15
+    8 -1.074300e-16 -7.639241e-16  5.604254e-16  5.962989e-16 -4.054128e-16 -6.197660e-16  3.955505e-17  2.245661e-16  1.000000e+00 -1.067987e-15
+    9  1.830966e-15  4.870315e-15 -1.313468e-15  1.862186e-16 -4.052438e-16  1.608854e-16  1.031708e-15  1.321532e-15 -1.067987e-15  1.000000e+00
+    
+    
+    
+    
+Fantastic! This simple change, although it didn't improve your metrics, removed all of the multicollinearity in the diabetes dataset!
+
+    
+    
