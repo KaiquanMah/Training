@@ -1,0 +1,102 @@
+Visualization PCs with a scree plot
+In a machine learning interview, you may be asked what is the optimum number of features to keep. In this exercise you'll create a scree plot and a cumulative explained variance ratio plot of the principal components using PCA on loan_data. This will help inform the optimal number of PCs for training a more accurate ML model going forward.
+Since PCA is an unsupervised method, that means principal component analysis is performed on the X matrix having removed the target variable Loan Status from the dataset. Not setting n_components returns all the principal components from the trained model.
+
+
+
+Create a data matrix X, removing the target variable.
+Instantiate, fit and transform a PCA object that returns 10 PCs.
+# Remove target variable
+X = loan_data.drop('Loan Status', axis=1)
+
+# Instantiate
+pca = PCA(n_components=10)
+
+# Fit and transform
+principalComponents = pca.fit_transform(X)
+
+
+
+
+
+
+
+
+
+Create a DataFrame mapping Variance Explained to the explained variance ratio.
+Create a scree plot from pca_df setting your PCs on the x-axis and explained variance on the y-axis.
+In [1]: pca.explained_variance_ratio_
+Out[1]: 
+array([0.19089415, 0.14847562, 0.10137682, 0.09026473, 0.08305629,
+       0.06839962, 0.06211918, 0.05800661, 0.05436644, 0.03471682])
+       
+# List principal components names
+principal_components = ['PC1','PC2','PC3','PC4','PC5','PC6','PC7','PC8','PC9','PC10']
+
+# Create a DataFrame
+pca_df = pd.DataFrame({'Variance Explained': pca.explained_variance_ratio_,
+             'PC':principal_components})
+
+# Plot DataFrame
+sns.barplot(x='PC',y='Variance Explained', 
+           data=pca_df, color="c")
+plt.show()
+
+
+
+
+
+       
+
+Instantiate, fit and transform a PCA object not setting n_components.
+Print the variance explained ratio.
+# Instantiate, fit and transform
+pca2 = PCA()
+principalComponents2 = pca2.fit_transform(X)
+
+# Assign variance explained
+var = pca2.explained_variance_ratio_
+
+In [4]: var
+Out[4]: 
+array([1.90894149e-01, 1.48475624e-01, 1.01376820e-01, 9.02647255e-02,
+       8.30562885e-02, 6.83996173e-02, 6.21191786e-02, 5.80066099e-02,
+       5.43664369e-02, 3.47168181e-02, 2.40364389e-02, 2.02911879e-02,
+       1.93972624e-02, 1.65993683e-02, 1.06617271e-02, 5.52439963e-03,
+       5.31426375e-03, 2.26765288e-03, 1.21912598e-03, 8.79410666e-04,
+       7.86416889e-04, 6.30040786e-04, 5.29986150e-04, 1.01766388e-04,
+       8.46846612e-05, 3.76472329e-32, 1.02811075e-33, 1.02811075e-33,
+       1.02811075e-33, 1.02811075e-33])
+
+
+
+
+
+
+
+
+
+
+
+Assign the cumulative sum of the explained ratios from the previous step to cumulative_var.
+Plot the results.
+# Plot cumulative variance
+cumulative_var = np.cumsum(var)*100
+
+plt.plot(cumulative_var,
+         'k-o',
+         markerfacecolor='None',
+         markeredgecolor='k')
+plt.title('Principal Component Analysis',
+           fontsize=12)
+plt.xlabel("Principal Component",
+           fontsize=12)
+plt.ylabel("Cumulative Proportion of Variance Explained",
+           fontsize=12)
+plt.show()
+
+
+
+Interesting! The first 10 principal components explain 90% of the variance in loan_data. That's pretty good considering the original dataset has more than 30 features!
+
+
