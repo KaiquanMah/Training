@@ -1,0 +1,105 @@
+Logistic regression baseline classifier
+In the last 2 lessons, you learned how valuable feature selection is in the context of machine learning interviews. Another set of common questions you should expect in a machine learning interview pertain to feature engineering, and how they help improve model performance.
+In this exercise, you'll engineer a new feature on the loan_data dataset from Chapter 1, compare the accuracy score of Logistic Regression models on the dataset before and after feature engineering by comparing test labels with the predicted values of the target variable Loan Status.
+All relevant packages have been imported for you: matplotlib.pyplot as plt, seaborn as sns, LogisticRegression from sklearn.linear_model, train_test_split from sklearn.model_selection, and accuracy_score from sklearn.metrics.
+Feature engineering is considered a pre-processing step before modeling
+
+
+
+
+
+Fit and predict a Logistic Regression on loan_data with the target variable Loan Status as y and evaluate the trained model's accuracy score.
+# Create X matrix and y array
+X = loan_data.drop("Loan Status", axis=1)
+y = loan_data["Loan Status"]
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=123)
+
+# Instantiate
+logistic = LogisticRegression()
+
+# Fit
+logistic.fit(X_train, y_train)
+
+# Predict and print accuracy
+print(accuracy_score(y_true=y_test, y_pred=logistic.predict(X_test)))
+
+<script.py> output:
+    0.713643009785176
+    
+    
+    
+    
+    
+    
+Convert Annual Income to monthly, and derive the ratio of Monthly Debt to monthly_income and store it in dti_ratio.
+# Convert income: monthly_income
+monthly_income = loan_data["Annual Income"]/12
+
+# Make engineered feature, remove features used
+loan_data["dti_ratio"] = loan_data["Monthly Debt"]/monthly_income * 100
+loan_data = loan_data.drop(["Monthly Debt","Annual Income"], axis=1)
+
+
+
+
+
+
+
+
+Convert the target variable to numerical values and replace categorical features with dummy values.
+# Create dti_ratio variable
+monthly_income = loan_data["Annual Income"]/12
+loan_data["dti_ratio"] = loan_data["Monthly Debt"]/monthly_income * 100
+loan_data = loan_data.drop(["Monthly Debt","Annual Income"], axis=1)
+
+# Replace target variable levels
+loan_data["Loan Status"] = loan_data["Loan Status"].replace({'Fully Paid': 0, 
+                                            'Charged Off': 1})
+
+# One-hot encode categorical variables
+loan_data = pd.get_dummies(data=loan_data)
+
+# Print
+print(loan_data.head())
+
+<script.py> output:
+       Loan Status  Current Loan Amount  Credit Score  Years in current job  Years of Credit History  ...  Current Credit Balance  Maximum Open Credit  Bankruptcies  Tax Liens  dti_ratio
+    0            1                12232         728.0                   1.0                     2.89  ...                    6762                 7946           0.0        0.0  19.990138
+    1            1                25014         733.0                  10.0                     3.28  ...                   35706                77961           0.0        0.0  13.198683
+    2            1                16117         724.0                   9.0                     2.82  ...                   11275                14815           1.0        0.0  24.699692
+    3            1                11716         740.0                   3.0                     2.30  ...                    7009                43533           0.0        0.0  34.801440
+    4            1                 9789         686.0                  10.0                     2.82  ...                   16913                19553           1.0        0.0  12.867264
+    
+    [5 rows x 13 columns]
+
+
+
+
+
+Fit and predict a Logistic Regression on loans_dti and evaluate the trained model's accuracy score.
+# Create X matrix and y array
+X = loans_dti.drop("Loan Status", axis=1)
+y = loans_dti["Loan Status"]
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=123)
+
+# Instantiate
+logistic_dti = LogisticRegression()
+
+# Fit
+logistic_dti.fit(X_train, y_train)
+
+# Predict and print accuracy
+print(accuracy_score(y_true=y_test, y_pred=logistic_dti.predict(X_test)))
+
+<script.py> output:
+    0.7209333333333333
+
+
+Great job! Engineering features is a great way to increase the predictive accuracy of your models. 
+You've just seen how the accuracy went from a baseline LogisticRegression model with 71% accuracy to 72% using a feature you engineered. 
+In this case, it's not a huge improvement, so let's continue on with the next lesson where you'll learn how ensemble modeling can improve your models even more!
+
