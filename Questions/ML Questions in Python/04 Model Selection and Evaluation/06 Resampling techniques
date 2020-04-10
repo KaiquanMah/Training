@@ -1,0 +1,147 @@
+Resampling techniques
+In the last exercise, you saw how class imbalance can impact the results of your confusion matrix. In this exercise, you'll practice resampling techniques to explore the different results that alternative resampling styles can have on a dataset with class imbalance like that seen with loan_data. Using sklearn's resample() function, matching the number of rows in the majority class is called upsampling, while matching the number of rows in the minority class is called downsampling.
+You will create both an upsampled and downsampled version of the loan_data dataset, apply a logistic regression on both of them and then evaluate your performance. The training data and its labels that correspond to deny are subset to contain only the minority class and to approve that correspond to the majority.
+A train/test split testing object for making predictions has been saved to the workspace as X_test for your use in the exercises.
+
+
+
+In [1]: deny
+Out[1]: 
+       Current Loan Amount  Credit Score  Years in current job  Years of Credit History  Months since last delinquent  ...  Purpose_Other  Purpose_RenewableEnergyPurchase  Purpose_Vacation  \
+13544                 2.46         -1.83                 -0.48                     1.45                          0.07  ...              0                                0                 0   
+43999                 0.27          0.83                 -0.20                    -0.54                         -0.22  ...              0                                0                 0   
+48443                -0.76          0.25                 -1.45                    -0.09                          0.12  ...              0                                0                 0   
+...
+23766                 0.69         -2.78                  1.19                     0.52                         -0.20  ...              0                                0                 0   
+46203                -0.24          1.05                  0.36                     1.30                          1.11  ...              0                                0                 0   
+7763                  1.12          1.20                 -1.45                     0.05                          1.16  ...              0                                0                 0   
+
+       Purpose_Wedding  Loan Status  
+13544                0            0  
+43999                0            0  
+48443                0            0  
+...
+23766                0            0  
+46203                0            0  
+7763                 0            0  
+
+[9956 rows x 31 columns]
+
+
+
+
+
+In [2]: approve
+Out[2]: 
+       Current Loan Amount  Credit Score  Years in current job  Years of Credit History  Months since last delinquent  ...  Purpose_Other  Purpose_RenewableEnergyPurchase  Purpose_Vacation  \
+17325                 2.30         -0.64                  1.19                    -0.22                         -1.24  ...              1                                0                 0   
+49844                -0.45         -0.92                 -0.76                     0.17                          0.48  ...              0                                0                 0   
+16371                -0.64         -0.33                  0.36                    -1.52                          1.93  ...              0                                0                 0   
+...
+17730                 1.28          0.16                  1.19                     0.71                         -0.29  ...              1                                0                 0   
+28030                 0.80          0.69                  1.19                    -0.36                          0.84  ...              0                                0                 0   
+15725                -0.71         -0.02                 -0.76                    -0.36                         -0.26  ...              0                                0                 0   
+
+       Purpose_Wedding  Loan Status  
+17325                0            1  
+49844                0            1  
+16371                0            1  
+...
+17730                0            1  
+28030                0            1  
+15725                0            1  
+
+[25044 rows x 31 columns]
+
+
+
+
+
+
+Create an upsampled minority class the length of the majority class and concatenate (done for you).
+Create a downsampled majority class the length of the minority class and concatenate (done for you).
+# Upsample minority and combine with majority
+loans_upsampled = resample(deny, replace=True, n_samples=len(approve), random_state=123)
+upsampled = pd.concat([approve, loans_upsampled])
+
+# Downsample majority and combine with minority
+loans_downsampled = resample(approve, replace = False,  n_samples = len(deny), random_state = 123)
+downsampled = pd.concat([loans_downsampled, deny])
+
+
+
+
+
+
+
+
+
+
+
+Create an upsampled feature matrix and target array.
+Instantiate a logistic regression model object, fit, and predict with X_test.
+Print the evaluation metrics.
+# Upsampled feature matrix and target array
+X_train_up = upsampled.drop('Loan Status', axis=1)
+y_train_up = upsampled['Loan Status']
+
+# Instantiate, fit, predict
+loan_lr_up = LogisticRegression(solver='liblinear')
+loan_lr_up.fit(X_train_up, y_train_up)
+upsampled_y_pred = loan_lr_up.predict(X_test)
+
+# Print evaluation metrics
+print("Confusion matrix:\n {}".format(confusion_matrix(y_test, upsampled_y_pred)))
+print("Accuracy: {}".format(accuracy_score(y_test, upsampled_y_pred)))
+print("Precision: {}".format(precision_score(y_test, upsampled_y_pred)))
+print("Recall: {}".format(recall_score(y_test, upsampled_y_pred)))
+print("F1: {}".format(f1_score(y_test, upsampled_y_pred)))
+
+
+<script.py> output:
+    Confusion matrix:
+     [[2327 1908]
+     [3672 7093]]
+    Accuracy: 0.628
+    Precision: 0.7880235529385624
+    Recall: 0.658894565722248
+    F1: 0.7176970555499341
+
+
+
+
+
+
+
+Create a downsampled feature matrix and target array.
+Instantiate a logistic regression model object, fit, and predict with X_test.
+Print the evaluation metrics.
+# Downsampled feature matrix and target array
+X_train_down = downsampled.drop('Loan Status', axis=1)
+y_train_down = downsampled['Loan Status']
+
+# Instantiate, fit, predict
+loan_lr_down = LogisticRegression(solver='liblinear')
+loan_lr_down.fit(X_train_down, y_train_down)
+downsampled_y_pred = loan_lr_down.predict(X_test)
+
+# Print evaluation metrics
+print("Confusion matrix:\n {}".format(confusion_matrix(y_test, downsampled_y_pred)))
+print("Accuracy: {}".format(accuracy_score(y_test, downsampled_y_pred)))
+print("Precision: {}".format(precision_score(y_test, downsampled_y_pred)))
+print("Recall: {}".format(recall_score(y_test, downsampled_y_pred)))
+print("F1: {}".format(f1_score(y_test, downsampled_y_pred)))
+
+
+<script.py> output:
+    Confusion matrix:
+     [[2324 1911]
+     [3584 7181]]
+    Accuracy: 0.6336666666666667
+    Precision: 0.7898152221733392
+    Recall: 0.6670692057594054
+    F1: 0.7232713904416578
+    
+    
+    Amazing! Using both upsampling and downsampling techniques improved the precision score significantly, meaning there are less false positives. That is definitely a good thing!
+
