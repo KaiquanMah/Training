@@ -1,0 +1,64 @@
+Decision tree
+In the last three chapters, you've learned a range of techniques that help you tackle many aspects of the machine learning interview. In this chapter, you'll be introduced to various ways to make sure any model you're asked to create or discuss in a machine learning interview is generalizable, evaluated correctly, and properly selected from among other possible models.
+In this exercise, you will delve into hyperparameter tuning for a decision tree on the loan_data dataset. Here you'll tune min_samples_split, which is the minimum number of samples required to create an additional binary split, and max_depth, which is how deep you want to grow the tree. The deeper a tree, the more splits and therefore captures more information about the data.
+The feature matrix X and the target label y have been imported for you.
+Note that you're once again performing all of the steps in the machine learning pipeline!
+
+
+
+
+
+Import the correct function for a decision tree classifier and split the data into train and test sets.
+Instantiate a decision tree classifier, fit, predict, and print accuracy.
+# Import modules
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=123)
+
+# Instantiate, Fit, Predict
+loans_clf = DecisionTreeClassifier() 
+loans_clf.fit(X_train, y_train)
+y_pred = loans_clf.predict(X_test)
+
+# Evaluation metric
+print("Decision Tree Accuracy: {}".format(accuracy_score(y_test,y_pred)))
+
+<script.py> output:
+    Decision Tree Accuracy: 0.5966666666666667
+
+
+
+
+
+
+Import the correct function to perform cross-validated grid search.
+Instantiate a decision tree classifier and use it with the parameter grid to perform a cross-validated grid-search.
+Fit and print model evaluation metrics
+# Import modules
+from sklearn.model_selection import GridSearchCV
+
+# Create the hyperparameter grid
+param_grid = {"criterion": ["gini"], "min_samples_split": [2, 10, 20], 
+              "max_depth": [None, 2, 5, 10]}
+
+# Instantiate classifier and GridSearchCV, fit
+loans_clf = DecisionTreeClassifier()
+dtree_cv = GridSearchCV(loans_clf, param_grid, cv=5)
+fit = dtree_cv.fit(X_train, y_train)
+
+# Print the optimal parameters and best score
+print("Tuned Decision Tree Parameter: {}".format(dtree_cv.best_params_))
+print("Tuned Decision Tree Accuracy: {}".format(dtree_cv.best_score_))
+
+
+<script.py> output:
+    Tuned Decision Tree Parameter: {'criterion': 'gini', 'max_depth': 2, 'min_samples_split': 2}
+    Tuned Decision Tree Accuracy: 0.7
+    
+    
+Nice work! K-fold cross-validation improved the accuracy of a decision tree model by more than 10 percent!
+
+    
+    
