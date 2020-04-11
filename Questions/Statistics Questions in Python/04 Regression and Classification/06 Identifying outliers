@@ -1,0 +1,99 @@
+Identifying outliers
+Let's keep at it with our laptops dataset and tackle some outliers hiding away. In this exercise, we'll stick to the first technique we discussed in the slides using standard deviations to identify extreme values, since this method is more common in practice.
+You'll compute the descriptive statistics and outlier boundaries, and then identify the rows with them before dropping them from the dataset. You'll be working primarily with the Price column here.
+
+
+Calculate the mean and standard deviation of the Price column.
+# Calculate the mean and std
+mean, std = laptops['Price'].mean(), laptops['Price'].std()
+
+
+
+
+
+
+
+Compute and print the upper and lower boundaries for acceptable values.
+# Calculate the mean and std
+mean, std = laptops['Price'].mean(), laptops['Price'].std()
+
+# Compute and print the upper and lower threshold
+cut_off = std * 3
+lower, upper = mean-cut_off, mean+cut_off
+print(lower, 'to', upper)
+
+<script.py> output:
+    -1756.329166612584 to 3727.2904290710558
+
+
+
+
+
+
+
+
+
+Identify the rows with outliers; print outliers when you have it.
+# Calculate the mean and std
+mean, std = laptops['Price'].mean(), laptops['Price'].std()
+
+# Compute and print the upper and lower threshold
+cut_off = std * 3
+lower, upper = mean - cut_off, mean + cut_off
+print(lower, 'to', upper)
+
+# Identify and print rows with outliers
+outliers = laptops[(laptops['Price'] > upper) | 
+                   (laptops['Price'] < lower)]
+print(outliers)
+
+
+<script.py> output:
+    -1756.329166612584 to 3727.2904290710558
+        Company             Product    Price
+    65     Asus   ROG G703VI-E5062T   3890.0
+    127    Asus         ZenBook Pro  -3004.0
+    224    Asus  Rog GL753VD-GC082T  11369.9
+    262    Asus          ROG G701VO   3975.0
+
+
+
+
+
+
+
+
+
+Drop the rows from our DataFrame; would you recommend this?
+# Calculate the mean and std
+mean, std = laptops['Price'].mean(), laptops['Price'].std()
+
+# Compute and print the upper and lower threshold
+cut_off = std * 3
+lower, upper = mean - cut_off, mean + cut_off
+print(lower, 'to', upper)
+
+
+# Identify and print rows with outliers
+outliers = laptops[(laptops['Price'] > upper) | 
+                   (laptops['Price'] < lower)]
+print(outliers)
+
+
+# Drop the rows from the dataset
+laptops = laptops[(laptops['Price'] <= upper) | 
+                  (laptops['Price'] >= lower)]
+                  
+                  
+<script.py> output:
+    -1756.329166612584 to 3727.2904290710558
+        Company             Product    Price
+    65     Asus   ROG G703VI-E5062T   3890.0
+    127    Asus         ZenBook Pro  -3004.0
+    224    Asus  Rog GL753VD-GC082T  11369.9
+    262    Asus          ROG G701VO   3975.0
+                  
+
+Good job! In this scenario, dropping the outliers was likely the right move since the values were unthinkable for laptops prices. This implies that there was some mistake in data entry or data collection. With that being said, this won't always be the best path forward. It's important to understand why you got the outliers that you did and if they provide valuable information before you throw them out.
+
+                  
