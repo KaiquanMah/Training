@@ -1,0 +1,122 @@
+Pearson correlation
+You know how to identify different relationships based on scatter plots, but let's take a more practical approach now and dive a bit deeper into one relationship. We'll stick to the same version of the weather dataset that we just used.
+You'll analyze a seaborn pair plot of some features before drilling down for further analysis and coming to a conclusion about the correlation. This process should be something that you feel quite comfortable with.
+
+
+Display a seaborn pair plot for the weather dataset; explore the output a bit once it loads.
+In [1]: weather
+Out[1]: 
+    MinTemp  MaxTemp  Humidity9am  Humidity3pm
+0      20.8     30.1         83.0         58.0
+1      14.0     19.3         72.0         68.0
+2      23.7     31.2         59.0         60.0
+3       0.1     19.6         70.0         35.0
+4      11.0     19.9         68.0         61.0
+5       6.4     19.5         81.0         42.0
+6       NaN     20.2         67.0          NaN
+7       6.5     21.2         85.0         43.0
+8      14.1     21.9         80.0         66.0
+9      10.1     21.4         64.0         48.0
+10     14.0     19.5         86.0         72.0
+11      2.0     16.0         79.0         56.0
+12     14.1     26.9         51.0         45.0
+13     22.7     29.4         93.0         80.0
+14     22.8     25.4         98.0         95.0
+15     13.1     26.8         38.0         31.0
+16     14.6     28.7         52.0         33.0
+17     11.4     19.7         93.0         72.0
+18     20.7     28.4         65.0         58.0
+19      8.9     29.0         63.0         17.0
+20     11.2     13.6         90.0         87.0
+21     18.8     30.0         50.0         30.0
+22      5.5     13.9         92.0         88.0
+23     17.5     24.2         77.0         84.0
+24     20.0     28.1         79.0         73.0
+25     20.8     27.1         82.0         59.0
+26     11.3     23.9         61.0         34.0
+27     23.4     35.5         40.0         34.0
+28      8.0     14.6         91.0         84.0
+29     16.2     33.7         79.0         38.0
+..      ...      ...          ...          ...
+70     18.9     27.8         91.0         72.0
+71     12.3     22.6         88.0         66.0
+72     15.8     22.7         67.0         90.0
+73      4.6     30.1         49.0         24.0
+74      9.1     14.9         66.0         75.0
+75     18.2     30.8         37.0         28.0
+76      9.6     21.2         89.0         44.0
+77      5.5     18.0         62.0         45.0
+78      3.8     10.4         94.0         70.0
+79      8.6     22.0         74.0         53.0
+80      5.5     23.8         75.0         27.0
+81     15.4     19.2         66.0         61.0
+82      7.6     22.2         67.0         54.0
+83      7.1     16.8         87.0         60.0
+84     -2.0     15.5         90.0         46.0
+85     11.7     15.5          NaN          NaN
+86      NaN     18.2          NaN          NaN
+87      7.3     17.5         74.0         49.0
+88     21.4     35.5         56.0         81.0
+89     18.0     21.9         81.0         76.0
+90     21.1     33.1         26.0         15.0
+91     20.2     40.0         52.0         19.0
+92     11.7     25.4         85.0         44.0
+93      6.1     17.6         94.0         63.0
+94     15.4     33.2         51.0         16.0
+95      6.6     24.2         85.0         36.0
+96     16.4     28.9         56.0         34.0
+97      0.8     16.1         82.0         55.0
+98     21.7     33.2         69.0         52.0
+99     13.5     18.7         94.0         74.0
+
+[100 rows x 4 columns]
+
+
+
+# Generate the pair plot for the weather dataset
+sns.pairplot(weather)
+plt.show()
+
+
+
+
+
+
+
+
+
+Take a closer look at the relationship between the Humidity9am and Humidity3pm variables using the scatter() function.
+# Look at the scatter plot for the humidity variables
+plt.scatter(weather['Humidity9am'], weather['Humidity3pm'])
+plt.show()
+
+
+
+
+Calculate the Pearson correlation coefficient between the Humidity9am and Humidity3pm variables using pandas built-in corr() function; would you say these features are correlated?
+# Compute and print the Pearson correlation
+r = weather['Humidity9am'].corr(weather['Humidity3pm'])
+print(r)
+
+
+<script.py> output:
+    0.6682963889852788
+
+
+
+
+
+Assign the squared result to the r2 variable and print it out below; what does this means exactly?
+# Compute and print the Pearson correlation
+r = weather['Humidity9am'].corr(weather['Humidity3pm'])
+
+# Calculate the r-squared value and print the result
+r2 = r**2
+print(r2)
+
+<script.py> output:
+    0.446620063530763
+
+
+Well done! We see here that humidity in the morning has a moderately strong correlation with afternoon humidity, giving us a ~0.67 pearson coefficient. When we square that result, we get a r-squared value of ~0.45, meaning that Humidity9am explains around 45% of the variability in the Humidity3pm variable. Always be ready to explain your results!
+
