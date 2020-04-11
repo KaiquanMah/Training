@@ -1,0 +1,718 @@
+Confidence interval by hand
+There are two common ways that interviewers will touch on confidence intervals; they will either ask you to explain it in simple terms, or elaborate on how they are calculated, possibly having you implement one. In this exercise, you'll practice the latter by producing a confidence interval by hand, using no packages other than those imported for you.
+We have gone ahead and assigned the appropriate z-score for a 95% confidence interval and sample mean to the z_score and sample_mean variables to simplify things a bit.
+
+
+Compute the standard error and the margin of error using the sem() function and z_score variable imported for you.
+Compute and print the lower boundary of our confidence interval using the sample_mean variable imported for you.
+Compute and print the upper boundary of our confidence interval using the sample_mean variable imported for you.
+
+In [6]: z_score
+Out[6]: 2.7764451051977987
+
+
+
+from scipy.stats import sem, t
+data = [1, 2, 3, 4, 5]
+confidence = 0.95
+
+
+# Compute the standard error and margin of error
+#sem(inputArrayToCalculateStdError)
+std_err = sem(data)
+margin_error = std_err * z_score
+
+# Compute and print the lower threshold
+lower = sample_mean - margin_error
+print(lower)
+
+# Compute and print the upper threshold
+upper = sample_mean + margin_error
+print(upper)
+
+
+<script.py> output:
+    1.036756838522439
+    4.9632431614775605
+
+
+Good work showing your understanding of how confidence intervals are calculated! Now you'll be prepared if interviewers ever throw this at you in a coding assessment. Don't forget about the conceptual understanding, though. Make sure you're comfortable explaining confidence intervals to a beginner in an intuitive way.
+
+
+
+
+
+
+
+
+
+
+
+In [4]: help(sem)
+Help on function sem in module scipy.stats.stats:
+
+sem(a, axis=0, ddof=1, nan_policy='propagate')
+    Calculate the standard error of the mean (or standard error of
+    measurement) of the values in the input array.
+    
+    Parameters
+    ----------
+    a : array_like
+        An array containing the values for which the standard error is
+        returned.
+    axis : int or None, optional
+        Axis along which to operate. Default is 0. If None, compute over
+        the whole array `a`.
+    ddof : int, optional
+        Delta degrees-of-freedom. How many degrees of freedom to adjust
+        for bias in limited samples relative to the population estimate
+        of variance. Defaults to 1.
+    nan_policy : {'propagate', 'raise', 'omit'}, optional
+        Defines how to handle when input contains nan. 'propagate' returns nan,
+        'raise' throws an error, 'omit' performs the calculations ignoring nan
+        values. Default is 'propagate'.
+    
+    Returns
+    -------
+    s : ndarray or float
+        The standard error of the mean in the sample(s), along the input axis.
+    
+    Notes
+    -----
+    The default value for `ddof` is different to the default (0) used by other
+    ddof containing routines, such as np.std and np.nanstd.
+    
+    Examples
+    --------
+    Find standard error along the first axis:
+    
+    >>> from scipy import stats
+    >>> a = np.arange(20).reshape(5,4)
+    >>> stats.sem(a)
+    array([ 2.8284,  2.8284,  2.8284,  2.8284])
+    
+    Find standard error across the whole array, using n degrees of freedom:
+    
+    >>> stats.sem(a, axis=None, ddof=0)
+    1.2893796958227628
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+In [5]: help(t)
+Help on t_gen in module scipy.stats._continuous_distns object:
+
+class t_gen(scipy.stats._distn_infrastructure.rv_continuous)
+ |  A Student's T continuous random variable.
+ |  
+ |  %(before_notes)s
+ |  
+ |  Notes
+ |  -----
+ |  The probability density function for `t` is:
+ |  
+ |  .. math::
+ |  
+ |      f(x, df) = \frac{\gamma((df+1)/2)}
+ |                      {\sqrt{\pi*df} \gamma(df/2) (1+x^2/df)^{(df+1)/2}}
+ |  
+ |  for ``df > 0``.
+ |  
+ |  `t` takes ``df`` as a shape parameter.
+ |  
+ |  %(after_notes)s
+ |  
+ |  %(example)s
+ |  
+ |  Method resolution order:
+ |      t_gen
+ |      scipy.stats._distn_infrastructure.rv_continuous
+ |      scipy.stats._distn_infrastructure.rv_generic
+ |      builtins.object
+ |  
+ |  Methods inherited from scipy.stats._distn_infrastructure.rv_continuous:
+ |  
+ |  __init__(self, momtype=1, a=None, b=None, xtol=1e-14, badvalue=None, name=None, longname=None, shapes=None, extradoc=None, seed=None)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  cdf(self, x, *args, **kwds)
+ |      Cumulative distribution function of the given RV.
+ |      
+ |      Parameters
+ |      ----------
+ |      x : array_like
+ |          quantiles
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      cdf : ndarray
+ |          Cumulative distribution function evaluated at `x`
+ |  
+ |  expect(self, func=None, args=(), loc=0, scale=1, lb=None, ub=None, conditional=False, **kwds)
+ |      Calculate expected value of a function with respect to the
+ |      distribution.
+ |      
+ |      The expected value of a function ``f(x)`` with respect to a
+ |      distribution ``dist`` is defined as::
+ |      
+ |                  ubound
+ |          E[x] = Integral(f(x) * dist.pdf(x))
+ |                  lbound
+ |      
+ |      Parameters
+ |      ----------
+ |      func : callable, optional
+ |          Function for which integral is calculated. Takes only one argument.
+ |          The default is the identity mapping f(x) = x.
+ |      args : tuple, optional
+ |          Shape parameters of the distribution.
+ |      loc : float, optional
+ |          Location parameter (default=0).
+ |      scale : float, optional
+ |          Scale parameter (default=1).
+ |      lb, ub : scalar, optional
+ |          Lower and upper bound for integration. Default is set to the
+ |          support of the distribution.
+ |      conditional : bool, optional
+ |          If True, the integral is corrected by the conditional probability
+ |          of the integration interval.  The return value is the expectation
+ |          of the function, conditional on being in the given interval.
+ |          Default is False.
+ |      
+ |      Additional keyword arguments are passed to the integration routine.
+ |      
+ |      Returns
+ |      -------
+ |      expect : float
+ |          The calculated expected value.
+ |      
+ |      Notes
+ |      -----
+ |      The integration behavior of this function is inherited from
+ |      `integrate.quad`.
+ |  
+ |  fit(self, data, *args, **kwds)
+ |      Return MLEs for shape (if applicable), location, and scale
+ |      parameters from data.
+ |      
+ |      MLE stands for Maximum Likelihood Estimate.  Starting estimates for
+ |      the fit are given by input arguments; for any arguments not provided
+ |      with starting estimates, ``self._fitstart(data)`` is called to generate
+ |      such.
+ |      
+ |      One can hold some parameters fixed to specific values by passing in
+ |      keyword arguments ``f0``, ``f1``, ..., ``fn`` (for shape parameters)
+ |      and ``floc`` and ``fscale`` (for location and scale parameters,
+ |      respectively).
+ |      
+ |      Parameters
+ |      ----------
+ |      data : array_like
+ |          Data to use in calculating the MLEs.
+ |      args : floats, optional
+ |          Starting value(s) for any shape-characterizing arguments (those not
+ |          provided will be determined by a call to ``_fitstart(data)``).
+ |          No default value.
+ |      kwds : floats, optional
+ |          Starting values for the location and scale parameters; no default.
+ |          Special keyword arguments are recognized as holding certain
+ |          parameters fixed:
+ |      
+ |          - f0...fn : hold respective shape parameters fixed.
+ |            Alternatively, shape parameters to fix can be specified by name.
+ |            For example, if ``self.shapes == "a, b"``, ``fa``and ``fix_a``
+ |            are equivalent to ``f0``, and ``fb`` and ``fix_b`` are
+ |            equivalent to ``f1``.
+ |      
+ |          - floc : hold location parameter fixed to specified value.
+ |      
+ |          - fscale : hold scale parameter fixed to specified value.
+ |      
+ |          - optimizer : The optimizer to use.  The optimizer must take ``func``,
+ |            and starting position as the first two arguments,
+ |            plus ``args`` (for extra arguments to pass to the
+ |            function to be optimized) and ``disp=0`` to suppress
+ |            output as keyword arguments.
+ |      
+ |      Returns
+ |      -------
+ |      mle_tuple : tuple of floats
+ |          MLEs for any shape parameters (if applicable), followed by those
+ |          for location and scale. For most random variables, shape statistics
+ |          will be returned, but there are exceptions (e.g. ``norm``).
+ |      
+ |      Notes
+ |      -----
+ |      This fit is computed by maximizing a log-likelihood function, with
+ |      penalty applied for samples outside of range of the distribution. The
+ |      returned answer is not guaranteed to be the globally optimal MLE, it
+ |      may only be locally optimal, or the optimization may fail altogether.
+ |      
+ |      Examples
+ |      --------
+ |      
+ |      Generate some data to fit: draw random variates from the `beta`
+ |      distribution
+ |      
+ |      >>> from scipy.stats import beta
+ |      >>> a, b = 1., 2.
+ |      >>> x = beta.rvs(a, b, size=1000)
+ |      
+ |      Now we can fit all four parameters (``a``, ``b``, ``loc`` and ``scale``):
+ |      
+ |      >>> a1, b1, loc1, scale1 = beta.fit(x)
+ |      
+ |      We can also use some prior knowledge about the dataset: let's keep
+ |      ``loc`` and ``scale`` fixed:
+ |      
+ |      >>> a1, b1, loc1, scale1 = beta.fit(x, floc=0, fscale=1)
+ |      >>> loc1, scale1
+ |      (0, 1)
+ |      
+ |      We can also keep shape parameters fixed by using ``f``-keywords. To
+ |      keep the zero-th shape parameter ``a`` equal 1, use ``f0=1`` or,
+ |      equivalently, ``fa=1``:
+ |      
+ |      >>> a1, b1, loc1, scale1 = beta.fit(x, fa=1, floc=0, fscale=1)
+ |      >>> a1
+ |      1
+ |      
+ |      Not all distributions return estimates for the shape parameters.
+ |      ``norm`` for example just returns estimates for location and scale:
+ |      
+ |      >>> from scipy.stats import norm
+ |      >>> x = norm.rvs(a, b, size=1000, random_state=123)
+ |      >>> loc1, scale1 = norm.fit(x)
+ |      >>> loc1, scale1
+ |      (0.92087172783841631, 2.0015750750324668)
+ |  
+ |  fit_loc_scale(self, data, *args)
+ |      Estimate loc and scale parameters from data using 1st and 2nd moments.
+ |      
+ |      Parameters
+ |      ----------
+ |      data : array_like
+ |          Data to fit.
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information).
+ |      
+ |      Returns
+ |      -------
+ |      Lhat : float
+ |          Estimated location parameter for the data.
+ |      Shat : float
+ |          Estimated scale parameter for the data.
+ |  
+ |  isf(self, q, *args, **kwds)
+ |      Inverse survival function (inverse of `sf`) at q of the given RV.
+ |      
+ |      Parameters
+ |      ----------
+ |      q : array_like
+ |          upper tail probability
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      x : ndarray or scalar
+ |          Quantile corresponding to the upper tail probability q.
+ |  
+ |  logcdf(self, x, *args, **kwds)
+ |      Log of the cumulative distribution function at x of the given RV.
+ |      
+ |      Parameters
+ |      ----------
+ |      x : array_like
+ |          quantiles
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      logcdf : array_like
+ |          Log of the cumulative distribution function evaluated at x
+ |  
+ |  logpdf(self, x, *args, **kwds)
+ |      Log of the probability density function at x of the given RV.
+ |      
+ |      This uses a more numerically accurate calculation if available.
+ |      
+ |      Parameters
+ |      ----------
+ |      x : array_like
+ |          quantiles
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      logpdf : array_like
+ |          Log of the probability density function evaluated at x
+ |  
+ |  logsf(self, x, *args, **kwds)
+ |      Log of the survival function of the given RV.
+ |      
+ |      Returns the log of the "survival function," defined as (1 - `cdf`),
+ |      evaluated at `x`.
+ |      
+ |      Parameters
+ |      ----------
+ |      x : array_like
+ |          quantiles
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      logsf : ndarray
+ |          Log of the survival function evaluated at `x`.
+ |  
+ |  nnlf(self, theta, x)
+ |      Return negative loglikelihood function.
+ |      
+ |      Notes
+ |      -----
+ |      This is ``-sum(log pdf(x, theta), axis=0)`` where `theta` are the
+ |      parameters (including loc and scale).
+ |  
+ |  pdf(self, x, *args, **kwds)
+ |      Probability density function at x of the given RV.
+ |      
+ |      Parameters
+ |      ----------
+ |      x : array_like
+ |          quantiles
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      pdf : ndarray
+ |          Probability density function evaluated at x
+ |  
+ |  ppf(self, q, *args, **kwds)
+ |      Percent point function (inverse of `cdf`) at q of the given RV.
+ |      
+ |      Parameters
+ |      ----------
+ |      q : array_like
+ |          lower tail probability
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      x : array_like
+ |          quantile corresponding to the lower tail probability q.
+ |  
+ |  sf(self, x, *args, **kwds)
+ |      Survival function (1 - `cdf`) at x of the given RV.
+ |      
+ |      Parameters
+ |      ----------
+ |      x : array_like
+ |          quantiles
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      sf : array_like
+ |          Survival function evaluated at x
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from scipy.stats._distn_infrastructure.rv_generic:
+ |  
+ |  __call__(self, *args, **kwds)
+ |      Freeze the distribution for the given arguments.
+ |      
+ |      Parameters
+ |      ----------
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution.  Should include all
+ |          the non-optional arguments, may include ``loc`` and ``scale``.
+ |      
+ |      Returns
+ |      -------
+ |      rv_frozen : rv_frozen instance
+ |          The frozen distribution.
+ |  
+ |  __getstate__(self)
+ |  
+ |  __setstate__(self, state)
+ |  
+ |  entropy(self, *args, **kwds)
+ |      Differential entropy of the RV.
+ |      
+ |      Parameters
+ |      ----------
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information).
+ |      loc : array_like, optional
+ |          Location parameter (default=0).
+ |      scale : array_like, optional  (continuous distributions only).
+ |          Scale parameter (default=1).
+ |      
+ |      Notes
+ |      -----
+ |      Entropy is defined base `e`:
+ |      
+ |      >>> drv = rv_discrete(values=((0, 1), (0.5, 0.5)))
+ |      >>> np.allclose(drv.entropy(), np.log(2.0))
+ |      True
+ |  
+ |  freeze(self, *args, **kwds)
+ |      Freeze the distribution for the given arguments.
+ |      
+ |      Parameters
+ |      ----------
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution.  Should include all
+ |          the non-optional arguments, may include ``loc`` and ``scale``.
+ |      
+ |      Returns
+ |      -------
+ |      rv_frozen : rv_frozen instance
+ |          The frozen distribution.
+ |  
+ |  interval(self, alpha, *args, **kwds)
+ |      Confidence interval with equal areas around the median.
+ |      
+ |      Parameters
+ |      ----------
+ |      alpha : array_like of float
+ |          Probability that an rv will be drawn from the returned range.
+ |          Each value should be in the range [0, 1].
+ |      arg1, arg2, ... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information).
+ |      loc : array_like, optional
+ |          location parameter, Default is 0.
+ |      scale : array_like, optional
+ |          scale parameter, Default is 1.
+ |      
+ |      Returns
+ |      -------
+ |      a, b : ndarray of float
+ |          end-points of range that contain ``100 * alpha %`` of the rv's
+ |          possible values.
+ |  
+ |  mean(self, *args, **kwds)
+ |      Mean of the distribution.
+ |      
+ |      Parameters
+ |      ----------
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      mean : float
+ |          the mean of the distribution
+ |  
+ |  median(self, *args, **kwds)
+ |      Median of the distribution.
+ |      
+ |      Parameters
+ |      ----------
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          Location parameter, Default is 0.
+ |      scale : array_like, optional
+ |          Scale parameter, Default is 1.
+ |      
+ |      Returns
+ |      -------
+ |      median : float
+ |          The median of the distribution.
+ |      
+ |      See Also
+ |      --------
+ |      stats.distributions.rv_discrete.ppf
+ |          Inverse of the CDF
+ |  
+ |  moment(self, n, *args, **kwds)
+ |      n-th order non-central moment of distribution.
+ |      
+ |      Parameters
+ |      ----------
+ |      n : int, n >= 1
+ |          Order of moment.
+ |      arg1, arg2, arg3,... : float
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information).
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |  
+ |  rvs(self, *args, **kwds)
+ |      Random variates of given type.
+ |      
+ |      Parameters
+ |      ----------
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information).
+ |      loc : array_like, optional
+ |          Location parameter (default=0).
+ |      scale : array_like, optional
+ |          Scale parameter (default=1).
+ |      size : int or tuple of ints, optional
+ |          Defining number of random variates (default is 1).
+ |      random_state : None or int or ``np.random.RandomState`` instance, optional
+ |          If int or RandomState, use it for drawing the random variates.
+ |          If None, rely on ``self.random_state``.
+ |          Default is None.
+ |      
+ |      Returns
+ |      -------
+ |      rvs : ndarray or scalar
+ |          Random variates of given `size`.
+ |  
+ |  stats(self, *args, **kwds)
+ |      Some statistics of the given RV.
+ |      
+ |      Parameters
+ |      ----------
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional (continuous RVs only)
+ |          scale parameter (default=1)
+ |      moments : str, optional
+ |          composed of letters ['mvsk'] defining which moments to compute:
+ |          'm' = mean,
+ |          'v' = variance,
+ |          's' = (Fisher's) skew,
+ |          'k' = (Fisher's) kurtosis.
+ |          (default is 'mv')
+ |      
+ |      Returns
+ |      -------
+ |      stats : sequence
+ |          of requested moments.
+ |  
+ |  std(self, *args, **kwds)
+ |      Standard deviation of the distribution.
+ |      
+ |      Parameters
+ |      ----------
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      std : float
+ |          standard deviation of the distribution
+ |  
+ |  var(self, *args, **kwds)
+ |      Variance of the distribution.
+ |      
+ |      Parameters
+ |      ----------
+ |      arg1, arg2, arg3,... : array_like
+ |          The shape parameter(s) for the distribution (see docstring of the
+ |          instance object for more information)
+ |      loc : array_like, optional
+ |          location parameter (default=0)
+ |      scale : array_like, optional
+ |          scale parameter (default=1)
+ |      
+ |      Returns
+ |      -------
+ |      var : float
+ |          the variance of the distribution
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from scipy.stats._distn_infrastructure.rv_generic:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+ |  
+ |  random_state
+ |      Get or set the RandomState object for generating random variates.
+ |      
+ |      This can be either None or an existing RandomState object.
+ |      
+ |      If None (or np.random), use the RandomState singleton used by np.random.
+ |      If already a RandomState instance, use it.
+ |      If an int, use a new RandomState instance seeded with seed.
+ 
+ 
+ 
+ 
+ 
+ 
