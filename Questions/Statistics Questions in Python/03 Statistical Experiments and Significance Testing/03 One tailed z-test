@@ -1,0 +1,155 @@
+One tailed z-test
+We know now that hypothesis tests can come in several forms. In this exercise, you'll implement a one tailed z-test on test data from tracking conversion on a mobile app. The data has been imported as results and numpy has already been imported for you along with pandas as well.
+The treatment group represents some graphic alteration that we expect to improve the conversion rate of users. Run a test with alpha as .05 and find out if the change actually helped.
+https://www.kaggle.com/zhangluyuan/ab-testing
+
+
+In [1]: results
+Out[1]: 
+          Group  Converted
+0       control          0
+1       control          1
+2     treatment          0
+3     treatment          0
+4       control          1
+5       control          0
+6       control          1
+7       control          0
+8     treatment          0
+9     treatment          1
+10    treatment          0
+11      control          0
+12      control          0
+13      control          0
+14      control          0
+15      control          0
+16      control          0
+17    treatment          0
+18    treatment          0
+19    treatment          0
+20    treatment          1
+21    treatment          0
+22    treatment          0
+23    treatment          0
+24    treatment          0
+25      control          0
+26    treatment          0
+27    treatment          0
+28      control          1
+29      control          0
+...         ...        ...
+9970    control          0
+9971    control          0
+9972  treatment          0
+9973  treatment          1
+9974    control          0
+9975    control          0
+9976    control          0
+9977    control          0
+9978    control          0
+9979    control          0
+9980  treatment          1
+9981  treatment          0
+9982    control          0
+9983    control          0
+9984    control          0
+9985    control          0
+9986    control          0
+9987  treatment          0
+9988  treatment          0
+9989  treatment          0
+9990  treatment          0
+9991  treatment          1
+9992  treatment          0
+9993    control          0
+9994  treatment          0
+9995  treatment          0
+9996  treatment          0
+9997  treatment          0
+9998  treatment          0
+9999  treatment          1
+
+[10000 rows x 2 columns]
+
+
+
+
+
+
+
+
+Assign and print the mean conversion rate for each group using the groupby() function on the Group column.
+# Assign and print the conversion rate for each group
+conv_rates = results.groupby('Group').mean()
+print(conv_rates)
+
+<script.py> output:
+               Converted
+    Group               
+    control     0.112593
+    treatment   0.128111
+
+
+
+
+
+
+
+
+
+
+Assign the number of control conversions to num_control and the total number of trials to the total_control variable by slicing the DataFrame.
+# Assign the number of control "conversions and trials"
+num_control = results[results['Group'] == 'control']['Converted'].sum()
+total_control = len(results[results['Group'] == 'control'])
+
+
+
+
+
+
+Similarly, assign the same values for the treatment group by slicing the DataFrame.
+# Assign the number of "control" conversions and total trials
+num_control = results[results['Group'] == 'control']['Converted'].sum()
+total_control = len(results[results['Group'] == 'control'])
+
+# Assign the number of "treatment" conversions and total trials
+num_treat = results[results['Group'] == 'treatment']['Converted'].sum()
+total_treat = len(results[results['Group'] == 'treatment'])
+
+
+
+
+
+
+
+Run the z-test using the proportions_ztest() function and passing it the count and nobs variables.
+In [3]: count
+Out[3]: array([628, 574])
+
+In [4]: nobs
+Out[4]: array([4902, 5098])
+
+
+# Assign the number of conversions and total trials
+num_control = results[results['Group'] == 'control']['Converted'].sum()
+total_control = len(results[results['Group'] == 'control'])
+
+# Assign the number of conversions and total trials
+num_treat = results[results['Group'] == 'treatment']['Converted'].sum()
+total_treat = len(results[results['Group'] == 'treatment'])
+
+from statsmodels.stats.proportion import proportions_ztest
+count = np.array([num_treat, num_control]) 
+nobs = np.array([total_treat, total_control])
+
+# Run the z-test and print the result 
+stat, pval = proportions_ztest(count, nobs, alternative="larger")
+print('{0:0.3f}'.format(pval))
+
+
+<script.py> output:
+    0.009
+
+Good job! You see that our test gave us a resulting p-value of .009 which falls under our alpha value of .05, so we can conclude that there is an effect and, therefore, we reject the null hypothesis. It looks like the change actually did have a noticeable positive effect on conversion rate!
+
