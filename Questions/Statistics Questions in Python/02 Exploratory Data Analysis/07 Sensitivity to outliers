@@ -1,0 +1,74 @@
+Sensitivity to outliers
+When we are analyzing the relationship of more than one variable, correlation is a great start. But how does correlation hold up against some more interesting datasets? How well does it hold up against outliers?
+In this exercise, you will plot and compute the correlation for a dataset with an outlier and then remove it and see what changes. In the end, you want to see how correlation performs and come to a conclusion about when and where you should use it.
+A sample dataset from the famous Anscombe's quartet has been imported for you as the df variable, along with the all the packages used previously in this chapter.
+https://en.wikipedia.org/wiki/Anscombe%27s_quartet
+
+
+
+Display a matplotlib scatter plot of the X and Y features; notice the outlier in the top right.
+# Display the scatter plot of X and Y
+plt.scatter(df['X'], df['Y'])
+plt.show()
+
+
+
+Compute and print the Pearson correlation for the X and Y columns using the built-in corr() function within the pandas package.
+In [2]: df['X']
+Out[2]: 
+0     10.0
+1      8.0
+2     13.0
+3      9.0
+4     11.0
+5     14.0
+6      6.0
+7      4.0
+8     12.0
+9      7.0
+10     5.0
+Name: X, dtype: float64
+
+In [3]: df['Y']
+Out[3]: 
+0      7.46
+1      6.77
+2     12.74
+3      7.11
+4      7.81
+5      8.84
+6      6.08
+7      5.39
+8      8.15
+9      6.42
+10     5.73
+Name: Y, dtype: float64
+
+
+
+# Compute and print the correlation
+corr  = df['X'].corr(df['Y'])
+print(corr)
+
+<script.py> output:
+    0.8162867394895984
+
+
+
+
+
+
+Drop the outlier at index 2 from our dataset using the drop() function; assign and print the correlation again.
+# Drop the outlier from the dataset
+df = df.drop(2)
+
+# Compute and print the correlation once more
+new_corr  = df['X'].corr(df['Y'])
+print(new_corr)
+
+<script.py> output:
+    0.9999965537848281
+    
+Great! Notice how our correlation initially suffered due to the outlier, but became nearly perfect once it was removed. This effectively conveyed the biggest complaint about Pearson correlation; the metric is not very robust to outliers, so data scientists often must seek other tools when the outliers can't or shouldn't be easily removed. It's a good idea to think about the pros and cons of techniques to stand out during your interview!
+
+    
