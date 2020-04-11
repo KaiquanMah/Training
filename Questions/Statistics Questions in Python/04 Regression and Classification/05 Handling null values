@@ -1,0 +1,98 @@
+Handling null values
+Let's practice handling null values with our laptops dataset that we worked with previously. You will identify rows with null values, and then try out several techniques to address this problem.
+Remember that the laptops data and the pandas package have been imported for you already.
+
+
+Identify and print the rows with null values by slicing your DataFrame with the isnull() function.
+# laptops.isnull()
+<script.py> output:
+        Company Product  Price
+    0       NaN     NaN    NaN
+    1       NaN     NaN    NaN
+...
+    308     NaN     NaN    NaN
+    
+    [309 rows x 3 columns]
+
+In [7]: laptops.shape
+Out[7]: (309, 3)
+
+
+# Identify and print the the rows with null values
+# Append .any(axis=1) to the isnull() function in order to return rows where any column is null.
+nulls = laptops[laptops.isnull().any(axis=1)]
+print(nulls)
+
+<script.py> output:
+         Company                               Product  Price
+    1       Asus                       ZenBook UX430UN    NaN
+    2       Acer                               Swift 3    NaN
+    5       Acer                              Aspire 3    NaN
+    10      Asus  X751NV-TY001T (N4200/4GB/1TB/GeForce    NaN
+    86      Asus     GL553VE-FY082T (i7-7700HQ/8GB/1TB    NaN
+    115  Toshiba                     Portege Z30-C-16P    NaN
+    165     Asus                            ROG G701VI    NaN
+    207     Acer                         Chromebook 11    NaN
+
+
+
+
+
+
+
+
+
+
+Impute 0 for missing prices using the fillna() function; print the DataFrame head and note index 1 and 2 were null.
+# Impute constant value 0 and print the head
+laptops.fillna(0, inplace=True)
+print(laptops.head())
+
+<script.py> output:
+      Company                               Product  Price
+    0    Acer                              Aspire 3  400.0
+    1    Asus                       ZenBook UX430UN    0.0
+    2    Acer                               Swift 3    0.0
+    3    Asus                       Vivobook E200HA  191.9
+    4    Asus  E402WA-GA010T (E2-6110/2GB/32GB/W10)  199.0
+    
+    
+
+Adapt your code to impute the median price instead; once again print the first five rows to confirm.
+#https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.fillna.html
+#https://stackoverflow.com/questions/49127897/python-pandas-fillna-median-not-working
+# Impute median price and print the head
+laptops.fillna(laptops.median(), inplace=True)
+print(laptops.head())
+
+<script.py> output:
+      Company                               Product  Price
+    0    Acer                              Aspire 3  400.0
+    1    Asus                       ZenBook UX430UN  812.0
+    2    Acer                               Swift 3  812.0
+    3    Asus                       Vivobook E200HA  191.9
+    4    Asus  E402WA-GA010T (E2-6110/2GB/32GB/W10)  199.0
+
+
+
+
+
+
+
+Drop all the rows with null values using the dropna() function; make sure you pass inplace=True as a parameter.
+# Drop each row with a null value and print the head
+laptops.dropna(inplace=True)
+print(laptops.head())
+
+
+<script.py> output:
+      Company                                    Product   Price
+    0    Acer                                   Aspire 3  400.00
+    3    Asus                            Vivobook E200HA  191.90
+    4    Asus       E402WA-GA010T (E2-6110/2GB/32GB/W10)  199.00
+    6    Asus  X540UA-DM186 (i3-6006U/4GB/1TB/FHD/Linux)  389.00
+    7    Asus     X542UQ-GO005 (i5-7200U/8GB/1TB/GeForce  522.99
+
+
+Nice job! Notice that the observations at index 1 and 2 are gone now. The technique that you decide on should be entirely dependent on the context of the situation. Interviewers may be curious as to how you think about this problem, as it comes up often on the job. Are you quick to throw away information or are you more inclined to patch up any null values? There's usually no one right answer, but be sure to explain your thought process!
+
