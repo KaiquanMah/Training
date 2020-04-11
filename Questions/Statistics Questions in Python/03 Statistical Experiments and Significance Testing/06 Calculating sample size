@@ -1,0 +1,59 @@
+Calculating sample size
+Let's finish up our dive into statistical tests by performing power analysis to generate needed sample size. Power analysis involves four moving parts:
+Sample size
+Effect size
+Minimum effect
+Power
+
+In this exercise, you're working with a website and want to test for a difference in conversion rate. Before you begin the experiment, you must decide how many samples you'll need per variant using 5% significance and 95% power.
+
+
+Standardize the effect of a conversion rate increase from 20% to 25% success using the proportion_effectsize() function.
+# Standardize the effect size
+from statsmodels.stats.proportion import proportion_effectsize
+std_effect = proportion_effectsize(0.2, 0.25)
+
+
+
+
+
+
+Calculate and print the needed sample size using the zt_ind_solve_power() function.
+# Standardize the effect size
+from statsmodels.stats.proportion import proportion_effectsize
+std_effect = proportion_effectsize(.20, .25)
+
+# Assign and print the needed sample size
+from statsmodels.stats.power import  zt_ind_solve_power
+sample_size = zt_ind_solve_power(effect_size=std_effect, 
+                                 nobs1=None, 
+                                 alpha=0.05, 
+                                 power=0.95)
+print(sample_size)
+
+
+<script.py> output:
+    1807.7621477153257
+
+
+
+
+Adapt your code to solve for needed sample size using 80% power instead; observe what happens.
+# Standardize the effect size
+from statsmodels.stats.proportion import proportion_effectsize
+std_effect = proportion_effectsize(.20, .25)
+
+# Assign and print the needed sample size
+from statsmodels.stats.power import  zt_ind_solve_power
+sample_size = zt_ind_solve_power(effect_size=std_effect, 
+                                 nobs1=None, 
+                                 alpha=0.05, 
+                                 power=0.80)
+print(sample_size)
+
+
+<script.py> output:
+    1091.8961587171943
+
+All done! Notice how lowering the power allowed you fewer observations in your sample, yet increased your chance of a Type II error. Remember that doing these calculations by hand is quite difficult, so you may be asked to show or explain these tradeoffs with whiteboarding rather than programming.
+
