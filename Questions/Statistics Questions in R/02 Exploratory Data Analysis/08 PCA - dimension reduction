@@ -1,0 +1,138 @@
+PCA - dimension reduction
+In the previous exercise, you worked on a dataset with two variables. During an interview, you are likely to face a bigger dataset.
+PCA allows reducing the number of variables without significant loss of informational value.
+PCA returns the dataset of the same size as your original dataset. It's up to you, how many variables to keep!
+
+
+The following parameters of prcomp() reduce dimensions based on:
+tol - the standard deviation as percentage of the first component's standard deviation,
+rank - the maximal number of components.
+The letters dataset contains numerical attributes of letters.
+
+
+
+
+
+
+
+
+
+
+Identify the principal components and show the proportion of variance captured by each of them.
+> letters
+      x_box y_box width high  onpix x_bar y_bar x2bar y2bar xybar x2ybr xy2br
+1         2     8     3     5     1     8    13     0     6     6    10     8
+2         5    12     3     7     2    10     5     5     4    13     3     9
+3         4    11     6     8     6    10     6     2     6    10     3     7
+...
+
+      x_ege xegvy y_ege yegvx
+1         0     8     0     8
+2         2     8     4    10
+3         3     7     3     9
+...
+ [ reached getOption("max.print") -- omitted 13751 rows ]
+
+
+
+> str(letters)
+'data.frame':	20000 obs. of  16 variables:
+ $ x_box: int  2 5 4 7 2 4 4 1 2 11 ...
+ $ y_box: int  8 12 11 11 1 11 2 1 2 15 ...
+ $ width: int  3 3 6 6 3 5 5 3 4 13 ...
+ $ high : int  5 7 8 6 1 8 4 2 4 9 ...
+ $ onpix: int  1 2 6 3 1 3 4 1 2 7 ...
+ $ x_bar: int  8 10 10 5 8 8 8 8 10 13 ...
+ $ y_bar: int  13 5 6 9 6 8 7 2 6 2 ...
+ $ x2bar: int  0 5 2 4 6 6 6 2 2 6 ...
+ $ y2bar: int  6 4 6 6 6 9 6 2 6 2 ...
+ $ xybar: int  6 13 10 4 6 5 7 8 12 12 ...
+ $ x2ybr: int  10 3 3 4 5 6 6 2 4 1 ...
+ $ xy2br: int  8 9 7 10 9 6 6 8 8 9 ...
+ $ x_ege: int  0 2 3 6 1 0 2 1 1 8 ...
+ $ xegvy: int  8 8 7 10 7 8 8 6 6 1 ...
+ $ y_ege: int  0 4 3 2 5 9 7 2 1 1 ...
+ $ yegvx: int  8 10 9 8 10 7 10 7 7 8 ...
+ 
+ 
+ 
+ 
+ 
+# Perform PCA on letters
+pca_letters <- prcomp(letters)
+
+# Output spread measures of principal components
+summary(pca_letters)
+ 
+ 
+Importance of components:
+                          PC1    PC2    PC3     PC4     PC5     PC6     PC7
+Standard deviation     4.9517 3.5895 3.2701 2.73546 2.54943 2.19088 2.08339
+Proportion of Variance 0.2868 0.1507 0.1251 0.08751 0.07601 0.05614 0.05076
+Cumulative Proportion  0.2868 0.4375 0.5625 0.65003 0.72604 0.78218 0.83294
+                           PC8    PC9    PC10    PC11    PC12    PC13   PC14
+Standard deviation     1.83263 1.6412 1.42243 1.22499 1.17204 1.12933 1.0295
+Proportion of Variance 0.03928 0.0315 0.02366 0.01755 0.01607 0.01492 0.0124
+Cumulative Proportion  0.87222 0.9037 0.92739 0.94494 0.96100 0.97592 0.9883
+                          PC15    PC16
+Standard deviation     0.82900 0.55839
+Proportion of Variance 0.00804 0.00365
+Cumulative Proportion  0.99635 1.00000
+
+
+
+
+
+
+
+
+
+
+Omit components for which the standard deviation is lower than 0.25 of the first component's standard deviation.
+# Perform PCA on letters
+pca_letters <- prcomp(letters, 
+                      tol = 0.25)
+
+# Output spread measures of principal components
+summary(pca_letters)
+
+
+Importance of first k=10 (out of 16) components:
+                          PC1    PC2    PC3     PC4     PC5     PC6     PC7
+Standard deviation     4.9517 3.5895 3.2701 2.73546 2.54943 2.19088 2.08339
+Proportion of Variance 0.2868 0.1507 0.1251 0.08751 0.07601 0.05614 0.05076
+Cumulative Proportion  0.2868 0.4375 0.5625 0.65003 0.72604 0.78218 0.83294
+                           PC8    PC9    PC10
+Standard deviation     1.83263 1.6412 1.42243
+Proportion of Variance 0.03928 0.0315 0.02366
+Cumulative Proportion  0.87222 0.9037 0.92739
+
+
+
+
+
+
+
+
+
+
+
+
+Limit the number of principal components to 7.
+# Perform PCA on letters
+pca_letters <- prcomp(letters, 
+                      rank = 7)
+
+# Output spread measures of principal components
+summary(pca_letters)
+
+
+Importance of first k=7 (out of 16) components:
+                          PC1    PC2    PC3     PC4     PC5     PC6     PC7
+Standard deviation     4.9517 3.5895 3.2701 2.73546 2.54943 2.19088 2.08339
+Proportion of Variance 0.2868 0.1507 0.1251 0.08751 0.07601 0.05614 0.05076
+Cumulative Proportion  0.2868 0.4375 0.5625 0.65003 0.72604 0.78218 0.83294
+
+
+Great work! There are 16 explanatory variables, but you can reduce the number of dimensions to 7 and still explain 83% of the variance. You can demonstrate to an interviewer that your model can run faster without significant loss of accuracy. In the next chapter, we will review statistical tests!
+
