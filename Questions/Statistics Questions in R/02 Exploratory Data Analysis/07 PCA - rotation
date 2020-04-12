@@ -1,0 +1,89 @@
+PCA - rotation
+Principal Component Analysis allows you to reduce the number of dimensions in a dataset, which speeds up calculation time without significant loss of informational value.
+You may expect questions on PCA during the interview if your future role involves handling vast amounts of data.
+Recall that in PCA the variables are transformed into principal components. The first principal component has the largest possible variance.
+You will perform PCA using the cats dataset that you have already encountered in the previous exercises.
+In this exercise, use prcomp() to perform the principal component analysis. The returned object can be used to predict the rotated variables.
+
+
+
+
+Draw a plot of Bwt and Hwt from the cats dataset.
+Perform PCA on Bwt and Hwt from the cats dataset.
+Derive the summary of the PCA.
+# Plot the unrotated data
+# plot (Y ~ X, data=df)
+plot(Bwt ~ Hwt, 
+     data = cats)
+
+
+> cats
+    Sex Bwt  Hwt
+1     F 2.0  7.0
+2     F 2.0  7.4
+3     F 2.0  9.5
+
+
+
+
+
+
+# Perform PCA
+pca_cats <- prcomp(~ Bwt + Hwt, 
+                   data = cats)
+
+
+> pca_cats
+Standard deviations (1, .., p=2):
+[1] 2.4661424 0.2848082
+
+Rotation (n x k) = (2 x 2):
+          PC1        PC2
+Bwt 0.1604097 -0.9870505
+Hwt 0.9870505  0.1604097
+
+
+
+
+
+
+# Compute the summary
+summary(pca_cats)
+
+
+Importance of components:
+                          PC1     PC2
+Standard deviation     2.4661 0.28481
+Proportion of Variance 0.9868 0.01316
+Cumulative Proportion  0.9868 1.00000
+
+
+
+
+
+
+
+
+
+
+
+
+Rotate the data to the principal components.
+Draw a plot of the rotated data.
+
+# Compute the rotated data
+principal_components <- predict(pca_cats)
+
+# Plot the rotated data
+plot(principal_components)
+
+
+> principal_components
+             PC1          PC2
+1   -3.699615994  0.131864245
+2   -3.304795789  0.196028141
+3   -1.231989711  0.532888596
+
+
+Awesome! The first principal component explains 98.7% of the variance. In your work, you can use only one variable instead of two and get comparable results. If you scale this solution to bigger datasets, you will get a significant drop in the code run-time. Remember to communicate the pros and cons of PCA to an interviewer.
+
