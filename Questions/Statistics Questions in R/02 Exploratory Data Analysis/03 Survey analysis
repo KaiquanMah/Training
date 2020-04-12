@@ -1,0 +1,81 @@
+Survey analysis
+A categorical variable is a variable that can take on one of a limited number of possible values.
+Let's practice wrangling categorical data before your interview on the survey dataset from the MASS package. The dataset contains responses of statistics students to several questions.
+
+One of the questions concerns how often the students exercise. The answers to this question are stored in the Exer column. The available responses were:
+"None"
+"Some", and
+"Freq" (frequently).
+
+Note that these answers can be put in order.
+Recall that tapply() applies a function to each group of values within categories.
+
+For example,
+tapply(survey$Age, survey$Sex, median)
+computes median age split by sex.
+
+The dataset has been pre-loaded and is stored in the survey variable.
+
+
+
+
+
+
+
+
+Compute the structure of Exer from the survey dataset; are the data ordered?
+Add an ordered factor based on Exer to the survey dataset.
+Compute the structure of Exer_ordered.
+# Return the structure of Exer
+str(survey$Exer)
+
+# Create the ordered factor 
+survey$Exer_ordered <- factor(survey$Exer, 
+                              levels = c("None", "Some", "Freq"), 
+                              ordered = TRUE)
+
+# Return the structure of Exer_ordered
+str(survey$Exer_ordered)
+
+ Ord.factor w/ 3 levels "None"<"Some"<..: 2 1 1 1 2 2 3 3 2 2 ...
+ 
+
+
+
+
+
+
+
+
+
+Build a contingency table for Exer_ordered from the survey dataset.
+Calculate the average Pulse for students who exercise none, some and frequently (removing NA values from the computation).
+# Return the structure of Exer
+str(survey$Exer)
+
+# Create the ordered factor 
+survey$Exer_ordered <- factor(survey$Exer, levels = c("None", "Some", "Freq"), ordered = TRUE)
+
+# Return the structure of Exer_ordered
+str(survey$Exer_ordered)
+
+# Build a contingency table for Exer_ordered
+table(survey$Exer_ordered)
+
+None Some Freq 
+  24   98  115
+
+
+# Compute mean pulse for groups
+tapply(survey$Pulse, 
+       survey$Exer_ordered, 
+       mean, 
+       na.rm = TRUE)
+       
+    None     Some     Freq 
+76.76471 76.18750 71.96842       
+
+
+
+What conclusion can you draw from the results? Does exercising impact the pulse level? During your interview, remember to emphasize communicating results. Companies are looking for someone that can share insights from the analysis with non-technical team members.
+
