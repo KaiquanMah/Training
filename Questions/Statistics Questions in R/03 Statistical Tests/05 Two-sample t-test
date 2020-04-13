@@ -1,0 +1,141 @@
+Two-sample t-test
+A two-sample t-test is used to test if the means of two populations equal.
+The examples of analyses that quantify the impact of a factor include testing a pharmaceutical drug on patients or a marketing campaign on demand.
+
+
+Recall that few assumptions need to be met to carry out a two-sample t-test:
+Random samples
+Independent observations
+Normally distributed underlying data
+Homogeneity of variances
+
+
+The former two assumptions need to be met at the stage of designing the experiment. The latter two assumptions can be tested using the Shapiro-Wilk test and Bartlett's test respectively.
+A company provided you with the df data frame. The sample column indicates the sample, and the value column contains numerical data. The dplyr package is available in your environment.
+
+
+
+
+
+
+Print the first 6 rows of df.
+Retrieve values and run the Shapiro-Wilk test on the first sample.
+Retrieve values and run the Shapiro-Wilk test on the second sample.
+# Return the first part of df
+head(df)
+
+     value sample
+1 72.19762      1
+2 73.84911      1
+3 82.79354      1
+4 75.35254      1
+5 75.64644      1
+6 83.57532      1
+
+
+
+
+# Test normality of sample 1
+sample1 <- df %>% 
+  filter(sample == 1) %>% 
+  select(value) %>% 
+  pull()
+
+> sample1
+   [1] 72.19762 73.84911 82.79354 75.35254 75.64644 83.57532 77.30458 68.67469
+   [9] 71.56574 72.77169 81.12041 76.79907 77.00386 75.55341 72.22079 83.93457
+  ...
+
+
+shapiro.test(sample1)
+
+
+	Shapiro-Wilk normality test
+
+data:  sample1
+W = 0.99838, p-value = 0.4765
+
+
+
+
+
+
+
+# Test normality of sample 2
+sample2 <- df %>% 
+  filter(sample == 2) %>% 
+  select(value) %>% 
+  pull()
+
+
+shapiro.test(sample2)
+
+	Shapiro-Wilk normality test
+
+data:  sample2
+W = 0.99862, p-value = 0.6316
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Perform Bartlett's test on the two samples.
+# Test equality of variances
+bartlett.test(value ~ sample, 
+              data = df)
+
+
+	Bartlett test of homogeneity of variances
+
+data:  value by sample
+Bartlett's K-squared = 0.32233, df = 1, p-value = 0.5702
+
+
+
+
+
+
+What can you derive from the Shapiro-Wilk and Bartlett's tests?
+There is no evidence to reject the hypothesis that the underlying data are normal. The hypothesis on the homogeneity of variances has been rejected.
+The hypothesis on the normality of data has been rejected. There is no evidence to reject the hypothesis on the homogeneity of variances.
+The hypotheses on the normality of the underlying data and the homogeneity of variances have been rejected.
+
+#yes - There is no evidence to reject the hypothesis that the underlying data comes from the normally distributed populations, nor that the variances are equal.
+
+
+
+
+
+
+
+
+Carry out a two-sample t-test on the data samples; what is the result of the analysis?
+# Test equality of means 
+t.test(value ~ sample, 
+       data = df, 
+       var.equal = TRUE)
+
+
+	Two Sample t-test
+
+data:  value by sample
+t = 21.756, df = 1998, p-value < 2.2e-16
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ 4.429468 5.307158
+sample estimates:
+mean in group 1 mean in group 2 
+       75.08064        70.21233
+
+
+Well done! You've proved that the means of the two populations differ. You can make a statistically significant insight from the data at hand. Your knowledge will be an excellent asset for your future employer!
+
