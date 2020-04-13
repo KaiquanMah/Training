@@ -1,0 +1,138 @@
+ANOVA for plant growth
+In this exercise, you will perform a one-way ANOVA to compare means across three groups.
+Such a task might pop up during the interviews for various sectors, including engineering, marketing, and medical services.
+
+Recall that the assumptions of ANOVA are:
+Independence of cases
+Normal distributions
+Homogeneity (equality) of variances
+
+
+You can check the two last assumptions with the Shapiro-Wilk test and Bartlett's test respectively.
+The null hypothesis of a one-way ANOVA states that the means across groups are equal.
+H0:μ1=μ2=...=μn
+
+
+Use oneway.test() to perform ANOVA in this exercise.
+Watch out! So far, we've used tapply() to compute descriptive statistics across groups. We can use this function to perform statistical tests across groups, too!
+
+
+
+
+
+
+
+
+
+
+Perform a normality test of weight on the data for each group using the PlantGrowth data frame.
+Test if variances of weight across groups are equal.
+
+> PlantGrowth$group
+ [1] ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl ctrl trt1 trt1 trt1 trt1 trt1
+[16] trt1 trt1 trt1 trt1 trt1 trt2 trt2 trt2 trt2 trt2 trt2 trt2 trt2 trt2 trt2
+Levels: ctrl trt1 trt2
+
+> PlantGrowth$weight
+ [1] 4.17 5.58 5.18 6.11 4.50 4.61 5.17 4.53 5.33 5.14 4.81 4.17 4.41 3.59 5.87
+[16] 3.83 6.03 4.89 4.32 4.69 6.31 5.12 5.54 5.50 5.37 5.29 4.92 6.15 5.80 5.26
+
+
+# Test normality across groups
+tapply(PlantGrowth$weight, 
+       PlantGrowth$group, 
+       FUN = shapiro.test)
+
+
+
+$ctrl
+	Shapiro-Wilk normality test
+
+data:  X[[i]]
+W = 0.95668, p-value = 0.7475
+
+
+$trt1
+	Shapiro-Wilk normality test
+
+data:  X[[i]]
+W = 0.93041, p-value = 0.4519
+
+
+$trt2
+	Shapiro-Wilk normality test
+
+data:  X[[i]]
+W = 0.94101, p-value = 0.5643
+
+
+
+
+
+
+
+
+
+# Check the homogeneity of variance
+bartlett.test(weight ~ group, 
+              data = PlantGrowth)
+
+
+	Bartlett test of homogeneity of variances
+
+data:  weight by group
+Bartlett's K-squared = 2.8786, df = 2, p-value = 0.2371
+
+
+
+
+
+
+
+
+
+
+
+Do the tests' results imply the violation of ANOVA assumptions?
+Yes, the data for weight under the first treatment is non-normal.
+Yes, the variance across groups is not homogeneous.
+Yes, the samples are not independent.
+
+#yes - No, the results do not imply the violation of ANOVA assumptions.
+
+
+
+
+
+
+
+
+
+Numerically assess if the means of weight across groups are equal using a one-way ANOVA.
+# Perform one-way ANOVA 
+oneway.test(weight ~ group, 
+            data = PlantGrowth, 
+            var.equal = TRUE)
+
+	One-way analysis of means
+
+data:  weight and group
+F = 4.8461, num df = 2, denom df = 27, p-value = 0.01591
+
+
+
+
+
+
+
+
+
+What is the result of the test?
+There is a difference in average yields across groups because the p-value amounts to 4.8461.
+There is no difference in average yields across groups because the p-value amounts to 4.8461.
+There is no difference in average yields across groups because the p-value amounts to 0.01591.
+
+#YES - There is a difference in average yields across groups because the p-value amounts to 0.01591.
+Yes! The p-value is lower than 5%, so we reject the null hypothesis that the means across groups are equal. The treatment affects the yields! Congratulations on completing chapter 3! In chapter 4, we'll review regression models.
+
+
