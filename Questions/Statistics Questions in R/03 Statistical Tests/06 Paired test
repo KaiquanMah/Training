@@ -1,0 +1,109 @@
+Paired test
+In the previous lesson, you've worked on the sleep dataset. The dataset contains data on the effect of two drugs on the increase in sleep hours.
+In the case of this experiment, the data are pairs of measurements. The same people were tested with each of the drugs. If data contain pairs of measurements, you should use a paired test. It is worth keeping this distinction in mind during the interview.
+To carry out a paired test, set the paired parameter of the t.test() function to TRUE.
+The dataset is available as sleep in your environment. Recall that extra is the increase in the number of sleep hours, and group indicates which drug has been given.
+
+
+
+Assign the increase in the sleep hours of the first group to drug1.
+Assign the increase in the sleep hours of the second group to drug2.
+> sleep$group == 1
+ [1]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE
+[13] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+
+> sleep$extra[sleep$group == 1]
+ [1]  0.7 -1.6 -0.2 -1.2 -0.1  3.4  3.7  0.8  0.0  2.0
+ 
+ 
+# Subset the first group
+drug1 <- sleep$extra[sleep$group == 1]
+
+# Subset the second group
+drug2 <- sleep$extra[sleep$group == 2]
+
+
+
+
+
+
+
+Carry out a paired test for drug1 and drug2.
+> sleep
+   extra group ID
+1    0.7     1  1
+2   -1.6     1  2
+3   -0.2     1  3
+4   -1.2     1  4
+5   -0.1     1  5
+6    3.4     1  6
+7    3.7     1  7
+8    0.8     1  8
+9    0.0     1  9
+10   2.0     1 10
+11   1.9     2  1
+12   0.8     2  2
+13   1.1     2  3
+14   0.1     2  4
+15  -0.1     2  5
+16   4.4     2  6
+17   5.5     2  7
+18   1.6     2  8
+19   4.6     2  9
+20   3.4     2 10
+
+
+
+# Perform paired test
+t.test(extra ~ group, 
+       data=sleep, 
+       paired = TRUE)
+
+
+	Paired t-test
+
+data:  extra by group
+t = -4.0621, df = 9, p-value = 0.002833
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -2.4598858 -0.7001142
+sample estimates:
+mean of the differences 
+                  -1.58
+
+
+
+
+
+# Perform paired test
+t.test(drug1,
+       drug2,
+       paired = TRUE)
+
+
+	Paired t-test
+
+data:  drug1 and drug2
+t = -4.0621, df = 9, p-value = 0.002833
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -2.4598858 -0.7001142
+sample estimates:
+mean of the differences 
+                  -1.58
+
+
+
+
+
+
+
+What is the conclusion of the test?
+The means of the populations are equal for the 95% confidence level.
+The result of the test is inconclusive on any confidence level.
+
+#yes - The means of the populations are not equal for the 95% confidence level.
+
+
+Awesome! You can distinguish between drawing samples from two populations and measuring the impact of a factor on the same group of objects. In the next lesson, we will compare several samples at the same time.
+
