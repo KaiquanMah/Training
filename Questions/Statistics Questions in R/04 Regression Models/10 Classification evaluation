@@ -1,0 +1,129 @@
+Classification evaluation
+In the previous lesson, you have built a logistic model to predict Parkinson's disease. In this exercise, you will compare predictions against actual values.
+This skill is vital because companies focus on the results. Employers want to know how accurate the models that you develop are.
+Once again, you will build a model to predict the status of Parkinson's disease. This time, you will build the model on part of the dataset and use the rest for testing.
+
+Remember that recall=TPTP+FN.
+TP means that we have predicted a positive value and we were right.
+FN means that we have predicted a negative value but we were wrong.
+
+
+Around 80% of the rows of the parkinsons dataset have been assigned to train, and the rest have been assigned to test.
+
+
+
+
+
+
+
+
+
+Build a logistic model that explains status by NHR and DFA using the train data.
+Compute the probabilities of having Parkinson's disease for the test data.
+# Build a logistic model on the train data
+model <- glm(status ~ NHR + DFA, 
+             data = train, 
+             family = "binomial")
+
+# Calculate probabilities for the test data
+probabilities <- predict(model, 
+                         newdata = test, 
+                         type = "response")
+
+
+> probabilities
+        1         6        17        19        24        42        45        48 
+0.9285285 0.9124395 0.5568697 0.8395793 0.6833165 0.7596401 0.4044337 0.4023212 
+       51        53        74        76        77        88        89        93 
+0.8093256 0.7892106 0.8419170 0.8639927 0.8553736 0.9253042 0.9123472 0.8041504 
+       95        96        98       104       115       117       131       132 
+0.6789803 0.6734111 0.9658940 0.6805900 0.7020135 0.5596506 0.7631505 0.7511699 
+      136       141       145       148       149       150       154       155 
+0.7803549 0.7254761 0.4399754 0.9649284 0.9812446 0.9827996 0.7986232 0.7997873 
+      158       159       160       172       183       185       187 
+0.9670060 0.6670835 0.7140454 0.7650865 0.7761198 0.5356762 0.5899972
+
+
+
+
+
+
+
+
+
+
+
+If probability is greater than 0.5 assign "disease" to predictions; otherwise assign "no_disease". If test$status equals 1 assign "disease" to actuals; otherwise assign "no_disease"
+# Derive predicted and actual values
+predictions <- ifelse(probabilities > 0.5, "disease", "no_disease")
+actuals <- ifelse(test$status == 1, "disease", "no_disease")
+
+> predictions
+           1            6           17           19           24           42 
+   "disease"    "disease"    "disease"    "disease"    "disease"    "disease" 
+          45           48           51           53           74           76 
+"no_disease" "no_disease"    "disease"    "disease"    "disease"    "disease" 
+          77           88           89           93           95           96 
+   "disease"    "disease"    "disease"    "disease"    "disease"    "disease" 
+          98          104          115          117          131          132 
+   "disease"    "disease"    "disease"    "disease"    "disease"    "disease" 
+         136          141          145          148          149          150 
+   "disease"    "disease" "no_disease"    "disease"    "disease"    "disease" 
+         154          155          158          159          160          172 
+   "disease"    "disease"    "disease"    "disease"    "disease"    "disease" 
+         183          185          187 
+   "disease"    "disease"    "disease"
+
+
+> actuals
+ [1] "disease"    "disease"    "disease"    "disease"    "disease"   
+ [6] "disease"    "no_disease" "no_disease" "no_disease" "no_disease"
+[11] "disease"    "disease"    "disease"    "disease"    "disease"   
+[16] "disease"    "disease"    "disease"    "disease"    "disease"   
+[21] "disease"    "disease"    "disease"    "disease"    "disease"   
+[26] "disease"    "disease"    "disease"    "disease"    "disease"   
+[31] "disease"    "disease"    "disease"    "disease"    "disease"   
+[36] "no_disease" "disease"    "no_disease" "no_disease"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Build a contingency table of actuals and predictions.
+Calculate the recall. Assume "disease" as a positive result.
+# Compute the confusion matrix
+#https://medium.com/analytics-vidhya/a-guide-to-machine-learning-in-r-for-beginners-part-5-4c00f2366b90
+confusion_matrix <- table(actuals, predictions)
+
+            predictions
+actuals      disease no_disease
+  disease         31          1
+  no_disease       5          2
+
+
+> confusion_matrix[0, 0]
+< table of extent 0 x 0 >
+
+> confusion_matrix[1, 1]
+[1] 31
+
+
+
+
+# Compute the recall
+confusion_matrix[1, 1]/(confusion_matrix[1, 1] + confusion_matrix[1, 2])
+
+[1] 0.96875
+
+
+Fabulous! You managed to quantify the fraction of the total amount of relevant instances that were correctly predicted. Remember that this result might vary depending on the chosen train and test sets. Awareness of the strengths and weaknesses of the models is a deal-breaker during job interviews.
+
