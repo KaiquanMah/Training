@@ -1,0 +1,89 @@
+Validation set approach
+In the chapter on linear regression, you fit a linear regression model that explains cats' heart weights by their body weights. The job interviewer asks you to evaluate how good your model is.
+To answer this question, you need to derive predictions that can be compared against the actual values. In the validation set approach, you divide your data into two parts.
+To do that, you can first take a sample of, say, 80% row numbers. Use the chosen row numbers to subset the train set. The rest of the data frame can be used for testing.
+
+
+
+Remember that:
+rows <- c(1, 3)
+df[-rows, ]
+subsets all but the first and the third row.
+
+> c(1,3)
+[1] 1 3
+
+
+
+
+
+
+The cats dataset is available in your environment.
+Randomly choose 80% (rounded) of the row numbers of the cats dataset.
+#https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/sample
+#https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/nrow
+> cats
+    Sex Bwt  Hwt
+1     F 2.0  7.0
+2     F 2.0  7.4
+...
+144   M 3.9 20.5
+> nrow(cats)
+[1] 144
+
+
+
+
+set.seed(123)
+
+#attempt 1
+# Generate train row numbers
+train_rows <- sample(cats,
+                     round(0.8 * nrow(cats)))
+# Error: cannot take a sample larger than the population when 'replace = FALSE'
+                     
+                     
+
+#attempt2
+# Generate train row numbers
+#sample(from 1 to this max #, total # samples)
+train_rows <- sample(nrow(cats), round(0.8 * nrow(cats)))
+> train_rows
+  [1]  42 113  59 125 132   7  73 123  75  62 129  61  90  76  14 117  32   6
+ [19] 144 120 111  86  79 121 122  85  65  70  34  17 110 102  78  89   3  53
+ [37]  82  24 116  25  15  43 103  38  16 130  23  46  26 108   5 126  74  12
+ [55]  51  19  91  66  77 128  56   8 119  98  87  36  64  63 133  33  84  97
+ [73]  52   1 106 100  96  93 107  83  69 143  68  49 139 135  58 140  50  10
+ [91] 118  35  18 134 115  55 101  94  22  80  27 104  21  40  20 109  39  81
+[109] 137 127  95 131   2  30 138
+
+
+
+
+
+
+
+
+
+
+
+
+
+Select the training observations from cats.
+Select the testing observations from cats.
+# Derive the training set
+train_set <- cats[train_rows, ]
+
+# Derive the testing set
+test_set <- cats[-train_rows, ]
+
+
+
+Fit a linear regression model that explains Hwt by Bwt on the training set.
+# Fit the model
+model <- lm(Hwt ~ Bwt, 
+            data = train_set)
+
+
+Magnificent! You've split the dataset into two parts and fit the model on the training set. In the next exercise, you will use this work to compute evaluation metrics.
+
