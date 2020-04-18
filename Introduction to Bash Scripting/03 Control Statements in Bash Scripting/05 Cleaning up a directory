@@ -1,0 +1,112 @@
+Cleaning up a directory
+Continuing your work as a data scientist in a large organization, you were told today that a colleague has left for their dream job (lucky them!). Unfortunately, when their logins were terminated, all their files were dumped into a single folder.
+The good news is that most of their useful code has been backed up. However, all their python files using the Random Forest algorithm are buried in the file dump.
+The task has fallen to you to sift through the hundreds of files to determine if they are both Python files and contain a Random Forest model. This sounds like a perfect opportunity to use your Bash skills, rather than checking every single file manually.
+Write a script that loops through each file in the robs_files/ directory to see if it is a Python file (ends in .py) AND contains RandomForestClassifier. If so, move it into the to_keep/ directory.
+
+
+Use a FOR statement to loop through (using glob expansion) files that end in .py in robs_files/.
+Use an IF statement and grep (remember the 'quiet' flag?) to check if RandomForestClassifier is in the file. Don't use a shell-within-a-shell here.
+Move the Python files that contain RandomForestClassifier into the to_keep/ directory.
+
+# Create a FOR statement on files in directory
+for file in robs_files/*.py
+do  
+    # Create IF statement using grep
+    if grep -q 'RandomForestClassifier' $file; then
+        # Move wanted files to to_keep/ folder
+        mv $file to_keep/
+    fi
+done
+
+
+
+
+
+
+repl:~/workspace$ cd /home/repl/workspace
+repl:~/workspace$ bash script.sh
+
+
+
+
+
+
+
+code_file101.py
+# Scikitlearn packages
+# Prep
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import Imputer
+from sklearn.preprocessing import StandardScaler
+
+import pandas as pd
+import numpy as np
+
+# Models
+from sklearn.ensemble import RandomForestClassifier
+
+#Hyperparameter tuning packages
+from sklearn.model_selection import GridSearchCV
+
+#Metrics
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import roc_auc_score
+
+# Read in data 
+import os
+data_dir = os.path.dirname(os.getcwd()) + "/datasets"
+import pickle
+
+state_seed = 42
+file_list = ["xtrain.pkl", "xtest.pkl", "ytrain.pkl", "ytest.pkl"]
+
+for x in file_list:
+    x = data_dir + "/" + x
+    with open(x, 'rb') as file_in:
+        if "xtrain" in x:
+            X_train = pickle.load(file_in)
+            file_in.close()
+        if "xtest" in x:
+            X_test = pickle.load(file_in)
+            file_in.close()
+        if "ytrain" in x:
+            y_train = pickle.load(file_in)
+            file_in.close()
+        if "ytest" in x:
+            y_test = pickle.load(file_in)
+            file_in.close()
+
+print(X_train.shape,X_test.shape, y_train.shape, y_test.shape)
+
+#Create the model object
+rf_class = RandomForestClassifier(
+n_estimators=358
+criterion='entropy'
+    max_features= None,
+    max_depth=None,
+    min_samples_split=2,
+    min_samples_leaf=2,
+)
+
+#Fit to our model
+rf_class.fit(X_train, y_train.values.ravel())
+
+#Predict
+y_test = pd.DataFrame(y_test) #This will avoide the setwithcopy warning, though not really necessary
+y_test.loc[:,"predictions"] = rf_class.predict(X_test)
+
+#Get confusion matrix 
+print("Confustion Matrix \n", confusion_matrix(y_test.qualitary_binary, y_test.predictions))
+
+
+
+
+
+
+
+
+
+What a combination! Combining the power of FOR and IF statements together makes quite a formidable piece of code. When you start putting together the pieces of everything you are learning, you will be able to make really powerful scripts to save time and effort. Let's now learn about another useful Bash construct - the CASE statement.
+
