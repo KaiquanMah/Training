@@ -1,0 +1,31 @@
+Moving model results with CASE
+You are working as a data scientist in charge of analyzing some machine learning model results. The production environment moves files into a folder called model_out/ and names them model_RXX.csv where XX is a random number related to which experiment was run.
+
+Each file has the following structure (example):
+Model Name, Accuracy, CV, Model Duration (s)
+Logistic,42,4,48
+
+
+Your manager has told you that recent work in the organization has meant that tree-based models are to be kept in one folder and everything else deleted.
+Your task is to use a CASE statement to move the tree-based models (Random Forest, GBM, and XGBoost) to the tree_models/ folder, and delete all other models (KNN and Logistic).
+
+# Use a FOR loop for each file in 'model_out/'
+for file in model_out/*
+do
+    # Create a CASE statement for each file's contents
+    case $(cat $file) in
+      # Match on tree and non-tree models
+      *"Random Forest"*|*GBM*|*XGBoost*)
+      mv $file tree_models/ ;;
+      *KNN*|*Logistic*)
+      rm $file ;;
+      # Create a default
+      *) 
+      echo "Unknown model in FILE" ;;
+    esac
+done
+
+
+
+Excellent work! A CASE statement allows you to undertake multiple or complex IF conditions all together. This will nicely tidy up the model outputs folder. Now that you have mastered some of the core control statements for Bash scripting, let's move on to learning about creating functions in Bash.
+
