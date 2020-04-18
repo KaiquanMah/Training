@@ -1,0 +1,40 @@
+Sorting model results
+You are working as a data scientist in a large corporation. The production environment for your machine learning models writes out text files into the model_results/ folder whenever an experiment is completed. The files have the following structure (example):
+Model Name: KNN
+Accuracy: 89
+F1: 0.87
+Date: 2019-12-01
+ModelID: 34598utjfddfgdg
+
+
+You can see the model name, accuracy and F1 scores, the date the experiment completed and a unique ID to link the model experiment back into your experiment system.
+The company has a threshold of 90% for accuracy for a model to continue experimentation. Your task is to write a Bash script that takes in an ARGV argument (a filename), extracts the accuracy score and conditionally sorts the model result file into one of two folders: good_models/ for those with accuracy greater than or equal to 90 and bad_models/ for those less than 90.
+
+# Extract Accuracy from first ARGV element
+# https://askubuntu.com/questions/579121/sed-difference-between-sed-s-sed-s-gw
+#https://unix.stackexchange.com/questions/210766/why-does-sed-replace-all-occurrences-instead-of-only-the-first-occurrence
+#https://serverfault.com/questions/69283/when-to-use-single-quote-double-quote-in-grep
+
+accuracy=$(grep Accuracy $1 | sed 's/.* //')
+
+# Conditionally move into good_models folder
+if [ $accuracy -ge 90 ]; then
+    mv $1 good_models/
+fi
+
+# Conditionally move into bad_models folder
+if [ $accuracy -lt 90 ]; then
+    mv $1 bad_models/
+fi
+
+
+
+
+
+repl:~/workspace$ bash script.sh model_results/model_1.txt 
+repl:~/workspace$ bash script.sh model_results/model_2.txt 
+repl:~/workspace$ bash script.sh model_results/model_3.txt 
+repl:~/workspace$ bash script.sh model_results/model_4.txt 
+
+
+
