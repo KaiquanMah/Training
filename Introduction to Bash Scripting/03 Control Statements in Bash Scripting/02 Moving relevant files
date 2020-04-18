@@ -1,0 +1,70 @@
+Moving relevant files
+You have recently joined a new startup as one of the few technical employees. Your manager has asked if you can assist to clean up some of the folders on the server. The company has been through a variety of server monitoring software and so there are many files that should be deleted.
+Luckily you know that all the files to keep contain both vpt and SRVM_ inside the file somewhere.
+Your task is to write a Bash script that will take in file names as ARGV elements and move the file to good_logs/ if it matches both conditions above.
+
+
+Create a variable sfile out of the first ARGV element.
+Use an IF statement and grep to check if the first ARGV element contains SRVM_ AND vpt inside.
+Inside the IF statement, move matching files to the good_logs/ directory.
+Try your script on all of the files in the directory (that is, run it four times - once for each file). It should move only one of them.
+
+
+# Create variable from first ARGV element
+sfile=$1
+
+
+
+# Create an IF statement on first ARGV element's contents
+#attempt 1
+if [[ grep -q 'SRVM_' $sfile && grep -q 'vpt' $sfile ]]; then
+	# Move file if matched
+	mv $sfile good_logs/
+fi
+
+
+repl:~/workspace$ bash script.sh
+script.sh: line 5: conditional binary operator expected
+script.sh: line 5: syntax error near `-q'
+script.sh: line 5: `if [[ grep -q 'SRVM_' $sfile && grep -q 'vpt' $sfile ]]; then'
+
+
+
+#attempt 2
+if grep -q 'SRVM_' $sfile && grep -q 'vpt' $sfile; then
+	# Move file if matched
+	mv $sfile good_logs/
+fi
+
+
+
+repl:~/workspace$ bash script.sh log.csv
+repl:~/workspace$ bash script.sh log1.txt 
+repl:~/workspace$ bash script.sh logdays.txt 
+repl:~/workspace$ bash script.sh logfiles8.txt 
+
+
+
+
+
+
+
+
+
+
+
+logfiles8.txt 
+SRVM_
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation 
+ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat 
+nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia 
+deserunt mollit anim id est laborum.
+vpt
+
+
+
+
+Nice stuff! You were not only able to employ the use of a command-line program (grep), but you did a combined conditional. Now you can create more complex conditions to better control your Bash scripts. Let's build on this and learn another powerful control statement - the FOR loop.
+
