@@ -1,0 +1,79 @@
+Sports analytics function
+You have been contracted back to the soccer league to help them with some sports analytics. You notice that a number of the scripts undertake aggregations, just like you did in a previous exercise. Since there is a lot of duplication of code, this is an excellent opportunity to create a single useful function that can be called at many places in the script.
+Your task is to create a Bash function that will take in a city name and find out how many wins they have had since recording began.
+Inside the main function, this script will call out to a shell-within-a-shell which is captured in a (by default, global) variable. You can then access this variable outside the function. This was the first technique discussed in the video for getting data out of a function.
+Most of the shell pipeline used has been done for you, though of course feel free to explore and understand what is happening here. Nothing there should be new to you!
+
+
+Create a function called get_number_wins using the function-word method.
+Create a variable inside the function called win_stats that takes the argument fed into the function to filter the last step of the shell-pipeline presented.
+Call the function using the city Etar.
+Below the function call, try to access the win_stats variable created inside the function in the echo command presented.
+
+
+
+
+Year,Winner,Winner Goals
+1932,Arda,4
+1933,Botev,1
+1934,Cherno,5
+1935,Dunav,2
+1936,Cherno,4
+1937,Dunav,4
+1938,Beroe,5
+1939,Botev,2
+1940,Beroe,3
+...
+2007,Cherno,4
+
+
+
+
+
+#https://unix.stackexchange.com/questions/19467/using-grep-v-on-multiple-arguments
+#find foo and bar in the file -> give me files with neither foo nor bar
+#$ grep -v -e foo -e bar file
+
+#find foo and bar in the file -> give me files with foo OR bar 
+#$ grep -e foo -e bar file
+
+
+
+
+
+
+
+# Create a function
+function get_number_wins () {
+
+  # Filter aggregate results by argument
+  # read the csv file
+  # split on commas, then give me the 2nd col
+  # i do not want the first row of the 2nd col which has the header string 'Winner'
+  # sort the remaining values
+  # count unique
+  # then filter to only the "count unique" value for the player u specify in the function argument later
+  win_stats=$(cat soccer_scores.csv | cut -d "," -f2 | egrep -v 'Winner'| sort | uniq -c | egrep "$1")
+
+}
+
+# Call the function with specified argument
+get_number_wins "Etar"
+
+# Print out the global variable
+echo "The aggregated stats are: $win_stats"
+
+
+
+
+
+
+repl:~/workspace$ bash script.sh
+The aggregated stats are:      15 Etar
+
+
+
+
+
+Great stuff! This is a practical example to see one of the two methods for accessing variables created inside of a function; by assigning to a global variable (in our case win_stats) and accessing outside using dollar-sign notation. Beware the use of global variables by default as unexpected things may occur if you don't keep track of them!
+
