@@ -1,0 +1,273 @@
+# Refactor: Wine Quality Analysis
+In this exercise, you'll refactor code that analyzes a wine quality dataset taken from the UCI Machine Learning Repository [here](https://archive.ics.uci.edu/ml/datasets/wine+quality). Each row contains data on a wine sample, including several physicochemical properties gathered from tests, as well as a quality rating evaluated by wine experts.
+The code in this notebook first renames the columns of the dataset and then calculates some statistics on how some features may be related to quality ratings. Can you refactor this code to make it more clean and modular?
+
+
+import pandas as pd
+df = pd.read_csv('winequality-red.csv', sep=';')
+df.head()
+
+	fixed acidity	volatile acidity	citric acid	residual sugar	chlorides	free sulfur dioxide	total sulfur dioxide	density	pH	sulphates	alcohol	quality
+0	7.4	0.70	0.00	1.9	0.076	11.0	34.0	0.9978	3.51	0.56	9.4	5
+1	7.8	0.88	0.00	2.6	0.098	25.0	67.0	0.9968	3.20	0.68	9.8	5
+2	7.8	0.76	0.04	2.3	0.092	15.0	54.0	0.9970	3.26	0.65	9.8	5
+3	11.2	0.28	0.56	1.9	0.075	17.0	60.0	0.9980	3.16	0.58	9.8	6
+4	7.4	0.70	0.00	1.9	0.076	11.0	34.0	0.9978	3.51	0.56	9.4	5
+
+
+
+
+
+Renaming Columns - Method 1
+You want to replace the spaces in the column labels with underscores to be able to reference columns with dot notation. Here's one way you could've done it.
+
+new_df = df.rename(columns={'fixed acidity': 'fixed_acidity',
+                             'volatile acidity': 'volatile_acidity',
+                             'citric acid': 'citric_acid',
+                             'residual sugar': 'residual_sugar',
+                             'free sulfur dioxide': 'free_sulfur_dioxide',
+                             'total sulfur dioxide': 'total_sulfur_dioxide'
+                            })
+new_df.head()
+
+
+
+	fixed_acidity	volatile_acidity	citric_acid	residual_sugar	chlorides	free_sulfur_dioxide	total_sulfur_dioxide	density	pH	sulphates	alcohol	quality
+0	7.4	0.70	0.00	1.9	0.076	11.0	34.0	0.9978	3.51	0.56	9.4	5
+1	7.8	0.88	0.00	2.6	0.098	25.0	67.0	0.9968	3.20	0.68	9.8	5
+2	7.8	0.76	0.04	2.3	0.092	15.0	54.0	0.9970	3.26	0.65	9.8	5
+3	11.2	0.28	0.56	1.9	0.075	17.0	60.0	0.9980	3.16	0.58	9.8	6
+4	7.4	0.70	0.00	1.9	0.076	11.0	34.0	0.9978	3.51	0.56	9.4	5
+
+
+
+
+
+
+
+
+
+
+And here's a slightly better way you could do it. You can avoid making naming errors due to typos caused by manual typing. However, this looks a little repetitive. Can you make it better?
+labels = list(df.columns)
+labels[0] = labels[0].replace(' ', '_')
+labels[1] = labels[1].replace(' ', '_')
+labels[2] = labels[2].replace(' ', '_')
+labels[3] = labels[3].replace(' ', '_')
+labels[5] = labels[5].replace(' ', '_')
+labels[6] = labels[6].replace(' ', '_')
+df.columns = labels
+
+df.head()
+
+
+	fixed_acidity	volatile_acidity	citric_acid	residual_sugar	chlorides	free_sulfur_dioxide	total_sulfur_dioxide	density	pH	sulphates	alcohol	quality
+0	7.4	0.70	0.00	1.9	0.076	11.0	34.0	0.9978	3.51	0.56	9.4	5
+1	7.8	0.88	0.00	2.6	0.098	25.0	67.0	0.9968	3.20	0.68	9.8	5
+2	7.8	0.76	0.04	2.3	0.092	15.0	54.0	0.9970	3.26	0.65	9.8	5
+3	11.2	0.28	0.56	1.9	0.075	17.0	60.0	0.9980	3.16	0.58	9.8	6
+4	7.4	0.70	0.00	1.9	0.076	11.0	34.0	0.9978	3.51	0.56	9.4	5
+
+
+
+
+
+
+
+
+
+
+
+Analyzing Features - Method 1
+Now that your columns are ready, you want to see how different features of this dataset relate to the quality rating of the wine. A very simple way you could do this is by observing the mean quality rating for the top and bottom half of each feature. The code below does this for four features. It looks pretty repetitive right now. Can you make this more concise?
+You might challenge yourself to figure out how to make this code more efficient! But you don't need to worry too much about efficiency right now - we will cover that more in the next section.
+
+
+median_alcohol = df.alcohol.median()
+for i, alcohol in enumerate(df.alcohol):
+    if alcohol >= median_alcohol:
+        df.loc[i, 'alcohol'] = 'high'
+    else:
+        df.loc[i, 'alcohol'] = 'low'
+df.groupby('alcohol').quality.mean()
+
+alcohol
+high    5.958904
+low     5.310302
+Name: quality, dtype: float64
+
+
+
+
+
+
+
+
+median_pH = df.pH.median()
+for i, pH in enumerate(df.pH):
+    if pH >= median_pH:
+        df.loc[i, 'pH'] = 'high'
+    else:
+        df.loc[i, 'pH'] = 'low'
+df.groupby('pH').quality.mean()
+
+pH
+high    5.598039
+low     5.675607
+Name: quality, dtype: float64
+
+
+
+
+
+
+
+
+median_sugar = df.residual_sugar.median()
+for i, sugar in enumerate(df.residual_sugar):
+    if sugar >= median_sugar:
+        df.loc[i, 'residual_sugar'] = 'high'
+    else:
+        df.loc[i, 'residual_sugar'] = 'low'
+df.groupby('residual_sugar').quality.mean()
+
+
+residual_sugar
+high    5.665880
+low     5.602394
+Name: quality, dtype: float64
+
+
+
+
+
+
+
+median_citric_acid = df.citric_acid.median()
+for i, citric_acid in enumerate(df.citric_acid):
+    if citric_acid >= median_citric_acid:
+        df.loc[i, 'citric_acid'] = 'high'
+    else:
+        df.loc[i, 'citric_acid'] = 'low'
+df.groupby('citric_acid').quality.mean()
+
+citric_acid
+high    5.822360
+low     5.447103
+Name: quality, dtype: float64
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Renaming Columns - Method 2
+You want to replace the spaces in the column labels with underscores to be able to reference columns with dot notation. Here's one way you could've done it.
+
+df.columns = [label.replace(' ', '_') for label in df.columns]
+df.head()
+
+	fixed_acidity	volatile_acidity	citric_acid	residual_sugar	chlorides	free_sulfur_dioxide	total_sulfur_dioxide	density	pH	sulphates	alcohol	quality
+0	7.4	0.70	0.00	1.9	0.076	11.0	34.0	0.9978	3.51	0.56	9.4	5
+1	7.8	0.88	0.00	2.6	0.098	25.0	67.0	0.9968	3.20	0.68	9.8	5
+2	7.8	0.76	0.04	2.3	0.092	15.0	54.0	0.9970	3.26	0.65	9.8	5
+3	11.2	0.28	0.56	1.9	0.075	17.0	60.0	0.9980	3.16	0.58	9.8	6
+4	7.4	0.70	0.00	1.9	0.076	11.0	34.0	0.9978	3.51	0.56	9.4	5
+
+
+
+
+
+Analyzing Features - Method 2
+Now that your columns are ready, you want to see how different features of this dataset relate to the quality rating of the wine. A very simple way you could do this is by observing the mean quality rating for the top and bottom half of each feature. The code below does this for four features. It looks pretty repetitive right now. Can you make this more concise?
+You might challenge yourself to figure out how to make this code more efficient! But you don't need to worry too much about efficiency right now - we will cover that more in the next section.
+
+def numeric_to_buckets(df, column_name):
+    median = df[column_name].median()
+    for i, val in enumerate(df[column_name]):
+        if val >= median:
+            df.loc[i, column_name] = 'high'
+        else:
+            df.loc[i, column_name] = 'low' 
+
+
+for feature in df.columns[:-1]:
+    numeric_to_buckets(df, feature)
+    print(df.groupby(feature).quality.mean(), '\n')
+    
+    
+    
+    
+fixed_acidity
+high    5.726061
+low     5.540052
+Name: quality, dtype: float64 
+
+volatile_acidity
+high    5.392157
+low     5.890166
+Name: quality, dtype: float64 
+
+citric_acid
+high    5.822360
+low     5.447103
+Name: quality, dtype: float64 
+
+residual_sugar
+high    5.665880
+low     5.602394
+Name: quality, dtype: float64 
+
+chlorides
+high    5.507194
+low     5.776471
+Name: quality, dtype: float64 
+
+free_sulfur_dioxide
+high    5.595268
+low     5.677136
+Name: quality, dtype: float64 
+
+total_sulfur_dioxide
+high    5.522981
+low     5.750630
+Name: quality, dtype: float64 
+
+density
+high    5.540574
+low     5.731830
+Name: quality, dtype: float64 
+
+pH
+high    5.598039
+low     5.675607
+Name: quality, dtype: float64 
+
+sulphates
+high    5.898917
+low     5.351562
+Name: quality, dtype: float64 
+
+alcohol
+high    5.958904
+low     5.310302
+Name: quality, dtype: float64 
+
+
