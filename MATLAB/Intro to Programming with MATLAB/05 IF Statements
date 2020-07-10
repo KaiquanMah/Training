@@ -1,0 +1,262 @@
+Function
+% give me either the first or second integer
+function out = picker(condition,int1,int2)
+
+% ensure condition is a logical/boolean value - T/F
+y=logical(condition)        
+
+% create the IF statements
+% give me the first integer argument if condition is true
+% else give me the second integer argument
+if  y==1
+    out = int1;
+else
+    out = int2;
+end
+end
+
+
+
+
+
+Code
+out = picker(true,1,2)
+out = picker(false,1,2)
+
+
+
+
+Output
+y =
+  logical
+   1
+
+
+out =
+     1
+
+
+y =
+  logical
+   0
+
+
+out =
+     2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Function
+% evaluate admission based on GRE
+% v=percentile of the verbal portion of GRE
+% q=percentile of the quantitative portion of GRE
+
+function admit = eligible(v,q)
+
+% if v is over 88%
+% and if q is over 88%
+% and avg is at least 92%
+% admit the applicant
+if (v>88) & (q>88) & ((v+q)/2>=92)
+    admit=true;
+else
+    admit=false;
+end
+end
+
+
+
+
+
+
+
+
+Code to call your function
+admit = eligible(96,89)
+admit = eligible(88,99)
+admit = eligible(92,91)
+
+
+
+
+
+
+Output
+admit =
+  logical
+   1
+
+
+admit =
+  logical
+   0
+
+
+admit =
+  logical
+   0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Variable Number of Input Arguments AND nargin (# arguments u input)
+Function
+% age = age
+% limit = age limit
+function too_young = under_age(age,limit)
+
+% if # of arguments is <2, and assume it is always the 'limit' argument which would not be provided under such scenarios
+% default 'limit' to 21
+    if nargin < 2
+        limit = 21
+    end
+
+% then evaluate the age limit    
+    if (age<limit)
+        too_young = true;
+    else
+        too_young = false;
+    end
+end
+
+
+
+
+
+
+Code to call your function
+too_young = under_age(18,18)
+too_young = under_age(20)
+
+
+
+
+
+
+Output
+too_young =
+  logical
+   0
+
+
+limit =
+    21
+
+too_young =
+  logical
+   1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lesson 5 Wrap-up
+Function
+% positive integer scalar arguments 'year', 'month', 'day'
+function valid = valid_date(y,m,d)
+   % Check if the inputs are valid 
+   % Check that they are scalars
+   if ~(isscalar(y) && isscalar(m) && isscalar(d))
+       valid = false;
+   % Check that inputs are positive
+   elseif ~all([y, m, d] > 0)
+       valid = false;
+   % Check that inputs are integers (not the data type) 
+   % remainder after division
+   elseif any(rem([y, m, d], 1))
+       valid = false;
+   % Check that m and d are below the max possible
+   elseif (m > 12) || (d > 31)
+       valid = false;
+   % The inputs could be a valid date, let's see if they actually are
+   else
+       % Vector of the number of days for each month
+       daysInMonth = [31 28 31 30 31 30 31 31 30 31 30 31];
+       % If leap year, change days in Feb
+       if isequal(rem(y, 4), 0) && (~isequal(rem(y, 100), 0) || isequal(rem(y, 400), 0))
+            daysInMonth(2) = 29;
+       end
+       maxDay = daysInMonth(m);
+       if d > maxDay
+           valid = false;
+       else
+           valid = true;
+       end
+       
+   end
+end
+
+
+
+
+
+
+Code to call your function
+valid = valid_date(2018,4,1)
+valid = valid_date(2018,4,31)
+
+
+
+
+
+
+
+Output
+valid =
+  logical
+   1
+
+
+valid =
+  logical
+   0
+
+
