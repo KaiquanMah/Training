@@ -1,0 +1,90 @@
+Aligning RGB Channels (using SSD)
+
+%1st try
+%Read the image
+img = imread('course1image.jpg');
+
+B=img(1:341,1:400);
+G=img(342:682,1:400);
+R=img(683:1023,1:400);
+
+%b=im2double(B);
+%g=im2double(G);
+%r=im2double(R);
+b=double(B);
+g=double(G);
+r=double(R);
+
+
+shiftr=circshift(r,[-10,10]);
+shiftb=circshift(b,[-5,5]);
+%ColorImg_aligned=cat(3,shiftr,g,shiftb);
+
+
+
+%cant use im2double in this programming task
+
+
+
+
+
+
+
+
+
+
+%2nd try
+%Read the image
+img = imread('course1image.jpg');
+[r,c] = size(img);
+
+B = img(1:r/3,:);
+G = img((r/3)+1:(2*r/3),:);
+R = img((2*r/3)+1:r,:);
+
+ref_img_region = G;
+[rg,cg] = size(ref_img_region);
+ref_img_region = ref_img_region(ceil((rg-50)/2) :ceil((rg-50)/2) + 50,ceil((cg-50)/2) :ceil((cg-50)/2) + 50);
+%disp(size(ref_img_region));
+ref_img_region = double(ref_img_region);
+
+% Naive way
+% ColorImg_aligned = cat(3,R,G,B);
+% imshow(ColorImg_aligned);
+
+% SSD way
+nR = align(G,R);
+nB = align(G,B);
+ColorImg_aligned = cat(3,nR,G,nB);
+imshow(ColorImg_aligned);
+
+
+function aligned = align(green,red)
+    [red_row,red_col] = size(red);
+    [green_row,green_col] = size(green);
+
+    % checking SSD for cropped part of the images for faster calculation 
+    cropped_red = red(ceil((red_row-50)/2) : ceil((red_row-50)/2) + 50,ceil((red_col-50)/2) :ceil((red_col-50)/2) + 50);
+cropped_green = green(ceil((green_row-50)/2) : ceil((green_row-50)/2) + 50,ceil((green_col-50)/2) :ceil((green_col-50)/2) + 50);
+
+    MiN = 9999999999;
+    r_index = 0;
+    r_dim = 1;
+    % Modifications
+    for i = -10:10
+        for j = -10:10
+            ssd = SSD(cropped_green,circshift(cropped_red,[i,j])); %circshift(A,[i,j])
+            if ssd < MiN
+                MiN = ssd;
+                r_index = i;
+                r_dim = j;
+            end
+        end
+    end
+    aligned = circshift(red,[r_index,r_dim]);
+end       
+
+function ssd = SSD(a1,a2)
+    x = double(a1)-double(a2);
+    ssd = sum(x(:).^2);
+end 
