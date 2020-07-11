@@ -1,0 +1,85 @@
+Saddle Points
+
+Function
+function indices = saddle(M)
+
+% instantiate the Matrix saddle_m with 0s
+saddle_m =  zeros(size(M));
+
+% https://www.mathworks.com/help/matlab/ref/max.html
+% If dim = 1, then max(A,[],1) returns a row vector containing the largest element in each column.
+% If dim = 2, then max(A,[],2) returns a column vector containing the largest element in each row.
+% we want the max for each row, and min for each col
+row_maxima = max(M, [], 2);
+col_minima = min(M, [], 1);
+
+% instantiate the list of indices
+indices = [];
+    
+    % iterate along each row
+    for i = 1:size(M, 1)
+        
+        % iterate along each col
+        for j = 1:size(M, 2)
+            
+            % saddle point is an element whose value is >= every element in its row AND <= every element in its col
+            % there may be more than 1 saddle pt
+            % evaluate across each M(i, j) element whether they are saddle pts
+            if M(i, j) == row_maxima(i) && M(i, j) == col_minima(j)
+                
+                % set value = 1 in Matrix saddle_m for each saddle pt
+                saddle_m(i, j) = 1;
+                indices = [i, j; indices];
+                
+            end
+            
+        end
+        
+    end
+    
+end
+
+
+
+
+
+
+
+
+
+
+Code to call your function
+% create an interesting surface
+[X,Y] = meshgrid(-15:0.5:10,-10:0.5:10);
+Z = (X.^2-Y.^2)';
+
+% find saddle points
+indices = saddle(Z)
+
+% plot surface
+surf(Z);
+hold on
+
+% mark saddle points with red dots in the same figure
+for ii = 1:size(indices,1)
+    h = scatter3(indices(ii,2),indices(ii,1),Z(indices(ii,1),indices(ii,2)),'red','filled');
+    h.SizeData = 120;
+end
+
+% adjust viewpoint
+view(-115,14);
+hold off
+
+
+
+
+
+
+
+
+
+Output
+indices =
+    31    21
+    
+    
