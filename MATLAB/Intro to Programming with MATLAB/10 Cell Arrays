@@ -1,0 +1,54 @@
+Cell Arrays-Sparse Matrix
+
+
+
+Function
+% take in a cell vector and return a matrix
+% within the cell vector - element 1 contains [# rows , # cols]
+% element 2 contains the default value for the sparse matrix
+% elements 3 and 4 contain the [row# col# value]
+
+function matrix=sparse2matrix(cell)
+
+% reference - https://www.mathworks.com/help/matlab/matlab_prog/access-data-in-a-cell-array.html - Content Indexing with Curly Braces, {}
+% instantiate a matrix of ones with # rows and # cols
+% e.g. sparse2matrix({[2 3], 0, [1 2 3], [2 2 -3]}) => cell{1} = [2 3], cell{1}(1,1) = 2 and cell{1}(1,2) = 3
+% then multiply each element of the matrix with the default value 0 denoted in cell{2}
+M = cell{2} * ones(cell{1}(1,1), cell{1}(1,2));
+    
+    % remove the 2 setup elements in the cell vector we already looked at
+    % iterate over the # of non-zero elements -> in this scenario, there are 2 non-zero elements
+    for ii=1:length(cell)-2
+        
+        % adjust the starting position to start from the 1st non-zero element
+        % at each row # and col # combination in the Matrix, set the value for the Matrix element 
+        M(cell{2+ii}(1,1), cell{2+ii}(1,2)) = cell{2+ii}(1,3);
+        
+    end
+    matrix=M;
+    
+end
+
+
+
+
+
+
+
+
+
+
+Code to call your function
+matrix = sparse2matrix({[2 3], 0, [1 2 3], [2 2 -3]})
+
+
+
+Output
+matrix =
+     0     3     0
+     0    -3     0
+     
+     
+     
+     
+     
