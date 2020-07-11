@@ -1,0 +1,54 @@
+Image Blur
+
+Function
+%for col vectors
+function output = echo_gen(s, Fs, delay, amp)
+    % Find the time between points using Fs
+    dt = 1/Fs;
+    % Calculate the number of points for the given delay
+    N = round(delay/dt);
+    % Pad the original signal with zeros to make room for the echo
+    s1 = [s; zeros(N, 1)];
+    % Create an echo signal that starts with 0's
+    s2 = [zeros(N, 1); s.*amp];
+    % Add the echo to the original signal
+    output = s1 + s2;
+    
+    % the abs of all values must be < 1. Rescale if necessary
+    if max(abs(output)) > 1
+        output = output./max(abs(output));
+    end
+    
+end
+
+
+
+
+
+
+
+
+
+Code to call your function
+% Load splat which adds y and Fs to the workspace
+load splat
+% Call echo_gen to create the new audio data
+output = echo_gen(y, Fs, 0.25, 0.6);
+
+% Create a time axis. The time between points is 1/Fs;
+dt = 1/Fs;
+t = 0:dt:dt*(length(output)-1);
+% Plot the new data to see visualize the echo
+plot(t, output)
+
+% sound (output, Fs) % Uncomment in MATLAB to listen to the new sound data
+
+
+
+
+
+
+
+
+
+
