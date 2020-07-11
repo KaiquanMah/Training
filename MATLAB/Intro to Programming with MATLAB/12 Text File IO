@@ -1,0 +1,64 @@
+Text File I/O
+
+Function
+function charnum = char_counter(fileName,character)
+    % http://www.ece.northwestern.edu/local-apps/matlabhelp/techdoc/ref/fopen.html
+    %fileName - filename
+    fid = fopen(fileName, 'rt'); %open file to read text file
+    
+    %character - count the number of occurrences for the specified character in the file
+    %charnum - number of characters found
+    % if file is found and character is valid
+    if fid>0 & ischar(character)
+        
+        % http://www.ece.northwestern.edu/local-apps/matlabhelp/techdoc/ref/fgets.html
+        % analyse each line
+        fline = fgets(fid);
+        k = 0;
+        
+        while ischar(fline)
+            
+            % iterate through each character in each line
+            for i = 1:length(fline)
+                
+                % if the line contains that character
+                % increment each occurrence by 1
+                if fline(i) == character
+                    k = k + 1;
+                end
+                
+            end
+        
+        % move on to the next line
+        fline = fgets(fid);
+        end
+        
+        % give me the final k as charnum
+        charnum = k;
+        
+    % if file is not found / character is not valid, charnum = -1
+    else
+        charnum = -1;
+    end
+    
+end
+
+
+
+
+
+
+Code to call your function
+type('simple.txt')
+charnum = char_counter('simple.txt','a')
+charnum = char_counter('Frankenstein-by-Shelley.txt','?')
+
+
+
+Output
+This file should have exactly three a-s...
+charnum =
+     3
+
+charnum =
+   220
