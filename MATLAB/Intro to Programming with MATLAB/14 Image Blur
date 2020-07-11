@@ -1,0 +1,60 @@
+Image Blur
+
+Function
+% grayImage is the input image.  It may be of any type (uint8, uint16, single, double).
+% w is the window width of the scanning filter.
+function output = blur(grayImage, w)
+    
+    % Get the dimensions of the image.
+    % numberOfColorChannels should be = 1 for a gray scale image, and 3 for an RGB color image.
+    [rows, columns, numberOfColorChannels] = size(grayImage);
+    
+    % pre-process colour images
+    % Make sure it's a gray scale image, not a color image.
+    if numberOfColorChannels > 1
+    	% It's not really gray scale like we expected - it's color.
+    	% Use weighted sum of ALL channels to create a gray scale image.
+    	grayImage = rgb2gray(grayImage);
+    	% ALTERNATE METHOD: Convert it to gray scale by taking only the green channel,
+    	% which in a typical snapshot will be the least noisy channel.
+    	% grayImage = grayImage(:, :, 2); % Take green channel.
+    end
+    
+    
+    % from gray scale images
+    % Make B larger, padding with NaNs.
+    B = nan(size(grayImage) + (2*w)); 
+    % Make the central part of B match the original image A, surrounded by a border of 'w' on all sides
+    B(w+1:end-w, w+1:end-w) = grayImage; 
+    % Initialize a double array for the output with the size and values of the input.
+    output = double(grayImage); 
+    
+    
+    % Scan the window over the image, making the output the average of the input at each pixel location.
+    for row = w+1:rows+w
+    	for col = w+1:columns+w
+    		% Extract the part of the image under the window at the window's current location.
+    		tmp = B(row-w:row+w, col-w:col+w);
+    		% Replace the output's value there with the mean of the input.
+    		output(row-w, col-w) = mean(tmp(:), 'omitnan');
+    	end
+    end
+
+    % Cast output image to be the same class (uint8, uint16, single, or double) as the input image.
+    output = cast(output, 'like', grayImage);
+
+
+
+
+
+
+
+
+
+Code to call your function
+img = imread('vandy.png');
+output = blur(img,2);
+imshow(output);
+
+
+
