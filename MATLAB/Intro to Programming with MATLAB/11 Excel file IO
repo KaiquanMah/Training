@@ -1,0 +1,60 @@
+Excel File I/O
+Function
+function distance=get_distance(a,b)
+
+    % read the spreadsheet
+    % raw=readtable('Distances.xlsx');
+    [~,~,raw]=xlsread('Distances.xlsx');
+    
+    % subset the labels in the 1st row
+    % subset the labels in the 1st col
+    row=raw(1,:);
+    col=raw(:,1);
+    
+    % in row 1
+    % for the set of non-NULL labels -> i.e. starting from col label 2 to the last cool label
+    % iterate through each col label
+    for ii=2:length(row)
+        
+        % https://www.mathworks.com/help/matlab/ref/strcmp.html
+        % find out whether each col label is same as input argument 'a'
+        % return the col label position if true
+        if strcmp(row(ii),a)
+            mii=ii;
+            break;
+        end
+    end
+    
+    
+    % in col 1
+    % repeat the same search process
+    for jj=2:length(col)
+        if strcmp(col(jj),b)
+            njj=jj;
+            break;
+        end
+    end
+    
+    
+    % if the search process is successful in BOTH row 1 AND col 1
+    % return the element at the row # and col # combination
+    if (strcmp(row(ii),a))&&(strcmp(col(jj),b))
+        distance=raw{mii,njj};
+    
+    % else, return -1    
+    else
+        distance=-1;
+    end
+    
+end
+
+
+
+
+Code to call your function
+distance = get_distance('Seattle, WA','Miami, FL')
+
+
+Output
+distance =
+        3723
