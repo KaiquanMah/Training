@@ -1,0 +1,142 @@
+Our first step is to make sure that we work with the correct Azure subscription before we change any settings. We'll use the az account list list command. By default, the command returns a JSON string. However, we'll format the output as a table to make the information easier to work with. Run the following command.
+Subscription/account list
+Requesting a Cloud Shell.Succeeded.
+Connecting terminal...
+
+Welcome to Azure Cloud Shell
+
+Type "az" to use Azure CLI
+Type "help" to learn about Cloud Shell
+
+k@Azure:~$ az account list --output table
+Name                    CloudName    SubscriptionId                        State    IsDefault
+----------------------  -----------  ------------------------------------  -------  -----------
+Concierge Subscription  AzureCloud   d14999c2-97e5-49de-a410-0dfc6b61ed1c  Enabled  True
+
+
+
+
+
+
+Recall that we used a pre-created resource group called learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731 when we created our website. However, if you ever need to list all the resource groups in a subscription, then you'll run the az group list command.
+resource group list
+k@Azure:~$ az group list --output table
+Name                                        Location    Status
+------------------------------------------  ----------  ---------
+learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731  westus      Succeeded
+
+
+
+
+Next, we'll list all the resources in the learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731 using the az resource list command. The command will return a list of resources. By specifying, --resource-type we can filter the result to include only the resource information related to websites.
+Copy the value of 'name' from the JSON output. We'll use it in the next steps to first stop and then start our website.
+resource list
+az resource list \
+    --resource-group learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731 \
+    --resource-type Microsoft.Web/sites
+
+
+
+
+sample JSON output
+{
+"id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx/resourceGroups/learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731/providers/Microsoft.Web/sites/BlogFor",
+"identity": null,
+"kind": "app",
+"location": "centralus",
+"managedBy": null,
+"name": "MyWebApp",
+"plan": null,
+"properties": null,
+"resourceGroup": "learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731",
+"sku": null,
+"tags": null,
+"type": "Microsoft.Web/sites"
+}
+
+
+
+
+
+actual JSON output
+[
+  {
+    "changedTime": null,
+    "createdTime": null,
+    "id": "/subscriptions/d14999c2-97e5-49de-a410-0dfc6b61ed1c/resourceGroups/learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731/providers/Microsoft.Web/sites/wordpresstut",
+    "identity": null,
+    "kind": "app",
+    "location": "southeastasia",
+    "managedBy": null,
+    "name": "wordpresstut",
+    "plan": null,
+    "properties": null,
+    "provisioningState": null,
+    "resourceGroup": "learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731",
+    "sku": null,
+    "tags": {
+      "tag1": "abc"
+    },
+    "type": "Microsoft.Web/sites"
+  }
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+We'll use the az webapp stop command to stop the web application running in our app service. Replace <web app name> with the name of your web app you copied, then run this command to stop your web app.
+stop app from running
+
+sample
+az webapp stop \
+    --resource-group learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731 \
+    --name <web app name>
+
+actual
+az webapp stop \
+    --resource-group learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731 \
+    --name wordpresstut
+    
+    
+
+
+
+
+
+
+Open the website in a new browser tab. You'll find the URL to the site in the overview of the App service in the portal. You'll see a message in your browser that reads:
+https://docs.microsoft.com/en-us/archive/blogs/waws/azure-web-apps-error-403-this-web-app-is-stopped
+
+
+
+Finally, let's start the web app by running the az webapp start command. Replace <web app name> with the name of your web app you copied, then run this command to start your web app.
+start web app
+
+sample
+az webapp start \
+    --resource-group learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731 \
+    --name <web app name>
+    
+actual
+az webapp start \
+    --resource-group learn-dca36ff5-da68-45a7-8c03-6d0d5e0c0731 \
+    --name wordpresstut
+
+
+
+
+
+
+
+
+Switch back to the tab for your website and refresh the page. Your website will be available after a couple of seconds.
+
