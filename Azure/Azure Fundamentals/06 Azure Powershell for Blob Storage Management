@@ -1,0 +1,32 @@
+rem create storage
+-skuname replication method
+new -azstorageaccount -resourcegroupname rg1 -name storagename -location canadaeast -skuname "standard _lrs"
+
+
+rem storage account list
+get-azstorageaccount
+
+
+
+rem create a reusable context variable $ctx
+$ctx = get-azstorageaccount -r rg1 -name storagename
+
+
+
+rem what are the endpoints in the context variable $ctx
+$ctx.context
+
+
+
+rem create container in the storage
+new azstoragecontainer -name "containername" -context $ctx.context
+
+
+
+rem check items in ur local directory 
+dir
+
+
+
+rem upload file from local directory to container
+set -azstorageblobcontent -file c:\samplefiles\filename.jpg -container containername -blob filename.jpg -context $ctx.context
