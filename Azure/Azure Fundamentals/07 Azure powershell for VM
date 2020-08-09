@@ -1,0 +1,27 @@
+rem get list of azvm
+Get-AzVMImage -Location "Central US" -PublisherName "MicrosoftwindowsServer" -Offer "windowsserver" -Skus "2012-R2-Datacenter"
+->version, sku, location, id, PublisherName (microsoftwindowsserver), Offer (windowsserver)
+
+
+rem use the PowerShell Get-Credential cmdlet which will pop up a graphical dialog box where I can specify both a username and a password
+rem that's going to be stored in the $creds variable that I will refer to later
+$creds = Get-Credential -Message "New VM username and password?"
+
+
+rem specify vmconfig parameters
+rem for vmconfig, assign $creds to 'Credential'
+$vmconfig = 
+@{ 
+  ResourceGroupName = 'rg1' 
+  Name = 'vmName'
+  Location = 'Canadaeast' 
+  ImageName = 'win2016Datacenter' 
+  PublicIPAddressName = 'eastwindowsvm2_ pubIP' 
+  Credential = $creds 
+  OpenPorts =3389
+}
+  
+
+
+rem Create vm using vmconfig parameters and the $creds variable
+New-AzVM @vmconfig
