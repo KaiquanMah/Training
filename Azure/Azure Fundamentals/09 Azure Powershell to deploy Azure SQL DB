@@ -1,0 +1,17 @@
+rem connect to azure
+Connect-AzAccount
+
+
+
+rem create sql server
+New-AzSqlServer -ResourceGroupName rg1 -ServerName sqlsrvname -Location canadaeast -SqlAdministratorCredentials `
+$(New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList "username" , $ (ConvertTo-SecureString - String "password" -AsPlainText -Force))
+
+
+rem create sql db
+New-AzSqldatabase -ResourceGroupName rg1 -ServerName sqlsrvname -DatabaseName dbname
+
+rem create sql server firewall rule
+rem allow only access from the specified public ip address
+New-AzSqlServer FirewallRule -ResourceGroupName rg1 -ServerName sqlsrvname -FirewallRuleName "AllowIncoming SQL" -StartIpAddress 71.7.180.108 -EndIpAddress 71.7.180.108
+
