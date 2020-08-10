@@ -1,0 +1,27 @@
+Azure Powershell
+New-AzNetworkSecurityGroup
+Remove-AzNetworkSecurityGroup
+
+rem retrieve a list of network security groups
+Get-AzNetworkSecurityGroup
+
+
+
+
+rem list of network security groups -> return a list of their names
+Get-AzNetworkSecurityGroup | select name
+
+
+
+rem create network security group
+New-AzNetworkSecurityGroup - name Linux_NSG -resourcegroupname RG1 -location canadaeast
+
+
+
+rem get network security group
+rem then add a rule to allow inbound SSH
+rem write settings we have written to the network security group we retrieved
+Get-AzNetworkSecurityGroup -name linux_nsg -resourcegroupname rg1 | Add-AzNetworkSecurityRuleConfig `
+-name AllowSSH -access allow -protocol tcp -direction inbound -priority 220 -sourceaddressprefix * `
+-sourceportrange * -destinationaddressprefix * -destinationportrange 22 | Set-AzNetworkSecurityGroup
+
