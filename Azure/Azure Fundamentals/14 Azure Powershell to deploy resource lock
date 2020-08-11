@@ -1,0 +1,13 @@
+rem lock at resource level instead of resource group level
+New-AzResourceLock -LockName Rg1NoDelete -LockLevel CanNotDelete -ResourceGroupName rg1
+
+rem get list of resource locks
+Get-AzResourceLock
+
+
+rem (expression).property
+rem instead of rg1.LockId as the parameter value
+$lockId = (Get-AzResourceLock -ResourceGroupName rg1).LockId
+
+rem remove lock
+Remove-AzResourceLock -LockId $lockId
