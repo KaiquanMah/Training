@@ -1,0 +1,77 @@
+https://googlecoursera.qwiklabs.com/focuses/10714028?parent=lti_session
+
+enable apis and services
+Dialogflow API
+Cloud Source Repositories API
+Cloud Natural Language API
+
+
+https://cloud.google.com/dialogflow/docs/
+https://console.dialogflow.com
+export and import>import from zip
+
+#Add follow-up intents with input and output contexts
+intents > hover over order.pizza > add follow-up intent > yes
+order.pizza - yes
+intents > hover over order.pizza > add follow-up intent > no
+order.pizza - no
+
+#Setup fulfillment using Cloud Functions to push order entries into Datastore
+Fulfillment > inline editor > enable
+
+json tab
+dependencies > add the line below within key-value pairs stored in 'dependencies'
+"@google-cloud/datastore": "^0.8.0",
+Deploy
+
+index.js tab
+#add lines to work with Datastore
+add the lines below after the line "process.env.DEBUG = 'dialogflow:debug';"
+const Datastore = require('@google-cloud/datastore');
+const datastore = new Datastore({
+  projectId: 'qwiklabs-gcp-<projectid>'
+});
+#add the lines below to handle pizza orders after the handler functions for Welcome and Fallback intents
+function order_pizza(agent) {
+      var pizza_size = agent.parameters.size;
+      var pizza_topping = agent.parameters.pizza_topping;
+      var time = agent.parameters.time;
+      const taskKey = datastore.key('order_item');
+      const entity = {
+        key: taskKey,
+        data: {
+        item_name: 'pizza',
+        topping: pizza_topping,
+        time: time,
+        order_time: new Date().toLocaleString(),
+        size: pizza_size }
+       };
+      return datastore.save(entity).then(() => {
+                console.log(`Saved ${entity.key.name}: ${entity.data.item_name}`);
+                agent.add(`Your order for ${pizza_topping} pizza has been placed! Would you like a drink with your order?`);
+
+             });
+     }
+#Modify intentMap. Add an entry to handle the order.pizza mapping to the function you just added
+intentMap.set('order.pizza', order_pizza);
+#full intentMap
+let intentMap = new Map();
+intentMap.set('order.pizza', order_pizza);
+intentMap.set('Default Welcome Intent', welcome);
+intentMap.set('Default Fallback Intent', fallback);
+agent.handleRequest(intentMap);
+
+
+#deploy
+deploy
+
+#enable webhook calls
+order.pizza intent > Fulfillment > Enable the webhook call for this intent
+Default Welcome intent > Fulfillment > Enable the webhook call for this intent
+Default Fallback intent > Fulfillment > Enable the webhook call for this intent
+
+
+datastore > datastore mode > create database
+test conversation in Dialogflow
+check entries being entered into datastore
+
