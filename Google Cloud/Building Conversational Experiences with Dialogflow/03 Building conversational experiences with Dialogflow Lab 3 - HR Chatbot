@@ -1,0 +1,394 @@
+https://googlecoursera.qwiklabs.com/focuses/10744574?parent=lti_session
+HR Chatbot : Setup knowledge base for your agent in Cloud Datastore
+In this HR chatbot series of labs, you build a chatbot in three steps. In this first lab, you extract the content from a document to create a knowledge base, which the chatbot uses to converse with your users about topics found in the knowledge base. This lab uses a Human Resources Manual as the example document. However, this use case can be applied to any type of document: an operations manual, an instruction manual, a policy document, etc.
+
+What you'll learn to do
+Use Cloud Datalab, Python, data science libraries, and Google Natural Language API machine learning technology to transform an unstructured text document into a structured knowledge base in Cloud Datastore
+Use Dialogflow to build a conversational agent that can respond to questions about the HR manual
+Populate entities from Datastore into your Dialogflow agent
+
+
+Enable APIs
+Compute Engine API
+Dialogflow API
+Cloud Storage
+Cloud Source Repositories API
+Cloud Natural Language API
+
+
+Initialize App Engine and Cloud Datastore
+App Engine > Dashboard > Create Application
+
+
+Get started with Cloud Datalab
+This lab uses several Cloud Datalab notebooks, each of which has a primary function as described below:
+#Pre-Processing Notebooks
+Let's first review the purpose of each of the notebooks. They are used to extract information from the HR Manual and create a knowledge base that is used by the chatbot to answer questions. Each of them will be run one time in the order listed here:
+ProcessHandbook.ipynb performs "semi-structured" analysis on the HR Manual text file. It alternately extracts topic "headings" and associated "policy text" from the file and stores these as key-value pairs in Cloud Datastore to give the chatbot a basic vocabulary.
+ProcessSynonyms.ipynb uses several Python data science libraries and the Cloud Natural Language API to generate synonyms for topics, which gives the chatbot an expanded vocabulary.
+DialogFlow.ipynb uses Dialogflow's "Entity" API to write the topics to Dialogflow's Entity module, which makes these words available to the chatbot as a data type.
+
+#Set up Cloud Datalab
+Launch Google Cloud Shell
+student_00_c53c6ce9bb3e@cloudshell:~ (qwiklabs-gcp-00-7a3b1145f3b2)$ gcloud config set core/project $GOOGLE_CLOUD_PROJECT
+Updated property [core/project].
+student_00_c53c6ce9bb3e@cloudshell:~ (qwiklabs-gcp-00-7a3b1145f3b2)$ gcloud compute zones list
+NAME                       REGION                   STATUS  NEXT_MAINTENANCE  TURNDOWN_DATE
+us-east1-b                 us-east1                 UP
+us-east1-c                 us-east1                 UP
+us-east1-d                 us-east1                 UP
+us-east4-c                 us-east4                 UP
+us-east4-b                 us-east4                 UP
+us-east4-a                 us-east4                 UP
+us-central1-c              us-central1              UP
+us-central1-a              us-central1              UP
+us-central1-f              us-central1              UP
+us-central1-b              us-central1              UP
+us-west1-b                 us-west1                 UP
+us-west1-c                 us-west1                 UP
+us-west1-a                 us-west1                 UP
+europe-west4-a             europe-west4             UP
+europe-west4-b             europe-west4             UP
+europe-west4-c             europe-west4             UP
+europe-west1-b             europe-west1             UP
+europe-west1-d             europe-west1             UP
+europe-west1-c             europe-west1             UP
+europe-west3-c             europe-west3             UP
+europe-west3-a             europe-west3             UP
+europe-west3-b             europe-west3             UP
+europe-west2-c             europe-west2             UP
+europe-west2-b             europe-west2             UP
+europe-west2-a             europe-west2             UP
+asia-east1-b               asia-east1               UP
+asia-east1-a               asia-east1               UP
+asia-east1-c               asia-east1               UP
+asia-southeast1-b          asia-southeast1          UP
+asia-southeast1-a          asia-southeast1          UP
+asia-southeast1-c          asia-southeast1          UP
+asia-northeast1-b          asia-northeast1          UP
+asia-northeast1-c          asia-northeast1          UP
+asia-northeast1-a          asia-northeast1          UP
+asia-south1-c              asia-south1              UP
+asia-south1-b              asia-south1              UP
+asia-south1-a              asia-south1              UP
+australia-southeast1-b     australia-southeast1     UP
+australia-southeast1-c     australia-southeast1     UP
+australia-southeast1-a     australia-southeast1     UP
+southamerica-east1-b       southamerica-east1       UP
+southamerica-east1-c       southamerica-east1       UP
+southamerica-east1-a       southamerica-east1       UP
+asia-east2-a               asia-east2               UP
+asia-east2-b               asia-east2               UP
+asia-east2-c               asia-east2               UP
+asia-northeast2-a          asia-northeast2          UP
+asia-northeast2-b          asia-northeast2          UP
+asia-northeast2-c          asia-northeast2          UP
+asia-northeast3-a          asia-northeast3          UP
+asia-northeast3-b          asia-northeast3          UP
+asia-northeast3-c          asia-northeast3          UP
+asia-southeast2-a          asia-southeast2          UP
+asia-southeast2-b          asia-southeast2          UP
+asia-southeast2-c          asia-southeast2          UP
+europe-north1-a            europe-north1            UP
+europe-north1-b            europe-north1            UP
+europe-north1-c            europe-north1            UP
+europe-west6-a             europe-west6             UP
+europe-west6-b             europe-west6             UP
+europe-west6-c             europe-west6             UP
+northamerica-northeast1-a  northamerica-northeast1  UP
+northamerica-northeast1-b  northamerica-northeast1  UP
+northamerica-northeast1-c  northamerica-northeast1  UP
+us-west2-a                 us-west2                 UP
+us-west2-b                 us-west2                 UP
+us-west2-c                 us-west2                 UP
+us-west3-a                 us-west3                 UP
+us-west3-b                 us-west3                 UP
+us-west3-c                 us-west3                 UP
+us-west4-a                 us-west4                 UP
+us-west4-b                 us-west4                 UP
+us-west4-c                 us-west4                 UP
+
+(Zone | Region | Status)
+#datalab create mydatalabvm --zone <ZONE>
+#If the command prompts you to create SSH keys, type Y.
+#If the command prompts you for an RSA key password, press ENTER twice to confirm.
+student_00_c53c6ce9bb3e@cloudshell:~ (qwiklabs-gcp-00-7a3b1145f3b2)$ datalab create mydatalabvm --zone us-west1-a
+Creating the network datalab-network
+Creating the firewall rule datalab-network-allow-ssh
+Creating the disk mydatalabvm-pd
+Creating the repository datalab-notebooks
+Creating the instance mydatalabvm
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-00-7a3b1145f3b2/zones/us-west1-a/instances/mydatalabvm].
+Connecting to mydatalabvm.
+This will create an SSH tunnel and may prompt you to create an rsa key pair. To manage these keys, see https://cloud.google.com/compute/docs/instances/adding-removing-ssh-keys
+Waiting for Datalab to be reachable at http://localhost:8081/
+This tool needs to create the directory
+[/home/student_00_c53c6ce9bb3e/.ssh] before being able to generate SSH
+ keys.
+
+Do you want to continue (Y/n)?  y
+
+Generating public/private rsa key pair.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/student_00_c53c6ce9bb3e/.ssh/google_compute_engine.
+Your public key has been saved in /home/student_00_c53c6ce9bb3e/.ssh/google_compute_engine.pub.
+The key fingerprint is:
+SHA256:<SHA256hash> student_00_c53c6ce9bb3e@cs-6000-devshell-vm-d228e4ec-0384-45bc-8a23-a1c768912f7f
+The key's randomart image is:
++---[RSA 2048]----+
+|=..+=+o...o      |
+|o.*o.o..   +     |
+|++..  o  .ooo.   |
+| o . . .+.+ =o   |
+|    =  oSo =..   |
+|   o . +. .oo    |
+|      ..o . ..   |
+|    . .  +. .    |
+|     oE ..oo     |
++----[SHA256]-----+
+Updating project ssh metadata...⠹Updated [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-00-7a3b1145f3b2].
+Updating project ssh metadata...done.
+Waiting for SSH key to propagate.
+The connection to Datalab is now open and will remain until this command is killed.
+Click on the *Web Preview* (square button at top-right), select *Change port > Port 8081*, and start using Datalab.
+
+#Note: The connection from the Cloud Shell to the Datalab instance can time out due to inactivity. If you lose connection, you may be able to restore it as follows. Find the instance name from the drop down menu Compute Engine > VM Instances, then enter the command: datalab connect mydatalabvm in your new Cloud Shell.
+
+
+
+
+#Download and open lab notebooks
+cloud shell > web preview > port 8081 (opens up Cloud Datalab)
++Notebook
+%bash
+git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+rm -rf training-data-analyst/.git
+
+#View the HR Manual sample text file
+training-data-analyst > courses > dialogflow-chatbot > notebooks > CAHRC_HR_Manual.txt
+#the file is organized in a semi-structured format, with topic headings followed by blocks of text describing each topic
+#https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/dialogflow-chatbot/notebooks/CAHRC_HR_Manual.txt
+
+
+
+
+
+
+
+
+
+#Open and execute the ProcessHandbook notebook
+#https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/dialogflow-chatbot/notebooks/ProcessHandbook.ipynb
+#extracts heading "topics" along with their associated content "action text" from the HR manual text file, and stores these as key-value pairs in Cloud Datastore. 
+#This notebook should only be run one time
+
+!pip install google-cloud-datastore
+Collecting google-cloud-datastore
+  Using cached https://files.pythonhosted.org/packages/40/7c/e1dec4fd96448fded7812f23be75cc3697534e7252d018499a9fb40fb9cc/google_cloud_datastore-1.15.0-py2.py3-none-any.whl
+Collecting google-cloud-core<2.0dev,>=1.4.0 (from google-cloud-datastore)
+  Using cached https://files.pythonhosted.org/packages/a8/c8/9be9810356f62daea7e417164db6eb4b5f5edf087a9516fa4602de8b1924/google_cloud_core-1.4.1-py2.py3-none-any.whl
+Collecting google-api-core[grpc]<2.0.0dev,>=1.14.0 (from google-cloud-datastore)
+  Using cached https://files.pythonhosted.org/packages/e0/2d/7c6c75013105e1d2b6eaa1bf18a56995be1dbc673c38885aea31136e9918/google_api_core-1.22.1-py2.py3-none-any.whl
+Collecting googleapis-common-protos<2.0dev,>=1.6.0 (from google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore)
+  Using cached https://files.pythonhosted.org/packages/03/74/3956721ea1eb4bcf7502a311fdaa60b85bd751de4e57d1943afe9b334141/googleapis_common_protos-1.52.0-py2.py3-none-any.whl
+Collecting protobuf>=3.12.0 (from google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore)
+  Using cached https://files.pythonhosted.org/packages/19/f1/e7ea38480048cc073802b9242156b85095586c5b1f66d84447635696be60/protobuf-3.13.0-cp27-cp27mu-manylinux1_x86_64.whl
+Collecting google-auth<2.0dev,>=1.19.1 (from google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore)
+  Using cached https://files.pythonhosted.org/packages/63/7f/ef6bcf2cc0f50c7163afb94382aab67a6b278e1e447c2e3981aa281b9747/google_auth-1.21.0-py2.py3-none-any.whl
+Requirement already satisfied: futures>=3.2.0; python_version < "3.2" in /usr/local/envs/py2env/lib/python2.7/site-packages (from google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (3.2.0)
+Requirement already satisfied: pytz in /usr/local/envs/py2env/lib/python2.7/site-packages (from google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (2018.4)
+Requirement already satisfied: six>=1.10.0 in /usr/local/envs/py2env/lib/python2.7/site-packages (from google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (1.10.0)
+Requirement already satisfied: setuptools>=34.0.0 in /usr/local/envs/py2env/lib/python2.7/site-packages (from google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (41.0.1)
+Requirement already satisfied: requests<3.0.0dev,>=2.18.0 in /usr/local/envs/py2env/lib/python2.7/site-packages (from google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (2.18.4)
+Collecting grpcio<2.0dev,>=1.29.0; extra == "grpc" (from google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore)
+  Using cached https://files.pythonhosted.org/packages/e3/0e/f56aa1f8200ae3c5d38305e69f5920caa480c7ff54ae4d8a5f57d1d69fa4/grpcio-1.31.0.tar.gz
+Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/envs/py2env/lib/python2.7/site-packages (from google-auth<2.0dev,>=1.19.1->google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (0.2.4)
+Requirement already satisfied: cachetools<5.0,>=2.0.0 in /usr/local/envs/py2env/lib/python2.7/site-packages (from google-auth<2.0dev,>=1.19.1->google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (2.1.0)
+Requirement already satisfied: rsa<4.6; python_version < "3.5" in /usr/local/envs/py2env/lib/python2.7/site-packages (from google-auth<2.0dev,>=1.19.1->google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (3.4.2)
+Requirement already satisfied: chardet<3.1.0,>=3.0.2 in /usr/local/envs/py2env/lib/python2.7/site-packages (from requests<3.0.0dev,>=2.18.0->google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (3.0.4)
+Requirement already satisfied: idna<2.7,>=2.5 in /usr/local/envs/py2env/lib/python2.7/site-packages (from requests<3.0.0dev,>=2.18.0->google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (2.6)
+Requirement already satisfied: urllib3<1.23,>=1.21.1 in /usr/local/envs/py2env/lib/python2.7/site-packages (from requests<3.0.0dev,>=2.18.0->google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (1.22)
+Requirement already satisfied: certifi>=2017.4.17 in /usr/local/envs/py2env/lib/python2.7/site-packages (from requests<3.0.0dev,>=2.18.0->google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (2019.3.9)
+Requirement already satisfied: enum34>=1.0.4 in /usr/local/envs/py2env/lib/python2.7/site-packages (from grpcio<2.0dev,>=1.29.0; extra == "grpc"->google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (1.1.6)
+Requirement already satisfied: pyasn1<0.5.0,>=0.4.1 in /usr/local/envs/py2env/lib/python2.7/site-packages (from pyasn1-modules>=0.2.1->google-auth<2.0dev,>=1.19.1->google-api-core[grpc]<2.0.0dev,>=1.14.0->google-cloud-datastore) (0.4.5)
+Building wheels for collected packages: grpcio
+  Running setup.py bdist_wheel for grpcio ... done
+  Stored in directory: /content/.cache/pip/wheels/e4/2a/04/8be8b1db08cb3def3c8f6e608c9fcdc1509ce7587856793b3f
+Successfully built grpcio
+pandas-gbq 0.3.0 has requirement google-cloud-bigquery>=0.28.0, but you'll have google-cloud-bigquery 0.23.0 which is incompatible.
+google-cloud-monitoring 0.28.0 has requirement google-api-core<0.2.0dev,>=0.1.1, but you'll have google-api-core 1.22.1 which is incompatible.
+google-cloud-monitoring 0.28.0 has requirement google-cloud-core<0.29dev,>=0.28.0, but you'll have google-cloud-core 1.4.1 which is incompatible.
+google-cloud-bigquery 0.23.0 has requirement google-cloud-core<0.24dev,>=0.23.1, but you'll have google-cloud-core 1.4.1 which is incompatible.
+tensorboard 1.8.0 has requirement bleach==1.5.0, but you'll have bleach 2.1.2 which is incompatible.
+tensorboard 1.8.0 has requirement html5lib==0.9999999, but you'll have html5lib 1.0.1 which is incompatible.
+google-cloud-dataflow 2.0.0 has requirement httplib2<0.10,>=0.8, but you'll have httplib2 0.13.0 which is incompatible.
+google-cloud-dataflow 2.0.0 has requirement protobuf==3.2.0, but you'll have protobuf 3.13.0 which is incompatible.
+Installing collected packages: protobuf, googleapis-common-protos, google-auth, grpcio, google-api-core, google-cloud-core, google-cloud-datastore
+  Found existing installation: protobuf 3.6.1
+    Uninstalling protobuf-3.6.1:
+      Successfully uninstalled protobuf-3.6.1
+  Found existing installation: googleapis-common-protos 1.5.10
+    Uninstalling googleapis-common-protos-1.5.10:
+      Successfully uninstalled googleapis-common-protos-1.5.10
+  Found existing installation: google-auth 1.6.3
+    Uninstalling google-auth-1.6.3:
+      Successfully uninstalled google-auth-1.6.3
+  Found existing installation: grpcio 1.21.1
+    Uninstalling grpcio-1.21.1:
+      Successfully uninstalled grpcio-1.21.1
+  Found existing installation: google-api-core 0.1.4
+    Uninstalling google-api-core-0.1.4:
+      Successfully uninstalled google-api-core-0.1.4
+  Found existing installation: google-cloud-core 0.28.1
+    Uninstalling google-cloud-core-0.28.1:
+      Successfully uninstalled google-cloud-core-0.28.1
+Successfully installed google-api-core-1.22.1 google-auth-1.21.0 google-cloud-core-1.4.1 google-cloud-datastore-1.15.0 googleapis-common-protos-1.52.0 grpcio-1.31.0 protobuf-3.13.0
+
+
+
+from google.cloud import datastore
+
+datastore_client = datastore.Client()
+
+employee_handbook = open('CAHRC_HR_Manual.txt', 'r')
+while True:
+  
+  topic = employee_handbook.readline()
+  if not(topic):
+    break
+  
+  if (topic != '\r\n') and (len(topic.split(' ')) < 5):
+  
+    action_text = ''
+        
+    last_line = ''
+    line = employee_handbook.readline()
+    
+    while (last_line != '\r\n') and (line != '\r\n') and (len(line.split(' ')) > 5):
+      
+      action_text += line
+      last_line = line
+      line = employee_handbook.readline()
+      
+    if action_text != '':
+      
+      kind = 'Topic'
+      topic_key = datastore_client.key(kind, topic.strip().lower())
+
+      topic = datastore.Entity(key=topic_key)
+      topic['action_text'] = action_text
+
+      datastore_client.put(topic)
+
+      print('Saved {}: {}'.format(topic.key.name, topic['action_text']))
+
+
+
+
+Saved employment equity: [THE ORGANIZATION] is an equal opportunity employer and employs personnel without regard to race, ancestry, place of origin, colour, ethnic origin, language, citizenship, creed, religion, gender, sexual orientation, age, marital status, physical and/or mental handicap or financial ability. While remaining alert and sensitive to the issue of fair and equitable treatment for all, [THE ORGANIZATION] has a special concern with the participation and advancement of members of four designated groups that have traditionally been disadvantaged in employment: women, visible minorities, aboriginal peoples and persons with disabilities.
+Saved recruitment and selection: All employment opportunities at [the organization]  are posted for a minimum 10 working day period.  They are posted on [THE ORGANIZATION]’s website and on the websites of affiliated organizations.  Occasionally, they are posted on employment websites or with an employment agency.  Applications are encouraged from current employees but will be screened in the same manner as applications received from outside applicants.
+...
+Saved renovations: As odours from building materials and noise levels for tools can cause discomfort to employees, renovations will be scheduled to have a minimum impact on employees.  This may include renovating during non work hours (evenings & weekends) and ensuring direct ventilation to control fumes.  Carpets should be installed and cloth furniture unwrapped late in the day so emissions may occur during non working hours.
+
+
+
+
+
+
+
+
+Datastore > Entities > kind > topic
+Name/ID
+action_text
+name=annual salary	U2FsYXJpZXMgc2hhbGwgYmUgZGV0ZXJtaW5lZCBieSB0aGUgRXhlY3V0aXZlIERpcmVjdG9yLCBiYXNlZCBvbiBidWRnZXQgY29uc2lkZXJhdGlvbnMgYW5kIGNvbW1lbnN1cmF0ZSB3aXRoIHRoZSBleHBlcmllbmNlIG9mIHRoZSBzdWNjZXNzZnVsIGNhbmRpZGF0ZS4gICBUaGUgb3JnYW5pemF0aW9uIHNoYWxsIHBheSBlbXBsb3	
+name=compassionate leave	W1RIRSBPUkdBTklaQVRJT05dIHdpbGwgZ3JhbnQgdXAgdG8gdGhyZWUgKDMpIHdvcmtpbmcgZGF5cyBwZXIgZXZlbnQgb24gdGhlIG9jY2FzaW9uIG9mIGEgZGVhdGggaW4gdGhlIHN0YWZmIG1lbWJlcuKAmXMgaW1tZWRpYXRlIGZhbWlseS4gIEltbWVkaWF0ZSBmYW1pbHkgaXMgZGVmaW5lZCBhczogcGFyZW50KHMpLCBzdGVwIH	
+name=statutory holidays	VGhlIFByb3ZpbmNlIG9mIE9udGFyaW8gaGFzIHR
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+#Open and execute the ProcessSynonyms notebook
+annual salary salary Set([u'wage', u'salary', u'remuneration', u'pay', u'salaries', u'earnings', u'pays', u'wages', u'earning', u'remunerations'])
+compassionate leave compassionate Set([])
+compassionate leave leave Set([u'partings', u'leaves', u'farewells', u'leave', u'farewell', u'parting'])
+...
+statutory holidays statutory Set([])
+statutory holidays holidays Set([u'holiday', u'vacation', u'holidays', u'vacations'])
+#then 
+Datastore > Entities > kind > synonym
+Name/ID
+synonym
+name=PET	pets	
+name=PETS	pets	
+name=annual	annual salary	
+name=annual salary	annual salary	
+name=annuals	annual salary
+...
+name=work	hours of work	
+name=workplace	hours of work	
+name=workplaces	hours of work	
+name=works	hours of work
+
+
+
+
+
+
+
+
+
+#Dialogflow
+https://console.dialogflow.com/
+Create agent
+
+Create a "Topic" entity
+Allow automated expansion - This allows your chatbot to recognize Topic values that are not explicitly listed in your data model.
+Clear / uncheck Define synonyms. Your webhook handles synonyms instead.
+Add a value - 'test'. You add more values for Topic in an automated fashion in the next task, but Dialogflow doesn't allow you to save the entity without at least a single value.
+
+
+
+
+
+
+#Import topic entities from Cloud Datastore to Dialogflow
+run DialogFlow.ipynb
+[value: "annual salary"
+synonyms: "annual salary"
+,
+...
+, value: "sick leave"
+synonyms: "sick leave"
+]
+#check out the new values in dialogflow > entity > Topic
+
+
+
+
+
+
+#Create and train your intent
+intent - Topic
+#create a "lookup" action that passes a "topic" parameter to your backend process (webhook), which retrieves information on this topic from the HR Manual.
+action name - lookup
+Parameter Name - topic
+Entity - @Topic
+value - $topic 
+
+fulfilment > Enable webhook call for this intent
+add training phrases
+
+#export agent as zip
+gear > export and import tab > export as zip
+
