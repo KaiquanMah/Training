@@ -1,0 +1,137 @@
+https://googlecoursera.qwiklabs.com/focuses/10768668?parent=lti_session
+
+#Enable APIs
+Cloud Storage
+Cloud Source Repositories API
+Cloud Natural Language API
+
+
+
+
+#Initialize App Engine and Cloud Datastore
+App Engine > Dashboard > create application > create app
+
+
+#Import Entities
+cloud shell
+student_00_a2dd475a0572@cloudshell:~ (qwiklabs-gcp-00-7fda13dcf174)$ gcloud datastore import gs://cloud-training/T-GCPDF-I/datastore_HR_entities/2018-11-14T06:19:16_10212.overall_export_metadata
+Waiting for [projects/qwiklabs-gcp-00-7fda13dcf174/operations/AiA3Mzc1MzUzMzYyChp0bHVhZmVkBxJsYXJ0bmVjc3Utc2Jvai1uaW1kYRQKLRI] to finish...done.
+metadata:
+  '@type': type.googleapis.com/google.datastore.admin.v1.ImportEntitiesMetadata
+  common:
+    operationType: IMPORT_ENTITIES
+    startTime: '2020-09-01T13:04:28.006405Z'
+    state: PROCESSING
+  entityFilter:
+    namespaceIds:
+    - ''
+  inputUrl: gs://cloud-training/T-GCPDF-I/datastore_HR_entities/2018-11-14T06:19:16_10212.overall_export_metadata
+name: projects/qwiklabs-gcp-00-7fda13dcf174/operations/AiA3Mzc1MzUzMzYyChp0bHVhZmVkBxJsYXJ0bmVjc3Utc2Jvai1uaW1kYRQKLRI
+
+
+datastore>entities>kind=synonym
+Name/ID   synonym
+name=PET	pets	
+name=PETS	pets	
+name=annual	annual salary	
+name=annual salary	annual salary	
+name=annuals	annual salary	
+name=appraisal	performance appraisals	
+name=appraisals	performance appraisals	
+name=aroma	scents	
+name=aromas	scents	
+
+
+datastore>entities>kind=topic
+Name/ID
+action_text
+name=annual salary	U2FsYXJpZXMgc2hhbGwgYmUgZGV0ZXJtaW5lZCBieSB0aGUgRXhlY3V0aXZlIERpcmVjdG9yLCBiYXNlZCBvbiBidWRnZXQgY29uc2lkZXJhdGlvbnMgYW5kIGNvbW1lbnN1cmF0ZSB3aXRoIHRoZSBleHBlcmllbmNlIG9mIHRoZSBzdWNjZXNzZnVsIGNhbmRpZGF0ZS4gICBUaGUgb3JnYW5pemF0aW9uIHNoYWxsIHBheSBlbXBsb3	
+name=compassionate leave	W1RIRSBPUkdBTklaQVRJT05dIHdpbGwgZ3JhbnQgdXAgdG8gdGhyZWUgKDMpIHdvcmtpbmcgZGF5cyBwZXIgZXZlbnQgb24gdGhlIG9jY2FzaW9uIG9mIGEgZGVhdGggaW4gdGhlIHN0YWZmIG1lbWJlcuKAmXMgaW1tZWRpYXRlIGZhbWlseS4gIEltbWVkaWF0ZSBmYW1pbHkgaXMgZGVmaW5lZCBhczogcGFyZW50KHMpLCBzdGVwIH	
+name=disability leave	Q3VycmVudGx5LCBbVEhFIE9SR0FOSVpBVElPTl3igJlzIGJlbmVmaXQgcGFja2FnZSBkb2VzIG5vdCBwcm92aWRlIGZvciBTaG9ydCBUZXJtIERpc2FiaWxpdHkuICBbVEhFIE9SR0FOSVpBVElPTl0gZG9lcyBoYXZlIGNvdmVyYWdlIGZvciBMb25nIFRlcm0gRGlzYWJpbGl0eSB0aHJvdWdoIFRoZSBHcmVhdCBXZXN0IExpZmUgQX	
+...
+name=statutory holidays	VGhlIFByb3ZpbmNlIG9mIE9udGFyaW8gaGFzIHR3ZWx2ZSAoMTIpIHB1YmxpYyBob2xpZGF5cyBhbmQgb3RoZXIgZGF5cyBmb3Igd2hpY2ggc3RhZmYgd2lsbCBiZSBwYWlkLiAgVGhleSBhcmU6DQo=	
+
+
+
+#Dialogflow, create chatbot agent
+https://console.dialogflow.com
+#import agent
+IMPORT FROM ZIP
+
+
+
+
+
+
+
+
+
+#Build a Custom Chatbot User Interface
+#cloud shell > create a working directory for your App Engine code
+student_00_a2dd475a0572@cloudshell:~ (qwiklabs-gcp-00-7fda13dcf174)$ mkdir hr-chatbot
+student_00_a2dd475a0572@cloudshell:~ (qwiklabs-gcp-00-7fda13dcf174)$ cd hr-chatbot
+#Download the chatbot code into your working directory.
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot (qwiklabs-gcp-00-7fda13dcf174)$ gsutil -m cp -r gs://cloud-training/bootcamps/chatbot/code/* .
+#Change into the subfolder containing the chatbot code you just downloaded, specifically into the "environments" subdirectory with the .ts files.
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot (qwiklabs-gcp-00-7fda13dcf174)$ cd ~/hr-chatbot/angular-ui/src/environments
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot/angular-ui/src/environments (qwiklabs-gcp-00-7fda13dcf174)$ ls
+environment.prod.ts  environment.ts
+#dialogflow > agent > gear > general tab > enable beta features and APIs (v2 beta-API)
+
+#Run the npm (Node Package Manager) commands to install the Node JavaScript project dependencies and compile the application
+#Change into the angular-ui subdirectory.
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot/angular-ui/src/environments (qwiklabs-gcp-00-7fda13dcf174)$ cd ~/hr-chatbot/angular-ui
+#Install all of the necessary node_modules listed in the package.json file for your project.
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot/angular-ui (qwiklabs-gcp-00-7fda13dcf174)$ npm install
+#Globally install the Angular CLI.
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot/angular-ui (qwiklabs-gcp-00-7fda13dcf174)$ npm install -g @angular/cli@6.0.8
+#Compile the application into an output directory where the build artifacts will be stored (the dist/ folder).
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot/angular-ui (qwiklabs-gcp-00-7fda13dcf174)$ ng build --prod
+
+#Deploy your application to App Engine on the standard environment
+#Run the deploy command to re-deploy your Angular frontend as the default service.
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot/angular-ui (qwiklabs-gcp-00-7fda13dcf174)$ gcloud app deploy
+Services to deploy:
+
+descriptor:      [/home/student_00_a2dd475a0572/hr-chatbot/angular-ui/app.yaml]
+source:          [/home/student_00_a2dd475a0572/hr-chatbot/angular-ui]
+target project:  [qwiklabs-gcp-00-7fda13dcf174]
+target service:  [default]
+target version:  [20200901t213251]
+target url:      [https://qwiklabs-gcp-00-7fda13dcf174.uc.r.appspot.com]
+
+
+Do you want to continue (Y/n)?  y
+
+Beginning deployment of service [default]...
+╔════════════════════════════════════════════════════════════╗
+╠═ Uploading 8 files to Google Cloud Storage                ═╣
+╚════════════════════════════════════════════════════════════╝
+File upload done.
+Updating service [default]...done.
+Setting traffic split for service [default]...done.
+Deployed service [default] to [https://qwiklabs-gcp-00-7fda13dcf174.uc.r.appspot.com]
+
+
+#view deployed HR chatbot application
+#http://[YOUR_PROJECT_ID].appspot.com.
+https://qwiklabs-gcp-00-7fda13dcf174.appspot.com/
+
+
+
+
+
+
+
+
+
+
+
+
+#Deploying a Webhook on App Engine
+#cloud shell
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot/angular-ui (qwiklabs-gcp-00-7fda13dcf174)$ cd ..
+student_00_a2dd475a0572@cloudshell:~/hr-chatbot (qwiklabs-gcp-00-7fda13dcf174)$ cd webhook
+pip install -t lib -r requirements.txt
+gcloud app deploy
+
