@@ -1,0 +1,252 @@
+https://googlecoursera.qwiklabs.com/focuses/10791351?parent=lti_session
+Task 1: Enable APIs
+Compute Engine API
+Dialogflow API
+Cloud Storage
+Cloud Source Repositories API
+Cloud Natural Language API
+
+
+
+Task 2: Initialize App Engine and Cloud Datastore
+App Engine > Dashboard > create application > create app
+
+
+
+Task 3: Import your entities into Cloud Datastore
+#Google Cloud Shell
+#import the Topic and Synonym entities into your Datastore
+student_03_a8f0b80a3912@cloudshell:~ (qwiklabs-gcp-03-fd14191e5f10)$ gcloud datastore import gs://cloud-training/T-GCPDF-I/datastore_HR_entities/2018-11-14T06:19:16_10212.overall_export_metadata
+Waiting for [projects/qwiklabs-gcp-03-fd14191e5f10/operations/AiAzMzk0Mzc5MjYyChp0bHVhZmVkBxJsYXJ0bmVjc3Utc2Jvai1uaW1kYRQKLRI] to finish...done.
+metadata:
+  '@type': type.googleapis.com/google.datastore.admin.v1.ImportEntitiesMetadata
+  common:
+    operationType: IMPORT_ENTITIES
+    startTime: '2020-09-02T12:47:43.102993Z'
+    state: PROCESSING
+  entityFilter:
+    namespaceIds:
+    - ''
+  inputUrl: gs://cloud-training/T-GCPDF-I/datastore_HR_entities/2018-11-14T06:19:16_10212.overall_export_metadata
+name: projects/qwiklabs-gcp-03-fd14191e5f10/operations/AiAzMzk0Mzc5MjYyChp0bHVhZmVkBxJsYXJ0bmVjc3Utc2Jvai1uaW1kYRQKLRI
+
+
+
+
+Task 4: Sign in to Dialogflow
+#https://console.dialogflow.com
+
+Task 5: Import your Dialogflow agent
+Create agenet
+enable beta features and APIs
+import from zip
+
+
+
+Task 6: Building a Custom Chatbot User Interface
+#Run the following commands to create a working directory for your App Engine code.
+mkdir hr-chatbot
+cd hr-chatbot
+#Download the chatbot code into your working directory.
+gsutil -m cp -r gs://cloud-training/bootcamps/chatbot/code/* .
+#Change into the subfolder containing the chatbot code you just downloaded, specifically into the "environments" subdirectory with the .ts files.
+cd ~/hr-chatbot/angular-ui/src/environments
+
+#Find your client access token in the Dialogflow console.
+#a) Click the gear ⚙ icon next to your agent name.
+#b) Under the General tab, scroll down to the API Version section and verify V2 API is selected.
+#Note: Here you are using V2 of the API but you can still use this V1 access token.
+#c) Copy the client access token listed.
+#*****Unable to find client access token*****maybe this is no longer available in the 'General' tab?*****
+
+#cloud shell > open editor > hr_chatbot\angular-ui\src\environments\
+#update environment.ts and environment.prod.ts
+#not sure whether the service account id is the access token
+#but we can still try. service account id: dialogflow-bxvmed@qwiklabs-gcp-03-fd14191e5f10.iam.gserviceaccount.com
+
+#Run the npm (Node Package Manager) commands to install the Node JavaScript project dependencies and compile the application
+#Change into the angular-ui subdirectory.
+cd ~/hr-chatbot/angular-ui
+#Install all of the necessary node_modules listed in the package.json file for your project.
+npm install
+#Globally install the Angular CLI.
+npm install -g @angular/cli@6.0.8
+#Compile the application into an output directory where the build artifacts will be stored (the dist/ folder).
+ng build --prod
+
+#Deploy your application to App Engine on the standard environment
+#From the Cloud Shell terminal, change into the angular-ui subdirectory
+cd ~/hr-chatbot/angular-ui
+#Run the deploy command to re-deploy your Angular frontend as the default service.
+gcloud app deploy
+#To view your deployed application, go to http://[YOUR_PROJECT_ID].appspot.com
+#http://qwiklabs-gcp-03-fd14191e5f10.appspot.com
+
+
+
+
+
+
+
+Task 7: Add basic authentication to your Webhook code
+#cloud shell
+cd ..
+cd webhook
+#code editor
+#hr-chatbot/webhook/main.py
+import json
+import re
+import logging
+from flask import Flask, render_template, request, make_response, Response
+from functools import wraps
+
+from google.appengine.ext import ndb
+
+app = Flask(__name__)
+
+#add here in lab 5
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwards):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwards)
+    return decorated
+
+def check_auth(username, password):
+    """This function is called to check if a username /
+    password combination is valid.
+    """
+    uname="myuser"
+    pwd="mypassword"
+
+    return username == uname and password == pwd
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    logging.info("inside authenticate")
+    return Response(
+    'Could not verify your access level for that URL.\n'
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+#end addition in lab 5
+
+@app.route('/webhook/', methods=['POST'])
+@requires_auth
+def handle():
+    req = request.get_json(silent=True, force=True)
+    #print 'Request:'
+    #print(json.dumps(req, indent=4))
+    if req.get('queryResult').get('action') != 'lookup':
+        return {}
+
+    topic = req.get('queryResult').get('parameters').get('topic')
+    topic = re.sub(r'[^\w\s]', '', topic)
+    print topic
+    rsp = getResponse(topic)
+    rsp = json.dumps(rsp, indent=4)
+    print rsp
+    r = make_response(rsp)
+    r.headers['Content-Type'] = 'application/json'
+    return r
+
+def getResponse(topic):
+    #Get the synonym 
+    synonym_text = getSynonym(topic)
+
+    action_text = getActionText(synonym_text)
+
+    return buildReply(action_text)
+
+def buildReply(info):
+    return {
+        'fulfillmentText': info,
+    }
+
+def getSynonym(query_text):
+    synonym_key = ndb.Key('Synonym', query_text)
+    synonyms = Synonym.query_synonym(synonym_key).fetch(1)
+    
+    synonym_text = ""
+    for synonym in synonyms:
+        synonym_text = synonym.synonym
+        break 
+    
+    return synonym_text
+
+def getActionText(synonym_text):
+    synonym_text = synonym_text.strip()
+    topic_key = ndb.Key('Topic', synonym_text)
+    topics = Topic.query_topic(topic_key).fetch(1)
+    
+    action_text = ""
+    for topic in topics:
+        action_text = topic.action_text
+        
+    if action_text == None or action_text == "":
+        return ""
+
+    return action_text
+
+@app.errorhandler(500)
+def server_error(e):
+    # Log the error and stacktrace.
+    print e
+    return 'An internal error occurred.', 500
+
+class Topic(ndb.Model):
+    action_text = ndb.StringProperty()
+    
+    @classmethod
+    def query_topic(cls, ancestor_key):
+        return cls.query(ancestor=ancestor_key)
+    
+class Synonym(ndb.Model):
+    synonym = ndb.StringProperty()
+    
+    @classmethod
+    def query_synonym(cls, ancestor_key):
+        return cls.query(ancestor=ancestor_key)
+
+
+
+
+
+#cloud shell
+#Install all required libraries (including Flask) into a "lib" directory to be deployed with your app to App Engine.
+pip install -t lib -r requirements.txt
+
+
+
+#code editor
+#hr-chatbot/webhook/app.yaml
+runtime: python27
+api_version: 1
+threadsafe: true
+service: dialogflow
+
+# [START handlers]
+handlers:
+- url: /static
+  static_dir: static
+- url: /.*
+  script: main.app
+# [END handlers]
+
+
+
+#deploy webhook
+gcloud app deploy
+#App Engine > Services > dialogflow
+#https://dialogflow-dot-qwiklabs-gcp-03-fd14191e5f10.uc.r.appspot.com/
+#dialogflow > fulfilment > webhook > URL:https://dialogflow-dot-qwiklabs-gcp-03-fd14191e5f10.uc.r.appspot.com/webhook/
+#Basic auth; username=myuser, password=mypassword
+#Return to the Dialogflow test console and test out a phrase, such as Tell me about annual salary. If it works, you have successfully ported your webhook to App Engine! Congratulations! If it doesn't work, retrace your steps and correct the error.
+
+
+
+
+
+Task 8: Export your agent
+
