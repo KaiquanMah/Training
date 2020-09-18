@@ -1,0 +1,137 @@
+https://google.qwiklabs.com/games/1233/labs/5222
+#GCLOUD CLI https://cloud.google.com/sdk/gcloud
+
+You can list the active account name with this command:
+gcloud auth list
+
+(Output)
+Credentialed accounts:
+ - <myaccount>@<mydomain>.com (active)
+
+(Example output)
+Credentialed accounts:
+ - google1623327_student@qwiklabs.net
+You can list the project ID with this command:
+
+
+
+
+
+
+gcloud config list project
+
+(Output)
+[core]
+project = <project_ID>
+
+(Example output)
+[core]
+project = qwiklabs-gcp-44776a13dea667a6
+
+
+
+Resources that live in a zone are referred to as zonal resources. Virtual machine Instances and persistent disks live in a zone. 
+#VM and persistent disk 
+To attach a persistent disk to a virtual machine instance, both resources must be in the same zone. 
+#static IP address and persistent disk  
+Similarly, if you want to assign a static IP address to an instance, the instance must be in the same region as the static IP.
+
+
+
+
+
+
+
+
+#create VM on google cloud console
+
+#Install a NGINX web server
+#Once SSH'ed, get root access using sudo:
+sudo su -
+
+#As the root user, update your OS:
+apt-get update
+(Output)
+Get:1 http://security.debian.org stretch/updates InRelease [94.3 kB]
+Ign http://deb.debian.org strech InRelease
+Get:2 http://deb.debian.org strech-updates InRelease [91.0 kB]
+...
+
+
+
+
+#Install NGINX:
+apt-get install nginx -y
+(Output)
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+The following additional packages will be installed:
+...
+
+
+#Check that NGINX is running:
+ps auwx | grep nginx
+(Output)
+root      2330  0.0  0.0 159532  1628 ?        Ss   14:06   0:00 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
+www-data  2331  0.0  0.0 159864  3204 ?        S    14:06   0:00 nginx: worker process
+www-data  2332  0.0  0.0 159864  3204 ?        S    14:06   0:00 nginx: worker process
+root      2342  0.0  0.0  12780   988 pts/0    S+   14:07   0:00 grep nginx
+
+
+
+
+
+
+
+
+
+
+
+#Create a new VM instance with gcloud
+gcloud compute instances create gcelab2 --machine-type n1-standard-2 --zone us-central1-c
+
+(Output)
+Created [...gcelab2].
+NAME     ZONE           MACHINE_TYPE  ...    STATUS
+gcelab2  us-central1-c  n1-standard-2 ...    RUNNING
+
+
+
+The instance created has these default values:
+The latest Debian 9 (stretch) image.
+The n1-standard-2 machine type. In this lab you can select one of these other machine types if you'd like: n1-highmem-4 or n1-highcpu-4. When you're working on a project outside of Qwiklabs, you can also specify a custom machine type.
+A root persistent disk with the same name as the instance; the disk is automatically attached to the instance.
+
+Run gcloud compute instances create --help to see all the defaults.
+To exit help, press Ctrl+c.
+
+
+Note: You can set the default region and zones that gcloud uses if you are always working within one region/zone and you don't want to append the --zone flag every time. Do this by running these commands :
+gcloud config set compute/zone ...
+gcloud config set compute/region ...
+
+
+
+Finally, you can SSH into your instance using gcloud as well. Make sure you add your zone, or omit the --zone flag if you've set the option globally:
+gcloud compute ssh gcelab2 --zone us-central1-c
+(Output)
+WARNING: The public SSH key file for gcloud does not exist.
+WARNING: The private SSH key file for gcloud does not exist.
+WARNING: You do not have an SSH key for gcloud.
+WARNING: [/usr/bin/ssh-keygen] will be executed to generate a key.
+This tool needs to create the directory [/home/gcpstaging306_student/.ssh] before being able to generate SSH Keys.
+
+
+Now you'll type Y to continue.
+Do you want to continue? (Y/n)
+
+
+Enter through the passphrase section to leave the passphrase empty.
+Generating public/private rsa key pair.
+Enter passphrase (empty for no passphrase)
+
+After connecting, you disconnect from SSH by exiting from the remote shell:
+exit
+
+
