@@ -1,0 +1,537 @@
+AI Platform: Qwik Start
+https://google.qwiklabs.com/focuses/581?parent=catalog&qlcampaign=6s-msgs2-45
+
+
+Overview
+This lab will give you hands-on practice with TensorFlow 2.x model training, both locally and on AI Platform. After training, you will learn how to deploy your model to AI Platform for serving (prediction). You'll train your model to predict income category of a person using the United States Census Income Dataset.
+
+This lab gives you an introductory, end-to-end experience of training and prediction on AI Platform. The lab will use a census dataset to:
+Create a TensorFlow 2.x training application and validate it locally.
+Run your training job on a single worker instance in the cloud.
+Deploy a model to support prediction.
+Request an online prediction and see the response.
+
+
+
+What you will build
+The sample builds a classification model for predicting income category based on United States Census Income Dataset. The two income categories (also known as labels) are:
+>50K — Greater than 50,000 dollars
+<=50K — Less than or equal to 50,000 dollars
+The sample defines the model using the Keras Sequential API. The sample defines the data transformations particular to the census dataset, then assigns these (potentially) transformed features to either the DNN or the linear portion of the model.
+
+
+
+
+
+
+
+
+
+
+Launch AI Platform Notebooks
+Navigation menu > ai platform > notebooks
+new instance > tensorflow 2.x > without gpu
+
+New notebook instance
+Instance name tensorflow-2-3-20200919-140418
+63-char limit with lowercase letters, digits, or '-' only. Must start with a letter. Cannot end with a '-'.
+Region        us-west1 (Oregon)
+Zone          us-west1-b
+Environment   TensorFlow Enterprise 2.3 (with Intel® MKL-DNN/MKL)
+Machine type  4 vCPUs, 15 GB RAM
+Boot disk     100 GB Disk
+Subnetwork    default(10.138.0.0/20)
+External IP   Ephemeral(Automatic)
+Extensions    None selected
+Permission    Compute Engine default service account
+Estimated cost  $102.69 monthly, $0.141 hourly
+
+Instance name                     Zone        Environment       Machine type        GPUs    Permission        Labels
+tensorflow-2-3-20200919-140418		us-west1-b	TensorFlow:2.3	  4 vCPUs, 15 GB RAM 	None 	  Service account	  No labels
+
+
+
+
+Open JupyterLab
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Clone the example repo within your AI Platform Notebooks instance
+To clone the 'training-data-analyst' notebook in your JupyterLab instance:
+In JupyterLab, click the Terminal icon to open a new terminal.
+
+At the command-line prompt, type in the following command and press Enter.
+git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+(output)
+Cloning into 'training-data-analyst'...
+remote: Enumerating objects: 184, done.
+remote: Counting objects: 100% (184/184), done.
+remote: Compressing objects: 100% (155/155), done.
+remote: Total 41489 (delta 113), reused 59 (delta 24), pack-reused 41305
+Receiving objects: 100% (41489/41489), 447.31 MiB | 42.51 MiB/s, done.
+Resolving deltas: 100% (25885/25885), done.
+
+
+
+Navigate to the example notebook
+In AI Platform Notebooks, navigate to training-data-analyst/self-paced-labs/ai-platform-qwikstart and open ai_platform_qwik_start.ipynb.
+Clear all the cells in the notebook (look for the Clear button on the notebook toolbar) and then Run the cells one by one.
+When prompted, come back to these instructions to check your progress.
+https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/self-paced-labs/ai-platform-qwikstart/ai_platform_qwik_start.ipynb
+
+
+#execute box 4
+#Inspect what the data looks like by looking at the first couple of rows:
+%%bash
+head data/adult.data.csv
+39, State-gov, 77516, Bachelors, 13, Never-married, Adm-clerical, Not-in-family, White, Male, 2174, 0, 40, United-States, <=50K
+50, Self-emp-not-inc, 83311, Bachelors, 13, Married-civ-spouse, Exec-managerial, Husband, White, Male, 0, 0, 13, United-States, <=50K
+38, Private, 215646, HS-grad, 9, Divorced, Handlers-cleaners, Not-in-family, White, Male, 0, 0, 40, United-States, <=50K
+53, Private, 234721, 11th, 7, Married-civ-spouse, Handlers-cleaners, Husband, Black, Male, 0, 0, 40, United-States, <=50K
+28, Private, 338409, Bachelors, 13, Married-civ-spouse, Prof-specialty, Wife, Black, Female, 0, 0, 40, Cuba, <=50K
+37, Private, 284582, Masters, 14, Married-civ-spouse, Exec-managerial, Wife, White, Female, 0, 0, 40, United-States, <=50K
+49, Private, 160187, 9th, 5, Married-spouse-absent, Other-service, Not-in-family, Black, Female, 0, 0, 16, Jamaica, <=50K
+52, Self-emp-not-inc, 209642, HS-grad, 9, Married-civ-spouse, Exec-managerial, Husband, White, Male, 0, 0, 45, United-States, >50K
+31, Private, 45781, Masters, 14, Never-married, Prof-specialty, Not-in-family, White, Female, 14084, 0, 50, United-States, >50K
+42, Private, 159449, Bachelors, 13, Married-civ-spouse, Exec-managerial, Husband, White, Male, 5178, 0, 40, United-States, >50K
+
+
+
+
+
+
+#execute box 9
+#Run a training job locally using the Python training program
+%%bash
+MODEL_DIR=output
+gcloud ai-platform local train \
+    --module-name trainer.task \
+    --package-path trainer/ \
+    --job-dir $MODEL_DIR \
+    -- \
+    --train-files $TRAIN_DATA \
+    --eval-files $EVAL_DATA \
+    --train-steps 1000 \
+    --eval-steps 100
+Epoch 00001: LearningRateScheduler reducing learning rate to 0.02.
+Epoch 1/20
+254/254 [==============================] - 3s 11ms/step - loss: 0.6070 - accuracy: 0.7893 - val_loss: 0.3762 - val_accuracy: 0.8342
+
+Epoch 00002: LearningRateScheduler reducing learning rate to 0.015.
+Epoch 2/20
+254/254 [==============================] - 2s 8ms/step - loss: 0.3588 - accuracy: 0.8365 - val_loss: 0.3402 - val_accuracy: 0.8365
+
+Epoch 00003: LearningRateScheduler reducing learning rate to 0.0125.
+Epoch 3/20
+254/254 [==============================] - 2s 10ms/step - loss: 0.3402 - accuracy: 0.8438 - val_loss: 0.3343 - val_accuracy: 0.8446
+
+Epoch 00004: LearningRateScheduler reducing learning rate to 0.01125.
+Epoch 4/20
+254/254 [==============================] - 2s 6ms/step - loss: 0.3358 - accuracy: 0.8444 - val_loss: 0.3262 - val_accuracy: 0.8489
+
+Epoch 00005: LearningRateScheduler reducing learning rate to 0.010625.
+Epoch 5/20
+254/254 [==============================] - 1s 5ms/step - loss: 0.3317 - accuracy: 0.8449 - val_loss: 0.3280 - val_accuracy: 0.8429
+
+Epoch 00006: LearningRateScheduler reducing learning rate to 0.0103125.
+Epoch 6/20
+254/254 [==============================] - 1s 5ms/step - loss: 0.3287 - accuracy: 0.8456 - val_loss: 0.3283 - val_accuracy: 0.8477
+
+Epoch 00007: LearningRateScheduler reducing learning rate to 0.01015625.
+Epoch 7/20
+254/254 [==============================] - 2s 7ms/step - loss: 0.3281 - accuracy: 0.8462 - val_loss: 0.3201 - val_accuracy: 0.8497
+
+Epoch 00008: LearningRateScheduler reducing learning rate to 0.010078125.
+Epoch 8/20
+254/254 [==============================] - 2s 7ms/step - loss: 0.3276 - accuracy: 0.8450 - val_loss: 0.3345 - val_accuracy: 0.8481
+
+Epoch 00009: LearningRateScheduler reducing learning rate to 0.0100390625.
+Epoch 9/20
+254/254 [==============================] - 2s 7ms/step - loss: 0.3250 - accuracy: 0.8475 - val_loss: 0.3314 - val_accuracy: 0.8465
+
+Epoch 00010: LearningRateScheduler reducing learning rate to 0.01001953125.
+Epoch 10/20
+254/254 [==============================] - 1s 5ms/step - loss: 0.3275 - accuracy: 0.8482 - val_loss: 0.3240 - val_accuracy: 0.8492
+
+Epoch 00011: LearningRateScheduler reducing learning rate to 0.010009765625.
+Epoch 11/20
+254/254 [==============================] - 1s 5ms/step - loss: 0.3258 - accuracy: 0.8486 - val_loss: 0.3261 - val_accuracy: 0.8507
+
+Epoch 00012: LearningRateScheduler reducing learning rate to 0.010004882812500001.
+Epoch 12/20
+254/254 [==============================] - 2s 8ms/step - loss: 0.3254 - accuracy: 0.8474 - val_loss: 0.3218 - val_accuracy: 0.8535
+
+Epoch 00013: LearningRateScheduler reducing learning rate to 0.01000244140625.
+Epoch 13/20
+254/254 [==============================] - 2s 7ms/step - loss: 0.3235 - accuracy: 0.8495 - val_loss: 0.3301 - val_accuracy: 0.8486
+
+Epoch 00014: LearningRateScheduler reducing learning rate to 0.010001220703125.
+Epoch 14/20
+254/254 [==============================] - 1s 5ms/step - loss: 0.3228 - accuracy: 0.8505 - val_loss: 0.3299 - val_accuracy: 0.8473
+
+Epoch 00015: LearningRateScheduler reducing learning rate to 0.0100006103515625.
+Epoch 15/20
+254/254 [==============================] - 1s 5ms/step - loss: 0.3248 - accuracy: 0.8483 - val_loss: 0.3283 - val_accuracy: 0.8497
+
+Epoch 00016: LearningRateScheduler reducing learning rate to 0.01000030517578125.
+Epoch 16/20
+254/254 [==============================] - 1s 5ms/step - loss: 0.3261 - accuracy: 0.8491 - val_loss: 0.3207 - val_accuracy: 0.8515
+
+Epoch 00017: LearningRateScheduler reducing learning rate to 0.010000152587890625.
+Epoch 17/20
+254/254 [==============================] - 2s 7ms/step - loss: 0.3227 - accuracy: 0.8500 - val_loss: 0.3224 - val_accuracy: 0.8488
+
+Epoch 00018: LearningRateScheduler reducing learning rate to 0.010000076293945313.
+Epoch 18/20
+254/254 [==============================] - 2s 9ms/step - loss: 0.3243 - accuracy: 0.8494 - val_loss: 0.3649 - val_accuracy: 0.8471
+
+Epoch 00019: LearningRateScheduler reducing learning rate to 0.010000038146972657.
+Epoch 19/20
+254/254 [==============================] - 2s 6ms/step - loss: 0.3256 - accuracy: 0.8474 - val_loss: 0.3297 - val_accuracy: 0.8516
+
+Epoch 00020: LearningRateScheduler reducing learning rate to 0.010000019073486329.
+Epoch 20/20
+254/254 [==============================] - 1s 5ms/step - loss: 0.3251 - accuracy: 0.8501 - val_loss: 0.3289 - val_accuracy: 0.8485
+Model exported to: output/keras_export
+2020-09-19 06:17:11.948856: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 2200140000 Hz
+2020-09-19 06:17:11.949187: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x558e3e745b10 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-09-19 06:17:11.949228: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-09-19 06:17:11.951708: I tensorflow/core/common_runtime/process_util.cc:146] Creating new thread pool with default inter op setting: 2. Tune using inter_op_parallelism_threads for best performance.
+WARNING:tensorflow:There are non-GPU devices in `tf.distribute.Strategy`, not using nccl allreduce.
+2020-09-19 06:17:12.696437: I tensorflow/core/profiler/lib/profiler_session.cc:164] Profiler session started.
+WARNING:tensorflow:From /opt/conda/lib/python3.7/site-packages/tensorflow/python/data/ops/multi_device_iterator_ops.py:601: get_next_as_optional (from tensorflow.python.data.ops.iterator_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.data.Iterator.get_next_as_optional()` instead.
+2020-09-19 06:17:16.374738: I tensorflow/core/profiler/lib/profiler_session.cc:164] Profiler session started.
+WARNING:tensorflow:From /opt/conda/lib/python3.7/site-packages/tensorflow/python/ops/summary_ops_v2.py:1277: stop (from tensorflow.python.eager.profiler) is deprecated and will be removed after 2020-07-01.
+Instructions for updating:
+use `tf.profiler.experimental.stop` instead.
+2020-09-19 06:17:16.414245: I tensorflow/core/profiler/rpc/client/save_profile.cc:176] Creating directory: output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16
+2020-09-19 06:17:16.419377: I tensorflow/core/profiler/rpc/client/save_profile.cc:182] Dumped gzipped tool data for trace.json.gz to output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16/tensorflow-2-3-20200919-140418.trace.json.gz
+2020-09-19 06:17:16.441897: I tensorflow/core/profiler/rpc/client/save_profile.cc:176] Creating directory: output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16
+2020-09-19 06:17:16.444952: I tensorflow/core/profiler/rpc/client/save_profile.cc:182] Dumped gzipped tool data for memory_profile.json.gz to output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16/tensorflow-2-3-20200919-140418.memory_profile.json.gz
+2020-09-19 06:17:16.447696: I tensorflow/python/profiler/internal/profiler_wrapper.cc:111] Creating directory: output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16Dumped tool data for xplane.pb to output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16/tensorflow-2-3-20200919-140418.xplane.pb
+Dumped tool data for overview_page.pb to output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16/tensorflow-2-3-20200919-140418.overview_page.pb
+Dumped tool data for input_pipeline.pb to output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16/tensorflow-2-3-20200919-140418.input_pipeline.pb
+Dumped tool data for tensorflow_stats.pb to output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16/tensorflow-2-3-20200919-140418.tensorflow_stats.pb
+Dumped tool data for kernel_stats.pb to output/keras_tensorboard/train/plugins/profile/2020_09_19_06_17_16/tensorflow-2-3-20200919-140418.kernel_stats.pb
+
+WARNING:tensorflow:Callbacks method `on_train_batch_end` is slow compared to the batch time (batch time: 0.0080s vs `on_train_batch_end` time: 0.0663s). Check your callbacks.
+WARNING:tensorflow:From /opt/conda/lib/python3.7/site-packages/tensorflow/python/training/tracking/tracking.py:111: Model.state_updates (from tensorflow.python.keras.engine.training) is deprecated and will be removed in a future version.
+Instructions for updating:
+This property should not be used in TensorFlow 2.0, as updates are applied automatically.
+2020-09-19 06:17:51.360758: W tensorflow/python/util/util.cc:348] Sets are not currently considered sequences, but this may change in the future, so consider avoiding using them.
+WARNING:tensorflow:From /opt/conda/lib/python3.7/site-packages/tensorflow/python/training/tracking/tracking.py:111: Layer.updates (from tensorflow.python.keras.engine.base_layer) is deprecated and will be removed in a future version.
+Instructions for updating:
+This property should not be used in TensorFlow 2.0, as updates are applied automatically.
+INFO:tensorflow:Assets written to: output/keras_export/assets
+
+
+
+
+
+
+
+
+
+
+
+#execute box 12
+#Check the numerical representation of the features by printing the preprocessed data:
+print(prediction_input)
+
+            age  workclass  education_num  marital_status  occupation  \
+10278 -0.776285          3      -0.419265               2           2   
+2567  -1.213893          3      -0.030304               4           2   
+14557 -1.068023         -1      -0.030304               4          -1   
+3522   0.244801          5      -0.030304               4           3   
+478   -0.557481          3      -0.030304               1          11   
+
+       relationship  race  capital_gain  capital_loss  hours_per_week  \
+10278             0     4     -0.144792     -0.217132        0.288764   
+2567              3     4     -0.144792     -0.217132       -0.034039   
+14557             1     4     -0.144792     -0.217132        1.579979   
+3522              1     4     -0.144792     -0.217132       -0.034039   
+478               5     4     -0.144792     -0.217132       -1.648058   
+
+       native_country  
+10278              38  
+2567               38  
+14557              38  
+3522               38  
+478                38  
+
+
+
+
+
+
+
+
+
+
+
+#execute box 14
+#Inspect the .json file:
+
+%%bash
+
+cat test.json
+
+[-0.7762847657917541, 3.0, -0.4192650914017433, 2.0, 2.0, 0.0, 4.0, -0.14479173735784842, -0.21713186390175285, 0.2887644552712294, 38.0]
+[-1.2138928199445767, 3.0, -0.030303770229214273, 4.0, 2.0, 3.0, 4.0, -0.14479173735784842, -0.21713186390175285, -0.03403923708700391, 38.0]
+[-1.0680234685603025, -1.0, -0.030303770229214273, 4.0, -1.0, 1.0, 4.0, -0.14479173735784842, -0.21713186390175285, 1.5799792247041626, 38.0]
+[0.24480069389816542, 5.0, -0.030303770229214273, 4.0, 3.0, 1.0, 4.0, -0.14479173735784842, -0.21713186390175285, -0.03403923708700391, 38.0]
+[-0.5574807387153428, 3.0, -0.030303770229214273, 1.0, 11.0, 5.0, 4.0, -0.14479173735784842, -0.21713186390175285, -1.6480576988781703, 38.0]
+
+
+
+
+
+
+
+
+#execute box 15
+#Use your trained model for prediction
+%%bash
+
+gcloud ai-platform local predict \
+    --model-dir output/keras_export/ \
+    --json-instances ./test.json
+
+DENSE_4
+[0.24299022555351257]
+[0.012027859687805176]
+[0.009289830923080444]
+[0.08800730109214783]
+[0.05711069703102112]
+If the signature defined in the model is not serving_default then you must specify it via --signature-name flag, otherwise the command may fail.
+WARNING: WARNING:tensorflow:From /opt/conda/lib/python3.7/site-packages/tensorflow/python/compat/v2_compat.py:96: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+Instructions for updating:
+non-resource variables are not supported in the long term
+2020-09-19 06:21:46.225214: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 2200140000 Hz
+2020-09-19 06:21:46.225456: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x558d3cc66860 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-09-19 06:21:46.225488: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-09-19 06:21:46.225721: I tensorflow/core/common_runtime/process_util.cc:146] Creating new thread pool with default inter op setting: 2. Tune using inter_op_parallelism_threads for best performance.
+WARNING:tensorflow:From /usr/lib/google-cloud-sdk/lib/third_party/ml_sdk/cloud/ml/prediction/frameworks/tf_prediction_lib.py:236: load (from tensorflow.python.saved_model.loader_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+This function will only be available through the v1 compatibility library as tf.compat.v1.saved_model.loader.load or tf.compat.v1.saved_model.load. There will be a new function for importing SavedModels in Tensorflow 2.0.
+WARNING:tensorflow:From /usr/lib/google-cloud-sdk/lib/third_party/ml_sdk/cloud/ml/prediction/frameworks/tf_prediction_lib.py:236: load (from tensorflow.python.saved_model.loader_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+This function will only be available through the v1 compatibility library as tf.compat.v1.saved_model.loader.load or tf.compat.v1.saved_model.load. There will be a new function for importing SavedModels in Tensorflow 2.0.
+WARNING:root:Error updating signature __saved_model_init_op: The name 'NoOp' refers to an Operation, not a Tensor. Tensor names must be of the form "<op_name>:<output_index>".
+
+
+
+
+
+
+
+
+
+#Run your training job in the cloud
+#execute box 17
+PROJECT = "qwiklabs-gcp-03-754de6f5e413"  # Replace with your project name
+BUCKET_NAME=PROJECT+"-aiplatform"
+REGION="us-central1"
+
+
+
+
+
+
+#Set up a Cloud Storage bucket¶
+The AI Platform services need to access Cloud Storage (GCS) to read and write data during model training and batch prediction.
+Create a bucket using BUCKET_NAME as the name for the bucket and copy the data into it.
+#execute box 19
+%%bash
+
+if ! gsutil ls | grep -q gs://${BUCKET_NAME}; then
+    gsutil mb -l ${REGION} gs://${BUCKET_NAME}
+fi
+gsutil cp -r data gs://$BUCKET_NAME/data
+
+
+
+Creating gs://qwiklabs-gcp-03-754de6f5e413-aiplatform/...
+Copying file://data/census.test.csv [Content-Type=text/csv]...
+Copying file://data/adult.test.csv [Content-Type=text/csv]...                   
+Copying file://data/census.train.csv [Content-Type=text/csv]...                 
+Copying file://data/test.csv [Content-Type=text/csv]...                         
+\ [4 files][  6.9 MiB/  6.9 MiB]                                                
+==> NOTE: You are performing a sequence of gsutil operations that may
+run significantly faster if you instead use gsutil -m cp ... Please
+see the -m section under "gsutil help options" for further information
+about when gsutil -m can be advantageous.
+
+Copying file://data/test.json [Content-Type=application/json]...
+Copying file://data/adult.data.csv [Content-Type=text/csv]...                   
+| [6 files][ 10.7 MiB/ 10.7 MiB]                                                
+Operation completed over 6 objects/10.7 MiB.                      
+
+
+
+
+
+
+
+#Use gsutil again to copy the JSON test file test.json to your Cloud Storage bucket:
+#execute box 21
+%%bash
+
+gsutil cp test.json gs://$BUCKET_NAME/data/test.json
+
+Copying file://test.json [Content-Type=application/json]...
+/ [1 files][  706.0 B/  706.0 B]                                                
+Operation completed over 1 objects/706.0 B.     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Step 3.2: Run a single-instance trainer in the cloud - box #1
+%%bash
+
+JOB_ID=census_$(date -u +%y%m%d_%H%M%S)
+OUTPUT_PATH=gs://$BUCKET_NAME/$JOB_ID
+gcloud ai-platform jobs submit training $JOB_ID \
+    --job-dir $OUTPUT_PATH \
+    --runtime-version $TFVERSION \
+    --python-version $PYTHONVERSION \
+    --module-name trainer.task \
+    --package-path trainer/ \
+    --region $REGION \
+    -- \
+    --train-files $TRAIN_DATA \
+    --eval-files $EVAL_DATA \
+    --train-steps 1000 \
+    --eval-steps 100 \
+    --verbosity DEBUG
+    
+    
+    
+    
+    
+jobId: census_200919_063824
+state: QUEUED
+Job [census_200919_063824] submitted successfully.
+Your job is still active. You may view the status of your job with the command
+
+  $ gcloud ai-platform jobs describe census_200919_063824
+
+or continue streaming the logs with the command
+
+  $ gcloud ai-platform jobs stream-logs census_200919_063824
+  
+
+
+#step 3.2  - box #2
+Set an environment variable with the jobId generated above:
+os.environ["JOB_ID"] = "census_200919_063824" # Replace with your job id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Step 3.3: Deploy your model to support prediction
+#step 3.3 - box #2
+%%bash
+
+gcloud ai-platform models create $MODEL_NAME --regions=$REGION
+Using endpoint [https://ml.googleapis.com/]
+Created ml engine model [projects/qwiklabs-gcp-03-754de6f5e413/models/census].
+
+
+
+#step 3.3 - box #3
+Run the following command to create a version v1 of your model:
+%%bash
+
+OUTPUT_PATH=gs://$BUCKET_NAME/$JOB_ID
+MODEL_BINARIES=$OUTPUT_PATH/keras_export/
+gcloud ai-platform versions create v1 \
+--model $MODEL_NAME \
+--origin $MODEL_BINARIES \
+--runtime-version $TFVERSION \
+--python-version $PYTHONVERSION
+
+
+Using endpoint [https://ml.googleapis.com/]
+Creating version (this might take a few minutes)......
+.....................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................done.
+
+
+
+#step 3.3 - box #4
+It may take several minutes to deploy your trained model. When done, you can see a list of your models using the models list command:
+%%bash
+
+gcloud ai-platform models list
+
+
+
+NAME    DEFAULT_VERSION_NAME
+census  v1
+Using endpoint [https://ml.googleapis.com/]
+
+
+
+
+
+
+
+
+
+
+#step 3.4
+%%bash
+
+gcloud ai-platform predict \
+--model $MODEL_NAME \
+--version v1 \
+--json-instances ./test.json
+
+DENSE_4
+[0.0812830924987793]
+[0.9116583466529846]
+[0.6804255247116089]
+[0.1848381608724594]
+[0.6039838790893555]
+Using endpoint [https://ml.googleapis.com/]
+
+
