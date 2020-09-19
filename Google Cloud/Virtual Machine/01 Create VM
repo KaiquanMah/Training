@@ -96,6 +96,11 @@ Created [...gcelab2].
 NAME     ZONE           MACHINE_TYPE  ...    STATUS
 gcelab2  us-central1-c  n1-standard-2 ...    RUNNING
 
+NAME     ZONE           MACHINE_TYPE   PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
+gcelab2  us-central1-c  n1-standard-2               10.128.0.3   35.188.168.132  RUNNING
+
+
+
 
 
 The instance created has these default values:
@@ -103,8 +108,80 @@ The latest Debian 9 (stretch) image.
 The n1-standard-2 machine type. In this lab you can select one of these other machine types if you'd like: n1-highmem-4 or n1-highcpu-4. When you're working on a project outside of Qwiklabs, you can also specify a custom machine type.
 A root persistent disk with the same name as the instance; the disk is automatically attached to the instance.
 
-Run gcloud compute instances create --help to see all the defaults.
+Run 'gcloud compute instances create --help' to see all the defaults.
+(output)
+NAME
+    gcloud compute instances create - create Compute Engine virtual machine
+        instances
+
+SYNOPSIS
+    gcloud compute instances create INSTANCE_NAMES [INSTANCE_NAMES ...]
+        [--accelerator=[count=COUNT],[type=TYPE]] [--async]
+        [--no-boot-disk-auto-delete]
+        [--boot-disk-device-name=BOOT_DISK_DEVICE_NAME]
+        [--boot-disk-size=BOOT_DISK_SIZE] [--boot-disk-type=BOOT_DISK_TYPE]
+        [--can-ip-forward] [--create-disk=[PROPERTY=VALUE,...]]
+        [--csek-key-file=FILE] [--deletion-protection]
+        [--description=DESCRIPTION]
+        [--disk=[auto-delete=AUTO-DELETE],
+          [boot=BOOT],[device-name=DEVICE-NAME],[mode=MODE],[name=NAME]]
+        [--enable-display-device] [--hostname=HOSTNAME]
+        [--labels=[KEY=VALUE,...]]
+        [--local-ssd=[device-name=DEVICE-NAME],[interface=INTERFACE]]
+        [--machine-type=MACHINE_TYPE] [--maintenance-policy=MAINTENANCE_POLICY]
+        [--metadata=KEY=VALUE,[KEY=VALUE,...]]
+        [--metadata-from-file=KEY=LOCAL_FILE_PATH,[...]]
+        [--min-cpu-platform=PLATFORM] [--min-node-cpu=MIN_NODE_CPU]
+        [--network=NETWORK] [--network-interface=[PROPERTY=VALUE,...]]
+        [--network-tier=NETWORK_TIER] [--preemptible]
+        [--private-ipv6-google-access-type=PRIVATE_IPV6_GOOGLE_ACCESS_TYPE]
+        [--private-network-ip=PRIVATE_NETWORK_IP]
+        [--no-require-csek-key-create]
+        [--resource-policies=[RESOURCE_POLICY,...]] [--no-restart-on-failure]
+        [--shielded-integrity-monitoring] [--shielded-secure-boot]
+        [--shielded-vtpm] [--source-instance-template=SOURCE_INSTANCE_TEMPLATE]
+        [--subnet=SUBNET] [--tags=TAG,[TAG,...]] [--zone=ZONE]
+        [--address=ADDRESS | --no-address]
+        [--boot-disk-kms-key=BOOT_DISK_KMS_KEY
+          : --boot-disk-kms-keyring=BOOT_DISK_KMS_KEYRING
+          --boot-disk-kms-location=BOOT_DISK_KMS_LOCATION
+          --boot-disk-kms-project=BOOT_DISK_KMS_PROJECT]
+        [--custom-cpu=CUSTOM_CPU --custom-memory=CUSTOM_MEMORY
+          : --custom-extensions --custom-vm-type=CUSTOM_VM_TYPE]
+        [--image-project=IMAGE_PROJECT --image=IMAGE
+          | --image-family=IMAGE_FAMILY | --source-snapshot=SOURCE_SNAPSHOT]
+        [--node=NODE | --node-affinity-file=NODE_AFFINITY_FILE
+          | --node-group=NODE_GROUP] [--public-ptr | --no-public-ptr]
+        [--public-ptr-domain=PUBLIC_PTR_DOMAIN | --no-public-ptr-domain]
+        [--reservation=RESERVATION
+          --reservation-affinity=RESERVATION_AFFINITY; default="any"]
+        [--scopes=[SCOPE,...] | --no-scopes]
+        [--service-account=SERVICE_ACCOUNT | --no-service-account]
+        [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    gcloud compute instances create facilitates the creation of Compute Engine
+    virtual machines.
+
 To exit help, press Ctrl+c.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Note: You can set the default region and zones that gcloud uses if you are always working within one region/zone and you don't want to append the --zone flag every time. Do this by running these commands :
@@ -131,7 +208,62 @@ Enter through the passphrase section to leave the passphrase empty.
 Generating public/private rsa key pair.
 Enter passphrase (empty for no passphrase)
 
+
+
+
+
+
+(output)
+WARNING: The private SSH key file for gcloud does not exist.
+WARNING: The public SSH key file for gcloud does not exist.
+WARNING: You do not have an SSH key for gcloud.
+WARNING: SSH keygen will be executed to generate a key.
+This tool needs to create the directory
+[/home/student_01_b33e82e56202/.ssh] before being able to generate SSH
+ keys.
+
+Do you want to continue (Y/n)?  y
+
+Generating public/private rsa key pair.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/student_01_b33e82e56202/.ssh/google_compute_engine.
+Your public key has been saved in /home/student_01_b33e82e56202/.ssh/google_compute_engine.pub.
+The key fingerprint is:
+SHA256:60Gj6cjpkqJhQvtN5c7bDeajZYc/PzyX2iyvXbKhXc0 student_01_b33e82e56202@cs-6000-devshell-vm-ede48b2f-cde4-49f3-ba86-cede5941f53d
+The key's randomart image is:
++---[RSA 2048]----+
+|                 |
+|                 |
+|                 |
+|                 |
+| .     .S        |
+|. .   o+ o.    ..|
+|oo . .o.o* .. o E|
+|+.+.o+o.*o=. B+B.|
+|o. +=..=+o.o++@= |
++----[SHA256]-----+
+Warning: Permanently added 'compute.8012834690610819872' (ECDSA) to the list of known hosts.
+Linux gcelab2 4.19.0-10-cloud-amd64 #1 SMP Debian 4.19.132-1 (2020-07-24) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Creating directory '/home/student-01-b33e82e56202'.
+
+
+
+
+
+
 After connecting, you disconnect from SSH by exiting from the remote shell:
 exit
+
+(output)
+logout
+Connection to 35.188.168.132 closed.
 
 
