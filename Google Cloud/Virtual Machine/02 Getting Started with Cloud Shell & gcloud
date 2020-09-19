@@ -4,11 +4,103 @@ https://google.qwiklabs.com/games/1233/labs/5223
 
 
 Default regions and zones are set by using the following values:
-google-compute-default-zone google-compute-default-region
+google-compute-default-zone, google-compute-default-region
 
 To see what your default region and zone settings are, run the following gcloud command, replacing <your_project_id> which you can see on the Home page in the Console or look in the Qwiklabs tab where you started this lab, with your Project ID:
 Look for the default zone and region metadata values in the response. If the google-compute-default-region and google-compute-default-zone keys and values are missing from the response, that means no default zone or region is set.
 gcloud compute project-info describe --project <your_project_ID>
+gcloud compute project-info describe --project qwiklabs-gcp-02-b1291304a9df
+
+(output)
+commonInstanceMetadata:
+  fingerprint: IaxW7YWqtQI=
+  items:
+  - key: ssh-keys
+    value: student-02-b179bdce2c13:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDGDZeHm9wWESYc7Xd86fUq6lWdWICypRjixtndS68nmsjFkTZM6ZtzOjXaHzLpDnVTQqx5zEo+4m+O/drYTVb5j8bGu1zC1iHMFTZNthI2j04gX7UB+7UWCGs/b22dp7C7pS470GZ6E6XVuc8DtjMgRufuQUXEQdj46H1L//38AJlcZX6FkTvqbfAzAkwxm1It/FMtWuz7XF7EU0dan5xwHkey6QiLPZ8bUxCmBGHq/mSZvMgCTRWT0UDD9QBiDQqNGWTW8NRIPgMtSW/NqH2qg4ZjjmwB/uMjpt5dZ9ejOSzNF558PJGBKOLj4K14D5LZV8Cx/aB5SdYcx7tdyhU5
+      student-02-b179bdce2c13@qwiklabs.net
+  - key: enable-oslogin
+    value: 'true'
+  - key: google-compute-default-zone
+    value: us-central1-a
+  - key: google-compute-default-region
+    value: us-central1
+  kind: compute#metadata
+creationTimestamp: '2020-09-14T07:17:20.634-07:00'
+defaultNetworkTier: PREMIUM
+defaultServiceAccount: 115550823918-compute@developer.gserviceaccount.com
+id: '1941014530627913119'
+kind: compute#project
+name: qwiklabs-gcp-02-b1291304a9df
+quotas:
+- limit: 1000.0
+  metric: SNAPSHOTS
+  usage: 0.0
+- limit: 5.0
+  metric: NETWORKS
+  usage: 1.0
+- limit: 100.0
+  metric: FIREWALLS
+  usage: 4.0
+- limit: 100.0
+  metric: IMAGES
+  usage: 0.0
+- limit: 8.0
+  metric: STATIC_ADDRESSES
+  usage: 0.0
+- limit: 200.0
+- limit: 100.0
+  metric: SECURITY_POLICY_RULES
+  usage: 0.0
+- limit: 20.0
+  metric: PACKET_MIRRORINGS
+  usage: 0.0
+- limit: 100.0
+  metric: NETWORK_ENDPOINT_GROUPS
+  usage: 0.0
+- limit: 6.0
+  metric: INTERCONNECTS
+  usage: 0.0
+- limit: 5000.0
+  metric: GLOBAL_INTERNAL_ADDRESSES
+  usage: 0.0
+- limit: 5.0
+  metric: VPN_GATEWAYS
+  usage: 0.0
+- limit: 100.0
+  metric: MACHINE_IMAGES
+  usage: 0.0
+- limit: 20.0
+  metric: SECURITY_POLICY_CEVAL_RULES
+  usage: 0.0
+- limit: 0.0
+  metric: GPUS_ALL_REGIONS
+  usage: 0.0
+- limit: 5.0
+  metric: EXTERNAL_VPN_GATEWAYS
+  usage: 0.0
+- limit: 1.0
+  metric: PUBLIC_ADVERTISED_PREFIXES
+  usage: 0.0
+- limit: 10.0
+  metric: PUBLIC_DELEGATED_PREFIXES
+  usage: 0.0
+- limit: 128.0
+  metric: STATIC_BYOIP_ADDRESSES
+  usage: 0.0
+selfLink: https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-02-b1291304a9df
+xpnProjectStatus: UNSPECIFIED_XPN_PROJECT_STATUS
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -28,9 +120,12 @@ Environment variables are variables that define your environment. Define your ow
 
 Make a couple of environment variables:
 export PROJECT_ID=<your_project_ID>
+export PROJECT_ID=qwiklabs-gcp-02-b1291304a9df
 
 Set your ZONE environment variable (use the value for zone from the earlier command):
 export ZONE=<your_zone>
+export ZONE=us-central1-a
+
 
 Verify that your variables were set properly:
 echo $PROJECT_ID
@@ -62,17 +157,242 @@ You're using the --machine-type flag to specify the machine type as "n1-standard
 You're using the --zone flag to specify that it gets created in the zone you defined with your environment variable.
 If you omit the --zone flag, gcloud can infer your desired zone based on your default properties. Other required instance settings, like machine type and image, if not specified in the create command, are set to default values.
 
+(output)
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-02-b1291304a9df/zones/us-central1-a/instances/gcelab2].
+NAME     ZONE           MACHINE_TYPE   PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP      STATUS
+gcelab2  us-central1-a  n1-standard-2               10.128.0.2   104.197.105.254  RUNNING
+
 
 
 You can see the default values by displaying help for the create command:
 gcloud compute instances create --help
 
+(output)
+NAME
+    gcloud compute instances create - create Compute Engine virtual machine
+        instances
 
+SYNOPSIS
+    gcloud compute instances create INSTANCE_NAMES [INSTANCE_NAMES ...]
+        [--accelerator=[count=COUNT],[type=TYPE]] [--async]
+        [--no-boot-disk-auto-delete]
+        [--boot-disk-device-name=BOOT_DISK_DEVICE_NAME]
+        [--boot-disk-size=BOOT_DISK_SIZE] [--boot-disk-type=BOOT_DISK_TYPE]
+        [--can-ip-forward] [--create-disk=[PROPERTY=VALUE,...]]
+        [--csek-key-file=FILE] [--deletion-protection]
+        [--description=DESCRIPTION]
+        [--disk=[auto-delete=AUTO-DELETE],
+          [boot=BOOT],[device-name=DEVICE-NAME],[mode=MODE],[name=NAME]]
+        [--enable-display-device] [--hostname=HOSTNAME]
+        [--labels=[KEY=VALUE,...]]
+        [--local-ssd=[device-name=DEVICE-NAME],[interface=INTERFACE]]
+        [--machine-type=MACHINE_TYPE] [--maintenance-policy=MAINTENANCE_POLICY]
+        [--metadata=KEY=VALUE,[KEY=VALUE,...]]
+        [--metadata-from-file=KEY=LOCAL_FILE_PATH,[...]]
+        [--min-cpu-platform=PLATFORM] [--min-node-cpu=MIN_NODE_CPU]
+        [--network=NETWORK] [--network-interface=[PROPERTY=VALUE,...]]
+        [--network-tier=NETWORK_TIER] [--preemptible]
+        [--private-ipv6-google-access-type=PRIVATE_IPV6_GOOGLE_ACCESS_TYPE]
+        [--private-network-ip=PRIVATE_NETWORK_IP]
+        [--no-require-csek-key-create]
+        [--resource-policies=[RESOURCE_POLICY,...]] [--no-restart-on-failure]
+        [--shielded-integrity-monitoring] [--shielded-secure-boot]
+        [--shielded-vtpm] [--source-instance-template=SOURCE_INSTANCE_TEMPLATE]
+        [--subnet=SUBNET] [--tags=TAG,[TAG,...]] [--zone=ZONE]
+        [--address=ADDRESS | --no-address]
+        [--boot-disk-kms-key=BOOT_DISK_KMS_KEY
+          : --boot-disk-kms-keyring=BOOT_DISK_KMS_KEYRING
+          --boot-disk-kms-location=BOOT_DISK_KMS_LOCATION
+          --boot-disk-kms-project=BOOT_DISK_KMS_PROJECT]
+        [--custom-cpu=CUSTOM_CPU --custom-memory=CUSTOM_MEMORY
+          : --custom-extensions --custom-vm-type=CUSTOM_VM_TYPE]
+        [--image-project=IMAGE_PROJECT --image=IMAGE
+          | --image-family=IMAGE_FAMILY | --source-snapshot=SOURCE_SNAPSHOT]
+        [--node=NODE | --node-affinity-file=NODE_AFFINITY_FILE
+          | --node-group=NODE_GROUP] [--public-ptr | --no-public-ptr]
+        [--public-ptr-domain=PUBLIC_PTR_DOMAIN | --no-public-ptr-domain]
+        [--reservation=RESERVATION
+          --reservation-affinity=RESERVATION_AFFINITY; default="any"]
+        [--scopes=[SCOPE,...] | --no-scopes]
+        [--service-account=SERVICE_ACCOUNT | --no-service-account]
+        [GCLOUD_WIDE_FLAG ...]
 
+DESCRIPTION
+    gcloud compute instances create facilitates the creation of Compute Engine
+    virtual machines.
 
+    When an instance is in RUNNING state and the system begins to boot, the
+    instance creation is considered finished, and the command returns with a
+    list of new virtual machines. Note that you usually cannot log into a new
+    
+        instance until it finishes booting. Check the progress of an instance using
+    gcloud compute instances get-serial-port-output.
 
+    For more examples, refer to the EXAMPLES section below.
 
+POSITIONAL ARGUMENTS
+     INSTANCE_NAMES [INSTANCE_NAMES ...]
+        Names of the instances to create. For details on valid instance names,
+        refer to the criteria documented under the field 'name' at:
+        https://cloud.google.com/compute/docs/reference/rest/v1/instances
 
+FLAGS
+     --accelerator=[count=COUNT],[type=TYPE]
+        Attaches accelerators (e.g. GPUs) to the instances.
+
+         type
+            The specific type (e.g. nvidia-tesla-k80 for nVidia Tesla K80) of
+            accelerator to attach to the instances. Use 'gcloud compute
+            accelerator-types list' to learn about all available accelerator
+            types.
+
+         count
+            Number of accelerators to attach to each instance. The default
+            value is 1.
+
+     --async
+        Return immediately, without waiting for the operation in progress to
+        complete.
+
+     --boot-disk-auto-delete
+        Automatically delete boot disks when their instances are deleted.
+        Enabled by default, use --no-boot-disk-auto-delete to disable.
+
+     --boot-disk-device-name=BOOT_DISK_DEVICE_NAME
+        The name the guest operating system will see for the boot disk. This
+        option can only be specified if a new boot disk is being created (as
+        opposed to mounting an existing persistent disk).
+
+     --boot-disk-size=BOOT_DISK_SIZE
+        The size of the boot disk. This option can only be specified if a new
+        boot disk is being created (as opposed to mounting an existing
+        persistent disk). The value must be a whole number followed by a size
+        unit of KB for kilobyte, MB for megabyte, GB for gigabyte, or TB for
+        terabyte. For example, 10GB will produce a 10 gigabyte disk. The
+        minimum size a boot disk can have is 10 GB. Disk size must be a
+        multiple of 1 GB. Limit boot disk size to 2 TB to account for MBR
+        partition table limitations. Default size unit is GB.
+
+     --boot-disk-type=BOOT_DISK_TYPE
+        The type of the boot disk. This option can only be specified if a new
+        boot disk is being created (as opposed to mounting an existing
+        persistent disk). To get a list of available disk types, run $ gcloud
+        compute disk-types list.
+
+     --can-ip-forward
+        If provided, allows the instances to send and receive packets with
+                non-matching destination or source IP addresses.
+
+     --create-disk=[PROPERTY=VALUE,...]
+        Creates and attaches persistent disks to the instances.
+
+         name
+            Specifies the name of the disk. This option cannot be specified if
+            more than one instance is being created.
+
+         description
+            Optional textual description for the disk being created.
+
+         mode
+            Specifies the mode of the disk. Supported options are ro for
+            read-only and rw for read-write. If omitted, rw is used as a
+            default.
+
+         image
+            Specifies the name of the image that the disk will be initialized
+            with. A new disk will be created based on the given image. To view
+            a list of public images and projects, run $ gcloud compute images
+            list. It is best practice to use image when a specific version of
+            an image is needed. If both image and image-family flags are
+            omitted a blank disk will be created.
+
+         image-family
+            The image family for the operating system that the boot disk will
+            be initialized with. Compute Engine offers multiple Linux
+            distributions, some of which are available as both regular and
+            Shielded VM images. When a family is specified instead of an image,
+            the latest non-deprecated image associated with that family is
+            used. It is best practice to use --image-family when the latest
+            version of an image is needed.
+
+         image-project
+            The Google Cloud project against which all image and image family
+            references will be resolved. It is best practice to define
+            image-project. A full list of available projects can be generated
+            by running gcloud projects list.
+
+            ▸ If specifying one of our public images, image-project must be
+              provided.
+            ▸ If there are several of the same image-family value in multiple
+              projects, image-project must be specified to clarify the image to
+              be used.
+            ▸ If not specified and either image or image-family is provided,
+              the current default project is used.
+
+         size
+            The size of the disk. The value must be a whole number followed by
+            a size unit of KB for kilobyte, MB for megabyte, GB for gigabyte,
+            or TB for terabyte. For example, 10GB will produce a 10 gigabyte
+            disk. Disk size must be a multiple of 1 GB. If not specified, the
+            default image size will be used for the new disk.
+
+         type
+                     The type of the disk. To get a list of available disk types, run $
+            gcloud compute disk-types list. The default disk type is
+            pd-standard.
+         device-name
+            An optional name that indicates the disk name the guest operating
+            system will see. If omitted, a device name of the form
+            persistent-disk-N will be used.
+         auto-delete
+            If yes, this persistent disk will be automatically deleted when the
+            instance is deleted. However, if the disk is later detached from
+            the instance, this option won't apply. The default value for this
+            is yes.
+         boot
+            If yes, indicates that this is a boot disk. The instance will use
+            the first partition of the disk for its root file system. The
+            default value for this is no.
+         kms-key
+            Fully qualified Cloud KMS cryptokey name that will protect the
+            disk.
+            This can either be the fully qualified path or the name.
+            The fully qualified Cloud KMS cryptokey name format is:
+            projects/<kms-project>/locations/<kms-location>/keyRings/<kms-keyring>/
+            cryptoKeys/<key-name>.
+            If the value is not fully qualified then kms-location, kms-keyring,
+            and optionally kms-project are required.
+            See
+            https://cloud.google.com/compute/docs/disks/customer-managed-encryption
+            for more details.
+         kms-project
+            Project that contains the Cloud KMS cryptokey that will protect the
+            disk.
+            If the project is not specified then the project where the disk is
+            being created will be used.
+            If this flag is set then key-location, kms-keyring, and kms-key are
+            required.
+            See
+            https://cloud.google.com/compute/docs/disks/customer-managed-encryption
+            for more details.
+         kms-location
+            Location of the Cloud KMS cryptokey to be used for protecting the
+            disk.
+            All Cloud KMS cryptokeys are reside in a 'location'. To get a list
+        ...
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
 
 
@@ -81,6 +401,31 @@ gcloud compute instances create --help
 Using gcloud commands
 gcloud offers simple usage guidelines that are available by adding the -h flag (for help) onto the end of any gcloud invocation.
 gcloud -h
+
+(output)
+Usage: gcloud [optional flags] <group | command>
+  group may be           access-context-manager | active-directory |
+                         ai-platform | alpha | anthos | app | asset | auth |
+                         beta | bigtable | builds | components | composer |
+                         compute | config | container | data-catalog |
+                         dataflow | dataproc | datastore | debug |
+                         deployment-manager | dns | domains | endpoints |
+                         filestore | firebase | firestore | functions | game |
+                         healthcare | iam | iap | iot | kms | logging | ml |
+                         ml-engine | monitoring | network-management |
+                         organizations | policy-troubleshoot | projects |
+                         pubsub | recommender | redis | resource-manager | run |
+                         scc | scheduler | secrets | services | source |
+                         spanner | sql | tasks | topic
+  command may be         cheat-sheet | docker | feedback | help | info | init |
+                         survey | version
+
+For detailed information on this command and its flags, run:
+  gcloud --help
+  
+  
+  
+
 
 
 More verbose help can be obtained by appending --help flag, or executing gcloud help command. Run the following in Cloud Shell:
@@ -91,6 +436,71 @@ gcloud config --help
 You can see that the gcloud config --help and gcloud help config commands are equivalent. Both give long, detailed help.
 gcloud help config
 
+(output)
+NAME
+    gcloud config - view and edit Cloud SDK properties
+
+SYNOPSIS
+    gcloud config GROUP | COMMAND [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    The gcloud config command group lets you set, view and unset properties
+    used by Cloud SDK.
+
+    A configuration is a set of properties that govern the behavior of gcloud
+    and other Cloud SDK tools. The initial default configuration is set when
+    gcloud init is run. You can create additional named configurations using
+    gcloud init or gcloud config configurations create.
+
+    To display the path of the active configuration along with information
+    about the current gcloud environment, run $ gcloud info.
+
+    To switch between configurations, use gcloud config configurations
+    activate.
+
+    gcloud supports several flags that have the same effect as properties in a
+    configuration (for example, gcloud supports both the --project flag and
+    project property). Properties differ from flags in that flags affect
+    command behavior on a per-invocation basis. Properties allow you to
+    maintain the same settings across command executions.
+
+    For more information on configurations, see gcloud topic configurations.
+
+GCLOUD WIDE FLAGS
+    These flags are available to all commands: --account, --billing-project,
+    --configuration, --flags-file, --flatten, --format, --help,
+    --impersonate-service-account, --log-http, --project, --quiet,
+    --trace-token, --user-output-enabled, --verbosity.
+
+    Run $ gcloud help for details.
+
+GROUPS
+    GROUP is one of the following:
+
+     configurations
+        Manage the set of gcloud named configurations.
+
+COMMANDS
+    COMMAND is one of the following:
+
+     get-value
+        Print the value of a Cloud SDK property.
+
+     list
+        List Cloud SDK properties for the currently active configuration.
+
+     set
+        Set a Cloud SDK property.
+
+     unset
+     ......
+     
+     
+     
+     
+     
+     
+     
 
 
 gcloud Global Flags govern the behavior of commands on a per-invocation level. Flags override any values set in SDK properties.
@@ -99,11 +509,221 @@ https://cloud.google.com/sdk/gcloud/reference/
 View the list of configurations in your environment:
 gcloud config list
 
+(output)
+[component_manager]
+disable_update_check = True
+[compute]
+gce_metadata_read_timeout_sec = 30
+[core]
+account = student-02-b179bdce2c13@qwiklabs.net
+disable_usage_reporting = True
+project = qwiklabs-gcp-02-b1291304a9df
+[metrics]
+environment = devshell
+
+Your active configuration is: [cloudshell-13904]
+
+
+
+
+
+
 To check how other properties are set, see all properties by calling:
 gcloud config list --all
 
+(output)
+[accessibility]
+screen_reader (unset)
+[app]
+cloud_build_timeout (unset)
+promote_by_default (unset)
+stop_previous_version (unset)
+use_runtime_builders (unset)
+[artifacts]
+location (unset)
+repository (unset)
+[auth]
+disable_credentials (unset)
+impersonate_service_account (unset)
+[billing]
+quota_project (unset)
+[builds]
+kaniko_cache_ttl (unset)
+timeout (unset)
+use_kaniko (unset)
+[component_manager]
+additional_repositories (unset)
+disable_update_check = True
+[composer]
+location (unset)
+[compute]
+gce_metadata_read_timeout_sec = 30
+region (unset)
+use_new_list_usable_subnets_api (unset)
+zone (unset)
+[container]
+build_timeout (unset)
+cluster (unset)
+use_application_default_credentials (unset)
+use_client_certificate (unset)
+[context_aware]
+use_client_certificate (unset)
+[core]
+account = student-02-b179bdce2c13@qwiklabs.net
+custom_ca_certs_file (unset)
+default_regional_backend_service (unset)
+disable_color (unset)
+disable_file_logging (unset)
+disable_prompts (unset)
+disable_usage_reporting = True
+log_http (unset)
+max_log_days (unset)
+pass_credentials_to_gsutil (unset)
+project = qwiklabs-gcp-02-b1291304a9df
+show_structured_logs (unset)
+trace_token (unset)
+user_output_enabled (unset)
+verbosity (unset)
+[dataflow]
+disable_public_ips (unset)
+print_only (unset)
+[datafusion]
+location (unset)
+[dataproc]
+region (unset)
+[deployment_manager]
+glob_imports (unset)
+[filestore]
+location (unset)
+zone (unset)
+[functions]
+region (unset)
+[game_services]
+default_deployment (unset)
+default_realm (unset)
+location (unset)
+[gcloudignore]
+enabled (unset)
+[healthcare]
+dataset (unset)
+location (unset)
+[interactive]
+bottom_bindings_line (unset)
+bottom_status_line (unset)
+completion_menu_lines (unset)
+context (unset)
+fixed_prompt_position (unset)
+help_lines (unset)
+hidden (unset)
+justify_bottom_lines (unset)
+manpage_generator (unset)
+multi_column_completion_menu (unset)
+prompt (unset)
+show_help (unset)
+suggest (unset)
+[lifesciences]
+location (unset)
+[memcache]
+region (unset)
+[metrics]
+environment = devshell
+[ml_engine]
+local_python (unset)
+polling_interval (unset)
+[notebooks]
+location (unset)
+[privateca]
+location (unset)
+[proxy]
+address (unset)
+password (unset)
+port (unset)
+rdns (unset)
+type (unset)
+username (unset)
+[redis]
+region (unset)
+[run]
+cluster (unset)
+cluster_location (unset)
+platform (unset)
+region (unset)
+[scc]
+organization (unset)
+[secrets]
+locations (unset)
+replication-policy (unset)
+[spanner]
+instance (unset)
+[ssh]
+putty_force_connect (unset)
+verify_internal_ip (unset)
+[survey]
+disable_prompts (unset)
+[vmware]
+location (unset)
+
+Your active configuration is: [cloudshell-13904]
+
+
+
+
+
+
+
+
+
+
 List your components:
 gcloud components list
+
+(output)
+Your current Cloud SDK version is: 310.0.0
+The latest available version is: 310.0.0
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                 Components                                                 │
+├───────────────┬──────────────────────────────────────────────────────┬──────────────────────────┬──────────┤
+│     Status    │                         Name                         │            ID            │   Size   │
+├───────────────┼──────────────────────────────────────────────────────┼──────────────────────────┼──────────┤
+│ Not Installed │ Appctl                                               │ appctl                   │ 21.0 MiB │
+│ Not Installed │ Cloud Firestore Emulator                             │ cloud-firestore-emulator │ 41.0 MiB │
+│ Not Installed │ Cloud SQL Proxy                                      │ cloud_sql_proxy          │  7.5 MiB │
+│ Not Installed │ Cloud Spanner Emulator                               │ cloud-spanner-emulator   │ 21.4 MiB │
+│ Not Installed │ Emulator Reverse Proxy                               │ emulator-reverse-proxy   │ 14.5 MiB │
+│ Not Installed │ Google Container Registry's Docker credential helper │ docker-credential-gcr    │  1.8 MiB │
+│ Not Installed │ Kustomize                                            │ kustomize                │ 25.9 MiB │
+│ Not Installed │ Nomos CLI                                            │ nomos                    │ 17.7 MiB │
+│ Not Installed │ anthos-auth                                          │ anthos-auth              │ 16.0 MiB │
+│ Installed     │ App Engine Go Extensions                             │ app-engine-go            │  4.9 MiB │
+│ Installed     │ BigQuery Command Line Tool                           │ bq                       │  < 1 MiB │
+│ Installed     │ Cloud Bigtable Command Line Tool                     │ cbt                      │  7.7 MiB │
+│ Installed     │ Cloud Bigtable Emulator                              │ bigtable                 │  6.6 MiB │
+│ Installed     │ Cloud Datalab Command Line Tool                      │ datalab                  │  < 1 MiB │
+│ Installed     │ Cloud Datastore Emulator                             │ cloud-datastore-emulator │ 18.4 MiB │
+│ Installed     │ Cloud Pub/Sub Emulator                               │ pubsub-emulator          │ 34.9 MiB │
+│ Installed     │ Cloud SDK Core Libraries                             │ core                     │ 15.7 MiB │
+│ Installed     │ Cloud Storage Command Line Tool                      │ gsutil                   │  3.5 MiB │
+│ Installed     │ Google Cloud Build Local Builder                     │ cloud-build-local        │  6.0 MiB │
+│ Installed     │ Kind                                                 │ kind                     │  4.5 MiB │
+│ Installed     │ Minikube                                             │ minikube                 │ 24.1 MiB │
+│ Installed     │ Skaffold                                             │ skaffold                 │ 14.5 MiB │
+│ Installed     │ gcloud Alpha Commands                                │ alpha                    │  < 1 MiB │
+│ Installed     │ gcloud Beta Commands                                 │ beta                     │  < 1 MiB │
+│ Installed     │ gcloud app Java Extensions                           │ app-engine-java          │ 59.5 MiB │
+│ Installed     │ gcloud app Python Extensions                         │ app-engine-python        │  6.1 MiB │
+│ Installed     │ gcloud app Python Extensions (Extra Libraries)       │ app-engine-python-extras │ 27.1 MiB │
+│ Installed     │ kpt                                                  │ kpt                      │ 12.0 MiB │
+│ Installed     │ kubectl                                              │ kubectl                  │  < 1 MiB │
+└───────────────┴──────────────────────────────────────────────────────┴──────────────────────────┴──────────┘
+To install or remove components at your current SDK version [310.0.0], run:
+  $ gcloud components install COMPONENT_ID
+  $ gcloud components remove COMPONENT_ID
+
+To update your SDK installation to the latest version [310.0.0], run:
+  $ gcloud components update
+
+
 
 
 
@@ -122,6 +742,27 @@ Auto-completion
 Install the beta components:
 sudo apt-get install google-cloud-sdk
 
+(output)
+********************************************************************************
+You are running apt-get inside of Cloud Shell. Note that your Cloud Shell
+machine is ephemeral and no system-wide change will persist beyond session end.
+
+To suppress this warning, create an empty ~/.cloudshell/no-apt-get-warning file.
+The command will automatically proceed in 5 seconds or on any key.
+
+Visit https://cloud.google.com/shell/help for more information.
+********************************************************************************
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+google-cloud-sdk is already the newest version (310.0.0-0).
+0 upgraded, 0 newly installed, 0 to remove and 7 not upgraded.
+
+
+
+
+
+
 
 gcloud interactive has auto prompting for commands and flags, and displays inline help snippets in the lower section as the command is typed.
 Static information, like command and sub-command names, and flag names and enumerated flag values, are auto-completed using dropdown menus.
@@ -130,10 +771,29 @@ If a dropdown menu appears, use the Tab key to move through the list, and the Sp
 Enter the gcloud interactive mode:
 gcloud beta interactive
 
+(output)
+Welcome to the gcloud interactive shell environment.
+
+    Tips:
+
+      ▪ start by typing commands to get auto-suggestions and inline help
+      ▪ use tab, up-arrow, or down-arrow to navigate completion dropdowns
+      ▪ use space or / to accept the highlighted dropdown item
+      ▪ run gcloud <alpha|beta> interactive --help for more info
+
+    Run $ gcloud feedback to report bugs or request new features.
+    
+    
+    
 
 
 Start typing the following command, using auto-complete to finish the command:
 gcloud compute instances describe <your_vm>
+gcloud compute instances describe gcelab2
+
+
+
+
 
 Across the bottom of Cloud Shell you can see the shortcut to toggle this feature. Try out the F2 toggle:
 F2:help:STATE Toggles the active help section, ON when enabled, OFF when disabled.
@@ -171,6 +831,61 @@ Enter passphrase (empty for no passphrase)
 
 You don't need to do anything here, so disconnect from SSH by exiting from the remote shell by typing "exit":
 exit
+
+
+
+(output)
+WARNING: The private SSH key file for gcloud does not exist.
+WARNING: The public SSH key file for gcloud does not exist.
+WARNING: You do not have an SSH key for gcloud.
+WARNING: SSH keygen will be executed to generate a key.
+This tool needs to create the directory
+[/home/student_02_b179bdce2c13/.ssh] before being able to generate SSH
+ keys.
+
+Do you want to continue (Y/n)?  y
+
+Generating public/private rsa key pair.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/student_02_b179bdce2c13/.ssh/google_compute_engine.
+Your public key has been saved in /home/student_02_b179bdce2c13/.ssh/google_compute_engine.pub.
+The key fingerprint is:
+SHA256:HpUYNspvg19EauFXwiMDKJKFDvYbvNMLxxC4Jaf49g8 student_02_b179bdce2c13@cs-6000-devshell-vm-18b37f08-2222-4cd7-bbb6-3ca91897c981
+The key's randomart image is:
++---[RSA 2048]----+
+| +o  ...=.o .    |
+|=+.+.. +oBo+     |
+|=.O.. o =o=.     |
+|.+ =   + +       |
+| .  B . S .      |
+|  o= + + +       |
+| . .E . o        |
+|    .o           |
+|     ..          |
++----[SHA256]-----+
+
+Warning: Permanently added 'compute.7170064594198129748' (ECDSA) to the list of known hosts.
+Linux gcelab2 4.19.0-10-cloud-amd64 #1 SMP Debian 4.19.132-1 (2020-07-24) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Creating directory '/home/student-02-b179bdce2c13'.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
