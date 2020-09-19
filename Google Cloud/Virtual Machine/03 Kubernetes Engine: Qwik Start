@@ -1,0 +1,222 @@
+https://google.qwiklabs.com/games/1233/labs/5224
+
+
+
+
+You can list the active account name with this command:
+gcloud auth list
+(Output)
+Credentialed accounts:
+ - <myaccount>@<mydomain>.com (active)
+(Example output)
+
+Credentialed accounts:
+ - google1623327_student@qwiklabs.net
+You can list the project ID with this command:
+
+
+
+
+
+gcloud config list project
+(Output)
+[core]
+project = <project_ID>
+(Example output)
+
+[core]
+project = qwiklabs-gcp-44776a13dea667a6
+
+
+
+
+
+
+
+
+
+
+
+
+Setting a default compute zone
+Your compute zone is an approximate regional location in which your clusters and their resources live. For example, us-central1-a is a zone in the us-central1 region.
+Start a new session in Cloud Shell and run the following command to set your default compute zone to us-central1-a:
+gcloud config set compute/zone us-central1-a
+
+
+You receive the following output:
+Updated property [compute/zone].
+
+                  
+
+
+
+
+
+
+
+
+Creating a Kubernetes Engine cluster
+A cluster consists of at least one cluster master machine and multiple worker machines called nodes. Nodes are Compute Engine virtual machine (VM) instances that run the Kubernetes processes necessary to make them part of the cluster.
+To create a cluster, run the following command, replacing [CLUSTER-NAME] with the name you choose for the cluster (for example my-cluster). Cluster names must start with a letter, end with an alphanumeric, and cannot be longer than 40 characters.
+gcloud container clusters create [CLUSTER-NAME]
+
+
+You can ignore any warnings in the output. It might take several minutes to finish creating the cluster. Soon after you should receive a similar output:
+NAME        LOCATION       ...   NODE_VERSION  NUM_NODES  STATUS
+my-cluster  us-central1-a  ...   1.15.12-gke.2  3          RUNNING
+
+
+gcloud container clusters create myKubernetesCluster
+(Output)
+WARNING: Warning: basic authentication is deprecated, and will be removed in GKE control plane versions 1.19 and newer. For a list of recommended authentication methods, see: https://cloud.google.com/kubernetes-engine/docs/how-to/api-server-authentication
+WARNING: Currently VPC-native is not the default mode during cluster creation. In the future, this will become the default mode and can be disabled using `--no-enable-ip-alias` flag. Use `--[no-]enable-ip-alias` flag to suppress this warning.
+WARNING: Newly created clusters and node-pools will have node auto-upgrade enabled by default. This can be disabled using the `--no-enable-autoupgrade` flag.
+WARNING: Starting with version 1.18, clusters will have shielded GKE nodes by default.
+WARNING: Your Pod address range (`--cluster-ipv4-cidr`) can accommodate at most 1008 node(s).
+ERROR: (gcloud.container.clusters.create) ResponseError: code=400, message=Invalid value for field "cluster.name": "myKubernetesCluster". Must be a match of regex '(?:[a-z](?:[-a-z0-9]{0,38}[a-z0-9])?)' (only alphanumerics and '-' allowed, must start with a letter and end with an alphanumeric, and must be no longer than 40 characters).
+
+
+#retry
+gcloud container clusters create mykubernetescluster
+(Output)
+WARNING: Warning: basic authentication is deprecated, and will be removed in GKE control plane versions 1.19 and newer. For a list of recommended authentication methods, see: https://cloud.google.com/kubernetes-engine/docs/how-to/api-server-authentication
+WARNING: Currently VPC-native is not the default mode during cluster creation. In the future, this will become the default mode and can be disabled using `--no-enable-ip-alias` flag. Use `--[no-]enable-ip-alias` flag to suppress this warning.
+WARNING: Newly created clusters and node-pools will have node auto-upgrade enabled by default. This can be disabled using the `--no-enable-autoupgrade` flag.
+WARNING: Starting with version 1.18, clusters will have shielded GKE nodes by default.
+WARNING: Your Pod address range (`--cluster-ipv4-cidr`) can accommodate at most 1008 node(s).
+Creating cluster mykubernetescluster in us-central1-a... Cluster is being health-checked (master is healthy)...done.
+Created [https://container.googleapis.com/v1/projects/qwiklabs-gcp-04-f53781a61249/zones/us-central1-a/clusters/mykubernetescluster].
+To inspect the contents of your cluster, go to: https://console.cloud.google.com/kubernetes/workload_/gcloud/us-central1-a/mykubernetescluster?project=qwiklabs-gcp-04-f53781a61249
+kubeconfig entry generated for mykubernetescluster.
+NAME                 LOCATION       MASTER_VERSION  MASTER_IP      MACHINE_TYPE   NODE_VERSION    NUM_NODES  STATUS
+mykubernetescluster  us-central1-a  1.15.12-gke.20  34.123.141.32  n1-standard-1  1.15.12-gke.20  3          RUNNING
+
+
+
+
+
+
+
+
+
+
+Get authentication credentials for the cluster
+After creating your cluster, you need to get authentication credentials to interact with the cluster.
+To authenticate the cluster run the following command, replacing [CLUSTER-NAME] with the name of your cluster:
+gcloud container clusters get-credentials [CLUSTER-NAME]
+
+
+You should receive a similar output:
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for my-cluster.
+Deploying an application to the c
+
+
+
+
+gcloud container clusters get-credentials mykubernetescluster
+(Output)
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for mykubernetescluster.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Deploying an application to the cluster
+Now that you have created a cluster, you can deploy a containerized application to it. For this lab you'll run hello-app in your cluster.
+Kubernetes Engine uses Kubernetes objects to create and manage your cluster's resources. Kubernetes provides the Deployment object for deploying stateless applications like web servers. Service objects define rules and load balancing for accessing your application from the Internet.
+Run the following kubectl create command in Cloud Shell to create a new Deployment hello-server from the hello-app container image:
+kubectl create deployment hello-server --image=gcr.io/google-samples/hello-app:1.0
+
+
+This Kubernetes command creates a Deployment object that represents hello-server. 
+In this case, --image specifies a container image to deploy. 
+The command pulls the example image from a Google Container Registry bucket. gcr.io/google-samples/hello-app:1.0 indicates the specific image version to pull. 
+If a version is not specified, the latest version is used.
+You should receive the following output:
+deployment.apps/hello-server created
+
+
+
+
+
+
+
+
+
+Now create a Kubernetes Service, which is a Kubernetes resource that lets you expose your application to external traffic, by running the following kubectl expose command:
+kubectl expose deployment hello-server --type=LoadBalancer --port 8080
+
+In this command:
+--port specifies the port that the container exposes.
+type="LoadBalancer" creates a Compute Engine load balancer for your container.
+
+You should receive the following output:
+service/hello-server exposed
+
+
+
+
+Inspect the hello-server Service by running kubectl get:
+kubectl get service
+(Output)
+NAME           TYPE           CLUSTER-IP    EXTERNAL-IP   PORT(S)          AGE
+hello-server   LoadBalancer   10.3.249.65   <pending>     8080:32674/TCP   15s
+kubernetes     ClusterIP      10.3.240.1    <none>        443/TCP          106s
+
+(Output again)
+NAME           TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)          AGE
+hello-server   LoadBalancer   10.3.249.65   35.184.159.156   8080:32674/TCP   97s
+kubernetes     ClusterIP      10.3.240.1    <none>           443/TCP          3m8s
+
+
+
+
+
+From this command's output, copy the Service's external IP address from the EXTERNAL IP column.
+View the application from your web browser using the external IP address with the exposed port:
+http://[EXTERNAL-IP]:8080
+
+http://35.184.159.156:8080
+
+
+Hello, world!
+Version: 1.0.0
+Hostname: hello-server-57c495f96c-kc9nr
+
+
+
+
+
+
+
+
+
+
+
+
+
+Clean Up
+Run the following to delete the cluster:
+gcloud container clusters delete [CLUSTER-NAME]
+
+
+gcloud container clusters delete mykubernetescluster
+(Output)
+The following clusters will be deleted.
+ - [mykubernetescluster] in [us-central1-a]
+
+Do you want to continue (Y/n)?  y
+
+Deleting cluster mykubernetescluster...done.
+Deleted [https://container.googleapis.com/v1/projects/qwiklabs-gcp-04-f53781a61249/zones/us-central1-a/clusters/mykubernetescluster].
