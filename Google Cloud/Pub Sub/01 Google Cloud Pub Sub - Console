@@ -1,0 +1,95 @@
+Google Cloud Pub Sub - Console
+https://googlecoursera.qwiklabs.com/focuses/11719344?parent=lti_session
+Google Cloud Pub/Sub is a messaging service for exchanging event data among applications and services. 
+A producer of data publishes messages to a Cloud Pub/Sub topic. 
+A consumer creates a subscription to that topic. 
+Subscribers either pull messages from a subscription or are configured as webhooks for push subscriptions. 
+Every subscriber must acknowledge each message within a configurable window of time.
+
+
+
+Navigation menu > Pub/Sub > Topics
+1. Create topic
+
+
+
+2. Create subscription
+>subscriptions
+create subscription
+
+Delivery type
+pull, push
+
+Message retention duration
+acknowledged, not acknowledged messages; days, hr, min
+
+Subscription expiration
+automatically delete a subscription after a specified period if there is no subscriber activity such as open connections, active pulls, or successful pushes
+31 days
+365 days
+never expire
+
+
+Acknowledgement deadline
+How long Pub/Sub waits for the subscriber to acknowledge receipt before resending the message
+10-600 seconds
+
+
+Subscription filter 
+If a filter syntax is provided, subscribers will only receive messages that match the filter.
+
+Message ordering 
+Order messages with an ordering key
+When enabled, messages tagged with the same ordering key will be received in the order they are published. This option cannot be changed later.
+
+Dead lettering
+Subscriptions may configure a maximum number of delivery attempts. 
+When a message cannot be delivered, it is republished to the specified dead letter topic.
+max delivery attempts - 5-100
+
+Retry policy
+Retry policy will be triggered on NACKs or acknowledgement deadline-exceeded events for a given message
+retry immediately
+retry after delay - 0-600 seconds; set max min delay
+
+
+
+
+
+
+3. Publish message
+>topics
+>topic
+>publish message
+>single / recurring
+Hello World
+
+
+
+
+4. View the message - use subscription to pull data from the topic
+>subscription
+>view messages
+>pull
+Publish time                  Attribute keys        Message body      Ordering key        Ack
+Oct 12, 2020, 1:58:17 PM	        —	                Hello World         1                 Deadline exceeded
+
+
+
+
+>google cloud shell
+gcloud beta pubsub subscriptions pull --auto-ack MySub
+
+┌─────────────┬──────────────────┬──────────────┬────────────┬──────────────────┐
+│     DATA    │    MESSAGE_ID    │ ORDERING_KEY │ ATTRIBUTES │ DELIVERY_ATTEMPT │
+├─────────────┼──────────────────┼──────────────┼────────────┼──────────────────┤
+│ Hello World │ 1637626582532012 │ 1            │            │                  │
+└─────────────┴──────────────────┴──────────────┴────────────┴──────────────────┘
+
+
+
+
+1. A publisher application creates and sends messages to a ____. Subscriber applications create a ____ to a topic to receive messages from it.
+topic, subscription
+
+2. Cloud Pub/Sub is an asynchronous messaging service designed to be highly reliable and scalable.
