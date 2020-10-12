@@ -1,0 +1,174 @@
+Creating a Cloud Storage Bucket
+https://googlecoursera.qwiklabs.com/focuses/11719973?parent=lti_session
+Buckets are storage objects on Google Cloud Storage. 
+You can use buckets to integrate storage into your apps, access data instantly from any storage class, and they are designed for secure and durable storage.
+
+
+Create a GCS bucket and folder
+Upload a folder and file to the bucket
+Set the Lifecycle rules for a folder
+Create permissions for a bucket
+
+
+
+
+
+
+
+
+
+
+Enable APIs
+Navigation menu, click APIs & Services
+
+Cloud IoT API
+Cloud Pub/Sub API
+Container Registry API
+
+
+
+
+Task 1. Create a bucket
+Navigation menu, click Storage > Browser
+Create bucket
+qwiklabs-gcp-01-79aff62460dc
+
+Location type
+This permanent choice defines the geographic placement of your data and affects cost, performance, and availability.
+Region        Lowest latency within a single region
+Dual-region   High availability and low latency across 2 regions
+Multi-region  Highest availability across largest area
+
+
+A storage class sets costs for storage, retrieval, and operations. Pick a default storage class based on how long you plan to store your data and how often it will be accessed.
+Standard      Best for short-term storage and frequently accessed data
+Nearline      Best for backups and data accessed less than once a month
+Coldline      Best for disaster recovery and data accessed less than once a quarter
+Archive       Best for long-term digital preservation of data accessed less than once a year
+
+Access control
+Fine-grained  Specify access to individual objects by using object-level permissions (ACLs) in addition to your bucket-level permissions (IAM). 
+Uniform       Ensure uniform access to all objects in the bucket by using only bucket-level permissions (IAM). This option becomes permanent after 90 days.
+
+Encryption
+Google-managed key      No configuration required
+Customer-managed key    Manage via Google Cloud Key Management Service
+
+Retention policy
+Set a retention policy to specify the minimum duration that this bucket's objects must be protected from deletion or modification after they're uploaded. 
+You might set a policy to address industry-specific retention challenges. 
+
+
+Labels
+Labels are key:value pairs that allow you to group related buckets together or with other Cloud Platform resources.
+
+
+Name                            Created                 Location type     Location                                Default storage class     Updated                     Public access             Access control    Lifecycle rules     Labels    Retention policy    Requester pays    Encryption 
+qwiklabs-gcp-01-79aff62460dc	Oct 12, 2020, 2:31:08 PM	Multi-region	    us (multiple regions in United States)	Standard	                Oct 12, 2020, 2:31:08 PM	  Subject to object ACLs	  Fine-grained	    None	                                                              Google-managed key
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Upload images to the bucket
+On your computer, Git clone https://github.com/cagamboa123/images.git. This will download images to your computer as a folder called images.
+On the Bucket details page, click Upload folder. Find the images folder and click Upload.
+A folder called images will be created in the GCS bucket.
+Click on the folder images. The image files are shown in the bucket.
+
+
+
+
+
+Task 3. Set lifecycle rules
+On the Browser page, find the bucket you created. Click on None in the Lifecycle column.
+Add rule.
+
+select an action
+Set storage class to Nearline         Best for backups and data accessed less than once a month
+Set storage class to Coldline         Best for disaster recovery and data accessed less than once a quarter
+Set storage class to Archive          Best for long-term digital preservation of data accessed less than once a year
+Delete object                         Objects cannot be restored after deletion, unless you have object versioning enabled. (With versioning enabled, live objects will be made noncurrent, and noncurrent versions will be permanently deleted.) You could also incur early deletion charges for objects set to Nearline, Coldline, or Archive storage classes.
+
+select 'delete'
+
+
+
+Select object conditions
+This rule will apply the action to current and future objects that meet all the selected conditions below.
+Age - Age is counted from when an object was uploaded to the current bucket, even if it moved from another
+Created before
+Storage class matches
+Number of newer versions - Applies action only to versioned objects with at least this many newer versions.
+Days since becoming noncurrent
+Became noncurrent before
+Live state - Applies action only to versioned objects with selected state - Live OR Noncurrent
+Days since custom time
+Custom time before
+
+
+Property                    Value
+Select object conditions    Age
+days                        5
+
+
+Selecting this action will delete all files 5 days after creation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Set up Cloud IAM permissions
+Cloud IAM (Identity Access Management) permissions are different from GCS bucket permissions. 
+Cloud IAM permissions give you access to the GCS cloud resources themselves. 
+Plus, depending on how they are configured, any new buckets or objects will inherit the same permissions created as part of this lab.
+
+create permissions to access and manage your GCS buckets from an email account. 
+When you are done with this section you will be able to access files from your email account
+
+
+Navigation menu, click IAM & admin.
+Permissions > add
+For New members, type the email address that you can access now.
+For Select a role, select Cloud Storage > Storage Admin.
+This gives full control of GCS resources to the email address you specified. Click Save.
+The email address is now a member with a Storage Admin role.
+
+
+
+Validate the new permissions
+On the Navigation menu, click Storage.
+copy the link to the buckets page.
+https://storage.googleapis.com/BUCKET_NAME/OBJECT_NAME
+https://storage.googleapis.com/qwiklabs-gcp-01-79aff62460dc
+https://console.cloud.google.com/storage/browser/qwiklabs-gcp-01-79aff62460dc
+Open an incognito window in Chrome.
+Log in to the account you added to the IAM permissions.
+Paste the link into the navigation bar. The console will display the storage page for your Qwiklabs project.
+On the Navigation menu, click Pub/Sub.
+It shows that you do not have sufficient permissions to view the page.
+Close the window you opened with your own account.
+
+
+
+
