@@ -1,0 +1,202 @@
+Using Cloud IoT Core
+https://googlecoursera.qwiklabs.com/focuses/11719641?parent=lti_session
+configure Cloud IoT Core to create a registry on GCP and 
+then add a device to it. 
+You use Stackdriver Logging to view the logs for the device.
+
+
+
+Enable APIs
+Navigation menu>APIs & Services
+
+Cloud IoT API
+Cloud Pub/Sub API
+Container Registry API
+
+
+
+
+
+
+Create a topic and subscription
+Navigation menu, click Pub/Sub > Topics
+topic- device-data
+subscription- device-data-sub, pull
+
+
+
+
+
+
+Create a device registry
+Navigation menu, click IoT Core
+Create registry
+
+
+Property	            Value (type or select)
+Registry ID	          deviceReg
+Region	              <closest region to you>
+Cloud Pub/Sub topics	projects/<project-id>/topics/device-data, projects/qwiklabs-gcp-03-f7de0f15f994/topics/device-data
+
+
+
+
+
+
+Create a device
+Navigation menu, click IoT Core > Devices.
+Create a device.
+
+
+
+Property	                      Value (type or select)
+Device ID	                      device1
+Device communication	          Allow
+Authentication > Input method	  Enter manually
+Public key format	              RS256_X509
+-----BEGIN CERTIFICATE-----
+<public key value>
+-----END CERTIFICATE-----
+
+
+
+
+
+
+
+
+
+
+
+View Logs
+Navigation menu, click Logging > Log Viewer.
+For first dropdown (resource), select Cloud IoT Device > All device_num_id
+The logs display: <date> <time> <IAM Role> <CreateDevice> <region> <email> 
+The logs do not display the published messages because Cloud IoT doesn't provide DATA_READ, DATA_WRITE logs.
+
+
+
+I 2020-10-12T06:13:24.132533997Z Cloud IoT CreateDevice asia-east1:deviceReg:device1 student-03-f57d1582b78f@qwiklabs.net {"@type":"type.googleapis.com/google.cloud.audit.AuditLog","authenticationInfo":{"principalEmail":"student-03-f57d1582b78f@qwiklabs.net"},"requestMetadata":{"callerIp":"222.164.14.186","callerSuppliedUserAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/… Cloud IoT CreateDevice asia-east1:deviceReg:device1 student-03-f57d1582b78f@qwiklabs.net 
+  {
+ insertId: "18y9czedah1q"  
+ logName: "projects/qwiklabs-gcp-03-f7de0f15f994/logs/cloudaudit.googleapis.com%2Factivity"  
+ protoPayload: {…}  
+ receiveTimestamp: "2020-10-12T06:13:24.736544302Z"  
+ resource: {…}  
+ severity: "NOTICE"  
+ timestamp: "2020-10-12T06:13:24.132533997Z"  
+  }
+I 2020-10-12T06:14:06.462580453Z Cloud IoT DeleteDevice asia-east1:deviceReg:device1 student-03-f57d1582b78f@qwiklabs.net {"@type":"type.googleapis.com/google.cloud.audit.AuditLog","authenticationInfo":{"principalEmail":"student-03-f57d1582b78f@qwiklabs.net"},"requestMetadata":{"callerIp":"222.164.14.186","callerSuppliedUserAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/… Cloud IoT DeleteDevice asia-east1:deviceReg:device1 student-03-f57d1582b78f@qwiklabs.net 
+  {
+   insertId: "j59pbidmfnq"  
+   logName: "projects/qwiklabs-gcp-03-f7de0f15f994/logs/cloudaudit.googleapis.com%2Factivity"  
+   protoPayload: {
+    @type: "type.googleapis.com/google.cloud.audit.AuditLog"   
+    authenticationInfo: {
+     principalEmail: "student-03-f57d1582b78f@qwiklabs.net"    
+    }
+    authorizationInfo: [
+     0: {
+      granted: true     
+      permission: "cloudiot.devices.delete"     
+      resource: "projects/qwiklabs-gcp-03-f7de0f15f994/locations/asia-east1/registries/deviceReg/devices/device1"     
+      resourceAttributes: {
+      }
+     }
+    ]
+    methodName: "google.cloud.iot.v1.DeviceManager.DeleteDevice"   
+    request: {
+     @type: "type.googleapis.com/google.cloud.iot.v1.DeleteDeviceRequest"    
+     name: "projects/qwiklabs-gcp-03-f7de0f15f994/locations/asia-east1/registries/deviceReg/devices/device1"    
+    }
+    requestMetadata: {
+     callerIp: "222.164.14.186"    
+     callerSuppliedUserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36,gzip(gfe),gzip(gfe)"    
+     destinationAttributes: {
+     }
+     requestAttributes: {
+      auth: {
+      }
+      time: "2020-10-12T06:14:06.470738815Z"     
+     }
+    }
+    resourceName: "projects/qwiklabs-gcp-03-f7de0f15f994/locations/asia-east1/registries/deviceReg/devices/device1"   
+    serviceName: "cloudiot.googleapis.com"   
+   }
+   receiveTimestamp: "2020-10-12T06:14:06.981946518Z"  
+   resource: {
+    labels: {
+     device_num_id: "3210437374247037"    
+     device_registry_id: "deviceReg"    
+     location: "asia-east1"    
+     project_id: "qwiklabs-gcp-03-f7de0f15f994"    
+    }
+    type: "cloudiot_device"   
+   }
+   severity: "NOTICE"  
+   timestamp: "2020-10-12T06:14:06.462580453Z"  
+  }
+I 2020-10-12T06:15:31.350116545Z Cloud IoT CreateDevice asia-east1:deviceReg:device1 student-03-f57d1582b78f@qwiklabs.net {"@type":"type.googleapis.com/google.cloud.audit.AuditLog","authenticationInfo":{"principalEmail":"student-03-f57d1582b78f@qwiklabs.net"},"requestMetadata":{"callerIp":"222.164.14.186","callerSuppliedUserAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/… Cloud IoT CreateDevice asia-east1:deviceReg:device1 student-03-f57d1582b78f@qwiklabs.net 
+  undefined
+ {
+ insertId: "j59pbidmfss"  
+ logName: "projects/qwiklabs-gcp-03-f7de0f15f994/logs/cloudaudit.googleapis.com%2Factivity"  
+ protoPayload: {
+  @type: "type.googleapis.com/google.cloud.audit.AuditLog"   
+  authenticationInfo: {
+   principalEmail: "student-03-f57d1582b78f@qwiklabs.net"    
+  }
+  authorizationInfo: [
+   0: {
+    granted: true     
+    permission: "cloudiot.devices.create"     
+    resource: "projects/qwiklabs-gcp-03-f7de0f15f994/locations/asia-east1/registries/deviceRegdevice1"     
+    resourceAttributes: {
+    }
+   }
+  ]
+  methodName: "google.cloud.iot.v1.DeviceManager.CreateDevice"   
+  request: {
+   @type: "type.googleapis.com/google.cloud.iot.v1.CreateDeviceRequest"    
+   device: {
+    blocked: false     
+    id: "device1"     
+    logLevel: "LOG_LEVEL_UNSPECIFIED"     
+   }
+   parent: "projects/qwiklabs-gcp-03-f7de0f15f994/locations/asia-east1/registries/deviceReg"    
+  }
+  requestMetadata: {
+   callerIp: "222.164.14.186"    
+   callerSuppliedUserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36,gzip(gfe),gzip(gfe)"    
+   destinationAttributes: {
+   }
+   requestAttributes: {
+    auth: {
+    }
+    time: "2020-10-12T06:15:31.358696248Z"     
+   }
+  }
+  resourceName: "projects/qwiklabs-gcp-03-f7de0f15f994/locations/asia-east1/registries/deviceReg/devices/device1"   
+  response: {
+   @type: "type.googleapis.com/google.cloud.iot.v1.Device"    
+   id: "device1"    
+   name: "projects/qwiklabs-gcp-03-f7de0f15f994/locations/asia-east1/registries/deviceReg/devices/3368287230893446"    
+  }
+  serviceName: "cloudiot.googleapis.com"   
+ }
+ receiveTimestamp: "2020-10-12T06:15:31.989576817Z"  
+ resource: {
+  labels: {
+   device_num_id: "3368287230893446"    
+   device_registry_id: "deviceReg"    
+   location: "asia-east1"    
+   project_id: "qwiklabs-gcp-03-f7de0f15f994"    
+  }
+  type: "cloudiot_device"   
+ }
+ severity: "NOTICE"  
+ timestamp: "2020-10-12T06:15:31.350116545Z"  
+}
+
+
+
