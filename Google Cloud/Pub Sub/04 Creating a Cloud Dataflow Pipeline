@@ -1,0 +1,1597 @@
+https://googlecoursera.qwiklabs.com/focuses/11745025?parent=lti_session
+The pipeline template is called Word Count. 
+The pipeline will count the number of instances of each word in Shakespeare's "King Lear."
+
+
+Create a Cloud Dataflow pipeline using the Word Count template
+Publish a text file to Cloud Pub/Sub
+Read messages published on a Cloud Pub/Sub subscription
+
+
+
+
+
+
+
+
+
+
+
+
+Check project permissions
+Navigation menu, click IAM & Admin > IAM.
+Confirm that the default compute Service Account {project-number}-compute@developer.gserviceaccount.com is present and has the editor role
+
+Project number 878158293095
+878158293095-compute@developer.gserviceaccount.com
+
+
+
+
+Enable APIs
+Cloud Pub/Sub API
+Cloud IoT API
+Container Registry API (if necessary, move to the second page of listings to see this item)
+
+
+
+
+
+
+Task 1. Create a bucket
+In this section, you create a uniquely named Google Cloud bucket.
+In the GCP Console, on the Navigation menu, click Storage > Browser.
+Create bucket.
+Name - GCP Project ID - qwiklabs-gcp-00-0ead8239f248
+You may leave the default choices for the remainder of the steps.
+Skip to the bottom of the list and click Create.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Create a Dataflow Pipeline
+In this task, you create a Dataflow using a template called Word Count. The template will use Shakespeare's play "King Lear" as an input file. 
+The process will read in the play line by line, count the number of times each word is used, and then write the counts to an output file.
+On the Navigation menu, click Dataflow.
+Click Create job from template.
+
+Property	                            Value (type or select)
+Job name	                            counting-words
+Dataflow template	                    Word Count                                            Batch pipeline. Reads text from Cloud Storage, tokenizes text lines into individual words, and performs frequency count on each of the words.
+Input file(s) in Cloud Storage	      gs://dataflow-samples/shakespeare/kinglear.txt        The input file pattern Dataflow reads from. Use the example file (gs://dataflow-samples/shakespeare/kinglear.txt) or enter the path to your own using the same format: gs://your-bucket/your-file.txt
+Output Cloud Storage file(s) prefix	  gs://<bucket-name>/wordcount/counts                   gs://qwiklabs-gcp-00-0ead8239f248/wordcount/counts              Path and filename prefix for writing output files. Ex: gs://your-bucket/counts
+Temporary Location	                  gs://<bucket-name>/tmp                                gs://qwiklabs-gcp-00-0ead8239f248/tmp                           Path and filename prefix for writing temporary files. Ex: gs://your-bucket/temp
+
+
+Click Run job.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Check job progress
+counting-words
+
+#while running
+{
+    "id": "2020-10-12_23_23_05-7552446452426153361",
+    "projectId": "qwiklabs-gcp-00-0ead8239f248",
+    "name": "counting-words",
+    "type": "JOB_TYPE_BATCH",
+    "environment": {
+        "userAgent": {
+            "os.version": "4.15.0-smp-907.23.0.0",
+            "fnapi.environment.major.version": "7",
+            "version": "2.20.0",
+            "container.version": "beam-2.20.0",
+            "os.arch": "amd64",
+            "name": "Apache Beam SDK for Java",
+            "legacy.environment.major.version": "7",
+            "os.name": "Linux",
+            "java.version": "11.0.8",
+            "java.vendor": "Google Inc."
+        },
+        "version": {
+            "major": "7",
+            "job_type": "JAVA_BATCH_AUTOSCALING"
+        }
+    },
+    "currentState": "JOB_STATE_PENDING",
+    "currentStateTime": "2020-10-13T06:23:07.096762Z",
+    "createTime": "2020-10-13T06:23:07.096762Z",
+    "labels": {
+        "goog-dataflow-provided-template-type": "legacy",
+        "goog-dataflow-provided-template-name": "word_count",
+        "goog-dataflow-provided-template-version": "2020-09-30-00_rc00"
+    },
+    "location": "us-central1",
+    "stageStates": [
+        {
+            "executionStageName": "s21-close-shuffle15",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s9-close-shuffle33",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "F43",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s44-close-shuffle24",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s9-shuffle-session30",
+            "executionStageState": "JOB_STATE_DONE",
+            "currentStateTime": "2020-10-13T06:23:12.059Z"
+        },
+        {
+            "executionStageName": "F44",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s44-open-shuffle22",
+            "executionStageState": "JOB_STATE_DONE",
+            "currentStateTime": "2020-10-13T06:23:11.981Z"
+        },
+        {
+            "executionStageName": "failure48",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s14",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s12-u40",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s44-shuffle-session21",
+            "executionStageState": "JOB_STATE_DONE",
+            "currentStateTime": "2020-10-13T06:23:12.092Z"
+        },
+        {
+            "executionStageName": "start49",
+            "executionStageState": "JOB_STATE_DONE",
+            "currentStateTime": "2020-10-13T06:23:11.777Z"
+        },
+        {
+            "executionStageName": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3-c38",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s9-open-shuffle31",
+            "executionStageState": "JOB_STATE_DONE",
+            "currentStateTime": "2020-10-13T06:23:11.981Z"
+        },
+        {
+            "executionStageName": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3-c39",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "F42",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s21-shuffle-session12",
+            "executionStageState": "JOB_STATE_DONE",
+            "currentStateTime": "2020-10-13T06:23:12.036Z"
+        },
+        {
+            "executionStageName": "s21-open-shuffle13",
+            "executionStageState": "JOB_STATE_DONE",
+            "currentStateTime": "2020-10-13T06:23:11.970Z"
+        },
+        {
+            "executionStageName": "F45",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "F46",
+            "executionStageState": "JOB_STATE_RUNNING",
+            "currentStateTime": "2020-10-13T06:23:12.094Z"
+        },
+        {
+            "executionStageName": "success47",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        },
+        {
+            "executionStageName": "s14.output",
+            "executionStageState": "JOB_STATE_PENDING",
+            "currentStateTime": "2020-10-13T06:23:11.463Z"
+        }
+    ],
+    "jobMetadata": {
+        "sdkVersion": {
+            "version": "2.20.0",
+            "versionDisplayName": "Apache Beam SDK for Java",
+            "sdkSupportStatus": "STALE"
+        }
+    },
+    "startTime": "2020-10-13T06:23:07.096762Z",
+    "pipelineDescription": {
+        "originalPipelineTransform": [
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s16",
+                "name": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Reify.ReifyView/ParDo(Anonymous)",
+                "displayData": [
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.sdk.transforms.Reify$ReifyView$1",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Reify.ReifyView/ParDo(Anonymous).out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Create.Values/Read(CreateSource).out0",
+                    "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s22",
+                "name": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/ExpandIterable",
+                "displayData": [
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.runners.dataflow.ReshuffleOverrideFactory$ReshuffleWithOnlyTrigger$1",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/ExpandIterable.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s10",
+                "name": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnwritten",
+                "displayData": [
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.sdk.io.WriteFiles$WriteShardsIntoTempFilesFn",
+                        "shortStrValue": "WriteShardsIntoTempFilesFn",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnwritten.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s23",
+                "name": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Values/Values/Map",
+                "displayData": [
+                    {
+                        "key": "class",
+                        "namespace": "org.apache.beam.sdk.transforms.MapElements",
+                        "strValue": "org.apache.beam.sdk.transforms.Values$1"
+                    },
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.sdk.transforms.MapElements$1",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Values/Values/Map.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/ExpandIterable.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s19",
+                "name": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Pair with random key",
+                "displayData": [
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.sdk.transforms.Reshuffle$ViaRandomKey$AssignShardFn",
+                        "shortStrValue": "AssignShardFn",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Pair with random key.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Finalize.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s13",
+                "name": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)",
+                "displayData": [
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.runners.dataflow.BatchViewOverrides$BatchViewAsList$ToIsmRecordForGlobalWindowDoFn",
+                        "shortStrValue": "ToIsmRecordForGlobalWindowDoFn",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/Flatten.PCollections.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s7",
+                "name": "WriteCounts/WriteFiles/RewindowIntoGlobal/Window.Assign",
+                "displayData": [
+                    {
+                        "key": "accumulationMode",
+                        "namespace": "org.apache.beam.sdk.transforms.windowing.Window$Assign",
+                        "strValue": "DISCARDING_FIRED_PANES",
+                        "label": "Accumulation Mode"
+                    },
+                    {
+                        "key": "windowFn",
+                        "namespace": "org.apache.beam.sdk.transforms.windowing.Window$Assign",
+                        "strValue": "org.apache.beam.sdk.transforms.windowing.GlobalWindows",
+                        "shortStrValue": "GlobalWindows",
+                        "label": "Windowing Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/RewindowIntoGlobal/Window.Assign.out0"
+                ],
+                "inputCollectionName": [
+                    "MapElements/Map.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s8",
+                "name": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles",
+                "displayData": [
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$MultiOutput",
+                        "strValue": "org.apache.beam.sdk.io.WriteFiles$WriteUnshardedTempFilesFn",
+                        "shortStrValue": "WriteUnshardedTempFilesFn",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles.out0",
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles.out1"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/RewindowIntoGlobal/Window.Assign.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s3",
+                "name": "WordCount.CountWords/Count.PerElement/Init/Map",
+                "displayData": [
+                    {
+                        "key": "class",
+                        "namespace": "org.apache.beam.sdk.transforms.MapElements",
+                        "strValue": "org.apache.beam.sdk.transforms.Count$PerElement$1"
+                    },
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.sdk.transforms.MapElements$1",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WordCount.CountWords/Count.PerElement/Init/Map.out0"
+                ],
+                "inputCollectionName": [
+                    "WordCount.CountWords/ParDo(ExtractWords).out0"
+                ]
+            },
+            {
+                "kind": "GROUP_BY_KEY_KIND",
+                "id": "s9",
+                "name": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten",
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles.out1"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s6",
+                "name": "MapElements/Map",
+                "displayData": [
+                    {
+                        "key": "class",
+                        "namespace": "org.apache.beam.sdk.transforms.MapElements",
+                        "strValue": "com.google.cloud.teleport.templates.WordCount$FormatAsTextFn",
+                        "shortStrValue": "FormatAsTextFn"
+                    },
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.sdk.transforms.MapElements$1",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "MapElements/Map.out0"
+                ],
+                "inputCollectionName": [
+                    "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s11",
+                "name": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/DropShardNum",
+                "displayData": [
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.sdk.io.WriteFiles$WriteUnshardedBundlesToTempFiles$1",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/DropShardNum.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnwritten.out0"
+                ]
+            },
+            {
+                "kind": "READ_KIND",
+                "id": "s15",
+                "name": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Create.Values/Read(CreateSource)",
+                "displayData": [
+                    {
+                        "key": "endOffset",
+                        "namespace": "org.apache.beam.sdk.transforms.Create$Values$CreateSource",
+                        "int64Value": "1",
+                        "label": "End Read Offset"
+                    },
+                    {
+                        "key": "source",
+                        "namespace": "org.apache.beam.sdk.io.Read$Bounded",
+                        "strValue": "org.apache.beam.sdk.transforms.Create$Values$CreateSource",
+                        "shortStrValue": "CreateSource",
+                        "label": "Read Source"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Create.Values/Read(CreateSource).out0"
+                ]
+            },
+            {
+                "kind": "SINGLETON_KIND",
+                "id": "s14",
+                "name": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView",
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s18",
+                "name": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Finalize",
+                "displayData": [
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.sdk.io.WriteFiles$FinalizeTempFileBundles$FinalizeFn",
+                        "shortStrValue": "FinalizeFn",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Finalize.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Values/Values/Map.out0"
+                ]
+            },
+            {
+                "kind": "GROUP_BY_KEY_KIND",
+                "id": "s4",
+                "name": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey",
+                "outputCollectionName": [
+                    "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey.out0"
+                ],
+                "inputCollectionName": [
+                    "WordCount.CountWords/Count.PerElement/Init/Map.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s5",
+                "name": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues",
+                "outputCollectionName": [
+                    "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues.out0"
+                ],
+                "inputCollectionName": [
+                    "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s17",
+                "name": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Values/Values/Map",
+                "displayData": [
+                    {
+                        "key": "class",
+                        "namespace": "org.apache.beam.sdk.transforms.MapElements",
+                        "strValue": "org.apache.beam.sdk.transforms.Values$1"
+                    },
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "org.apache.beam.sdk.transforms.MapElements$1",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Values/Values/Map.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Reify.ReifyView/ParDo(Anonymous).out0"
+                ]
+            },
+            {
+                "kind": "GROUP_BY_KEY_KIND",
+                "id": "s21",
+                "name": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey",
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/Window.Into()/Window.Assign.out0"
+                ]
+            },
+            {
+                "kind": "FLATTEN_KIND",
+                "id": "s12",
+                "name": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/Flatten.PCollections",
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/Flatten.PCollections.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles.out0",
+                    "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/DropShardNum.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s20",
+                "name": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/Window.Into()/Window.Assign",
+                "displayData": [
+                    {
+                        "key": "accumulationMode",
+                        "namespace": "org.apache.beam.sdk.transforms.windowing.Window$Assign",
+                        "strValue": "DISCARDING_FIRED_PANES",
+                        "label": "Accumulation Mode"
+                    },
+                    {
+                        "key": "timestampCombiner",
+                        "namespace": "org.apache.beam.sdk.transforms.windowing.Window$Assign",
+                        "strValue": "EARLIEST",
+                        "label": "Timestamp Combiner"
+                    },
+                    {
+                        "key": "windowFn",
+                        "namespace": "org.apache.beam.sdk.transforms.windowing.Window$Assign",
+                        "strValue": "org.apache.beam.sdk.util.IdentityWindowFn",
+                        "shortStrValue": "IdentityWindowFn",
+                        "label": "Windowing Function"
+                    },
+                    {
+                        "key": "trigger",
+                        "namespace": "org.apache.beam.sdk.transforms.windowing.Window$Assign",
+                        "strValue": "ReshuffleTrigger()",
+                        "label": "Trigger"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/Window.Into()/Window.Assign.out0"
+                ],
+                "inputCollectionName": [
+                    "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Pair with random key.out0"
+                ]
+            },
+            {
+                "kind": "PAR_DO_KIND",
+                "id": "s2",
+                "name": "WordCount.CountWords/ParDo(ExtractWords)",
+                "displayData": [
+                    {
+                        "key": "fn",
+                        "namespace": "org.apache.beam.sdk.transforms.ParDo$SingleOutput",
+                        "strValue": "com.google.cloud.teleport.templates.WordCount$ExtractWordsFn",
+                        "shortStrValue": "ExtractWordsFn",
+                        "label": "Transform Function"
+                    }
+                ],
+                "outputCollectionName": [
+                    "WordCount.CountWords/ParDo(ExtractWords).out0"
+                ],
+                "inputCollectionName": [
+                    "ReadLines/Read.out0"
+                ]
+            },
+            {
+                "kind": "READ_KIND",
+                "id": "s1",
+                "name": "ReadLines/Read",
+                "displayData": [
+                    {
+                        "key": "filePattern",
+                        "namespace": "org.apache.beam.sdk.io.TextSource",
+                        "strValue": "RuntimeValueProvider{propertyName=inputFile, default=null}",
+                        "label": "File Pattern"
+                    },
+                    {
+                        "key": "compressionMode",
+                        "namespace": "org.apache.beam.sdk.io.CompressedSource",
+                        "strValue": "AUTO",
+                        "label": "Compression Mode"
+                    },
+                    {
+                        "key": "source",
+                        "namespace": "org.apache.beam.sdk.io.CompressedSource",
+                        "strValue": "org.apache.beam.sdk.io.TextSource",
+                        "shortStrValue": "TextSource",
+                        "label": "Read Source"
+                    },
+                    {
+                        "key": "source",
+                        "namespace": "org.apache.beam.sdk.io.Read$Bounded",
+                        "strValue": "org.apache.beam.sdk.io.CompressedSource",
+                        "shortStrValue": "CompressedSource",
+                        "label": "Read Source"
+                    }
+                ],
+                "outputCollectionName": [
+                    "ReadLines/Read.out0"
+                ]
+            }
+        ],
+        "executionPipelineStage": [
+            {
+                "name": "F42",
+                "id": "S13",
+                "kind": "PAR_DO_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Session",
+                        "name": "s21-shuffle-session12",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey",
+                        "sizeBytes": "67108864"
+                    }
+                ],
+                "componentTransform": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Read",
+                        "name": "s21-read-shuffle16",
+                        "originalTransform": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/GroupByWindow",
+                        "name": "s21-also-by-window17",
+                        "originalTransform": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/ExpandIterable",
+                        "name": "s22",
+                        "originalTransform": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/ExpandIterable"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Values/Values/Map",
+                        "name": "s23",
+                        "originalTransform": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Values/Values/Map"
+                    }
+                ],
+                "componentSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Read-out0",
+                        "name": "s21-also-by-window-input-value10",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/GroupByWindow-out0",
+                        "name": "s21.output",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/ExpandIterable-out0",
+                        "name": "s22.org.apache.beam.sdk.values.PCollection.<init>:400#b8ec6571abcba715",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/ExpandIterable.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Values/Values/Map-out0",
+                        "name": "s23.org.apache.beam.sdk.values.PCollection.<init>:400#e63ad18dfc139ac0",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Values/Values/Map.out0"
+                    }
+                ]
+            },
+            {
+                "name": "F43",
+                "id": "S11",
+                "kind": "PAR_DO_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView.out0",
+                        "name": "s14.output",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Session",
+                        "name": "s21-shuffle-session12",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey",
+                        "sizeBytes": "67108864"
+                    }
+                ],
+                "componentTransform": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Create.Values/Read(CreateSource)",
+                        "name": "s15",
+                        "originalTransform": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Create.Values/Read(CreateSource)"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Reify.ReifyView/ParDo(Anonymous)",
+                        "name": "s16",
+                        "originalTransform": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Reify.ReifyView/ParDo(Anonymous)"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Values/Values/Map",
+                        "name": "s17",
+                        "originalTransform": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Values/Values/Map"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Finalize",
+                        "name": "s18",
+                        "originalTransform": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Finalize"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Pair with random key",
+                        "name": "s19",
+                        "originalTransform": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Pair with random key"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/Window.Into()/Window.Assign",
+                        "name": "s20",
+                        "originalTransform": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/Window.Into()/Window.Assign"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Reify",
+                        "name": "s21-reify11",
+                        "originalTransform": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Write",
+                        "name": "s21-write-shuffle14",
+                        "originalTransform": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey"
+                    }
+                ],
+                "componentSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Create.Values/Read(CreateSource)-out0",
+                        "name": "s15.output",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Create.Values/Read(CreateSource).out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Reify.ReifyView/ParDo(Anonymous)-out0",
+                        "name": "s16.org.apache.beam.sdk.values.PCollection.<init>:400#a00997a449310e6c",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Reify.ReifyView/ParDo(Anonymous).out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Values/Values/Map-out0",
+                        "name": "s17.org.apache.beam.sdk.values.PCollection.<init>:400#6929f09b03d242ca",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Values/Values/Map.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Finalize-out0",
+                        "name": "s18.org.apache.beam.sdk.values.PCollection.<init>:400#c6bc66e4fa08de96",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Finalize.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Pair with random key-out0",
+                        "name": "s19.org.apache.beam.sdk.values.PCollection.<init>:400#fda00200b030232e",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Pair with random key.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/Window.Into()/Window.Assign-out0",
+                        "name": "s20.output",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/Window.Into()/Window.Assign.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Reify-out0",
+                        "name": "s21-reify-value9",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey"
+                    }
+                ]
+            },
+            {
+                "name": "F44",
+                "id": "S07",
+                "kind": "PAR_DO_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Session",
+                        "name": "s9-shuffle-session30",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten",
+                        "sizeBytes": "67108864"
+                    }
+                ],
+                "outputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "name": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3-c38",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "sizeBytes": "134217728"
+                    }
+                ],
+                "componentTransform": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Read",
+                        "name": "s9-read-shuffle34",
+                        "originalTransform": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/GroupByWindow",
+                        "name": "s9-also-by-window35",
+                        "originalTransform": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnwritten",
+                        "name": "s10",
+                        "originalTransform": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnwritten"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/DropShardNum",
+                        "name": "s11",
+                        "originalTransform": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/DropShardNum"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)",
+                        "name": "s13-c37",
+                        "originalTransform": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)"
+                    }
+                ],
+                "componentSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Read-out0",
+                        "name": "s9-also-by-window-input-value28",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/GroupByWindow-out0",
+                        "name": "s9.output",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnwritten-out0",
+                        "name": "s10.org.apache.beam.sdk.values.PCollection.<init>:400#4663620f501c9270",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnwritten.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/DropShardNum-out0",
+                        "name": "s11.org.apache.beam.sdk.values.PCollection.<init>:400#20ff67585e33a8f6",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/DropShardNum.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)-out0",
+                        "name": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3-c38",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0"
+                    }
+                ]
+            },
+            {
+                "name": "F45",
+                "id": "S05",
+                "kind": "PAR_DO_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Session",
+                        "name": "s44-shuffle-session21",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey",
+                        "sizeBytes": "67108864"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Session",
+                        "name": "s9-shuffle-session30",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten",
+                        "sizeBytes": "67108864"
+                    }
+                ],
+                "outputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "name": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3-c39",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "sizeBytes": "134217728"
+                    }
+                ],
+                "componentTransform": [
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Read",
+                        "name": "s44-read-shuffle25",
+                        "originalTransform": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues",
+                        "name": "s44-also-by-window26",
+                        "originalTransform": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues/Extract",
+                        "name": "s5-extract8",
+                        "originalTransform": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues"
+                    },
+                    {
+                        "userName": "MapElements/Map",
+                        "name": "s6",
+                        "originalTransform": "MapElements/Map"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/RewindowIntoGlobal/Window.Assign",
+                        "name": "s7",
+                        "originalTransform": "WriteCounts/WriteFiles/RewindowIntoGlobal/Window.Assign"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles",
+                        "name": "s8",
+                        "originalTransform": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)",
+                        "name": "s13",
+                        "originalTransform": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Reify",
+                        "name": "s9-reify29",
+                        "originalTransform": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Write",
+                        "name": "s9-write-shuffle32",
+                        "originalTransform": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten"
+                    }
+                ],
+                "componentSource": [
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Read-out0",
+                        "name": "s44-also-by-window-input-value19",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues-out0",
+                        "name": "s5-merge-out7",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues/Extract-out0",
+                        "name": "s5.output",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues.out0"
+                    },
+                    {
+                        "userName": "MapElements/Map-out0",
+                        "name": "s6.org.apache.beam.sdk.values.PCollection.<init>:400#554dcd2b40b5f04b",
+                        "originalTransformOrCollection": "MapElements/Map.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/RewindowIntoGlobal/Window.Assign-out0",
+                        "name": "s7.output",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/RewindowIntoGlobal/Window.Assign.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles-out0",
+                        "name": "s8.writtenRecords",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles.out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles-out1",
+                        "name": "s8.unwrittenRecords",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles.out1"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)-out0",
+                        "name": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3-c39",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Reify-out0",
+                        "name": "s9-reify-value27",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten"
+                    }
+                ]
+            },
+            {
+                "name": "F46",
+                "id": "S02",
+                "kind": "PAR_DO_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Session",
+                        "name": "s44-shuffle-session21",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey",
+                        "sizeBytes": "67108864"
+                    }
+                ],
+                "componentTransform": [
+                    {
+                        "userName": "ReadLines/Read",
+                        "name": "s1",
+                        "originalTransform": "ReadLines/Read"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/ParDo(ExtractWords)",
+                        "name": "s2",
+                        "originalTransform": "WordCount.CountWords/ParDo(ExtractWords)"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Init/Map",
+                        "name": "s3",
+                        "originalTransform": "WordCount.CountWords/Count.PerElement/Init/Map"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues/Partial",
+                        "name": "partial-s40",
+                        "originalTransform": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Reify",
+                        "name": "s44-reify20",
+                        "originalTransform": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Write",
+                        "name": "s44-write-shuffle23",
+                        "originalTransform": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey"
+                    }
+                ],
+                "componentSource": [
+                    {
+                        "userName": "ReadLines/Read-out0",
+                        "name": "s1.output",
+                        "originalTransformOrCollection": "ReadLines/Read.out0"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/ParDo(ExtractWords)-out0",
+                        "name": "s2.org.apache.beam.sdk.values.PCollection.<init>:400#3d93cb799b3970be",
+                        "originalTransformOrCollection": "WordCount.CountWords/ParDo(ExtractWords).out0"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Init/Map-out0",
+                        "name": "s3.org.apache.beam.sdk.values.PCollection.<init>:400#a32dc9f64f1df03a",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Init/Map.out0"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues/Partial-out0",
+                        "name": "partial-s4-out1",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey"
+                    },
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Reify-out0",
+                        "name": "s44-reify-value18",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey"
+                    }
+                ]
+            },
+            {
+                "name": "s12-u40",
+                "id": "S08",
+                "kind": "FLATTEN_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "name": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3-c38",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "sizeBytes": "134217728"
+                    },
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "name": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3-c39",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "sizeBytes": "134217728"
+                    }
+                ],
+                "outputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "name": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "sizeBytes": "134217728"
+                    }
+                ]
+            },
+            {
+                "name": "s14",
+                "id": "S09",
+                "kind": "SINGLETON_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "name": "s13.org.apache.beam.sdk.values.PCollection.<init>:400#2249e1908bcf01f3",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0",
+                        "sizeBytes": "134217728"
+                    }
+                ],
+                "outputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView.out0",
+                        "name": "s14.output",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView.out0"
+                    }
+                ]
+            },
+            {
+                "name": "s21-close-shuffle15",
+                "id": "S12",
+                "kind": "SHUFFLE_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Session",
+                        "name": "s21-shuffle-session12",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey",
+                        "sizeBytes": "67108864"
+                    }
+                ]
+            },
+            {
+                "name": "s21-open-shuffle13",
+                "id": "S10",
+                "kind": "SHUFFLE_KIND",
+                "outputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Session",
+                        "name": "s21-shuffle-session12",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey",
+                        "sizeBytes": "67108864"
+                    }
+                ]
+            },
+            {
+                "name": "s44-close-shuffle24",
+                "id": "S03",
+                "kind": "SHUFFLE_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Session",
+                        "name": "s44-shuffle-session21",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey",
+                        "sizeBytes": "67108864"
+                    }
+                ]
+            },
+            {
+                "name": "s44-open-shuffle22",
+                "id": "S01",
+                "kind": "SHUFFLE_KIND",
+                "outputSource": [
+                    {
+                        "userName": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Session",
+                        "name": "s44-shuffle-session21",
+                        "originalTransformOrCollection": "WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey",
+                        "sizeBytes": "67108864"
+                    }
+                ]
+            },
+            {
+                "name": "s9-close-shuffle33",
+                "id": "S06",
+                "kind": "SHUFFLE_KIND",
+                "inputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Session",
+                        "name": "s9-shuffle-session30",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten",
+                        "sizeBytes": "67108864"
+                    }
+                ]
+            },
+            {
+                "name": "s9-open-shuffle31",
+                "id": "S04",
+                "kind": "SHUFFLE_KIND",
+                "outputSource": [
+                    {
+                        "userName": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Session",
+                        "name": "s9-shuffle-session30",
+                        "originalTransformOrCollection": "WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten",
+                        "sizeBytes": "67108864"
+                    }
+                ]
+            }
+        ],
+        "displayData": [
+            {
+                "key": "appName",
+                "namespace": "org.apache.beam.sdk.options.ApplicationNameOptions",
+                "strValue": "WordCount"
+            },
+            {
+                "key": "project",
+                "namespace": "org.apache.beam.runners.dataflow.options.DataflowPipelineOptions",
+                "strValue": "qwiklabs-gcp-00-0ead8239f248"
+            },
+            {
+                "key": "jobName",
+                "namespace": "org.apache.beam.sdk.options.PipelineOptions",
+                "strValue": "counting-words"
+            },
+            {
+                "key": "tempLocation",
+                "namespace": "org.apache.beam.sdk.options.PipelineOptions",
+                "strValue": "gs://qwiklabs-gcp-00-0ead8239f248/tmp"
+            },
+            {
+                "key": "templateLocation",
+                "namespace": "org.apache.beam.runners.dataflow.options.DataflowPipelineOptions",
+                "strValue": "gs://dataflow-templates-us-central1/latest/Word_Count"
+            },
+            {
+                "key": "stagingLocation",
+                "namespace": "org.apache.beam.runners.dataflow.options.DataflowPipelineOptions",
+                "strValue": "gs://dataflow-templates-libraries/2020-09-30-00_RC00"
+            },
+            {
+                "key": "pipelineUrl",
+                "namespace": "org.apache.beam.runners.dataflow.options.DataflowPipelineOptions",
+                "strValue": "gs://dataflow-templates-libraries/2020-09-30-00_RC00/pipeline-jvE5zQcY9of7Owx4fAdljQ.pb"
+            },
+            {
+                "key": "filesToStage",
+                "namespace": "org.apache.beam.runners.dataflow.options.DataflowPipelineWorkerPoolOptions",
+                "strValue": "[/export/hda3/borglet/remote_hdd_fs_dirs/0.rapid.runner-pfrab3n6-r2bu-rby4-ulto-cpwxsfmktbff.dataflow-releaser.539183000320.14b334fb3717c109/mount/rapid/workflow/9ae8fdb1-8d08-4ca0-986b-2ef6911f41e5/tmp/tmpotsl6wkq/teleport-all-bundled.jar]"
+            },
+            {
+                "key": "labels",
+                "namespace": "org.apache.beam.runners.dataflow.options.DataflowPipelineOptions",
+                "strValue": "{goog-dataflow-provided-template-name=word_count, goog-dataflow-provided-template-version=2020-09-30-00_rc00, goog-dataflow-provided-template-type=legacy}"
+            },
+            {
+                "key": "userAgent",
+                "namespace": "org.apache.beam.sdk.options.PipelineOptions",
+                "strValue": "Apache_Beam_SDK_for_Java/2.20.0(JDK_11_environment)"
+            },
+            {
+                "key": "filesToStage",
+                "namespace": "org.apache.beam.sdk.options.PortablePipelineOptions",
+                "strValue": "[/export/hda3/borglet/remote_hdd_fs_dirs/0.rapid.runner-pfrab3n6-r2bu-rby4-ulto-cpwxsfmktbff.dataflow-releaser.539183000320.14b334fb3717c109/mount/rapid/workflow/9ae8fdb1-8d08-4ca0-986b-2ef6911f41e5/tmp/tmpotsl6wkq/teleport-all-bundled.jar]"
+            },
+            {
+                "key": "runner",
+                "namespace": "org.apache.beam.sdk.options.PipelineOptions",
+                "strValue": "org.apache.beam.runners.dataflow.DataflowRunner",
+                "shortStrValue": "DataflowRunner"
+            },
+            {
+                "key": "region",
+                "namespace": "google.dataflow.v1beta3.TemplatesService",
+                "strValue": "us-central1"
+            },
+            {
+                "key": "gcpTempLocation",
+                "namespace": "google.dataflow.v1beta3.TemplatesService",
+                "strValue": "gs://qwiklabs-gcp-00-0ead8239f248/tmp"
+            },
+            {
+                "key": "inputFile",
+                "strValue": "gs://dataflow-samples/shakespeare/kinglear.txt"
+            },
+            {
+                "key": "output",
+                "strValue": "gs://qwiklabs-gcp-00-0ead8239f248/wordcount/counts"
+            }
+        ]
+    }
+}
+
+
+
+
+
+
+
+
+#after running successfully - job logs
+No older entries found matching current filter.
+Debug
+2020-10-13 14:23:37.005 HKT
+Autoscaling: Raised the number of workers to 1 based on the rate of progress in the currently running stage(s).
+Debug
+2020-10-13 14:24:17.936 HKT
+Workers have started successfully.
+Debug
+2020-10-13 14:24:17.963 HKT
+Workers have started successfully.
+Info
+2020-10-13 14:24:31.152 HKT
+Finished operation ReadLines/Read+WordCount.CountWords/ParDo(ExtractWords)+WordCount.CountWords/Count.PerElement/Init/Map+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues/Partial+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Reify+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Write
+Info
+2020-10-13 14:24:31.209 HKT
+Executing operation WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Close
+Info
+2020-10-13 14:24:31.260 HKT
+Finished operation WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Close
+Info
+2020-10-13 14:24:31.393 HKT
+Executing operation WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Read+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues/Extract+MapElements/Map+WriteCounts/WriteFiles/RewindowIntoGlobal/Window.Assign+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles+WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Reify+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Write
+Info
+2020-10-13 14:24:41.899 HKT
+Finished operation WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/GroupByKey/Read+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues+WordCount.CountWords/Count.PerElement/Combine.perKey(Count)/Combine.GroupedValues/Extract+MapElements/Map+WriteCounts/WriteFiles/RewindowIntoGlobal/Window.Assign+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles+WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Reify+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Write
+Debug
+2020-10-13 14:24:42.001 HKT
+Value "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0" materialized.
+Info
+2020-10-13 14:24:42.030 HKT
+Executing operation WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Close
+Info
+2020-10-13 14:24:42.076 HKT
+Finished operation WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Close
+Info
+2020-10-13 14:24:42.132 HKT
+Executing operation WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Read+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/GroupByWindow+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnwritten+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/DropShardNum+WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)
+Info
+2020-10-13 14:24:43.675 HKT
+Finished operation WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/Read+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten/GroupByWindow+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnwritten+WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/DropShardNum+WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow)
+Debug
+2020-10-13 14:24:43.741 HKT
+Value "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0" materialized.
+Info
+2020-10-13 14:24:43.823 HKT
+Executing operation WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/Flatten.PCollections/Unzipped-1
+Info
+2020-10-13 14:24:43.924 HKT
+Finished operation WriteCounts/WriteFiles/WriteUnshardedBundlesToTempFiles/Flatten.PCollections/Unzipped-1
+Debug
+2020-10-13 14:24:43.993 HKT
+Value "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/ParDo(ToIsmRecordForGlobalWindow).out0" materialized.
+Info
+2020-10-13 14:24:44.050 HKT
+Executing operation WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView
+Info
+2020-10-13 14:24:44.109 HKT
+Finished operation WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView
+Debug
+2020-10-13 14:24:44.170 HKT
+Value "WriteCounts/WriteFiles/GatherTempFileResults/View.AsList/CreateDataflowView.out0" materialized.
+Info
+2020-10-13 14:24:44.214 HKT
+Executing operation WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Create.Values/Read(CreateSource)+WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Reify.ReifyView/ParDo(Anonymous)+WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Values/Values/Map+WriteCounts/WriteFiles/FinalizeTempFileBundles/Finalize+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Pair with random key+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/Window.Into()/Window.Assign+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Reify+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Write
+Info
+2020-10-13 14:24:48.133 HKT
+Finished operation WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Create.Values/Read(CreateSource)+WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Reify.ReifyView/ParDo(Anonymous)+WriteCounts/WriteFiles/GatherTempFileResults/Reify.ReifyViewInGlobalWindow/Values/Values/Map+WriteCounts/WriteFiles/FinalizeTempFileBundles/Finalize+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Pair with random key+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/Window.Into()/Window.Assign+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Reify+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Write
+Info
+2020-10-13 14:24:48.203 HKT
+Executing operation WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Close
+Info
+2020-10-13 14:24:48.246 HKT
+Finished operation WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Close
+Info
+2020-10-13 14:24:48.328 HKT
+Executing operation WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Read+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/GroupByWindow+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/ExpandIterable+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Values/Values/Map
+Info
+2020-10-13 14:24:54.543 HKT
+Finished operation WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/Read+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/GroupByKey/GroupByWindow+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Reshuffle/ExpandIterable+WriteCounts/WriteFiles/FinalizeTempFileBundles/Reshuffle.ViaRandomKey/Values/Values/Map
+Debug
+2020-10-13 14:24:54.607 HKT
+Executing success step success47
+Debug
+2020-10-13 14:24:54.673 HKT
+Cleaning up.
+Debug
+2020-10-13 14:24:54.719 HKT
+Starting worker pool teardown.
+Info
+2020-10-13 14:24:54.761 HKT
+Stopping worker pool...
+Debug
+2020-10-13 14:25:46.254 HKT
+Autoscaling: Resized worker pool from 1 to 0.
+Info
+2020-10-13 14:25:46.296 HKT
+Worker pool stopped.
+Debug
+2020-10-13 14:25:46.343 HKT
+Tearing down pending resources...
+No newer entries found matching current filter.
+
+
+
+
+
+
+#after running successfully - worker logs
+No older entries found matching current filter.
+2020-10-13T06:24:19.972ZLoading pipeline options from /var/opt/google/dataflow/pipeline_options.json
+2020-10-13T06:24:20.002ZWorker harness starting with: {"display_data":[{"key":"appName","namespace":"org.apache.beam.sdk.options.ApplicationNameOptions","type":"STRING","value":"WordCount"},{"key":"project","namespace":"org.apache.beam.runners.dataflow.options.DataflowPipelineOptions","type":"STRING","value":"dataflow-templates"},{"key":"jobName","namespace":"org.apache.beam.sdk.options.PipelineOptions","type":"STRING","value":"wordcount-dataflow0releaser-0930220149-cb4fb4be"},{"key":"tempLocation","namespace":"org.apache.beam.sdk.options.PipelineOptions","type":"STRING","value":"gs://qwiklabs-gcp-00-0ead8239f248/tmp"},{"key":"templateLocation","namespace":"org.apache.beam.runners.dataflow.options.DataflowPipelineOptions","type":"STRING","value":"gs://dataflow-templates-us-central1/latest/Word_Count"},{"key":"stagingLocation","namespace":"org.apache.beam.runners.dataflow.options.DataflowPipelineOptions","type":"STRING","value":"gs://dataflow-templates-libraries/2020-09-30-00_RC00"},{"key":"pipelineUrl","namespace":"org.apache.beam.runners.dataflow.options.DataflowPipelineOptions","type":"STRING","value":"gs://dataflow-templates-libraries/2020-09-30-00_RC00/pipeline-jvE5zQcY9of7Owx4fAdljQ.pb"},{"key":"filesToStage","namespace":"org.apache.beam.runners.dataflow.options.DataflowPipelineWorkerPoolOptions","type":"STRING","value":"[/export/hda3/borglet/remote_hdd_fs_dirs/0.rapid.runner-pfrab3n6-r2bu-rby4-ulto-cpwxsfmktbff.dataflow-releaser.539183000320.14b334fb3717c109/mount/rapid/workflow/9ae8fdb1-8d08-4ca0-986b-2ef6911f41e5/tmp/tmpotsl6wkq/teleport-all-bundled.jar]"},{"key":"labels","namespace":"org.apache.beam.runners.dataflow.options.DataflowPipelineOptions","type":"STRING","value":"{goog-dataflow-provided-template-name=word_count, goog-dataflow-provided-template-version=2020-09-30-00_rc00, goog-dataflow-provided-template-type=legacy}"},{"key":"userAgent","namespace":"org.apache.beam.sdk.options.PipelineOptions","type":"STRING","value":"Apache_Beam_SDK_for_Java/2.20.0(JDK_11_environment)"},{"key":"filesToStage","namespace":"org.apache.beam.sdk.options.PortablePipelineOptions","type":"STRING","value":"[/export/hda3/borglet/remote_hdd_fs_dirs/0.rapid.runner-pfrab3n6-r2bu-rby4-ulto-cpwxsfmktbff.dataflow-releaser.539183000320.14b334fb3717c109/mount/rapid/workflow/9ae8fdb1-8d08-4ca0-986b-2ef6911f41e5/tmp/tmpotsl6wkq/teleport-all-bundled.jar]"},{"key":"runner","namespace":"org.apache.beam.sdk.options.PipelineOptions","shortValue":"DataflowRunner","type":"JAVA_CLASS","value":"org.apache.beam.runners.dataflow.DataflowRunner"},{"key":"region","namespace":"google.dataflow.v1beta3.TemplatesService","type":"STRING","value":"us-central1"},{"key":"gcpTempLocation","namespace":"google.dataflow.v1beta3.TemplatesService","type":"STRING","value":"gs://qwiklabs-gcp-00-0ead8239f248/tmp"}],"options":{"apiRootUrl":"https://dataflow.googleapis.com/","appName":"WordCount","autoscalingAlgorithm":"NONE","credentialFactoryClass":"org.apache.beam.sdk.extensions.gcp.auth.GcpCredentialFactory","dataflowEndpoint":"","dataflowJobId":"2020-10-12_23_23_05-7552446452426153361","dataflowKmsKey":null,"dataflowWorkerJar":null,"defaultEnvironmentConfig":null,"defaultEnvironmentType":null,"diskSizeGb":0,"enableCloudDebugger":false,"enableStreamingEngine":false,"experiments":["sideinput_io_metrics"],"filesToStage":["/export/hda3/borglet/remote_hdd_fs_dirs/0.rapid.runner-pfrab3n6-r2bu-rby4-ulto-cpwxsfmktbff.dataflow-releaser.539183000320.14b334fb3717c109/mount/rapid/workflow/9ae8fdb1-8d08-4ca0-986b-2ef6911f41e5/tmp/tmpotsl6wkq/teleport-all-bundled.jar"],"gcpTempLocation":"gs://qwiklabs-gcp-00-0ead8239f248/tmp","gcsPerformanceMetrics":false,"gcsUploadBufferSizeBytes":null,"googleApiTrace":null,"hdfsConfiguration":null,"inputFile":"gs://dataflow-samples/shakespeare/kinglear.txt","jobName":"wordcount-dataflow0releaser-0930220149-cb4fb4be","labels":{"goog-dataflow-provided-template-name":"word_count","goog-dataflow-provided-template-type":"legacy","goog-dataflow-provided-template-version":"2020-09-30-00_rc00"},"maxNumWorkers":0,"network":null,"numWorkers":3,"numberOfWorkerHarnessThreads":0,"optionsId":0,"output":"gs://qwiklabs-gcp-00-0ead8239f248/wordcount/counts","overrideWindmillBinary":null,"pathValidatorClass":"org.apache.beam.sdk.extensions.gcp.storage.GcsPathValidator","pipelineUrl":"gs://dataflow-templates-libraries/2020-09-30-00_RC00/pipeline-jvE5zQcY9of7Owx4fAdljQ.pb","project":"qwiklabs-gcp-00-0ead8239f248","region":"us-central1","runner":"org.apache.beam.runners.dataflow.DataflowRunner","saveProfilesToGcs":null,"serviceAccount":null,"stableUniqueNames":"WARNING","stagerClass":"org.apache.beam.runners.dataflow.util.GcsStager","stagingLocation":"gs://dataflow-templates-libraries/2020-09-30-00_RC00","streaming":false,"subnetwork":null,"tempLocation":"gs://qwiklabs-gcp-00-0ead8239f248/tmp","templateLocation":"gs://dataflow-templates-us-central1/latest/Word_Count","useGrpcForGcs":false,"userAgent":"Apache_Beam_SDK_for_Java/2.20.0(JDK_11_environment)","workerDiskType":null,"workerHarnessContainerImage":"gcr.io/cloud-dataflow/v1beta3/IMAGE:beam-2.20.0","workerMachineType":null,"workerRegion":null,"zone":null}}
+2020-10-13T06:24:22.131ZNot using conscrypt SSL. Note this is the default Java behavior, but may have reduced performance. To use conscrypt SSL pass pipeline option --experiments=enable_conscrypt_security_provider
+2020-10-13T06:24:22.842ZLogging initialized @4266ms
+2020-10-13T06:24:22.959Zjetty-9.2.z-SNAPSHOT
+2020-10-13T06:24:23.138ZStarted ServerConnector@6e7bc430{HTTP/1.1}{0.0.0.0:8081}
+2020-10-13T06:24:23.139ZStarted @4563ms
+...
+2020-10-13T06:24:49.157ZStarting MapTask stage s13
+2020-10-13T06:24:49.235ZSuccess processing work item qwiklabs-gcp-00-0ead8239f248;2020-10-12_23_23_05-7552446452426153361;268729950954298895
+2020-10-13T06:24:49.236ZFinished processing stage s13 with 0 errors in 0.078 seconds
+2020-10-13T06:24:51.315ZStarting MapTask stage s13
+2020-10-13T06:24:51.346ZSuccess processing work item qwiklabs-gcp-00-0ead8239f248;2020-10-12_23_23_05-7552446452426153361;7415210853700372977
+2020-10-13T06:24:51.347ZFinished processing stage s13 with 0 errors in 0.031 seconds
+2020-10-13T06:24:53.434ZStarting MapTask stage s13
+2020-10-13T06:24:53.466ZSuccess processing work item qwiklabs-gcp-00-0ead8239f248;2020-10-12_23_23_05-7552446452426153361;8098018787256557794
+2020-10-13T06:24:53.466ZFinished processing stage s13 with 0 errors in 0.032 seconds
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Read output files
+read the outputs created by the Dataflow.
+On the Navigation menu (8c24be286e75dbe7.png), click Storage > Browser.
+Click on <bucket-name> and then the wordcount folder.
+
+Three files are listed:
+counts-00000-of-00003             https://storage.cloud.google.com/qwiklabs-gcp-00-0ead8239f248/wordcount/counts-00000-of-00003
+counts-00001-of-00003             https://storage.cloud.google.com/qwiklabs-gcp-00-0ead8239f248/wordcount/counts-00001-of-00003
+counts-00002-of-00003             https://storage.cloud.google.com/qwiklabs-gcp-00-0ead8239f248/wordcount/counts-00002-of-00003
+These files contain the word count for Shakespeare's "King Lear."
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Publish to Cloud Pub/Sub
+In this section, you create a data flow that reads all the files in a folder and publishes the data one line at a time to Pub/Sub.
+
+Create a topic
+Navigation menu, click Pub/Sub > Topics.
+Click Create Topic.
+For Topic ID, add device-data, and then click Create topic.
+You will be directed to the Pub/Sub page for the new device-data Topic.
+Scroll toward the bottom of the page, under Subscriptions click Create Subscripton and on the next menu select Create subscription, create a simple subscription.
+For Subscription ID, input device-data-sub.
+Ensure Delivery Type, is set to Pull.
+Scroll to the bottom of the page and click Create.
+
+
+
+
+
+
+
+
+Export to PubSub
+Navigation menu, click Storage > Browser.
+Click on the <bucket-name> and then the expansion menu for the wordcount folder.
+Click Export to Cloud Pub/Sub (this action opens a Dataflow template window) .
+
+
+On the Create job from template page, specify the following.
+Property	                      Value (type, select, or confirm)
+Job name	                      wordcount-to-pubsub                                 Must be unique among running jobs
+Dataflow template	              Text Files on Cloud Storage to Pub/Sub              You must scroll the list to find the 'Text Files on Cloud Storage to Pub/Sub' template from Process Data Continuously (stream) section.         A pipeline that polls every 10 seconds for new text files stored in GCS and outputs each line to a Pub/Sub topic.
+Input Cloud Storage File(s)	    gs://<bucket-name>/wordcount/*                      gs://qwiklabs-gcp-00-0ead8239f248/wordcount/*                       Path of the file pattern glob to read from. ex: gs://your-bucket/path/*.csv
+Output Pub/Sub Topic	          projects/<project-id>/topics/device-data            projects/qwiklabs-gcp-00-0ead8239f248/topics/device-data            The name of the topic which data should be published to. The name should be in the format of projects/your-project-id/topics/your-topic-name.
+Temporary location	            gs://<bucket-name>/tmp                              gs://qwiklabs-gcp-00-0ead8239f248/tmp                 Path and filename prefix for writing temporary files. Ex: gs://your-bucket/temp
+
+
+
+
+
+
+
+Read the published messages
+In this section, you manually pull the messages from the topic subscription.
+On the Google Cloud top menu bar, click Activate Cloud Shell to open Cloud Shell. If prompted, click Continue.
+
+To read the messages received by the subscription, execute the following command:
+gcloud pubsub subscriptions pull device-data-sub --auto-ack --limit=10
+
