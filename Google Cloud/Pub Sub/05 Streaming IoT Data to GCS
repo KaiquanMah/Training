@@ -1,0 +1,202 @@
+https://googlecoursera.qwiklabs.com/focuses/11768437?parent=lti_session
+In this lab, you configure Cloud IoT Core and Cloud Pub/Sub to create a Pub/Sub topic and registry on GCP. 
+You use this topic to ingest data streaming from an Android Things board.
+
+Create Cloud Pub/Sub topics and subscriptions
+Use IoT Core to create a registry
+Start the MQTT Application on a simulator
+Stream data to Google Cloud Storage
+
+
+project id  qwiklabs-gcp-01-15df2afcfbba
+region      us-central1
+zone        us-central1-a
+
+
+
+
+
+
+
+Enable APIs
+Cloud IoT API
+Cloud Pub/Sub API
+Container Registry API
+Google Cloud Storage
+
+
+
+
+
+Cloud Pub/Sub setup and topics
+In this section you create a pub/sub topic for your streaming data.
+On the Navigation menu, click Pub/Sub > Topics. If prompted, enable the API.
+Click Create Topic.
+For Topic ID, type iotlab, and then click Create Topic.
+
+Setting topic permissions
+You now have a pub/sub topic. To allow the project to publish this topic, add the project as a member/publisher.
+To add members, check the topic name, and then click Show info panel.
+Click Add member.
+Add the project as a member to the topic.       cloud-iot@system.gserviceaccount.com      <project ID>@<project ID>.iam.gserviceaccount.com
+Select the role of Pub/Sub > Pub/Sub Publisher, and then click Save to add the member.
+
+
+
+
+
+
+
+
+Create a location for data storage
+You need to create a storage folder to store the data streaming from the Android Things board. This is done in two steps.
+Create a storage bucket.
+Create a folder in the bucket.
+
+
+Create a storage bucket
+On the Navigation menu, click Storage > Browser.
+Click Create bucket menu item.
+Bucket names must be unique, use your project name for the bucket name or create a unique bucket name. Enter the <bucket-name> for the bucket, and then click Create.
+
+Create a folder in your bucket
+Return to the Storage Browser. Your new bucket should be in the list.
+Click on the bucket you created.
+Click Create folder.
+For Name, type Sensor-Data, and then click Create.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Start a Dataflow job
+You now have a device publishing data, and your Google Cloud Project is authorized to receive this data. 
+Now you can start a Dataflow job to save the data to your bucket.
+
+Create a Dataflow job from a template
+On the Navigation menu, click Dataflow.
+Click Create job from template.
+
+Enter the following values in the template.
+Property	                    Value (type or select)
+Job name	                    sensor-data
+Cloud Dataflow template	      Cloud Pub/Sub to Text Files on Cloud Storage
+
+The template page will expand to display a series of textboxes. Some of the textboxes are optional and some are required. You will only modify the required textboxes.
+Property	                        Value (type or select)
+Regional endpoint	                Select the region closest to you
+Input Cloud Pub/Sub topic	        projects/<project-name>/topics/iotlab                                           projects/qwiklabs-gcp-01-15df2afcfbba/topics/iotlab
+Output Cloud.Storage directory	  gs://<bucket-name>/Sensor-Data/ (note the slash at the end of the input text)   gs://qwiklabs-gcp-01-15df2afcfbba/Sensor-Data/
+Output file prefix	              output-
+Temporary Location	              gs://<bucket-name>/tmp                                                          gs://qwiklabs-gcp-01-15df2afcfbba/tmp
+
+Click Run job.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Prepare Your Compute Engine VM
+In your project, a pre-provisioned VM instance named iot-device-simulator will let you run instances of a Python script that emulate an MQTT-connected IoT device. 
+Before you emulate the devices, you will also use this VM instance to populate your Cloud IoT Core device registry.
+
+To connect to the iot-device-simulator VM instance:
+In the GCP Console, go to Navigation menu > Compute Engine> VM Instances. You'll see your VM instance listed as iot-device-simulator.
+
+To the right, click the SSH drop-down arrow and select Open in browser window.
+You might need to click Hide Info Panel to reveal the SSH drop-down arrow.
+
+In your SSH session on the iot-device-simulator VM instance, enter this command to remove the default Google Cloud Platform SDK installation. 
+(In subsequent steps, you will install the latest version, including the beta component.)
+sudo apt-get remove google-cloud-sdk -y
+
+Now install the latest version of the Google Cloud Platform SDK and accept all defaults:
+curl https://sdk.cloud.google.com | bash
+
+End your ssh session on the iot-device-simulator VM instance:
+exit
+
+Start another SSH session on the iot-device-simulator VM instance.
+
+Initialize the gcloud SDK.
+gcloud init
+
+Click on the URL shown to open a new browser window that displays a verification code.
+
+Use your browser to copy the verification code.
+
+Paste the verification code in response to the "Enter verification code:" prompt and press Enter.
+
+In response to "Pick cloud project to use", pick the GCP project that Qwiklabs created for you.
+
+Enter this command to make sure that the components of the SDK are up to date.
+gcloud components update
+
+Enter the following command to install the beta components. Accept if prompted to continue.
+gcloud components install beta
+
+Enter this command to update the system's information about Debian Linux package repositories:
+sudo apt-get update
+
+Enter this command to make sure that various required software packages are installed:
+sudo apt-get install python-pip openssl git -y
+
+Use pip to add needed Python components:
+sudo pip install pyjwt paho-mqtt cryptography
+
+Enter this command to add data to analyze during this lab:
+git clone http://github.com/GoogleCloudPlatform/training-data-analyst
+
+In your SSH session on the iot-device-simulator VM instance, run the following, adding your project ID as the value for PROJECT_ID:
+export PROJECT_ID=
+
+Your completed command will look like this: export PROJECT_ID=qwiklabs-gcp-d2e509fed105b3ed
+
+You must choose a region for your IoT registry. At the present time, these regions are supported:
+us-central1
+europe-west1
+Asia-east1
+Choose the region that is closest to you. To set an environment variable containing your preferred region, enter the command:
+export MY_REGION=
+followed by the region name. Your completed command will look like this:
+export MY_REGION=us-central1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Open Core IoT
+
