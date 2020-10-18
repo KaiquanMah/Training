@@ -1,0 +1,376 @@
+https://googlecoursera.qwiklabs.com/focuses/11857020?parent=lti_session
+create a Pub/Sub topic to ingest data streaming from simulated data. 
+create a BigQuery table and export the streaming data to it. 
+create a query to query and modify the data.
+
+
+
+
+
+
+Enable APIs
+Cloud IoT API
+Cloud Pub/Sub API
+Container Registry API
+
+
+
+
+
+
+Installing and using virtualenv with Python3
+Execute the following command to download and update the packages list.
+sudo apt-get update
+
+********************************************************************************
+You are running apt-get inside of Cloud Shell. Note that your Cloud Shell
+machine is ephemeral and no system-wide change will persist beyond session end.
+To suppress this warning, create an empty ~/.cloudshell/no-apt-get-warning file.
+The command will automatically proceed in 5 seconds or on any key.
+Visit https://cloud.google.com/shell/help for more information.
+********************************************************************************
+Err:1 https://packages.cloud.google.com/apt cloud-sdk-buster InRelease
+  Temporary failure resolving 'packages.cloud.google.com'
+Hit:2 http://deb.debian.org/debian buster InRelease                                                                                                                                                                  
+Get:3 http://deb.debian.org/debian buster-updates InRelease [51.9 kB]                                                                                                                                                
+Hit:4 https://packages.microsoft.com/repos/microsoft-debian-buster-prod buster InRelease                                                                                                                                                           
+Hit:5 http://storage.googleapis.com/bazel-apt stable InRelease                                                                                                                                                                       
+Get:7 https://packages.sury.org/php buster InRelease [6,759 B]                                                                                                                        
+Get:8 https://packages.sury.org/php buster/main amd64 Packages [144 kB]                                                                                      
+Hit:6 https://apt.llvm.org/buster llvm-toolchain-buster-9 InRelease                                                                                                                        
+Hit:9 http://repo.mysql.com/apt/debian buster InRelease                                                        
+Get:10 http://security.debian.org/debian-security buster/updates InRelease [65.4 kB]                                                                          
+Get:11 https://download.docker.com/linux/debian buster InRelease [44.4 kB]                                                                            
+Get:12 http://packages.cloud.google.com/apt gcsfuse-buster InRelease [3,724 B]                               
+Get:13 http://security.debian.org/debian-security buster/updates/main Sources [140 kB]
+Get:14 http://security.debian.org/debian-security buster/updates/main amd64 Packages [235 kB]
+Ign:15 http://ftp.debian.org/debian jessie InRelease                            
+Ign:16 http://ftp.debian.org/debian stretch InRelease
+Get:17 http://ftp.debian.org/debian stretch-backports InRelease [91.8 kB]
+Get:18 http://ftp.debian.org/debian stretch-updates InRelease [93.6 kB]                                                                                                                                                                            
+Hit:19 http://ftp.debian.org/debian jessie Release                                                                                                                                                                                                 
+Hit:21 http://ftp.debian.org/debian stretch Release                                                                                                                                                                                                
+Get:22 http://ftp.debian.org/debian stretch-backports/main Sources.diff/Index [27.8 kB]                                                                                                                                                            
+Get:23 http://ftp.debian.org/debian stretch-backports/main amd64 Packages.diff/Index [27.8 kB]                                                                                                                                                     
+Get:25 http://ftp.debian.org/debian stretch-backports/main Sources 2020-10-16-1418.20.pdiff [60 B]                                                                                                                                                 
+Get:25 http://ftp.debian.org/debian stretch-backports/main Sources 2020-10-16-1418.20.pdiff [60 B]                                                                                                                                                 
+Get:26 http://ftp.debian.org/debian stretch-backports/main amd64 Packages 2020-10-16-1418.20.pdiff [78 B]    
+Get:26 http://ftp.debian.org/debian stretch-backports/main amd64 Packages 2020-10-16-1418.20.pdiff [78 B]                                                                                                                                          
+Fetched 933 kB in 9s (105 kB/s)                                                                                                                                                                                                                    
+Reading package lists... Done
+W: Failed to fetch https://packages.cloud.google.com/apt/dists/cloud-sdk-buster/InRelease  Temporary failure resolving 'packages.cloud.google.com'
+W: Some index files failed to download. They have been ignored, or old ones used instead.
+
+
+
+
+Python virtual environments are used to isolate package installation from the system.
+sudo apt-get install virtualenv
+
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following additional packages will be installed:
+  python3-virtualenv
+The following NEW packages will be installed:
+  python3-virtualenv virtualenv
+0 upgraded, 2 newly installed, 0 to remove and 18 not upgraded.
+Need to get 78.2 kB of archives.
+After this operation, 171 kB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://deb.debian.org/debian buster/main amd64 python3-virtualenv all 15.1.0+ds-2 [58.1 kB]
+Get:2 http://deb.debian.org/debian buster/main amd64 virtualenv all 15.1.0+ds-2 [20.1 kB]
+Fetched 78.2 kB in 0s (4,913 kB/s)    
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package python3-virtualenv.
+(Reading database ... 130271 files and directories currently installed.)
+Preparing to unpack .../python3-virtualenv_15.1.0+ds-2_all.deb ...
+Unpacking python3-virtualenv (15.1.0+ds-2) ...
+Selecting previously unselected package virtualenv.
+Preparing to unpack .../virtualenv_15.1.0+ds-2_all.deb ...
+Unpacking virtualenv (15.1.0+ds-2) ...
+Setting up python3-virtualenv (15.1.0+ds-2) ...
+Setting up virtualenv (15.1.0+ds-2) ...
+Processing triggers for man-db (2.8.5-2) ...
+
+
+
+
+If prompted [Y/n], press Y and then Enter.
+virtualenv -p python3 venv
+
+Activate the virtual environment.
+source venv/bin/activate
+
+-bash: venv/bin/activate: No such file or directory
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 1. Create a topic and subscription
+In this section, you create a Pub/Sub topic.
+On the Navigation menu, click Pub/Sub > Topics.
+Click Create Topic.
+For Topic ID, type device-events, and then click Create Topic.
+
+
+
+
+
+Task 2. Create a storage bucket
+In this section, you create a Google Cloud Storage bucket.
+In the GCP Console, on the Navigation menu, click Storage > Browser.
+Click Create bucket.
+Use your project name as the bucket name.
+Click Create
+
+
+
+
+Task 3. Start publishing simulated sensor data
+In this section, you start a simulator for the sensors. 
+The simulator is a simple Python script that publishes sensor data every 30 seconds. 
+The data is actual data from an Android Things NXP board and Rainbow HAT.
+
+The Python script imports a pubsub library from google.cloud. 
+For the script to work properly, the following four commands must be executed in Cloud Shell.
+Copy and paste into Cloud Shell. Execute the following commands.
+
+pip uninstall google-cloud-pubsub
+pip uninstall google-cloud
+pip install google-cloud
+********************************************************************************
+Python 2 is deprecated. Upgrade to pip3 as soon as possible.
+See https://cloud.google.com/python/docs/python2-sunset
+
+To suppress this warning, create an empty ~/.cloudshell/no-pip-warning file.
+The command will automatically proceed in 5 seconds or on any key.
+********************************************************************************
+Collecting google-cloud
+  Using cached https://files.pythonhosted.org/packages/ba/b1/7c54d1950e7808df06642274e677dbcedba57f75307adf2e5ad8d39e5e0e/google_cloud-0.34.0-py2.py3-none-any.whl
+Installing collected packages: google-cloud
+Successfully installed google-cloud-0.34.0
+
+
+
+pip install google-cloud-pubsub
+********************************************************************************
+Python 2 is deprecated. Upgrade to pip3 as soon as possible.
+See https://cloud.google.com/python/docs/python2-sunset
+
+To suppress this warning, create an empty ~/.cloudshell/no-pip-warning file.
+The command will automatically proceed in 5 seconds or on any key.
+********************************************************************************
+Collecting google-cloud-pubsub
+  Using cached https://files.pythonhosted.org/packages/1f/b3/dd83eca4cd1019d592e82595ea45d53f11e39db4ee99daa66ceb8a1b2d89/google_cloud_pubsub-1.7.0-py2.py3-none-any.whl
+Requirement already satisfied: grpc-google-iam-v1<0.13dev,>=0.12.3 in /usr/local/lib/python2.7/dist-packages (from google-cloud-pubsub) (0.12.3)
+Requirement already satisfied: enum34; python_version < "3.4" in /usr/local/lib/python2.7/dist-packages (from google-cloud-pubsub) (1.1.10)
+Requirement already satisfied: google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0 in /usr/local/lib/python2.7/dist-packages (from google-cloud-pubsub) (1.22.4)
+Requirement already satisfied: grpcio<2.0.0dev,>=1.0.0 in /usr/local/lib/python2.7/dist-packages (from grpc-google-iam-v1<0.13dev,>=0.12.3->google-cloud-pubsub) (1.32.0)
+Requirement already satisfied: googleapis-common-protos[grpc]<2.0.0dev,>=1.5.2 in /usr/local/lib/python2.7/dist-packages (from grpc-google-iam-v1<0.13dev,>=0.12.3->google-cloud-pubsub) (1.52.0)
+Requirement already satisfied: setuptools>=34.0.0 in /usr/local/lib/python2.7/dist-packages (from google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (44.1.1)
+Requirement already satisfied: protobuf>=3.12.0 in /usr/local/lib/python2.7/dist-packages (from google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (3.13.0)
+Requirement already satisfied: futures>=3.2.0; python_version < "3.2" in /usr/local/lib/python2.7/dist-packages (from google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (3.3.0)
+Requirement already satisfied: pytz in /usr/local/lib/python2.7/dist-packages (from google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (2020.1)
+Requirement already satisfied: six>=1.13.0 in /usr/local/lib/python2.7/dist-packages (from google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (1.15.0)
+Requirement already satisfied: google-auth<2.0dev,>=1.21.1 in /usr/local/lib/python2.7/dist-packages (from google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (1.22.1)
+Requirement already satisfied: requests<3.0.0dev,>=2.18.0 in /usr/local/lib/python2.7/dist-packages (from google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (2.24.0)
+Requirement already satisfied: rsa<4.6; python_version < "3.5" in /usr/local/lib/python2.7/dist-packages (from google-auth<2.0dev,>=1.21.1->google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (4.5)
+Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python2.7/dist-packages (from google-auth<2.0dev,>=1.21.1->google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (0.2.8)
+Requirement already satisfied: cachetools<5.0,>=2.0.0 in /usr/local/lib/python2.7/dist-packages (from google-auth<2.0dev,>=1.21.1->google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (3.1.1)
+Requirement already satisfied: idna<3,>=2.5 in /usr/local/lib/python2.7/dist-packages (from requests<3.0.0dev,>=2.18.0->google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (2.10)
+Requirement already satisfied: urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1 in /usr/local/lib/python2.7/dist-packages (from requests<3.0.0dev,>=2.18.0->google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (1.25.10)
+Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python2.7/dist-packages (from requests<3.0.0dev,>=2.18.0->google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (2020.6.20)
+Requirement already satisfied: chardet<4,>=3.0.2 in /usr/local/lib/python2.7/dist-packages (from requests<3.0.0dev,>=2.18.0->google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (3.0.4)
+Requirement already satisfied: pyasn1>=0.1.3 in /usr/local/lib/python2.7/dist-packages (from rsa<4.6; python_version < "3.5"->google-auth<2.0dev,>=1.21.1->google-api-core[grpc]!=1.17.*,!=1.18.*,!=1.19.*,>=1.14.0->google-cloud-pubsub) (0.4.8)
+Installing collected packages: google-cloud-pubsub
+Successfully installed google-cloud-pubsub-1.7.0
+
+
+
+
+Get the Python script from GitHub.
+Copy and paste into Cloud Shell. 
+Execute the following commands
+git clone https://github.com/GoogleCloudPlatform/training-data-analyst.git
+cd training-data-analyst/iot/sensor-sim
+
+Cloning into 'training-data-analyst'...
+remote: Enumerating objects: 50, done.
+remote: Counting objects: 100% (50/50), done.
+remote: Compressing objects: 100% (39/39), done.
+remote: Total 42388 (delta 16), reused 34 (delta 11), pack-reused 42338
+Receiving objects: 100% (42388/42388), 465.04 MiB | 16.36 MiB/s, done.
+Resolving deltas: 100% (26525/26525), done.
+Checking out files: 100% (9064/9064), done.
+student_01_4212f8c936a5@cloudshell:~ (qwiklabs-gcp-01-7c4f4ddf7056)$ cd training-data-analyst/iot/sensor-sim
+student_01_4212f8c936a5@cloudshell:~/training-data-analyst/iot/sensor-sim (qwiklabs-gcp-01-7c4f4ddf7056)$
+
+
+
+
+To start the Python script, execute the following command, and replace the project name placeholder, including the brackets, with the name of your project:
+python sendData.py -p <project_name> -t device-events           python sendData.py -p qwiklabs-gcp-01-7c4f4ddf7056 -t device-events
+
+The script immediately starts publishing data to the topic and printing it in Cloud Shell. It should look similar to what is shown below.
+Let the script run in this Cloud Shell.
+{"data":[{"timestamp_ambient_pressure":1528752334018,"ambient_pressure":1012.0814819335938},{"timestamp_temperature":1528752334018,"temperature":35.23337936401367}]}
+...
+{"data":[{"timestamp_ambient_pressure":1528752313484,"ambient_pressure":1012.103515625},{"timestamp_temperature":1528752313484,"temperature":35.18467712402344}]}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Streaming data to BigQuery
+In this section, you create a BigQuery table and stream data directly to it. 
+Then you perform a query on the sensor data.
+
+Create a BigQuery table
+The first step in streaming data to BigQuery is to create a BigQuery table.
+On the Navigation menu, click BigQuery then click Done.
+Click on your project name, then click Create Dataset.
+For Dataset ID type sensorHubData. 
+Select the data location as Default, click Create dataset.
+
+To add a table, click on your dataset then click Create table.
+Create table from:	Empty table
+Dataset name	      sensorHubData
+Table type	        Native table
+Table name	        sensorData
+Under Schema, click Edit as Text.
+
+Remove any text in the text box.
+Copy the BigQuery table schema text shown below and paste it into the text box.
+
+The schema of the data from the device is an array of records.
+[
+    {
+        "name": "data",
+        "type": "RECORD",
+        "mode": "REPEATED",
+        "fields": [
+            {
+                "name": "timestamp_ambient_pressure",
+                "type": "STRING"
+            },
+            {
+                "name": "ambient_pressure",
+                "type": "FLOAT"
+            },
+            {
+                "name": "timestamp_temperature",
+                "type": "STRING"
+            },
+            {
+                "name": "temperature",
+                "type": "FLOAT"
+            }
+        ]
+    }
+]
+
+
+
+
+Dataset info 
+Dataset ID	              qwiklabs-gcp-01-7c4f4ddf7056:sensorHubData
+Created	                  Oct 18, 2020, 4:22:55 PM
+Default table expiration	Never
+Last modified	            Oct 18, 2020, 4:22:55 PM
+Data location	            US
+
+Schema
+Field name	                      Type	      Mode	      Policy tags 	Description
+data	                            RECORD	    REPEATED	
+data. timestamp_ambient_pressure	STRING	    NULLABLE	
+data. ambient_pressure	          FLOAT	      NULLABLE	
+data. timestamp_temperature	      STRING	    NULLABLE	
+data. temperature	                FLOAT	      NULLABLE	
+
+Policy tags are used to control access to individual columns.
+
+
+
+
+Click the Details tab, and select and copy the Table ID text. You need this information at a later step in the lab.
+Table info 
+Table ID	            qwiklabs-gcp-01-7c4f4ddf7056:sensorHubData.sensorData
+Table size	          0 B
+Number of rows	      0
+Created	              Oct 18, 2020, 4:25:15 PM
+Table expiration	    Never
+Last modified	        Oct 18, 2020, 4:25:15 PM
+Data location	        US
+
+
+
+
+
+
+
+
+
+
+Export data to BigQuery
+At this point you have:
+Authorized Google Cloud Platform to read the data.
+Created a BigQuery table to accept the published data from the device.
+
+Now you are ready for the final step, exporting the data to BigQuery.
+On the Navigation menu, click Pub/Sub.
+Click on the name of the Topic device-events.
+Go to bottom of the page, click Create subscription > Export to BigQuery.
+
+On the Create job from template page, specify the following, and leave the remaining settings as their defaults:
+Property	              Value (type or select)
+Job name	              Enter the job name                                              device-events
+Cloud Dataflow template	Cloud Pub/Sub Topic to BigQuery
+Cloud Pub/Sub           input topic	projects/<project>/topics/<topic>                   projects/qwiklabs-gcp-01-7c4f4ddf7056/topics/device-events
+BigQuery output table	  <project_name>:sensorHubData.sensorData (paste the BigQuery table name that you copied)         qwiklabs-gcp-01-7c4f4ddf7056:sensorHubData.sensorData
+Temporary Location	    gs://<bucket_name>/tmp                                          gs://qwiklabs-gcp-01-7c4f4ddf7056/tmp
+
+Click Run job.
+The data from the device, which is published on Pub/Sub, will be stored in a BigQuery table.
+A Cloud Dataflow graph and job status page will open. 
+To check that the job is running correctly, click on the Job Logs menu item. 
+The job should run without errors.
+
+
+
+Errors:
+Dataflow>device-events>logs
+2020-10-18T08:34:36.711092860ZWorkflow failed. Causes: Permissions verification for controller service account failed. 
+IAM role roles/dataflow.worker should be granted to controller service account 383741794385-compute@developer.gserviceaccount.com.
+
+IAM and admin>permissions>add
+You need permissions for this action.
+Required permission(s): resourcemanager.projects.setIamPolicy
+
+
