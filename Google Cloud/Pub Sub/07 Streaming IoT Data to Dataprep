@@ -1,0 +1,550 @@
+https://googlecoursera.qwiklabs.com/focuses/11857416?parent=lti_session
+In this lab, you configure Cloud IoT Core and Cloud Pub/Sub to create a Pub/Sub topic and registry on GCP. 
+Using a simulated device, you stream data to Google Cloud Storage. 
+You then design a Dataprep flow and use it to analyze data.
+
+
+In this lab, you learn how to perform the following tasks:
+Create Cloud Pub/Sub topics and subscriptions
+Use IoT Core to create a registry
+Start the MQTT Application on a simulator
+Stream data to Google Cloud Storage
+Use Dataprep to manipulate the data
+
+
+
+
+
+
+
+
+Check project permissions
+Navigation menu click IAM & Admin > IAM.
+Confirm that the default compute Service Account {project-number}-compute@developer.gserviceaccount.com is present and has the editor role assigned. 
+The account prefix is the project number, which you can find on Navigation menu > Home.
+
+If the account is not present in IAM or does not have the editor role, follow the steps below to assign the required role.
+In the Google Cloud console, on the Navigation menu, click Home.
+Copy the project number (e.g. 729328892908).
+On the Navigation menu, click IAM & Admin > IAM.
+At the top of the IAM page, click Add.
+For New members, type:
+{project-number}-compute@developer.gserviceaccount.com                  x
+Replace {project-number} with your project number.
+For Role, select Project > Editor. Click Save.
+
+
+
+
+
+
+Enable APIs
+Cloud IoT API
+Cloud Pub/Sub API
+Container Registry API
+Cloud Storage
+
+
+
+
+
+Cloud Pub/Sub setup and topics
+In this section, you create a pub/sub topic for your streaming data.
+On the Navigation menu, click Pub/Sub > Topics. If prompted, enable the API.
+Click Create Topic.
+For Topic ID, type iotlab, and then click Create Topic.
+
+Setting topic permissions
+You now have a pub/sub topic. To allow the project to publish this topic, add the project as a member/publisher.
+To add members, click the overflow menu, next to the topic name, and then click View Permissions.
+Click Add members.
+In New members field, add the project as a member to the topic.
+cloud-iot@system.gserviceaccount.com
+Select the role as Pub/Sub > Pub/Sub Publisher, and then click Save.
+
+
+
+
+
+
+
+Create a location for data storage
+You need to create a storage folder to store the data streaming from the Android Things board. This is done in two steps.
+1 Create a storage bucket.
+2 Create a folder in the bucket.
+
+1 Create a storage bucket
+On the Navigation menu, click Storage > Browser.
+Click Create bucket.
+Enter the bucket name. Bucket names must be unique, use your project name for the bucket name or create a unique bucket name. Click Create.
+
+2 Create a folder in your bucket
+Return to the Storage Browser. Your new bucket should be in the list.
+Click on the bucket you created.
+Click Create folder.
+For Name, type Sensor-Data, and then click Create.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Start a Dataflow job
+You now have a device publishing data, and your Google Cloud Project is authorized to receive this data. Now you can start a Dataflow job to save the data to your bucket.
+
+Create a Dataflow job from a template
+On the Navigation menu, click Dataflow.
+Click Create job from template.
+Enter the following values in the template.
+Property	          Value (type value or select option as specified)
+Job name	          sensor-data
+Dataflow template	  Pub/Sub to Text Files on Cloud Storage
+
+The template page will expand to display a series of textboxes. Some of the textboxes are optional and some are required. You will only modify the required textboxes.
+Property	                      Value (type value or select option as specified)
+Regional endpoint	              Select the region closest to you
+Input Cloud Pub/Sub topic	      projects/<project-name>/topics/iotlab
+Output Cloud Storage directory	gs://<bucket-name>/Sensor-Data/ (note the slash at the end of the input text)
+Output file prefix	            output-
+Temporary location	            gs://<bucket-name>/tmp
+
+Click Run job.
+
+
+
+
+
+
+
+
+
+
+Prepare Your Compute Engine VM
+In your project, a pre-provisioned VM instance named iot-device-simulator will let you run instances of a Python script that emulate an MQTT-connected IoT device. 
+Before you emulate the devices, you will also use this VM instance to populate your Cloud IoT Core device registry.
+
+To connect to the iot-device-simulator VM instance:
+To the right, click the SSH drop-down arrow and select Open in browser window.
+You might need to click Hide Info Panel to reveal the SSH drop-down arrow.
+
+In your SSH session on the iot-device-simulator VM instance, enter this command to remove the default Google Cloud Platform SDK installation. 
+(In subsequent steps, you will install the latest version, including the beta component.)
+sudo apt-get remove google-cloud-sdk -y
+
+Now install the latest version of the Google Cloud Platform SDK and accept all defaults:
+curl https://sdk.cloud.google.com | bash
+
+End your ssh session on the iot-device-simulator VM instance:
+exit
+
+
+Start another SSH session on the iot-device-simulator VM instance.
+Initialize the gcloud SDK.
+gcloud init
+
+If you get the error message "Command not found", you might have forgotten to exit your previous SSH session and start a new one.
+If you are asked whether to authenticate with an @developer.gserviceaccount.com account or to log in with a new account, choose to log in with a new account.
+If you are asked "Are you sure you want to authenticate with your personal account? Do you want to continue (Y/n)?" enter Y.
+Click on the URL shown to open a new browser window that displays a verification code.
+Use your browser to copy the verification code.
+Paste the verification code in response to the Enter verification code: prompt and press Enter.
+
+
+In response to Pick cloud project to use, pick the GCP project that Qwiklabs created for you.
+
+Enter this command to make sure that the components of the SDK are up to date.
+gcloud components update
+
+Enter the following command to install the beta components. Accept if prompted to continue.
+gcloud components install beta
+
+Enter this command to update the system's information about Debian Linux package repositories:
+sudo apt-get update
+
+Enter this command to make sure that various required software packages are installed:
+sudo apt-get install python-pip openssl git -y
+
+Use pip to add needed Python components:
+sudo pip install pyjwt paho-mqtt cryptography
+
+Enter this command to add data to analyze during this lab:
+git clone https://github.com/cagamboa123/training-data-analyst.git
+
+In your SSH session on the iot-device-simulator VM instance, run the following, adding your project ID as the value for PROJECT_ID:
+export PROJECT_ID=
+Your completed command will look like this: export PROJECT_ID=qwiklabs-gcp-d2e509fed105b3ed
+
+
+You must choose a region for your IoT registry. At the present time, these regions are supported:
+us-central1
+europe-west1
+Asia-east1
+Choose the region that is closest to you. To set an environment variable containing your preferred region, enter the command:
+export MY_REGION=
+followed by the region name.
+Your completed command will look like this: export MY_REGION=us-central1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Open Core IoT
+On the Navigation menu, click IoT Core menu. Enable it if prompted.
+Click Create registry.
+On the Create a registry page, specify the following, and leave the remaining settings as their defaults:
+Property	                    Value (type value or select option as specified)
+Registry ID	                  iotlab-registry
+Region	                      us-central1 (or select a region that is closest to you)
+Select a Cloud Pub/Sub topic	projects/<project-name>/topics/iotlab
+Click Create.
+
+
+
+
+
+
+
+
+
+
+
+Create a Cryptographic Keypair
+To allow IoT devices to connect securely to Cloud IoT Core, you must create a cryptographic keypair.
+
+In your SSH session on the iot-device-simulator VM instance, enter these commands to create the keypair in the appropriate directory:
+cd $HOME/training-data-analyst/quests/iotlab/
+openssl req -x509 -newkey rsa:2048 -keyout rsa_private.pem \
+    -nodes -out rsa_cert.pem -subj "/CN=unused"
+
+This openssl command creates an RSA cryptographic keypair and writes it to a file called rsa_private.pem.
+
+
+Create the device and add it to the registry
+In your SSH session on the iot-device-simulator VM instance, type
+cat rsa_cert.pem
+
+Select and copy the entire certificate. 
+Including all dashes at the beginning and end of the certificate.
+
+
+Click on Devices in the left side panel under IoT Core menu.
+Click Create a device.
+Property	                                                              Value (type value or select option as specified)
+Device ID	                                                              temp-sensor-buenos-aires
+Communication, stackdriver logging, authentication > Authentication	    Enter manually
+Public key format	                                                      RS256_X509
+Public key value	                                                      Paste the certificate that you copied
+
+Click Create.
+Go back to Devices menu and add a second device. Click Create a device.
+Property	          Value (type value or select option as specified)
+Device ID	          temp-sensor-istanbul
+Authentication	    Enter manually
+Public key format	  RS256_X509
+Public key value	  Paste the certificate that you copied
+Click Create.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Run Simulated Devices
+In your SSH session on the iot-device-simulator VM instance, enter these commands to download the CA root certificates from pki.google.com to the appropriate directory:
+cd $HOME/training-data-analyst/quests/iotlab/
+wget https://pki.google.com/roots.pem
+
+
+Enter this command to run the first simulated device:
+python cloudiot_mqtt_example_json.py \
+   --project_id=$PROJECT_ID \
+   --cloud_region=$MY_REGION \
+   --registry_id=iotlab-registry \
+   --device_id=temp-sensor-buenos-aires \
+   --private_key_file=rsa_private.pem \
+   --message_type=event \
+   --algorithm=RS256 --num_messages=1000 > buenos-aires-log.txt 2>&1 &
+
+It will continue to run in the background.
+
+
+Enter this command to run the second simulated device:
+python cloudiot_mqtt_example_json.py \
+   --project_id=$PROJECT_ID \
+   --cloud_region=$MY_REGION \
+   --registry_id=iotlab-registry \
+   --device_id=temp-sensor-istanbul \
+   --private_key_file=rsa_private.pem \
+   --message_type=event \
+   --algorithm=RS256 --num_messages=1000
+
+Telemetry data will flow from the simulated devices through Cloud IoT Core to your Cloud Pub/Sub topic. In turn, your Dataflow job will read messages from your Pub/Sub topic and write their contents to your BigQuery table.
+
+
+
+Examine the stored data
+Dataflow is collecting the data published by Pub/Sub and saving it in output files in the bucket and folder specified in the job template. 
+The files are written every 5 minutes, and each begins with the prefix specified in the job template.
+
+On the Navigation menu, click Storage.
+Select the bucket used for this project: <bucket-name>
+Select the folder Sensor-Data. Dataflow is writing the data from the device to this folder.
+It writes a file every five minutes. 
+If the folder is empty, wait until the minutes are a multiple of five, then check.
+
+Open a file by clicking on its name.
+Your file contents should be similar to what is shown below.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Create a Dataprep Flow
+In this section, you create a Dataprep Flow.
+
+Start Dataprep
+On the Navigation menu, click Dataprep.
+(Check the project on the top of the page. It should be the same project number.)
+
+Select the checkbox and click Accept to accept the Terms of service.
+Check the box to Share account information with Trifacta, then Agree and Continue.
+Allow Trifacta access to project data.
+Select your project, click Allow.
+Check the box, and click Accept.
+Click Continue with your default storage location.
+In Dataprep, click Create Flow.
+Enter the flow name as Sensor-Data, click Create.
+Click Don't show me any helpers.
+Click Import & Add Datasets.
+On the left hand side, click GCS.
+Select the bucket you have created earlier then click Sensor-Data > (+).
+If there is more than one file, click on each file.
+Click Import & Add to Flow.
+Click Add new Recipe.
+Click Edit Recipe.
+
+
+
+Create a Dataprep recipe
+In this section, you create a Dataprep recipe. A recipe is a list of transformations and modifications of the data and data set. 
+It will be applied to all the data presently in the dataset, as well as any new data.
+
+Split a column
+Click the Split Column icon.
+Click On delimiter.
+Select device in Column field.
+For delimiter use temp-sensor-.
+Click Add.
+You should have a column called device2 with only locations of the devices listed.
+
+
+Delete column
+Click the expansion arrow on the column titled device1.
+Click Delete.
+
+
+Rename column
+Click the expansion arrow on the column titled device2.
+Select Rename.
+For new column name, type Device location.
+Click Add.
+
+
+Round values in a column
+Click the expansion arrow on the column titled temperature.
+Click Calculate > Round > Round.
+Click Add.
+
+
+You now have a recipe for handling data coming from GCS.
+Click Run job. Select the Dataflow Execution Settings and click Run Job.
+This can take several minutes.
+When the job is done, click on the job name and analyze the data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Schedule a Dataprep job
+You now have a Dataprep dataset and a recipe for transforming the data. AS you may have noticed, your devices are continuing to publish data and store it in GCS. You can now schedule a flow to download new data and execute the recipe.
+
+Click on the Dataprep icon in the upper left corner.
+Click on Sensor-Data.
+The flow has the data set and the recipe you created. Click on the recipe icon.
+You should now have a second recipe icon in the flow. Click on the second recipe icon.
+At the top of the Flow page, click on the overflow menu.
+Click Schedule flow.
+
+On the Add schedule page, specify the following:
+Property	                  Value (type value or select option as specified)
+Timezone	                  Select your timezone
+Frequency	                  Hourly
+Minutes past the hour	      Specify 20 minutes from your present time
+
+Click Save. You will see a message that says ‘No scheduled destinations set...'. You will set the destination in the following steps.
+Go to the Details page on the right side of the Flow page. Click on the overflow menu
+Click Create Output to run.
+For Scheduled destinations click Add.
+Click Add new Publishing Action.
+Click GCS.
+Click Create Folder.
+
+On the Create Folder page, specify the following:
+Property	              Value
+Folder Name	            Device Events Data
+
+Click Create Folder.
+Click Create a new file.
+Click Add.
+Click Save Settings.
+Your flow should look like the image below. Note the calendar icon on the second recipe, this signifies the flow is scheduled.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Examine the data
+You have created a dataprep flow and you have created a schedule for it to be regularly updated. Examine the data after a scheduled job execution.
+
+Click Jobs
+If the job is not scheduled to run within the next few minutes, you can run the job manually.
+
+Run a job manually
+Click on the Flows page and select your flow.
+Click on the second recipe icon.
+Click on Edit Recipe.
+Click on Run Job (upper right corner).
+Select the Dataflow Execution Settings and click Run Job.
+Click on the Jobs page.
+
+The Jobs page lists the jobs that have been completed. Click on the job number as soon as it is completed. This time the job will take a little longer because it has more data to process. The metadata for the dataset is shown. Moving your cursor over the bar graphs will give you details about each data point.
+Dataprep assumes the dataset is large, therefore it does not show the entire dataset. The default is to show initial values. There are cases where this may not be acceptable.
+
+
+
+
+
+
+
+
+
+Change dataset sample
+Find the dataset name in the information bar at the top of the page. Click on the dataset name.
+On the Flows page, click on the second recipe icon.
+In the upper right corner, click the Samples item.
+Click Got it!. his will display all the samples available.
+Click Random.
+Select Full to pull samples from the entire dataset.
+Click Collect.
+Click on the Dataflow next to the progress bar. The Dataflow page shows the job as running. The time to complete the job depends on how much data has accumulated in the Sensor-Data folder. Wait for the job to complete.
+Go back to the GCP Console. Click Navigation > Storage.
+Click bucket titled <project name>.
+Click Sensor-Data. You should now see a list of files, each written five minutes apart. These files contain all the data published by the devices.
+Return to Dataprep. Click Flows.
+Click Sensor-Data Flow.
+Double click the last icon in the flow. Examine the data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cleanup
+Stop Jobs
+In this section, you stop the Dataflow and Dataprep jobs.
+
+
+Stop Dataflow jobs
+On the Navigation menu, click Dataflow.
+Click on the Dataflow job.
+Click Stop job.
+On the Stop job page select Drain and Click Stop job.
+
+
+Stop Dataprep jobs
+On the menu bar in Dataprep, click Flows.
+Click on the Flow name.
+Click on the Schedule icon.
+On the Schedule Settings page, click Delete Schedule.
+
+
+
