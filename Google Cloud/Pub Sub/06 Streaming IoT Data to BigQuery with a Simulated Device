@@ -18,6 +18,46 @@ Container Registry API
 
 
 
++++++++additional step to add/check permissions
+project id/name         qwiklabs-gcp-01-efe3758c49a4
+project number          1017786332145
+
+
+Check project permissions
+Navigation menu click IAM & Admin > IAM.
+Confirm that the default compute Service Account {project-number}-compute@developer.gserviceaccount.com is present and has the editor role assigned. 
+90388388750-compute@developer.gserviceaccount.com
+The account prefix is the project number, which you can find on Navigation menu > Home.
+
+If the account is not present in IAM or does not have the editor role, follow the steps below to assign the required role.
+In the Google Cloud console, on the Navigation menu, click Home.
+Copy the project number (e.g. 729328892908).
+On the Navigation menu, click IAM & Admin > IAM.
+At the top of the IAM page, click Add.
+For New members, type:
+{project-number}-compute@developer.gserviceaccount.com                  x
+Replace {project-number} with your project number.
+For Role, select Project > Editor. Click Save.
+
+	
+Type    Member                                                    Name                                      Role    Analyzed permissions (excess/total)         Inheritance
+        1017786332145-compute@developer.gserviceaccount.com	      Compute Engine default service account	  Editor  3072/3072                                   No inheritance, for role Editor
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Installing and using virtualenv with Python3
 Execute the following command to download and update the packages list.
 sudo apt-get update
@@ -300,7 +340,7 @@ The schema of the data from the device is an array of records.
 
 
 Dataset info 
-Dataset ID	              qwiklabs-gcp-01-7c4f4ddf7056:sensorHubData
+Dataset ID	              qwiklabs-gcp-01-7c4f4ddf7056:sensorHubData                    qwiklabs-gcp-01-efe3758c49a4:sensorHubData.sensorData
 Created	                  Oct 18, 2020, 4:22:55 PM
 Default table expiration	Never
 Last modified	            Oct 18, 2020, 4:22:55 PM
@@ -350,11 +390,11 @@ Go to bottom of the page, click Create subscription > Export to BigQuery.
 
 On the Create job from template page, specify the following, and leave the remaining settings as their defaults:
 Property	              Value (type or select)
-Job name	              Enter the job name                                              device-events
+Job name	              Enter the job name                                              device-events             ps-to-bq-device-events
 Cloud Dataflow template	Cloud Pub/Sub Topic to BigQuery
-Cloud Pub/Sub           input topic	projects/<project>/topics/<topic>                   projects/qwiklabs-gcp-01-7c4f4ddf7056/topics/device-events
-BigQuery output table	  <project_name>:sensorHubData.sensorData (paste the BigQuery table name that you copied)         qwiklabs-gcp-01-7c4f4ddf7056:sensorHubData.sensorData
-Temporary Location	    gs://<bucket_name>/tmp                                          gs://qwiklabs-gcp-01-7c4f4ddf7056/tmp
+Cloud Pub/Sub           input topic	projects/<project>/topics/<topic>                   projects/qwiklabs-gcp-01-efe3758c49a4/topics/device-events
+BigQuery output table	  <project_name>:sensorHubData.sensorData (paste the BigQuery table name that you copied)         qwiklabs-gcp-01-efe3758c49a4:sensorHubData.sensorData
+Temporary Location	    gs://<bucket_name>/tmp                                          gs://qwiklabs-gcp-01-efe3758c49a4/tmp
 
 Click Run job.
 The data from the device, which is published on Pub/Sub, will be stored in a BigQuery table.
@@ -364,7 +404,7 @@ The job should run without errors.
 
 
 
-Errors:
+Errors on 2020.10.18:
 Dataflow>device-events>logs
 2020-10-18T08:34:36.711092860ZWorkflow failed. Causes: Permissions verification for controller service account failed. 
 IAM role roles/dataflow.worker should be granted to controller service account 383741794385-compute@developer.gserviceaccount.com.
@@ -372,5 +412,173 @@ IAM role roles/dataflow.worker should be granted to controller service account 3
 IAM and admin>permissions>add
 You need permissions for this action.
 Required permission(s): resourcemanager.projects.setIamPolicy
+
+
+
+
+
+
+
+Job logs on 2020.10.19:
+2020-10-19T04:36:24.700568267ZAutoscaling: Enabled for job 2020-10-18_21_36_20-3426351493754657670 between 1 and 3 worker processes.
+2020-10-19T04:36:25.223436444ZWorker configuration: n1-standard-4 in us-central1-b.
+2020-10-19T04:36:27.676171275ZGenerating 3 persistent disks which will allow autoscaling from 1 to 3 workers.
+2020-10-19T04:36:28.147125529ZStarting 1 workers...
+2020-10-19T04:36:31.115537361ZExecuting operation WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/ReadStream+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/MergeBuckets+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/ExpandIterable+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/GlobalWindow/Window.Assign+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/StreamingWrite
+2020-10-19T04:36:31.181936450ZExecuting operation WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/ReadStream+WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/MergeBuckets+WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/ExpandIterable+WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/GlobalWindow/Window.Assign+WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/StreamingWrite
+2020-10-19T04:36:31.216227407ZExecuting operation ReadPubSubTopic/PubsubUnboundedSource+ReadPubSubTopic/MapElements/Map+ConvertMessageToTableRow/MapToRecord+ConvertMessageToTableRow/InvokeUDF/ProcessUdf+WriteFailedRecords/FailedRecordToTableRow+WriteFailedRecords/WriteFailedRecordsToBigQuery/PrepareWrite/ParDo(Anonymous)+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/CreateTables/ParDo(CreateTables)+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/ShardTableWrites+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/TagWithUniqueIds+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/Window.Into()/Window.Assign+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/WriteStream+ConvertMessageToTableRow/JsonToTableRow/JsonToTableRow+WriteFailedRecords/FailedRecordToTableRow+WriteFailedRecords/WriteFailedRecordsToBigQuery/PrepareWrite/ParDo(Anonymous)+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/CreateTables/ParDo(CreateTables)+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/ShardTableWrites+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/TagWithUniqueIds+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/Window.Into()/Window.Assign+WriteFailedRecords/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/WriteStream+WriteSuccessfulRecords/PrepareWrite/ParDo(Anonymous)+WriteSuccessfulRecords/StreamingInserts/CreateTables/ParDo(CreateTables)+WriteSuccessfulRecords/StreamingInserts/StreamingWriteTables/ShardTableWrites+WriteSuccessfulRecords/StreamingInserts/StreamingWriteTables/TagWithUniqueIds+WriteSuccessfulRecords/StreamingInserts/StreamingWriteTables/Reshuffle/Window.Into()/Window.Assign+WriteSuccessfulRecords/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/WriteStream
+2020-10-19T04:36:31.248815110ZExecuting operation WriteSuccessfulRecords/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/ReadStream+WriteSuccessfulRecords/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/MergeBuckets+WriteSuccessfulRecords/StreamingInserts/StreamingWriteTables/Reshuffle/ExpandIterable+WriteSuccessfulRecords/StreamingInserts/StreamingWriteTables/GlobalWindow/Window.Assign+WriteSuccessfulRecords/StreamingInserts/StreamingWriteTables/StreamingWrite+WrapInsertionErrors/Map+WriteFailedRecords2/FailedRecordToTableRow+WriteFailedRecords2/WriteFailedRecordsToBigQuery/PrepareWrite/ParDo(Anonymous)+WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/CreateTables/ParDo(CreateTables)+WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/ShardTableWrites+WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/TagWithUniqueIds+WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/Window.Into()/Window.Assign+WriteFailedRecords2/WriteFailedRecordsToBigQuery/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey/WriteStream
+2020-10-19T04:36:57.982107706ZWorker configuration: n1-standard-4 in us-central1-b.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5. Query the data in BigQuery
+The data can be queried in BigQuery immediately. 
+Cloud Dataflow will continue to write data to the table as long as the device is still publishing and the Cloud Dataflow job is still running.
+On the Navigation menu, click BigQuery.
+In the navigation pane, click <your-project-id> > sensorHubData.
+Click sensorData. The schema for the table you created will appear.
+Click Query Table. A query window and a row of buttons appear.
+
+Click on More > Query settings, and ensure you are using Standard SQL dialect. 
+You are using Standard SQL if Standard radio button is selected, then click Cancel. 
+If not selected, select Standard SQL and click Save.
+
+Copy and paste this query into the query editor:
+SELECT * FROM `<project name>.sensorHubData.sensorData` LIMIT 10
+SELECT * FROM `qwiklabs-gcp-01-efe3758c49a4.sensorHubData.sensorData` LIMIT 10
+Important tip: do not use single quotes around the table name. Use the back-quote symbol, which is different than single quotes.
+
+Click Run.
+Your results should be similar to what is shown below.
+
+
+
+Query complete (0.3 sec elapsed, 0 B processed)
+Job info tab
+Job ID	qwiklabs-gcp-01-efe3758c49a4:US.bquxjob_4c66adcd_1753f29f875
+User	  student-01-c194e2346b5c@qwiklabs.net
+Location  United States (US)
+Creation time	Oct 19, 2020, 12:42:54 PM
+Start time	  Oct 19, 2020, 12:42:55 PM
+End time	    Oct 19, 2020, 12:42:55 PM
+Duration	    0.3 sec
+Bytes processed	0 B
+Bytes billed	  0 B
+Job priority	  INTERACTIVE
+Destination table	    Temporary table
+Use legacy SQL	      false
+
+
+
+Results tab
+Row	  data.timestamp_ambient_pressure	  data.ambient_pressure	  data.timestamp_temperature	data.temperature	
+1	    1528752559871                     1012.0789794921875      null                        null
+      null                              null                    1528752559871               35.554813385009766
+2	    1528752642002                     1012.094482421875       null                        null
+      null                              null                    1528752642002               35.579166412353516
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 6. Reformat the data in BigQuery
+In this section, you run a query to reformat the data and convert the temperature into Farenheit.
+Copy the query shown below and change <project-id> with your project.
+
+#query:
+SELECT
+  #timestamp in miliseconds
+  EXTRACT(DATE FROM TIMESTAMP_MILLIS(CAST(timestamp_ambient_pressure AS INT64))) AS Pressuredate,
+  TIMESTAMP_MILLIS(CAST(timestamp_ambient_pressure AS INT64)) AS Pressuretime,
+
+  EXTRACT(DATE FROM TIMESTAMP_MILLIS(CAST(timestamp_temperature AS INT64))) AS Tempdate,
+  TIMESTAMP_MILLIS(CAST(timestamp_temperature AS INT64)) AS Temptime,
+
+  ambient_pressure as pressure,
+  temperature as temp_c,
+  (temperature*1.8)+32 as temp_f
+
+FROM
+  `<project-id>.sensorHubData.sensorData`,
+  UNNEST(data) AS d
+  WHERE timestamp_temperature IS NOT NULL OR timestamp_ambient_pressure IS NOT NULL
+Paste the query into the Query window.
+Click Run.
+Your results should be similar to what is shown below.
+
+
+
+
+SELECT
+  #timestamp in miliseconds
+  EXTRACT(DATE FROM TIMESTAMP_MILLIS(CAST(timestamp_ambient_pressure AS INT64))) AS Pressuredate,
+  TIMESTAMP_MILLIS(CAST(timestamp_ambient_pressure AS INT64)) AS Pressuretime,
+
+  EXTRACT(DATE FROM TIMESTAMP_MILLIS(CAST(timestamp_temperature AS INT64))) AS Tempdate,
+  TIMESTAMP_MILLIS(CAST(timestamp_temperature AS INT64)) AS Temptime,
+
+  ambient_pressure as pressure,
+  temperature as temp_c,
+  (temperature*1.8)+32 as temp_f
+
+FROM
+  `qwiklabs-gcp-01-efe3758c49a4.sensorHubData.sensorData`,
+  UNNEST(data) AS d
+  WHERE timestamp_temperature IS NOT NULL OR timestamp_ambient_pressure IS NOT NULL
+  
+
+
+Row	  Pressuredate	Pressuretime	                  Tempdate	  Temptime	                    pressure	              temp_c	            temp_f	
+1	    2018-06-11    2018-06-11 21:29:19.871 UTC     null        null                          1012.0789794921875      null                null
+2	    null          null                            2018-06-11  2018-06-11 21:29:19.871 UTC   null                    35.554813385009766  95.99866409301758
+...
+  
 
 
