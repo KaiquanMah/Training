@@ -1,0 +1,309 @@
+https://googlecoursera.qwiklabs.com/focuses/11906239?parent=lti_session
+In this lab, you create a streaming Dataflow from Pub/Sub-to-BigQuery. 
+Then analyze the data in the BigQuery table in Data Studio. 
+The lab uses a public Pub/Sub topic New York City taxi rides.
+
+
+In this lab, you learn how to perform the following tasks:
+Use the Dataflow template Pub/Sub to BigQuery.
+Use Data Studio with a BigQuery table.
+Share the report with another user.
+
+
+
+
+project id/name         qwiklabs-gcp-04-585e451c5d46
+project number          19553578825
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Check project permissions
+Navigation menu click IAM & Admin > IAM.
+Confirm that the default compute Service Account {project-number}-compute@developer.gserviceaccount.com is present and has the editor role assigned. 
+19553578825-compute@developer.gserviceaccount.com
+The account prefix is the project number, which you can find on Navigation menu > Home.
+
+If the account is not present in IAM or does not have the editor role, follow the steps below to assign the required role.
+In the Google Cloud console, on the Navigation menu, click Home.
+Copy the project number (e.g. 729328892908).
+On the Navigation menu, click IAM & Admin > IAM.
+At the top of the IAM page, click Add.
+For New members, type:
+{project-number}-compute@developer.gserviceaccount.com                  x
+Replace {project-number} with your project number.
+For Role, select Project > Editor. Click Save.
+
+
+
+
+
+Enable APIs
+Cloud Dataflow
+Cloud Pub/Sub API
+Container Registry API
+
+
+
+
+
+
+Task 1. Connect to the Public Pub/Sub topic
+The public Google Cloud Pubsub topic used in this lab. 
+Anyone can connect to this topic, which is data for New York City taxi rides. 
+To connect to the public data stream you create a subscription to it.
+
+On the Google Cloud Platform menu, click Activate Cloud Shell. click Continue.
+Create a subscription to the public topic,
+Copy and paste the below command into Cloud Shell:
+gcloud alpha pubsub subscriptions create taxi-test-sub --topic projects/pubsub-public-data/topics/taxirides-realtime
+
+Created subscription [projects/qwiklabs-gcp-04-585e451c5d46/subscriptions/taxi-test-sub].
+
+
+
+To make sure the connection is successful, wait for a couple seconds before pulling a message from your subscription.
+Copy and paste the below command into Cloud Shell and also make sure to change <your-project-id> to your project id:
+gcloud alpha pubsub subscriptions pull projects/<your-project-id>/subscriptions/taxi-test-sub
+gcloud alpha pubsub subscriptions pull projects/qwiklabs-gcp-04-585e451c5d46/subscriptions/taxi-test-sub
+
+Listed 0 items.
+
+
+
+
+
+
+
+
+
+
+Task 2. Create a Google Cloud Storage bucket
+In this section, you create a Google Cloud Storage bucket.
+In the GCP Console, on the Navigation menu, click Storage.
+Click Create bucket.
+For Name, type <qwiklabs-project-name>
+Click Create.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Create a BigQuery dataset and table
+In this section, you create a BigQuery dataset and table. 
+Then you query the dataset to make sure the pipeline is working correctly.
+In the GCP Console, on the Navigation menu, click BigQuery then click Done.
+Click on your project name, then click Create Dataset.
+Set the Dataset ID to streamingTaxi. Leave the other options at their default values (Data Location, Default table Expiration). Click Create dataset.
+Click on the dataset, then click Create table.
+For Create table from, choose Empty table.
+For Table name enter taxiData.
+
+In the Schema section, click Edit as text and Copy and paste the below schema.
+[
+        {
+                "name": "ride_id",
+                "type": "STRING"
+        },
+        {
+                "name": "latitude",
+                "type": "FLOAT"
+        },
+        {
+                "name": "longitude",
+                "type": "FLOAT"
+        },
+        {
+                "name": "timestamp",
+                "type": "STRING"
+        },
+        {
+                "name": "meter_reading",
+                "type": "FLOAT"
+        },
+        {
+                "name": "meter_increment",
+                "type": "FLOAT"
+        },
+        {
+                "name": "ride_status",
+                "type": "STRING"
+        },
+        {
+                "name": "passenger_count",
+                "type": "INTEGER"
+        },
+        {
+                "name": "point_idx",
+                "type": "INTEGER"
+        }
+]
+
+Click Create Table.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Create a Pub/Sub-to-BigQuery Dataflow
+In this section, you use a Dataflow template to create a pipeline from Pub/Sub to BigQuery. 
+You do not need to create a topic because you use the publicly available Pub/Sub topic.
+
+In the GCP Console, on the Navigation menu, click Dataflow.
+Click Create job from template.
+Job name: taxistream
+
+Select Cloud Pub/Sub Topic to BigQuery in Cloud Dataflow template. 
+Specify the following details, make sure to change <your-project-id> with your qwiklabs project id.
+Regional endpoint                 us-central1
+Cloud Pub/Sub input topic         projects/pubsub-public-data/topics/taxirides-realtime
+BigQuery output table             <your-project-id>:streamingTaxi.taxiData                      qwiklabs-gcp-04-585e451c5d46:streamingTaxi.taxiData
+Temporary Location                gs://<your-project-id>/tmp                                    gs://qwiklabs-gcp-04-585e451c5d46/tmp
+
+Click Run job.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5. Run a Query in BigQuery
+In the GCP Console, on the Navigation menu, click BigQuery.
+In the resources menu, navigate the the table: taxiData
+Click Query Table. A query window and a row of buttons appear.
+Click on More > Query settings, and ensure you are using Standard SQL dialect. You are using Standard SQL if Standard radio button is selected then click Cancel. If not selected, select Standard SQL and click Save.
+Copy and paste this query into the Query editor, make sure to change <your-project-id> to your project id:
+SELECT * FROM `<your-project-id>.streamingTaxi.taxiData` LIMIT 10
+Click Run.
+
+SELECT * FROM `qwiklabs-gcp-04-585e451c5d46.streamingTaxi.taxiData` LIMIT 10
+This query returned no results.
+
+
+
+
+
+
+
+
+
+Task 6. Connect to your Data
+In this section, you create a report on the data streaming into Data Studio from BigQuery. 
+Then you add a Scorecard to track the number of data points received.
+Go to the Data Studio page. https://datastudio.google.com/u/0/
+Click Data sources.
+To add a data source, click +.
+
+When we add a data source for the first time then we need to follow the given instructions:
+Click GET STARTED.
+Select the acknowledgement to accept the terms of service and click ACCEPT.
+Click "No, thanks" for all of the notification email options and then click DONE.
+
+You may need to click the + again after agreeing to the terms and conditions.
+In search field type BigQuery.
+On the BigQuery tile, click SELECT.
+Click AUTHORIZE.
+Your Qwiklab user account should be selected, click ALLOW.
+Select your <project name>.
+Select the dataset streamingTaxi.
+Select the table taxiData.
+Click Connect.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 7. Visualize your Data
+Click Create Report.
+Click Add to Report. Your Qwiklab user account should be selected, click ALLOW.
+You may need to wait a few minutes before the data is available in BigQuery
+
+Click Insert > Scorecard. Using the handle, stretch a rectangle on the report to display the scorecard.
+The report shows something similar to what is shown below.
+
+Add a bar chart, click Insert > Bar chart Using the handle, stretch a rectangle on the report to display the chart
+The report shows something similar to what is shown below.
+
+Change the title of the report to NYC Taxi Data.
+
+
+
+
+
+
+
+
+Task 8. Share the dashboard
+In this section, you share the report. You give access to the report to another email address. To check the permissions setting, the email address should be the one you can access.
+Click on the menu item: File > Share
+Enter an email address that you can access.
+Click Send.
+In a different window, log into the email address.
+Open the email NYC Taxi Data - Invitation to edit. This email address now has access to the Data Studio report.
+
+
