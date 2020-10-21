@@ -19,9 +19,9 @@ Perform a query on the data in BigQuery.
 
 
 Task 1: Sign in to the Google Cloud Platform (GCP) Console
-
-
-
+gcp project id/name       qwiklabs-gcp-03-ba19a798d681
+region                    us-central1
+zone                      us-central1-a
 
 
 
@@ -65,6 +65,36 @@ In this activity, you will learn about the daily pattern of load on this web ser
 
 
 
+Table info          
+Table ID	                    qwiklabs-gcp-03-ba19a798d681:logdata.accesslog
+Table size	                  304.56 MB
+Number of rows	              1,461,378
+Created	                      Oct 21, 2020, 9:03:23 PM
+Table expiration	            Never
+Last modified	                Oct 21, 2020, 9:03:23 PM
+Data location	                US
+
+
+Preview
+Row	string_field_0	    string_field_1	string_field_2	int64_field_3	string_field_4	int64_field_5	int64_field_6	int64_field_7	int64_field_8	    string_field_9	            string_field_10	          int64_field_11	int64_field_12	string_field_13	        string_field_14	
+1	  10.124.190.15     -               -               10            May             2017            18            28            0                                           GET /products HTTP/1.0      200             4951            -                     Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -85,6 +115,226 @@ https://cloud.google.com/products/calculator/
 Click Run and examine the results. 
 At what time of day is the website busiest? 
 When is it least busy?
+
+
+
+[
+  {
+    "hour": "0",
+    "hitcount": "26983"
+  },
+  {
+    "hour": "1",
+    "hitcount": "12287"
+  },
+  {
+    "hour": "2",
+    "hitcount": "8824"
+  },
+  {
+    "hour": "3",
+    "hitcount": "6607"
+  },
+  {
+    "hour": "4",
+    "hitcount": "10519"
+  },
+  {
+    "hour": "5",
+    "hitcount": "14581"
+  },
+  {
+    "hour": "6",
+    "hitcount": "26634"
+  },
+  {
+    "hour": "7",
+    "hitcount": "73708"
+  },
+  {
+    "hour": "8",
+    "hitcount": "218842"
+  },
+  {
+    "hour": "9",
+    "hitcount": "219769"
+  },
+  {
+    "hour": "10",
+    "hitcount": "115119"
+  },
+  {
+    "hour": "11",
+    "hitcount": "58151"
+  },
+  {
+    "hour": "12",
+    "hitcount": "55623"
+  },
+  {
+    "hour": "13",
+    "hitcount": "55625"
+  },
+  {
+    "hour": "14",
+    "hitcount": "56057"
+  },
+  {
+    "hour": "15",
+    "hitcount": "55675"
+  },
+  {
+    "hour": "16",
+    "hitcount": "55573"
+  },
+  {
+    "hour": "17",
+    "hitcount": "55740"
+  },
+  {
+    "hour": "18",
+    "hitcount": "55800"
+  },
+  {
+    "hour": "19",
+    "hitcount": "55935"
+  },
+  {
+    "hour": "20",
+    "hitcount": "55996"
+  },
+  {
+    "hour": "21",
+    "hitcount": "55797"
+  },
+  {
+    "hour": "22",
+    "hitcount": "55778"
+  },
+  {
+    "hour": "23",
+    "hitcount": "55755"
+  }
+]
+
+
+
+
+
+
+
+
+
+
+
+
+select int64_field_6 as hour, count(*) as hitcount from logdata.accesslog
+group by hour
+order by hitcount desc
+
+
+[
+  {
+    "hour": "9",
+    "hitcount": "219769"              busiest
+  },
+  {
+    "hour": "8",
+    "hitcount": "218842"
+  },
+  {
+    "hour": "10",
+    "hitcount": "115119"
+  },
+  {
+    "hour": "7",
+    "hitcount": "73708"
+  },
+  {
+    "hour": "11",
+    "hitcount": "58151"
+  },
+  {
+    "hour": "14",
+    "hitcount": "56057"
+  },
+  {
+    "hour": "20",
+    "hitcount": "55996"
+  },
+  {
+    "hour": "19",
+    "hitcount": "55935"
+  },
+  {
+    "hour": "18",
+    "hitcount": "55800"
+  },
+  {
+    "hour": "21",
+    "hitcount": "55797"
+  },
+  {
+    "hour": "22",
+    "hitcount": "55778"
+  },
+  {
+    "hour": "23",
+    "hitcount": "55755"
+  },
+  {
+    "hour": "17",
+    "hitcount": "55740"
+  },
+  {
+    "hour": "15",
+    "hitcount": "55675"
+  },
+  {
+    "hour": "13",
+    "hitcount": "55625"
+  },
+  {
+    "hour": "12",
+    "hitcount": "55623"
+  },
+  {
+    "hour": "16",
+    "hitcount": "55573"
+  },
+  {
+    "hour": "0",
+    "hitcount": "26983"
+  },
+  {
+    "hour": "6",
+    "hitcount": "26634"
+  },
+  {
+    "hour": "5",
+    "hitcount": "14581"
+  },
+  {
+    "hour": "1",
+    "hitcount": "12287"
+  },
+  {
+    "hour": "4",
+    "hitcount": "10519"
+  },
+  {
+    "hour": "2",
+    "hitcount": "8824"
+  },
+  {
+    "hour": "3",
+    "hitcount": "6607"                least busiest
+  }
+]
+
+
+
+
 
 
 
@@ -110,4 +360,22 @@ Choose the project that Qwiklabs assigned you to. Its name will look like qwikla
 The bq command then performs the action requested on its command line. 
 What URL offered by this web server was most popular? 
 Which was least popular?
+
+
+Waiting on bqjob_rd2f02decb2ed2a2_000001754b4b511e_1 ... (0s) Current status: DONE   
++----------------------------------------+--------------+
+|                request                 | requestcount |
++----------------------------------------+--------------+
+| GET /store HTTP/1.0                    |       337293 |
+| GET /index.html HTTP/1.0               |       336193 |
+| GET /products HTTP/1.0                 |       280937 |
+| GET /services HTTP/1.0                 |       169090 |
+| GET /products/desserttoppings HTTP/1.0 |        56580 |
+| GET /products/floorwaxes HTTP/1.0      |        56451 |
+| GET /careers HTTP/1.0                  |        56412 |
+| GET /services/turnipwinding HTTP/1.0   |        56401 |
+| GET /services/spacetravel HTTP/1.0     |        56176 |
+| GET /favicon.ico HTTP/1.0              |        55845 |
++----------------------------------------+--------------+
+
 
