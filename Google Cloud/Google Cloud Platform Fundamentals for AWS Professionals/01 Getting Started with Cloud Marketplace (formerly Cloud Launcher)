@@ -1,0 +1,537 @@
+https://googlecoursera.qwiklabs.com/focuses/11917930?parent=lti_session
+In this lab, you use Cloud Marketplace to quickly and easily deploy a LAMP stack on a Compute Engine instance. 
+The Bitnami LAMP Stack provides a complete web development environment for Linux that can be launched in one click.
+Component	              Role
+Linux	                  Operating system
+Apache HTTP Server	    Web server
+MySQL	                  Relational database
+PHP	                    Web application framework
+phpMyAdmin	            PHP administration tool
+
+https://docs.bitnami.com/google/infrastructure/lamp
+
+
+
+LAMP enables you to quickly start building your websites and applications by providing a coding framework. 
+As a developer, it provides standalone project directories to store your applications.
+This image is configured for production environments. 
+It includes SSL auto-configuration with Let's Encrypt certificates, and the latest releases of PHP, Apache, and MySQL on Linux. 
+This application also includes phpMyAdmin, PHP main modules and Composer.
+This open source solution is packaged by Bitnami. 
+
+Learn how to install, configure, and manage it at docs.bitnami.com. 
+For deployment issues, reach out our support team at community.bitnami.com.
+
+
+Why use Bitnami Certified Apps?
+Bitnami certifies that our images are secure, up-to-date, and packaged using industry best practices.
+With Bitnami, you can trust what is in the app you're launching. 
+We monitor all the applications we package for vulnerabilities, outdated components and libraries, and application updates. 
+When any of these are identified, we patch and release every affected listing within a couple of days.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+In this lab, you learn how to launch a solution using Cloud Marketplace.
+Task 1: Sign in to the Google Cloud Platform (GCP) Console
+google project ID/name       qwiklabs-gcp-03-66b30fcf4de1
+region                       us-central1
+zone                         us-central1-a
+
+
+
+
+
+Task 2: Use Cloud Marketplace to deploy a LAMP stack
+In the GCP Console, on the Navigation menu (Navigation menu), click Marketplace.
+In the search bar, type LAMP
+
+In the search results, click LAMP Certified by Bitnami.
+If you choose another LAMP stack, such as the Google Click to Deploy offering, the lab instructions will not work as expected.
+
+On the LAMP page, click Launch.
+If this is your first time using Compute Engine, the Compute Engine API must be initialized before you can continue.
+
+For Zone, select the deployment zone that Qwiklabs assigned to you.
+Leave the remaining settings as their defaults.
+If you are prompted to accept the GCP Marketplace Terms of Service, do so.
+Click Deploy.
+
+If a Welcome to Deployment Manager message appears, click Close to dismiss it.
+The status of the deployment appears in the console window: lampstack-1 is being deployed. When the deployment of the infrastructure is complete, the status changes to lampstack-1 has been deployed.
+After the software is installed, a summary of the details for the instance, including the site address, is displayed.
+
+
+
+Network interfaces
+default default (10.128.0.0/20)
+
+Software        
+Operating System	          Debian (10)
+Software	
+                            Apache Portable Runtime (APR) (1.7.0)
+                            Apache utilities (APR) (1.6.1)
+                            Apache (2.4.46)
+                            ModSecurity (3.0.4)
+                            ModSecurity Apache Connector (0.20200422.0)
+                            mod_pagespeed library (1.13.35-2)
+                            mod_pagespeed_ap24 library (1.13.35-2)
+                            Apache PageSpeed Module (1.13.35-2)
+                            qpress (11.0.0-0)
+                            Percona XtraBackup (8.0.14)
+                            Varnish (4.1.11)
+                            vmod-querystring (1.0.6)
+                            phpMyAdmin (5.0.2)
+                            Gonit (0.2.4)
+                            MySQL (8.0.21)
+                            Git (2.28.0)
+                            Bnsupport Tool (0.9.2)
+                            gosu (1.12.0)
+                            IMAP (2007.0.0)
+                            PECL APC User Cache (5.1.18)
+                            PHP (7.4.11)
+                            PECL PHP driver for Mcrypt (1.0.3)
+                            PECL PHP driver for Imagick (3.4.4)
+                            libmemcached (3.1.5)
+                            libmaxminddb (1.4.3)
+                            MaxMind DB Reader PHP API (1.8.0)
+                            PECL PHP driver for MongoDB (1.8.0)
+                            PECL PHP driver for Xdebug (2.9.8)
+                            Composer (1.10.13)
+                            Bncert Tool (0.5.12)
+                            Symfony Installer (1.5.11)
+                            ini-file (1.3.0)
+                            render-template (1.0.0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3: Verify your deployment
+When the deployment is complete, click the Site address link in the right pane.
+
+Alternatively, you can click Visit the site in the Get started with LAMP Certified by Bitnami section of the page. 
+A new browser tab displays a congratulations message. This page confirms that, as part of the LAMP stack, the Apache HTTP Server is running.
+
+Close the congratulations browser tab.
+
+On the GCP Console, under Get started with LAMP Certified by Bitnami, click SSH.
+In a new window, a secure login shell session on your virtual machine appears.
+In the just-created SSH window, to change the current working directory to /opt/bitnami, execute the following command:
+cd /opt/bitnami
+
+student-03-82b33f38bc65@lampstack-1-vm:~$ pwd
+/home/student-03-82b33f38bc65
+student-03-82b33f38bc65@lampstack-1-vm:~$ cd /opt/bitnami
+student-03-82b33f38bc65@lampstack-1-vm:/opt/bitnami$ pwd
+/opt/bitnami
+
+
+
+
+To copy the phpinfo.php script from the installation directory to a publicly accessible location under the web server document root, execute the following command:
+sudo sh -c 'echo "<?php phpinfo(); ?>" > apache2/htdocs/phpinfo.php'
+
+The phpinfo.php script displays your PHP configuration. It is often used to verify a new PHP installation.
+
+To close the SSH window, execute the following command:
+exit
+
+
+Open a new browser tab.
+Type the following URL, and replace SITE_ADDRESS with the URL in the Site address field in the right pane of the lampstack page.
+http://SITE_ADDRESS/phpinfo.php
+
+A summary of the PHP configuration of your server is displayed.
+Close the phpinfo tab.
+
+
+
+
+
+Site address            http://35.222.0.126/ 
+Instance                lampstack-1-vm
+Instance zone           us-central1-a
+Instance machine type   f1-micro
+http://35.222.0.126/phpinfo.php
+
+
+PHP Version 7.4.11
+System	            Linux lampstack-1-vm 4.19.0-11-cloud-amd64 #1 SMP Debian 4.19.146-1 (2020-09-17) x86_64
+Build Date	        Oct 1 2020 19:07:41
+Configure Command	  '/bitnami/blacksmith-sandox/php-7.4.11/configure' '--prefix=/opt/bitnami/php' '--with-imap=/bitnami/blacksmith-sandox/imap-2007.0.0' '--with-imap-ssl' '--with-zlib-dir' '--with-zlib' '--with-libxml-dir=/usr' '--enable-soap' '--disable-rpath' '--enable-inline-optimization' '--with-bz2' '--enable-sockets' '--enable-pcntl' '--enable-exif' '--enable-bcmath' '--with-pdo-mysql=mysqlnd' '--with-mysqli=mysqlnd' '--with-png-dir=/usr' '--with-openssl' '--with-libdir=/lib/x86_64-linux-gnu' '--enable-ftp' '--enable-calendar' '--with-gettext' '--with-xmlrpc' '--with-xsl' '--enable-fpm' '--with-fpm-user=daemon' '--with-fpm-group=daemon' '--enable-mbstring' '--enable-cgi' '--enable-ctype' '--enable-session' '--enable-mysqlnd' '--enable-intl' '--with-iconv' '--with-pdo_sqlite' '--with-sqlite3' '--with-readline' '--with-gmp' '--with-curl' '--with-pdo-pgsql=shared' '--with-pgsql=shared' '--with-config-file-scan-dir=/opt/bitnami/php/etc/conf.d' '--enable-gd' '--with-pear' '--with-freetype' '--with-jpeg' '--with-zip' '--with-pdo-dblib=shared' '--with-tidy' '--with-ldap=/usr/' '--enable-apcu=shared'
+Server API	        FPM/FastCGI
+Virtual Directory Support	                disabled
+Configuration File (php.ini) Path	        /opt/bitnami/php/lib
+Loaded Configuration File	                /opt/bitnami/php/etc/php.ini
+Scan this dir for additional .ini files	  /opt/bitnami/php/etc/conf.d
+Additional .ini files parsed	            (none)
+PHP API	                                  20190902
+PHP Extension	                            20190902
+Zend Extension	                          320190902
+Zend Extension Build	                    API320190902,NTS
+PHP Extension Build	                      API20190902,NTS
+Debug Build	                              no
+Thread Safety	                            disabled
+Zend Signal Handling	                    enabled
+Zend Memory Manager	                      enabled
+Zend Multibyte Support	                  provided by mbstring
+IPv6 Support	                            enabled
+DTrace Support	                          disabled
+Registered PHP Streams	                  https, ftps, compress.zlib, compress.bzip2, php, file, glob, data, http, ftp, phar, zip
+Registered Stream Socket Transports	      tcp, udp, unix, udg, ssl, tls, tlsv1.0, tlsv1.1, tlsv1.2, tlsv1.3
+Registered Stream Filters	                zlib.*, bzip2.*, convert.iconv.*, string.rot13, string.toupper, string.tolower, string.strip_tags, convert.*, consumed, dechunk
+
+
+
+
+
+
+
+
+Deployment properties
+ID                                2345139350798517706
+Created On                        2020-10-21 (08:04:53)
+Manifest Name                     manifest-1603238693813
+Config                            View
+Imports
+                                  c2d_deployment_configuration.json
+                                  common.py
+                                  default.py
+                                  lampstack.jinja
+                                  lampstack.jinja.display
+                                  lampstack.jinja.schema
+                                  password.py
+                                  path_utils.jinja
+                                  resources/en-us/lampstack_small.png
+                                  resources/en-us/lampstack_store.png
+                                  software_status.py
+                                  software_status.py.schema
+                                  software_status.sh.tmpl
+                                  software_status_script.py
+                                  software_status_script.py.schema
+                                  test_config.yaml
+                                  vm_instance.py
+                                  vm_instance.py.schema
+Layout                            View
+Expanded Config                   View
+
+
+
+
+Config
+{
+  "imports": [
+    {
+      "path": "lampstack.jinja"
+    }
+  ],
+  "resources": [
+    {
+      "name": "lampstack",
+      "type": "lampstack.jinja",
+      "properties": {
+        "zone": "us-central1-a",
+        "machineType": "f1-micro",
+        "bootDiskType": "pd-standard",
+        "bootDiskSizeGb": 10,
+        "network": [
+          "https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-03-66b30fcf4de1/global/networks/default"
+        ],
+        "subnetwork": [
+          "https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-03-66b30fcf4de1/regions/us-central1/subnetworks/default"
+        ],
+        "externalIP": [
+          "EPHEMERAL"
+        ],
+        "enableTcp80": true,
+        "tcp80SourceRanges": "",
+        "enableTcp443": true,
+        "tcp443SourceRanges": ""
+      }
+    }
+  ]
+}
+
+
+
+
+
+
+
+Expanded config
+resources:
+- name: lampstack-1-vm
+  properties:
+    canIpForward: false
+    disks:
+    - autoDelete: true
+      boot: true
+      deviceName: lampstack-vm-tmpl-boot-disk
+      initializeParams:
+        diskSizeGb: 10
+        diskType: https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-03-66b30fcf4de1/zones/us-central1-a/diskTypes/pd-standard
+        sourceImage: https://www.googleapis.com/compute/v1/projects/bitnami-launchpad/global/images/bitnami-lampstack-7-4-11-0-linux-debian-10-x86-64-nami
+      type: PERSISTENT
+    machineType: https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-03-66b30fcf4de1/zones/us-central1-a/machineTypes/f1-micro
+    metadata:
+      items:
+      - key: bitnami-base-password
+        value: kPSsVFDcf2Rw
+      - key: status-config-url
+        value: https://runtimeconfig.googleapis.com/v1beta1/projects/qwiklabs-gcp-03-66b30fcf4de1/configs/lampstack-1-config
+      - key: status-variable-path
+        value: status
+      - key: status-uptime-deadline
+        value: 1800
+      - key: startup-script
+        value: |-
+          #!/bin/bash
+
+          set -e
+
+          DEFAULT_UPTIME_DEADLINE="300"  # 5 minutes
+
+          metadata_value() {
+            curl --retry 5 -sfH "Metadata-Flavor: Google" \
+                 "http://metadata/computeMetadata/v1/$1"
+          }
+
+          access_token() {
+            metadata_value "instance/service-accounts/default/token" \
+            | python -c "import sys, json; print json.load(sys.stdin)['access_token']"
+          }
+
+          uptime_seconds() {
+            seconds="$(cat /proc/uptime | cut -d' ' -f1)"
+            echo ${seconds%%.*}  # delete floating point.
+          }
+
+          config_url() { metadata_value "instance/attributes/status-config-url"; }
+          instance_id() { metadata_value "instance/id"; }
+          variable_path() { metadata_value "instance/attributes/status-variable-path"; }
+          project_name() { metadata_value "project/project-id"; }
+          uptime_deadline() {
+            metadata_value "instance/attributes/status-uptime-deadline" \
+                || echo $DEFAULT_UPTIME_DEADLINE
+          }
+
+          config_name() {
+            python - $(config_url) <<EOF
+          import sys, urlparse
+          parsed = urlparse.urlparse(sys.argv[1])
+          print '/'.join(parsed.path.rstrip('/').split('/')[-4:])
+          EOF
+          }
+
+          variable_body() {
+            encoded_value=$(echo "$2" | base64)
+            printf '{"name":"%s", "value":"%s"}\n' "$1" "$encoded_value"
+          }
+
+          post_result() {
+            var_subpath=$1
+            var_value=$2
+            var_path="$(config_name)/variables/$var_subpath/$(instance_id)"
+
+            curl --retry 5 -sH "Authorization: Bearer $(access_token)" \
+                -H "Content-Type: application/json" \
+                -X POST -d "$(variable_body "$var_path" "$var_value")" \
+                "$(config_url)/variables"
+          }
+
+          post_success() {
+            post_result "$(variable_path)/success" "${1:-Success}"
+          }
+
+          post_failure() {
+            post_result "$(variable_path)/failure" "${1:-Failure}"
+          }
+
+          # The contents of initScript are contained within this function.
+          custom_init() (
+            return 0
+          )
+
+          # The contents of checkScript are contained within this function.
+          check_success() (
+            failed=$(/etc/init.d/bitnami status | grep "not running" | cut -d" " -f1 | tr "\n" " ")
+            if [ ! -z "$failed" ]; then
+              echo "Processes failed to start: $failed"
+              exit 1
+            fi
+          )
+
+          check_success_with_retries() {
+            deadline="$(uptime_deadline)"
+            while [ "$(uptime_seconds)" -lt "$deadline" ]; do
+              message=$(check_success)
+              case $? in
+              0)
+                # Success.
+                return 0
+                ;;
+              1)
+                # Not ready; continue loop
+                ;;
+              *)
+                # Failure; abort.
+                echo $message
+                return 1
+                ;;
+              esac
+
+              sleep 5
+            done
+
+            # The check was not successful within the required deadline.
+            echo "status check timeout"
+            return 1
+          }
+
+          do_init() {
+            # Run the init script first. If no init script was specified, this
+            # is a no-op.
+            echo "software-status: initializing..."
+
+            set +e
+            message="$(custom_init)"
+            result=$?
+            set -e
+
+            if [ $result -ne 0 ]; then
+              echo "software-status: init failure"
+              post_failure "$message"
+              return 1
+            fi
+          }
+
+          do_check() {
+            # Poll for success.
+            echo "software-status: waiting for software to become ready..."
+            set +e
+            message="$(check_success_with_retries)"
+            result=$?
+            set -e
+
+            if [ $result -eq 0 ]; then
+              echo "software-status: success"
+              post_success
+            else
+              echo "software-status: failed with message: $message"
+              post_failure "$message"
+            fi
+          }
+
+          # Run the initialization script synchronously.
+          do_init || exit $?
+
+          # The actual software initialization might come after google's init.d
+          # script that executes our startup script. Thus, launch this script
+          # into the background so that it does not block init and eventually
+          # timeout while waiting for software to start.
+          do_check & disown
+      - key: google-monitoring-enable
+        value: '0'
+      - key: google-logging-enable
+        value: '0'
+    networkInterfaces:
+    - accessConfigs:
+      - name: Interface 0 External NAT
+        type: ONE_TO_ONE_NAT
+      name: Interface 0
+      network: https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-03-66b30fcf4de1/global/networks/default
+      subnetwork: https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-03-66b30fcf4de1/regions/us-central1/subnetworks/default
+    serviceAccounts:
+    - email: default
+      scopes:
+      - https://www.googleapis.com/auth/cloud.useraccounts.readonly
+      - https://www.googleapis.com/auth/devstorage.read_only
+      - https://www.googleapis.com/auth/logging.write
+      - https://www.googleapis.com/auth/monitoring.write
+      - https://www.googleapis.com/auth/cloudruntimeconfig
+    tags:
+      items:
+      - lampstack-1-deployment
+    zone: us-central1-a
+  type: compute.v1.instance
+- name: lampstack-1-config
+  properties:
+    config: lampstack-1-config
+    description: Holds software readiness status for lampstack-1
+  type: runtimeconfig.v1beta1.config
+- metadata:
+    dependsOn:
+    - lampstack-1-vm
+    - lampstack-1-config
+  name: lampstack-1-software
+  properties:
+    failure:
+      cardinality:
+        number: 1
+        path: status/failure
+    parent: $(ref.lampstack-1-config.name)
+    success:
+      cardinality:
+        number: 1
+        path: status/success
+    timeout: 1860s
+    waiter: software
+  type: runtimeconfig.v1beta1.waiter
+- name: lampstack-1-tcp-80
+  properties:
+    allowed:
+    - IPProtocol: TCP
+      ports:
+      - '80'
+    network: https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-03-66b30fcf4de1/global/networks/default
+    sourceRanges:
+    - 0.0.0.0/0
+    targetTags:
+    - lampstack-1-deployment
+  type: compute.v1.firewall
+- name: lampstack-1-tcp-443
+  properties:
+    allowed:
+    - IPProtocol: TCP
+      ports:
+      - '443'
+    network: https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-03-66b30fcf4de1/global/networks/default
+    sourceRanges:
+    - 0.0.0.0/0
+    targetTags:
+    - lampstack-1-deployment
+  type: compute.v1.firewall
+
+
