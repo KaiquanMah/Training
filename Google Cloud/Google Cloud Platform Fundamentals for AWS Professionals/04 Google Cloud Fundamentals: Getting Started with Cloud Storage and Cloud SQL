@@ -12,6 +12,16 @@ Create a Cloud SQL instance and configure it.
 Connect to the Cloud SQL instance from a web server.
 Use the image in the Cloud Storage bucket on a web page.
 
+gcp project id/name     qwiklabs-gcp-03-914ddf7d3789
+region                  us-central1
+zone                    us-central1-a
+
+
+
+
+
+
+
 
 
 
@@ -42,6 +52,16 @@ If you accidentally put it into another field, it won't be executed when the VM 
 Leave the remaining settings as their defaults, and click Create.
 Instance can take about two minutes to launch and be fully available for use.
 On the VM instances page, copy the bloghost VM instance's internal and external IP addresses to a text editor for use later in this lab.
+
+
+Name	      Zone	            Recommendation	    In use by	    Internal IP	        External IP	       Connect	
+bloghost	  us-central1-a	                                    10.128.0.2 (nic0)	  34.122.254.69 	 	
+
+
+
+
+
+
 
 
 
@@ -76,15 +96,95 @@ export LOCATION=ASIA
 
 In Cloud Shell, the DEVSHELL_PROJECT_ID environment variable contains your project ID. Enter this command to make a bucket named after your project ID:
 gsutil mb -l $LOCATION gs://$DEVSHELL_PROJECT_ID
+CommandException: "mb" command does not support provider-only URLs.
+
+student_03_53d48e8de8b9@cloudshell:~$ gsutil mb -l $LOCATION gs://$qwiklabs-gcp-03-914ddf7d3789
+InvalidUrlError: Invalid bucket name in URL "-gcp-03-914ddf7d3789".
+
+student_03_53d48e8de8b9@cloudshell:~$ gsutil mb -l $LOCATION gs://qwiklabs-gcp-03-914ddf7d3789
+Creating gs://qwiklabs-gcp-03-914ddf7d3789/...
+You are attempting to perform an operation that requires a project id, with none configured. Please re-run gsutil config and make sure to follow the instructions for finding and entering your default project id.
+
+
+retry
+gsutil mb -l $LOCATION gs://$DEVSHELL_PROJECT_ID
+Creating gs://qwiklabs-gcp-03-914ddf7d3789/...
+
+
+
+
+
+
+
+
 
 Retrieve a banner image from a publicly accessible Cloud Storage location:
 gsutil cp gs://cloud-training/gcpfci/my-excellent-blog.png my-excellent-blog.png
 
+Copying gs://cloud-training/gcpfci/my-excellent-blog.png...
+/ [1 files][  8.2 KiB/  8.2 KiB]
+Operation completed over 1 objects/8.2 KiB.
+
+
+retry
+student_03_53d48e8de8b9@cloudshell:~ (qwiklabs-gcp-03-914ddf7d3789)$ gsutil cp gs://cloud-training/gcpfci/my-excellent-blog.png my-excellent-blog.png
+Copying gs://cloud-training/gcpfci/my-excellent-blog.png...
+/ [1 files][  8.2 KiB/  8.2 KiB]
+Operation completed over 1 objects/8.2 KiB.
+
+
+
+
+
+
+
+
+
 Copy the banner image to your newly created Cloud Storage bucket:
 gsutil cp my-excellent-blog.png gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png
+CommandException: "cp" command does not support provider-only URLs.
+
+
+gsutil cp my-excellent-blog.png gs://qwiklabs-gcp-03-914ddf7d3789/my-excellent-blog.png
+student_03_53d48e8de8b9@cloudshell:~$ gsutil cp my-excellent-blog.png gs://qwiklabs-gcp-03-914ddf7d3789/my-excellent-blog.png
+BucketNotFoundException: 404 gs://qwiklabs-gcp-03-914ddf7d3789 bucket does not exist.
+
+
+retry
+student_03_53d48e8de8b9@cloudshell:~ (qwiklabs-gcp-03-914ddf7d3789)$ gsutil cp my-excellent-blog.png gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png
+Copying file://my-excellent-blog.png [Content-Type=image/png]...
+/ [1 files][  8.2 KiB/  8.2 KiB]
+Operation completed over 1 objects/8.2 KiB.
+
+
+
+
+
+
+
+
+
 
 Modify the Access Control List of the object you just created so that it is readable by everyone:
 gsutil acl ch -u allUsers:R gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png
+CommandException: "acl" command does not support provider-only URLs.
+
+
+gsutil acl ch -u allUsers:R gs://qwiklabs-gcp-03-914ddf7d3789/my-excellent-blog.png
+BucketNotFoundException: 404 gs://qwiklabs-gcp-03-914ddf7d3789 bucket does not exist.
+
+retry
+student_03_53d48e8de8b9@cloudshell:~ (qwiklabs-gcp-03-914ddf7d3789)$ gsutil acl ch -u allUsers:R gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png
+Updated ACL on gs://qwiklabs-gcp-03-914ddf7d3789/my-excellent-blog.png
+
+
+
+
+
+
+
+
+
 
 
 
@@ -114,6 +214,46 @@ Wait for the instance to finish deploying. It will take a few minutes.
 
 Click on the name of the instance, blog-db, to open its details page.
 From the SQL instances details page, copy the Public IP address for your SQL instance to a text editor for use later in this lab.
+
+Public IP address
+35.193.86.122
+Connection name
+qwiklabs-gcp-03-914ddf7d3789:us-central1:blog-db
+Service account
+p772863393062-juom2o@gcp-sa-cloud-sql.iam.gserviceaccount.com
+Operations and logs
+Creation Time                Type       Status
+Oct 22, 2020, 8:16:34 AM	    Create	    Instance is being created
+
+Configuration
+vCPUs
+1
+Memory
+3.75 GB
+SSD storage
+10 GB
+Database version is MySQL 5.7
+Auto storage increase is enabled
+Automated backups are enabled
+Point-in-time recovery is enabled
+Located in us-central1-a
+Not highly available (zonal)
+No database flags set
+No labels set
+
+Maintenance
+Preferred window             Updates may occur any day of the week.
+Order of update              Cloud SQL chooses the maintenance timing.
+Notifications                Off
+Upcoming                     No maintenance scheduled right now.
+Deny maintenance period      You can specify times when maintenance shouldn’t occur using gcloud.
+
+
+
+
+
+
+
 Click on Users menu on the left-hand side, and then click ADD USER ACCOUNT.
 For User name, type blogdbuser
 For Password, type a password of your choice. Make a note of it.
@@ -121,17 +261,22 @@ For Password, type a password of your choice. Make a note of it.
 Click Create to create the user account in the database.
 Wait for the user to be created.
 
-Click the Connections tab, and then click Add network.
-If you are offered the choice between a Private IP connection and a Public IP connection, choose Public IP for purposes of this lab. The Private IP feature is in beta at the time this lab was written.
-The Add network button may be grayed out if the user account creation is not yet complete.
 
+Click the Connections tab, and then click Add network.
+If you are offered the choice between a Private IP connection and a Public IP connection, choose Public IP for purposes of this lab. 
+The Private IP feature is in beta at the time this lab was written.
+The Add network button may be grayed out if the user account creation is not yet complete.
 For Name, type web front end
 
 
 For Network, type the external IP address of your bloghost VM instance, followed by /32
 The result will look like this:
 35.192.208.2/32
-Be sure to use the external IP address of your VM instance followed by /32. Do not use the VM instance's internal IP address. Do not use the sample IP address shown here.
+Be sure to use the external IP address of your VM instance followed by /32. 
+Do not use the VM instance's internal IP address. 
+Do not use the sample IP address shown above.
+34.122.254.69/32
+
 
 Click Done to finish defining the authorized network.
 Click Save to save the configuration change.
@@ -165,6 +310,17 @@ In the VM instances list, click SSH in the row for your VM instance bloghost.
 
 In your ssh session on bloghost, change your working directory to the document root of the web server:
 cd /var/www/html
+
+student-03-53d48e8de8b9@bloghost:~$ pwd
+/home/student-03-53d48e8de8b9
+student-03-53d48e8de8b9@bloghost:~$ cd /var/www/html
+student-03-53d48e8de8b9@bloghost:/var/www/html$ pwd
+/var/www/html
+
+
+
+
+
 
 Use the nano text editor to edit a file called index.php:
 sudo nano index.php
@@ -204,10 +360,27 @@ sudo service apache2 restart
 
 Open a new web browser tab and paste into the address bar your bloghost VM instance's external IP address followed by /index.php. The URL will look like this:
 35.192.208.2/index.php
-Be sure to use the external IP address of your VM instance followed by /index.php. Do not use the VM instance's internal IP address. Do not use the sample IP address shown here.
+Be sure to use the external IP address of your VM instance followed by /index.php. 
+Do not use the VM instance's internal IP address. 
+Do not use the sample IP address shown above.
+34.122.254.69/index.php
+
+
+
+
 When you load the page, you will see that its content includes an error message beginning with the words:
 Database connection failed: ...
 This message occurs because you have not yet configured PHP's connection to your Cloud SQL instance.
+
+Welcome to my excellent blog
+Database connection failed: php_network_getaddresses: getaddrinfo failed: Name or service not known
+
+
+
+
+
+
+
 
 
 Return to your ssh session on bloghost. Use the nano text editor to edit index.php again.
@@ -215,15 +388,52 @@ sudo nano index.php
 
 In the nano text editor, replace CLOUDSQLIP with the Cloud SQL instance Public IP address that you noted above. Leave the quotation marks around the value in place.
 In the nano text editor, replace DBPASSWORD with the Cloud SQL database password that you defined above. Leave the quotation marks around the value in place.
+
+
+<html>
+<head><title>Welcome to my excellent blog</title></head>
+<body>
+<h1>Welcome to my excellent blog</h1>
+<?php
+ $dbserver = "35.193.86.122";
+$dbuser = "blogdbuser";
+$dbpassword = "blogdbuser";
+// In a production blog, we would not store the MySQL
+// password in the document root. Instead, we would store it in a
+// configuration file elsewhere on the web server VM instance.
+
+$conn = new mysqli($dbserver, $dbuser, $dbpassword);
+
+if (mysqli_connect_error()) {
+        echo ("Database connection failed: " . mysqli_connect_error());
+} else {
+        echo ("Database connection succeeded.");
+}
+?>
+</body></html>
+
+
+
 Press Ctrl+O, and then press Enter to save your edited file.
 Press Ctrl+X to exit the nano text editor.
+
 
 Restart the web server:
 sudo service apache2 restart
 
+
+
 Return to the web browser tab in which you opened your bloghost VM instance's external IP address. When you load the page, the following message appears:
 Database connection succeeded.
 In an actual blog, the database connection status would not be visible to blog visitors. Instead, the database connection would be managed solely by the administrator.
+
+
+
+Welcome to my excellent blog
+Database connection succeeded.
+
+
+
 
 
 
@@ -253,8 +463,30 @@ In the GCP Console, click Storage > Browser.
 Click on the bucket that is named after your GCP project.
 In this bucket, there is an object called my-excellent-blog.png. Copy the URL behind the link icon that appears in that object's Public access column, or behind the words "Public link" if shown.
 If you see neither a link icon nor a "Public link", try refreshing the browser. If you still do not see a link icon, return to Cloud Shell and confirm that your attempt to change the object's Access Control list with the gsutil acl ch command was successful.
-Return to your ssh session on your bloghost VM instance.
 
+
+Access         Public to internet
+Type           image/png
+Size           8.2 KB
+Created        Oct 22, 2020, 8:12:55 AM
+Last modified  Oct 22, 2020, 8:13:15 AM
+Hold status    None 
+Retention policy       None
+Encryption type        Google-managed key
+Custom time            —
+Public URL             https://storage.googleapis.com/qwiklabs-gcp-03-914ddf7d3789/my-excellent-blog.png
+Authenticated URL      https://storage.cloud.google.com/qwiklabs-gcp-03-914ddf7d3789/my-excellent-blog.png
+URI                    gs://qwiklabs-gcp-03-914ddf7d3789/my-excellent-blog.png 
+
+
+
+
+
+
+
+
+
+Return to your ssh session on your bloghost VM instance.
 Enter this command to set your working directory to the document root of the web server:
 cd /var/www/html
 
@@ -262,7 +494,8 @@ Use the nano text editor to edit index.php:
 sudo nano index.php
 
 
-Use the arrow keys to move the cursor to the line that contains the h1 element. Press Enter to open up a new, blank screen line, and then paste the URL you copied earlier into the line.
+Use the arrow keys to move the cursor to the line that contains the h1 element. 
+Press Enter to open up a new, blank screen line, and then paste the URL you copied earlier *****************BEFORE THE H1 LINE*****.
 Paste this HTML markup immediately before the URL:
 <img src='
 
@@ -275,18 +508,60 @@ Place a closing single quotation mark and a closing angle bracket at the end of 
 
 The resulting line will look like this:
 <img src='https://storage.googleapis.com/qwiklabs-gcp-0005e186fa559a09/my-excellent-blog.png'>
+<img src='https://storage.googleapis.com/qwiklabs-gcp-03-914ddf7d3789/my-excellent-blog.png'>
 
-
-The effect of these steps is to place the line containing <img src='...'> immediately before the line containing <h1>...</h1>
+The effect of these steps is to place the line containing <img src='...'> immediately BEFORE the line containing <h1>...</h1>
 Do not copy the URL shown here. Instead, copy the URL shown by the Storage browser in your own Cloud Platform project.
+
+<html>
+<head><title>Welcome to my excellent blog</title></head>
+<body>
+<img src='https://storage.googleapis.com/qwiklabs-gcp-03-914ddf7d3789/my-excellent-blog.png'>
+<h1>Welcome to my excellent blog</h1>
+<?php
+ $dbserver = "35.193.86.122";
+$dbuser = "blogdbuser";
+$dbpassword = "blogdbuser";
+// In a production blog, we would not store the MySQL
+// password in the document root. Instead, we would store it in a
+// configuration file elsewhere on the web server VM instance.
+
+$conn = new mysqli($dbserver, $dbuser, $dbpassword);
+
+if (mysqli_connect_error()) {
+        echo ("Database connection failed: " . mysqli_connect_error());
+} else {
+        echo ("Database connection succeeded.");
+}
+?>
+</body></html>
+
+
+
+
+
+
+
+
+
 Press Ctrl+O, and then press Enter to save your edited file.
 Press Ctrl+X to exit the nano text editor.
+
+student-03-53d48e8de8b9@bloghost:/var/www/html$ ls
+index.html  index.php
+
+
+
 
 
 Restart the web server:
 sudo service apache2 restart
 
+
 Return to the web browser tab in which you opened your bloghost VM instance's external IP address. When you load the page, its content now includes a banner image.
 
+(myexcellentblog.png)
+Welcome to my excellent blog
+Database connection succeeded.
 
 
