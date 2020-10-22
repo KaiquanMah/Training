@@ -1,0 +1,480 @@
+https://googlecoursera.qwiklabs.com/focuses/11951482?parent=lti_session
+create a deployment using Deployment Manager and use it to maintain a consistent state of your deployment. 
+You will also view resource usage in a VM instance using Cloud Monitoring.
+
+
+In this lab, you will learn how to perform the following tasks:
+Create a Deployment Manager deployment.
+Update a Deployment Manager deployment.
+View the load on a VM instance using Cloud Monitoring.
+
+
+
+
+
+
+
+
+
+
+
+Task 1: Sign in to the Google Cloud Platform (GCP) Console
+GCP Project ID/name         qwiklabs-gcp-00-bdfd8a127523
+region                      us-central1
+zone                        us-central1-a
+
+
+
+
+
+
+Task 2: Confirm that needed APIs are enabled
+Cloud Deployment Manager v2 API
+Cloud Runtime Configuration API
+Cloud Monitoring API
+
+
+
+
+
+
+Task 3: Create a Deployment Manager deployment
+In GCP console, on the top right toolbar, click the Open Cloud Shell button (Activate Cloud Shell). Click Continue.
+
+
+For your convenience, place the zone that Qwiklabs assigned you to into an environment variable called MY_ZONE. At the Cloud Shell prompt, type this partial command:
+export MY_ZONE=
+followed by the zone that Qwiklabs assigned you to. Your complete command will look similar to this:
+export MY_ZONE=us-central1-a
+
+
+
+At the Cloud Shell prompt, download an editable Deployment Manager template:
+gsutil cp gs://cloud-training/gcpfcoreinfra/mydeploy.yaml mydeploy.yaml
+
+Copying gs://cloud-training/gcpfcoreinfra/mydeploy.yaml...
+/ [1 files][  664.0 B/  664.0 B]
+Operation completed over 1 objects/664.0 B.
+
+
+
+
+
+In the Cloud Shell, use the sed command to replace the PROJECT_ID placeholder string with your Google Cloud Platform project ID using this command:
+sed -i -e "s/PROJECT_ID/$DEVSHELL_PROJECT_ID/" mydeploy.yaml
+
+
+
+In the Cloud Shell, use the sed command to replace the ZONE placeholder string with your Google Cloud Platform zone using this command:
+sed -i -e "s/ZONE/$MY_ZONE/" mydeploy.yaml
+
+
+
+
+
+
+View the mydeploy.yaml file, with your modifications, with this command:
+cat mydeploy.yaml
+
+
+The file will look something like this:
+
+  resources:
+  - name: my-vm
+    type: compute.v1.instance
+    properties:
+      zone: us-central1-a
+      machineType: zones/us-central1-a/machineTypes/n1-standard-1
+      metadata:
+        items:
+        - key: startup-script
+          value: "apt-get update"
+      disks:
+      - deviceName: boot
+        type: PERSISTENT
+        boot: true
+        autoDelete: true
+        initializeParams:
+          sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-9-stretch-v20180806
+      networkInterfaces:
+      - network: https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-00-bdfd8a127523/global/networks/default
+        accessConfigs:
+        - name: External NAT
+          type: ONE_TO_ONE_NAT
+Do not use the above text literally in your own mydeploy.yaml file. 
+Be sure that the zone that is named on the zone: and machineType: lines in your file matches the zone to which Qwiklabs assigned you. 
+Be sure that the GCP project ID on the network: line in your file matches the project ID to which Qwiklabs assigned you, not the one in this example.
+
+
+
+
+
+
+
+
+
+Build a deployment from the template:
+gcloud deployment-manager deployments create my-first-depl --config mydeploy.yaml
+
+
+The fingerprint of the deployment is b'HD5jSgZkVJW71PA8rVfipA=='
+Waiting for create [operation-1603373353331-5b242732aeaeb-fc44bf14-80740cec]...done.
+WARNING: Create operation operation-1603373353331-5b242732aeaeb-fc44bf14-80740cec completed with warnings:
+---
+code: EXTERNAL_API_WARNING
+data:
+- key: resource_name
+  value: projects/debian-cloud/global/images/debian-9-stretch-v20180806
+- key: replacement_suggestion
+  value: A suggested replacement is 'projects/debian-cloud/global/images/debian-9-stretch-v20180814'.
+message: The resource 'projects/debian-cloud/global/images/debian-9-stretch-v20180806'
+  is deprecated. A suggested replacement is 'projects/debian-cloud/global/images/debian-9-stretch-v20180814'.
+
+NAME   TYPE                 STATE      ERRORS  INTENT
+my-vm  compute.v1.instance  COMPLETED  []
+
+
+
+
+
+
+
+
+
+
+
+When the deployment operation is complete, the gcloud command displays a list of the resources named in the template and their current state.
+Confirm that the deployment was successful. 
+
+
+In the GCP Console, on the Navigation menu (Navigation menu), click Compute Engine > VM instances. 
+You will see that a VM instance called my-vm has been created, as specified by the template.
+Click on the VM instance's name to open its VM instance details screen.
+Scroll down to the Custom metadata section. 
+Confirm that the startup script you specified in your Deployment Manager template has been installed.
+
+
+
+Custom metadata
+startup-script	          apt-get update
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4: Update a Deployment Manager deployment
+Return to your Cloud Shell prompt. Launch the nano text editor to edit the mydeploy.yaml file:
+nano mydeploy.yaml
+
+
+
+Find the line that sets the value of the startup script, value: "apt-get update", and edit it so that it looks like this:
+      value: "apt-get update; apt-get install nginx-light -y"
+
+
+Do not disturb the spaces at the beginning of the line. 
+The YAML templating language relies on indented lines as part of its syntax. 
+As you edit the file, be sure that the v in the word value in this new line is immediately below the k in the word key on the line above it.
+
+
+Press Ctrl+O and then press Enter to save your edited file.
+Press Ctrl+X to exit the nano text editor.
+Return to your Cloud Shell prompt. 
+
+
+
+
+
+
+Enter this command to cause Deployment Manager to update your deployment to install the new startup script:
+gcloud deployment-manager deployments update my-first-depl --config mydeploy.yaml
+
+
+The fingerprint of the deployment is b'TBCtBejsZebpiYa5WQ68UA=='
+Waiting for update [operation-1603373583833-5b24280e819f8-02fc348c-1748a55f]...done.
+Update operation operation-1603373583833-5b24280e819f8-02fc348c-1748a55f completed successfully.
+NAME   TYPE                 STATE      ERRORS  INTENT
+my-vm  compute.v1.instance  COMPLETED  []
+
+
+
+
+
+Wait for the gcloud command to display a message confirming that the update operation was completed successfully.
+In the GCP console, on the Navigation menu (Navigation menu), click Compute Engine > VM instances.
+Click on the my-vm VM instance's name to open its VM instance details pane.
+Scroll down to the Custom metadata section. 
+Confirm that the startup script has been updated to the value you declared in your Deployment Manager template.
+
+
+
+Custom metadata
+startup-script	        apt-get update; apt-get install nginx-light -y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5: View the Load on a VM using Cloud Monitoring
+In the GCP Console, on the Navigation menu (Navigation menu), click Compute Engine > VM instances.
+To open a command prompt on the my-vm instance, click SSH in its row in the VM instances list.
+
+
+In the ssh session on my-vm, execute this command to create a CPU load:
+dd if=/dev/urandom | gzip -9 >> /dev/null &
+
+student-00-c25755289d91@my-vm:~$ dd if=/dev/urandom | gzip -9 >> /dev/null &
+[1] 1590
+
+
+This Linux pipeline forces the CPU to work on compressing a continuous stream of random data.
+Leave the window containing your SSH session open while you proceed with the lab.
+
+
+
+
+
+Create a Monitoring workspace
+You will now setup a Monitoring workspace that's tied to your Qwiklabs GCP Project. The following steps create a new account that has a free trial of Monitoring.
+In the Google Cloud Platform Console, click on Navigation menu > Monitoring.
+Wait for your workspace to be provisioned.
+When the Monitoring dashboard opens, your workspace is ready.
+
+Click on Settings option from the left panel and confirm that the GCP project which Qwiklabs created for you is shown under the GCP Projects section.
+
+Workspace Name
+Host                            Project ID
+Cloud Solutions Project	        cloud-solutions-group	
+Qwiklabs Resources	            qwiklabs-resources	
+qwiklabs-gcp-00-bdfd8a127523	  qwiklabs-gcp-00-bdfd8a127523	
+
+
+
+Run the commands shown on screen in the SSH window of your VM instance to install both the Monitoring and Logging agents.
+curl -sSO https://dl.google.com/cloudagents/install-monitoring-agent.sh
+sudo bash install-monitoring-agent.sh
+
+
+==============================================================================
+Starting installation of stackdriver-agent
+==============================================================================
+
+Installing agent for Debian or Ubuntu.
+OK
+Ign:1 http://deb.debian.org/debian stretch InRelease
+Hit:2 http://security.debian.org stretch/updates InRelease          
+Hit:3 http://deb.debian.org/debian stretch-updates InRelease        
+Hit:4 http://deb.debian.org/debian stretch-backports InRelease
+Hit:5 http://deb.debian.org/debian stretch Release                       
+Get:6 http://packages.cloud.google.com/apt google-cloud-monitoring-stretch InRelease [3,806 B]
+Get:7 http://packages.cloud.google.com/apt cloud-sdk-stretch InRelease [6,389 B]
+Hit:8 http://packages.cloud.google.com/apt google-compute-engine-stretch-stable InRelease
+Hit:9 http://packages.cloud.google.com/apt google-cloud-packages-archive-keyring-stretch InRelease
+Get:11 http://packages.cloud.google.com/apt google-cloud-monitoring-stretch/main amd64 Packages [2,337 B]
+Fetched 12.5 kB in 3s (3,513 B/s)                    
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following additional packages will be installed:
+  libltdl7 libpython2.7 libpython2.7-minimal libpython2.7-stdlib libyajl2 python2.7 python2.7-minimal
+Suggested packages:
+  python2.7-doc binutils binfmt-support default-jre libhiredis0.13 libmariadbclient18 libpq5
+The following NEW packages will be installed:
+  libltdl7 libpython2.7 libyajl2 stackdriver-agent
+The following packages will be upgraded:
+  libpython2.7-minimal libpython2.7-stdlib python2.7 python2.7-minimal
+4 upgraded, 4 newly installed, 0 to remove and 81 not upgraded.
+Need to get 7,194 kB of archives.
+After this operation, 10.0 MB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian stretch/main amd64 libltdl7 amd64 2.4.6-2 [389 kB]
+Get:2 http://security.debian.org stretch/updates/main amd64 python2.7 amd64 2.7.13-2+deb9u4 [286 kB]
+Get:3 http://packages.cloud.google.com/apt google-cloud-monitoring-stretch/main amd64 stackdriver-agent amd64 5.5.2-1002.stretch [1,751 kB]
+Get:4 http://deb.debian.org/debian stretch/main amd64 libyajl2 amd64 2.1.0-2+b3 [23.2 kB]                  
+Get:5 http://security.debian.org stretch/updates/main amd64 libpython2.7-stdlib amd64 2.7.13-2+deb9u4 [1,897 kB]
+Get:6 http://security.debian.org stretch/updates/main amd64 python2.7-minimal amd64 2.7.13-2+deb9u4 [1,386 kB]
+Get:7 http://security.debian.org stretch/updates/main amd64 libpython2.7-minimal amd64 2.7.13-2+deb9u4 [390 kB]
+Get:8 http://security.debian.org stretch/updates/main amd64 libpython2.7 amd64 2.7.13-2+deb9u4 [1,071 kB]
+Fetched 7,194 kB in 0s (20.3 MB/s)  
+(Reading database ... 33271 files and directories currently installed.)
+Preparing to unpack .../0-python2.7_2.7.13-2+deb9u4_amd64.deb ...
+Unpacking python2.7 (2.7.13-2+deb9u4) over (2.7.13-2+deb9u2) ...
+Preparing to unpack .../1-libpython2.7-stdlib_2.7.13-2+deb9u4_amd64.deb ...
+Unpacking libpython2.7-stdlib:amd64 (2.7.13-2+deb9u4) over (2.7.13-2+deb9u2) ...
+Preparing to unpack .../2-python2.7-minimal_2.7.13-2+deb9u4_amd64.deb ...
+Unpacking python2.7-minimal (2.7.13-2+deb9u4) over (2.7.13-2+deb9u2) ...
+Preparing to unpack .../3-libpython2.7-minimal_2.7.13-2+deb9u4_amd64.deb ...
+Unpacking libpython2.7-minimal:amd64 (2.7.13-2+deb9u4) over (2.7.13-2+deb9u2) ...
+Selecting previously unselected package libltdl7:amd64.
+Preparing to unpack .../4-libltdl7_2.4.6-2_amd64.deb ...
+Unpacking libltdl7:amd64 (2.4.6-2) ...
+Selecting previously unselected package libpython2.7:amd64.
+Preparing to unpack .../5-libpython2.7_2.7.13-2+deb9u4_amd64.deb ...
+Unpacking libpython2.7:amd64 (2.7.13-2+deb9u4) ...
+Selecting previously unselected package libyajl2:amd64.
+Preparing to unpack .../6-libyajl2_2.1.0-2+b3_amd64.deb ...
+Unpacking libyajl2:amd64 (2.1.0-2+b3) ...
+Selecting previously unselected package stackdriver-agent.
+Preparing to unpack .../7-stackdriver-agent_5.5.2-1002.stretch_amd64.deb ...
+Unpacking stackdriver-agent (5.5.2-1002.stretch) ...
+Processing triggers for mime-support (3.60) ...
+Setting up libyajl2:amd64 (2.1.0-2+b3) ...
+Processing triggers for libc-bin (2.24-11+deb9u3) ...
+Processing triggers for systemd (232-25+deb9u4) ...
+Setting up libltdl7:amd64 (2.4.6-2) ...
+Processing triggers for man-db (2.7.6.1-2) ...
+Setting up libpython2.7-minimal:amd64 (2.7.13-2+deb9u4) ...
+Setting up libpython2.7-stdlib:amd64 (2.7.13-2+deb9u4) ...
+Setting up python2.7-minimal (2.7.13-2+deb9u4) ...
+Setting up python2.7 (2.7.13-2+deb9u4) ...
+Setting up libpython2.7:amd64 (2.7.13-2+deb9u4) ...
+Setting up stackdriver-agent (5.5.2-1002.stretch) ...
+The instance has neither the application default credentials file nor the correct monitoring scopes; The agent will likely fail.
+Processing triggers for libc-bin (2.24-11+deb9u3) ...
+Processing triggers for systemd (232-25+deb9u4) ...
+
+==============================================================================
+Installation of stackdriver-agent-5.5.2-1002 completed successfully.
+
+Please consult the documentation for troubleshooting advice:
+  https://cloud.google.com/monitoring/agent
+
+You can monitor the monitoring agent's logfile at:
+  /var/log/syslog
+==============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+curl -sSO https://dl.google.com/cloudagents/install-logging-agent.sh
+sudo bash install-logging-agent.sh
+
+==============================================================================
+Starting installation of google-fluentd
+==============================================================================
+
+Installing agent for Debian or Ubuntu.
+OK
+Get:1 http://packages.cloud.google.com/apt google-cloud-logging-stretch InRelease [3,806 B]
+Get:2 http://packages.cloud.google.com/apt google-cloud-logging-stretch/main amd64 Packages [3,195 B]
+Fetched 7,001 B in 0s (10.7 kB/s)
+Reading package lists... Done
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following NEW packages will be installed:
+  google-fluentd google-fluentd-catch-all-config
+0 upgraded, 2 newly installed, 0 to remove and 81 not upgraded.
+Need to get 88.5 MB of archives.
+After this operation, 307 MB of additional disk space will be used.
+Get:1 http://packages.cloud.google.com/apt google-cloud-logging-stretch/main amd64 google-fluentd amd64 1.8.3-1 [88.5 MB]
+Get:2 http://packages.cloud.google.com/apt google-cloud-logging-stretch/main amd64 google-fluentd-catch-all-config all 0.7 [5,740 B]
+Fetched 88.5 MB in 2s (33.2 MB/s)
+Selecting previously unselected package google-fluentd.
+(Reading database ... 33704 files and directories currently installed.)
+Preparing to unpack .../google-fluentd_1.8.3-1_amd64.deb ...
+Unpacking google-fluentd (1.8.3-1) ...
+Selecting previously unselected package google-fluentd-catch-all-config.
+Preparing to unpack .../google-fluentd-catch-all-config_0.7_all.deb ...
+Unpacking google-fluentd-catch-all-config (0.7) ...
+Setting up google-fluentd (1.8.3-1) ...
+Adding system user `google-fluentd' (UID 108) ...
+Adding new group `google-fluentd' (GID 112) ...
+Adding new user `google-fluentd' (UID 108) with group `google-fluentd' ...
+Not creating home directory `/home/google-fluentd'.
+Installing default conffile /etc/google-fluentd/google-fluentd.conf ...
+Setting up google-fluentd-catch-all-config (0.7) ...
+grep: /var/log/google-fluentd/google-fluentd.log: No such file or directory
+
+==============================================================================
+Installation of google-fluentd complete.
+
+Logs from this machine should be visible in the log viewer at:
+  (failed to obtain logs viewer URL from agent log)
+
+A test message has been sent to syslog to help verify proper operation.
+
+Please consult the documentation for troubleshooting advice:
+  https://cloud.google.com/logging/docs/agent
+
+You can monitor the logging agent's logfile at:
+  /var/log/google-fluentd/google-fluentd.log
+==============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Once both of the agents have been installed on your project's VM, click Metrics Explorer under the main Cloud Monitoring menu on the far left.
+In the Metric pane of Metrics Explorer, select the resource type VM instance and the metric CPU usage.
+In the resulting graph, notice that CPU usage increased sharply a few minutes ago.
+
+
+Terminate your workload generator. Return to your ssh session on my-vm and enter this command:
+kill %1
+
+
+
+
+
+
+
+
+
+
+
+Extra readings
+Google Cloud metrics      https://cloud.google.com/monitoring/api/metrics_gcp
