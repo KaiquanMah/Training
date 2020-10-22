@@ -9,9 +9,9 @@ Deploy and manage Docker containers using kubectl.
 
 
 Task 1: Sign in to the Google Cloud Platform (GCP) Console
-
-
-
+GCP Project ID/name         qwiklabs-gcp-03-00dca398dff3
+region                      us-central1
+zone                        us-central1-a
 
 
 
@@ -44,14 +44,92 @@ Start a Kubernetes cluster managed by Kubernetes Engine. Name the cluster webfro
 gcloud container clusters create webfrontend --zone $MY_ZONE --num-nodes 2
 
 
+
+
+Welcome to Cloud Shell! Type "help" to get started.
+Your Cloud Platform project in this session is set to qwiklabs-gcp-03-00dca398dff3.
+Use “gcloud config set project [PROJECT_ID]” to change to a different project.
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ export MY_ZONE=us-central1-a
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ gcloud container clusters create webfrontend --zone $MY_ZONE --num-nodes 2
+WARNING: Warning: basic authentication is deprecated, and will be removed in GKE control plane versions 1.19 and newer. For a list of recommended authentication methods, see: https://cloud.google.com/kubernetes-engine/docs/how-to/api-server-aut
+hentication
+WARNING: Currently VPC-native is not the default mode during cluster creation. In the future, this will become the default mode and can be disabled using `--no-enable-ip-alias` flag. Use `--[no-]enable-ip-alias` flag to suppress this warning.
+WARNING: Newly created clusters and node-pools will have node auto-upgrade enabled by default. This can be disabled using the `--no-enable-autoupgrade` flag.
+WARNING: Starting with version 1.18, clusters will have shielded GKE nodes by default.
+WARNING: Your Pod address range (`--cluster-ipv4-cidr`) can accommodate at most 1008 node(s).
+Creating cluster webfrontend in us-central1-a... Cluster is being health-checked (master is healthy)...done.
+Created [https://container.googleapis.com/v1/projects/qwiklabs-gcp-03-00dca398dff3/zones/us-central1-a/clusters/webfrontend].
+To inspect the contents of your cluster, go to: https://console.cloud.google.com/kubernetes/workload_/gcloud/us-central1-a/webfrontend?project=qwiklabs-gcp-03-00dca398dff3
+kubeconfig entry generated for webfrontend.
+NAME         LOCATION       MASTER_VERSION   MASTER_IP        MACHINE_TYPE   NODE_VERSION     NUM_NODES  STATUS
+webfrontend  us-central1-a  1.16.13-gke.401  104.198.184.179  n1-standard-1  1.16.13-gke.401  2          RUNNING
+
+
+
+
+
+https://container.googleapis.com/v1/projects/qwiklabs-gcp-03-00dca398dff3/zones/us-central1-a/clusters/webfrontend
+{
+  "error": {
+    "code": 401,
+    "message": "Request is missing required authentication credential. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.",
+    "status": "UNAUTHENTICATED"
+  }
+}
+
+
+
+
+https://console.cloud.google.com/kubernetes/workload_/gcloud/us-central1-a/webfrontend?project=qwiklabs-gcp-03-00dca398dff3
+Kubernetes engine>workloads     
+cluster:webfrontend, location:us-central1-a
+
+Name                 Status                 Type          Pods          Namespace             Cluster
+event-exporter-gke	 OK	                  Deployment	    1/1	        kube-system	        webfrontend	
+fluentd-gke	         Pods have warnings	  Daemon Set	    0/2	        kube-system	        webfrontend	
+fluentd-gke-scaler	 OK	                  Deployment	    1/1	        kube-system	        webfrontend	
+gke-metrics-agent	   Pods are pending      Daemon Set	    1/2	        kube-system	webfrontend	
+gke-metrics-agent-windows	 DaemonSet has no nodes selected	Daemon Set	0/0	        kube-system	        webfrontend	
+kube-dns	 Does not have minimum availability	Deployment	1/2	        kube-system	        webfrontend	
+kube-dns-autoscaler	 OK	Deployment	1/1	        kube-system	        webfrontend	
+kube-proxy	 DaemonSet has no nodes selected	Daemon Set	0/0	        kube-system	        webfrontend	
+kube-proxy-gke-webfrontend-default-pool-06324e43-8mfm	 Running	Pod	1/1	        kube-system	        webfrontend	
+kube-proxy-gke-webfrontend-default-pool-06324e43-xgwq	 Running	Pod	1/1	        kube-system	        webfrontend	
+l7-default-backend	 Does not have minimum availability	Deployment	0/1	        kube-system	        webfrontend	
+metadata-proxy-v0.1	 DaemonSet has no nodes selected	Daemon Set	0/0	        kube-system	        webfrontend	
+metrics-server-v0.3.6	 Does not have minimum availability	Deployment	0/1	        kube-system	        webfrontend	
+nvidia-gpu-device-plugin	 DaemonSet has no nodes selected	Daemon Set	0/0	        kube-system	        webfrontend	
+prometheus-to-sd	 OK	Daemon Set	2/2	        kube-system	        webfrontend	
+stackdriver-metadata-agent-cluster-level	 0 of 1 updated replicas available - Pods have warnings     Deployment	1/1	        kube-system	        webfrontend	
+
+
+
+
+
+
+
 It takes several minutes to create a cluster as Kubernetes Engine provisions virtual machines for you.
 After the cluster is created, check your installed version of Kubernetes using the kubectl version command:
 kubectl version
+
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"19", GitVersion:"v1.19.2", GitCommit:"f5743093fd1c663cb0cbc89748f730662345d44d", GitTreeState:"clean", BuildDate:"2020-09-16T13:41:02Z", GoVersion:"go1.15", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"16+", GitVersion:"v1.16.13-gke.401", GitCommit:"eb94c181eea5290e9da1238db02cfef263542f5f", GitTreeState:"clean", BuildDate:"2020-09-09T00:57:35Z", GoVersion:"go1.13.9b4", Compiler:"gc", Platform:"linux/amd64"}
+
+
+
+
+
 
 
 The gcloud container clusters create command automatically authenticated kubectl for you.
 View your running nodes in the GCP Console. On the Navigation menu (Navigation menu), click Compute Engine > VM Instances.
 Your Kubernetes cluster is now ready for use.
+
+Name	                                      Zone	              Recommendation	      In use by	                                        Internal IP	          External IP	        Connect	
+gke-webfrontend-default-pool-06324e43-8mfm	us-central1-a	                            gke-webfrontend-default-pool-06324e43-grp	        10.128.0.2 (nic0)	    104.197.29.143	 	  SSH
+ gke-webfrontend-default-pool-06324e43-xgwq	us-central1-a	                            gke-webfrontend-default-pool-06324e43-grp	        10.128.0.3 (nic0)	    34.66.133.141	 	    SSH
+
 
 
 
@@ -72,21 +150,66 @@ Task 4: Run and deploy a container
 From your Cloud Shell prompt, launch a single instance of the nginx container. (Nginx is a popular web server.)
 kubectl create deploy nginx --image=nginx:1.17.10
 
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ kubectl create deploy nginx --image=nginx:1.17.10
+deployment.apps/nginx created
 
-In Kubernetes, all containers run in pods. This use of the kubectl create command caused Kubernetes to create a deployment consisting of a single pod containing the nginx container. A Kubernetes deployment keeps a given number of pods up and running even in the event of failures among the nodes on which they run. In this command, you launched the default number of pods, which is 1.
+
+
+
+In Kubernetes, all containers run in pods. 
+This use of the kubectl create command caused Kubernetes to create a deployment consisting of a single pod containing the nginx container. 
+A Kubernetes deployment keeps a given number of pods up and running even in the event of failures among the nodes on which they run. 
+In this command, you launched the default number of pods, which is 1.
 Note: If you see any deprecation warning about future version you can simply ignore it for now and can proceed further.
 
 View the pod running the nginx container:
 kubectl get pods
 
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-5df596bbf9-8lt54   1/1     Running   0          2m18s
+
+
+
+
+
+
 
 Expose the nginx container to the Internet:
 kubectl expose deployment nginx --port 80 --type LoadBalancer
 
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ kubectl expose deployment nginx --port 80 --type LoadBalancer
+service/nginx exposed
 
-Kubernetes created a service and an external load balancer with a public IP address attached to it. The IP address remains the same for the life of the service. Any network traffic to that public IP address is routed to pods behind the service: in this case, the nginx pod.
+
+
+
+
+Kubernetes created a service and an external load balancer with a public IP address attached to it. 
+The IP address remains the same for the life of the service. 
+Any network traffic to that public IP address is routed to pods behind the service: in this case, the nginx pod.
 View the new service:
 kubectl get services
+
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ kubectl get services
+NAME         TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)        AGE
+kubernetes   ClusterIP      10.51.240.1     <none>           443/TCP        14m
+nginx        LoadBalancer   10.51.241.230   35.226.193.120   80:32091/TCP   76s
+
+
+
+Loadbalancer EXTERNAL-IP - 35.226.193.120
+Welcome to nginx!
+If you see this page, the nginx web server is successfully installed and working. Further configuration is required.
+For online documentation and support please refer to nginx.org.
+Commercial support is available at nginx.com.
+Thank you for using nginx.
+
+
+
+
+
+
 
 
 
@@ -99,16 +222,41 @@ Open a new web browser tab and paste your cluster's external IP address into the
 Scale up the number of pods running on your service:
 kubectl scale deployment nginx --replicas 3
 
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ kubectl scale deployment nginx --replicas 3
+deployment.apps/nginx scaled
+
+
+
+
+
 
 
 Scaling up a deployment is useful when you want to increase available resources for an application that is becoming more popular.
 Confirm that Kubernetes has updated the number of pods:
 kubectl get pods
 
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-5df596bbf9-8lt54   1/1     Running   0          10m
+nginx-5df596bbf9-cvrt7   1/1     Running   0          24s
+nginx-5df596bbf9-jlb7t   1/1     Running   0          24s
+
+
+
 
 
 Confirm that your external IP address has not changed:
 kubectl get services
+
+student_03_1a1723d29cf2@cloudshell:~ (qwiklabs-gcp-03-00dca398dff3)$ kubectl get services
+NAME         TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)        AGE
+kubernetes   ClusterIP      10.51.240.1     <none>           443/TCP        20m
+nginx        LoadBalancer   10.51.241.230   35.226.193.120   80:32091/TCP   7m58s
+
+
+
+
+
 
 Return to the web browser tab in which you viewed your cluster's external IP address. Refresh the page to confirm that the nginx web server is still responding.
 
