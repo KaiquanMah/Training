@@ -1,16 +1,20 @@
 EDA
-Install packages
+# Install packages
 !pip install -U pkgName
 !pip install -U pandas
 !pip install -U seaborn
 
-Import packages
+# Import packages
 import pandas as pd
 import numpy as np
+import seaborn as sns
+from matplotlib import pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 
 
-
-read into df
+# read into df
 df = pd.read_csv('./csvFileNameInSameFolder.csv')
 
 
@@ -18,23 +22,31 @@ df = pd.read_csv('./csvFileNameInSameFolder.csv')
 
 
 
-1st 5 rows
+# 1st 5 rows
 df.head()
 
-(row, col) count
+# (row, col) count
 df.shape
 
-col names
+# col names
 df.columns
 
-descriptive statistics
+# descriptive statistics
 df.describe()
 
 
-drop 1 or more cols
-df.drop('colXName', axis=1)
 
-Rename cols
+
+# drop 1 or more cols
+df.drop('colXName', axis=1)
+numeric_df = df.drop(['col1', ..., 'colm'], axis=1)
+categorical_df = df.drop(['col2', ..., 'coln'], axis=1)
+
+numeric_df = df[['col1', ..., 'colm']]
+categorical_df = df[['col2', ..., 'coln']]
+
+
+# Rename cols
 df = df.rename(columns = {"col1OrigName" : "col1NewName",
                           ...
                           }
@@ -48,7 +60,7 @@ df = df.rename(columns = {"col1OrigName" : "col1NewName",
 
 
 
-Remove duplicates
+# Remove duplicates
 # true/false for each row - whether it is a dupe
 dupes = df.duplicated() 
 # count dupes
@@ -61,35 +73,156 @@ df.shape
 
 
 
-Check # NULLs in every col
+
+# Check # NULLs in every col
 df.isnull().sum()
 df.isna().sum()
 
-Drop NA
+# Drop NA
 df.dropna()
 
-Fill NA - ffill, bfill, mean, median, 0
+# Fill NA - ffill, bfill, mean, median, 0
 df['numericColName'].fillna(method='ffill')
 df['numericColName'].fillna(method='backfill')
 df['numericColName'].fillna(0)
 df['numericColName'].fillna(df['numericColName'].mean())
 df['numericColName'].fillna(df['numericColName'].median())
 
-Interpolate
+# Interpolate
 df['numericColName'].interpolate()
 
 
-unique values in a col
+# unique values in a col
 df['col'].unique()
-count of unique values in a col
+# count of unique values in a col
 len(df['col'].unique())
 
 
 
 
 
-export to CSV
+# export to CSV
 df.to_csv('outputFileName.csv', index=False)
 
-check files in the folder
+# check files in the folder
 !ls
+
+
+
+
+
+# plot
+fig, ax = plt.subplots(figsize = (10,8))
+# boxplot extending from top to bottom vertically
+# x-axis no labels, y-axis has labels
+sns.boxplot(numeric_df['ram'],
+            orient='v')
+
+
+fig, ax = plt.subplots(figsize = (10,8))
+bp = sns.boxplot(df = numeric_df)
+# set labels along the x-axis
+# x-axis has labels, y-axis has labels
+bp.set_xticklabels(bp.get_xticklabels(),
+                   rotation = 90)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# scale numeric data to have 0 mean; 1 or unit variance
+# values become Z-scores
+scaler = StandardScaler()
+scaled_array = scaler.fit_transform(numeric_df)
+scaled_numeric_df = pd.DataFrame(scaled_array,
+                                 columns = numeric_df.columns)
+
+
+fig, ax = plt.subplots(figsize = (10,8))
+bp = sns.boxplot(df = scaled_numeric_df)
+# set labels along the x-axis
+# x-axis has labels, y-axis has labels
+bp.set_xticklabels(bp.get_xticklabels(),
+                   rotation = 90)
+
+
+Q1 = numeric_df.quantile(0.25)
+Q3 = numeric_df.quantile(0.75) 
+IQR = Q3 - Q1
+print(IQR)
+
+
+
+
+
+# remove outliers
+outliers_removed_numeric_df = numeric_df[~ ( (numeric_df < (Q1 - 1.5*IQR)) \
+                                           | (numeric_df > (Q3 + 1.5*IQR))
+                                           ).any(axis=1)
+                                        ]
+
+
+fig, ax = plt.subplots(figsize = (10,8))
+bp = sns.boxplot(df = outliers_removed_numeric_df)
+# set labels along the x-axis
+# x-axis has labels, y-axis has labels
+bp.set_xticklabels(bp.get_xticklabels(),
+                   rotation = 90)
+
+
+
+
+
+
+
+
+
+
+
+# reset index
+scaled_numeric_df = scaled_numeric_df.reset_index()
+categorical_df = categorical_df.reset_index()
+# then combine both df into 1 df
+# axis = 1 concatenates to the right
+final_df = pd.concat([scaled_numeric_df, categorical_df],
+                      axis = 1)
+
+
+
+
+
+
+# split into X and y df
+X = final_df.drop('colY', axis=1)
+y = df['colY']
+
+# split into training and test set
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                    test_size = 0.2,
+                                                    random_state = 42)
+
+X_train.shape
+X_test.shape
+
+# instantiate model
+logitModel = LogisticRegression(solver='lbfgs',
+                                multi_class='multinomial',
+                                max_iter=10000)
+
+# train model
+logitModel.fit(X_train, y_train)
+# test model
+logitModel.score(X_test, y_test)
+
+
