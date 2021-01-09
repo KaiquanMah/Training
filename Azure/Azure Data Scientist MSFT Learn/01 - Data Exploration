@@ -1037,7 +1037,241 @@ max	16.000000	97.000000
 
 
 
-z
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Comparing data
+#Now that you know something about the statistical distribution of the data in your dataset, you're ready to examine your data to identify any apparent relationships between variables.
+#First of all, let's get rid of any rows that contain outliers so that we have a sample that is representative of a typical class of students. We identified that the StudyHours column contains some outliers with extremely low values, so we'll remove those rows.
+
+df_sample = df_students[df_students['StudyHours']>1]
+df_sample
+
+	Name	StudyHours	Grade	Pass
+3	Rosie	16.00	97.0	True
+10	Francesca	15.50	82.0	True
+9	Giovanni	14.50	74.0	True
+14	Jenny	15.50	70.0	True
+21	Aisha	12.00	64.0	True
+20	Daniel	12.50	63.0	True
+11	Rajab	13.75	62.0	True
+6	Frederic	11.50	53.0	False
+19	Skye	12.00	52.0	False
+1	Joann	11.50	50.0	False
+0	Dan	10.00	50.0	False
+4	Ethan	9.25	49.0	False
+18	Anila	10.00	48.0	False
+2	Pedro	9.00	47.0	False
+7	Jimmie	9.00	42.0	False
+12	Naiyana	9.00	37.0	False
+16	Helena	9.00	36.0	False
+17	Ismat	6.00	35.0	False
+15	Jakeem	8.00	27.0	False
+8	Rhonda	8.50	26.0	False
+13	Kian	8.00	15.0	False
+
+
+
+
+
+
+
+#Comparing numeric and categorical variables
+#The data includes two numeric variables (StudyHours and Grade) and two categorical variables (Name and Pass). Let's start by comparing the numeric StudyHours column to the categorical Pass column to see if there's an apparent relationship between the number of hours studied and a passing grade.
+#To make this comparison, let's create box plots showing the distribution of StudyHours for each possible Pass value (true and false).
+
+df_sample.boxplot(column='StudyHours', by='Pass', figsize=(8,5))
+
+#Comparing the StudyHours distributions, it's immediately apparent (if not particularly surprising) that students who passed the course tended to study for more hours than students who didn't. So if you wanted to predict whether or not a student is likely to pass the course, the amount of time they spend studying may be a good predictive feature.
+
+
+
+
+
+
+
+#Comparing numeric variables
+#Now let's compare two numeric variables. We'll start by creating a bar chart that shows both grade and study hours.
+# Create a bar plot of name vs grade and study hours
+df_sample.plot(x='Name', y=['Grade','StudyHours'], kind='bar', figsize=(8,5))
+
+
+#use minmax scaling to normalise numeric data when showing 2 measures on a chart
+#The chart from the code above shows bars for both grade and study hours for each student; but it's not easy to compare because the values are on different scales. Grades are measured in grade points, and range from 3 to 97; while study time is measured in hours and ranges from 1 to 16.
+#A common technique when dealing with numeric data in different scales is to normalize the data so that the values retain their proportional distribution, but are measured on the same scale. To accomplish this, we'll use a technique called MinMax scaling that distributes the values proportionally on a scale of 0 to 1. You could write the code to apply this transformation; but the Scikit-Learn library provides a scaler to do it for you.
+
+from sklearn.preprocessing import MinMaxScaler
+
+# Get a scaler object
+scaler = MinMaxScaler()
+
+# Create a new dataframe for the scaled values
+df_normalized = df_sample[['Name', 'Grade', 'StudyHours']].copy()
+
+# Normalize the numeric columns
+df_normalized[['Grade','StudyHours']] = scaler.fit_transform(df_normalized[['Grade','StudyHours']])
+
+# Plot the normalized values
+df_normalized.plot(x='Name', y=['Grade','StudyHours'], kind='bar', figsize=(8,5))
+
+
+
+
+
+
+
+#With the data normalized, it's easier to see an apparent relationship between grade and study time. It's not an exact match, but it definitely seems like students with higher grades tend to have studied more.
+#So there seems to be a correlation between study time and grade; and in fact, there's a statistical correlation measurement we can use to quantify the relationship between these columns.
+df_normalized.Grade.corr(df_normalized.StudyHours)
+0.9117666413789675
+
+#The correlation statistic is a value between -1 and 1 that indicates the strength of a relationship. Values above 0 indicate a positive correlation (high values of one variable tend to coincide with high values of the other), while values below 0 indicate a negative correlation (high values of one variable tend to coincide with low values of the other). In this case, the correlation value is close to 1; showing a strongly positive correlation between study time and grade.
+#Note: Data scientists often quote the maxim "correlation is not causation". In other words, as tempting as it might be, you shouldn't interpret the statistical correlation as explaining why one of the values is high. In the case of the student data, the statistic demonstrates that students with high grades tend to also have high amounts of study time; but this is not the same as proving that they achieved high grades because they studied a lot. The statistic could equally be used as evidence to support the nonsensical conclusion that the students studied a lot because their grades were going to be high.
+#Another way to visualise the apparent correlation between two numeric columns is to use a scatter plot.
+# Create a scatter plot
+df_sample.plot.scatter(title='Study Time vs Grade', x='StudyHours', y='Grade')
+
+
+
+
+
+#Again, it looks like there's a discernible pattern in which the students who studied the most hours are also the students who got the highest grades.
+#We can see this more clearly by adding a regression line (or a line of best fit) to the plot that shows the general trend in the data. To do this, we'll use a statistical technique called least squares regression.
+#Cast your mind back to when you were learning how to solve linear equations in school, and recall that the slope-intercept form of a linear equation looks like this:
+#𝑦=𝑚𝑥+𝑏
+#In this equation, y and x are the coordinate variables, m is the slope of the line, and b is the y-intercept (where the line goes through the Y-axis).
+#In the case of our scatter plot for our student data, we already have our values for x (StudyHours) and y (Grade), so we just need to calculate the intercept and slope of the straight line that lies closest to those points. Then we can form a linear equation that calculates a new y value on that line for each of our x (StudyHours) values - to avoid confusion, we'll call this new y value f(x) (because it's the output from a linear equation function based on x). The difference between the original y (Grade) value and the f(x) value is the error between our regression line and the actual Grade achieved by the student. Our goal is to calculate the slope and intercept for a line with the lowest overall error.
+#Specifically, we define the overall error by taking the error for each point, squaring it, and adding all the squared errors together. The line of best fit is the line that gives us the lowest value for the sum of the squared errors - hence the name least squares regression.
+#Fortunately, you don't need to code the regression calculation yourself - the SciPy package includes a stats class that provides a linregress method to do the hard work for you. This returns (among other things) the coefficients you need for the slope equation - slope (m) and intercept (b) based on a given pair of variable samples you want to compare.
+
+from scipy import stats
+
+#
+df_regression = df_sample[['Grade', 'StudyHours']].copy()
+
+# Get the regression slope and intercept
+m, b, r, p, se = stats.linregress(df_regression['StudyHours'], df_regression['Grade'])
+print('slope: {:.4f}\ny-intercept: {:.4f}'.format(m,b))
+print('so...\n f(x) = {:.4f}x + {:.4f}'.format(m,b))
+
+slope: 6.3134
+y-intercept: -17.9164
+so...
+ f(x) = 6.3134x + -17.9164
+ 
+ 
+
+# Use the function (mx + b) to calculate f(x) for each x (StudyHours) value
+df_regression['fx'] = (m * df_regression['StudyHours']) + b
+
+# Calculate the error between f(x) and the actual y (Grade) value
+df_regression['error'] = df_regression['fx'] - df_regression['Grade']
+
+# Create a scatter plot of Grade vs Salary
+df_regression.plot.scatter(x='StudyHours', y='Grade')
+
+# Plot the regression line
+plt.plot(df_regression['StudyHours'],df_regression['fx'], color='cyan')
+
+# Display the plot
+plt.show()
+
+
+
+
+
+
+
+
+
+
+#Note that this time, the code plotted two distinct things - the scatter plot of the sample study hours and grades is plotted as before, and then a line of best fit based on the least squares regression coefficients is plotted.
+#The slope and intercept coefficients calculated for the regression line are shown above the plot.
+
+#The line is based on the f(x) values calculated for each StudyHours value. Run the following cell to see a table that includes the following values:
+The StudyHours for each student.
+The Grade achieved by each student.
+The f(x) value calculated using the regression line coefficients.
+The error between the calculated f(x) value and the actual Grade value.
+Some of the errors, particularly at the extreme ends, and quite large (up to over 17.5 grade points); but in general, the line is pretty close to the actual grades.
+
+# Show the original x,y values, the f(x) value, and the error
+df_regression[['StudyHours', 'Grade', 'fx', 'error']]
+
+
+	StudyHours	Grade	fx	error
+3	16.00	97.0	83.098400	-13.901600
+10	15.50	82.0	79.941687	-2.058313
+9	14.50	74.0	73.628262	-0.371738
+14	15.50	70.0	79.941687	9.941687
+21	12.00	64.0	57.844698	-6.155302
+20	12.50	63.0	61.001410	-1.998590
+11	13.75	62.0	68.893193	6.893193
+6	11.50	53.0	54.687985	1.687985
+19	12.00	52.0	57.844698	5.844698
+1	11.50	50.0	54.687985	4.687985
+0	10.00	50.0	45.217846	-4.782154
+4	9.25	49.0	40.482777	-8.517223
+18	10.00	48.0	45.217846	-2.782154
+2	9.00	47.0	38.904421	-8.095579
+7	9.00	42.0	38.904421	-3.095579
+12	9.00	37.0	38.904421	1.904421
+16	9.00	36.0	38.904421	2.904421
+17	6.00	35.0	19.964144	-15.035856
+15	8.00	27.0	32.590995	5.590995
+8	8.50	26.0	35.747708	9.747708
+13	8.00	15.0	32.590995	17.590995
+
+
+
+
+
+
+
+
+
+#Using the regression coefficients for prediction
+#Now that you have the regression coefficients for the study time and grade relationship, you can use them in a function to estimate the expected grade for a given amount of study.
+# Define a function based on our regression coefficients
+def f(x):
+    m = 6.3134
+    b = -17.9164
+    return m*x + b
+
+study_time = 14
+
+# Get f(x) for study time
+prediction = f(study_time)
+
+# Grade can't be less than 0 or more than 100
+expected_grade = max(0,min(100,prediction))
+
+#Print the estimated grade
+print ('Studying for {} hours per week may result in a grade of {:.0f}'.format(study_time, expected_grade))
+
+Studying for 14 hours per week may result in a grade of 70
+
+
+
+
+#So by applying statistics to sample data, you've determined a relationship between study time and grade; and encapsulated that relationship in a general function that can be used to predict a grade for a given amount of study time.
+#This technique is in fact the basic premise of machine learning. You can take a set of sample data that includes one or more features (in this case, the number of hours studied) and a known label value (in this case, the grade achieved) and use the sample data to derive a function that calculates predicted label values for any given set of features.
 
