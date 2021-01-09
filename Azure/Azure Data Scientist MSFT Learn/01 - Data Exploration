@@ -407,3 +407,637 @@ Name	StudyHours	Grade
 20	Daniel	12.50	63.0
 21	Aisha	12.00	64.0
 
+
+
+#let's find the average grade for students who undertook more than the average amount of study time.
+# What was their mean grade?
+df_students[df_students.StudyHours > mean_study].Grade.mean()
+66.7
+
+
+
+#Let's assume that the passing grade for the course is 60.
+#We can use that information to add a new column to the DataFrame, indicating whether or not each student passed.
+#First, we'll create a Pandas Series containing the pass/fail indicator (True or False), and 
+passes  = pd.Series(df_students['Grade'] >= 60)
+
+
+#then we'll concatenate that series as a new column (axis 1) in the DataFrame.
+df_students = pd.concat([df_students, passes.rename("Pass")], axis=1)
+df_students
+
+Name	StudyHours	Grade	Pass
+0	Dan	10.00	50.0	False
+1	Joann	11.50	50.0	False
+2	Pedro	9.00	47.0	False
+3	Rosie	16.00	97.0	True
+4	Ethan	9.25	49.0	False
+5	Vicky	1.00	3.0	False
+6	Frederic	11.50	53.0	False
+7	Jimmie	9.00	42.0	False
+8	Rhonda	8.50	26.0	False
+9	Giovanni	14.50	74.0	True
+10	Francesca	15.50	82.0	True
+11	Rajab	13.75	62.0	True
+12	Naiyana	9.00	37.0	False
+13	Kian	8.00	15.0	False
+14	Jenny	15.50	70.0	True
+15	Jakeem	8.00	27.0	False
+16	Helena	9.00	36.0	False
+17	Ismat	6.00	35.0	False
+18	Anila	10.00	48.0	False
+19	Skye	12.00	52.0	False
+20	Daniel	12.50	63.0	True
+21	Aisha	12.00	64.0	True
+
+
+
+
+
+
+
+#DataFrames are designed for tabular data, and you can use them to perform many of the kinds of data analytics operation you can do in a relational database; such as grouping and aggregating tables of data.
+#For example, you can use the groupby method to group the student data into groups based on the Pass column you added previously, and 
+#count the number of names in each group - in other words, you can determine how many students passed and failed.
+
+#df -> groupby a df col's unique values -> then COUNT the # records in each category/group
+print(df_students.groupby(df_students.Pass).Name.count())
+
+Pass
+False    15
+True      7
+Name: Name, dtype: int64
+
+
+#You can aggregate multiple fields in a group using any available aggregation function. For example, you can find the mean study time and grade for the groups of students who passed and failed the course.
+print(df_students.groupby(df_students.Pass)['StudyHours', 'Grade'].mean())
+
+       StudyHours      Grade
+Pass                        
+False    8.783333  38.000000
+True    14.250000  73.142857
+
+
+
+
+
+
+
+#DataFrames are amazingly versatile, and make it easy to manipulate data. Many DataFrame operations return a new copy of the DataFrame; so if you want to modify a DataFrame but keep the existing variable, you need to assign the result of the operation to the existing variable. For example, the following code sorts the student data into descending order of Grade, and assigns the resulting sorted DataFrame to the original df_students variable.
+# Create a DataFrame with the data sorted by Grade (descending)
+df_students = df_students.sort_values('Grade', ascending=False)
+
+# Show the DataFrame
+df_students
+
+	Name	StudyHours	Grade	Pass
+3	Rosie	16.00	97.0	True
+10	Francesca	15.50	82.0	True
+9	Giovanni	14.50	74.0	True
+14	Jenny	15.50	70.0	True
+21	Aisha	12.00	64.0	True
+20	Daniel	12.50	63.0	True
+11	Rajab	13.75	62.0	True
+6	Frederic	11.50	53.0	False
+19	Skye	12.00	52.0	False
+1	Joann	11.50	50.0	False
+0	Dan	10.00	50.0	False
+4	Ethan	9.25	49.0	False
+18	Anila	10.00	48.0	False
+2	Pedro	9.00	47.0	False
+7	Jimmie	9.00	42.0	False
+12	Naiyana	9.00	37.0	False
+16	Helena	9.00	36.0	False
+17	Ismat	6.00	35.0	False
+15	Jakeem	8.00	27.0	False
+8	Rhonda	8.50	26.0	False
+13	Kian	8.00	15.0	False
+5	Vicky	1.00	3.0	False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Visualizing data with Matplotlib
+# Ensure plots are displayed inline in the notebook
+%matplotlib inline
+
+from matplotlib import pyplot as plt
+
+# Create a bar plot of name vs grade
+plt.bar(x=df_students.Name, height=df_students.Grade)
+# Display the plot
+plt.show()
+
+
+
+
+
+
+
+
+#improve the visual elements of the bar chart
+#Specifies the color of the bar chart.
+#Adds a title to the chart (so we know what it represents)
+#Adds labels to the X and Y (so we know which axis shows which data)
+#Adds a grid (to make it easier to determine the values for the bars)
+#Rotates the X markers (so we can read them)
+# Create a bar plot of name vs grade
+plt.bar(x=df_students.Name, height=df_students.Grade, color='orange')
+
+# Customize the chart
+plt.title('Student Grades')
+plt.xlabel('Student')
+plt.ylabel('Grade')
+plt.grid(color='#95a5a6', linestyle='--', linewidth=2, axis='y', alpha=0.7)
+plt.xticks(rotation=90)
+
+# Display the plot
+plt.show()
+
+
+
+
+
+
+
+
+
+#A plot is technically contained with a Figure. In the previous examples, the figure was created implicitly for you; but you can create it explicitly. For example, the following code creates a figure with a specific size.
+# Create a Figure
+fig = plt.figure(figsize=(8,3))
+
+# Create a bar plot of name vs grade
+plt.bar(x=df_students.Name, height=df_students.Grade, color='orange')
+
+# Customize the chart
+plt.title('Student Grades')
+plt.xlabel('Student')
+plt.ylabel('Grade')
+plt.grid(color='#95a5a6', linestyle='--', linewidth=2, axis='y', alpha=0.7)
+plt.xticks(rotation=90)
+
+# Show the figure
+plt.show()
+
+
+
+
+
+
+
+
+
+#A figure can contain multiple subplots, each on its own axis.
+#For example, the following code creates a figure with two subplots - one is a bar chart showing student grades, and the other is a pie chart comparing the number of passing grades to non-passing grades.
+# Create a figure for 2 subplots (1 row, 2 columns)
+fig, ax = plt.subplots(1, 2, figsize = (10,4))
+
+# Create a bar plot of name vs grade on the first axis
+ax[0].bar(x=df_students.Name, height=df_students.Grade, color='orange')
+ax[0].set_title('Grades')
+ax[0].set_xticklabels(df_students.Name, rotation=90)
+
+# Create a pie chart of pass counts on the second axis
+pass_counts = df_students['Pass'].value_counts()
+ax[1].pie(pass_counts, labels=pass_counts)
+ax[1].set_title('Passing Grades')
+ax[1].legend(pass_counts.keys().tolist())
+
+# Add a title to the Figure
+fig.suptitle('Student Data')
+
+# Show the figure
+fig.show()
+
+
+
+
+
+
+
+#Pandas provides methods that abstract the underlying Matplotlib functions and simplify plotting. 
+#For example, the DataFrame provides its own methods for plotting data, as shown in the following example to plot a bar chart of study hours.
+df_students.plot.bar(x='Name', y='StudyHours', color='teal', figsize=(6,4))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Getting started with statistical analysis
+#Descriptive statistics and data distribution
+#When examining a variable (for example a sample of student grades), data scientists are particularly interested in its distribution (in other words, how are all the different grade values spread across the sample). The starting point for this exploration is often to visualize the data as a histogram, and see how frequently each value for the variable occurs.
+# Get the variable to examine
+var_data = df_students['Grade']
+
+# Create a Figure
+fig = plt.figure(figsize=(10,4))
+
+# Plot a histogram
+plt.hist(var_data)
+
+# Add titles and labels
+plt.title('Data Distribution')
+plt.xlabel('Value')
+plt.ylabel('Frequency')
+
+# Show the figure
+fig.show()
+
+
+
+
+
+
+#Measures of central tendency
+#To understand the distribution better, we can examine so-called measures of central tendency; which is a fancy way of describing statistics that represent the "middle" of the data. The goal of this is to try to find a "typical" value. Common ways to define the middle of the data include:
+
+#The mean: A simple average based on adding together all of the values in the sample set, and then dividing the total by the number of samples.
+#The median: The value in the middle of the range of all of the sample values.
+#The mode: The most commonly occuring value in the sample set*.
+
+# Get the variable to examine
+var = df_students['Grade']
+
+# Get statistics
+min_val = var.min()
+max_val = var.max()
+mean_val = var.mean()
+med_val = var.median()
+mod_val = var.mode()[0]
+
+print('Minimum:{:.2f}\nMean:{:.2f}\nMedian:{:.2f}\nMode:{:.2f}\nMaximum:{:.2f}\n'.format(min_val,
+                                                                                        mean_val,
+                                                                                        med_val,
+                                                                                        mod_val,
+                                                                                        max_val))
+
+Minimum:3.00
+Mean:49.18
+Median:49.50
+Mode:50.00
+Maximum:97.00
+
+
+
+
+# Create a Figure
+fig = plt.figure(figsize=(10,4))
+
+# Plot a histogram
+plt.hist(var)
+
+# Add lines for the statistics
+plt.axvline(x=min_val, color = 'gray', linestyle='dashed', linewidth = 2)
+plt.axvline(x=mean_val, color = 'cyan', linestyle='dashed', linewidth = 2)
+plt.axvline(x=med_val, color = 'red', linestyle='dashed', linewidth = 2)
+plt.axvline(x=mod_val, color = 'yellow', linestyle='dashed', linewidth = 2)
+plt.axvline(x=max_val, color = 'gray', linestyle='dashed', linewidth = 2)
+
+# Add titles and labels
+plt.title('Data Distribution')
+plt.xlabel('Value')
+plt.ylabel('Frequency')
+
+# Show the figure
+fig.show()
+
+
+
+
+
+
+
+#test mode
+mod_val1 = var.mode()
+print(mod_val1)
+0    50.0
+dtype: float64
+
+print(mod_val)
+50.0
+
+
+
+#For the grade data, the mean, median, and mode all seem to be more or less in the middle of the minimum and maximum, at around 50.
+#Another way to visualize the distribution of a variable is to use a box plot (sometimes called a box-and-whiskers plot). Let's create one for the grade data.
+# Get the variable to examine
+var = df_students['Grade']
+
+# Create a Figure
+fig = plt.figure(figsize=(10,4))
+
+# Plot a histogram
+plt.boxplot(var)
+
+# Add titles and labels
+plt.title('Data Distribution')
+
+# Show the figure
+fig.show()
+
+
+
+
+
+#The box plot shows the distribution of the grade values in a different format to the histogram. The box part of the plot shows where the inner two quartiles of the data reside - so in this case, half of the grades are between approximately 36 and 63. The whiskers extending from the box show the outer two quartiles; so the other half of the grades in this case are between 0 and 36 or 63 and 100. The line in the box indicates the median value.
+#It's often useful to combine histograms and box plots, with the box plot's orientation changed to align it with the histogram (in some ways, it can be helpful to think of the histogram as a "front elevation" view of the distribution, and the box plot as a "plan" view of the distribution from above.)
+
+# Create a function that we can re-use
+def show_distribution(var_data):
+    from matplotlib import pyplot as plt
+
+    # Get statistics
+    min_val = var_data.min()
+    max_val = var_data.max()
+    mean_val = var_data.mean()
+    med_val = var_data.median()
+    mod_val = var_data.mode()[0]
+
+    print('Minimum:{:.2f}\nMean:{:.2f}\nMedian:{:.2f}\nMode:{:.2f}\nMaximum:{:.2f}\n'.format(min_val,
+                                                                                            mean_val,
+                                                                                            med_val,
+                                                                                            mod_val,
+                                                                                            max_val))
+
+    # Create a figure for 2 subplots (2 rows, 1 column)
+    fig, ax = plt.subplots(2, 1, figsize = (10,4))
+
+    # Plot the histogram   
+    ax[0].hist(var_data)
+    ax[0].set_ylabel('Frequency')
+
+    # Add lines for the mean, median, and mode
+    ax[0].axvline(x=min_val, color = 'gray', linestyle='dashed', linewidth = 2)
+    ax[0].axvline(x=mean_val, color = 'cyan', linestyle='dashed', linewidth = 2)
+    ax[0].axvline(x=med_val, color = 'red', linestyle='dashed', linewidth = 2)
+    ax[0].axvline(x=mod_val, color = 'yellow', linestyle='dashed', linewidth = 2)
+    ax[0].axvline(x=max_val, color = 'gray', linestyle='dashed', linewidth = 2)
+
+    # Plot the boxplot   
+    ax[1].boxplot(var_data, vert=False)
+    ax[1].set_xlabel('Value')
+
+    # Add a title to the Figure
+    fig.suptitle('Data Distribution')
+
+    # Show the figure
+    fig.show()
+
+# Get the variable to examine
+col = df_students['Grade']
+# Call the function
+show_distribution(col)
+
+
+
+Minimum:3.00
+Mean:49.18
+Median:49.50
+Mode:50.00
+Maximum:97.00
+
+
+
+
+
+
+#All of the measurements of central tendency are right in the middle of the data distribution, which is symmetric with values becoming progressively lower in both directions from the middle.
+#To explore this distribution in more detail, you need to understand that statistics is fundamentally about taking samples of data and using probability functions to extrapolate information about the full population of data. For example, the student data consists of 22 samples, and for each sample there is a grade value. You can think of each sample grade as a variable that's been randomly selected from the set of all grades awarded for this course. With enough of these random variables, you can calculate something called a probability density function, which estimates the distribution of grades for the full population.
+
+def show_density(var_data):
+    from matplotlib import pyplot as plt
+
+    fig = plt.figure(figsize=(10,4))
+
+    # Plot density
+    var_data.plot.density()
+
+    # Add titles and labels
+    plt.title('Data Density')
+
+    # Show the mean, median, and mode
+    plt.axvline(x=var_data.mean(), color = 'cyan', linestyle='dashed', linewidth = 2)
+    plt.axvline(x=var_data.median(), color = 'red', linestyle='dashed', linewidth = 2)
+    plt.axvline(x=var_data.mode()[0], color = 'yellow', linestyle='dashed', linewidth = 2)
+
+    # Show the figure
+    plt.show()
+
+# Get the density of Grade
+col = df_students['Grade']
+show_density(col)
+
+
+
+
+
+
+
+#As expected from the histogram of the sample, the density shows the characteristic 'bell curve" of what statisticians call a *normal* distribution with the mean and mode at the center and symmetric tails.
+#Now let's take a look at the distribution of the study hours data.
+
+# Get the variable to examine
+col = df_students['StudyHours']
+# Call the function
+show_distribution(col)
+
+Minimum:1.00
+Mean:10.52
+Median:10.00
+Mode:9.00
+Maximum:16.00
+
+
+
+#The distribution of the study time data is significantly different from that of the grades.
+#Note that the whiskers of the box plot only extend to around 6.0, indicating that the vast majority of the first quarter of the data is above this value. The minimum is marked with an o, indicating that it is statistically an outlier - a value that lies significantly outside the range of the rest of the distribution.
+#Outliers can occur for many reasons. Maybe a student meant to record "10" hours of study time, but entered "1" and missed the "0". Or maybe the student was abnormally lazy when it comes to studying! Either way, it's a statistical anomaly that doesn't represent a typical student. Let's see what the distribution looks like without it.
+
+# Get the variable to examine
+col = df_students[df_students.StudyHours>1]['StudyHours']
+# Call the function
+show_distribution(col)
+
+Minimum:6.00
+Mean:10.98
+Median:10.00
+Mode:9.00
+Maximum:16.00
+
+
+
+
+#In this example, the dataset is small enough to clearly see that the value 1 is an outlier for the StudyHours column, so you can exclude it explicitly. In most real-world cases, it's easier to consider outliers as being values that fall below or above percentiles within which most of the data lie. For example, the following code uses the Pandas quantile function to exclude observations below the 0.01th percentile (the value above which 99% of the data reside).
+q01 = df_students.StudyHours.quantile(0.01)
+# Get the variable to examine
+col = df_students[df_students.StudyHours>q01]['StudyHours']
+# Call the function
+show_distribution(col)
+
+Minimum:6.00
+Mean:10.98
+Median:10.00
+Mode:9.00
+Maximum:16.00
+
+#Tip: You can also eliminate outliers at the upper end of the distribution by defining a threshold at a high percentile value - for example, you could use the quantile function to find the 0.99 percentile below which 99% of the data reside.
+
+
+
+
+
+
+#With the outliers removed, the box plot shows all data within the four quartiles. Note that the distribution is not symmetric like it is for the grade data though - there are some students with very high study times of around 16 hours, but the bulk of the data is between 7 and 13 hours; The few extremely high values pull the mean towards the higher end of the scale.
+#Let's look at the density for this distribution.
+# Get the density of StudyHours
+show_density(col)
+
+#distribution is LEFT SKEWED
+#The mass of the data is on the RIGHT side of the distribution, creating a long tail to the LEFT because of the values at the extreme high end; 
+#which pull the mean to the right.
+
+
+
+
+
+
+
+
+#Measures of variance
+#So now we have a good idea where the middle of the grade and study hours data distributions are. However, there's another aspect of the distributions we should examine: how much variability is there in the data?
+#Typical statistics that measure variability in the data include:
+
+#Range: The difference between the maximum and minimum. There's no built-in function for this, but it's easy to calculate using the min and max functions.
+#Variance: The average of the squared difference from the mean. You can use the built-in var function to find this.
+#Standard Deviation: The square root of the variance. You can use the built-in std function to find this.
+
+for col_name in ['Grade','StudyHours']:
+    col = df_students[col_name]
+    rng = col.max() - col.min()
+    var = col.var()
+    std = col.std()
+    print('\n{}:\n - Range: {:.2f}\n - Variance: {:.2f}\n - Std.Dev: {:.2f}'.format(col_name, rng, var, std))
+
+
+Grade:
+ - Range: 94.00
+ - Variance: 472.54
+ - Std.Dev: 21.74
+
+StudyHours:
+ - Range: 15.00
+ - Variance: 12.16
+ - Std.Dev: 3.49
+
+
+
+
+
+#Of these statistics, the standard deviation is generally the most useful. It provides a measure of variance in the data on the same scale as the data itself (so grade points for the Grade distribution and hours for the StudyHours distribution). The higher the standard deviation, the more variance there is when comparing values in the distribution to the distribution mean - in other words, the data is more spread out.
+#When working with a normal distribution, the standard deviation works with the particular characteristics of a normal distribution to provide even greater insight. Run the cell below to see the relationship between standard deviations and the data in the normal distribution.
+
+import scipy.stats as stats
+
+# Get the Grade column
+col = df_students['Grade']
+
+# get the density
+density = stats.gaussian_kde(col)
+
+# Plot the density
+col.plot.density()
+
+# Get the mean and standard deviation
+s = col.std()
+m = col.mean()
+
+# Annotate 1 stdev
+x1 = [m-s, m+s]
+y1 = density(x1)
+plt.plot(x1,y1, color='magenta')
+plt.annotate('1 std (68.26%)', (x1[1],y1[1]))
+
+# Annotate 2 stdevs
+x2 = [m-(s*2), m+(s*2)]
+y2 = density(x2)
+plt.plot(x2,y2, color='green')
+plt.annotate('2 std (95.45%)', (x2[1],y2[1]))
+
+# Annotate 3 stdevs
+x3 = [m-(s*3), m+(s*3)]
+y3 = density(x3)
+plt.plot(x3,y3, color='orange')
+plt.annotate('3 std (99.73%)', (x3[1],y3[1]))
+
+# Show the location of the mean
+plt.axvline(col.mean(), color='cyan', linestyle='dashed', linewidth=1)
+
+plt.axis('off')
+
+plt.show()
+
+
+
+
+
+
+print(x1)
+[27.4439066782538, 70.91972968538256]
+print(y1)
+[0.01025848 0.01019866]
+
+The horizontal lines show the percentage of data within 1, 2, and 3 standard deviations of the mean (plus or minus).
+
+In any normal distribution:
+Approximately 68.26% of values fall within one standard deviation from the mean.
+Approximately 95.45% of values fall within two standard deviations from the mean.
+Approximately 99.73% of values fall within three standard deviations from the mean.
+So, since we know that the mean grade is 49.18, the standard deviation is 21.74, and distribution of grades is approximately normal; we can calculate that 68.26% of students should achieve a grade between 27.44 and 70.92.
+
+
+#The descriptive statistics we've used to understand the distribution of the student data variables are the basis of statistical analysis; and because they're such an important part of exploring your data, there's a built-in Describe method of the DataFrame object that returns the main descriptive statistics for all numeric columns.
+df_students.describe()
+
+	StudyHours	Grade
+count	22.000000	22.000000
+mean	10.522727	49.181818
+std	3.487144	21.737912
+min	1.000000	3.000000
+25%	9.000000	36.250000
+50%	10.000000	49.500000
+75%	12.375000	62.750000
+max	16.000000	97.000000
+
+
+
+
+
+z
+
+
+
