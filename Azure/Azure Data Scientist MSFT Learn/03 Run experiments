@@ -1,0 +1,165 @@
+#source: https://docs.microsoft.com/en-us/learn/modules/intro-to-azure-machine-learning-service/5-using-azure-ml
+#source: https://microsoftlearning.github.io/mslearn-dp100/instructions/04-run-experiments.html
+#extra reading: https://jupyter-notebook.readthedocs.io/en/stable/notebook.html
+
+
+#Install the Azure Machine Learning SDK
+#The Azure Machine Learning SDK is installed by default on your compute instance, but it is updated frequently; so follow these steps to upgrade to the latest release.
+
+#In the Jupyter notebook environment, create a new Terminal. 
+#This will open a new tab with a command shell.
+
+#Enter the following command to update the Azure ML SDK:
+pip install --upgrade azureml-sdk
+
+#install the azureml-widgets package, which contains libraries for displaying Azure Machine Learning information in notebooks
+pip install --upgrade azureml-widgets
+
+#When the installation is complete, you can close the Terminal tab and return to the tab containing the Jupyter home page
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#https://github.com/MicrosoftLearning/mslearn-dp100
+#04 - Run Experiments.ipynb
+
+
+#Connect to your workspace
+import azureml.core
+from azureml.core import Workspace
+
+# Load the workspace from the saved config file
+ws = Workspace.from_config()
+print('Ready to use Azure ML {} to work with {}'.format(azureml.core.VERSION, ws.name))
+
+Ready to use Azure ML 1.19.0 to work with Workspace1
+
+
+
+
+
+
+
+#Run an experiment
+from azureml.core import Experiment
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline 
+
+# Create an Azure ML experiment in your workspace
+experiment = Experiment(workspace=ws, name="mslearn-diabetes")
+
+# Start logging data from the experiment, obtaining a reference to the experiment run
+run = experiment.start_logging()
+print("Starting experiment:", experiment.name)
+
+# load the data from a local file
+data = pd.read_csv('data/diabetes.csv')
+
+# Count the rows and log the result
+row_count = (len(data))
+run.log('observations', row_count)
+print('Analyzing {} rows of data'.format(row_count))
+
+# Plot and log the count of diabetic vs non-diabetic patients
+diabetic_counts = data['Diabetic'].value_counts()
+fig = plt.figure(figsize=(6,6))
+#gca = get current axes
+#If the current axes don't exist, the appropriate axes will be created and then returned.
+ax = fig.gca()    
+diabetic_counts.plot.bar(ax = ax) 
+ax.set_title('Patients with Diabetes') 
+ax.set_xlabel('Diagnosis') 
+ax.set_ylabel('Patients')
+plt.show()
+run.log_image(name='label distribution', plot=fig)
+
+# log distinct pregnancy counts
+pregnancies = data.Pregnancies.unique()
+run.log_list('pregnancy categories', pregnancies)
+
+# Log summary statistics for numeric columns
+med_columns = ['PlasmaGlucose', 'DiastolicBloodPressure', 'TricepsThickness', 'SerumInsulin', 'BMI']
+summary_stats = data[med_columns].describe().to_dict()
+for col in summary_stats:
+    keys = list(summary_stats[col].keys())
+    values = list(summary_stats[col].values())
+    for index in range(len(keys)):
+        run.log_row(col, stat=keys[index], value = values[index])
+        
+# Save a sample of the data and upload it to the experiment output
+data.sample(100).to_csv('sample.csv', index=False, header=True)
+run.upload_file(name='outputs/sample.csv', path_or_stream='./sample.csv')
+
+# Complete the run
+run.complete()
+
+
+Starting experiment: mslearn-diabetes
+Analyzing 10000 rows of data
+<bar chart>
+
+
+
+
+
+
+
+
+
+
+
+
+#View run details
+#In Jupyter Notebooks, you can use the RunDetails widget to see a visualization of the run details.
+from azureml.widgets import RunDetails
+RunDetails(run).show()
+
+
+ScriptRun Widget (Completed)View run details
+Run Properties
+Status	Completed
+Node run Start Time	1/11/2021 5:45:43 PM
+Node run Duration	0:00:18
+Run Id	8dda5d9e-73b8-415a-a23b-87ed663f5cd6
+Arguments	
+N/A
+BMI
+[object Object]
+DiastolicBloodPressure
+[object Object]
+label distribution
+aml://artifactId/ExperimentRun/dcid.8dda5d9e-73b8-415a-a23b-87ed663f5cd6/label distribution_1610358354.png
+observations
+10000
+PlasmaGlucose
+[object Object]
+SerumInsulin
+[object Object]
+TricepsThickness
+[object Object]
+Output Logs
+  Show Active log
+
+Run is completed.
+
+
+
