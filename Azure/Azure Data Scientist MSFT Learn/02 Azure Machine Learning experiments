@@ -1,0 +1,207 @@
+#source: https://docs.microsoft.com/en-us/learn/modules/intro-to-azure-machine-learning-service/4-azure-ml-experiment
+#Experiment Run Context
+#When you submit an experiment, you use its run context to 
+#initialize and 
+#end the experiment run that is tracked in Azure Machine Learning
+#python
+from azureml.core import Experiment
+
+# create an experiment variable
+experiment = Experiment(workspace = ws, 
+                        name = "my-experiment")
+
+# start the experiment
+run = experiment.start_logging()
+
+# experiment code goes here
+
+# end the experiment
+run.complete()
+
+
+
+
+
+
+
+
+
+
+
+#Logging Metrics
+log: Record a single named value.
+log_list: Record a named list of values.
+log_row: Record a row with multiple columns.
+log_table: Record a dictionary as a table.
+log_image: Record an image file or a plot.
+
+#extra reading
+#https://docs.microsoft.com/en-us/azure/machine-learning/how-to-track-experiments
+
+#the following code records the number of observations (records) in a CSV file:
+from azureml.core import Experiment
+import pandas as pd
+
+# Create an Azure ML experiment in your workspace
+experiment = Experiment(workspace = ws, name = 'my-experiment')
+
+# Start logging data from the experiment
+run = experiment.start_logging()
+
+# load the dataset and count the rows
+data = pd.read_csv('data.csv')
+row_count = (len(data))
+
+# Log the row count
+run.log('observations', row_count)
+
+# Complete the experiment
+run.complete()
+
+
+
+
+
+
+
+
+
+
+
+#Retrieving and Viewing Logged Metrics
+#method 1
+#in Azure Machine Learning studio
+
+#method 2
+#use the RunDetails widget in a notebook
+from azureml.widgets import RunDetails
+RunDetails(run).show()
+
+
+#method 3
+#use the Run object's get_metrics method, which returns a JSON representation of the metrics:
+import json
+
+# Get logged metrics
+metrics = run.get_metrics()
+print(json.dumps(metrics, indent=2))
+
+#sample JSON output
+{
+  "observations": 15000
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Experiment Output Files
+#The output files of an experiment are saved in its outputs folder.
+#The technique you use to add files to the outputs of an experiment depend on how you're running the experiment. 
+
+#method 1
+#If you control the experiment lifecycle inline in your code, 
+#you can upload local files to the run's outputs folder by using the Run object's upload_file method in your experiment code
+run.upload_file(name='outputs/sample.csv', path_or_stream='./sample.csv')
+
+#method 2
+#When running an experiment in a remote compute context, any files written to the outputs folder in the compute context are 
+#automatically uploaded to the run's outputs folder when the run completes.
+
+
+#Whichever approach you use to run your experiment, 
+#you can retrieve a list of output files from the Run object like this:
+import json
+
+files = run.get_file_names()
+print(json.dumps(files, indent=2))
+
+#sample JSON output
+[
+  "outputs/sample.csv"
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Running a Script as an Experiment
+#method 1
+#You can run an experiment inline using the start_logging method of the Experiment object [much further up]
+
+#method 2
+#more common
+#encapsulate the experiment logic in a script and run the script as an experiment
+#An experiment script is just a Python code file that contains the code you want to run in the experiment. 
+#To access the experiment run context (which is needed to log metrics) the script must import the azureml.core.Run class and 
+#call its get_context method. 
+#The script can then use the run context to log metrics, upload files, and complete the experiment
+
+from azureml.core import Run
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
+# Get the experiment run context
+run = Run.get_context()
+
+# load the diabetes dataset
+data = pd.read_csv('data.csv')
+
+# Count the rows and log the result
+row_count = (len(data))
+run.log('observations', row_count)
+
+# Save a sample of the data
+os.makedirs('outputs', exist_ok=True)
+data.sample(100).to_csv("outputs/sample.csv", index=False, header=True)
+
+# Complete the run
+run.complete()
+
+
+
+
+#To run a script as an experiment, you must define a script configuration that defines 
+#the script to be run and 
+#the Python environment in which to run it. 
+#This is implemented by using a ScriptRunConfig object.
+
+#For example, the following code could be used to run an experiment based on a script in the experiment_files folder (which must also contain any files used by the script, such as the data.csv file in previous script code example):
+from azureml.core import Experiment, ScriptRunConfig
+
+# Create a script config
+script_config = ScriptRunConfig(source_directory=experiment_folder,
+                                script='experiment.py') 
+
+# submit the experiment
+experiment = Experiment(workspace = ws, 
+                        name = 'my-experiment')
+run = experiment.submit(config=script_config)
+run.wait_for_completion(show_output=True)
+
+
+
