@@ -1,0 +1,96 @@
+#Jupyter notebook - Azure ml python sdk
+#source: https://docs.microsoft.com/en-us/learn/modules/intro-to-azure-machine-learning-service/2-azure-ml-workspace
+
+#create workspace
+from azureml.core import Workspace
+    
+ws = Workspace.create(name='aml-workspace', 
+                  subscription_id='123456-abc-123...',
+                  resource_group='aml-resources',
+                  create_resource_group=True,
+                  location='eastus'
+                 )
+
+
+
+
+#or use azure cli
+#assume a resource group named aml-resources has already been created
+az ml workspace create -w 'aml-workspace' -g 'aml-resources'
+
+
+
+
+
+
+
+
+
+
+
+#source: https://microsoftlearning.github.io/mslearn-dp100/
+4 kinds of compute resources
+Compute instances: Development WORKSTATIONS that data scientists can use to work with data and models.
+Compute clusters: Scalable CLUSTERS of virtual machines for on-demand processing of experiment code.
+Inference clusters: Deployment targets for PREDICTIVE SERVICES that use your trained models.
+Attached compute: LINKS TO OTHER AZURE COMPUTE RESOURCES, such as Virtual Machines or Azure Databricks clusters.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#source: https://docs.microsoft.com/en-us/learn/modules/intro-to-azure-machine-learning-service/3-azure-ml-tools
+#Installing the Azure Machine Learning SDK for Python
+bash
+pip install azureml-sdk
+#the notebooks extra include widgets for displaying DETAILED OUTPUT in Jupyter Notebooks, 
+#the AutoML extra includes packages for AUTOMATED MACHINE LEARNING TRAINING, and 
+#the explain extra includes packages for GENERATING MODEL EXPLANATIONS
+pip install azureml-sdk[notebooks,automl,explain]
+
+#extra readings
+#https://docs.microsoft.com/en-us/python/api/overview/azure/ml/install?view=azure-ml-py
+#https://docs.microsoft.com/en-us/azure/machine-learning/azure-machine-learning-release-notes
+
+
+
+
+
+
+#Connecting to a Workspace
+#azure portal>machine learning>overview
+#config.json
+{
+    "subscription_id": "1234567-abcde-890-fgh...",
+    "resource_group": "aml-resources",
+    "workspace_name": "aml-workspace"
+}
+
+
+#connect to the workspace using the configuration file
+#method 1
+#By default, the from_config method looks for a file named config.json in the folder containing the Python code file, but you can specify another path if necessary.
+#python
+from azureml.core import Workspace
+ws = Workspace.from_config()
+
+#method 2
+#use the get method of the Workspace class with explicitly specified subscription, resource group, and workspace details
+#which you can obtain from config.json
+#this method is preferred due to greater flexibility when using multiple scripts
+from azureml.core import Workspace
+
+ws = Workspace.get(name='aml-workspace',
+                   subscription_id='1234567-abcde-890-fgh...',
+                   resource_group='aml-resources')
+
+
