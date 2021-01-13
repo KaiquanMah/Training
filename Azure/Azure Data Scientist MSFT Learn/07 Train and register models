@@ -1,0 +1,733 @@
+#https://docs.microsoft.com/en-us/learn/modules/train-local-model-with-azure-mls/5-training-model
+
+#Install the Azure Machine Learning SDK
+!pip install --upgrade azureml-sdk azureml-widgets
+
+
+
+#Connect to your workspace
+import azureml.core
+from azureml.core import Workspace
+
+# Load the workspace from the saved config file
+ws = Workspace.from_config()
+print('Ready to use Azure ML {} to work with {}'.format(azureml.core.VERSION, ws.name))
+
+Ready to use Azure ML 1.20.0 to work with workspace1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Create a training script
+import os, shutil
+
+# Create a folder for the experiment files
+training_folder = 'diabetes-training'
+os.makedirs(training_folder, exist_ok=True)
+
+# Copy the data file into the experiment folder
+shutil.copy('data/diabetes.csv', os.path.join(training_folder, "diabetes.csv"))
+
+'diabetes-training/diabetes.csv'
+
+
+
+
+
+
+
+#create the training script and save it in the folder you created
+%%writefile $training_folder/diabetes_training.py
+# Import libraries
+from azureml.core import Run
+import pandas as pd
+import numpy as np
+import joblib
+import os
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+
+# Get the experiment run context
+run = Run.get_context()
+
+# load the diabetes dataset
+print("Loading Data...")
+diabetes = pd.read_csv('diabetes.csv')
+
+# Separate features and labels
+X, y = diabetes[['Pregnancies','PlasmaGlucose','DiastolicBloodPressure','TricepsThickness','SerumInsulin','BMI','DiabetesPedigree','Age']].values, diabetes['Diabetic'].values
+
+# Split data into training set and test set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=0)
+
+# Set regularization hyperparameter
+reg = 0.01
+
+# Train a logistic regression model
+print('Training a logistic regression model with regularization rate of', reg)
+run.log('Regularization Rate',  np.float(reg))
+model = LogisticRegression(C=1/reg, solver="liblinear").fit(X_train, y_train)
+
+# calculate accuracy
+y_hat = model.predict(X_test)
+acc = np.average(y_hat == y_test)
+print('Accuracy:', acc)
+run.log('Accuracy', np.float(acc))
+
+# calculate AUC
+y_scores = model.predict_proba(X_test)
+auc = roc_auc_score(y_test,y_scores[:,1])
+print('AUC: ' + str(auc))
+run.log('AUC', np.float(auc))
+
+# Save the trained model in the outputs folder
+os.makedirs('outputs', exist_ok=True)
+joblib.dump(value=model, filename='outputs/diabetes_model.pkl')
+
+run.complete()
+
+
+Writing diabetes-training/diabetes_training.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Run the training script as an experiment
+#Now you're ready to run the script as an experiment. Note that the default environment does not include the scikit-learn package, so you need to explicitly add that to the configuration. The conda environment is built on-demand the first time the experiment is run, and cached for future runs that use the same configuration; so the first run will take a little longer.
+from azureml.core import Experiment, ScriptRunConfig, Environment
+from azureml.core.conda_dependencies import CondaDependencies
+from azureml.widgets import RunDetails
+
+# Create a Python environment for the experiment
+sklearn_env = Environment("sklearn-env")
+
+# Ensure the required packages are installed (we need scikit-learn and Azure ML defaults)
+packages = CondaDependencies.create(pip_packages=['scikit-learn','azureml-defaults'])
+sklearn_env.python.conda_dependencies = packages
+
+# Create a script config
+script_config = ScriptRunConfig(source_directory=training_folder,
+                                script='diabetes_training.py',
+                                environment=sklearn_env) 
+
+# submit the experiment run
+experiment_name = 'mslearn-train-diabetes'
+experiment = Experiment(workspace=ws, name=experiment_name)
+run = experiment.submit(config=script_config)
+
+# Show the running experiment run in the notebook widget
+RunDetails(run).show()
+
+# Block until the experiment run has completed
+run.wait_for_completion()
+
+
+logs/azureml/1667_azureml.log
+2021-01-13 02:53:04,944|azureml|DEBUG|Inputs:: kwargs: {'OutputCollection': True, 'EnableMLflowTracking': True, 'snapshotProject': True}, track_folders: None, deny_list: None, directories_to_watch: ['logs', 'logs/azureml']
+2021-01-13 02:53:04,945|azureml.history._tracking.PythonWorkingDirectory|DEBUG|Execution target type: none
+2021-01-13 02:53:04,945|azureml.history._tracking.PythonWorkingDirectory|DEBUG|Failed to import pyspark with error: No module named 'pyspark'
+2021-01-13 02:53:04,946|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|Pinning working directory for filesystems: ['pyfs']
+2021-01-13 02:53:05,585|azureml.core.run|DEBUG|Adding new factory <function ScriptRun._from_run_dto at 0x7ff2fc2a2488> for run source azureml.scriptrun
+2021-01-13 02:53:05,601|azureml._vendor.azure_cli_core.azureml_cloud|DEBUG|Start : Loading cloud metatdata
+2021-01-13 02:53:05,601|azureml._vendor.azure_cli_core.azureml_cloud|DEBUG|Start : Loading cloud metatdata from the url specified by https://management.azure.com/metadata/endpoints?api-version=2019-05-01
+2021-01-13 02:53:05,630|azureml._vendor.azure_cli_core.azureml_cloud|DEBUG|Finish : Loading cloud metatdata from the url specified by https://management.azure.com/metadata/endpoints?api-version=2019-05-01
+2021-01-13 02:53:05,631|azureml._vendor.azure_cli_core.azureml_cloud|DEBUG|Finish : Loading cloud metatdata
+2021-01-13 02:53:05,631|azureml.core.authentication.TokenRefresherDaemon|DEBUG|Starting daemon and triggering first instance
+2021-01-13 02:53:05,640|azureml._restclient.clientbase|INFO|Created a worker pool for first use
+2021-01-13 02:53:05,640|azureml.core.authentication|DEBUG|Time to expire 1814327.359441 seconds
+2021-01-13 02:53:05,640|azureml._restclient.service_context|DEBUG|Created a static thread pool for ServiceContext class
+2021-01-13 02:53:05,640|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:05,641|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:05,641|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:05,641|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:05,641|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:05,641|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:05,641|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:05,679|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.RunClient.get_by_exp_id-async:False|DEBUG|[START]
+2021-01-13 02:53:05,679|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.RunClient|DEBUG|ClientBase: Calling get_by_exp_id with url /history/v1.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/experimentids/{experimentId}/runs/{runId}
+2021-01-13 02:53:05,763|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.RunClient.get_by_exp_id-async:False|DEBUG|[STOP]
+2021-01-13 02:53:05,764|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7|DEBUG|Constructing run from dto. type: azureml.scriptrun, source: None, props: {'_azureml.ComputeTargetType': 'local', 'ContentSnapshotId': '220272d9-7ac0-4ac8-ae47-e8f867e69d49', 'azureml.git.repository_uri': 'https://github.com/MicrosoftLearning/mslearn-dp100', 'mlflow.source.git.repoURL': 'https://github.com/MicrosoftLearning/mslearn-dp100', 'azureml.git.branch': 'main', 'mlflow.source.git.branch': 'main', 'azureml.git.commit': '45ed35fde189dd3dad0e9ca7c19c94a89dea98c5', 'mlflow.source.git.commit': '45ed35fde189dd3dad0e9ca7c19c94a89dea98c5', 'azureml.git.dirty': 'True'}
+2021-01-13 02:53:05,764|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunContextManager|DEBUG|Valid logs dir, setting up content loader
+2021-01-13 02:53:05,764|azureml|WARNING|Could not import azureml.mlflow or azureml.contrib.mlflow mlflow APIs will not run against AzureML services.  Add azureml-mlflow as a conda dependency for the run if this behavior is desired
+2021-01-13 02:53:05,765|azureml.WorkerPool|DEBUG|[START]
+2021-01-13 02:53:05,765|azureml.SendRunKillSignal|DEBUG|[START]
+2021-01-13 02:53:05,765|azureml.RunStatusContext|DEBUG|[START]
+2021-01-13 02:53:05,765|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunContextManager.RunStatusContext|DEBUG|[START]
+2021-01-13 02:53:05,765|azureml.MetricsClient|DEBUG|[START]
+2021-01-13 02:53:05,765|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient|DEBUG|[START]
+2021-01-13 02:53:05,765|azureml.ContentUploader|DEBUG|[START]
+2021-01-13 02:53:05,765|azureml._history.utils.context_managers|DEBUG|starting file watcher
+2021-01-13 02:53:05,766|azureml._history.utils.context_managers.FileWatcher.UploadQueue|DEBUG|[Start]
+2021-01-13 02:53:05,766|azureml.TrackFolders|DEBUG|[START]
+2021-01-13 02:53:05,766|azureml.WorkingDirectoryCM|DEBUG|[START]
+2021-01-13 02:53:05,766|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|[START]
+2021-01-13 02:53:05,767|azureml.history._tracking.PythonWorkingDirectory|INFO|Current working dir: /tmp/azureml_runs/mslearn-train-diabetes_1610506313_4f7209c7
+2021-01-13 02:53:05,767|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|Calling pyfs
+2021-01-13 02:53:05,767|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|Storing working dir for pyfs as /tmp/azureml_runs/mslearn-train-diabetes_1610506313_4f7209c7
+2021-01-13 02:53:05,774|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.batch_create_empty_artifacts-async:False|DEBUG|[START]
+2021-01-13 02:53:05,774|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient|DEBUG|ClientBase: Calling batch_create_empty_artifacts with url /artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/batch/metadata/{origin}/{container}
+2021-01-13 02:53:05,906|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.batch_create_empty_artifacts-async:False|DEBUG|[STOP]
+2021-01-13 02:53:06,573|azureml._restclient.service_context|DEBUG|Access an existing static threadpool for ServiceContext class
+2021-01-13 02:53:06,573|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:06,574|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:06,574|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:06,574|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:06,574|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:06,574|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:06,574|azureml._base_sdk_common.service_discovery|DEBUG|Found history service url in environment variable AZUREML_SERVICE_ENDPOINT, history service url: https://eastus2.experiments.azureml.net.
+2021-01-13 02:53:06,608|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.RunClient.get_by_exp_id-async:False|DEBUG|[START]
+2021-01-13 02:53:06,608|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.RunClient|DEBUG|ClientBase: Calling get_by_exp_id with url /history/v1.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/experimentids/{experimentId}/runs/{runId}
+2021-01-13 02:53:06,673|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.RunClient.get_by_exp_id-async:False|DEBUG|[STOP]
+2021-01-13 02:53:06,674|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7|DEBUG|Constructing run from dto. type: azureml.scriptrun, source: None, props: {'_azureml.ComputeTargetType': 'local', 'ContentSnapshotId': '220272d9-7ac0-4ac8-ae47-e8f867e69d49', 'azureml.git.repository_uri': 'https://github.com/MicrosoftLearning/mslearn-dp100', 'mlflow.source.git.repoURL': 'https://github.com/MicrosoftLearning/mslearn-dp100', 'azureml.git.branch': 'main', 'mlflow.source.git.branch': 'main', 'azureml.git.commit': '45ed35fde189dd3dad0e9ca7c19c94a89dea98c5', 'mlflow.source.git.commit': '45ed35fde189dd3dad0e9ca7c19c94a89dea98c5', 'azureml.git.dirty': 'True'}
+2021-01-13 02:53:06,674|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunContextManager|DEBUG|Valid logs dir, setting up content loader
+2021-01-13 02:53:06,692|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient|DEBUG|Overrides: Max batch size: 50, batch cushion: 5, Interval: 1.
+2021-01-13 02:53:06,692|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2.PostMetricsBatchV2Daemon|DEBUG|Starting daemon and triggering first instance
+2021-01-13 02:53:06,692|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient|DEBUG|Used <class 'azureml._common.async_utils.batch_task_queue.BatchTaskQueue'> for use_batch=True.
+2021-01-13 02:53:06,746|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7|INFO|complete is not setting status for submitted runs.
+2021-01-13 02:53:06,747|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.FlushingMetricsClient|DEBUG|[START]
+2021-01-13 02:53:06,747|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient|DEBUG|Overrides: Max batch size: 50, batch cushion: 5, Interval: 1.
+2021-01-13 02:53:06,747|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatch.PostMetricsBatchDaemon|DEBUG|Starting daemon and triggering first instance
+2021-01-13 02:53:06,747|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient|DEBUG|Used <class 'azureml._common.async_utils.batch_task_queue.BatchTaskQueue'> for use_batch=True.
+2021-01-13 02:53:06,747|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatch.WaitFlushSource:MetricsClient|DEBUG|[START]
+2021-01-13 02:53:06,747|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatch.WaitFlushSource:MetricsClient|DEBUG|flush timeout 300 is different from task queue timeout 120, using flush timeout
+2021-01-13 02:53:06,747|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatch.WaitFlushSource:MetricsClient|DEBUG|Waiting 300 seconds on tasks: [].
+2021-01-13 02:53:06,747|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatch|DEBUG|
+2021-01-13 02:53:06,747|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatch.WaitFlushSource:MetricsClient|DEBUG|[STOP]
+2021-01-13 02:53:06,747|azureml.BatchTaskQueueAdd_1_Batches|DEBUG|[Start]
+2021-01-13 02:53:06,747|azureml.BatchTaskQueueAdd_1_Batches.WorkerPool|DEBUG|submitting future: _handle_batch
+2021-01-13 02:53:06,748|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2|DEBUG|Batch size 3.
+2021-01-13 02:53:06,748|azureml.BatchTaskQueueAdd_1_Batches.0__handle_batch|DEBUG|Using basic handler - no exception handling
+2021-01-13 02:53:06,748|azureml.BatchTaskQueueAdd_1_Batches|DEBUG|Adding task 0__handle_batch to queue of approximate size: 0
+2021-01-13 02:53:06,748|azureml.BatchTaskQueueAdd_1_Batches|DEBUG|[Stop] - waiting default timeout
+2021-01-13 02:53:06,748|azureml.BatchTaskQueueAdd_1_Batches.WaitFlushSource:BatchTaskQueueAdd_1_Batches|DEBUG|[START]
+2021-01-13 02:53:06,748|azureml.BatchTaskQueueAdd_1_Batches.WaitFlushSource:BatchTaskQueueAdd_1_Batches|DEBUG|Overriding default flush timeout from None to 120
+2021-01-13 02:53:06,748|azureml.BatchTaskQueueAdd_1_Batches.WaitFlushSource:BatchTaskQueueAdd_1_Batches|DEBUG|Waiting 120 seconds on tasks: [AsyncTask(0__handle_batch)].
+2021-01-13 02:53:06,748|azureml._restclient.service_context.WorkerPool|DEBUG|submitting future: _log_batch_v2
+2021-01-13 02:53:06,748|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient|DEBUG|Metrics Client: _log_batch_v2 is calling post_run_metrics posting 3 values.
+2021-01-13 02:53:06,748|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2.0__log_batch_v2|DEBUG|Using basic handler - no exception handling
+2021-01-13 02:53:06,748|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2|DEBUG|Adding task 0__log_batch_v2 to queue of approximate size: 0
+2021-01-13 02:53:06,748|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient._post_run_metrics_log_failed_validations-async:False|DEBUG|[START]
+2021-01-13 02:53:06,748|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient|DEBUG|ClientBase: Calling _post_run_metrics_log_failed_validations with url None
+2021-01-13 02:53:06,881|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient._post_run_metrics_log_failed_validations-async:False|DEBUG|[STOP]
+2021-01-13 02:53:06,999|azureml.BatchTaskQueueAdd_1_Batches.0__handle_batch.WaitingTask|DEBUG|[START]
+2021-01-13 02:53:06,999|azureml.BatchTaskQueueAdd_1_Batches.0__handle_batch.WaitingTask|DEBUG|Awaiter is BatchTaskQueueAdd_1_Batches
+2021-01-13 02:53:06,999|azureml.BatchTaskQueueAdd_1_Batches.0__handle_batch.WaitingTask|DEBUG|[STOP]
+2021-01-13 02:53:06,999|azureml.BatchTaskQueueAdd_1_Batches|DEBUG|Waiting on task: 0__handle_batch.
+1 tasks left. Current duration of flush 5.7220458984375e-05 seconds.
+
+2021-01-13 02:53:06,999|azureml.BatchTaskQueueAdd_1_Batches.WaitFlushSource:BatchTaskQueueAdd_1_Batches|DEBUG|[STOP]
+2021-01-13 02:53:06,999|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2.WaitFlushSource:MetricsClient|DEBUG|[START]
+2021-01-13 02:53:06,999|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2.WaitFlushSource:MetricsClient|DEBUG|flush timeout 300 is different from task queue timeout 120, using flush timeout
+2021-01-13 02:53:06,999|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2.WaitFlushSource:MetricsClient|DEBUG|Waiting 300 seconds on tasks: [AsyncTask(0__log_batch_v2)].
+2021-01-13 02:53:07,000|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2.0__log_batch_v2.WaitingTask|DEBUG|[START]
+2021-01-13 02:53:07,000|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2.0__log_batch_v2.WaitingTask|DEBUG|Awaiter is PostMetricsBatchV2
+2021-01-13 02:53:07,000|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2.0__log_batch_v2.WaitingTask|DEBUG|[STOP]
+2021-01-13 02:53:07,000|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2|DEBUG|
+2021-01-13 02:53:07,000|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.PostMetricsBatchV2.WaitFlushSource:MetricsClient|DEBUG|[STOP]
+2021-01-13 02:53:07,000|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.FlushingMetricsClient|DEBUG|[STOP]
+2021-01-13 02:53:07,000|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.wait_on_ingest-async:False|DEBUG|[START]
+2021-01-13 02:53:07,000|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient|DEBUG|ClientBase: Calling wait_on_ingest with url /history/v1.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/experiments/{experimentName}/runs/{runId}/metricsingest/wait
+2021-01-13 02:53:07,057|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.MetricsClient.wait_on_ingest-async:False|DEBUG|[STOP]
+2021-01-13 02:53:10,954|azureml._history.utils.context_managers.FileWatcher|DEBUG|uploading data to container: azureml blob: ExperimentRun/dcid.mslearn-train-diabetes_1610506313_4f7209c7/logs/azureml/1667_azureml.log path: /tmp/azureml_runs/mslearn-train-diabetes_1610506313_4f7209c7/logs/azureml/1667_azureml.log
+2021-01-13 02:53:10,954|azureml._history.utils.context_managers.FileWatcher.UploadQueue.WorkerPool|DEBUG|submitting future: result
+2021-01-13 02:53:10,954|azureml._history.utils.context_managers.FileWatcher.UploadQueue.0_result|DEBUG|Using basic handler - no exception handling
+2021-01-13 02:53:10,954|azureml._history.utils.context_managers.FileWatcher.UploadQueue|DEBUG|Adding task 0_result to queue of approximate size: 0
+2021-01-13 02:53:12,063|azureml._restclient.clientbase|DEBUG|ClientBase: Calling update_status with url None
+2021-01-13 02:53:12,125|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|Uploading tracked directories: [], excluding []
+2021-01-13 02:53:12,125|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|Calling track for pyfs
+2021-01-13 02:53:12,399|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|Calling pyfs
+2021-01-13 02:53:12,399|azureml.history._tracking.PythonWorkingDirectory|INFO|Current working dir: /tmp/azureml_runs/mslearn-train-diabetes_1610506313_4f7209c7
+2021-01-13 02:53:12,399|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|Reverting working dir from /tmp/azureml_runs/mslearn-train-diabetes_1610506313_4f7209c7 to /tmp/azureml_runs/mslearn-train-diabetes_1610506313_4f7209c7
+2021-01-13 02:53:12,399|azureml.history._tracking.PythonWorkingDirectory|INFO|Working dir is already updated /tmp/azureml_runs/mslearn-train-diabetes_1610506313_4f7209c7
+2021-01-13 02:53:12,399|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|[STOP]
+2021-01-13 02:53:12,399|azureml.WorkingDirectoryCM|DEBUG|[STOP]
+2021-01-13 02:53:12,400|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|Uploading tracked directories: ['./outputs'], excluding ['azureml-logs/driver_log']
+2021-01-13 02:53:12,400|azureml.history._tracking.PythonWorkingDirectory.workingdir|DEBUG|Calling track for pyfs
+2021-01-13 02:53:12,400|azureml.history._tracking.PythonWorkingDirectory|DEBUG|./outputs exists as directory, uploading..
+2021-01-13 02:53:12,400|azureml.history._tracking.PythonWorkingDirectory|DEBUG|Found and adding path to upload: ./outputs/diabetes_model.pkl
+2021-01-13 02:53:12,400|azureml.history._tracking.PythonWorkingDirectory|DEBUG|Paths to upload is ['./outputs/diabetes_model.pkl'] in dir ./outputs
+2021-01-13 02:53:12,400|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files|DEBUG|Overriding default timeout to 300
+2021-01-13 02:53:12,400|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files|DEBUG|[Start]
+2021-01-13 02:53:12,400|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.batch_create_empty_artifacts-async:False|DEBUG|[START]
+2021-01-13 02:53:12,400|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient|DEBUG|ClientBase: Calling batch_create_empty_artifacts with url /artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/batch/metadata/{origin}/{container}
+2021-01-13 02:53:13,446|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.batch_create_empty_artifacts-async:False|DEBUG|[STOP]
+2021-01-13 02:53:13,447|azureml._restclient.service_context.WorkerPool|DEBUG|submitting future: perform_upload
+2021-01-13 02:53:13,447|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files.0_perform_upload|DEBUG|Using basic handler - no exception handling
+2021-01-13 02:53:13,447|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files|DEBUG|Adding task 0_perform_upload to queue of approximate size: 0
+2021-01-13 02:53:13,447|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files|DEBUG|[Stop] - waiting default timeout
+2021-01-13 02:53:13,447|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files.WaitFlushSource:upload_files|DEBUG|[START]
+2021-01-13 02:53:13,447|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files.WaitFlushSource:upload_files|DEBUG|Overriding default flush timeout from None to 300
+2021-01-13 02:53:13,447|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files.WaitFlushSource:upload_files|DEBUG|Waiting 300 seconds on tasks: [AsyncTask(0_perform_upload)].
+2021-01-13 02:53:13,447|azureml._restclient.clientbase|DEBUG|ClientBase: Calling create_blob_from_stream with url None
+2021-01-13 02:53:13,494|azureml._file_utils.upload|DEBUG|Uploaded blob ExperimentRun/dcid.mslearn-train-diabetes_1610506313_4f7209c7/outputs/diabetes_model.pkl with size 964.
+2021-01-13 02:53:13,698|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files.0_perform_upload.WaitingTask|DEBUG|[START]
+2021-01-13 02:53:13,698|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files.0_perform_upload.WaitingTask|DEBUG|Awaiter is upload_files
+2021-01-13 02:53:13,698|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files.0_perform_upload.WaitingTask|DEBUG|[STOP]
+2021-01-13 02:53:13,698|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files|DEBUG|Waiting on task: 0_perform_upload.
+1 tasks left. Current duration of flush 6.747245788574219e-05 seconds.
+
+2021-01-13 02:53:13,698|azureml._SubmittedRun#mslearn-train-diabetes_1610506313_4f7209c7.RunHistoryFacade.ArtifactsClient.upload_files.WaitFlushSource:upload_files|DEBUG|[STOP]
+2021-01-13 02:53:13,698|azureml.TrackFolders|DEBUG|[STOP]
+2021-01-13 02:53:13,698|azureml._history.utils.context_managers|DEBUG|exiting ContentUploader, waiting for file_watcher to finish upload...
+2021-01-13 02:53:13,698|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher called finish, setting event
+2021-01-13 02:53:13,698|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher received exit event, getting current_stat
+2021-01-13 02:53:13,699|azureml._history.utils.context_managers.FileWatcher.UploadQueue.WorkerPool|DEBUG|submitting future: result
+2021-01-13 02:53:13,699|azureml._history.utils.context_managers.FileWatcher.UploadQueue.1_result|DEBUG|Using basic handler - no exception handling
+2021-01-13 02:53:13,700|azureml._history.utils.context_managers.FileWatcher.UploadQueue|DEBUG|Adding task 1_result to queue of approximate size: 1
+2021-01-13 02:53:13,700|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher retrieved current_stat, will upload to current_stat
+2021-01-13 02:53:13,700|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,702|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,703|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,703|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,703|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,703|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,703|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,703|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,703|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,703|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,704|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,704|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,704|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,704|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,704|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,704|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,704|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,704|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,705|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,705|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,705|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,705|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,705|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,705|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,705|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,705|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,706|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,706|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,706|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,706|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,706|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,706|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,706|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,706|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,706|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,707|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,707|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,707|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,707|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,707|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher uploading files to current_stat...
+2021-01-13 02:53:13,708|azureml._history.utils.context_managers.FileWatcher.UploadQueue.WorkerPool|DEBUG|submitting future: result
+2021-01-13 02:53:13,709|azureml._history.utils.context_managers.FileWatcher.UploadQueue.2_result|DEBUG|Using basic handler - no exception handling
+2021-01-13 02:53:13,711|azureml._history.utils.context_managers.FileWatcher.UploadQueue|DEBUG|Adding task 2_result to queue of approximate size: 2
+2021-01-13 02:53:13,711|azureml._history.utils.context_managers.FileWatcher|DEBUG|FileWatcher finished uploading to current_stat, finishing task queue
+2021-01-13 02:53:13,711|azureml._history.utils.context_managers.FileWatcher.UploadQueue|DEBUG|[Stop] - waiting default timeout
+2021-01-13 02:53:13,711|azureml._history.utils.context_managers.FileWatcher.UploadQueue.WaitFlushSource:UploadQueue|DEBUG|[START]
+2021-01-13 02:53:13,711|azureml._history.utils.context_managers.FileWatcher.UploadQueue.WaitFlushSource:UploadQueue|DEBUG|Overriding default flush timeout from None to 120
+2021-01-13 02:53:13,711|azureml._history.utils.context_managers.FileWatcher.UploadQueue.WaitFlushSource:UploadQueue|DEBUG|Waiting 120 seconds on tasks: [AsyncTask(0_result), AsyncTask(1_result), AsyncTask(2_result)].
+2021-01-13 02:53:13,712|azureml._history.utils.context_managers.FileWatcher.UploadQueue.0_result.WaitingTask|DEBUG|[START]
+2021-01-13 02:53:13,712|azureml._history.utils.context_managers.FileWatcher.UploadQueue.0_result.WaitingTask|DEBUG|Awaiter is UploadQueue
+2021-01-13 02:53:13,712|azureml._history.utils.context_managers.FileWatcher.UploadQueue.0_result.WaitingTask|DEBUG|[STOP]
+2021-01-13 02:53:13,712|azureml._history.utils.context_managers.FileWatcher.UploadQueue.1_result.WaitingTask|DEBUG|[START]
+2021-01-13 02:53:13,712|azureml._history.utils.context_managers.FileWatcher.UploadQueue.1_result.WaitingTask|DEBUG|Awaiter is UploadQueue
+2021-01-13 02:53:13,712|azureml._history.utils.context_managers.FileWatcher.UploadQueue.1_result.WaitingTask|DEBUG|[STOP]
+2021-01-13 02:53:13,962|azureml._history.utils.context_managers.FileWatcher.UploadQueue.2_result.WaitingTask|DEBUG|[START]
+2021-01-13 02:53:13,963|azureml._history.utils.context_managers.FileWatcher.UploadQueue.2_result.WaitingTask|DEBUG|Awaiter is UploadQueue
+2021-01-13 02:53:13,963|azureml._history.utils.context_managers.FileWatcher.UploadQueue.2_result.WaitingTask|DEBUG|[STOP]
+2021-01-13 02:53:13,963|azureml._history.utils.context_managers.FileWatcher.UploadQueue|DEBUG|Waiting on task: 2_result.
+1 tasks left. Current duration of flush 0.0003650188446044922 seconds.
+
+2021-01-13 02:53:13,963|azureml._history.utils.context_managers.FileWatcher.UploadQueue.WaitFlushSource:UploadQueue|DEBUG|[STOP]
+
+Run is completed.
+
+
+
+
+
+
+
+
+
+#You can retrieve the metrics and outputs from the Run object.
+# Get logged metrics and files
+metrics = run.get_metrics()
+for key in metrics.keys():
+        print(key, metrics.get(key))
+print('\n')
+for file in run.get_file_names():
+    print(file)
+    
+
+Regularization Rate 0.01
+Accuracy 0.774
+AUC 0.8483203144435048
+
+
+azureml-logs/60_control_log.txt
+azureml-logs/70_driver_log.txt
+logs/azureml/1667_azureml.log
+outputs/diabetes_model.pkl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Register the trained model
+#Note that the outputs of the experiment include the trained model file (diabetes_model.pkl). You can register this model in your Azure Machine Learning workspace, making it possible to track model versions and retrieve them later.
+from azureml.core import Model
+
+# Register the model
+run.register_model(model_path='outputs/diabetes_model.pkl', model_name='diabetes_model',
+                   tags={'Training context':'Script'},
+                   properties={'AUC': run.get_metrics()['AUC'], 'Accuracy': run.get_metrics()['Accuracy']})
+
+# List registered models
+for model in Model.list(ws):
+    print(model.name, 'version:', model.version)
+    for tag_name in model.tags:
+        tag = model.tags[tag_name]
+        print ('\t',tag_name, ':', tag)
+    for prop_name in model.properties:
+        prop = model.properties[prop_name]
+        print ('\t',prop_name, ':', prop)
+    print('\n')
+
+
+diabetes_model version: 1
+	 Training context : Script
+	 AUC : 0.8483203144435048
+	 Accuracy : 0.774
+
+
+
+
+
+print(Model.list(ws))
+[Model(workspace=Workspace.create(name='workspace1', 
+                                  subscription_id='c7daf4ee-2604-49aa-a38b-ccbd58f44f00', 
+                                  resource_group='rg1'), 
+       name=diabetes_model, 
+       id=diabetes_model:1, 
+       version=1, 
+       tags={'Training context': 'Script'}, 
+       properties={'AUC': '0.8483203144435048', 
+                   'Accuracy': '0.774'})]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Create a parameterized training script
+#You can increase the flexibility of your training experiment by adding parameters to your script, enabling you to repeat the same training experiment with different settings. In this case, you'll add a parameter for the regularization rate used by the logistic regression algorithm when training the model.
+#Again, lets start by creating a folder for the parameterized script and the training data.
+import os, shutil
+
+# Create a folder for the experiment files
+training_folder = 'diabetes-training-params'
+os.makedirs(training_folder, exist_ok=True)
+
+# Copy the data file into the experiment folder
+shutil.copy('data/diabetes.csv', os.path.join(training_folder, "diabetes.csv"))
+
+'diabetes-training-params/diabetes.csv'
+
+
+
+
+#Now let's create a script with an argument for the regularization rate hyperparameter. The argument is read using a Python argparse.ArgumentParser object.
+%%writefile $training_folder/diabetes_training.py
+# Import libraries
+from azureml.core import Run
+import pandas as pd
+import numpy as np
+import joblib
+import os
+import argparse
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+
+# Get the experiment run context
+run = Run.get_context()
+
+# Set regularization hyperparameter
+parser = argparse.ArgumentParser()
+parser.add_argument('--reg_rate', type=float, dest='reg', default=0.01)
+args = parser.parse_args()
+reg = args.reg
+
+# load the diabetes dataset
+print("Loading Data...")
+# load the diabetes dataset
+diabetes = pd.read_csv('diabetes.csv')
+
+# Separate features and labels
+X, y = diabetes[['Pregnancies','PlasmaGlucose','DiastolicBloodPressure','TricepsThickness','SerumInsulin','BMI','DiabetesPedigree','Age']].values, diabetes['Diabetic'].values
+
+# Split data into training set and test set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=0)
+
+# Train a logistic regression model
+print('Training a logistic regression model with regularization rate of', reg)
+run.log('Regularization Rate',  np.float(reg))
+model = LogisticRegression(C=1/reg, solver="liblinear").fit(X_train, y_train)
+
+# calculate accuracy
+y_hat = model.predict(X_test)
+acc = np.average(y_hat == y_test)
+print('Accuracy:', acc)
+run.log('Accuracy', np.float(acc))
+
+# calculate AUC
+y_scores = model.predict_proba(X_test)
+auc = roc_auc_score(y_test,y_scores[:,1])
+print('AUC: ' + str(auc))
+run.log('AUC', np.float(auc))
+
+os.makedirs('outputs', exist_ok=True)
+joblib.dump(value=model, filename='outputs/diabetes_model.pkl')
+
+run.complete()
+
+
+Writing diabetes-training-params/diabetes_training.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Run the script with arguments
+#You run the script as an experiment like you did previously, reusing the environment you created; but this time you must provide the --reg_rate parameter that the script expects as an argument.
+# Create a script config
+script_config = ScriptRunConfig(source_directory=training_folder,
+                                script='diabetes_training.py',
+                                arguments = ['--reg_rate', 0.1],
+                                environment=sklearn_env) 
+
+# submit the experiment
+experiment_name = 'mslearn-train-diabetes'
+experiment = Experiment(workspace=ws, name=experiment_name)
+run = experiment.submit(config=script_config)
+RunDetails(run).show()
+run.wait_for_completion()
+
+{'runId': 'mslearn-train-diabetes_1610511217_a107289f',
+ 'target': 'local',
+ 'status': 'Finalizing',
+ 'startTimeUtc': '2021-01-13T04:13:42.627191Z',
+ 'properties': {'_azureml.ComputeTargetType': 'local',
+  'ContentSnapshotId': 'de3d37c2-26d0-4736-93ad-625a651d8d71',
+  'azureml.git.repository_uri': 'https://github.com/MicrosoftLearning/mslearn-dp100',
+  'mlflow.source.git.repoURL': 'https://github.com/MicrosoftLearning/mslearn-dp100',
+  'azureml.git.branch': 'main',
+  'mlflow.source.git.branch': 'main',
+  'azureml.git.commit': '45ed35fde189dd3dad0e9ca7c19c94a89dea98c5',
+  'mlflow.source.git.commit': '45ed35fde189dd3dad0e9ca7c19c94a89dea98c5',
+  'azureml.git.dirty': 'True'},
+ 'inputDatasets': [],
+ 'outputDatasets': [],
+ 'runDefinition': {'script': 'diabetes_training.py',
+  'command': '',
+  'useAbsolutePath': False,
+  'arguments': ['--reg_rate', '0.1'],
+  'sourceDirectoryDataStore': None,
+  'framework': 'Python',
+  'communicator': 'None',
+  'target': 'local',
+  'dataReferences': {},
+  'data': {},
+  'outputData': {},
+  'jobName': None,
+  'maxRunDurationSeconds': 2592000,
+  'nodeCount': 1,
+  'priority': None,
+  'credentialPassthrough': False,
+  'environment': {'name': 'sklearn-env',
+   'version': 'Autosave_2021-01-13T02:51:53Z_a79cbbc6',
+   'python': {'interpreterPath': 'python',
+    'userManagedDependencies': False,
+    'condaDependencies': {'channels': ['anaconda', 'conda-forge'],
+     'dependencies': ['python=3.6.2',
+      {'pip': ['scikit-learn', 'azureml-defaults~=1.20.0']}],
+     'name': 'azureml_b5582cc467b1c803d5da53931a16a9ca'},
+    'baseCondaEnvironment': None},
+   'environmentVariables': {'EXAMPLE_ENV_VAR': 'EXAMPLE_VALUE'},
+   'docker': {'baseImage': 'mcr.microsoft.com/azureml/intelmpi2018.3-ubuntu16.04:20210104.v1',
+    'platform': {'os': 'Linux', 'architecture': 'amd64'},
+    'baseDockerfile': None,
+    'baseImageRegistry': {'address': None, 'username': None, 'password': None},
+    'enabled': False,
+    'arguments': []},
+   'spark': {'repositories': [], 'packages': [], 'precachePackages': True},
+   'inferencingStackVersion': None},
+  'history': {'outputCollection': True,
+   'directoriesToWatch': ['logs'],
+   'enableMLflowTracking': True,
+   'snapshotProject': True},
+  'spark': {'configuration': {'spark.app.name': 'Azure ML Experiment',
+    'spark.yarn.maxAppAttempts': '1'}},
+  'parallelTask': {'maxRetriesPerWorker': 0,
+   'workerCountPerNode': 1,
+   'terminalExitCodes': None,
+   'configuration': {}},
+  'amlCompute': {'name': None,
+   'vmSize': None,
+   'retainCluster': False,
+   'clusterMaxNodeCount': None},
+  'aiSuperComputer': {'instanceType': None,
+   'frameworkImage': None,
+   'imageVersion': None,
+   'location': None,
+   'aiSuperComputerStorageData': None},
+  'tensorflow': {'workerCount': 1, 'parameterServerCount': 1},
+  'mpi': {'processCountPerNode': 1},
+  'hdi': {'yarnDeployMode': 'Cluster'},
+  'containerInstance': {'region': None, 'cpuCores': 2.0, 'memoryGb': 3.5},
+  'exposedPorts': None,
+  'docker': {'useDocker': False,
+   'sharedVolumes': True,
+   'shmSize': '2g',
+   'arguments': []},
+  'cmk8sCompute': {'configuration': {}},
+  'commandReturnCodeConfig': {'returnCode': 'Zero',
+   'successfulReturnCodes': []}},
+ 'logFiles': {'azureml-logs/60_control_log.txt': 'https://workspace12471181703.blob.core.windows.net/azureml/ExperimentRun/dcid.mslearn-train-diabetes_1610511217_a107289f/azureml-logs/60_control_log.txt?sv=2019-02-02&sr=b&sig=JrwUCfY1Ge4WNvVeIXT9Z1NTaf%2FZ9UVE9milN3CdJjE%3D&st=2021-01-13T04%3A03%3A54Z&se=2021-01-13T12%3A13%3A54Z&sp=r',
+  'azureml-logs/70_driver_log.txt': 'https://workspace12471181703.blob.core.windows.net/azureml/ExperimentRun/dcid.mslearn-train-diabetes_1610511217_a107289f/azureml-logs/70_driver_log.txt?sv=2019-02-02&sr=b&sig=vH7qQSF7rOfF3g70J1vMDzyESZHfbGyUNHDDprcI5pQ%3D&st=2021-01-13T04%3A03%3A54Z&se=2021-01-13T12%3A13%3A54Z&sp=r',
+  'logs/azureml/21477_azureml.log': 'https://workspace12471181703.blob.core.windows.net/azureml/ExperimentRun/dcid.mslearn-train-diabetes_1610511217_a107289f/logs/azureml/21477_azureml.log?sv=2019-02-02&sr=b&sig=4hCHopxdBXRwN1x6p7luEfS5AOS4M96eM7rNv27x9bQ%3D&st=2021-01-13T04%3A03%3A47Z&se=2021-01-13T12%3A13%3A47Z&sp=r'},
+ 'submittedBy': 'you'}
+
+
+
+
+
+#Once again, we can get the metrics and outputs from the completed run.
+# Get logged metrics
+metrics = run.get_metrics()
+for key in metrics.keys():
+        print(key, metrics.get(key))
+print('\n')
+for file in run.get_file_names():
+    print(file)
+    
+Regularization Rate 0.1
+Accuracy 0.774
+AUC 0.8484357430717946
+
+
+azureml-logs/60_control_log.txt
+azureml-logs/70_driver_log.txt
+logs/azureml/21477_azureml.log
+outputs/diabetes_model.pkl
+
+
+
+
+
+
+
+
+#Register a new version of the model
+#Now that you've trained a new model, you can register it as a new version in the workspace.
+from azureml.core import Model
+
+# Register the model
+run.register_model(model_path='outputs/diabetes_model.pkl', model_name='diabetes_model',
+                   tags={'Training context':'Parameterized script'},
+                   properties={'AUC': run.get_metrics()['AUC'], 'Accuracy': run.get_metrics()['Accuracy']})
+
+# List registered models
+for model in Model.list(ws):
+    print(model.name, 'version:', model.version)
+    for tag_name in model.tags:
+        tag = model.tags[tag_name]
+        print ('\t',tag_name, ':', tag)
+    for prop_name in model.properties:
+        prop = model.properties[prop_name]
+        print ('\t',prop_name, ':', prop)
+    print('\n')
+    
+    
+diabetes_model version: 2
+	 Training context : Parameterized script
+	 AUC : 0.8484357430717946
+	 Accuracy : 0.774
+
+
+diabetes_model version: 1
+	 Training context : Script
+	 AUC : 0.8483203144435048
+	 Accuracy : 0.774
+
+
