@@ -1,0 +1,370 @@
+#https://docs.microsoft.com/en-us/learn/modules/work-with-data-in-aml/3-using-datastores
+
+#register an Azure Storage blob container as a datastore named blob_data
+from azureml.core import Workspace, Datastore
+
+ws = Workspace.from_config()
+
+# Register a new datastore
+blob_ds = Datastore.register_azure_blob_container(workspace=ws, 
+                                                  datastore_name='blob_data', 
+                                                  container_name='data_container',
+                                                  account_name='az_store_acct',
+                                                  account_key='123456abcde789…')
+                                                  
+                                                  
+                                                  
+
+
+
+
+#Managing datastores
+#list the names of each datastore in the workspace
+for ds_name in ws.datastores:
+    print(ds_name)
+
+#get a reference to any datastore by using the Datastore.get() method
+blob_store = Datastore.get(ws, datastore_name='blob_data')
+
+
+#The workspace always includes a default datastore (initially, this is the built-in workspaceblobstore datastore), which you can retrieve by using the get_default_datastore() method of a Workspace object
+default_store = ws.get_default_datastore()
+
+
+
+
+
+
+
+
+
+#Parquet (data file) format generally results in better performance
+#To change the default datastore, use the set_default_datastore() method:
+ws.set_default_datastore('blob_data')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#dataset
+#To create a tabular dataset using the SDK, use the from_delimited_files method of the Dataset.Tabular class, like this:
+#Creating and registering tabular datasets
+from azureml.core import Dataset
+
+blob_ds = ws.get_default_datastore()
+
+#The dataset in this example includes data from two file paths within the default datastore:
+#The current_data.csv file in the data/files folder.
+#All .csv files in the data/files/archive/ folder.
+csv_paths = [(blob_ds, 'data/files/current_data.csv'),
+             (blob_ds, 'data/files/archive/*.csv')]
+
+#create dataset
+tab_ds = Dataset.Tabular.from_delimited_files(path=csv_paths)
+#register dataset in the workspace with the name csv_table
+tab_ds = tab_ds.register(workspace=ws, name='csv_table')
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Creating and registering file datasets
+#To create a file dataset using the SDK, use the from_files method of the Dataset.File class, like this:
+from azureml.core import Dataset
+
+blob_ds = ws.get_default_datastore()
+
+#create dataset containing all .jpg files in the data/files/images path within the default datastore
+file_ds = Dataset.File.from_files(path=(blob_ds, 'data/files/images/*.jpg'))
+#register dataset
+file_ds = file_ds.register(workspace=ws, name='img_files')
+
+
+
+
+
+
+
+
+
+
+#Retrieving a registered dataset
+#After registering a dataset, you can retrieve it by using any of the following techniques:
+#The datasets dictionary attribute of a Workspace object.
+#The get_by_name or get_by_id method of the Dataset class.
+import azureml.core
+from azureml.core import Workspace, Dataset
+
+# Load the workspace from the saved config file
+ws = Workspace.from_config()
+
+#method 1
+# Get a dataset from the workspace datasets collection
+ds1 = ws.datasets['csv_table']
+
+#method 2
+# Get a dataset by name from the datasets class
+ds2 = Dataset.get_by_name(ws, 'img_files')
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Dataset versioning
+#Datasets can be versioned, enabling you to track historical versions of datasets that were used in experiments, and reproduce those experiments with data in the same state.
+#.png files in the images folder have been added to the definition of the img_paths dataset
+img_paths = [(blob_ds, 'data/files/images/*.jpg'),
+             (blob_ds, 'data/files/images/*.png')]
+             
+file_ds = Dataset.File.from_files(path=img_paths)
+#You can create a new version of a dataset by registering it with the same name as a previously registered dataset and specifying the create_new_version property:
+file_ds = file_ds.register(workspace=ws, name='img_files', create_new_version=True)
+
+
+
+
+
+
+
+
+
+
+
+#Retrieving a specific dataset version
+#specify the version parameter in the get_by_name method of the Dataset class
+img_ds = Dataset.get_by_name(workspace=ws, name='img_files', version=2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Use datasets
+
+#Read tabular datasets
+#You can read data directly from a tabular dataset by converting it into a Pandas or Spark dataframe:
+df = tab_ds.to_pandas_dataframe()
+# code to work with dataframe goes here, for example:
+print(df.head())
+
+
+
+#Pass a tabular dataset to an experiment script
+#method 1
+#Use a SCRIPT ARGUMENT (DEFINED IN THE SCRIPT) for a tabular dataset
+#ScriptRunConfig:
+env = Environment('my_env')
+packages = CondaDependencies.create(conda_packages=['pip'],
+                                    pip_packages=['azureml-defaults',
+                                                  'azureml-dataprep[pandas]'])
+env.python.conda_dependencies = packages
+
+script_config = ScriptRunConfig(source_directory='my_dir',
+                                script='script.py',
+                                arguments=['--ds', tab_ds],
+                                environment=env)
+
+
+
+#Script:
+from azureml.core import Run, Dataset
+
+#You can pass a tabular dataset as a script argument. 
+#the argument received by the script is the unique ID for the dataset in your workspace. 
+parser.add_argument('--ds', type=str, dest='dataset_id')
+args = parser.parse_args()
+
+run = Run.get_context()
+#get the workspace from the run context
+ws = run.experiment.workspace
+
+#In the script, retrieve the dataset by it's ID.
+dataset = Dataset.get_by_id(ws, id=args.dataset_id)
+data = dataset.to_pandas_dataframe()
+
+
+
+
+
+#method 2
+#Use a NAMED INPUT (DEFINED IN THE SCRIPTRUNCONFIG) for a tabular dataset
+#ScriptRunConfig:
+env = Environment('my_env')
+packages = CondaDependencies.create(conda_packages=['pip'],
+                                    pip_packages=['azureml-defaults',
+                                                  'azureml-dataprep[pandas]'])
+env.python.conda_dependencies = packages
+
+script_config = ScriptRunConfig(source_directory='my_dir',
+                                script='script.py',
+                                #use the as_named_input method of the dataset to specify a name for the dataset
+                                arguments=['--ds', tab_ds.as_named_input('my_dataset')],
+                                environment=env)
+
+
+
+#Script:
+from azureml.core import Run
+
+#Note that if you use this approach, you still need to include a script argument for the dataset, even though you don’t actually use it to retrieve the dataset.
+parser.add_argument('--ds', type=str, dest='ds_id')
+args = parser.parse_args()
+
+run = Run.get_context()
+#in the script, retrieve the dataset by name from the run context's input_datasets collection without needing to retrieve it from the workspace. 
+dataset = run.input_datasets['my_dataset']
+data = dataset.to_pandas_dataframe()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Work with file datasets
+#When working with a file dataset, you can use the to_path() method to return a list of the file paths encapsulated by the dataset:
+for file_path in file_ds.to_path():
+    print(file_path)
+
+
+#method 1
+#Use a script argument for a file dataset
+#specify a mode for the file dataset argument, which can be 
+#as_download - copies the files to a temporary location on the compute where the script is being run
+#as_mount - stream the files directly from their source; when there is a large amount of data for which there may not be enough storage space on the experiment compute
+
+#ScriptRunConfig:
+env = Environment('my_env')
+packages = CondaDependencies.create(conda_packages=['pip'],
+                                    pip_packages=['azureml-defaults',
+                                                  'azureml-dataprep[pandas]'])
+env.python.conda_dependencies = packages
+
+script_config = ScriptRunConfig(source_directory='my_dir',
+                                script='script.py',
+                                #as_download
+                                arguments=['--ds', file_ds.as_download()],
+                                environment=env)
+
+#Script:
+from azureml.core import Run
+import glob
+
+parser.add_argument('--ds', type=str, dest='ds_ref')
+args = parser.parse_args()
+run = Run.get_context()
+
+imgs = glob.glob(ds_ref + "/*.jpg")
+
+
+
+
+
+#method 2
+#Use a named input for a file dataset
+#ScriptRunConfig:
+env = Environment('my_env')
+packages = CondaDependencies.create(conda_packages=['pip'],
+                                    pip_packages=['azureml-defaults',
+                                                  'azureml-dataprep[pandas]'])
+env.python.conda_dependencies = packages
+
+script_config = ScriptRunConfig(source_directory='my_dir',
+                                script='script.py',
+                                #use the as_named_input method of the dataset to specify a name before specifying the access mode
+                                arguments=['--ds', file_ds.as_named_input('my_ds').as_download()],
+                                environment=env)
+
+
+#Script:
+from azureml.core import Run
+import glob
+
+#As with tabular datasets, if you use a named input, you still need to include a script argument for the dataset, even though you don’t actually use it to retrieve the dataset
+parser.add_argument('--ds', type=str, dest='ds_ref')
+args = parser.parse_args()
+
+run = Run.get_context()
+#in the script, you can retrieve the dataset by name from the run context's input_datasets collection
+dataset = run.input_datasets['my_ds']
+imgs= glob.glob(dataset + "/*.jpg")
+
+
+
