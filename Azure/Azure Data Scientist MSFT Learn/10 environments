@@ -1,0 +1,195 @@
+#https://docs.microsoft.com/en-us/learn/modules/use-compute-contexts-in-aml/2-environments
+#Creating environments
+#3 methods
+
+
+
+
+
+
+
+#method 1
+#Creating an environment from a specification file
+#You can use a 
+#Conda specification file or
+#pip specification file 
+#to define the packages required in a Python environment, and use it to create an Environment object.
+
+#For example, you could save the following Conda configuration settings in a CONDA SPECIFICATION FILE named conda.yml:
+#Bash
+name: py_env
+dependencies:
+  - numpy
+  - pandas
+  - scikit-learn
+  - pip:
+    - azureml-defaults
+
+#You could then use the following code to create an Azure Machine Learning environment from the saved specification file:
+#Py
+from azureml.core import Environment
+
+env = Environment.from_conda_specification(name='training_environment',
+                                           file_path='./conda.yml')
+
+
+
+
+
+
+
+#method 2
+#Creating an environment from an EXISTING CONDA ENVIRONMENT on your workstation
+#QUESTION: LOCAL WORKSTATION/LAPTOP OR AZURE ML WORKSPACE?
+#py
+from azureml.core import Environment
+
+env = Environment.from_existing_conda_environment(name='training_environment',
+                                                  conda_environment_name='py_env')
+
+
+
+
+
+
+
+#method 3
+#Creating an environment by SPECIFYING PACKAGES
+#specify the Conda and pip packages you need in a CondaDependencies object
+#py
+from azureml.core import Environment
+from azureml.core.conda_dependencies import CondaDependencies
+
+env = Environment('training_environment')
+deps = CondaDependencies.create(conda_packages=['scikit-learn','pandas','numpy'],
+                                pip_packages=['azureml-defaults'])
+env.python.conda_dependencies = deps
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Configuring environment containers
+#Usually, you should create environments in containers (this is the default unless the docker.enabled property is set to False, in which case the environment is created directly in the compute target)
+
+#method 1
+#specify container conda dependencies
+#Py
+env.docker.enabled = True
+deps = CondaDependencies.create(conda_packages=['scikit-learn','pandas','pip'],                      
+                                pip_packages=['azureml-defaults']
+env.python.conda_dependencies = deps
+
+
+
+
+
+
+#container base image
+#Azure Machine Learning uses a library of base images for containers, 
+#choosing the appropriate base for the compute target you specify (for example, including Cuda support for GPU-based compute). 
+#If you have created custom container images and registered them in a container registry, you can override the default base images and use your own.
+
+#method 2
+#POSSIBLE TO USE YOUR OWN CONTAINER BASE IMAGE
+#PY
+env.docker.base_image='my-base-image'
+env.docker.base_image_registry='myregistry.azurecr.io/myimage'
+
+
+
+
+#method 3
+#Alternatively, you can have an image created on-demand based on the base image and 
+#additional settings in a DOCKERFILE.
+#py
+env.docker.base_image = None
+env.docker.base_dockerfile = './Dockerfile'
+
+
+
+
+#method 4
+#By default, Azure machine Learning handles Python paths and package dependencies. 
+#If your image already includes an installation of Python with the dependencies you need, you can override this behavior 
+#by setting python.user_managed_dependencies to True and 
+#setting an explicit Python path for your installation.
+#py
+env.python.user_managed_dependencies=True
+env.python.interpreter_path = '/opt/miniconda/bin/python'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Registering and reusing environments
+#After you've created an environment, 
+#you can register it in your workspace and reuse it for future experiments that have the same Python dependencies.
+
+#Registering an environment
+#Use the register method of an Environment object to register an environment:
+#py
+env.register(workspace=ws)
+
+
+#view the registered environments in your workspace like this:
+#py
+from azureml.core import Environment
+
+env_names = Environment.list(workspace=ws)
+for env_name in env_names:
+    print('Name:',env_name)
+
+
+
+
+
+
+
+
+#Retrieving and using an environment
+#You can retrieve a registered environment by 
+#using the get method of the Environment class, and then 
+#assign the registered environment to a ScriptRunConfig.
+#When an experiment based on the estimator is run, Azure Machine Learning will look for an existing environment that matches the definition, and if none is found a new environment will be created based on the registered environment specification.
+
+
+#For example, the following code sample retrieves the training_environment registered environment, and 
+#assigns the registered environment to a script run configuration:
+#py
+from azureml.core import Environment, ScriptRunConfig
+
+training_env = Environment.get(workspace=ws, 
+                               name='training_environment')
+
+#QUESTION: should environment=training_env?
+script_config = ScriptRunConfig(source_directory='my_dir',
+                                script='script.py',
+                                environment=env)
+
