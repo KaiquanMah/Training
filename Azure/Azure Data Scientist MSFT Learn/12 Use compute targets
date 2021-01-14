@@ -1,0 +1,59 @@
+#source - https://docs.microsoft.com/en-us/learn/modules/use-compute-contexts-in-aml/5-using-compute
+#eg run experiments
+#To use a particular compute target, you can specify it in the appropriate parameter for 
+#an experiment run configuration or 
+#estimator
+
+
+
+
+
+#here we configure an estimator to use the compute target named aml-cluster:
+from azureml.core import Environment, ScriptRunConfig
+
+compute_name = 'aml-cluster'
+
+training_env = Environment.get(workspace=ws, name='training_environment')
+
+script_config = ScriptRunConfig(source_directory='my_dir',
+                                script='script.py',
+                                environment=training_env,
+                                compute_target=compute_name)
+
+
+
+
+
+
+
+
+
+#When an experiment is submitted, 
+#the RUN will be QUEUED while 
+#the aml-cluster COMPUTE TARGET is STARTed and 
+#the specified ENVIRONMENT CREATED on the compute target, and then 
+#the RUN will be PROCESSED on the compute environment.
+
+#Instead of specifying the name of the compute target, 
+#you can specify a ComputeTarget object, like this:
+from azureml.core import Environment, ScriptRunConfig
+from azureml.core.compute import ComputeTarget
+
+compute_name = "aml-cluster"
+
+#specify a ComputeTarget object
+training_cluster = ComputeTarget(workspace=ws, name=compute_name)
+
+training_env = Environment.get(workspace=ws, name='training_environment')
+
+script_config = ScriptRunConfig(source_directory='my_dir',
+                                script='script.py',
+                                environment=training_env,
+                                #reference the ComputeTarget object
+                                compute_target=training_cluster)
+
+
+
+
+
+
