@@ -1,0 +1,1750 @@
+#source - https://docs.microsoft.com/en-us/learn/modules/create-pipelines-in-aml/2-pipelines
+#steps/tasks can be sequential v parallel
+#each step can use the same vs different compute targets
+#can publish pipeline as a REST endpoint
+#can schedule pipeline vs adhoc run
+
+
+
+
+
+#Pipeline steps
+#Common kinds of step in an Azure Machine Learning pipeline include:
+PythonScriptStep: Runs a specified Python script.
+DataTransferStep: Uses Azure Data Factory to copy data between data stores.
+DatabricksStep: Runs a notebook, script, or compiled JAR on a databricks cluster.
+AdlaStep: Runs a U-SQL job in Azure Data Lake Analytics.
+ParallelRunStep - Runs a Python script as a distributed task on multiple compute nodes.
+#extra reading - https://docs.microsoft.com/en-us/python/api/azureml-pipeline-steps/azureml.pipeline.steps?view=azure-ml-py
+
+
+
+
+
+
+
+#To create a pipeline, you must first define each step and then create a pipeline that includes the steps. 
+#The specific configuration of each step depends on the step type. 
+#the following code defines two PythonScriptStep steps to prepare data, and then train a model.
+from azureml.pipeline.steps import PythonScriptStep
+
+# Step to run a Python script
+step1 = PythonScriptStep(name = 'prepare data',
+                         source_directory = 'scripts',
+                         script_name = 'data_prep.py',
+                         compute_target = 'aml-cluster')
+
+# Step to train a model
+step2 = PythonScriptStep(name = 'train model',
+                         source_directory = 'scripts',
+                         script_name = 'train_model.py',
+                         compute_target = 'aml-cluster')
+
+
+
+
+
+
+
+
+
+#After defining the steps, you can assign them to a pipeline, and run it as an experiment:
+from azureml.pipeline.core import Pipeline
+from azureml.core import Experiment
+
+# Construct the pipeline
+train_pipeline = Pipeline(workspace = ws, steps = [step1,step2])
+
+# Create an experiment and run the pipeline
+experiment = Experiment(workspace = ws, name = 'training-pipeline')
+pipeline_run = experiment.submit(train_pipeline)
+
+
+
+
+
+
+
+
+
+
+#Pass data between pipeline steps
+#The PipelineData object is a special kind of DataReference that:
+References a location in a datastore.
+Creates a data dependency between pipeline steps.
+#You can view a PipelineData object as an intermediary store for data that must be passed from a step to a subsequent step.
+
+#To use a PipelineData object to pass data between steps, you must:
+Define a named PipelineData object that references a LOCATION in a DATASTORE.
+Pass the PipelineData object as a SCRIPT ARGUMENT in steps that run scripts (and include code in those scripts to read or write data)
+Specify the PipelineData object as an INPUT or OUTPUT for the steps as appropriate.
+
+#the following code defines a PipelineData object that for the preprocessed data that must be passed between the steps:
+from azureml.pipeline.core import PipelineData
+from azureml.pipeline.steps import PythonScriptStep, EstimatorStep
+
+# Get a dataset for the initial data
+raw_ds = Dataset.get_by_name(ws, 'raw_dataset')
+
+# Define a PipelineData object to pass data between steps
+data_store = ws.get_default_datastore()
+prepped_data = PipelineData('prepped',  datastore=data_store)
+
+# Step to run a Python script
+step1 = PythonScriptStep(name = 'prepare data',
+                         source_directory = 'scripts',
+                         script_name = 'data_prep.py',
+                         compute_target = 'aml-cluster',
+                         # Script arguments include PipelineData
+                         arguments = ['--raw-ds', raw_ds.as_named_input('raw_data'),
+                                      '--out_folder', prepped_data],
+                         # Specify PipelineData as output
+                         outputs=[prepped_data])
+
+
+#OUTPUT FROM STEP 1 = INPUT TO STEP 2
+# Step to run an estimator
+step2 = PythonScriptStep(name = 'train model',
+                         source_directory = 'scripts',
+                         script_name = 'data_prep.py',
+                         compute_target = 'aml-cluster',
+                         # Pass as script argument
+                         arguments=['--in_folder', prepped_data],
+                         # Specify PipelineData as input
+                         inputs=[prepped_data])
+
+
+
+
+
+
+#In the scripts themselves, you can obtain a reference to the PipelineData object from the script argument, and 
+#use it like a local folder.
+#QUESTION: WHERE IS THE PIPELINEDATA OBJECT REFERENCED IN THE SCRIPT ARGUMENT? IS THIS APPEARING ONLY IN THE 2nd LAST LINE - 'prepped_data.csv'?
+# code in data_prep.py
+from azureml.core import Run
+import argparse
+import os
+
+# Get the experiment run context
+run = Run.get_context()
+
+# Get arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('--raw-ds', type=str, dest='raw_dataset_id')
+parser.add_argument('--out_folder', type=str, dest='folder')
+args = parser.parse_args()
+output_folder = args.folder
+
+# Get input dataset as dataframe
+raw_df = run.input_datasets['raw_data'].to_pandas_dataframe()
+
+# code to prep data (in this case, just select specific columns)
+prepped_df = raw_df[['col1', 'col2', 'col3']]
+
+# Save prepped data to the PipelineData location
+os.makedirs(output_folder, exist_ok=True)
+output_path = os.path.join(output_folder, 'prepped_data.csv')
+prepped_df.to_csv(output_path)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Reuse pipeline steps
+#Pipelines with multiple long-running steps can take a significant time to complete. 
+#Azure Machine Learning includes some caching and reuse features to reduce this time.
+
+#Managing step output reuse
+#By default, the step output from a previous pipeline run is reused without rerunning the step 
+#provided the script, source directory, and other parameters for the step have not changed. Step reuse can reduce the time it takes to run a pipeline, 
+#but it can lead to stale results when changes to downstream data sources have not been accounted for.
+
+#To control reuse for an individual step, you can set the allow_reuse parameter in the step configuration, like this:
+step1 = PythonScriptStep(name = 'prepare data',
+                         source_directory = 'scripts',
+                         script_name = 'data_prep.py',
+                         compute_target = 'aml-cluster',
+                         runconfig = run_config,
+                         inputs=[raw_ds.as_named_input('raw_data')],
+                         outputs=[prepped_data],
+                         arguments = ['--folder', prepped_data]),
+                         # Disable step reuse
+                         allow_reuse = False)
+
+
+#Forcing all steps to run
+#When you have multiple steps, you can force all of them to run REGARDLESS OF INDIVIDUAL REUSE CONFIGURATION by 
+#setting the regenerate_outputs parameter when submitting the pipeline experiment:
+pipeline_run = experiment.submit(train_pipeline, regenerate_outputs=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Publish pipelines
+#After you have created a pipeline, you can publish it to create a REST endpoint through which the pipeline can be run on demand.
+
+#method 1
+#you can call its publish method, as shown here:
+published_pipeline = pipeline.publish(name='training_pipeline',
+                                          description='Model training pipeline',
+                                          version='1.0')
+
+
+
+#method 2
+#Alternatively, you can call the publish method on a SUCCESSFUL RUN of the pipeline:
+# Get the most recent run of the pipeline
+pipeline_experiment = ws.experiments.get('training-pipeline')
+run = list(pipeline_experiment.get_runs())[0]
+
+# Publish the pipeline from the run
+published_pipeline = run.publish_pipeline(name='training_pipeline',
+                                          description='Model training pipeline',
+                                          version='1.0')
+
+
+
+
+#After the pipeline has been published, you can view it in Azure Machine Learning studio. You can also determine the URI of its endpoint like this:
+rest_endpoint = published_pipeline.endpoint
+print(rest_endpoint)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Using a published pipeline
+#you make an HTTP request to its REST endpoint, 
+#passing an authorization header 
+#with a token for a service principal with permission to run the pipeline, and 
+#a JSON payload specifying the experiment name. 
+#The pipeline is run asynchronously, so the response from a successful REST call includes the run ID. You can use this to track the run in Azure Machine Learning studio.
+
+#For example, the following Python code makes a REST request to run a pipeline and displays the returned run ID.
+import requests
+
+response = requests.post(rest_endpoint,
+                         headers=auth_header,
+                         json={"ExperimentName": "run_training_pipeline"})
+run_id = response.json()["Id"]
+print(run_id)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#pipeline parameters
+#Defining parameters for a pipeline
+#create a PipelineParameter object for each parameter, and specify each parameter in at least one step
+
+#eg. parameter for a regularization rate in the script used by an estimator:
+#if you want to define params, you must define parameters for a pipeline before publishing it
+from azureml.pipeline.core.graph import PipelineParameter
+
+#define regularisation rate param
+reg_param = PipelineParameter(name='reg_rate', default_value=0.01)
+
+...
+
+step2 = PythonScriptStep(name = 'train model',
+                         source_directory = 'scripts',
+                         script_name = 'data_prep.py',
+                         compute_target = 'aml-cluster',
+                         # Pass parameter as script argument
+                         arguments=['--in_folder', prepped_data,
+                                    #use the defined regularisation rate param
+                                    '--reg', reg_param],
+                         inputs=[prepped_data])
+
+
+
+
+#Running a pipeline with a parameter
+#After you publish a parameterized pipeline, you can pass parameter values in the JSON payload for the REST interface:
+response = requests.post(rest_endpoint,
+                         headers=auth_header,
+                         json={"ExperimentName": "run_training_pipeline",
+                               #post the param value in the JSON payload
+                               "ParameterAssignments": {"reg_rate": 0.1}})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Schedule pipelines
+#schedule vs trigger on data changes
+
+#Scheduling a pipeline for periodic intervals
+#define a ScheduleRecurrence that determines the run frequency, and use it to create a Schedule
+#the following code schedules a daily run of a published pipeline
+from azureml.pipeline.core import ScheduleRecurrence, Schedule
+
+#define schedule
+daily = ScheduleRecurrence(frequency='Day', interval=1)
+pipeline_schedule = Schedule.create(ws, name='Daily Training',
+                                        description='trains model every day',
+                                        pipeline_id=published_pipeline.id,
+                                        experiment_name='Training_Pipeline',
+                                        #use defined schedule
+                                        recurrence=daily)
+
+
+
+
+#Triggering a pipeline run on data changes
+#create a Schedule that monitors a specified path on a datastore, like this:
+from azureml.core import Datastore
+from azureml.pipeline.core import Schedule
+
+#define workspace datastore
+training_datastore = Datastore(workspace=ws, name='blob_data')
+pipeline_schedule = Schedule.create(ws, name='Reactive Training',
+                                    description='trains model on data change',
+                                    pipeline_id=published_pipeline_id,
+                                    experiment_name='Training_Pipeline',
+                                    #use defined workspace datastore
+                                    datastore=training_datastore,
+                                    #define folder path
+                                    path_on_datastore='data/training')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
