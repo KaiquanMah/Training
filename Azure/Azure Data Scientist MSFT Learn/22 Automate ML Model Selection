@@ -1,0 +1,186 @@
+#Automate ML experiment
+#extra - https://docs.microsoft.com/en-us/azure/machine-learning/concept-automated-ml
+#Basic n enterprise workspace -> can use AZ ML SDK
+#enterprise workspace -> can use AZ ML web UI
+
+#e.g. to test 
+#different ways to preprocess data
+#different models
+
+
+
+
+
+
+
+#algo examples
+#https://docs.microsoft.com/en-us/learn/modules/automate-model-selection-with-azure-automl/2-automl-algorithms
+#Restricting algorithm selection
+#By default, automated machine learning will randomly select from the full range of algorithms for the specified task. 
+#You can choose to block individual algorithms from being selected; which can be 
+#useful if you know that your DATA IS NOT SUITED to a particular type of algorithm, or 
+#you have to comply with a POLICY THAT RESTRICTS the ML ALGORITHMS you can use in your organization.
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Data preprocessing and featurization
+#apply preprocessing transformations to your data; improving the performance of the model.
+
+#1 Scaling and normalization
+#Automated machine learning applies scaling and normalization to numeric data automatically, helping 
+#prevent any large-scale features from dominating training. 
+#During an automated machine learning experiment, multiple scaling or normalization techniques will be applied.
+
+
+
+#2 Optional featurization
+You can choose to have automated machine learning apply preprocessing transformations such as:
+-MISSING VALUE IMPUTATION to eliminate nulls in the training dataset.
+-CATEGORICAL ENCODING to convert categorical features to numeric indicators.
+-Dropping high-cardinality features, such as record IDs.
+-FEATURE ENGINEERING (for example, DERIVING individual date parts from DateTime features)
+-Others...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Running automated machine learning experiments
+#To run an automated machine learning experiment, you can either 
+#use the user interface in Azure Machine Learning studio, or 
+#submit an experiment using the SDK.
+
+#1 Configuring an automated machine learning experiment
+#The user interface provides an intuitive way to select options for your automated machine learning experiment. 
+#When using the SDK, you have greater flexibility, and you can set experiment options using the AutoMLConfig class, as shown in the following example:
+#Python
+from azureml.train.automl import AutoMLConfig
+
+automl_run_config = RunConfiguration(framework='python')
+automl_config = AutoMLConfig(name='Automated ML Experiment',
+                             #type of algo/problem u want to solve
+                             task='classification',
+                             primary_metric = 'AUC_weighted',
+                             compute_target=aml_compute,
+                             training_data = train_dataset,
+                             validation_data = test_dataset,
+                             label_column_name='Label',
+                             featurization='auto',
+                             iterations=12,
+                             max_concurrent_iterations=4)
+
+
+
+
+
+
+
+#2 Specifying data for training
+#Automated machine learning is designed to enable you to simply bring your data, and 
+#have Azure Machine Learning figure out how best to train a model from it.
+
+#UI
+#When using the Automated Machine Learning user interface in Azure Machine Learning studio, you can 
+#create or select an Azure Machine Learning dataset to be used as the input for your automated machine learning experiment.
+
+#AZ ML SDK
+#When using the SDK to run an automated machine learning experiment, you can submit the data in the following ways:
+-Specify a dataset or dataframe of TRAINING DATA that includes FEATURES and the LABEL to be predicted.
+-Optionally, specify a SECOND VALIDATION DATASET or dataframe that will be used to validate the trained model. if this is not provided, Azure Machine Learning will apply cross-validation using the training data.
+
+#Alternatively:
+-Specify a DATASET, DATAFRAME, OR NUMPY ARRAY of X values containing the training features, with a corresponding y ARRAY of label values.
+-Optionally, specify X_valid and y_valid DATASETS, DATAFRAMES, OR NUMPY ARRAYS of X_valid values to be used for validation.
+
+#EXTRA - https://docs.microsoft.com/en-us/azure/machine-learning/how-to-create-register-datasets
+
+
+
+
+
+
+
+#3 Specifying the primary metric
+#One of the most important settings you must specify is the primary_metric. 
+#This is the target performance metric for which the optimal model will be determined. 
+#Azure Machine #Learning supports a set of named metrics for each type of task. 
+#To retrieve the list of metrics available for a particular task type, you can use the get_primary_metrics function as shown here:
+#Python
+from azureml.train.automl.utilities import get_primary_metrics
+
+get_primary_metrics('classification')
+
+#EXTRA - https://docs.microsoft.com/en-us/azure/machine-learning/how-to-understand-automated-ml
+
+
+
+
+
+
+#4 Submitting an automated machine learning experiment
+#You can submit an automated machine learning experiment like any other SDK-based experiment:
+#Python
+from azureml.core.experiment import Experiment
+
+automl_experiment = Experiment(ws, 'automl_experiment')
+automl_run = automl_experiment.submit(automl_config)
+
+#You can monitor automated machine learning experiment runs in Azure Machine Learning studio, or 
+#in the Jupyter Notebooks RunDetails widget.
+
+
+
+
+
+
+#5 Retrieving the best run and its model
+#You can easily identify the best run in Azure Machine Learning studio, and 
+#download or deploy the model AZ ML generated. 
+#To accomplish this programmatically with the SDK, you can use code like the following example:
+#Python
+best_run, fitted_model = automl_run.get_output()
+best_run_metrics = best_run.get_metrics()
+for metric_name in best_run_metrics:
+    metric = best_run_metrics[metric_name]
+    print(metric_name, metric)
+
+
+
+
+
+
+#6 Exploring preprocessing steps
+#Automated machine learning uses scikit-learn pipelines to encapsulate preprocessing steps with the model. 
+#You can view the steps in the fitted model you obtained from the best run using the code below like this:
+#Python
+for step_ in fitted_model.named_steps:
+    print(step)
+    
+    
+
+
+
+
