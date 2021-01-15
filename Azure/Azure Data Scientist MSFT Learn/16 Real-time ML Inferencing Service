@@ -278,12 +278,107 @@ service.wait_for_deployment(show_output = True)
 
 
 
+#Consuming a real-time inferencing service
+#After deploying a real-time service, you can consume it from client applications to predict labels for new data cases.
+
+#method 1
+Using the Azure Machine Learning SDK
+#For testing, you can use the Azure Machine Learning SDK to call a web service through 
+#the run method of a WebService object 
+#that references the deployed service. 
+
+#Typically, you SEND INPUT DATA to the run method in JSON format with the following structure:
+#JSON
+{
+  "data":[
+      [0.1,2.3,4.1,2.0], // 1st case
+      [0.2,1.8,3.9,2.1],  // 2nd case,
+      ...
+  ]
+}
+
+
+
+
+#The response from the run method is a JSON collection with a prediction for each case that was submitted in the data. 
+#The following code sample calls a service and displays the response:
+#Python
+import json
+
+#INPUT DATA
+# An array of new data cases
+x_new = [[0.1,2.3,4.1,2.0],
+         [0.2,1.8,3.9,2.1]]
+
+#ARRAY TO JSON
+# Convert the array to a serializable list in a JSON document
+json_data = json.dumps({"data": x_new})
+
+# Call the web service, passing the input data
+response = service.run(input_data = json_data)
+
+# Get the predictions
+predictions = json.loads(response)
+
+# Print the predicted class for each case.
+for i in range(len(x_new)):
+    print (x_new[i]), predictions[i] )
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+#method 2   
+#Using a REST endpoint
+#In production, most client applications will not include the Azure Machine Learning SDK, 
+#and will consume the service through its REST interface. 
+
+#You can determine the endpoint of a deployed service in Azure machine Learning studio, or 
+#by retrieving the scoring_uri property of the Webservice object in the SDK, like this:
+endpoint = service.scoring_uri
+print(endpoint)
+
+#With the endpoint known, you can 
+#use a HTTP POST request with JSON data to call the service.
+#Python
+import requests
+import json
 
+#INPUT DATA
+# An array of new data cases
+x_new = [[0.1,2.3,4.1,2.0],
+         [0.2,1.8,3.9,2.1]]
 
+#ARRAY TO JSON
+# Convert the array to a serializable list in a JSON document
+json_data = json.dumps({"data": x_new})
 
+#DIFF FROM METHOD 1
+# Set the content type in the request headers
+request_headers = { 'Content-Type':'application/json' }
 
+#DIFF FROM METHOD 1
+#HTTP POST REQUEST
+# Call the service
+response = requests.post(url = endpoint,
+                         data = json_data,
+                         headers = request_headers)
 
+# Get the predictions from the JSON response
+predictions = json.loads(response.json())
 
+# Print the predicted class for each case.
+for i in range(len(x_new)):
+    print (x_new[i]), predictions[i] )
+    
+    
 
 
 
@@ -292,17 +387,60 @@ service.wait_for_deployment(show_output = True)
 
 
 
+#TOPUP METHOD 2
+#Authentication
+#In production, you will likely want to restrict access to your services by applying authentication. 
 
+#There are two kinds of authentication you can use:
+Key: Requests are authenticated by specifying the key associated with the service.
+Token: Requests are authenticated by providing a JSON Web Token (JWT).
 
+#By default, authentication is disabled for ACI services, and 
+#set to key-based authentication for AKS services (for which primary and secondary keys are automatically generated). 
+#You can optionally configure an AKS service to use token-based authentication (which is not supported for ACI services).
+#SO AZ CONTAINER INSTANCES DONT SUPPORT AUTHENTICATION AT ALL
+#AZ KUBERNETES SERVICES SUPPORTS BOTH KEY + (JAVA WEB) TOKEN AUTHENTICATION
 
+#KEY
+#Assuming you have an authenticated session established with the workspace, you can 
+#retrieve the keys for a service by using the get_keys method of the WebService object associated with the service:
+#Python
+primary_key, secondary_key = service.get_keys()
 
+#TOKEN
+#For token-based authentication, your client application needs to use service-principal authentication to verify its identity through Azure Active Directory (Azure AD) and 
+#call the get_token method of the service to retrieve a time-limited token.
 
+#To make an authenticated call to the service's REST endpoint, you must include the key or token in the request header like this:
+Python
+import requests
+import json
 
+#INPUT DATA
+# An array of new data cases
+x_new = [[0.1,2.3,4.1,2.0],
+         [0.2,1.8,3.9,2.1]]
 
+#ARRAY TO JSON
+# Convert the array to a serializable list in a JSON document
+json_data = json.dumps({"data": x_new})
 
+#INCLUDE KEY/TOKEN IN REQUEST HEADERS
+# Set the content type in the request headers
+request_headers = { "Content-Type":"application/json",
+                    "Authorization":"Bearer " + key_or_token }
 
+# Call the service
+response = requests.post(url = endpoint,
+                         data = json_data,
+                         headers = request_headers)
 
+# Get the predictions from the JSON response
+predictions = json.loads(response.json())
 
+# Print the predicted class for each case.
+for i in range(len(x_new)):
+    print (x_new[i]), predictions[i] )
 
 
 
@@ -340,9 +478,25 @@ service.wait_for_deployment(show_output = True)
 
 
 
+#Troubleshooting service deployment
+#EG. trained model, 
+#the runtime environment configuration, 
+#the scoring script, 
+#the container image, and 
+#the container host
 
+#Check the service state
+#As an initial troubleshooting step, you can check the status of a service by examining its state:
+#Python
+#To view the state of a service, you must use the compute-specific service type (for example AksWebservice) and not a generic WebService object.
+from azureml.core.webservice import AksWebservice
 
+# Get the deployed service
+service = AksWebservice(name='classifier-service', workspace=ws)
 
+# Check its state
+#For an operational service, the state should be Healthy.
+print(service.state)
 
 
 
@@ -350,1285 +504,41 @@ service.wait_for_deployment(show_output = True)
 
 
 
+#Review service logs
+#If a service is not healthy, or you are experiencing errors when using it, you can review its logs:
+#The logs include detailed information about the provisioning of the service, and 
+#the requests it has processed
+#Python
+print(service.get_logs())
 
 
 
 
+#Deploy to a local container
+#Deployment and runtime errors can be easier to diagnose by 
+#deploying the service as a container in a local Docker instance, like this:
+#Python
+from azureml.core.webservice import LocalWebservice
 
+deployment_config = LocalWebservice.deploy_configuration(port=8890)
+service = Model.deploy(ws, 'test-svc', [model], inference_config, deployment_config)
 
 
 
 
 
+#You can then test the locally deployed service using the SDK:
+#Python
+print(service.run(input_data = json_data))
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#You can then troubleshoot RUNTIME ISSUES by 
+#making changes to the scoring file that is referenced in the inference configuration, and 
+#reloading the service without redeploying it (something you can only do with a local service):
+#Python
+service.reload()
+print(service.run(input_data = json_data))
 
 
 
