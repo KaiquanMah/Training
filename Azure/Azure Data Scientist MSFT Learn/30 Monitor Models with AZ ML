@@ -1,0 +1,135 @@
+#SOURCE - https://docs.microsoft.com/en-us/learn/modules/monitor-models-with-azure-machine-learning/1-introduction
+#send the telemetry data to Application Insights using Azure Machine Learning Web services
+#use Application Insights to monitor telemetry from many kinds of application, including applications that are not running in Azure
+
+
+
+
+
+
+
+#Enable Application Insights
+#To log telemetry in application insights from an Azure machine learning service, 
+#you must have an Application Insights resource associated with your Azure Machine Learning workspace, and 
+#you must configure your service to use it for telemetry logging.
+
+
+#Associate Application Insights with a workspace
+#When you create an Azure Machine Learning workspace, you can select an Azure Application Insights resource to associate with it. 
+#If you do not select an existing Application Insights resource, a new one is created in the same resource group as your workspace.
+#You can determine the Application Insights resource associated with your workspace by viewing the Overview page of the workspace blade in the Azure portal, or 
+#by using the get_details() method of a Workspace object as shown in the following code example:
+#Python
+from azureml.core import Workspace
+
+ws = Workspace.from_config()
+ws.get_details()['applicationInsights']
+
+
+
+
+
+
+
+
+
+
+#Enable Application Insights for a service
+#TYPE 1 - DEPLOY NEW WEB SERVICE
+#When deploying a new real-time service, you can enable Application Insights in the DEPLOYMENT CONFIGURATION for the service, as shown in this example:
+#Python
+dep_config = AciWebservice.deploy_configuration(cpu_cores = 1,
+                                                memory_gb = 1,
+                                                enable_app_insights=True)
+
+
+
+#TYPE 2 - WEB SERVICE EXISTS, SO U MODIFY THE WEB SERVICE
+#If you want to enable Application Insights for a service that is already deployed, you can 
+#modify the DEPLOYMENT CONFIGURATION for AZURE KUBERNETES SERVICE (AKS) based services in the Azure portal. 
+
+#Alternatively, you can update any web service by using the AZ ML SDK, like this:
+#Python
+service = ws.webservices['my-svc']
+service.update(enable_app_insights=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Capture and view telemetry
+#Application Insights automatically captures any information written to the STANDARD OUTPUT AND ERROR LOGS, and 
+#provides a query capability to view data in these logs.
+
+
+#Write log data
+#To capture telemetry data for Application insights, you can write any values to the standard output log in the SCORING SCRIPT for your service by using a print statement, as shown in the following example:
+#Python
+def init():
+    global model
+    model = joblib.load(Model.get_model_path('my_model'))
+def run(raw_data):
+    data = json.loads(raw_data)['data']
+    predictions = model.predict(data)
+    #LOG YOUR PREDICTIONS
+    log_txt = 'Data:' + str(data) + ' - Predictions:' + str(predictions)
+    print(log_txt)
+    return predictions.tolist()
+    
+#Azure Machine Learning creates a custom dimension in the Application Insights data model for the output you write.
+#QN: WHAT IS A CUSTOM DIMENSION IN THIS CONTEXT?
+
+
+
+
+
+
+
+
+
+#Query logs in Application Insights
+#To analyze captured log data, you can use the Log Analytics query interface for Application Insights in the Azure portal. 
+#This interface supports a SQL-like query syntax that you can use to extract fields from logged data, including custom dimensions created by your Azure Machine Learning service.
+
+#For example, the following query returns the timestamp and 
+#customDimensions.Content fields 
+#from log traces that have a message field value of STDOUT (indicating the data is in the standard output log) and 
+#customDimensions.["Service Name"] field value of my-svc:
+
+SQL
+traces
+|where message == "STDOUT"
+  and customDimensions.["Service Name"] = "my-svc"
+| project  timestamp, customDimensions.Content
+
+
+This query returns the logged data as a table:
+timestamp	          customDimensions_Content
+01/02/2020... 	    Data:[[1, 2, 2.5, 3.1], [0, 1, 1,7, 2.1]] - Predictions:[0 1]
+01/02/2020...	      Data:[[3, 2, 1.7, 2.0]] - Predictions:[0]
+
+
+
+
+
