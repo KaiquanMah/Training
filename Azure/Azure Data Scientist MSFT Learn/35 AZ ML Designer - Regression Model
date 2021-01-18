@@ -1,14 +1,229 @@
 #source - https://docs.microsoft.com/en-us/learn/modules/create-regression-model-azure-machine-learning-designer/explore-data
 #1 create workspace
-#2 create compute target/instance
+#2 create compute instance + cluster
+
+
+
+
+
 
 
 #3 Explore data
 Create a pipeline
+
 Add and explore a dataset
+-fields
+-value distributions/histograms
+-summary stats
+-# missing values (aka NaN) -> which fields have fewer NaNs -> better to use as features after imputing
+-fields with smaller values vs fields with larger values -> normalise fields
+
 Add data transformations
-Run the pipeline
+-Select Columns in Dataset
+-Clean Missing Data - replace with mean/median/mode, remove entire row/col, custom value substitution
+-Normalize Data - ZScore, minmax (use), logistic, lognormal, tanh
+
+Run the pipeline -> new expt
 View the transformed data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#4 Create and run a training pipeline
+#source - https://docs.microsoft.com/en-us/learn/modules/create-regression-model-azure-machine-learning-designer/create-training-pipeline
+#After you've used data transformations to prepare the data, you can use it to train a machine learning model.
+
+Add training modules
+#a Split Data
+-Split Rows (instead of regex and conditional/relative expression)
+-0.7 in the 1st output dataset
+-random seed 123
+-stratified split False
+
+#b Linear Regression
+-extra reading - https://docs.microsoft.com/en-us/azure/machine-learning/algorithm-cheat-sheet
+
+#c Train Model
+-label=price  
+
+
+Run the training pipeline
+-submit
+-existing expt - mslearn-auto-training
+-after the run, view 'score module' > Outputs + logs tab > 'Scored labels'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#5 Evaluate a regression model
+#To evaluate a regression model, you could simply compare the predicted labels to the actual labels in the validation dataset to held back during training, but this is an imprecise process and doesn't provide a simple metric that you can use to compare the performance of multiple models.
+
+Add an Evaluate Model module
+-Evaluate Model > submit > existing expt - mslearn-auto-training
+#regression performance metrics:
+-Mean Absolute Error (MAE): The average difference between predicted values and true values. This value is based on the same units as the label, in this case dollars. The lower this value is, the better the model is predicting.
+-Root Mean Squared Error (RMSE): The square root of the mean squared difference between predicted and true values. The result is a metric based on the same unit as the label (dollars). When compared to the MAE (above), a larger difference indicates greater variance in the individual errors (for example, with some errors being very small, while others are large).
+-Relative Squared Error (RSE): A relative metric between 0 and 1 based on the square of the differences between predicted and true values. The closer to 0 this metric is, the better the model is performing. Because this metric is relative, it can be used to compare models where the labels are in different units.
+-Relative Absolute Error (RAE): A relative metric between 0 and 1 based on the absolute differences between predicted and true values. The closer to 0 this metric is, the better the model is performing. Like RSE, this metric can be used to compare models where the labels are in different units.
+-Coefficient of Determination (R2): This metric is more commonly referred to as R-Squared, and summarizes how much of the variance between predicted and true values is explained by the model. The closer to 1 this value is, the better the model is performing.
+
+MAE 1955.638973
+RMSE 2892.378894
+RSE 0.0823
+RAE 0.245649
+R2 0.9177
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#6 Create an inference pipeline
+#After creating and running a pipeline to train the model, you need a second pipeline that performs the same data transformations for new data, and then uses the trained model to inference (in other words, predict) label values based on its features. This will form the basis for a predictive service that you can publish for applications to use.
+
+Create and run an inference pipeline
+-remove the Automobile price data (Raw) dataset
+-add Enter Data Manually module without price/label col
+-add Web Service Input module
+-Modify the Select Columns in Dataset - remove the old price/label col
+-remove Evaluate Model module
+-add Execute Python Script module
+import pandas as pd
+
+def azureml_main(dataframe1 = None, dataframe2 = None):
+    #selects only the Scored Labels column
+    scored_results = dataframe1[['Scored Labels']]
+    #renames Scored Labels column to predicted_price
+    scored_results.rename(columns={'Scored Labels':'predicted_price'},
+                        inplace=True)
+    return scored_results
+
+-add Web Service Output module
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#7 Deploy a predictive service
+#After you've created and tested an inference pipeline for real-time inferencing, you can publish it as a service for client applications to use.
+
+Deploy a service
+
+Test the service
+-Endpoints page > ur endpt > consume tab > get REST endpoint + primary key
+-Notebooks page > new notebook
+endpoint = 'YOUR_ENDPOINT' #Replace with your endpoint
+key = 'YOUR_KEY' #Replace with your key
+
+import urllib.request
+import json
+import os
+
+# Prepare the input data
+data = {
+    "Inputs": {
+        "WebServiceInput0":
+        [
+            {
+                    'symboling': 3,
+                    'normalized-losses': None,
+                    'make': "alfa-romero",
+                    'fuel-type': "gas",
+                    'aspiration': "std",
+                    'num-of-doors': "two",
+                    'body-style': "convertible",
+                    'drive-wheels': "rwd",
+                    'engine-location': "front",
+                    'wheel-base': 88.6,
+                    'length': 168.8,
+                    'width': 64.1,
+                    'height': 48.8,
+                    'curb-weight': 2548,
+                    'engine-type': "dohc",
+                    'num-of-cylinders': "four",
+                    'engine-size': 130,
+                    'fuel-system': "mpfi",
+                    'bore': 3.47,
+                    'stroke': 2.68,
+                    'compression-ratio': 9,
+                    'horsepower': 111,
+                    'peak-rpm': 5000,
+                    'city-mpg': 21,
+                    'highway-mpg': 27,
+            },
+        ],
+    },
+    "GlobalParameters":  {
+    }
+}
+body = str.encode(json.dumps(data))
+headers = {'Content-Type':'application/json', 'Authorization':('Bearer '+ key)}
+req = urllib.request.Request(endpoint, body, headers)
+
+try:
+    response = urllib.request.urlopen(req)
+    result = response.read()
+    json_result = json.loads(result)
+    y = json_result["Results"]["WebServiceOutput0"][0]["predicted_price"]
+    print('Predicted price: {:.2f}'.format(y))
+
+except urllib.error.HTTPError as error:
+    print("The request failed with status code: " + str(error.code))
+
+    # Print the headers to help debug the error
+    print(error.info())
+    print(json.loads(error.read().decode("utf8", 'ignore')))
+
+-save, run
 
 
 
