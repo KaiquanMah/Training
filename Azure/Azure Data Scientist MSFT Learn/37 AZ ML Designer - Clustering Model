@@ -1,0 +1,217 @@
+#1 create workspace
+#2 create compute instance + cluster
+
+
+
+#3 Explore data
+create dataset
+-https://aka.ms/penguin-data
+#The penguins dataset used in the this exercise is a subset of data collected and made available by Dr. Kristen Gorman and the Palmer Station, Antarctica LTER, a member of the Long Term Ecological Research Network.
+#https://www.uaf.edu/cfos/people/faculty/detail/kristen-gorman.php
+#https://pal.lternet.edu/
+#https://lternet.edu/
+
+
+Create a pipeline
+-Designer > new > Train Penguin Clustering
+-add datasets - penguin-data
+The dataset includes the following columns:
+CulmenLength: Length of the penguin's bill in millimeters.
+CulmenDepth: Depth of the penguin's bill in millimeters.
+FlipperLength: Length of the penguin's flipper in millimeters.
+BodyMass: Weight of the penguin in grams.
+Species: Species indicator (0:"Amelie", 1:"Gentoo", 2:"Chinstrap")
+
+
+Add Transformations
+-Select Columns in Dataset module - all except Species
+-Clean Missing Data module - include all cols
+-Normalize Data module - MinMax 
+
+Run the pipeline
+-new expt - mslearn-penguin-training
+
+View the transformed data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#4 Create and run a training pipeline
+#After you've used data transformations to prepare the data, you can use it to train a machine learning model.
+
+Add training modules
+-Split Data module
+Splitting mode: Split Rows
+Fraction of rows in the first output dataset: 0.7
+Random seed: 123
+Stratified split: False
+
+-K-Means Clustering module
+3 centroids
+
+-Train Clustering Model  module
+-Assign Data to Clusters module
+
+
+
+Run the training pipeline
+-Submit > existing expt - mslearn-penguin-training
+-View Assign Data to Clusters visualization - Assignments column (i.e. record has been assigned to which cluster)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#5 Evaluate a clustering model
+#Evaluating a clustering model is made difficult by the fact that there are no previously known true values for the cluster assignments. A successful clustering model is one that achieves a good level of separation between the items in each cluster, so we need metrics to help us measure that separation.
+
+-Add an Evaluate Model module
+-submit/run
+
+-Evaluate Model result visualization
+
+
+The metrics in each row are:
+Average Distance to Other Center: This indicates how close, on average, each point in the cluster is to the centroids of all other clusters.
+Average Distance to Cluster Center: This indicates how close, on average, each point in the cluster is to the centroid of the cluster.
+Number of Points: The number of points assigned to the cluster.
+Maximal Distance to Cluster Center: The maximum of the distances between each point and the centroid of that point’s cluster. If this number is high, the cluster may be widely dispersed. This statistic in combination with the Average Distance to Cluster Center helps you determine the cluster’s spread.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#6 Create an inference pipeline
+#After creating and running a pipeline to train the model, you need a second pipeline that performs the same data transformations for new data, and then uses the trained model to inference (in other words, predict) label values based on its features. This pipeline will form the basis for a predictive service that you can publish for applications to use.
+#follow the pipeline from https://docs.microsoft.com/en-us/learn/modules/create-clustering-model-azure-machine-learning-designer/inference-pipeline
+-remove penguin-data dataset
+-add Enter Data Manually module
+-add Web Service Input 
+-remove Select Columns in Dataset
+
+-remove Evaluate Model module
+-add Web Service Output
+-run pipeline on compute cluster
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#7 Deploy a predictive service
+#After you've created and tested an inference pipeline for real-time inferencing, you can publish it as a service for client applications to use.
+
+Deploy a service
+-Predict Penguin Clusters inference pipeline > Deploy
+
+Test the service
+-Endpoints page > predict-penguin-clusters  real-time endpoint > Consume tab > note down REST endpoint + primary key
+-Notebooks page > new notebook > 
+endpoint = 'YOUR_ENDPOINT' #Replace with your endpoint
+key = 'YOUR_KEY' #Replace with your key
+
+import urllib.request
+import json
+import os
+
+data = {
+    "Inputs": {
+        "WebServiceInput0":
+        [
+            {
+                    'CulmenLength': 49.1,
+                    'CulmenDepth': 4.8,
+                    'FlipperLength': 1220,
+                    'BodyMass': 5150,
+            },
+        ],
+    },
+    "GlobalParameters":  {
+    }
+}
+
+body = str.encode(json.dumps(data))
+
+
+headers = {'Content-Type':'application/json', 'Authorization':('Bearer '+ key)}
+
+req = urllib.request.Request(endpoint, body, headers)
+
+try:
+    response = urllib.request.urlopen(req)
+    result = response.read()
+    json_result = json.loads(result)
+    output = json_result["Results"]["WebServiceOutput0"][0]
+    print('Cluster: {}'.format(output["Assignments"]))
+
+except urllib.error.HTTPError as error:
+    print("The request failed with status code: " + str(error.code))
+
+    # Print the headers to help debug
+    print(error.info())
+    print(json.loads(error.read().decode("utf8", 'ignore')))
+
+
+
+
+
