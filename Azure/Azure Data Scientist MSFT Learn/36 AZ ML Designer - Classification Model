@@ -1,0 +1,213 @@
+#1 create workspace
+#2 create compute instance + cluster
+
+
+
+#3 Explore data
+create dataset
+-https://aka.ms/diabetes-data
+
+Create a pipeline
+-Designer > new > Diabetes Training
+-add datasets - diabetes-data
+
+Add Transformations
+-Normalize Data module - MinMax 
+
+Run the pipeline
+-new expt - mslearn-diabetes-training
+
+View the transformed data
+
+
+
+
+
+
+
+
+
+
+#4 Create and run a training pipeline
+#After you've used data transformations to prepare the data, you can use it to train a machine learning model.
+
+Add training modules
+-Split Data module
+Splitting mode: Split Rows
+Fraction of rows in the first output dataset: 0.7
+Random seed: 123
+Stratified split: False
+
+-Two-Class Logistic Regression module
+-Train Model module
+-Score Model module
+
+
+
+Run the training pipeline
+-Submit > existing expt - mslearn-diabetes-training
+-View Score Model result visualization window > Scored Labels, Scored Probabilities cols
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#5 Evaluate a classification model
+#The model is predicting values for the Diabetic label, but how reliable are its predictions? To assess that, you need to evaluate the model.
+#The validation data you held back and used to score the model includes the known values for the label. So to validate the model, you can compare the true values for the label to the label values that were predicted when you scored the validation dataset. Based on this comparison, you can calculate various metrics that describe how well the model performs.
+
+-Add an Evaluate Model module
+-submit/run
+
+-Evaluate Model result visualization
+Accuracy    0.788
+Precision   0.718
+Recall      0.587
+F1 Score    0.646
+AUC         0.86
+
+Accuracy: The ratio of correct predictions (true positives + true negatives) to the total number of predictions. In other words, what proportion of diabetes predictions did the model get right?
+Precision: The fraction of positive cases correctly identified (the number of true positives divided by the number of true positives plus false positives). In other words, out of all the patients that the model predicted as having diabetes, how many are actually diabetic?
+Recall: TRUE POSITIVE RATE. The fraction of the cases classified as positive that are actually positive (the number of true positives divided by the number of true positives plus false negatives). In other words, out of all the patients who actually have diabetes, how many did the model identify?
+F1 Score: An overall metric that essentially combines precision and recall.
+
+#The performance of this model isn't all that great, partly because we performed only minimal feature engineering and pre-processing. You could try a different classification algorithm, such as Two-Class Decision Forest, and compare the results. You can connect the outputs of the Split Data module to multiple Train Model and Score Model modules, and you can connect a second Score Model module to the Evaluate Model module to see a side-by-side comparison. The point of the exercise is simply to introduce you to classification and the Azure Machine Learning designer interface, not to train a perfect model!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#6 Create an inference pipeline
+#After creating and running a pipeline to train the model, you need a second pipeline that performs the same data transformations for new data, and then uses the trained model to inference (in other words, predict) label values based on its features. This pipeline will form the basis for a predictive service that you can publish for applications to use.
+-remove diabetes-data dataset
+-add Enter Data Manually module
+-add Web Service Input 
+-remove Evaluate Model module
+-add Execute Python Script module
+import pandas as pd
+
+def azureml_main(dataframe1 = None, dataframe2 = None):
+    #select only the PatientID, Scored Labels and Scored Probabilities columns and renames the cols
+    scored_results = dataframe1[['PatientID', 'Scored Labels', 'Scored Probabilities']]
+    scored_results.rename(columns={'Scored Labels':'DiabetesPrediction',
+                                'Scored Probabilities':'Probability'},
+                        inplace=True)
+    return scored_results
+
+
+-add Web Service Output
+-run pipeline on compute cluster
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#7 Deploy a predictive service
+#After you've created and tested an inference pipeline for real-time inferencing, you can publish it as a service for client applications to use.
+
+Deploy a service
+-Predict Diabetes inference pipeline > Deploy
+
+Test the service
+-Endpoints page > predict-diabetes real-time endpoint > Consume tab > note down REST endpoint + primary key
+-Notebooks page > new notebook > 
+endpoint = 'YOUR_ENDPOINT' #Replace with your endpoint
+key = 'YOUR_KEY' #Replace with your key
+
+import urllib.request
+import json
+import os
+
+data = {
+    "Inputs": {
+        "WebServiceInput0":
+        [
+            {
+                    'PatientID': 1882185,
+                    'Pregnancies': 9,
+                    'PlasmaGlucose': 104,
+                    'DiastolicBloodPressure': 51,
+                    'TricepsThickness': 7,
+                    'SerumInsulin': 24,
+                    'BMI': 27.36983156,
+                    'DiabetesPedigree': 1.3504720469999998,
+                    'Age': 43,
+            },
+        ],
+    },
+    "GlobalParameters":  {
+    }
+}
+
+body = str.encode(json.dumps(data))
+
+
+headers = {'Content-Type':'application/json', 'Authorization':('Bearer '+ key)}
+
+req = urllib.request.Request(endpoint, body, headers)
+
+try:
+    response = urllib.request.urlopen(req)
+    result = response.read()
+    json_result = json.loads(result)
+    output = json_result["Results"]["WebServiceOutput0"][0]
+    print('Patient: {}\nPrediction: {}\nProbability: {:.2f}'.format(output["PatientID"],
+                                                            output["DiabetesPrediction"],
+                                                            output["Probability"]))
+except urllib.error.HTTPError as error:
+    print("The request failed with status code: " + str(error.code))
+
+    # Print the headers to help debug
+    print(error.info())
+    print(json.loads(error.read().decode("utf8", 'ignore')))
+    
+    
+    
+    
+    
