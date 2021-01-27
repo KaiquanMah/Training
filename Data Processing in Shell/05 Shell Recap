@@ -1,0 +1,360 @@
+#source - 2021 CS50 A Taste of Linux
+#https://www.youtube.com/watch?v=IEY3nNXP0Tk&feature=youtu.be
+#root folder /
+#user's home folder ~/
+
+
+#absolute path
+#Starts with root folder (aka /)
+/home/ubuntu/pset1/mario.c
+/home/ubuntu/pset0
+
+#Relative path
+#Relative to where we are
+pset1/mario.c
+#same as
+./pset1/mario.c
+
+
+#Paths
+#. current folder
+#.. go up 1 folder; parent folder
+
+
+
+
+
+
+
+#shell = program which waits for a cmd -> process + run the cmds
+#e.g. Bash
+#can run in a terminal window
+
+#change dir
+cd
+#go to root folder
+cd /
+#go up 1 folder
+cd ..
+#go down 1 folder
+cd subFolderName
+cd ./subFolderName
+cd <full path>/thisfolder/subFolderName
+
+
+#print working dir
+pwd
+#list files and folders/directories within this directory
+ls
+#list files and folders within subdirectory
+ls subFolderName/
+#list file and folders + output to a file
+ls > outputFileName
+#read file
+cat outputFileName
+#outputFileName
+#otherFileName1
+....
+
+
+
+
+#create empty file
+touch fileName
+#create empty subfolder/directory
+mkdir subFolderName
+
+#move file to subfolder
+mv fileName subFolderName/
+mv fileName subFolderName
+mv fileName1 fileName2 fileName3 subFolderName/
+mv fileName1 fileName2 fileName3 subFolderName
+
+#rename file
+mv oldFileName newFileName
+
+#move file to subfolder + rename file
+mv oldFileName subFolderName/newFileName
+#move file from subfolder back to the current parent directory + rename file to oldFileName
+mv subFolderName/newFileName oldFileName
+
+#remove subfolder
+rmdir subFolderName
+#remove file
+rm fileName
+#remove file without prompt whether to delete
+rm -f fileName
+
+
+
+
+
+#redirect output stream to a file instead of the terminal 
+#output goes to the terminal by default
+#add/overwrite content to empty file
+cat > fileName
+
+<add ur lines of content>
+#append content to an existing file
+cat >> fileName
+
+<append ur lines of content>
+#read file
+cat fileName
+#read file and output to terminal
+cat < fileName
+#read file and output to new file
+cat < fileName > newFileName
+#copy file content + create new file
+cp fileName newFileName
+
+#read multiple files
+cat fileName1 fileName2
+#read multiple files (append content in subsequent rows) to new file
+cat fileName1 fileName2 > newFileName
+
+
+
+
+
+
+#help/manual
+rm --help
+<cmd> --help
+man rm
+man <cmd>
+
+#check manual for commands to use based on a keyword
+#-s look up in manual section 1 - usually the section for the general commands available
+#-k look up the keyword in the description
+man -s 1 -k remove
+man -s <sectionNumber> -k <keyword>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#activity 0
+#Create a directory called “activity0” in your home directory (~)
+#go to home dir
+cd ~
+mkdir activity0
+
+#Change your current directory to your “activity0” directory
+cd ~/activity0/
+
+#Write “hello, world!” to a file called “hello”
+touch hello
+cat > hello
+
+hello, world!
+<ctrl-d>
+#Print the contents of your “hello” file to the terminal
+cat hello
+
+
+
+
+
+
+
+
+
+
+
+
+
+#wordcount - full set
+wc 
+foo bar
+baz
+qux
+  3 4 16
+#3 lines  
+#4 words
+#16 bytes
+
+#wordcount - number of lines only
+wc -l
+foo bar
+baz
+qux
+3
+
+
+
+
+# use pipe | to chain commands
+# a | b | c
+# LHS - get the content within a file
+# pass as input to the RHS
+# do a wordcount of the number of lines only
+cat fileName | wc -l
+3
+
+
+
+
+
+
+
+
+#download file, e.g. csv file
+wget <url with file to download from>
+#read csv file
+cat csvFileName.csv
+G - scroll up to the header + 1st few lines
+K - scroll up line by line
+J - scroll down line by line
+B - scroll up page by page
+space - scroll down page by page
+shift-G - scroll down to the last few lines
+#find keyword in the csv file
+/the - find 'the'
+/<keyword>
+n - scroll down to the next match
+shift-n - scroll up to the previous match
+-i - find in a case-insensitive way
+q - quit the 'less' program and go back to the terminal shell
+
+
+
+#1st 10 rows
+head csvName.csv
+cat csvName.csv | head
+#1st n rows
+head -n <number of lines> csvName.csv
+head -n 15 csvName.csv
+#last 10 rows
+tail csvName.csv
+#last n rows
+tail -n <number of lines> csvName.csv
+tail -n 15 csvName.csv
+
+#get data in col 1
+#-d - delimiter
+#-f - field/col 1
+cut -d , -f 1 csvName.csv
+cut -d , -f 2,3 csvName.csv
+
+#sort
+#sort based on alphabetical order
+sort csvName.csv
+#sort based on numeric order
+sort -n csvName.csv
+
+#give me the record with the case-sensitive keyword in a CSV
+grep <keyword> csvName.csv
+grep Friends csvName.csv
+#case insensitive
+grep -i Friends csvName.csv
+#find a phrase
+grep -i 'kerry washington' csvName.csv
+#use REGEX tp find something that STARTS WITH
+grep '^28' csvName.csv
+
+#alias a command only for this session in a terminal
+alias igrep='grep -i'
+igrep Friends csvName.csv
+
+
+
+#search through cmd history
+<up-arrow>, <down-arrow>
+
+<ctrl-r> g - finds cmds with 'g' in it
+then 
+<ctrl-r> - continue scrolling through the search results
+then
+<enter> - run the cmd on the screen
+
+#full list of cmd history
+history 
+history | head
+history | tail
+
+
+#find files + folders
+#e.g. starts with cs50, ends with anything
+find /folderName -name 'file/folderName'
+find /usr -name 'cs50*'
+
+#replace parts of a file based on a pattern
+#eg to correct spelling mistakes
+sed 's/currentSpelling/rightSpelling' csvName.csv > csvFixedName.csv
+sed 's/Seinfled/Seinfeld' csvName.csv > csvFixedName.csv
+#use fixed csv file to overwrite the old csv file
+mv  csvFixedName.csv csvName.csv
+
+#replace text + replace file in place
+#-i do the replacement in the file right away
+sed -i 's/Seinfled/Seinfeld' csvName.csv
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#activity 1
+#Create a directory called “activity1” in your home directory (~)
+cd ~
+mkdir activity1
+
+#Change your current directory to your “activity1” directory
+cd activity1/
+
+#Download https://cdn.cs50.net/2021/x/seminars/linux/shows.csv
+wget https://cdn.cs50.net/2021/x/seminars/linux/shows.csv
+#check file has been downloaded to the default home directory
+ls ~
+#copy file downloaded to the default home directory (PARENT ..), into the activity1 directory (CURRENTLY WHERE U ARE .)
+#can actually dont use cd ~, then copy to the current activity1 folder
+cp ../shows.csv .
+ls
+
+
+#Using a pipe, print the year “Mr. Robot” aired on standard out
+#read the file
+#file the line with 'Mr. Robot' 
+#return only the year for that line
+#cut - get the row
+#-d , - delimiter is ','
+#-f <field number1,2> - get only this field/s
+cat shows.csv | grep 'Mr. Robot' | cut -d , -f 3
+#alternatively
+grep 'Mr. Robot' shows.csv | cut -d , -f 3
+
+#Where does “libcs50.a” live in /usr?
+find /usr -name libcs50.a
+#alternatively
+find /usr -name 'libcs50.a'
+
+
+
+
+
+
+
