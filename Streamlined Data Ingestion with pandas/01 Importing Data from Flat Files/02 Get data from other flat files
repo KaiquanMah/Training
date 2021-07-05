@@ -1,0 +1,46 @@
+Get data from other flat files
+While CSVs are the most common kind of flat file, you will sometimes find files that use different delimiters. read_csv() can load all of these with the help of the sep keyword argument. By default, pandas assumes that the separator is a comma, which is why we do not need to specify sep for CSVs.
+The version of Vermont tax data here is a tab-separated values file (TSV), so you will need to use sep to pass in the correct delimiter when reading the file. Remember that tabs are represented as \t. Once the file has been loaded, the remaining code groups the N1 field, which contains income range categories, to create a chart of tax returns by income category.
+
+data.head()
+
+   STATEFIPS STATE  zipcode  agi_stub      N1  ...  A85300  N11901  A11901  N11902  A11902
+0         50    VT        0         1  111580  ...       0   10820    9734   88260  138337
+1         50    VT        0         2   82760  ...       0   12820   20029   68760  151729
+2         50    VT        0         3   46270  ...       0   10810   24499   34600   90583
+3         50    VT        0         4   30070  ...       0    7320   21573   21300   67045
+4         50    VT        0         5   39530  ...       0   12500   67761   23320  103034
+
+[5 rows x 147 columns]
+
+
+
+
+
+
+# Import pandas with the alias pd
+import pandas as pd
+
+# Load TSV using the sep keyword argument to set delimiter
+data = pd.read_csv('vt_tax_data_2016.tsv', sep='\t')
+
+# Plot the total number of tax returns by income group
+counts = data.groupby("agi_stub").N1.sum()
+counts.plot.bar()
+plt.show()
+
+
+
+
+
+
+
+counts.head()
+
+agi_stub
+1         223310
+2         165570
+3         92650
+4         60200
+5         79130
+Name: N1, dtype: int64
