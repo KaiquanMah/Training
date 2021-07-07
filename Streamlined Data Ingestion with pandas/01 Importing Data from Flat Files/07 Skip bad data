@@ -1,0 +1,92 @@
+Skip bad data
+In this exercise you'll use read_csv() parameters to handle files with bad data, like records with more values than columns. By default, trying to import such files triggers a specific error, pandas.io.common.CParserError.
+Some lines in the Vermont tax data here are corrupted. In order to load the good lines, we need to tell pandas to skip errors. We also want pandas to warn us when it skips a line so we know the scope of data issues.
+pandas has been imported as pd. The exercise code will try to read the file. If there is a pandas.io.common.CParserError, the code in the except block will run.
+
+
+
+
+
+
+Try to import the file vt_tax_data_2016_corrupt.csv without any keyword arguments.
+try:
+  # Import the CSV without any keyword arguments
+  data = pd.read_csv('vt_tax_data_2016_corrupt.csv')
+  
+  # View first 5 records
+  print(data.head())
+  
+except pd.io.common.CParserError:
+    print("Your data contained rows that could not be parsed.")
+
+<script.py> output:
+    Your data contained rows that could not be parsed.
+
+
+
+
+
+
+
+Import vt_tax_data_2016_corrupt.csv with the error_bad_lines parameter set to skip bad records.
+try:
+  # Import CSV with error_bad_lines set to skip bad records
+  data = pd.read_csv("vt_tax_data_2016_corrupt.csv", 
+                     error_bad_lines = False)
+  
+  # View first 5 records
+  print(data.head())
+  
+except pd.io.common.CParserError:
+    print("Your data contained rows that could not be parsed.")
+    
+<script.py> output:
+       STATEFIPS STATE  zipcode  agi_stub      N1  ...  A85300  N11901  A11901  N11902  A11902
+    0         50    VT        0         1  111580  ...       0   10820    9734   88260  138337
+    1         50    VT        0         2   82760  ...       0   12820   20029   68760  151729
+    2         50    VT        0         3   46270  ...       0   10810   24499   34600   90583
+    3         50    VT        0         5   39530  ...       0   12500   67761   23320  103034
+    4         50    VT        0         6    9620  ...   20428    3900   93123    2870   39425
+    
+    [5 rows x 147 columns]
+
+
+
+
+
+
+
+
+
+Update the import with the warn_bad_lines parameter set to issue a warning whenever a bad record is skipped.
+try:
+  # Set warn_bad_lines to issue warnings about bad records
+  data = pd.read_csv("vt_tax_data_2016_corrupt.csv", 
+                     error_bad_lines=False, #dont error and fail the whole execution
+                     warn_bad_lines=True)   #just skip + warn me about the problematic records
+  
+  # View first 5 records
+  print(data.head())
+  
+except pd.io.common.CParserError:
+    print("Your data contained rows that could not be parsed.")
+
+<script.py> output:
+    Skipping line 5: expected 147 fields, saw 148
+    Skipping line 9: expected 147 fields, saw 148
+    Skipping line 51: expected 147 fields, saw 148
+    
+       STATEFIPS STATE  zipcode  agi_stub      N1  ...  A85300  N11901  A11901  N11902  A11902
+    0         50    VT        0         1  111580  ...       0   10820    9734   88260  138337
+    1         50    VT        0         2   82760  ...       0   12820   20029   68760  151729
+    2         50    VT        0         3   46270  ...       0   10810   24499   34600   90583
+    3         50    VT        0         5   39530  ...       0   12500   67761   23320  103034
+    4         50    VT        0         6    9620  ...   20428    3900   93123    2870   39425
+    
+    [5 rows x 147 columns]
+
+
+A note about this exercise: the exercise console doesn't usually display warnings, so this exercise uses a slightly modified version of read_csv() that prints warnings, just like you would see if you ran the code in a local environment.
+
+
+
