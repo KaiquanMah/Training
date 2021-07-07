@@ -1,0 +1,113 @@
+#pandas datatype 'object' = python datatype 'str'
+When loading a flat file, pandas infers the best data type for each column. Sometimes its guesses are off, particularly for numbers that represent groups or qualities instead of quantities.
+Looking at the data dictionary for vt_tax_data_2016.csv reveals two such columns. The agi_stub column contains numbers that correspond to income categories, and zipcode has 5-digit values that should be strings -- treating them as integers means we lose leading 0s, which are meaningful. Let's specify the correct data types with the dtype argument.
+pandas has been imported for you as pd.
+
+
+
+
+
+
+Load vt_tax_data_2016.csv with no arguments and view the data frame's dtypes attribute. Note the data types of zipcode and agi_stub.
+# Load csv with no additional arguments
+data = pd.read_csv("vt_tax_data_2016.csv")
+
+# Print the data types
+print(data.dtypes)
+
+STATEFIPS      int64
+STATE         object
+zipcode        int64
+agi_stub       int64
+N1             int64
+mars1          int64
+MARS2          int64
+MARS4          int64
+PREP           int64
+N2             int64
+NUMDEP         int64
+TOTAL_VITA     int64
+VITA           int64
+TCE            int64
+VITA_EIC       int64
+RAL            int64
+RAC            int64
+ELDERLY        int64
+A00100         int64
+N02650         int64
+A02650         int64
+N00200         int64
+A00200         int64
+N00300         int64
+A00300         int64
+N00600         int64
+A00600         int64
+N00650         int64
+A00650         int64
+N00700         int64
+               ...  
+N85770         int64
+A85770         int64
+N85775         int64
+A85775         int64
+N09750         int64
+A09750         int64
+N10600         int64
+A10600         int64
+N59660         int64
+A59660         int64
+N59720         int64
+A59720         int64
+N11070         int64
+A11070         int64
+N10960         int64
+A10960         int64
+N11560         int64
+A11560         int64
+N06500         int64
+A06500         int64
+N10300         int64
+A10300         int64
+N85530         int64
+A85530         int64
+N85300         int64
+A85300         int64
+N11901         int64
+A11901         int64
+N11902         int64
+A11902         int64
+Length: 147, dtype: object
+
+
+
+
+
+
+
+
+
+
+
+Create a dictionary, data_types, specifying that agi_stub is "category" data and zipcode is string data.
+Reload the CSV with the dtype argument and the dictionary to set the correct column data types.
+View the data frame's dtypes attribute.
+# Create dict specifying data types for agi_stub and zipcode
+data_types = {'agi_stub' : 'category',
+			  'zipcode' : 'object'}
+
+# Load csv using dtype to set correct data types
+data = pd.read_csv("vt_tax_data_2016.csv", dtype = data_types)
+
+# Print data types of resulting frame
+print(data.dtypes.head())
+
+<script.py> output:
+    STATEFIPS       int64
+    STATE          object
+    zipcode        object
+    agi_stub     category
+    N1              int64
+    dtype: object
+    
+    
+A common workflow is to load the data and explore it, then write code that sets data types at import to share with colleagues or other audiences.    
