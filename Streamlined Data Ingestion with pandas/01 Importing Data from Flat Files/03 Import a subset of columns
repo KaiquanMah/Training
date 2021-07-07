@@ -1,0 +1,31 @@
+The Vermont tax data contains 147 columns describing household composition, income sources, and taxes paid by ZIP code and income group. Most analyses don't need all these columns. In this exercise, you will create a data frame with fewer variables using read_csv()s usecols argument.
+Let's focus on household composition to see if there are differences by geography and income level. To do this, we'll need columns on income group, ZIP code, tax return filing status (e.g., single or married), and dependents. The data uses codes for variable names, so the specific columns needed are in the instructions.
+pandas has already been imported as pd.
+
+
+Create a list of columns to use: zipcode, agi_stub (income group), mars1 (number of single households), MARS2 (number of households filing as married), and NUMDEP (number of dependents).
+Create a data frame from vt_tax_data_2016.csv that uses only the selected columns.
+
+
+
+# Create list of columns to use
+cols = ['zipcode', 'agi_stub', 'mars1', 'MARS2', 'NUMDEP']
+
+# Create data frame from csv using only selected columns
+data = pd.read_csv("vt_tax_data_2016.csv", usecols = cols)
+
+# View counts of dependents and tax returns by income level
+print(data.groupby("agi_stub").sum())
+
+          zipcode   mars1  MARS2  NUMDEP
+agi_stub                                
+1         1439444  170320  28480   52490
+2         1439444  104000  37690   64660
+3         1439444   39160  45390   47330
+4         1439444   11670  44410   37760
+5         1439444    7820  67750   60730
+6         1439444    1210  16340   16300
+
+
+#There is a saying that rows are cheap, but columns are expensive. Limiting datasets to only variables of interest makes them more manageable and streamlines pipelines, but make sure you aren't losing confounding data in the process.
+
