@@ -1,0 +1,34 @@
+Set custom NA values
+Part of data exploration and cleaning consists of checking for missing or NA values and deciding how to account for them. This is easier when missing values are treated as their own data type. and there are pandas functions that specifically target such NA values. pandas automatically treats some values as missing, but we can pass additional NA indicators with the na_values argument. Here, you'll do this to ensure that invalid ZIP codes in the Vermont tax data are coded as NA.
+pandas has been imported as pd.
+
+Create a dictionary, null_values, specifying that 0s in the zipcode column should be considered NA values.
+Load vt_tax_data_2016.csv, using the na_values argument and the dictionary to make sure invalid ZIP codes are treated as missing.
+
+# Create dict specifying that 0s in zipcode are NA values
+null_values = {'zipcode' : 0}
+
+# Load csv using na_values keyword argument
+data = pd.read_csv("vt_tax_data_2016.csv", 
+                   na_values = null_values)
+
+# View rows with NA ZIP codes
+print(data[data.zipcode.isna()])
+
+
+<script.py> output:
+       STATEFIPS STATE  zipcode  agi_stub      N1  ...  A85300  N11901  A11901  N11902  A11902
+    0         50    VT      NaN         1  111580  ...       0   10820    9734   88260  138337
+    1         50    VT      NaN         2   82760  ...       0   12820   20029   68760  151729
+    2         50    VT      NaN         3   46270  ...       0   10810   24499   34600   90583
+    3         50    VT      NaN         4   30070  ...       0    7320   21573   21300   67045
+    4         50    VT      NaN         5   39530  ...       0   12500   67761   23320  103034
+    5         50    VT      NaN         6    9620  ...   20428    3900   93123    2870   39425
+    
+    [6 rows x 147 columns]
+    
+    
+    
+Now that NA values are marked as such, it's possible to use NA-specific functions to do things like count missing values, as we did here, or drop records with missing values.
+
+
