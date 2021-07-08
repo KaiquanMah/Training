@@ -1,0 +1,60 @@
+Datasets may have columns that are most accurately modeled as Boolean values. However, pandas usually loads these as floats by default, since defaulting to Booleans may have undesired effects like turning NA values into Trues.
+fcc_survey_subset.xlsx contains a string ID column and several True/False columns indicating financial stressors. You'll evaluate which non-ID columns have no NA values and therefore can be set as Boolean, then tell read_excel() to load them as such with the dtype argument.
+pandas is loaded as pd.
+
+Instructions 1/2
+1
+Count NA values in each column of survey_data with isna() and sum(). Note which columns besides ID.x, if any, have zero NAs.
+# Load the data
+survey_data = pd.read_excel("fcc_survey_subset.xlsx")
+
+# Count NA values in each column
+print(survey_data.isna().sum())
+
+<script.py> output:
+    ID.x                        0
+    HasDebt                     0
+    HasFinancialDependents      7
+    HasHomeMortgage           499
+    HasStudentDebt            502
+    dtype: int64
+
+
+
+
+
+2
+Set read_excel()'s dtype argument to load the HasDebt column as Boolean data.
+Supply the Boolean column name to the print statement to view financial burdens by group.
+
+# Set dtype to load appropriate column(s) as Boolean data
+survey_data = pd.read_excel("fcc_survey_subset.xlsx",
+                            dtype = {'HasDebt' : 'bool'})
+
+# View financial burdens by Boolean group
+print(survey_data.groupby('HasDebt').sum())
+
+<script.py> output:
+             HasFinancialDependents  HasHomeMortgage  HasStudentDebt
+    HasDebt                                                         
+    False                     112.0              0.0             0.0
+    True                      205.0            151.0           281.0
+
+
+#Modeling True/False data as Booleans can streamline some data manipulation functions and keep spurious summary statistics, like quartile values, from being calculated. If you want to make a column with NA values Boolean, you can load the data, impute missing values, then re-cast the column as Boolean.
+
+
+
+
+
+
+
+survey_data.head()
+
+                               ID.x  HasDebt  HasFinancialDependents  HasHomeMortgage  HasStudentDebt
+0  cef35615d61b202f1dc794ef2746df14     True                     1.0              0.0             1.0
+1  323e5a113644d18185c743c241407754    False                     0.0              NaN             NaN
+2  b29a1027e5cd062e654a63764157461d    False                     0.0              NaN             NaN
+3  04a11e4bcb573a1261eb0d9948d32637     True                     0.0              0.0             1.0
+4  9368291c93d5d5f5c8cdb1a575e18bec     True                     0.0              0.0             0.0
+
