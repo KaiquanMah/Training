@@ -1,0 +1,96 @@
+Datasets can contain columns that are not required for an analysis, like the weather table in data.db does. Some, such as elevation, are redundant, since all observations occurred at the same place, while others contain variables we are not interested in. After making a database engine, you'll write a query to SELECT only the date and temperature columns, and pass both to read_sql() to make a data frame of high and low temperature readings.
+pandas has been loaded as pd, and create_engine() has been imported from sqlalchemy.
+Note: The SQL checker is quite picky about column positions and expects fields to be selected in the specified order.
+
+
+Create a database engine for data.db.
+Write a SQL query that SELECTs the date, tmax, and tmin columns from the weather table.
+Make a data frame by passing the query and engine to read_sql() and assign the resulting data frame to temperatures.
+
+# Create database engine for data.db
+engine = create_engine('sqlite:///data.db')
+
+# Write query to get date, tmax, and tmin from weather
+query = """
+SELECT date, 
+       tmax, 
+       tmin
+  FROM weather;
+"""
+
+# Make a data frame by passing query and engine to read_sql()
+temperatures = pd.read_sql(query, engine)
+
+# View the resulting data frame
+print(temperatures)
+
+<script.py> output:
+               date  tmax  tmin
+    0    12/01/2017    52    42
+    1    12/02/2017    48    39
+    2    12/03/2017    48    42
+    3    12/04/2017    51    40
+    4    12/05/2017    61    50
+    5    12/06/2017    59    40
+    6    12/07/2017    44    37
+    7    12/08/2017    39    34
+    8    12/09/2017    35    30
+    9    12/10/2017    39    29
+    10   12/11/2017    41    33
+    11   12/12/2017    50    29
+    12   12/13/2017    31    20
+    13    12/14/217    32    22
+    14   12/15/2017    28    20
+    15   12/16/2017    39    23
+    16   12/17/2017    38    32
+    17   12/18/2017    47    34
+    18   12/19/2017    55    45
+    19   12/20/2017    51    34
+    20   12/21/2017    39    32
+    21   12/22/2017    50    35
+    22   12/23/2017    48    38
+    23   12/24/2017    41    36
+    24   12/25/2017    38    28
+    25   12/26/2017    28    23
+    26   12/27/2017    24    17
+    27   12/28/2017    18    11
+    28   12/29/2017    22    11
+    29   12/30/2017    23    17
+    ..          ...   ...   ...
+    91   03/02/2018    44    34
+    92   03/03/2018    49    36
+    93   03/04/2018    44    34
+    94   03/05/2018    43    33
+    95   03/06/2018    47    32
+    96   03/07/2018    39    33
+    97   03/08/2018    39    33
+    98   03/09/2018    42    30
+    99   03/10/2018    40    31
+    100  03/11/2018    45    32
+    101  03/12/2018    43    32
+    102  03/13/2018    40    33
+    103  03/14/2018    41    31
+    104  03/15/2018    48    32
+    105  03/16/2018    40    30
+    106  03/17/2018    48    27
+    107  03/18/2018    43    28
+    108  03/19/2018    47    33
+    109  03/20/2018    39    30
+    110  03/21/2018    39    31
+    111  03/22/2018    50    32
+    112  03/23/2018    49    35
+    113  03/24/2018    51    35
+    114  03/25/2018    45    33
+    115  03/26/2018    50    34
+    116  03/27/2018    47    34
+    117  03/28/2018    52    38
+    118  03/29/2018    53    49
+    119  03/30/2018    62    44
+    120  03/31/2018    58    39
+    
+    [121 rows x 3 columns]
+
+
+
+#Selecting columns is useful when you only want a few columns from a table. If you want most of the columns, it may be easier to load them all and then use pandas to drop unwanted columns.
+
