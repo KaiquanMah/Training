@@ -1,0 +1,96 @@
+Sometimes an analysis doesn't need every record, but rather unique values in one or more columns. Duplicate values can be removed after loading data into a data frame, but it can also be done at import with SQL's DISTINCT keyword.
+Since hpd311calls contains data about housing issues, we would expect most records to have a borough listed. Let's test this assumption by querying unique complaint_type/borough combinations.
+pandas has been imported as pd, and the database engine has been created as engine.
+Note: The SQL checker is quite picky about column positions and expects fields to be selected in the specified order.
+
+
+Create a query that gets DISTINCT values for borough and complaint_type (in that order) from hpd311calls.
+Use read_sql() to load the results of the query to a data frame, issues_and_boros.
+Print the data frame to check if the assumption that all issues besides literature requests appear with boroughs listed.
+
+
+
+# Create query for unique combinations of borough and complaint_type
+query = """
+SELECT DISTINCT borough, 
+       complaint_type
+  FROM hpd311calls;
+"""
+
+# Load results of query to a data frame
+issues_and_boros = pd.read_sql(query, engine)
+
+# Check assumption about issues and boroughs
+print(issues_and_boros)
+
+<script.py> output:
+              borough          complaint_type
+    0           BRONX          HEAT/HOT WATER
+    1       MANHATTAN                PLUMBING
+    2       MANHATTAN          HEAT/HOT WATER
+    3        BROOKLYN          HEAT/HOT WATER
+    4          QUEENS          HEAT/HOT WATER
+    5       MANHATTAN             DOOR/WINDOW
+    6        BROOKLYN         FLOORING/STAIRS
+    7        BROOKLYN             DOOR/WINDOW
+    8        BROOKLYN           PAINT/PLASTER
+    9        BROOKLYN    UNSANITARY CONDITION
+    10       BROOKLYN              WATER LEAK
+    11  STATEN ISLAND          HEAT/HOT WATER
+    12  STATEN ISLAND                ELECTRIC
+    13  STATEN ISLAND                PLUMBING
+    14      MANHATTAN                ELECTRIC
+    15          BRONX             DOOR/WINDOW
+    16          BRONX                ELEVATOR
+    17          BRONX                ELECTRIC
+    18       BROOKLYN                PLUMBING
+    19      MANHATTAN         FLOORING/STAIRS
+    20          BRONX                PLUMBING
+    21         QUEENS                 GENERAL
+    22          BRONX              WATER LEAK
+    23  STATEN ISLAND             DOOR/WINDOW
+    24          BRONX           PAINT/PLASTER
+    25          BRONX    UNSANITARY CONDITION
+    26         QUEENS    UNSANITARY CONDITION
+    27         QUEENS                PLUMBING
+    28       BROOKLYN                ELECTRIC
+    29       BROOKLYN                  SAFETY
+    ..            ...                     ...
+    35         QUEENS           PAINT/PLASTER
+    36          BRONX                 GENERAL
+    37         QUEENS                ELECTRIC
+    38      MANHATTAN              WATER LEAK
+    39          BRONX         FLOORING/STAIRS
+    40    Unspecified  HPD Literature Request
+    41         QUEENS               APPLIANCE
+    42         QUEENS             DOOR/WINDOW
+    43  STATEN ISLAND    UNSANITARY CONDITION
+    44       BROOKLYN                 GENERAL
+    45          BRONX                  SAFETY
+    46  STATEN ISLAND         FLOORING/STAIRS
+    47  STATEN ISLAND           PAINT/PLASTER
+    48  STATEN ISLAND              WATER LEAK
+    49      MANHATTAN                 GENERAL
+    50         QUEENS        OUTSIDE BUILDING
+    51      MANHATTAN           PAINT/PLASTER
+    52       BROOKLYN               APPLIANCE
+    53      MANHATTAN                  SAFETY
+    54         QUEENS                ELEVATOR
+    55          BRONX        OUTSIDE BUILDING
+    56         QUEENS                  SAFETY
+    57  STATEN ISLAND                 GENERAL
+    58  STATEN ISLAND               APPLIANCE
+    59         QUEENS         FLOORING/STAIRS
+    60      MANHATTAN        OUTSIDE BUILDING
+    61      MANHATTAN                ELEVATOR
+    62       BROOKLYN        OUTSIDE BUILDING
+    63  STATEN ISLAND                  SAFETY
+    64  STATEN ISLAND        OUTSIDE BUILDING
+    
+    [65 rows x 2 columns]
+
+
+
+
+#Looks like the only issues with no borough are requests for information, rather than housing complaints, which is okay. SELECT DISTINCT queries can be an easy way to find data quality issues like misspelled values or combinations of values that violate assumptions.
+
