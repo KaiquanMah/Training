@@ -1,0 +1,68 @@
+In previous exercises, you pulled data from tables, then summarized the resulting data frames in pandas to create graphs. By using COUNT and GROUP BY in a SQL query, we can pull those summary figures from the database directly.
+The hpd311calls table has a column, complaint_type, that categorizes call records by issue, such as heating or plumbing. In order to graph call volumes by issue, you'll write a SQL query that COUNTs records by complaint type.
+pandas has been imported as pd, and the database engine for data.db has been created as engine.
+
+
+Create a SQL query that gets the complaint_type column and counts of all records from hpd311calls, grouped by complaint_type.
+Create a data frame with read_sql() of call counts by issue, calls_by_issue.
+Run the last section of code to graph the number of calls for each housing issue.
+
+
+# Create query to get call counts by complaint_type
+query = """
+SELECT complaint_type, 
+     COUNT(*)
+  FROM hpd311calls
+  GROUP BY complaint_type;
+"""
+
+# Create data frame of call counts by issue
+calls_by_issue = pd.read_sql(query, engine)
+
+# Graph the number of calls for each housing issue
+calls_by_issue.plot.barh(x="complaint_type")
+plt.show()
+
+
+
+
+#Calls about heat and hot water issues vastly outnumber calls about all other issues. The data subset in the table comes from the winter, so this makes sense. We'll explore these calls more in the next lesson.
+calls_by_issue.sort_values(by = ['COUNT(*)'])
+
+            complaint_type  COUNT(*)
+8         OUTSIDE BUILDING        85
+3                 ELEVATOR       106
+7   HPD Literature Request       391
+11                  SAFETY      1043
+0                APPLIANCE      1307
+4          FLOORING/STAIRS      2190
+5                  GENERAL      2615
+2                 ELECTRIC      2777
+13              WATER LEAK      3567
+1              DOOR/WINDOW      4451
+9            PAINT/PLASTER      5680
+12    UNSANITARY CONDITION      6820
+10                PLUMBING      7117
+6           HEAT/HOT WATER     56740
+
+
+
+
+
+calls_by_issue.sort_values(by = ['COUNT(*)'], ascending = False)
+
+            complaint_type  COUNT(*)
+6           HEAT/HOT WATER     56740
+10                PLUMBING      7117
+12    UNSANITARY CONDITION      6820
+9            PAINT/PLASTER      5680
+1              DOOR/WINDOW      4451
+13              WATER LEAK      3567
+2                 ELECTRIC      2777
+5                  GENERAL      2615
+4          FLOORING/STAIRS      2190
+0                APPLIANCE      1307
+11                  SAFETY      1043
+7   HPD Literature Request       391
+3                 ELEVATOR       106
+8         OUTSIDE BUILDING        85
