@@ -1,0 +1,59 @@
+Just as you might not always want all the data in a single table, you might not want all columns and rows that result from a JOIN. In this exercise, you'll use SQL to refine a data import.
+Weather exacerbates some housing problems more than others. Your task is to focus on water leak reports in hpd311calls and assemble a dataset that includes the day's precipitation levels from weather to see if there is any relationship between the two. The provided SQL gets all columns in hpd311calls, but you'll need to modify it to get the necessary weather column and filter rows with a WHERE clause.
+pandas is loaded as pd, and the database engine, engine, has been created.
+
+
+1
+Complete query to get the prcp column in weather and join weather to hpd311calls on their date and created_date columns, respectively.
+Use read_sql() to load the results of the query into the leak_calls data frame.
+# Query to get hpd311calls and precipitation values
+query = """
+SELECT hpd311calls.*, weather.prcp
+  FROM hpd311calls
+  JOIN weather
+  ON hpd311calls.created_date = weather.date;"""
+
+# Load query results into the leak_calls data frame
+leak_calls = pd.read_sql(query, engine)
+
+# View the data frame
+print(leak_calls.head())
+
+
+<script.py> output:
+      unique_key created_date agency  complaint_type incident_zip      incident_address community_board    borough  prcp
+    0   38070822   01/01/2018    HPD  HEAT/HOT WATER        10468    2786 JEROME AVENUE        07 BRONX      BRONX   0.0
+    1   38065299   01/01/2018    HPD        PLUMBING        10003  323 EAST   12 STREET    03 MANHATTAN  MANHATTAN   0.0
+    2   38066653   01/01/2018    HPD  HEAT/HOT WATER        10452  1235 GRAND CONCOURSE        04 BRONX      BRONX   0.0
+    3   38070264   01/01/2018    HPD  HEAT/HOT WATER        10032  656 WEST  171 STREET    12 MANHATTAN  MANHATTAN   0.0
+    4   38072466   01/01/2018    HPD  HEAT/HOT WATER        11213       1030 PARK PLACE     08 BROOKLYN   BROOKLYN   0.0
+
+
+
+
+
+
+2
+Modify query to get only rows that have 'WATER LEAK' as their complaint_type.
+# Query to get water leak calls and daily precipitation
+query = """
+SELECT hpd311calls.*, weather.prcp
+  FROM hpd311calls
+  JOIN weather
+    ON hpd311calls.created_date = weather.date
+  WHERE hpd311calls.complaint_type = 'WATER LEAK';"""
+
+# Load query results into the leak_calls data frame
+leak_calls = pd.read_sql(query, engine)
+
+# View the data frame
+print(leak_calls.head())
+
+<script.py> output:
+      unique_key created_date agency complaint_type incident_zip         incident_address community_board   borough  prcp
+    0   38074305   01/01/2018    HPD     WATER LEAK        11212     1026 WILLMOHR STREET     17 BROOKLYN  BROOKLYN   0.0
+    1   38078748   01/01/2018    HPD     WATER LEAK        10458       2700 MARION AVENUE        07 BRONX     BRONX   0.0
+    2   38081097   01/01/2018    HPD     WATER LEAK        11221  192 MALCOLM X BOULEVARD     03 BROOKLYN  BROOKLYN   0.0
+    3   38077874   01/01/2018    HPD     WATER LEAK        11418    129-11 JAMAICA AVENUE       09 QUEENS    QUEENS   0.0
+    4   38081110   01/01/2018    HPD     WATER LEAK        11420        111-17 133 STREET       10 QUEENS    QUEENS   0.0
+
