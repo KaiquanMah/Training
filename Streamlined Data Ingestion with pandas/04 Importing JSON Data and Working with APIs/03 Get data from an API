@@ -1,0 +1,191 @@
+In this exercise, you'll use requests.get() to query the Yelp Business Search API for cafes in New York City. requests.get() needs a URL to get data from. The Yelp API also needs search parameters and authorization headers passed to the params and headers keyword arguments, respectively.
+You'll need to extract the data from the response with its json() method, and pass it to pandas's DataFrame() function to make a data frame. Note that the necessary data is under the dictionary key "businesses".
+pandas (as pd) and requests have been loaded. Authorization data is in the dictionary headers, and the needed API parameters are stored as params.
+
+
+Get data about New York City cafes from the Yelp API (api_url) with requests.get(). The necessary params and headers information has been provided.
+Extract the JSON data from the response with its json() method, and assign it to data.
+Load the cafe listings to the data frame cafes with pandas's DataFrame() function. The listings are under the "businesses" key in data.
+Print the data frame's dtypes to see what information you're getting.
+
+params
+{'location': 'NYC', 'term': 'cafe'}
+headers
+{'Authorization': 'Bearer mhmt6jn3SFPVC1u6pfwgHWQvsa1wmWvCpKRtFGRYlo4mzA14SisQiDjyygsGMV2Dm7tEsuwdC4TYSA0Ai_GQTjKf9d5s5XLSNfQqdg1oy7jcBBh1i7iQUZBujdA_XHYx'}
+
+
+
+
+api_url = "https://api.yelp.com/v3/businesses/search"
+
+# Get data about NYC cafes from the Yelp API
+response = requests.get(api_url, 
+                headers=headers, 
+                params=params)
+
+# Extract JSON data from the response
+data = response.json()
+
+# Load data to a data frame
+cafes = pd.DataFrame(data['businesses'])
+
+# View the data's dtypes
+print(cafes.dtypes)
+
+
+<script.py> output:
+    alias             object
+    categories        object
+    coordinates       object
+    display_phone     object
+    distance         float64
+    id                object
+    image_url         object
+    is_closed           bool
+    location          object
+    name              object
+    phone             object
+    price             object
+    rating           float64
+    review_count       int64
+    transactions      object
+    url               object
+    dtype: object
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#cafes.head()
+                         alias                                         categories                                        coordinates   display_phone     distance  ... price rating  review_count  \
+0       white-noise-brooklyn-2     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]  {'latitude': 40.6893582571548, 'longitude': -7...                  1856.127036  ...   NaN    4.5            15   
+1          devocion-brooklyn-3  [{'alias': 'coffee', 'title': 'Coffee & Tea'},...     {'latitude': 40.68857, 'longitude': -73.98334}  (718) 285-6180  2087.816949  ...    $$    4.0            73   
+2   coffee-project-ny-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]     {'latitude': 40.72699, 'longitude': -73.98922}  (212) 228-7888  2435.843426  ...    $$    4.5           630   
+3  spreadhouse-cafe-new-york-3  [{'alias': 'cafes', 'title': 'Cafes'}, {'alias...     {'latitude': 40.71891, 'longitude': -73.98585}  (646) 524-6353  1657.232800  ...     $    4.0           380   
+4             usagi-ny-dumbo-7  [{'alias': 'bookstores', 'title': 'Bookstores'...     {'latitude': 40.70383, 'longitude': -73.98691}  (718) 801-8037   635.781863  ...    $$    4.5            57   
+
+  transactions                                                url  
+0           []  https://www.yelp.com/biz/white-noise-brooklyn-...  
+1           []  https://www.yelp.com/biz/devocion-brooklyn-3?a...  
+2           []  https://www.yelp.com/biz/coffee-project-ny-new...  
+3           []  https://www.yelp.com/biz/spreadhouse-cafe-new-...  
+4           []  https://www.yelp.com/biz/usagi-ny-dumbo-7?adju...  
+
+[5 rows x 16 columns]
+
+
+
+
+
+
+
+
+
+
+
+
+
+#data
+
+{'businesses': [{'alias': 'white-noise-brooklyn-2',
+   'categories': [{'alias': 'coffee', 'title': 'Coffee & Tea'}],
+   'coordinates': {'latitude': 40.6893582571548,
+    'longitude': -73.9884148165584},
+   'display_phone': '',
+   'distance': 1856.1270355932324,
+   'id': 'CBmrwh7jHn88M4v8Q9Qyyg',
+   'image_url': 'https://s3-media2.fl.yelpcdn.com/bphoto/rcNRZr7mVv-vb-PKMMrsLw/o.jpg',
+   'is_closed': False,
+   'location': {'address1': '71 Smith St',
+    'address2': '',
+    'address3': None,
+    'city': 'Brooklyn',
+    'country': 'US',
+    'display_address': ['71 Smith St', 'Brooklyn, NY 11201'],
+    'state': 'NY',
+    'zip_code': '11201'},
+   'name': 'White Noise',
+   'phone': '',
+   'rating': 4.5,
+   'review_count': 15,
+   'transactions': [],
+   'url': 'https://www.yelp.com/biz/white-noise-brooklyn-2?adjust_creative=w1T_agSsZFkZALqEYIiCXQ&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=w1T_agSsZFkZALqEYIiCXQ'},
+  {'alias': 'devocion-brooklyn-3',
+   'categories': [{'alias': 'coffee', 'title': 'Coffee & Tea'},
+    {'alias': 'coffeeroasteries', 'title': 'Coffee Roasteries'},
+    {'alias': 'cafes', 'title': 'Cafes'}],
+   'coordinates': {'latitude': 40.68857, 'longitude': -73.98334},
+   'display_phone': '(718) 285-6180',
+   'distance': 2087.8169485341946,
+   'id': 'NG-KlDcSjBk3pfdzjXmMVw',
+   'image_url': 'https://s3-media1.fl.yelpcdn.com/bphoto/xEKPpnWtKdo3f_q3vJNW4A/o.jpg',
+   'is_closed': False,
+   'location': {'address1': '276 Livingston St',
+    'address2': '',
+    'address3': None,
+    'city': 'Brooklyn',
+    'country': 'US',
+    'display_address': ['276 Livingston St', 'Brooklyn, NY 11201'],
+    'state': 'NY',
+    'zip_code': '11201'},
+   'name': 'Devocion',
+   'phone': '+17182856180',
+   'price': '$$',
+   'rating': 4.0,
+   'review_count': 73,
+   'transactions': [],
+   'url': 'https://www.yelp.com/biz/devocion-brooklyn-3?adjust_creative=w1T_agSsZFkZALqEYIiCXQ&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=w1T_agSsZFkZALqEYIiCXQ'},
+   ...,
+  {'alias': 'absolute-coffee-brooklyn',
+   'categories': [{'alias': 'coffee', 'title': 'Coffee & Tea'},
+    {'alias': 'bakeries', 'title': 'Bakeries'}],
+   'coordinates': {'latitude': 40.68827, 'longitude': -73.987569},
+   'display_phone': '(718) 522-0969',
+   'distance': 1995.2838490428082,
+   'id': 'Qmv4SPta2zx7MhKit8ywag',
+   'image_url': 'https://s3-media2.fl.yelpcdn.com/bphoto/7-FjJHmxoT8JXS5lvyO13w/o.jpg',
+   'is_closed': False,
+   'location': {'address1': '327 Atlantic Ave',
+    'address2': None,
+    'address3': '',
+    'city': 'Brooklyn',
+    'country': 'US',
+    'display_address': ['327 Atlantic Ave', 'Brooklyn, NY 11201'],
+    'state': 'NY',
+    'zip_code': '11201'},
+   'name': 'Absolute Coffee',
+   'phone': '+17185220969',
+   'price': '$$',
+   'rating': 4.5,
+   'review_count': 158,
+   'transactions': [],
+   'url': 'https://www.yelp.com/biz/absolute-coffee-brooklyn?adjust_creative=w1T_agSsZFkZALqEYIiCXQ&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=w1T_agSsZFkZALqEYIiCXQ'}
+   ],
+ 'region': {'center': {'latitude': 40.70544486444615,
+                       'longitude': -73.99429321289062}
+           },
+ 'total': 6100}
+
+
+
+
+
+
+
+
+
+
+
+Check the response format whenever you work with a new API -- chances are the data you need is nested under a dictionary key, like here.
+One important note: to avoid problems like hitting usage limits or potential connection issues, this course mimics API requests in the background, and, if you set up the code right, returns the corresponding response object. The code you'll write looks exactly like what you would use to interact with the actual API, though. If you're curious about how this works, check out this GitHub repo.
+https://github.com/adrian-soto/mock-request
+
