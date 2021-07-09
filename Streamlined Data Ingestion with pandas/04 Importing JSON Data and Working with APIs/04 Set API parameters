@@ -1,0 +1,49 @@
+Formatting parameters to get the data you need is an integral part of working with APIs. These parameters can be passed to the get() function's params keyword argument as a dictionary.
+The Yelp API requires the location parameter be set. It also lets users supply a term to search for. You'll use these parameters to get data about cafes in NYC, then process the result to create a data frame.
+pandas (as pd) and requests have been loaded. The API endpoint is stored in the variable api_url. Authorization data is stored in the dictionary headers.
+
+
+Create a dictionary, parameters, with the term and location parameters set to search for "cafe"s in "NYC".
+Query the Yelp API (api_url) with requests's get() function and the headers and params keyword arguments set. Save the result as response.
+Extract the JSON data from response with the appropriate method. Save the result as data.
+Load the "businesses" values in data to the data frame cafes and print the head.
+
+
+# Create dictionary to query API for cafes in NYC
+parameters = {'location' : 'NYC',
+          	  'term' : 'cafe'}
+
+# Query the Yelp API with headers and params set
+response = requests.get(api_url,
+                headers=headers,
+                params=parameters)
+
+# Extract JSON data from response
+data = response.json()
+
+# Load "businesses" values to a data frame and print head
+cafes = pd.DataFrame(data['businesses'])
+print(cafes.head())
+
+
+<script.py> output:
+
+                             alias                                         categories                                        coordinates   display_phone     distance  ... price rating  review_count  \
+    0       white-noise-brooklyn-2     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]  {'latitude': 40.6893582571548, 'longitude': -7...                  1856.127036  ...   NaN    4.5            15   
+    1          devocion-brooklyn-3  [{'alias': 'coffee', 'title': 'Coffee & Tea'},...     {'latitude': 40.68857, 'longitude': -73.98334}  (718) 285-6180  2087.816949  ...    $$    4.0            73   
+    2   coffee-project-ny-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]     {'latitude': 40.72699, 'longitude': -73.98922}  (212) 228-7888  2435.843426  ...    $$    4.5           630   
+    3  spreadhouse-cafe-new-york-3  [{'alias': 'cafes', 'title': 'Cafes'}, {'alias...     {'latitude': 40.71891, 'longitude': -73.98585}  (646) 524-6353  1657.232800  ...     $    4.0           380   
+    4             usagi-ny-dumbo-7  [{'alias': 'bookstores', 'title': 'Bookstores'...     {'latitude': 40.70383, 'longitude': -73.98691}  (718) 801-8037   635.781863  ...    $$    4.5            57   
+    
+      transactions                                                url  
+    0           []  https://www.yelp.com/biz/white-noise-brooklyn-...  
+    1           []  https://www.yelp.com/biz/devocion-brooklyn-3?a...  
+    2           []  https://www.yelp.com/biz/coffee-project-ny-new...  
+    3           []  https://www.yelp.com/biz/spreadhouse-cafe-new-...  
+    4           []  https://www.yelp.com/biz/usagi-ny-dumbo-7?adju...  
+    
+    [5 rows x 16 columns]
+    
+    
+    
+    #Notice that some of the values are themselves dictionaries, making them hard to analyze. 
