@@ -1,0 +1,76 @@
+JSON isn't a tabular format, so pandas makes assumptions about its orientation when loading data. Most JSON data you encounter will be in orientations that pandas can automatically transform into a data frame.
+Sometimes, like in this modified version of the Department of Homeless Services Daily Report, data is oriented differently. To reduce the file size, it has been split formatted. You'll see what happens when you try to load it normally versus with the orient keyword argument. The try/except block will alert you if there are errors loading the data.
+pandas has been loaded as pd.
+
+1
+Try loading dhs_report_reformatted.json without any keyword arguments.
+try:
+    # Load the JSON without keyword arguments
+    df = pd.read_json('dhs_report_reformatted.json')
+    
+    # Plot total population in shelters over time
+    df["date_of_census"] = pd.to_datetime(df["date_of_census"])
+    df.plot(x="date_of_census", 
+            y="total_individuals_in_shelter")
+    plt.show()
+    
+except ValueError:
+    print("pandas could not parse the JSON.")
+    
+    
+    
+#ValueError: arrays must all be same length    
+    
+<script.py> output:
+    pandas could not parse the JSON.
+    
+    
+    
+    
+
+2
+Load dhs_report_reformatted.json to a data frame with orient specified.
+try:
+    # Load the JSON with orient specified
+    df = pd.read_json("dhs_report_reformatted.json",
+                      orient = 'split')
+    
+    # Plot total population in shelters over time
+    df["date_of_census"] = pd.to_datetime(df["date_of_census"])
+    df.plot(x="date_of_census", 
+            y="total_individuals_in_shelter")
+    plt.show()
+    
+except ValueError:
+    print("pandas could not parse the JSON.")
+
+
+
+#In this case, pandas could not parse the JSON at all without the orient keyword. For some other orientations, like index-oriented data, the data will load with transposed column and index names.
+
+
+
+
+
+    df.head()
+ERROR! Session/line number was not unique in database. History logging moved to new session 30
+
+   adult_families_in_shelter  adults_in_families_with_children_in_shelter  children_in_families_with_children_in_shelter date_of_census  families_with_children_in_shelter  ...  \
+0                       1796                                        14607                                          21314     2013-08-21                              10261  ...   
+1                       1803                                        14622                                          21324     2013-08-22                              10274  ...   
+2                       1802                                        14611                                          21291     2013-08-23                              10266  ...   
+3                       1801                                        14650                                          21343     2013-08-24                              10291  ...   
+4                       1804                                        14694                                          21400     2013-08-25                              10324  ...   
+
+   total_adults_in_shelter  total_children_in_shelter  total_individuals_in_families_with_children_in_shelter_  total_individuals_in_shelter  total_single_adults_in_shelter  
+0                    28359                      21314                                              35921                               49673                            9941  
+1                    28366                      21324                                              35946                               49690                            9917  
+2                    28257                      21291                                              35902                               49548                            9820  
+3                    28274                      21343                                              35993                               49617                            9800  
+4                    28458                      21400                                              36094                               49858                            9934  
+
+[5 rows x 13 columns]
+
+
+
+
