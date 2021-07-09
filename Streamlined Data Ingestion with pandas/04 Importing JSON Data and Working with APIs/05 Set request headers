@@ -1,0 +1,69 @@
+Many APIs require users provide an API key, obtained by registering for the service. Keys typically are passed in the request header, rather than as parameters.
+The Yelp API documentation says "To authenticate API calls with the API Key, set the Authorization HTTP header value as Bearer API_KEY."
+You'll set up a dictionary to pass this information to get(), call the API for the highest-rated cafes in NYC, and parse the response.
+pandas (as pd) and requests have been loaded. The API endpoint is stored as api_url, and the key is api_key. Parameters are in the dictionary params.
+https://www.yelp.com/developers/documentation/v3/authentication
+
+
+Create a dictionary, headers, that passes the formatted key string to the "Authorization" header value.
+Query the Yelp API (api_url) with get() and the necessary headers and parameters. Save the result as response.
+Extract the JSON data from response. Save the result as data.
+Load the "businesses" values in data to the data frame cafes and print the names column.
+
+
+
+
+api_key
+'mhmt6jn3SFPVC1u6pfwgHWQvsa1wmWvCpKRtFGRYlo4mzA14SisQiDjyygsGMV2Dm7tEsuwdC4TYSA0Ai_GQTjKf9d5s5XLSNfQqdg1oy7jcBBh1i7iQUZBujdA_XHYx'
+
+params
+{'location': 'NYC', 'sort_by': 'rating', 'term': 'cafe'}
+
+
+
+# Create dictionary that passes Authorization and key string
+headers = {'Authorization': "Bearer {}".format(api_key)}
+
+# Query the Yelp API with headers and params set
+response = requests.get(api_url,
+                        headers=headers,
+                        params=params)
+
+
+
+# Extract JSON data from response
+data = response.json()
+
+# Load "businesses" values to a data frame and print names
+cafes = pd.DataFrame(data['businesses'])
+print(cafes.name)
+
+
+
+<script.py> output:
+    0             Coffee Project NY
+    1                Urban Backyard
+    2              Saltwater Coffee
+    3                 Bird & Branch
+    4                  Bibble & Sip
+    5             Coffee Project NY
+    6                        Burrow
+    7                   Cafe Patoro
+    8                     Sweatshop
+    9                       Round K
+    10               Kobrick Coffee
+    11            Kaigo Coffee Room
+    12              Absolute Coffee
+    13                     Devocion
+    14                The Uncommons
+    15                      Butler 
+    16              Cafe Hanamizuki
+    17    Brooklyn Roasting Company
+    18             Takahachi Bakery
+    19              Happy Bones NYC
+    Name: name, dtype: object
+    
+    
+    API keys are employed to track and moderate API usage. Be sure to keep keys private -- unscrupulous developers use others' keys to get around usage limits.
+    
+    
