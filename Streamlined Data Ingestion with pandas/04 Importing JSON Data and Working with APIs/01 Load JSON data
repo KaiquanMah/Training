@@ -1,0 +1,62 @@
+Many open data portals make available JSONs datasets that are particularly easy to parse. They can be accessed directly via URL. Each object is a record, all objects have the same set of attributes, and none of the values are nested objects that themselves need to be parsed.
+The New York City Department of Homeless Services Daily Report is such a dataset, containing years' worth of homeless shelter population counts. You can view it in the console before loading it to a data frame with pandas's read_json() function.
+
+
+Get a sense of the contents of dhs_daily_report.json, which are printed in the console.
+[
+{"adult_families_in_shelter":"1796","adults_in_families_with_children_in_shelter":"14607","children_in_families_with_children_in_shelter":"21314","date_of_census":"2013-08-21T00:00:00.000","families_with_children_in_shelter":"10261","individuals_in_adult_families_in_shelter":"3811","single_adult_men_in_shelter":"7231","single_adult_women_in_shelter":"2710","total_adults_in_shelter":"28359","total_children_in_shelter":"21314","total_individuals_in_families_with_children_in_shelter_":"35921","total_individuals_in_shelter":"49673","total_single_adults_in_shelter":"9941"}
+,{"adult_families_in_shelter":"1803","adults_in_families_with_children_in_shelter":"14622","children_in_families_with_children_in_shelter":"21324","date_of_census":"2013-08-22T00:00:00.000","families_with_children_in_shelter":"10274","individuals_in_adult_families_in_shelter":"3827","single_adult_men_in_shelter":"7201","single_adult_women_in_shelter":"2716","total_adults_in_shelter":"28366","total_children_in_shelter":"21324","total_individuals_in_families_with_children_in_shelter_":"35946","total_individuals_in_shelter":"49690","total_single_adults_in_shelter":"9917"}
+,...
+,{"adult_families_in_shelter":"2346","adults_in_families_with_children_in_shelter":"17166","children_in_families_with_children_in_shelter":"22614","date_of_census":"2016-06-22T00:00:00.000","families_with_children_in_shelter":"12359","individuals_in_adult_families_in_shelter":"4919","single_adult_men_in_shelter":"9309","single_adult_women_in_shelter":"3779","total_adults_in_shelter":"35173","total_children_in_shelter":"22614","total_individuals_in_families_with_children_in_shelter_":"39780","total_individuals_in_shelter":"57787","total_single_adults_in_shelter":"13088"}
+]
+
+
+
+Load pandas as pd.
+Use read_json() to load dhs_daily_report.json to a data frame, pop_in_shelters.
+View summary statistics about pop_in_shelters with the data frame's describe() method.
+
+
+
+# Load pandas as pd
+import pandas as pd
+
+# Load the daily report to a data frame
+pop_in_shelters = pd.read_json('dhs_daily_report.json')
+
+# View summary stats about pop_in_shelters
+print(pop_in_shelters.describe())
+
+
+<script.py> output:
+           adult_families_in_shelter  adults_in_families_with_children_in_shelter  children_in_families_with_children_in_shelter  families_with_children_in_shelter  \
+    count                1000.000000                                  1000.000000                                    1000.000000                         1000.00000   
+    mean                 2074.955000                                 16487.932000                                   23273.873000                        11588.83500   
+    std                   148.020238                                   848.363772                                     926.243984                          626.41371   
+    min                  1796.000000                                 14607.000000                                   21291.000000                        10261.00000   
+    25%                  1906.000000                                 15831.500000                                   22666.000000                        11060.00000   
+    50%                  2129.000000                                 16836.000000                                   23285.500000                        11743.00000   
+    75%                  2172.250000                                 17118.250000                                   23610.000000                        12146.00000   
+    max                  2356.000000                                 17733.000000                                   25490.000000                        12413.00000   
+    
+           individuals_in_adult_families_in_shelter  ...  total_adults_in_shelter  total_children_in_shelter  total_individuals_in_families_with_children_in_shelter_  total_individuals_in_shelter  \
+    count                                1000.00000  ...              1000.000000                1000.000000                                        1000.000000                         1000.000000   
+    mean                                 4368.05400  ...             32328.857000               23273.882000                                       39761.805000                        55602.739000   
+    std                                   299.05424  ...              2150.583637                 926.247187                                        1677.972788                         2745.294235   
+    min                                  3811.00000  ...             28127.000000               21291.000000                                       35902.000000                        49462.000000   
+    25%                                  4026.00000  ...             30184.250000               22666.000000                                       38775.500000                        53196.500000   
+    50%                                  4473.00000  ...             33142.000000               23285.500000                                       40026.000000                        56713.500000   
+    75%                                  4567.00000  ...             33940.750000               23610.000000                                       40529.500000                        57872.250000   
+    max                                  4944.00000  ...             35294.000000               25490.000000                                       43208.000000                        59068.000000   
+    
+           total_single_adults_in_shelter  
+    count                      1000.00000  
+    mean                      11472.88000  
+    std                        1113.66412  
+    min                        9610.00000  
+    25%                       10381.75000  
+    50%                       11633.50000  
+    75%                       12437.50000  
+    max                       13270.00000  
+    
+    [8 rows x 12 columns]
