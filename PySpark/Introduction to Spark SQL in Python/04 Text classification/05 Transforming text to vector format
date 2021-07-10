@@ -1,0 +1,161 @@
+You learned how to split sentences and transform an array of words into a numerical vector using a CountVectorizer.
+A dataframe df is provided having the following columns: sentence, in, and out. Each column is an array of strings. sentence is a list of words representing a sentence from a text book. The out column gives the last word of sentence. The in column is obtained by removing the last word from sentence.
+
+Dataframe contents:
++--------------------+--------------------+-------------+
+|            sentence|                  in|          out|
++--------------------+--------------------+-------------+
+|[then, how, many,...|[then, how, many,...|      [there]|
+|         [how, many]|               [how]|       [many]|
+|    [i, donot, know]|          [i, donot]|       [know]|
+|         [quite, so]|             [quite]|         [so]|
+|[you, have, not, ...|    [you, have, not]|   [observed]|
+|[and, yet, you, h...|[and, yet, you, h...|       [seen]|
+|[that, is, just, ...|[that, is, just, my]|      [point]|
+|[now, i, know, th...|[now, i, know, th...|   [observed]|
+|[by, the, way, si...|[by, the, way, si...|       [this]|
+|[he, threw, over,...|[he, threw, over,...|       [pink]|
+|[tinted, notepape...|[tinted, notepape...|      [table]|
+|[it, came, by, th...|[it, came, by, th...|         [he]|
+|   [read, it, aloud]|          [read, it]|      [aloud]|
+|[the, note, was, ...|[the, note, was, ...|    [address]|
+|[there, will, cal...|[there, will, cal...|         [to]|
+|[night, at, a, qu...|[night, at, a, qu...|     [moment]|
+|[your, recent, se...|[your, recent, se...|[exaggerated]|
+|[this, account, o...|[this, account, o...|   [received]|
+|[be, in, your, ch...|[be, in, your, ch...|       [mask]|
++--------------------+--------------------+-------------+
+
+
+
+
+
+
+
+The CountVectorizer model expects a dataframe having a column words and creates a column vec.
+#HOW IS THE ABOVE SENTENCE RELEVANT TO WHAT WE NEED TO DO HERE/below? VIEW RESULTS LATER
+
+
+You will first perform a transform that adds an invec column, which looks like the following:
+
++----------------------+-------+------------------------------------+
+|in                    |out    |invec                               |
++----------------------+-------+------------------------------------+
+|[then, how, many, are]|[there]|(126,[3,18,28,30],[1.0,1.0,1.0,1.0])|
+|[how]                 |[many] |(126,[28],[1.0])                    |
+|[i, donot]            |[know] |(126,[15,78],[1.0,1.0])             |
++----------------------+-------+------------------------------------+
+only showing top 3 rows
+
+
+
+Then you will perform a second transform, which looks like the following:
+
++------------------------------------+----------------+
+|invec                               |outvec          |
++------------------------------------+----------------+
+|(126,[3,18,28,30],[1.0,1.0,1.0,1.0])|(126,[11],[1.0])|
+|(126,[28],[1.0])                    |(126,[18],[1.0])|
+|(126,[15,78],[1.0,1.0])             |(126,[21],[1.0])|
++------------------------------------+----------------+
+only showing top 3 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+Create a dataframe called result by using model to transform() df. result has the columns sentence, in, out, and invec. invec is the vector transformation of the in column.
+Add a column to result called outvec. result now has the columns sentence, in, out, invec, and outvec.
+
+#MODEL WAS ALREADY PRE-MADE
+model
+CountVectorizer_2a3968f3094a
+
+
+
+
+
+
+
+
+
+
+#IN, OUT COLS REMAIN THE SAME
+
+#rename col + ADD INVEC COL + rename cols
+#-step0-3 cols-sentence, in, out
+#-step1-3 cols-sentence, words (updated colname from 'in'), out
+#-step2-transform->4 cols now-sentence, words, out, vec (newly created col from the countvectoriser 'model')
+#-step3-4 cols-sentence, in (changed back col name after model has completed transformation), out, vec
+#-step4-4 cols-sentence, in, out, invec (update colname)
+
+#REMOVE SENTENCE COL
+
+#show 3 records
+
+# Overall -> Transform df using model
+result = model.transform(df.withColumnRenamed('in', 'words'))\
+        .withColumnRenamed('words', 'in')\
+        .withColumnRenamed('vec', 'invec')
+result.drop('sentence').show(3, False)
+result.show(3)
+
+
++--------------------+--------------------+-------+--------------------+
+|            sentence|                  in|    out|               invec|
++--------------------+--------------------+-------+--------------------+
+|[then, how, many,...|[then, how, many,...|[there]|(126,[3,18,28,30]...|
+|         [how, many]|               [how]| [many]|    (126,[28],[1.0])|
+|    [i, donot, know]|          [i, donot]| [know]|(126,[15,78],[1.0...|
++--------------------+--------------------+-------+--------------------+
+only showing top 3 rows
+
+
+
+
+
+
+
+
+
+
+
+#2nd transformation uses 'out' as the input vector
+#outvec is the output vector we want
+
+#step0-3 cols- in, out, invec
+#step1-3 cols- in, words (updated colname from 'out'), invec
+#step2-transform->4 cols now-in, words, invec, vec (newly created by model's transformation)
+#step3-4 cols-in, out (updated colname from 'words'), invec, vec
+#step4-4 cols-in, out, invec, outvec (updated colname from 'vec')
+
+#then PICK/SELECT ONLY THE 2 COLS U WANT TO SEE
+#NOT SURE WHETHER 'SELECT' IS ACTUALLY A TRANSFORMATION?!?!
+
+# Add a column based on the out column called outvec
+result = model.transform(result.withColumnRenamed('out', 'words'))\
+        .withColumnRenamed('words', 'out')\
+        .withColumnRenamed('vec', 'outvec')
+result.select('invec', 'outvec').show(3, False)	
+
++------------------------------------+----------------+
+|invec                               |outvec          |
++------------------------------------+----------------+
+|(126,[3,18,28,30],[1.0,1.0,1.0,1.0])|(126,[11],[1.0])|
+|(126,[28],[1.0])                    |(126,[18],[1.0])|
+|(126,[15,78],[1.0,1.0])             |(126,[21],[1.0])|
++------------------------------------+----------------+
+only showing top 3 rows
+
+
+
+With this you can now create feature sets for training a typical machine learning model.
+
