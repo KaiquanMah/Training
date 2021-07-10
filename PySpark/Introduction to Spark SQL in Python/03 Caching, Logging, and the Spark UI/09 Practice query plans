@@ -1,0 +1,75 @@
+A dataframe text_df is available. This dataframe is registered as a table called table1.
+
+Instructions
+Run explain on text_df.
+Run explain on a SQL query that does a "SELECT COUNT(*) as count" on table1.
+Run explain on a SQL query that counts the number of unique words in table1.
+
+
+# Run explain on text_df
+text_df.explain()
+
+<script.py> output:
+    == Physical Plan ==
+    *(1) Project [word#0, id#1L, part#2, title#3]
+    +- *(1) Filter (isnotnull(part#2) && (part#2 = 2))
+       +- *(1) FileScan parquet [word#0,id#1L,part#2,title#3] Batched: true, Format: Parquet, Location: InMemoryFileIndex[file:/tmp/tmp60zieo0r/sherlock_parts.parquet], PartitionFilters: [], PushedFilters: [IsNotNull(part), EqualTo(part,2)], ReadSchema: struct<word:string,id:bigint,part:int,title:string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Run explain on "SELECT COUNT(*) AS count FROM table1" 
+spark.sql("SELECT COUNT(*) AS count FROM table1").explain()
+
+== Physical Plan ==
+    *(2) HashAggregate(keys=[], functions=[count(1)])
+    +- Exchange SinglePartition
+       +- *(1) HashAggregate(keys=[], functions=[partial_count(1)])
+          +- *(1) Project
+             +- *(1) Filter (isnotnull(part#2) && (part#2 = 2))
+                +- *(1) FileScan parquet [part#2] Batched: true, Format: Parquet, Location: InMemoryFileIndex[file:/tmp/tmp60zieo0r/sherlock_parts.parquet], PartitionFilters: [], PushedFilters: [IsNotNull(part), EqualTo(part,2)], ReadSchema: struct<part:int>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Run explain on "SELECT COUNT(DISTINCT word) AS words FROM table1"
+spark.sql("SELECT COUNT(DISTINCT word) AS words FROM table1").explain()
+
+
+
+== Physical Plan ==
+    *(3) HashAggregate(keys=[], functions=[count(distinct word#0)])                                 #finally, count number of records for each DISTINCT combo/'word' value
+    +- Exchange SinglePartition
+       +- *(2) HashAggregate(keys=[], functions=[partial_count(distinct word#0)])                   #this is probably the DISTINCT operation
+          +- *(2) HashAggregate(keys=[word#0], functions=[])
+             +- Exchange hashpartitioning(word#0, 200)
+                +- *(1) HashAggregate(keys=[word#0], functions=[])
+                   +- *(1) Project [word#0]
+                      +- *(1) Filter (isnotnull(part#2) && (part#2 = 2))
+                         +- *(1) FileScan parquet [word#0,part#2] Batched: true, Format: Parquet, Location: InMemoryFileIndex[file:/tmp/tmp60zieo0r/sherlock_parts.parquet], PartitionFilters: [], PushedFilters: [IsNotNull(part), EqualTo(part,2)], ReadSchema: struct<word:string,part:int>
+
+
+
+
+#.explain() is good to know when tuning performance and for debugging slow operations.
