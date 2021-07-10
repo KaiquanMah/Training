@@ -1,0 +1,47 @@
+A window function is like an aggregate function, except that it gives an output for every row in the dataset instead of a single row per group.
+You can do aggregation along with window functions. A running sum using a window function is simpler than what is required using joins. The query duration can also be much faster.
+A table called schedule, having columns train_id, station, time, and diff_min is provided for you. The diff_min column gives the elapsed time between the current station and the next station on the line.
+
+
+Run a query that adds an additional column to the records in this dataset called running_total. The column running_total SUM()s the difference between station time given by the diff_min column.
+Run the query and display the result.
+
+
+
+# Add col running_total that sums diff_min col in each group
+query = """
+SELECT train_id, station, time, diff_min,
+SUM(diff_min) OVER (PARTITION BY train_id ORDER BY time) AS running_total
+FROM schedule
+"""
+
+# Run the query and display the result
+spark.sql(query).show()
+
+
+<script.py> output:
+    +--------+-------------+-----+--------+-------------+
+    |train_id|      station| time|diff_min|running_total|
+    +--------+-------------+-----+--------+-------------+
+    |     217|       Gilroy|6:06a|     9.0|          9.0|
+    |     217|   San Martin|6:15a|     6.0|         15.0|
+    |     217|  Morgan Hill|6:21a|    15.0|         30.0|
+    |     217| Blossom Hill|6:36a|     6.0|         36.0|
+    |     217|      Capitol|6:42a|     8.0|         44.0|
+    |     217|       Tamien|6:50a|     9.0|         53.0|
+    |     217|     San Jose|6:59a|    null|         53.0|
+    |     324|San Francisco|7:59a|     4.0|          4.0|
+    |     324|  22nd Street|8:03a|    13.0|         17.0|
+    |     324|     Millbrae|8:16a|     8.0|         25.0|
+    |     324|    Hillsdale|8:24a|     7.0|         32.0|
+    |     324| Redwood City|8:31a|     6.0|         38.0|
+    |     324|    Palo Alto|8:37a|    28.0|         66.0|
+    |     324|     San Jose|9:05a|    null|         66.0|
+    +--------+-------------+-----+--------+-------------+
+    
+
+
+
+You found that it takes 53 minutes to go from Gilroy to San Jose by train 217.
+
+
