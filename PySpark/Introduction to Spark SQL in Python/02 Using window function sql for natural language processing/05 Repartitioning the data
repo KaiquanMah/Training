@@ -1,0 +1,108 @@
+A dataframe text_df exists, having columns id, word, and chapter. The first 5 rows of text_df are printed to the console.
+
+
+You can determine that there are 12 chapters by the following:
+text_df.select('chapter')\
+       .distinct()\
+       .sort('chapter')\
+       .show(truncate=False)
+       
+           
+The result of this command is printed to the console as Table 1.
+
+The dataframe text_df is currently in a single partition. Suppose that you know that the upcoming processing steps are going to be grouping the data on chapters. Processing the data will be most efficient if each chapter stays within a single machine. To avoid unnecessary shuffling of the data from one machine to another, let's repartition the dataframe into one partition per chapter, using the repartition and getNumPartitions commands taught in the first video lesson to this chapter.
+Don't hesitate to refer to the slides available at the right of the console if you forget how something was done in the video.
+
+
+First 5 rows of text_df
++---+-------+------------------+
+| id|   word|           chapter|
++---+-------+------------------+
+|305|scandal|Sherlock Chapter I|
+|306|     in|Sherlock Chapter I|
+|307|bohemia|Sherlock Chapter I|
+|308|      i|Sherlock Chapter I|
+|309|     to|Sherlock Chapter I|
++---+-------+------------------+
+only showing top 5 rows
+
+
+
+
+
+
+Table 1
+
++---------------------+
+|chapter              |
++---------------------+
+|Sherlock Chapter I   |
+|Sherlock Chapter II  |
+|Sherlock Chapter III |
+|Sherlock Chapter IV  |
+|Sherlock Chapter IX  |
+|Sherlock Chapter V   |
+|Sherlock Chapter VI  |
+|Sherlock Chapter VII |
+|Sherlock Chapter VIII|
+|Sherlock Chapter X   |
+|Sherlock Chapter XI  |
+|Sherlock Chapter XII |
++---------------------+
+
+
+
+
+
+
+
+
+
+Repartition the text_df into 12 partitions, with each chapter in its own partition.
+Display the number of partitions in the new dataframe.
+
+# Repartition text_df into 12 partitions on 'chapter' column
+repart_df = text_df.repartition(12, 'chapter')
+
+# Prove that repart_df has 12 partitions
+repart_df.rdd.getNumPartitions()
+
+#Partitioning the data properly is straightforward and can dramatically improve performance.
+
+
+
+
+
+
+repart_df
+DataFrame[id: bigint, word: string, chapter: string]
+
+repart_df.rdd.getNumPartitions()
+12
+
+
+repart_df.show(15)
++-----+---------+-------------------+
+|   id|     word|            chapter|
++-----+---------+-------------------+
+|25046| boscombe|Sherlock Chapter IV|
+|25047|   valley|Sherlock Chapter IV|
+|25048|  mystery|Sherlock Chapter IV|
+|25049|       we|Sherlock Chapter IV|
+|25050|     were|Sherlock Chapter IV|
+|25051|   seated|Sherlock Chapter IV|
+|25052|       at|Sherlock Chapter IV|
+|25053|breakfast|Sherlock Chapter IV|
+|25054|      one|Sherlock Chapter IV|
+|25055|  morning|Sherlock Chapter IV|
+|25056|       my|Sherlock Chapter IV|
+|25057|     wife|Sherlock Chapter IV|
+|25058|      and|Sherlock Chapter IV|
+|25059|        i|Sherlock Chapter IV|
+|25060|     when|Sherlock Chapter IV|
++-----+---------+-------------------+
+only showing top 15 rows
+
+
+
+
