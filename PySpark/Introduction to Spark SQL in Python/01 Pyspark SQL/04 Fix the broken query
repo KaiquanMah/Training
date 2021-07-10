@@ -1,0 +1,51 @@
+This query runs correctly, but gives an incorrect result in one of the rows because of an omission in the OVER clause. Can you locate the bug? Can you modify the query to make it give a reasonable result?
+
+Provide the row number of the erroneous row as an integer.
+Provide the clause (as a string) that when added to the OVER clause fixes the problem.
+
+
+
+query = """
+SELECT 
+ROW_NUMBER() OVER (ORDER BY time) AS row,
+train_id, 
+station, 
+time, 
+LEAD(time,1) OVER (ORDER BY time) AS time_next 
+FROM schedule
+"""
+
+
+spark.sql(query).show()
+
+# Give the number of the bad row as an integer
+bad_row = 7
+
+# Provide the missing clause, SQL keywords in upper case
+clause = 'PARTITION BY train_id'
+
+
+<script.py> output:
+    +---+--------+-------------+-----+---------+
+    |row|train_id|      station| time|time_next|
+    +---+--------+-------------+-----+---------+
+    |  1|     217|       Gilroy|6:06a|    6:15a|
+    |  2|     217|   San Martin|6:15a|    6:21a|
+    |  3|     217|  Morgan Hill|6:21a|    6:36a|
+    |  4|     217| Blossom Hill|6:36a|    6:42a|
+    |  5|     217|      Capitol|6:42a|    6:50a|
+    |  6|     217|       Tamien|6:50a|    6:59a|
+    |  7|     217|     San Jose|6:59a|    7:59a|
+    |  8|     324|San Francisco|7:59a|    8:03a|
+    |  9|     324|  22nd Street|8:03a|    8:16a|
+    | 10|     324|     Millbrae|8:16a|    8:24a|
+    | 11|     324|    Hillsdale|8:24a|    8:31a|
+    | 12|     324| Redwood City|8:31a|    8:37a|
+    | 13|     324|    Palo Alto|8:37a|    9:05a|
+    | 14|     324|     San Jose|9:05a|     null|
+    +---+--------+-------------+-----+---------+
+
+#Yes. Omitting the PARTITION BY clause can give a nonsensical result that might not be obvious from inspecting the first few rows.
+#time_next just keeps going even for a different train/train_id
+
+
