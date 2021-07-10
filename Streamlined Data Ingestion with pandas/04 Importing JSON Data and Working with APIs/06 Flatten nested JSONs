@@ -1,0 +1,50 @@
+-Nested attribute
+-Categories -> deeply nested data [{'k1': 'v1', ...}]
+
+
+Flatten nested JSONs
+A feature of JSON data is that it can be nested: an attribute's value can consist of attribute-value pairs. This nested data is more useful unpacked, or flattened, into its own data frame columns. The pandas.io.json submodule has a function, json_normalize(), that does exactly this.
+The Yelp API response data is nested. Your job is to flatten out the next level of data in the coordinates and location columns.
+pandas (as pd) and requests have been imported. The results of the API call are stored as response.
+
+
+Load the json_normalize() function from pandas' io.json submodule.
+Isolate the JSON data from response and assign it to data.
+Use json_normalize() to flatten and load the businesses data to a data frame, cafes. Set the sep argument to use underscores (_), rather than periods.
+Show the data head.
+
+
+# Load json_normalize()
+from pandas.io.json import json_normalize
+
+# Isolate the JSON data from the API response
+data = response.json()
+
+# Flatten business data into a data frame, replace separator
+cafes = json_normalize(data["businesses"],
+             sep='_')
+
+# View data
+print(cafes.head())
+<script.py> output:
+                             alias                                         categories  coordinates_latitude  coordinates_longitude   display_phone  ...  price rating review_count  transactions  \
+    0       white-noise-brooklyn-2     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.689358             -73.988415                  ...    NaN    4.5           15            []   
+    1          devocion-brooklyn-3  [{'alias': 'coffee', 'title': 'Coffee & Tea'},...             40.688570             -73.983340  (718) 285-6180  ...     $$    4.0           73            []   
+    2   coffee-project-ny-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.726990             -73.989220  (212) 228-7888  ...     $$    4.5          630            []   
+    3  spreadhouse-cafe-new-york-3  [{'alias': 'cafes', 'title': 'Cafes'}, {'alias...             40.718910             -73.985850  (646) 524-6353  ...      $    4.0          380            []   
+    4             usagi-ny-dumbo-7  [{'alias': 'bookstores', 'title': 'Bookstores'...             40.703830             -73.986910  (718) 801-8037  ...     $$    4.5           57            []   
+    
+                                                     url  
+    0  https://www.yelp.com/biz/white-noise-brooklyn-...  
+    1  https://www.yelp.com/biz/devocion-brooklyn-3?a...  
+    2  https://www.yelp.com/biz/coffee-project-ny-new...  
+    3  https://www.yelp.com/biz/spreadhouse-cafe-new-...  
+    4  https://www.yelp.com/biz/usagi-ny-dumbo-7?adju...  
+    
+    [5 rows x 24 columns]
+    
+    
+    
+
+Notice that by accessing data['businesses'] we're already working one level down the nested structure. 
+data itself could be flattened with json_normalize().
