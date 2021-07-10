@@ -1,0 +1,219 @@
+In the last exercise, you built a dataset of the top 100 cafes in New York City according to Yelp. Now, you'll combine that with demographic data to investigate which neighborhood has the most good cafes per capita.
+To do this, you'll merge two datasets with the DataFrame merge() method. The first,crosswalk, is a crosswalk between ZIP codes and Public Use Micro Data Sample Areas (PUMAs), which are aggregates of census tracts and correspond roughly to NYC neighborhoods. Then, you'll merge in pop_data, which contains 2016 population estimates for each PUMA.
+pandas (as pd) has been imported, as has the cafes data frame from last exercise.
+
+
+
+1
+Question
+Explore the cafes and crosswalk data frames in the console. Which columns should be used as join keys?
+Possible Answers
+location_zip_code in cafes and zcta5 in crosswalk
+zipcode in both
+location.zipcode in cafes and zipcode in crosswalk
+#YES location_zip_code in cafes and zipcode in crosswalk
+
+
+
+cafes.head()
+
+                        alias                                         categories  coordinates_latitude  coordinates_longitude   display_phone  ...  price rating review_count  transactions  \
+0  coffee-project-ny-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.726990             -73.989220  (212) 228-7888  ...     $$    4.5          615            []   
+1   lella-alimentari-brooklyn  [{'alias': 'coffee', 'title': 'Coffee & Tea'},...             40.715160             -73.946451  (718) 599-2625  ...      $    5.0          152            []   
+2   saltwater-coffee-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.730458             -73.983918  (917) 881-2245  ...     $$    5.0          158            []   
+3     urban-backyard-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.720770             -73.996460  (646) 692-9957  ...     $$    5.0           54            []   
+4    bird-and-branch-new-york  [{'alias': 'coffee', 'title': 'Coffee & Tea'},...             40.760310             -73.990870  (917) 265-8444  ...     $$    5.0          131            []   
+
+                                                 url  
+0  https://www.yelp.com/biz/coffee-project-ny-new...  
+1  https://www.yelp.com/biz/lella-alimentari-broo...  
+2  https://www.yelp.com/biz/saltwater-coffee-new-...  
+3  https://www.yelp.com/biz/urban-backyard-new-yo...  
+4  https://www.yelp.com/biz/bird-and-branch-new-y...  
+[5 rows x 24 columns]
+
+
+
+
+cafes.describe()
+
+       coordinates_latitude  coordinates_longitude     distance      rating  review_count
+count            100.000000             100.000000   100.000000  100.000000    100.000000
+mean              40.720738             -73.982828  3350.938033    4.440000    349.780000
+std                0.026319               0.017796  1827.606541    0.277798    587.356044
+min               40.641931             -74.009380   635.781863    4.000000     24.000000
+25%               40.705318             -73.996430  1730.707902    4.500000     85.000000
+50%               40.719785             -73.987239  2962.118772    4.500000    241.000000
+75%               40.738060             -73.970568  4675.945620    4.500000    394.000000
+max               40.768877             -73.922850  7528.973146    5.000000   4135.000000
+
+
+
+cafes.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 100 entries, 0 to 99
+Data columns (total 24 columns):
+alias                       100 non-null object
+categories                  100 non-null object
+coordinates_latitude        100 non-null float64
+coordinates_longitude       100 non-null float64
+display_phone               100 non-null object
+distance                    100 non-null float64
+id                          100 non-null object
+image_url                   100 non-null object
+is_closed                   100 non-null bool
+location_address1           100 non-null object
+location_address2           64 non-null object
+location_address3           86 non-null object
+location_city               100 non-null object
+location_country            100 non-null object
+location_display_address    100 non-null object
+location_state              100 non-null object
+location_zip_code           100 non-null object
+name                        100 non-null object
+phone                       100 non-null object
+price                       96 non-null object
+rating                      100 non-null float64
+review_count                100 non-null int64
+transactions                100 non-null object
+url                         100 non-null object
+dtypes: bool(1), float64(4), int64(1), object(18)
+memory usage: 18.1+ KB
+
+
+
+
+
+
+crosswalk.head()
+
+  zipcode                               ziptype postalcity  zcta5  bcode note   puma                                      pumaname
+0   10001                         ZIP Code area   New York  10001  36061  NaN  03807  Chelsea, Clinton & Midtown Business District
+1   10118  Post Office or large volume customer   New York  10001  36061  NaN  03807  Chelsea, Clinton & Midtown Business District
+2   10120  Post Office or large volume customer   New York  10001  36061  NaN  03807  Chelsea, Clinton & Midtown Business District
+3   10122  Post Office or large volume customer   New York  10001  36061  NaN  03807  Chelsea, Clinton & Midtown Business District
+4   10123  Post Office or large volume customer   New York  10001  36061  NaN  03807  Chelsea, Clinton & Midtown Business District
+
+
+
+
+crosswalk.describe()
+
+              zcta5         bcode
+count    317.000000    317.000000
+mean   10613.555205  36060.634069
+std      599.174517     20.144223
+min    10001.000000  36005.000000
+25%    10024.000000  36061.000000
+50%    10310.000000  36061.000000
+75%    11228.000000  36081.000000
+max    11697.000000  36085.000000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2
+Explore the crosswalk and pop_data data frames in the console. Which columns should be used as join keys?
+Possible Answers
+pumaname in crosswalk and puma in pop_data
+#YES puma in both
+zipcode in both
+pumaname in crosswalk and geog_name in pop_data
+
+
+
+pop_data.head()
+
+   geo_type                                          geog_name   puma borough total_pop_estimate total_pop_moe
+0  PUMA2010  NYC-Bronx Community District 8--Riverdale, Fie...  03701   Bronx             109810          2134
+1  PUMA2010  NYC-Bronx Community District 12--Wakefield, Wi...  03702   Bronx             144341          2521
+2  PUMA2010  NYC-Bronx Community District 10--Co-op City, P...  03703   Bronx             122417          2742
+3  PUMA2010  NYC-Bronx Community District 11--Pelham Parkwa...  03704   Bronx             129501          2620
+4  PUMA2010  NYC-Bronx Community District 3 & 6--Belmont, C...  03705   Bronx             171849          2839
+pop_data.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 55 entries, 0 to 54
+Data columns (total 6 columns):
+geo_type              55 non-null object
+geog_name             55 non-null object
+puma                  55 non-null object
+borough               55 non-null object
+total_pop_estimate    55 non-null object
+total_pop_moe         55 non-null object
+dtypes: object(6)
+memory usage: 2.7+ KB
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3
+Use the DataFrame method to merge cafes and crosswalk on location_zip_code and zipcode, respectively. Assign the result to cafes_with_pumas.
+Merge pop_data into cafes_with_pumas on their puma fields. Save the result as cafes_with_pop.
+
+
+# Merge crosswalk into cafes on their zip code fields
+cafes_with_pumas = cafes.merge(crosswalk,
+                               left_on="location_zip_code",
+                               right_on="zipcode")
+
+
+
+# Merge pop_data into cafes_with_pumas on puma field
+cafes_with_pop = cafes_with_pumas.merge(pop_data,
+                                        left_on="puma",
+                                        right_on="puma")
+
+# View the data
+print(cafes_with_pop.head())
+
+<script.py> output:
+                            alias                                         categories  coordinates_latitude  coordinates_longitude   display_phone  ...  geo_type  \
+    0  coffee-project-ny-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.726990             -73.989220  (212) 228-7888  ...  PUMA2010   
+    1   saltwater-coffee-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.730458             -73.983918  (917) 881-2245  ...  PUMA2010   
+    2   daily-provisions-new-york  [{'alias': 'cafes', 'title': 'Cafes'}, {'alias...             40.737680             -73.987668  (212) 488-1505  ...  PUMA2010   
+    3              mud-new-york-3  [{'alias': 'coffee', 'title': 'Coffee & Tea'},...             40.729050             -73.986680  (212) 228-9074  ...  PUMA2010   
+    4  coffee-project-ny-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.726990             -73.989220  (212) 228-7888  ...  PUMA2010   
+    
+                                               geog_name    borough  total_pop_estimate total_pop_moe  
+    0  NYC-Manhattan Community District 3--Chinatown ...  Manhattan              160709          3289  
+    1  NYC-Manhattan Community District 3--Chinatown ...  Manhattan              160709          3289  
+    2  NYC-Manhattan Community District 3--Chinatown ...  Manhattan              160709          3289  
+    3  NYC-Manhattan Community District 3--Chinatown ...  Manhattan              160709          3289  
+    4  NYC-Manhattan Community District 3--Chinatown ...  Manhattan              160709          3289  
+    
+    [5 rows x 37 columns]
+
+
+
