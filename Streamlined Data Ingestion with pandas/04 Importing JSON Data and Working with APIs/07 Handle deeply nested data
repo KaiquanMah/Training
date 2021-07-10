@@ -75,8 +75,8 @@ Add "biz_" as a meta_prefix to prevent duplicate column names.
 # Load other business attributes and set meta prefix
 flat_cafes = json_normalize(data["businesses"],
                             sep="_",
-                    		record_path="categories",
-                    		meta=['name', 
+                    		record_path="categories",   #nested/sub-fields in record_path will not have the meta_prefix
+                    		meta=['name',               #fields NOT NESTED -> appearing in the meta list -> will have the meta_prefix
                               'alias', 
                               'rating', 
                           		  ['coordinates', 'latitude'], #input a list of (1) the field and (2) the key within the nested dictionary
@@ -101,4 +101,6 @@ print(flat_cafes.head())
 
 #Naming meta columns can get tedious for datasets with many attributes, and code is susceptible to breaking if column names or nesting levels change. 
 #In such cases, you may have to write a custom function and employ techniques like recursion to handle the data.
+
+
 
