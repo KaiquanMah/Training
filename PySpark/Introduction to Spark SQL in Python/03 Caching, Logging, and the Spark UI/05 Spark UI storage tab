@@ -1,0 +1,45 @@
+A folder sherlock_parts exists on disk containing twelve text files.
+
+ls sherlock_parts
+sherlock_part0.txt   sherlock_part2.txt   sherlock_part7.txt
+sherlock_part1.txt   sherlock_part3.txt   sherlock_part8.txt
+sherlock_part10.txt  sherlock_part4.txt   sherlock_part9.txt
+sherlock_part11.txt  sherlock_part5.txt
+sherlock_part12.txt  sherlock_part6.txt
+
+
+
+When loaded, this creates a dataframe having seven partitions.
+
+partitioned_df = sqlContext.read.text('sherlock_parts')
+partitioned_df.rdd.getNumPartitions()
+
+
+A table is created, and the table is cached:
+
+partitioned_df.createOrReplaceTempView('text')
+spark.catalog.cacheTable('text')
+
+
+
+
+Question: What will appear in the Spark UI Storage tab once the cache operation is triggered by an action?
+
+#NOT ExchangeRoundRobin...... 
+#No. Here you see that THE DATAFRAME WAS NOT CACHED <initial commentary: "a dataframe was cached:>. 
+#The underlying dataframe was not cached, only the table. 
+#Also, this dataframe has been persisted to disk, whereas tables are cached in memory only.
+
+
+#NOT in-memory table table1.....
+#WRONG table name
+
+
+
+#YES 
+RDD name - in-memory table text...
+Storage level - Memory deserialized 1x replicated
+Cached partitions - 7
+
+#The table name and number of partitions match what was cached.
+
