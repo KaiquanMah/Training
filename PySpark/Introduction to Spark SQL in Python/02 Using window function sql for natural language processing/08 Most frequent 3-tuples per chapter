@@ -1,0 +1,95 @@
+We will now use a query as a subquery in a larger query. Spark SQL supports advanced features of SQL. Previously you learned how to find the most common word sequences over an entire book having 12 chapters. Now you will obtain the most frequent 3-tuple for each of the 12 chapters. You will do this using a window function to retrieve the top row per group.
+
+There is a table having columns word, id, chapter.
+-The chapter column corresponds to the number of a chapter.
+-The word column corresponds to a single word in the document.
+-The id column corresponds to the word position in the document.
+
+
+
+We also have the following query:
+
+subquery = """
+SELECT chapter, w1, w2, w3, COUNT(*) as count
+FROM
+(
+    SELECT
+    chapter,
+    word AS w1,
+    LEAD(word, 1) OVER(PARTITION BY chapter ORDER BY id ) AS w2,
+    LEAD(word, 2) OVER(PARTITION BY chapter ORDER BY id ) AS w3
+    FROM text
+)
+GROUP BY chapter, w1, w2, w3
+ORDER BY chapter, count DESC
+"""
+
+
+
+
+
+spark.sql(subquery).show(5)
++-------+---+-----+----+-----+
+|chapter| w1|   w2|  w3|count|
++-------+---+-----+----+-----+
+|      1| up|   to| the|    6|
+|      1|one|   of| the|    6|
+|      1| in|front|  of|    5|
+|      1| up|  and|down|    5|
+|      1| it|  was|   a|    5|
++-------+---+-----+----+-----+
+only showing top 5 rows
+
+
+
+
+From this table you can determine that the first row of the desired result will be:
++-------+---+-----+----+-----+
+|chapter| w1|   w2|  w3|count|
++-------+---+-----+----+-----+
+|      1| up|   to| the|    6|
++-------+---+-----+----+-----+
+Your task is to use subquery as a subquery in a larger query to obtain the most frequent 3-tuple per chapter. The desired result will have the same schema, but having one row per chapter. Use ROW_NUMBER() to obtain the row number per row per chapter.
+
+
+
+
+
+Get the most frequent 3-tuple per chapter.
+#   Most frequent 3-tuple per chapter
+query = """
+SELECT chapter, w1, w2, w3, count FROM
+(
+  SELECT
+  chapter,
+  ROW_NUMBER() OVER (PARTITION BY chapter ORDER BY count DESC) AS row,        --geenerate row #
+  w1, w2, w3, count
+  FROM ( %s )
+)
+WHERE row = 1                   --gets the most frequent aggregated record per chapter
+ORDER BY chapter ASC
+""" % subquery
+
+spark.sql(query).show()
+
+
+<script.py> output:
+    +-------+-------+--------+-------+-----+
+    |chapter|     w1|      w2|     w3|count|
+    +-------+-------+--------+-------+-----+
+    |      1|     up|      to|    the|    6|
+    |      2|    one|      of|    the|    8|
+    |      3|     mr|  hosmer|  angel|   13|
+    |      4|   that|      he|    was|    8|
+    |      5|   that|      he|    was|    6|
+    |      6|neville|      st|  clair|   15|
+    |      7|   that|       i|     am|    7|
+    |      8|     dr|grimesby|roylott|    8|
+    |      9|   that|      it|    was|    7|
+    |     10|   lord|      st|  simon|   28|
+    |     11|      i|   think|   that|    8|
+    |     12|    the|  copper|beeches|   10|
+    +-------+-------+--------+-------+-----+
+
+#Did you notice that four of the rows seem to correspond to character names?
+
