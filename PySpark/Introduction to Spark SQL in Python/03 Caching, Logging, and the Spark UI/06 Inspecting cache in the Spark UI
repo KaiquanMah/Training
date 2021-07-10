@@ -1,0 +1,32 @@
+A dataframe partitioned_df is available. 
+It is used to register a temporary table called text. 
+text is then cached using spark.catalog.cacheTable('text'). 
+
+If you were running Spark locally, then the Spark UI would be available at http://localhost:4040/storage/. 
+For the purpose of this exercise, examine the following image. 
+It shows what the Spark UI would display once the cache for text is loaded:
+<storage tab - RDDs - ID|RDD name|storage level|cached partitions|fraction cached|size in memory|size on disk>
+
+
+
+
+This shows that a table called text having seven partitions is cached in memory. Which of the following would immediately cause the above to appear in Spark UI?
+1-Performing a transform on the underlying dataframe, for example df = partitioned_df.distinct().
+2-Counting the underlying dataframe, for example: partitioned_df.count()
+3-Querying the table using, say: spark.sql("select count(*) from text")
+4-Querying and showing the result, say: spark.sql("select count(*) from text").show()
+
+1
+2
+
+NOT 3 -> Not quite. (3) does not have an action to trigger the cache load.
+
+NOT 4 -> Not quite. This does trigger the cache load, but so does one of the other choices.
+
+NOT 2,3
+
+###YES2,4 -> need to (2) COUNT uncached df + (4) QUERY cached TABLE + SHOW
+
+NOT 3,4
+
+
