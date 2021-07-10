@@ -1,0 +1,113 @@
+The SQL function udf is available, as well as a dataframe df_before is available, of type DataFrame[doc: array<string>, in: array<string>, out: array<string>].
+The TRIVIAL_TOKENS variable is a set. It contains certain words that we want to remove.
+
+
+Show the rows of df_before where doc contains the item 5.
+Create a udf that removes items in TRIVIAL_TOKENS from an array column. The order does not need to be preserved.
+Remove tokens from the in and out columns in df2 that appear in TRIVIAL_TOKENS.
+
+
+
+type(TRIVIAL_TOKENS)
+set
+
+
+TRIVIAL_TOKENS
+{'',
+ '0',
+ '1',
+ '2',
+ '3',
+ '4',
+ '5',
+ '6',
+ '7',
+ '8',
+ '9',
+ 'b',
+ 'c',
+ 'e',
+ 'f',
+ 'g',
+ 'h',
+ 'j',
+ 'k',
+ 'l',
+ 'm',
+ 'n',
+ 'o',
+ 'p',
+ 'pp',
+ 'q',
+ 'r',
+ 's',
+ 't',
+ 'u',
+ 'v',
+ 'w',
+ 'x',
+ 'y',
+ 'z'}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+df_after
+DataFrame[doc: array<string>, in: array<string>, out: array<string>]
+
+
+# Show the rows where doc contains the item '5'
+df_before.where(array_contains('doc', '5')).show()
+
+
++--------------------+--------------------+--------------+
+|                 doc|                  in|           out|
++--------------------+--------------------+--------------+
+|[she, left, this,...|[she, left, this,...|           [5]|
+|[he, had, no, occ...|[he, had, no, occ...|           [5]|
+|           [5, vols]|                 [5]|        [vols]|
+|[on, the, night, ...|[on, the, night, ...|        [town]|
+|[by, hurried, and...|[by, hurried, and...|[philadelphia]|
++--------------------+--------------------+--------------+
+
+
+
+
+
+
+
+
+
+# UDF removes items in TRIVIAL_TOKENS from array
+rm_trivial_udf = udf(lambda x:
+                     list(set(x) - TRIVIAL_TOKENS) if x
+                     else x,
+                     ArrayType(StringType()))
+ 
+
+# Remove trivial tokens from 'in' and 'out' columns of df2
+df_after = df_before.withColumn('in', rm_trivial_udf('in'))\
+                    .withColumn('out', rm_trivial_udf('out'))
+
+# Show the rows of df_after where doc contains the item '5'
+df_after.where(array_contains('doc','5')).show()
+ 
+    +--------------------+--------------------+--------------+
+    |                 doc|                  in|           out|
+    +--------------------+--------------------+--------------+
+    |[she, left, this,...|[by, this, with, ...|            []|
+    |[he, had, no, occ...|[by, was, compani...|            []|
+    |           [5, vols]|                  []|        [vols]|
+    |[on, the, night, ...|[stationed, crowd...|        [town]|
+    |[by, hurried, and...|[carpenter, by, c...|[philadelphia]|
+    +--------------------+--------------------+--------------+
+    
+    
+#Did you notice how the token '5' disappeared from the 'out' column in the first two rows, and from the 'in' column in the third row?    
+ 
