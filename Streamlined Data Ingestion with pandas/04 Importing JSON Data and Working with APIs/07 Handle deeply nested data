@@ -1,0 +1,104 @@
+Handle deeply nested data
+Last exercise, you flattened data nested down one level. Here, you'll unpack more deeply nested data.
+The categories attribute in the Yelp API response contains lists of objects. To flatten this data, you'll employ json_normalize() arguments to specify the path to categories and pick other attributes to include in the data frame. You should also change the separator to facilitate column selection and prefix the other attributes to prevent column name collisions. We'll work through this in steps.
+pandas (as pd) and json_normalize() have been imported. JSON-formatted Yelp data on cafes in NYC is stored as data.
+
+
+1
+Use json_normalize() to flatten records under the businesses key in data, setting underscores (_) as separators.
+# Flatten businesses records and set underscore separators
+flat_cafes = json_normalize(data["businesses"],
+                  sep='_')
+
+# View the data
+print(flat_cafes.head())
+
+
+
+<script.py> output:
+                             alias                                         categories  coordinates_latitude  coordinates_longitude   display_phone  ...  price rating review_count  transactions  \
+    0       white-noise-brooklyn-2     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.689358             -73.988415                  ...    NaN    4.5           15            []   
+    1          devocion-brooklyn-3  [{'alias': 'coffee', 'title': 'Coffee & Tea'},...             40.688570             -73.983340  (718) 285-6180  ...     $$    4.0           73            []   
+    2   coffee-project-ny-new-york     [{'alias': 'coffee', 'title': 'Coffee & Tea'}]             40.726990             -73.989220  (212) 228-7888  ...     $$    4.5          630            []   
+    3  spreadhouse-cafe-new-york-3  [{'alias': 'cafes', 'title': 'Cafes'}, {'alias...             40.718910             -73.985850  (646) 524-6353  ...      $    4.0          380            []   
+    4             usagi-ny-dumbo-7  [{'alias': 'bookstores', 'title': 'Bookstores'...             40.703830             -73.986910  (718) 801-8037  ...     $$    4.5           57            []   
+    
+                                                     url  
+    0  https://www.yelp.com/biz/white-noise-brooklyn-...  
+    1  https://www.yelp.com/biz/devocion-brooklyn-3?a...  
+    2  https://www.yelp.com/biz/coffee-project-ny-new...  
+    3  https://www.yelp.com/biz/spreadhouse-cafe-new-...  
+    4  https://www.yelp.com/biz/usagi-ny-dumbo-7?adju...  
+    
+    [5 rows x 24 columns]
+    
+    
+    
+    
+    
+
+
+2
+Specify the record_path to the categories data.
+# Specify record path to get categories data
+flat_cafes = json_normalize(data["businesses"],
+                            sep="_",
+                    		record_path="categories") #record_path drills down into a 'nested' field, with each value containing a list of dictionary key-value pairs
+
+# View the data
+print(flat_cafes.head()) 
+
+
+
+<script.py> output:
+                  alias              title
+    0            coffee       Coffee & Tea
+    1            coffee       Coffee & Tea
+    2  coffeeroasteries  Coffee Roasteries
+    3             cafes              Cafes
+    4            coffee       Coffee & Tea
+
+
+
+
+
+
+
+
+
+
+
+3
+Set the meta keyword argument to get business name, alias, rating, and the attributes nested under coordinates: latitude and longitude.
+Add "biz_" as a meta_prefix to prevent duplicate column names.
+
+# Load other business attributes and set meta prefix
+flat_cafes = json_normalize(data["businesses"],
+                            sep="_",
+                    		record_path="categories",
+                    		meta=['name', 
+                              'alias', 
+                              'rating', 
+                          		  ['coordinates', 'latitude'], #input a list of (1) the field and (2) the key within the nested dictionary
+                          		  ['coordinates', 'longitude']],
+                    		meta_prefix="biz_")
+
+
+
+
+
+# View the data
+print(flat_cafes.head())
+
+
+<script.py> output:
+                  alias              title           biz_name                   biz_alias  biz_rating  biz_coordinates_latitude  biz_coordinates_longitude
+    0            coffee       Coffee & Tea        White Noise      white-noise-brooklyn-2         4.5                 40.689358                 -73.988415
+    1            coffee       Coffee & Tea           Devocion         devocion-brooklyn-3         4.0                 40.688570                 -73.983340
+    2  coffeeroasteries  Coffee Roasteries           Devocion         devocion-brooklyn-3         4.0                 40.688570                 -73.983340
+    3             cafes              Cafes           Devocion         devocion-brooklyn-3         4.0                 40.688570                 -73.983340
+    4            coffee       Coffee & Tea  Coffee Project NY  coffee-project-ny-new-york         4.5                 40.726990                 -73.989220
+
+#Naming meta columns can get tedious for datasets with many attributes, and code is susceptible to breaking if column names or nesting levels change. 
+#In such cases, you may have to write a custom function and employ techniques like recursion to handle the data.
+
