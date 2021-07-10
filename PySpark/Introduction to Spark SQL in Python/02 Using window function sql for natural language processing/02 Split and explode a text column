@@ -1,0 +1,118 @@
+A dataframe clauses_df with 100 rows is provided. It has a column clause and a row id. Each clause is a string containing one or more words separated by spaces.
+
+Split the clause column into a column called words, containing an array of individual words.
+Explode the words column into a column called word.
+Count the resulting number of rows.
+
+
+clauses_df.show(5)
++--------------------+---+
+|              clause| id|
++--------------------+---+
+|               title|  0|
+|the adventures of...|  1|
+|sir arthur conan ...|  2|
+|          march 1999|  3|
+|          ebook 1661|  4|
++--------------------+---+
+only showing top 5 rows
+
+
+
+
+
+
+
+
+
+
+
+
+# Split the clause column into a column called words 
+#NOT this '[ ]' method shown in the lesson
+#NOT split_df = clauses_df.select(split('clause', '[ ]').alias('words'))
+split_df.show(5, truncate=False)
+
++-----------------------------------------------+
+|words                                          |
++-----------------------------------------------+
+|[title]                                        |
+|[the, adventures, of, sherlock, holmes, author]|
+|[sir, arthur, conan, doyle, release, date]     |
+|[march, 1999]                                  |
+|[ebook, 1661]                                  |
++-----------------------------------------------+
+only showing top 5 rows
+
+
+
+
+# Split the clause column into a column called words 
+#YES
+split_df = clauses_df.select(split('clause', ' ').alias('words'))
+split_df.show(5, truncate=False)
++-----------------------------------------------+
+|words                                          |
++-----------------------------------------------+
+|[title]                                        |
+|[the, adventures, of, sherlock, holmes, author]|
+|[sir, arthur, conan, doyle, release, date]     |
+|[march, 1999]                                  |
+|[ebook, 1661]                                  |
++-----------------------------------------------+
+only showing top 5 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Explode the words column into a column called word 
+exploded_df = split_df.select(explode('words').alias('word'))
+exploded_df.show(10)
+
++----------+
+|      word|
++----------+
+|     title|
+|       the|
+|adventures|
+|        of|
+|  sherlock|
+|    holmes|
+|    author|
+|       sir|
+|    arthur|
+|     conan|
++----------+
+only showing top 10 rows
+
+
+
+
+
+
+
+
+
+
+
+# Count the resulting number of rows in exploded_df
+print("\nNumber of rows: ", exploded_df.count())
+
+Number of rows:  1279
+
+The 100 clauses had 1279 words, for an average of 12.79 words per clause.
+
+
