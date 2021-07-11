@@ -1,0 +1,63 @@
+You realized your products table doesn't have any constraint to check the data stored in its stock column. It makes sense that stock is always greater than or equal to 0. For some reason, there is a mistake in the following row. The stock is -1!
+
+| product_id | product_name | stock | price |
+|------------|--------------|-------|-------|
+| 6          | Trek Neko+   | -1    | 2799  |
+
+You want to prepare a script adding a constraint to the products table, so that only stocks greater than or equal to 0 are allowed.
+If you add this constraint that only allows stocks greater than or equal to 0, the execution will fail because there is one row where the stock equals -1.
+How can you prepare the script?
+
+
+Surround the constraint with a TRY block.
+Add the constraint to the products table.
+Surround the error message with a CATCH block.
+
+
+-- Set up the TRY block
+BEGIN TRY
+	-- Add the constraint
+	ALTER TABLE products
+		ADD CONSTRAINT CHK_Stock CHECK (stock >= 0);
+END TRY
+-- Set up the CATCH block
+BEGIN CATCH
+	SELECT 'An error occurred!';
+END CATCH
+
+
+--An error occurred!
+
+
+
+
+products
+product_id	product_name	stock	price
+1	Trek Conduit+ - 2016	50	2999.99
+2	Sun Bicycles ElectroLite - 2017	47	1559.99
+3	Trek Powerfly 8 FS Plus - 2017	41	4999.99
+4	Trek Conduit+	10	2799.00
+5	Trek CrossRip+ - 2018	12	4499.99
+6	Trek Neko+ - 2018	-1	2799.99
+7	Trek XM700+ Lowstep - 2018	26	3499.99
+8	Trek Lift+ Lowstep - 2018	10	2799.99
+9	Trek Dual Sport+ - 2018	15	2799.99
+10	Electra Loft Go! 8i - 2018	10	2799.99
+11	Electra Townie Go! 8i - 2017/2018	25	2599.99
+12	Trek Lift+ - 2018	30	2799.99
+13	Trek XM700+ - 2018	27	3499.99
+14	Electra Townie Go! 8i Ladies' - 2018	14	2599.99
+15	Trek Verve+ - 2018	16	2299.99
+16	Trek Verve+ Lowstep - 2018	18	2299.99
+17	Electra Townie Commute Go! - 2018	19	2999.99
+18	Electra Townie Commute Go! Ladies' - 2018	40	2999.99
+19	Trek Powerfly 5 - 2018	15	3499.99
+20	Trek Powerfly 5 FS - 2018	19	4499.99
+21	Trek Powerfly 5 Women's - 2018	14	3499.99
+22	Trek Powerfly 7 FS - 2018	15	4999.99
+23	Trek Super Commuter+ 7 - 2018	12	3599.99
+24	Trek Super Commuter+ 8S - 2018	18	4999.99
+Showing 24 out of 24 rows
+
+
+
