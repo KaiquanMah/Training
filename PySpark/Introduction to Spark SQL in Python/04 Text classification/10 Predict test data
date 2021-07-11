@@ -1,0 +1,100 @@
+A fitted logistic model df_fitted is available. A dataframe df_testset is available containing test data for this model. A variable fields is available, containing the list ['prediction', 'label', 'endword', 'doc', 'probability']; this is used to specify which prediction fields to print.
+
+Apply the model to the data in df_testset.
+Print "incorrect" if prediction does not match label.
+
+
+
+fields
+['prediction', 'label', 'endword', 'doc', 'probability']
+
+predictions
+DataFrame[prediction: double, label: int, endword: string, doc: array<string>, probability: vector]
+
+predictions.show(5)
++----------+-----+-------+--------------------+--------------------+
+|prediction|label|endword|                 doc|         probability|
++----------+-----+-------+--------------------+--------------------+
+|       1.0|    1|    him|[and, pierre, fel...|[0.28537355252312...|
+|       1.0|    1|    him|[at, the, time, o...|[0.42231424049876...|
+|       0.0|    1|    him|[bind, him, bind,...|[0.56234110253826...|
+|       1.0|    1|    him|[bolkonski, made,...|[0.36834990601757...|
++----------+-----+-------+--------------------+--------------------+
+
+
+
+#actually max # records we have here = 4
+#but the specified code already uses 8
+predictions.take(8)
+
+[Row(prediction=1.0, label=1, endword='him', doc=['and', 'pierre', 'felt', 'that', 'their', 'opinion', 'placed', 'responsibilities', 'upon', 'him'], probability=DenseVector([0.2854, 0.7146])),
+ Row(prediction=1.0, label=1, endword='him', doc=['at', 'the', 'time', 'of', 'that', 'meeting', 'it', 'had', 'not', 'produced', 'an', 'effect', 'upon', 'him'], probability=DenseVector([0.4223, 0.5777])),
+ Row(prediction=0.0, label=1, endword='him', doc=['bind', 'him', 'bind', 'him'], probability=DenseVector([0.5623, 0.4377])),
+ Row(prediction=1.0, label=1, endword='him', doc=['bolkonski', 'made', 'room', 'for', 'him', 'on', 'the', 'bench', 'and', 'the', 'lieutenant', 'colonel', 'sat', 'down', 'beside', 'him'], probability=DenseVector([0.3683, 0.6317]))]
+
+
+
+#pyspark df's take method retrieves the 1st # rows in a list
+predictions.take(2)
+
+[Row(prediction=1.0, label=1, endword='him', doc=['and', 'pierre', 'felt', 'that', 'their', 'opinion', 'placed', 'responsibilities', 'upon', 'him'], probability=DenseVector([0.2854, 0.7146])),
+ Row(prediction=1.0, label=1, endword='him', doc=['at', 'the', 'time', 'of', 'that', 'meeting', 'it', 'had', 'not', 'produced', 'an', 'effect', 'upon', 'him'], probability=DenseVector([0.4223, 0.5777]))]
+
+
+
+
+
+
+
+
+
+# Apply the model to the test data
+predictions = df_fitted.transform(df_testset).select(fields)
+
+
+# Print incorrect if prediction does not match label
+#so each x => each 'Row' object
+for x in predictions.take(8):
+    print()
+    #in each row, there is a 'prediction' value and a 'label' value
+    if x.label != int(x.prediction):
+        print("INCORRECT ==> ")
+    #after printing incorrect above
+    #IF INCORRECT - print the values for each field of corresponding Row
+    #IF CORRECT - dont print the 'incorrect' printout above; instead JUST print the values for each field of corresponding Row BELOW
+    for y in fields:
+        print(y,":", x[y])
+
+
+
+
+<script.py> output:
+    
+    prediction : 1.0
+    label : 1
+    endword : him
+    doc : ['and', 'pierre', 'felt', 'that', 'their', 'opinion', 'placed', 'responsibilities', 'upon', 'him']
+    probability : [0.28537355252312796,0.714626447476872]
+    
+    prediction : 1.0
+    label : 1
+    endword : him
+    doc : ['at', 'the', 'time', 'of', 'that', 'meeting', 'it', 'had', 'not', 'produced', 'an', 'effect', 'upon', 'him']
+    probability : [0.4223142404987621,0.5776857595012379]
+    
+    INCORRECT ==> 
+    prediction : 0.0
+    label : 1
+    endword : him
+    doc : ['bind', 'him', 'bind', 'him']
+    probability : [0.5623411025382637,0.43765889746173625]
+    
+    prediction : 1.0
+    label : 1
+    endword : him
+    doc : ['bolkonski', 'made', 'room', 'for', 'him', 'on', 'the', 'bench', 'and', 'the', 'lieutenant', 'colonel', 'sat', 'down', 'beside', 'him']
+    probability : [0.3683499060175795,0.6316500939824204]
+    
+    
+    
+    
