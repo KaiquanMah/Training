@@ -1,0 +1,29 @@
+You need to prepare a script to select all the information of a member from the staff table using a given staff_id.
+If the select statement doesn't find any member, you want to throw an error using the THROW statement. You need to warn there is no staff member with such id.
+
+
+Use the THROW statement, with 50001 as the error number, 'No staff member with such id' as the message text, and 1 as the state.
+Replace the value of @staff_id in the DECLARE statement at the beginning with an identifier that doesn't exist (e.g. '45') and click Run Code (not Run Solution). You will see the error.
+Set the value of @staff_id back to 4 and run the code without errors.
+
+
+
+DECLARE @staff_id INT = 4;
+
+IF NOT EXISTS (SELECT * FROM staff WHERE staff_id = @staff_id)
+   	-- Invoke the THROW statement with parameters
+	THROW 50001, 'No staff member with such id', 1; --error#, 'messageString', state#
+ELSE
+   	SELECT * FROM staff WHERE staff_id = @staff_id
+
+
+
+
+--query result
+staff_id	first_name	  last_name	      email	                        phone
+4	        Mateo	        Casanovas	      mateocasanovas@mail.com	      555110996
+Showing 1 out of 1 rows
+
+
+
+--You have learned how to use the THROW statement with parameters. Remember that the THROW statement with parameters can be used both inside or outside a CATCH block.
