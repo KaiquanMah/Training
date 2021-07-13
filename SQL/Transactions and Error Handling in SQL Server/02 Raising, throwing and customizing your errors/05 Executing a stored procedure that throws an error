@@ -1,0 +1,54 @@
+You want to register that you received 3 Trek Conduit+ bikes with a price of $499.99. You think Trek Conduit+ doesn't exist in the products table, so you try to insert it as a new product, using the stored procedure you created in the previous exercise:
+
+CREATE PROCEDURE insert_product
+  @product_name VARCHAR(50),
+  @stock INT,
+  @price DECIMAL
+
+AS
+
+BEGIN TRY
+    INSERT INTO products (product_name, stock, price)
+        VALUES (@product_name, @stock, @price);
+END TRY
+BEGIN CATCH    
+    INSERT INTO errors VALUES ('Error inserting a product');  
+    THROW;  
+END CATCH
+
+
+
+
+You need to catch the possible errors generated in the execution of the stored procedure, showing the original error message.
+
+
+How do you prepare the script?
+Execute the stored procedure called insert_product.
+Set the appropriate values for the parameters of the stored procedure.
+Surround the error handling with a CATCH block.
+Select the error message.
+
+
+
+
+
+
+BEGIN TRY
+	-- Execute the stored procedure
+	EXEC insert_product
+    	-- Set the values for the parameters
+    	@product_name = 'Trek Conduit+',
+        @stock = 3,
+        @price = 499.99;
+END TRY
+-- Set up the CATCH block
+BEGIN CATCH
+	-- Select the error message
+	SELECT ERROR_MESSAGE();
+END CATCH
+
+
+
+Violation of UNIQUE KEY constraint 'unique_product_name'. Cannot insert duplicate key in object 'dbo.products'. The duplicate key value is (Trek Conduit+).
+
+
