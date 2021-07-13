@@ -1,0 +1,78 @@
+Like in the previous exercise, you need to check if there is enough stock when you sell a product.
+This time you want to add your custom error message to the sys.messages catalog, by executing the sp_addmessage stored procedure. Once you have added the message, you can use it in the FORMATMESSAGE function.
+
+1
+Add the new message by passing to the sp_addmessage stored procedure 50002 as the message id, 16 as the severity, and 'There are not enough %s bikes. You only have %d in stock.' as the message text.
+
+-- Pass the variables to the stored procedure
+EXEC sp_addmessage @msgnum = 50002, @severity = 16, @msgtext = 'There are not enough %s bikes. You only have %d in stock.', @lang = N'us_english';
+
+
+
+
+
+
+
+2
+Use FORMATMESSAGE to customize the error. Pass 50002 as the first parameter, @product_name as the second parameter, and @current_stock as the third parameter.
+Pass @my_message to the THROW statement. This code will run without errors.
+
+EXEC sp_addmessage @msgnum = 50002, @severity = 16, @msgtext = 'There are not enough %s bikes. You only have %d in stock.', @lang = N'us_english';
+
+DECLARE @product_name AS NVARCHAR(50) = 'Trek CrossRip+ - 2018';
+DECLARE @sold_bikes AS INT = 10;
+DECLARE @current_stock INT;
+
+SELECT @current_stock = stock FROM products WHERE product_name = @product_name;
+
+DECLARE @my_message NVARCHAR(500) =
+	-- Prepare the error message
+	FORMATMESSAGE(50002, @product_name, @current_stock);
+
+IF (@current_stock - @sold_bikes < 0)
+	-- Throw the error
+	THROW 50000, @my_message, 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Set @sold_bikes to a value greater than @current_stock (e.g. 100).
+Click Run Code (not Run Solution). You will see the error.
+Set the value of @sold_bikes in DECLARE statement back to 10.
+Run the code without errors.
+
+EXEC sp_addmessage @msgnum = 50002, @severity = 16, @msgtext = 'There are not enough %s bikes. You only have %d in stock.', @lang = N'us_english';
+
+DECLARE @product_name AS NVARCHAR(50) = 'Trek CrossRip+ - 2018';
+--Change the value
+DECLARE @sold_bikes AS INT = 100;
+DECLARE @current_stock INT;
+
+SELECT @current_stock = stock FROM products WHERE product_name = @product_name;
+
+DECLARE @my_message NVARCHAR(500) =
+	FORMATMESSAGE(50002, @product_name, @current_stock);
+
+IF (@current_stock - @sold_bikes < 0)
+	THROW 50000, @my_message, 1;
+  
+
+
+('42000', '[42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]There are not enough Trek CrossRip+ - 2018 bikes. You only have 12 in stock. (50000) (SQLExecDirectW)')
+  
+Remember, the way to add messages to the sys.messages view is by executing the stored procedure sp_addmessage.  
+  
+  
+
