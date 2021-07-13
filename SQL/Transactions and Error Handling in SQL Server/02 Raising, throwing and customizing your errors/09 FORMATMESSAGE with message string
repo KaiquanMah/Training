@@ -1,0 +1,40 @@
+Every time you sell a bike in your store, you need to check if there is enough stock. You prepare a script to check it and throw an error if there is not enough stock.
+
+
+
+Set @sold_bikes to a value greater than @current_stock (e.g. 100).
+Customize the error using FORMATMESSAGE with the text 'There are not enough %s bikes. You have %d in stock.' as the first parameter, @product_name as the second parameter, and @current_stock as the third parameter.
+Pass to the THROW statement the @my_message variable and click Run Code (not Run Solution). You will see the error.
+Set @sold_bikes in DECLARE statement back to 10. Run the code without errors.
+
+
+DECLARE @product_name AS NVARCHAR(50) = 'Trek CrossRip+ - 2018';
+-- Set the number of sold bikes
+DECLARE @sold_bikes AS INT = 150;
+DECLARE @current_stock INT;
+
+
+SELECT @current_stock = stock 
+FROM products 
+WHERE product_name = @product_name;
+
+
+DECLARE @my_message NVARCHAR(500) =
+	-- Customize the error message
+	FORMATMESSAGE('There are not enough %s bikes. You have %d in stock.', @product_name, @current_stock);
+
+IF (@current_stock - @sold_bikes < 0)
+	-- Throw the error
+	THROW 50000, @my_message, 1;
+  
+
+
+
+('42000', '[42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]There are not enough Trek CrossRip+ - 2018 bikes. You have 12 in stock. (50000) (SQLExecDirectW)')
+  
+Remember, you need to create a variable to store the result of the FORMATMESSAGE function and then pass this variable to the THROW statement.
+
+
+
+
+
