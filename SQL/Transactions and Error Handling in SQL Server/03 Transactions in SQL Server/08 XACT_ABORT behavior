@@ -1,0 +1,72 @@
+SET XACT_ABORT OFF -> if there is an error -> execution may or may not terminate
+SET XACT_ABORT ON -> if there is an error -> execution WOULD terminate; BOTH lines NOT INSERTED
+
+
+SET XACT_ABORT ON;
+BEGIN TRAN
+      INSERT INTO...;
+      RAISERROR('errorMsg', 16, 1);
+      INSERT INTO...;
+COMMIT TRAN;
+->
+-both INSERT INTO lines execute successfully
+-U will encounter the error msg configured
+
+
+
+
+SET XACT_ABORT ON;
+BEGIN TRAN
+      INSERT INTO...;
+      THROW 55000, 'errorMsg', 1;
+      INSERT INTO...;
+COMMIT TRAN;
+->
+-execution WOULD terminate; BOTH lines NOT INSERTED
+-U will encounter the error msg configured
+
+
+
+
+
+
+XACT_STATE()
+-no input arguments
+- 0 if no open transaction
+- 1 if there is an open and commitable transaction
+- -1 if there is an open and UNcommitable/DOOMED transaction -> CANT COMMIT + ROLLBACK to savepoint + ROLLBACK full txn + MAKE CHANGES; CAN READ DATA
+
+
+
+
+
+
+
+
+
+
+
+
+
+XACT_ABORT behavior
+If there is an error and XACT_ABORT is set to…
+
+Answer the question
+#NOT
+1
+OFF, the transaction will always be rollbacked.
+
+#YES
+2
+ON, the transaction will always be rollbacked.
+#NEED TO ADD WORDS TO THE SENTENCE ABOVE, LIKE BELOW:
+#ON, the WHOLE transaction will always be rollED back IF THERE ARE ANY ERRORS.
+#That's correct! Setting XACT_ABORT to ON ensures that if an error occurs, the transaction is automatically rollbacked and the execution is aborted.
+
+
+
+
+#NOT
+3
+ON, the transaction can be rollbacked or not, depending on the error.
+
