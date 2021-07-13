@@ -1,0 +1,47 @@
+You need to prepare a script to select all the information about the members from the staff table using a given first_name.
+If the select statement doesn't find any member, you want to throw an error using the THROW statement. You need to warn there is no staff member with such a name.
+
+
+Assign to @my_message the concatenation of 'There is no staff member with ', with the value of @first_name and with ' as the first name.'.
+Use THROW with 50000 as the error number, @my_message as the message parameter, and 1 as the state.
+Replace the name 'Pedro' in the DECLARE statement at the beginning with a name that doesn't exist (e.g. 'David') and click Run Code (not Run Solution). You will see the error.
+Change again the name to 'Pedro' and run the code without errors.
+
+
+--staff table
+staff_id	first_name	last_name	email	phone
+1	Mohammed	Ferrec	mohammedferrec@mail.com	555888111
+2	Dimitri	Brown	dimitribrown@mail.com	555012012
+3	Leila	Merheg	leilamerheg@mail.com	555999133
+4	Mateo	Casanovas	mateocasanovas@mail.com	555110996
+5	Carl	York	carlyork@mail.com	555010011
+6	Robert	Berkeley	robertberkeley@mail.com	555447441
+7	Nicholas	Kent	nicholaskent@mail.com	555111111
+8	Fabrice	Fave	fabricefave@mail.com	555001000
+9	Karima	Sfeir	karimasfeir@mail.com	555123888
+10	Pedro	Romero	pedroromero@mail.com	555314111
+Showing 10 out of 10 rows
+
+
+
+
+
+
+
+DECLARE @first_name NVARCHAR(20) = 'David';
+
+-- Concat the message
+DECLARE @my_message NVARCHAR(500) =
+	CONCAT('There is no staff member with ', @first_name, ' as the first name.');
+
+IF NOT EXISTS (SELECT * FROM staff WHERE first_name = @first_name)
+	-- Throw the error
+	THROW 50000, @my_message, 1;
+  
+  
+  
+  
+  
+('42000', '[42000] [Microsoft][ODBC Driver 17 for SQL Server][SQL Server]There is no staff member with David as the first name. (50000) (SQLExecDirectW)')
+
+With the use of the CONCAT function, you can create your customized messages and use them in the THROW statement!
