@@ -1,0 +1,69 @@
+When there are nested transactions
+if @@TRANCOUNT is 1 -> transactions e.g. DELETIONs are committed
+if @@TRANCOUNT is >1 -> transactions e.g. DELETIONs are NOT committed
+
+
+@@TRANCOUNT 
+BEGIN TRAN +1 to @@TRANCOUNT 
+COMMIT TRAN -1 to @@TRANCOUNT
+ROLLBACK TRAN sets @@TRANCOUNT to 0
+
+
+
+When we have savepoints
+BEGIN TRAN
+      ...
+      ROLLBACK TRAN savepoint2;
+      SELECT @@TRANCOUNT AS '@@Trancount value';
+      
+      
+      ROLLBACK TRAN savepoint1;
+      SELECT @@TRANCOUNT AS '@@Trancount value';
+      ...
+COMMIT TRAN;
+
+@@TRANCOUNT value
+------------------
+1
+
+^at both instances above
+savepoints DO NOT decrease your @@TRANCOUNT
+
+
+
+
+
+
+
+
+
+
+Modifiers of the @@TRANCOUNT value
+Which of the following is false about @@TRANCOUNT?
+
+Answer the question
+#TRUE
+1
+The COMMIT TRAN|TRANSACTION statement decrements the value of @@TRANCOUNT by 1.
+
+
+
+#YES
+#FALSE
+2
+The COMMIT TRAN|TRANSACTION statement decrements the value of @@TRANCOUNT to 0, except if there is a savepoint.
+#That's correct! It is the ROLLBACK TRAN|TRANSACTION statement that decrements the value of @@TRANCOUNT to 0, except if there is a savepoint. (Note that at DC, @@TRANCOUNT starts with a value of 1 instead of 0 because there is 1 internal connection.)
+
+
+
+
+#TRUE
+3
+The ROLLBACK TRAN|TRANSACTION statement decrements the value of @@TRANCOUNT to 0, except if there is a savepoint.
+
+#TRUE
+4
+The BEGIN TRAN|TRANSACTION statement increments the value of @@TRANCOUNT by 1.
+
+
+
