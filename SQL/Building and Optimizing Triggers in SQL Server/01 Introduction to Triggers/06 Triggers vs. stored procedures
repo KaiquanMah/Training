@@ -1,0 +1,200 @@
+One important task when you take ownership of an existing database is to familiarize yourself with the objects that comprise the database.
+This task includes getting to know existing procedures, functions, and triggers.
+You find the following objects in the Fresh Fruit Delivery database:
+The company uses a regular stored procedure, MonthlyOrders, for reporting purposes. The stored procedure sums up order amounts for each product every month.
+The trigger CustomerDiscountHistory is used to keep a history of the changes that occur in the Discounts table. The trigger is fired when updates are made to the Discounts table, and it stores the old and new values from the Discount column into the table DiscountsHistory.
+
+
+
+1
+Run an update on the Discounts table (this will fire the CustomerDiscountHistory trigger).
+Get all the rows from DiscountsHistory to verify the outcome.
+-- Run an update for some of the discounts
+UPDATE Discounts
+SET Discount = Discount + 1
+WHERE Discount <= 5;
+
+-- Verify the trigger ran successfully
+SELECT * FROM DiscountsHistory;
+
+
+
+--QUERY RESULT
+Customer	OldDiscount	NewDiscount	ChangeDate
+Fruit Mania	3	4	2021-07-14
+Fruit Mag	5	6	2021-07-14
+Fruity Loops	4	5	2021-07-14
+Every Fruit	2	3	2021-07-14
+Showing 4 out of 4 rows
+
+
+
+--DISCOUNTS TABLE
+Customer	Discount
+eShop	10
+Every Fruit	2
+Exotic Taste	11
+Fruity Loops	4
+Fruit Mag	5
+Fruit Mania	3
+Fruit Paradise	16
+Fruit Shop	7
+Health Mag	13
+Healthy Choices	6
+Nutty Nuts	15
+Tasty Fruits	11
+VitaFruit	15
+World of Fruits	11
+Showing 14 out of 14 rows
+
+
+
+
+
+
+
+
+
+
+
+
+2
+Question
+Execute the MonthlyOrders regular stored procedure, using EXECUTE MonthlyOrders.
+
+Then, try to execute the CustomerDiscountHistory trigger using
+UPDATE Discounts SET Discount = Discount + 1 WHERE Discount <= 5
+
+
+What conclusions can be drawn from the execution results and the step performed earlier?
+Possible Answers
+-Both triggers and regular stored procedures can be executed explicitly when needed.
+-Triggers can be executed explicitly when needed, while regular stored procedures can only be fired by a corresponding event.
+-Triggers can be fired by the corresponding event, but can also be executed explicitly when needed.
+
+
+#YES
+-Triggers can only be fired by the corresponding event, while regular stored procedures can be executed explicitly when needed.
+
+
+
+
+
+
+EXECUTE MonthlyOrders
+--QUERY RESULT
+Product	OrderMonth	MonthlyQuantity	MonthlyAmount
+Apple	April 2018	1500	2865.00
+Apple	August 2018	750	1432.50
+Apple	December 2018	2710	5176.10
+Apple	February 2018	240	458.40
+Apple	January 2018	400	764.00
+Apple	June 2018	50	95.50
+Apple	March 2018	700	1337.00
+Apple	May 2018	25	47.75
+Apple	October 2018	250	477.50
+Apricot	April 2018	25	36.50
+Apricot	December 2018	565	824.90
+Apricot	January 2018	300	438.00
+Apricot	June 2018	300	438.00
+Apricot	March 2018	1045	1525.70
+Apricot	May 2018	1575	2299.50
+Apricot	November 2018	80	116.80
+Apricot	September 2018	240	350.40
+Avocado	April 2018	580	1687.80
+Avocado	August 2018	1500	4365.00
+Avocado	December 2018	350	1018.50
+Avocado	January 2018	750	2182.50
+Avocado	March 2018	500	1455.00
+Avocado	May 2018	1200	3492.00
+Avocado	October 2018	40	116.40
+Avocado	September 2018	1200	3492.00
+Banana	April 2018	500	855.00
+Banana	August 2018	1390	2376.90
+Banana	December 2018	2365	4044.15
+Banana	February 2018	20	34.20
+Banana	January 2018	1000	1710.00
+Banana	May 2018	380	649.80
+Banana	November 2018	700	1197.00
+Banana	October 2018	1550	2650.50
+Banana	September 2018	75	128.25
+Blackberry	April 2018	1000	1910.00
+Blackberry	August 2018	300	573.00
+Blackberry	December 2018	3445	6579.95
+Blackberry	February 2018	2900	5539.00
+Blackberry	July 2018	20	38.20
+Blackberry	June 2018	200	382.00
+Blackberry	March 2018	790	1508.90
+Blackberry	May 2018	1520	2903.20
+Blackberry	October 2018	100	191.00
+Blackberry	September 2018	2500	4775.00
+Blackcurrant	April 2018	1500	3615.00
+Blackcurrant	August 2018	1750	4217.50
+Blackcurrant	December 2018	1000	2410.00
+Blackcurrant	February 2018	120	289.20
+Blackcurrant	June 2018	1225	2952.25
+Blackcurrant	March 2018	720	1735.20
+Blackcurrant	May 2018	1250	3012.50
+Blackcurrant	October 2018	975	2349.75
+Blackcurrant	September 2018	800	1928.00
+Blueberry	April 2018	100	191.00
+Blueberry	August 2018	40	76.40
+Blueberry	December 2018	870	1661.70
+Blueberry	February 2018	1000	1910.00
+Blueberry	January 2018	120	229.20
+Blueberry	July 2018	750	1432.50
+Blueberry	June 2018	770	1470.70
+Blueberry	March 2018	1490	2845.90
+Blueberry	May 2018	220	420.20
+Blueberry	October 2018	1340	2559.40
+Blueberry	September 2018	120	229.20
+Cherry	August 2018	240	818.40
+Cherry	December 2018	2770	9445.70
+Cherry	February 2018	750	2557.50
+Cherry	January 2018	100	341.00
+Cherry	July 2018	325	1108.25
+Cherry	June 2018	1750	5967.50
+Cherry	March 2018	1500	5115.00
+Cherry	May 2018	1300	4433.00
+Cherry	November 2018	1000	3410.00
+Cherry	October 2018	1050	3580.50
+Cherry	September 2018	225	767.25
+Coconut	April 2018	50	145.50
+Coconut	December 2018	2850	8293.50
+Coconut	February 2018	2200	6402.00
+Coconut	January 2018	300	873.00
+Coconut	March 2018	350	1018.50
+Coconut	November 2018	220	640.20
+Coconut	September 2018	790	2298.90
+Cranberry	April 2018	45	45.45
+Cranberry	December 2018	865	873.65
+Cranberry	July 2018	120	121.20
+Cranberry	March 2018	750	757.50
+Cranberry	November 2018	200	202.00
+Cranberry	October 2018	25	25.25
+Cranberry	September 2018	525	530.25
+Date	April 2018	600	756.00
+Date	August 2018	300	378.00
+Date	December 2018	2350	2961.00
+Date	July 2018	750	945.00
+Date	June 2018	40	50.40
+Date	March 2018	25	31.50
+Date	May 2018	75	94.50
+Date	September 2018	200	252.00
+Fig	April 2018	250	390.00
+Fig	December 2018	2415	3767.40
+Fig	January 2018	20	31.20
+Showing 100 out of 250 rows
+
+
+
+
+
+
+
+
+UPDATE Discounts 
+SET Discount = Discount + 1 
+WHERE Discount <= 5
+
+
