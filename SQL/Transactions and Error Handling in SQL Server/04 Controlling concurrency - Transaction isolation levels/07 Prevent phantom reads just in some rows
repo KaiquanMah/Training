@@ -1,0 +1,59 @@
+You need to analyze some data about your bank customers with the customer_id between 1 and 10. You only want to lock the rows of the customers table with the customer_id between 1 and 10. In doing this, you guarantee nobody will be able to change these rows, and you allow other transactions to work with the rest of the table.
+You need to select the customers and execute some mathematical operations again. (We won't focus either on these operations for this exercise.) After that, you want to select the customers with the customer_id between 1 and 10 again, ensuring nothing has changed.
+How can you prepare the script?
+
+
+Set the appropriate isolation level to prevent phantom reads.
+Begin a transaction.
+Select those customers you want to lock.
+Commit the transaction.
+
+
+-- Set the appropriate isolation level
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+
+-- Begin a transaction
+BEGIN TRAN
+
+-- Select customer_id between 1 and 10
+SELECT * 
+FROM customers
+WHERE customer_id BETWEEN 1 AND 10;
+
+-- After completing some mathematical operation, select customer_id between 1 and 10
+SELECT * 
+FROM customers
+WHERE customer_id BETWEEN 1 AND 10;
+
+-- Commit the transaction
+COMMIT TRAN
+
+
+
+
+
+
+
+
+
+
+
+
+
+--QUERY RESULT
+customer_id	first_name	last_name	email	phone
+1	Dylan	Smith	dylansmith@mail.com	555888999
+2	John	Antona	johnantona@mail.com	555111222
+3	Astrid	Harper	astridharper@mail.com	555000999
+4	Angus	Brown	angusbrown@mail.com	555222012
+5	David	Elcano	davidelcano@mail.com	555602314
+6	Yamir	Baker	yamirbaker@mail.com	555804110
+7	Anne	Johnson	annejohnson@mail.com	555900010
+8	Roberto	Flores	robertoflores@mail.com	555004447
+9	Bryan	Page	bryanpage@mail.com	555333111
+10	Carol	York	carolyork@mail.com	555441001
+Showing 10 out of 10 rows
+
+
+
+Now you know how to lock just some rows. Remember that you must base your WHERE clause on an index range!
