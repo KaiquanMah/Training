@@ -1,0 +1,291 @@
+You've identified an issue when placing new orders in the company's sales system.
+The issue is related to a trigger run, but you don't have many details on the triggers themselves. Unfortunately, the database objects (including triggers) are not documented.
+You need to identify the trigger that's causing the problem to proceed with the investigation. To be sure, you need to gather some important details about the triggers.
+The only information you have when starting the investigation is that the table related to the issues is Orders.
+
+--sys.triggers
+name	object_id	parent_class	parent_class_desc	parent_id	type	type_desc	create_date	modify_date	is_ms_shipped	is_disabled	is_not_for_replication	is_instead_of_trigger
+ViewSecurityTrigger	1269579561	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.110000	2021-01-19 10:05:39.373000	false	true	false	false
+IndexSecurityTrigger	1285579618	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.140000	2021-01-19 10:05:39.377000	false	true	false	false
+ProcedureSecurityTrigger	1301579675	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.190000	2021-01-19 10:05:39.380000	false	true	false	false
+CustomerDiscountHistory	1317579732	1	OBJECT_OR_COLUMN	917578307	TR	SQL_TRIGGER	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	false	false	false
+SalesCalculateTotalAmount	1333579789	1	OBJECT_OR_COLUMN	1109578991	TR	SQL_TRIGGER	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	false	false	false
+TrackRetiredProducts	1349579846	1	OBJECT_OR_COLUMN	901578250	TR	SQL_TRIGGER	2021-01-19 10:05:39.353000	2021-01-19 10:05:39.353000	false	false	false	false
+PreventOrdersUpdate	1365579903	1	OBJECT_OR_COLUMN	885578193	TR	SQL_TRIGGER	2021-01-19 10:05:39.357000	2021-01-19 10:05:39.357000	false	false	false	true
+PreventDiscountsDelete	1381579960	1	OBJECT_OR_COLUMN	917578307	TR	SQL_TRIGGER	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	false	false	true
+ProductsNewItems	1397580017	1	OBJECT_OR_COLUMN	901578250	TR	SQL_TRIGGER	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	false	false	false
+PreventNewDiscounts	1413580074	1	OBJECT_OR_COLUMN	917578307	TR	SQL_TRIGGER	2021-01-19 10:05:39.363000	2021-01-19 10:05:39.363000	false	false	false	true
+TrackTableChanges	1429580131	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.363000	2021-01-19 10:05:39.363000	false	false	false	false
+PreventTableDeletion	1445580188	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.367000	2021-01-19 10:05:39.367000	false	false	false	false
+PreventCustomersRemoval	1461580245	1	OBJECT_OR_COLUMN	1141579105	TR	SQL_TRIGGER	2021-01-19 10:05:39.380000	2021-01-19 10:05:39.380000	false	false	false	true
+CopyCustomersToHistory	1477580302	1	OBJECT_OR_COLUMN	1141579105	TR	SQL_TRIGGER	2021-01-19 10:05:39.383000	2021-01-19 10:05:39.383000	false	false	false	false
+DatabaseAudit	1493580359	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.387000	2021-01-19 10:05:39.387000	false	false	false	false
+Showing 15 out of 15 rows
+
+
+
+--sys.trigger_events
+object_id	type	type_desc	is_first	is_last	event_group_type	event_group_type_desc	is_trigger_event
+1269579561	41	CREATE_VIEW	false	false	null	null	true
+1269579561	42	ALTER_VIEW	false	false	null	null	true
+1269579561	43	DROP_VIEW	false	false	null	null	true
+1285579618	24	CREATE_INDEX	false	false	null	null	true
+1301579675	52	ALTER_PROCEDURE	false	false	null	null	true
+1301579675	53	DROP_PROCEDURE	false	false	null	null	true
+1317579732	2	UPDATE	false	false	null	null	true
+1333579789	1	INSERT	false	false	null	null	true
+1349579846	3	DELETE	false	false	null	null	true
+1365579903	2	UPDATE	false	false	null	null	true
+1381579960	3	DELETE	false	false	null	null	true
+1397580017	1	INSERT	false	false	null	null	true
+1413580074	1	INSERT	false	false	null	null	true
+1429580131	21	CREATE_TABLE	false	false	null	null	true
+1429580131	22	ALTER_TABLE	false	false	null	null	true
+1429580131	23	DROP_TABLE	false	false	null	null	true
+1445580188	23	DROP_TABLE	false	false	null	null	true
+1461580245	3	DELETE	false	false	null	null	true
+1477580302	1	INSERT	false	false	null	null	true
+1477580302	2	UPDATE	false	false	null	null	true
+1493580359	21	CREATE_TABLE	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	22	ALTER_TABLE	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	23	DROP_TABLE	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	41	CREATE_VIEW	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	42	ALTER_VIEW	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	43	DROP_VIEW	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	24	CREATE_INDEX	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	25	ALTER_INDEX	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	26	DROP_INDEX	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	206	CREATE_XML_INDEX	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	213	ALTER_FULLTEXT_INDEX	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	224	CREATE_FULLTEXT_INDEX	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	235	DROP_FULLTEXT_INDEX	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	274	CREATE_SPATIAL_INDEX	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	27	CREATE_STATISTICS	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	28	UPDATE_STATISTICS	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+1493580359	29	DROP_STATISTICS	false	false	10017	DDL_TABLE_VIEW_EVENTS	true
+Showing 37 out of 37 rows
+
+
+
+--sys.objects
+name	object_id	principal_id	schema_id	parent_object_id	type	type_desc	create_date	modify_date	is_ms_shipped	is_published	is_schema_published
+sysrscols	3	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.047000	2018-06-13 18:25:47.053000	true	false	false
+sysrowsets	5	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.093000	2018-06-13 18:25:47.420000	true	false	false
+sysclones	6	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.267000	2018-06-13 18:25:47.273000	true	false	false
+sysallocunits	7	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.077000	2018-06-13 18:25:47.077000	true	false	false
+sysfiles1	8	null	4	0	S 	SYSTEM_TABLE	2003-04-08 09:13:38.093000	2003-04-08 09:13:38.093000	true	false	false
+sysseobjvalues	9	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.450000	2018-06-13 18:25:47.457000	true	false	false
+syspriorities	17	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.157000	2018-06-13 18:25:47.170000	true	false	false
+sysdbfrag	18	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.390000	2018-06-13 18:25:47.400000	true	false	false
+sysfgfrag	19	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.007000	2018-06-13 18:25:47.013000	true	false	false
+sysdbfiles	20	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.230000	2018-06-13 18:25:47.237000	true	false	false
+syspru	21	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.393000	2018-06-13 18:25:47.400000	true	false	false
+sysbrickfiles	22	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.397000	2018-06-13 18:25:47.403000	true	false	false
+sysphfg	23	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.010000	2018-06-13 18:25:47.017000	true	false	false
+sysprufiles	24	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.013000	2018-06-13 18:25:47.023000	true	false	false
+sysftinds	25	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.390000	2018-06-13 18:25:46.997000	true	false	false
+sysowners	27	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.373000	2018-06-13 18:25:47.293000	true	false	false
+sysdbreg	28	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.347000	2018-06-13 18:25:47.360000	true	false	false
+sysprivs	29	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:10.983000	2009-04-13 12:59:10.983000	true	false	false
+sysschobjs	34	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.170000	2018-06-13 18:25:47.327000	true	false	false
+syscsrowgroups	35	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.520000	2018-06-13 18:25:47.763000	true	false	false
+sysextsources	36	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.713000	2018-06-13 18:25:47.727000	true	false	false
+sysexttables	37	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.597000	2018-06-13 18:25:47.730000	true	false	false
+sysextfileformats	38	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.727000	2018-06-13 18:25:47.737000	true	false	false
+sysmultiobjvalues	40	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.627000	2018-06-13 18:25:47.637000	true	false	false
+syscolpars	41	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.310000	2018-06-13 18:25:46.993000	true	false	false
+sysxlgns	42	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.380000	2018-06-13 18:25:47.393000	true	false	false
+sysxsrvs	43	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.387000	2018-06-13 18:25:47.397000	true	false	false
+sysnsobjs	44	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.200000	2009-04-13 12:59:11.200000	true	false	false
+sysusermsgs	45	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.373000	2018-06-13 18:25:47.380000	true	false	false
+syscerts	46	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:13.013000	2018-06-13 18:25:47.777000	true	false	false
+sysrmtlgns	47	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.360000	2018-06-13 18:25:47.377000	true	false	false
+syslnklgns	48	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.357000	2018-06-13 18:25:47.363000	true	false	false
+sysxprops	49	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.500000	2009-04-13 12:59:11.500000	true	false	false
+sysscalartypes	50	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:10.950000	2009-04-13 12:59:10.950000	true	false	false
+systypedsubobjs	51	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.343000	2009-04-13 12:59:11.343000	true	false	false
+sysidxstats	54	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.360000	2009-04-13 12:59:11.360000	true	false	false
+sysiscols	55	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.360000	2018-06-13 18:25:47.743000	true	false	false
+sysendpts	56	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.350000	2018-06-13 18:25:47.360000	true	false	false
+syswebmethods	57	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.377000	2018-06-13 18:25:47.383000	true	false	false
+sysbinobjs	58	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.467000	2009-04-13 12:59:12.493000	true	false	false
+sysaudacts	59	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.180000	2018-06-13 18:25:47.187000	true	false	false
+sysobjvalues	60	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.170000	2009-04-13 12:59:11.170000	true	false	false
+syscscolsegments	62	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.330000	2018-07-04 08:25:35.020000	true	false	false
+syscsdictionaries	63	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.337000	2018-07-04 08:25:35.020000	true	false	false
+sysclsobjs	64	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.200000	2009-04-13 12:59:11.200000	true	false	false
+sysrowsetrefs	65	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:11.373000	2018-06-13 18:25:47	true	false	false
+sysremsvcbinds	67	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.860000	2009-04-13 12:59:12.883000	true	false	false
+sysxmitqueue	68	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.890000	2018-06-13 18:25:47.260000	true	false	false
+sysrts	69	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.873000	2009-04-13 12:59:12.900000	true	false	false
+sysconvgroup	71	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.873000	2009-04-13 12:59:12.883000	true	false	false
+sysdesend	72	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.903000	2009-04-13 12:59:13.003000	true	false	false
+sysdercv	73	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:13	2018-06-13 18:25:47.323000	true	false	false
+syssingleobjrefs	74	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:10.967000	2009-04-13 12:59:10.967000	true	false	false
+sysmultiobjrefs	75	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:10.983000	2009-04-13 12:59:10.983000	true	false	false
+sysguidrefs	78	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.577000	2009-04-13 12:59:12.600000	true	false	false
+sysfoqueues	79	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.427000	2018-06-13 18:25:47.433000	true	false	false
+syschildinsts	80	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.340000	2018-06-13 18:25:47.347000	true	false	false
+syscompfragments	82	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.190000	2018-06-13 18:25:47.197000	true	false	false
+sysftsemanticsdb	84	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.403000	2018-06-13 18:25:47.410000	true	false	false
+sysftstops	85	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.193000	2018-06-13 18:25:47.200000	true	false	false
+sysftproperties	86	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.247000	2018-06-13 18:25:47.260000	true	false	false
+sysxmitbody	87	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.260000	2018-06-13 18:25:47.267000	true	false	false
+sysfos	89	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.420000	2018-06-13 18:25:47.430000	true	false	false
+sysqnames	90	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.593000	2009-04-13 12:59:12.607000	true	false	false
+sysxmlcomponent	91	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.593000	2009-04-13 12:59:12.617000	true	false	false
+sysxmlfacet	92	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.610000	2009-04-13 12:59:12.620000	true	false	false
+sysxmlplacement	93	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.610000	2009-04-13 12:59:12.870000	true	false	false
+sysobjkeycrypts	94	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:13.013000	2009-04-13 12:59:13.023000	true	false	false
+sysasymkeys	95	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:13.030000	2018-06-13 18:25:47.777000	true	false	false
+syssqlguides	96	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:13.047000	2018-06-13 18:25:47.150000	true	false	false
+sysbinsubobjs	97	null	4	0	S 	SYSTEM_TABLE	2009-04-13 12:59:12.483000	2009-04-13 12:59:12.587000	true	false	false
+syssoftobjrefs	98	null	4	0	S 	SYSTEM_TABLE	2018-06-13 18:25:47.113000	2018-06-13 18:25:47.123000	true	false	false
+sqlagent_jobs	101575400	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.550000	2018-06-13 18:25:47.560000	true	false	false
+sqlagent_jobsteps	117575457	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.553000	2018-06-13 18:25:47.570000	true	false	false
+sqlagent_job_history	133575514	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.563000	2018-06-13 18:25:47.573000	true	false	false
+sqlagent_jobsteps_logs	149575571	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.567000	2018-06-13 18:25:47.580000	true	false	false
+plan_persist_query_text	165575628	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.663000	2018-06-13 18:25:47.820000	true	false	false
+plan_persist_query	181575685	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.667000	2018-07-04 08:25:34.880000	true	false	false
+plan_persist_plan	197575742	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.670000	2018-06-13 18:25:47.763000	true	false	false
+plan_persist_runtime_stats	213575799	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.677000	2018-06-13 18:25:47.830000	true	false	false
+plan_persist_runtime_stats_interval	229575856	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.697000	2018-06-13 18:25:47.697000	true	false	false
+plan_persist_context_settings	245575913	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.700000	2018-06-13 18:25:47.700000	true	false	false
+plan_persist_query_hints	261575970	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.803000	2018-06-13 18:25:47.803000	true	false	false
+plan_persist_query_template_parameterization	277576027	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.817000	2018-06-13 18:25:47.817000	true	false	false
+plan_persist_wait_stats	293576084	null	4	0	IT	INTERNAL_TABLE	2018-06-13 18:25:47.827000	2018-06-13 18:25:47.827000	true	false	false
+persistent_version_store	565577053	null	4	0	IT	INTERNAL_TABLE	2018-07-04 08:25:35.123000	2018-07-04 08:25:35.123000	true	false	false
+persistent_version_store_long_term	581577110	null	4	0	IT	INTERNAL_TABLE	2018-07-04 08:25:35.137000	2018-07-04 08:25:35.137000	true	false	false
+Orders	885578193	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.440000	2021-01-19 10:05:39.357000	false	false	false
+Products	901578250	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.520000	2021-01-19 10:05:39.360000	false	false	false
+Discounts	917578307	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.573000	2021-01-19 10:05:39.363000	false	false	false
+ProductsHistory	933578364	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.577000	2021-01-19 10:05:38.577000	false	false	false
+DF__ProductsH__First__38996AB5	949578421	null	1	933578364	D 	DEFAULT_CONSTRAINT	2021-01-19 10:05:38.580000	2021-01-19 10:05:38.580000	false	false	false
+RetiredProducts	965578478	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.587000	2021-01-19 10:05:38.587000	false	false	false
+DF__RetiredPr__Retir__3A81B327	981578535	null	1	965578478	D 	DEFAULT_CONSTRAINT	2021-01-19 10:05:38.590000	2021-01-19 10:05:38.590000	false	false	false
+CanceledOrders	997578592	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.593000	2021-01-19 10:05:38.593000	false	false	false
+TablesChangeLog	1013578649	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.600000	2021-01-19 10:05:38.600000	false	false	false
+PK__TablesCh__5E5499A8BCD4864A	1029578706	null	1	1013578649	PK	PRIMARY_KEY_CONSTRAINT	2021-01-19 10:05:38.603000	2021-01-19 10:05:38.603000	false	false	false
+ServerLogonLog	1045578763	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.607000	2021-01-19 10:05:38.607000	false	false	false
+DiscountsHistory	1061578820	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.613000	2021-01-19 10:05:38.613000	false	false	false
+SalesWithPrice	1077578877	null	1	0	U 	USER_TABLE	2021-01-19 10:05:38.620000	2021-01-19 10:05:38.620000	false	false	false
+Showing 100 out of 129 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1
+Find the ID of the Orders table by using the sys.objects system view.
+-- Get the table ID
+SELECT object_id AS TableID
+FROM sys.objects
+WHERE name = 'Orders';
+
+
+
+TableID
+885578193
+Showing 1 out of 1 rows
+
+
+
+
+
+
+
+
+2
+Find all the triggers attached to the Orders table by joining the first query with sys.triggers.
+Select the trigger name column.
+-- Get the trigger name
+SELECT t.name AS TriggerName
+FROM sys.objects AS o
+-- Join with the triggers table
+INNER JOIN sys.triggers AS t ON t.parent_id = o.object_id
+WHERE o.name = 'Orders';
+
+
+
+TriggerName
+PreventOrdersUpdate
+Showing 1 out of 1 rows
+
+
+
+
+
+3
+Filter the triggers fired for UPDATE statements, joining the previous query with sys.trigger_events.
+Select the triggers and their firing statements by matching the object_id columns from sys.triggers and sys.trigger_events.
+SELECT t.name AS TriggerName
+FROM sys.objects AS o
+INNER JOIN sys.triggers AS t ON t.parent_id = o.object_id
+-- Get the trigger events
+INNER JOIN sys.trigger_events AS te ON te.object_id = t.object_id
+WHERE o.name = 'Orders'
+-- Filter for triggers reacting to new rows
+AND te.type_desc = 'UPDATE';
+
+
+
+TriggerName
+PreventOrdersUpdate
+Showing 1 out of 1 rows
+
+
+
+
+
+
+
+
+4
+Include the trigger definitions in your selection with the use of a standard SQL Server function.
+SELECT t.name AS TriggerName,
+	   OBJECT_DEFINITION(t.object_id) AS TriggerDefinition
+FROM sys.objects AS o
+INNER JOIN sys.triggers AS t ON t.parent_id = o.object_id
+INNER JOIN sys.trigger_events AS te ON te.object_id = t.object_id
+WHERE o.name = 'Orders'
+AND te.type_desc = 'UPDATE';
+
+
+
+TriggerName	TriggerDefinition
+PreventOrdersUpdate	
+CREATE TRIGGER [PreventOrdersUpdate]
+ON [dbo].[Orders]
+INSTEAD OF UPDATE
+AS
+	RAISERROR ('Updates on "Orders" table are not permitted. Place a new order to add new products', 16, 1);
+Showing 1 out of 1 rows
+
+
+
+
+
+These are the steps you need to perform to identify the triggers attached to a table and see their definitions.
