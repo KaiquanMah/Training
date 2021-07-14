@@ -1,0 +1,47 @@
+Today you have to analyze the data of every customer of your bank. As this information is very important, you think about locking the complete customers table, so that nobody will be able to change anything in this table. In doing this, you prevent phantom reads.
+You prepare a script to select that information, and with the result of this selection, you need to process some mathematical operations. (We won't focus on these operations for this exercise.) After that, you want to select the same data again, ensuring nothing has changed.
+
+
+Set the appropriate isolation level to prevent phantom reads.
+Begin the transaction.
+Commit the transaction.
+
+
+
+-- Set the appropriate isolation level
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+
+-- Begin a transaction
+BEGIN TRAN
+
+SELECT * FROM customers;
+
+-- After some mathematical operations, we selected information from the customers table.
+SELECT * FROM customers;
+
+-- Commit the transaction
+COMMIT TRAN
+
+
+
+
+
+
+--QUERY RESULT
+customer_id	first_name	last_name	email	phone
+1	Dylan	Smith	dylansmith@mail.com	555888999
+2	John	Antona	johnantona@mail.com	555111222
+3	Astrid	Harper	astridharper@mail.com	555000999
+4	Angus	Brown	angusbrown@mail.com	555222012
+5	David	Elcano	davidelcano@mail.com	555602314
+6	Yamir	Baker	yamirbaker@mail.com	555804110
+7	Anne	Johnson	annejohnson@mail.com	555900010
+8	Roberto	Flores	robertoflores@mail.com	555004447
+9	Bryan	Page	bryanpage@mail.com	555333111
+10	Carol	York	carolyork@mail.com	555441001
+1002	Ann	Ros	aros@mail.com	555555555
+Showing 11 out of 11 rows
+
+
+You learned the goal of SERIALIZABLE isolation level is to prevent dirty, non-repeatable reads and phantom reads.
+
