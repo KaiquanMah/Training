@@ -1,0 +1,99 @@
+While continuing your analysis of the database, you find two other interesting objects:
+The table SalesWithPrice has a column that calculates the TotalAmount as Quantity * Price. This is done using a computed column which uses columns from the same table for the calculation.
+The trigger SalesCalculateTotalAmount was created on the SalesWithoutPrice table. The Price column is not part of the SalesWithoutPrice table, so a computed column cannot be used for the TotalAmount. The trigger overcomes this limitation by using the Price column from the Products table.
+
+
+1
+Insert new data into SalesWithPrice and then run a SELECT from the same table to verify the outcome.
+
+-- Add the following rows to the table
+INSERT INTO SalesWithPrice (Customer, Product, Price, Currency, Quantity)
+VALUES ('Fruit Mag', 'Pomelo', 1.12, 'USD', 200),
+	   ('VitaFruit', 'Avocado', 2.67, 'USD', 400),
+	   ('Tasty Fruits', 'Blackcurrant', 2.32, 'USD', 1100),
+	   ('Health Mag', 'Kiwi', 1.42, 'USD', 100),
+	   ('eShop', 'Plum', 1.1, 'USD', 500);
+
+-- Verify the results after adding the new rows
+SELECT * FROM SalesWithPrice;
+
+
+
+--QUERY RESULTS
+OrderID	Customer	Product	Price	Currency	Quantity	OrderDate	TotalAmount
+6	Fruit Mag	Pomelo	1.12	USD	200	2021-07-14	224.00
+7	VitaFruit	Avocado	2.67	USD	400	2021-07-14	1068.00
+8	Tasty Fruits	Blackcurrant	2.32	USD	1100	2021-07-14	2552.00
+9	Health Mag	Kiwi	1.42	USD	100	2021-07-14	142.00
+10	eShop	Plum	1.10	USD	500	2021-07-14	550.00
+Showing 5 out of 5 rows
+
+
+
+
+
+
+
+
+
+
+
+2
+Insert new data into SalesWithoutPrice and then run a SELECT from the same table to verify the outcome.
+
+-- Add the following rows to the table
+INSERT INTO SalesWithoutPrice (Customer, Product, Currency, Quantity)
+VALUES ('Fruit Mag', 'Pomelo', 'USD', 200),
+	   ('VitaFruit', 'Avocado', 'USD', 400),
+	   ('Tasty Fruits', 'Blackcurrant', 'USD', 1100),
+	   ('Health Mag', 'Kiwi', 'USD', 100),
+	   ('eShop', 'Plum', 'USD', 500);
+
+-- Verify the results after the INSERT
+SELECT * FROM SalesWithoutPrice;
+
+
+
+--QUERY RESULTS
+OrderID	Customer	Product	Quantity	OrderDate	TotalAmount	Currency
+6	Fruit Mag	Pomelo	200	2021-07-14	240.00	USD
+7	VitaFruit	Avocado	400	2021-07-14	1200.00	USD
+8	Tasty Fruits	Blackcurrant	1100	2021-07-14	2750.00	USD
+9	Health Mag	Kiwi	100	2021-07-14	140.00	USD
+10	eShop	Plum	500	2021-07-14	600.00	USD
+Showing 5 out of 5 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3
+Question
+The previous step used both a computed column and a trigger to calculate the TotalAmount value automatically. From a user perspective, there was no difference, but from a technical perspective, there is one.
+What is the major limitation of computed columns that can be easily overcome with the use of triggers?
+
+Possible Answers
+#YES
+-A computed column cannot use columns from other tables for the calculation.
+# If you bump into this limitation in your real-life work, try using a trigger to save your day!
+
+
+-A computed column cannot use columns from the same table for the calculation.
+-A computed column cannot use other columns for the calculation.
+-A computed column cannot use more than one column for the calculation.
+
+
+
+
+
