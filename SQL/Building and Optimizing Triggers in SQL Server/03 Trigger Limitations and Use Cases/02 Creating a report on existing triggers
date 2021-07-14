@@ -1,0 +1,322 @@
+Taking on the responsibility of administrating the database for the Fresh Fruit Delivery company also means keeping an eye on existing triggers.
+The best approach is to have a report that can be run regularly and outputs details of the existing triggers.
+This will ensure you have a good overview of the triggers and give you access to some interesting information.
+
+1
+Start creating the triggers report by gathering information about existing database triggers from the sys.triggers table.
+
+--sys.triggers
+name	object_id	parent_class	parent_class_desc	parent_id	type	type_desc	create_date	modify_date	is_ms_shipped	is_disabled	is_not_for_replication	is_instead_of_trigger
+ViewSecurityTrigger	1269579561	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.110000	2021-01-19 10:05:39.373000	false	true	false	false
+IndexSecurityTrigger	1285579618	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.140000	2021-01-19 10:05:39.377000	false	true	false	false
+ProcedureSecurityTrigger	1301579675	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.190000	2021-01-19 10:05:39.380000	false	true	false	false
+CustomerDiscountHistory	1317579732	1	OBJECT_OR_COLUMN	917578307	TR	SQL_TRIGGER	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	false	false	false
+SalesCalculateTotalAmount	1333579789	1	OBJECT_OR_COLUMN	1109578991	TR	SQL_TRIGGER	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	false	false	false
+TrackRetiredProducts	1349579846	1	OBJECT_OR_COLUMN	901578250	TR	SQL_TRIGGER	2021-01-19 10:05:39.353000	2021-01-19 10:05:39.353000	false	false	false	false
+PreventOrdersUpdate	1365579903	1	OBJECT_OR_COLUMN	885578193	TR	SQL_TRIGGER	2021-01-19 10:05:39.357000	2021-01-19 10:05:39.357000	false	false	false	true
+PreventDiscountsDelete	1381579960	1	OBJECT_OR_COLUMN	917578307	TR	SQL_TRIGGER	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	false	false	true
+ProductsNewItems	1397580017	1	OBJECT_OR_COLUMN	901578250	TR	SQL_TRIGGER	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	false	false	false
+PreventCustomersRemoval	1461580245	1	OBJECT_OR_COLUMN	1141579105	TR	SQL_TRIGGER	2021-01-19 10:05:39.380000	2021-01-19 10:05:39.380000	false	false	false	true
+CopyCustomersToHistory	1477580302	1	OBJECT_OR_COLUMN	1141579105	TR	SQL_TRIGGER	2021-01-19 10:05:39.383000	2021-01-19 10:05:39.383000	false	false	false	false
+DatabaseAudit	1493580359	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.387000	2021-01-19 10:05:39.387000	false	false	false	false
+Showing 12 out of 12 rows
+
+
+
+
+--sys.server_triggers
+name	object_id	parent_class	parent_class_desc	parent_id	type	type_desc	create_date	modify_date	is_ms_shipped	is_disabled
+DisallowDatabaseDelete	615673241	100	SERVER	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.340000	2021-01-19 10:05:39.343000	false	true
+DisallowLinkedServers	599673184	100	SERVER	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.203000	2021-01-19 10:05:39.203000	false	false
+Showing 2 out of 2 rows
+
+
+
+
+
+
+
+
+
+-- Get the column that contains the trigger name
+SELECT name AS TriggerName,
+	   parent_class_desc AS TriggerType,
+	   create_date AS CreateDate,
+	   modify_date AS LastModifiedDate,
+	   is_disabled AS Disabled,
+       -- Get the column that tells if it's an INSTEAD OF trigger
+	   is_instead_of_trigger AS InsteadOfTrigger
+FROM sys.triggers;
+
+
+--query result
+TriggerName	TriggerType	CreateDate	LastModifiedDate	Disabled	InsteadOfTrigger
+ViewSecurityTrigger	DATABASE	2021-01-19 10:05:39.110000	2021-01-19 10:05:39.373000	true	false
+IndexSecurityTrigger	DATABASE	2021-01-19 10:05:39.140000	2021-01-19 10:05:39.377000	true	false
+ProcedureSecurityTrigger	DATABASE	2021-01-19 10:05:39.190000	2021-01-19 10:05:39.380000	true	false
+CustomerDiscountHistory	OBJECT_OR_COLUMN	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	false
+SalesCalculateTotalAmount	OBJECT_OR_COLUMN	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	false
+TrackRetiredProducts	OBJECT_OR_COLUMN	2021-01-19 10:05:39.353000	2021-01-19 10:05:39.353000	false	false
+PreventOrdersUpdate	OBJECT_OR_COLUMN	2021-01-19 10:05:39.357000	2021-01-19 10:05:39.357000	false	true
+PreventDiscountsDelete	OBJECT_OR_COLUMN	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	true
+ProductsNewItems	OBJECT_OR_COLUMN	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	false
+PreventCustomersRemoval	OBJECT_OR_COLUMN	2021-01-19 10:05:39.380000	2021-01-19 10:05:39.380000	false	true
+CopyCustomersToHistory	OBJECT_OR_COLUMN	2021-01-19 10:05:39.383000	2021-01-19 10:05:39.383000	false	false
+DatabaseAudit	DATABASE	2021-01-19 10:05:39.387000	2021-01-19 10:05:39.387000	false	false
+Showing 12 out of 12 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2
+Include information about existing server-level triggers from the sys.server_triggers table and order by trigger name.
+-- Gather information about database triggers
+SELECT name AS TriggerName,
+	   parent_class_desc AS TriggerType,
+	   create_date AS CreateDate,
+	   modify_date AS LastModifiedDate,
+	   is_disabled AS Disabled,
+	   is_instead_of_trigger AS InsteadOfTrigger
+FROM sys.triggers
+UNION ALL
+SELECT name AS TriggerName,
+	   -- Get the column that contains the trigger type
+	   parent_class_desc AS TriggerType,
+	   create_date AS CreateDate,
+	   modify_date AS LastModifiedDate,
+	   is_disabled AS Disabled,
+	   0 AS InsteadOfTrigger
+-- Gather information about server triggers
+FROM sys.server_triggers
+-- Order the results by the trigger name
+ORDER BY TriggerName;
+
+
+
+
+
+--query result
+TriggerName	TriggerType	CreateDate	LastModifiedDate	Disabled	InsteadOfTrigger
+CopyCustomersToHistory	OBJECT_OR_COLUMN	2021-01-19 10:05:39.383000	2021-01-19 10:05:39.383000	false	0
+CustomerDiscountHistory	OBJECT_OR_COLUMN	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	0
+DatabaseAudit	DATABASE	2021-01-19 10:05:39.387000	2021-01-19 10:05:39.387000	false	0
+DisallowDatabaseDelete	SERVER	2021-01-19 10:05:39.340000	2021-01-19 10:05:39.343000	true	0
+DisallowLinkedServers	SERVER	2021-01-19 10:05:39.203000	2021-01-19 10:05:39.203000	false	0
+IndexSecurityTrigger	DATABASE	2021-01-19 10:05:39.140000	2021-01-19 10:05:39.377000	true	0
+PreventCustomersRemoval	OBJECT_OR_COLUMN	2021-01-19 10:05:39.380000	2021-01-19 10:05:39.380000	false	1
+PreventDiscountsDelete	OBJECT_OR_COLUMN	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	1
+PreventOrdersUpdate	OBJECT_OR_COLUMN	2021-01-19 10:05:39.357000	2021-01-19 10:05:39.357000	false	1
+ProcedureSecurityTrigger	DATABASE	2021-01-19 10:05:39.190000	2021-01-19 10:05:39.380000	true	0
+ProductsNewItems	OBJECT_OR_COLUMN	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	0
+SalesCalculateTotalAmount	OBJECT_OR_COLUMN	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	0
+TrackRetiredProducts	OBJECT_OR_COLUMN	2021-01-19 10:05:39.353000	2021-01-19 10:05:39.353000	false	0
+ViewSecurityTrigger	DATABASE	2021-01-19 10:05:39.110000	2021-01-19 10:05:39.373000	true	0
+Showing 14 out of 14 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3
+Enhance the report by including the trigger definitions. You can get a trigger's definition using the OBJECT_DEFINITION function.
+-- Gather information about database triggers
+SELECT name AS TriggerName,
+	   parent_class_desc AS TriggerType,
+	   create_date AS CreateDate,
+	   modify_date AS LastModifiedDate,
+	   is_disabled AS Disabled,
+	   is_instead_of_trigger AS InsteadOfTrigger,
+       -- Get the trigger definition by using a function
+	   OBJECT_DEFINITION (object_id)
+FROM sys.triggers
+UNION ALL
+-- Gather information about server triggers
+SELECT name AS TriggerName,
+	   parent_class_desc AS TriggerType,
+	   create_date AS CreateDate,
+	   modify_date AS LastModifiedDate,
+	   is_disabled AS Disabled,
+	   0 AS InsteadOfTrigger,
+       -- Get the trigger definition by using a function
+	   OBJECT_DEFINITION (object_id)
+FROM sys.server_triggers
+ORDER BY TriggerName;
+
+
+
+
+
+
+
+
+
+
+
+
+--query result
+TriggerName	TriggerType	CreateDate	LastModifiedDate	Disabled	InsteadOfTrigger	
+CopyCustomersToHistory	OBJECT_OR_COLUMN	2021-01-19 10:05:39.383000	2021-01-19 10:05:39.383000	false	0	
+CREATE TRIGGER [dbo].[CopyCustomersToHistory]
+ON [dbo].[Customers]
+AFTER INSERT, UPDATE
+AS
+	INSERT INTO [CustomersHistory] ([CustomerID], [Customer], [ContractID], [ContractDate], [Address], [PhoneNo], [Email], [ChangeDate])
+	SELECT [CustomerID], [Customer], [ContractID], [ContractDate], [Address], [PhoneNo], [Email], GETDATE()
+    FROM inserted;
+    
+    
+    
+    
+    
+CustomerDiscountHistory	OBJECT_OR_COLUMN	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	0	
+CREATE TRIGGER [CustomerDiscountHistory]
+ON [Discounts]
+AFTER UPDATE
+AS
+	INSERT INTO [DiscountsHistory] ([Customer], [OldDiscount], [NewDiscount], [ChangeDate])
+	SELECT [i].[Customer], [d].[Discount], [i].[Discount], GETDATE()
+	FROM [inserted] AS [i]
+	INNER JOIN [deleted] AS d ON [i].[Customer] = [d].[Customer];
+  
+  
+  
+  
+  
+DatabaseAudit	DATABASE	2021-01-19 10:05:39.387000	2021-01-19 10:05:39.387000	false	0	
+CREATE TRIGGER [DatabaseAudit]
+ON DATABASE
+FOR DDL_TABLE_VIEW_EVENTS
+AS
+	INSERT INTO [DatabaseAudit] ([EventType], [DatabaseName], [SchemaName], [Object], [ObjectType], [UserAccount], [Query], [EventTime])
+	SELECT EVENTDATA().value('(/EVENT_INSTANCE/EventType)[1]', 'NVARCHAR(50)') AS [EventType]
+		  ,EVENTDATA().value('(/EVENT_INSTANCE/DatabaseName)[1]', 'NVARCHAR(50)') AS [Database]
+		  ,EVENTDATA().value('(/EVENT_INSTANCE/SchemaName)[1]', 'NVARCHAR(50)') AS [Schema]
+		  ,EVENTDATA().value('(/EVENT_INSTANCE/ObjectName)[1]', 'NVARCHAR(100)') AS [Object]
+		  ,EVENTDATA().value('(/EVENT_INSTANCE/ObjectType)[1]', 'NVARCHAR(50)') AS [ObjectType]
+		  ,EVENTDATA().value('(/EVENT_INSTANCE/LoginName)[1]', 'NVARCHAR(100)') AS [UserAccount]
+		  ,EVENTDATA().value('(/EVENT_INSTANCE/TSQLCommand/CommandText)[1]', 'NVARCHAR(MAX)') AS [Query]
+		  ,EVENTDATA().value('(/EVENT_INSTANCE/PostTime)[1]', 'DATETIME') AS [EventTime];
+DisallowDatabaseDelete	SERVER	2021-01-19 10:05:39.340000	2021-01-19 10:05:39.343000	true	0	null
+DisallowLinkedServers	SERVER	2021-01-19 10:05:39.203000	2021-01-19 10:05:39.203000	false	0	null
+IndexSecurityTrigger	DATABASE	2021-01-19 10:05:39.140000	2021-01-19 10:05:39.377000	true	0	
+CREATE TRIGGER [IndexSecurityTrigger]
+ON DATABASE
+FOR CREATE_INDEX
+AS
+	PRINT 'You are not allowed to add new indexes.'
+	ROLLBACK;
+PreventCustomersRemoval	OBJECT_OR_COLUMN	2021-01-19 10:05:39.380000	2021-01-19 10:05:39.380000	false	1	
+CREATE TRIGGER [dbo].[PreventCustomersRemoval]
+ON [dbo].[Customers]
+INSTEAD OF DELETE
+AS
+	DECLARE @EmailBodyText NVARCHAR(50) = (SELECT 'User "' + ORIGINAL_LOGIN() + '" tried to remove a customer from the database.');
+
+	RAISERROR ('Customers entries are not subject to removal.', 16, 1);
+
+	EXECUTE [SendNotification] @RecipientEmail = 'admin@freshfruit.com'
+							  ,@EmailSubject = 'Suspicious database behavior'
+							  ,@EmailBody = @EmailBodyText;
+PreventDiscountsDelete	OBJECT_OR_COLUMN	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	1	
+CREATE TRIGGER [PreventDiscountsDelete]
+ON [Discounts]
+INSTEAD OF DELETE
+AS
+	PRINT 'You are not allowed to delete data from Discounts table.';
+PreventOrdersUpdate	OBJECT_OR_COLUMN	2021-01-19 10:05:39.357000	2021-01-19 10:05:39.357000	false	1	
+CREATE TRIGGER [PreventOrdersUpdate]
+ON [dbo].[Orders]
+INSTEAD OF UPDATE
+AS
+	RAISERROR ('Updates on "Orders" table are not permitted. Place a new order to add new products', 16, 1);
+ProcedureSecurityTrigger	DATABASE	2021-01-19 10:05:39.190000	2021-01-19 10:05:39.380000	true	0	
+CREATE TRIGGER [ProcedureSecurityTrigger]
+ON DATABASE
+FOR ALTER_PROCEDURE, DROP_PROCEDURE
+AS
+	PRINT 'You are not allowed to modify or delete procedures.'
+	ROLLBACK;
+ProductsNewItems	OBJECT_OR_COLUMN	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	0	
+CREATE TRIGGER [ProductsNewItems]
+ON [Products]
+AFTER INSERT
+AS
+	INSERT INTO [ProductsHistory](Product, Price, Currency, FirstAdded)
+	SELECT Product, Price, Currency, GETDATE()
+	FROM inserted;
+SalesCalculateTotalAmount	OBJECT_OR_COLUMN	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	0	
+CREATE TRIGGER [SalesCalculateTotalAmount]
+ON [SalesWithoutPrice]
+AFTER INSERT
+AS
+	UPDATE [sp]
+	SET [sp].[TotalAmount] = [sp].[Quantity] * [p].[Price]
+	FROM [SalesWithoutPrice] AS [sp]
+	INNER JOIN [Products] AS [p] ON [sp].Product = [p].[Product]
+	WHERE [sp].[TotalAmount] IS NULL;
+TrackRetiredProducts	OBJECT_OR_COLUMN	2021-01-19 10:05:39.353000	2021-01-19 10:05:39.353000	false	0	
+CREATE TRIGGER [TrackRetiredProducts]
+ON [Products]
+AFTER DELETE
+AS
+	INSERT INTO RetiredProducts (Product, Measure)
+	SELECT Product, Measure
+	FROM deleted;
+ViewSecurityTrigger	DATABASE	2021-01-19 10:05:39.110000	2021-01-19 10:05:39.373000	true	0	
+CREATE TRIGGER [ViewSecurityTrigger]
+ON DATABASE
+FOR CREATE_VIEW, ALTER_VIEW, DROP_VIEW
+AS
+	PRINT 'You are not allowed to add, modify or remove views from the database.'
+	ROLLBACK;
+Showing 14 out of 14 rows
+
+
+
+
+
+
+
+
+Using information from sys.triggers and sys.server_triggers will give you a good overview of all your triggers.
