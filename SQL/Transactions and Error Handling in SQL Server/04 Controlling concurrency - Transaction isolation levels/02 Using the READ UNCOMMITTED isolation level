@@ -1,0 +1,56 @@
+A new client visits your bank to open an account. You insert her data into your system, causing a script like this one to start running:
+
+BEGIN TRAN
+
+  INSERT INTO customers (first_name, last_name, email, phone)
+  VALUES ('Ann', 'Ros', 'aros@mail.com', '555555555')
+
+  DECLARE @cust_id INT = scope_identity()
+
+  INSERT INTO accounts (account_number, customer_id, current_balance)
+  VALUES ('55555555555010121212', @cust_id, 150)
+
+COMMIT TRAN
+
+
+
+
+
+At that moment, your marketing colleague starts to send e-mails to every customer. There is going to be a raffle for a car! The script he executes gets every customer's data, including the last customer you inserted. This script starts running after the first insert occurs but before the COMMIT TRAN.
+
+How can that be?
+Set the READ UNCOMMITTED isolation level.
+Select first_name, last_name, email and phone from customers table.
+
+
+
+
+
+-- Set the appropriate isolation level
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+
+	-- Select first_name, last_name, email and phone
+	SELECT
+    	first_name, 
+        last_name,
+        email,
+        phone
+    FROM customers;
+
+
+
+--query result
+first_name	last_name	email	phone
+Dylan	Smith	dylansmith@mail.com	555888999
+John	Antona	johnantona@mail.com	555111222
+Astrid	Harper	astridharper@mail.com	555000999
+Angus	Brown	angusbrown@mail.com	555222012
+David	Elcano	davidelcano@mail.com	555602314
+Yamir	Baker	yamirbaker@mail.com	555804110
+Anne	Johnson	annejohnson@mail.com	555900010
+Roberto	Flores	robertoflores@mail.com	555004447
+Bryan	Page	bryanpage@mail.com	555333111
+Carol	York	carolyork@mail.com	555441001
+Ann	Ros	aros@mail.com	555555555
+Showing 11 out of 11 rows
+
