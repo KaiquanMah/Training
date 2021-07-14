@@ -1,0 +1,25 @@
+You are trying to select every movement of account 1 from the transactions table. When selecting that information, you are blocked by another transaction, and the result doesn't output. Your database is configured under the READ COMMITTED isolation level.
+Can you change your select query to get the information right now without changing the isolation level? In doing this you can read the uncommitted data from the transactions table.
+
+
+
+Change your script to avoid being blocked.
+SELECT *
+	-- Avoid being blocked
+	FROM transactions WITH (NOLOCK)
+WHERE account_id = 1
+
+
+
+
+--QUERY RESULT
+transaction_id	account_id	amount	transaction_date
+1	1	-100.0000	2019-03-18 19:12:36.810000
+3	1	-9000.0000	2019-02-18 20:20:36.410000
+Showing 2 out of 2 rows
+
+
+You have learned how to apply the WITH (NOLOCK) option. Remember that similar to READ UNCOMMITTED, WITH (NOLOCK) is used to read uncommitted data. READ UNCOMMITTED applies to the entire connection and WITH (NOLOCK) applies to a specific table.
+
+
+
