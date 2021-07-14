@@ -1,0 +1,111 @@
+Fresh Fruit Delivery has asked you to act as the main administrator of their database.
+A best practice when taking over an existing database is to get familiar with all the existing objects.
+You'd like to start by looking at the existing triggers.
+
+
+
+--sys.triggers
+name	object_id	parent_class	parent_class_desc	parent_id	type	type_desc	create_date	modify_date	is_ms_shipped	is_disabled	is_not_for_replication	is_instead_of_trigger
+ViewSecurityTrigger	1269579561	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.110000	2021-01-19 10:05:39.373000	false	true	false	false
+IndexSecurityTrigger	1285579618	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.140000	2021-01-19 10:05:39.377000	false	true	false	false
+ProcedureSecurityTrigger	1301579675	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.190000	2021-01-19 10:05:39.380000	false	true	false	false
+CustomerDiscountHistory	1317579732	1	OBJECT_OR_COLUMN	917578307	TR	SQL_TRIGGER	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	false	false	false
+SalesCalculateTotalAmount	1333579789	1	OBJECT_OR_COLUMN	1109578991	TR	SQL_TRIGGER	2021-01-19 10:05:39.350000	2021-01-19 10:05:39.350000	false	false	false	false
+TrackRetiredProducts	1349579846	1	OBJECT_OR_COLUMN	901578250	TR	SQL_TRIGGER	2021-01-19 10:05:39.353000	2021-01-19 10:05:39.353000	false	false	false	false
+PreventOrdersUpdate	1365579903	1	OBJECT_OR_COLUMN	885578193	TR	SQL_TRIGGER	2021-01-19 10:05:39.357000	2021-01-19 10:05:39.357000	false	false	false	true
+PreventDiscountsDelete	1381579960	1	OBJECT_OR_COLUMN	917578307	TR	SQL_TRIGGER	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	false	false	true
+ProductsNewItems	1397580017	1	OBJECT_OR_COLUMN	901578250	TR	SQL_TRIGGER	2021-01-19 10:05:39.360000	2021-01-19 10:05:39.360000	false	false	false	false
+PreventNewDiscounts	1413580074	1	OBJECT_OR_COLUMN	917578307	TR	SQL_TRIGGER	2021-01-19 10:05:39.363000	2021-01-19 10:05:39.363000	false	false	false	true
+TrackTableChanges	1429580131	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.363000	2021-01-19 10:05:39.363000	false	false	false	false
+PreventTableDeletion	1445580188	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.367000	2021-01-19 10:05:39.367000	false	false	false	false
+PreventCustomersRemoval	1461580245	1	OBJECT_OR_COLUMN	1141579105	TR	SQL_TRIGGER	2021-01-19 10:05:39.380000	2021-01-19 10:05:39.380000	false	false	false	true
+CopyCustomersToHistory	1477580302	1	OBJECT_OR_COLUMN	1141579105	TR	SQL_TRIGGER	2021-01-19 10:05:39.383000	2021-01-19 10:05:39.383000	false	false	false	false
+DatabaseAudit	1493580359	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.387000	2021-01-19 10:05:39.387000	false	false	false	false
+Showing 15 out of 15 rows
+
+
+--sys.server_triggers
+name	object_id	parent_class	parent_class_desc	parent_id	type	type_desc	create_date	modify_date	is_ms_shipped	is_disabled
+DisallowDatabaseDelete	615673241	100	SERVER	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.340000	2021-01-19 10:05:39.343000	false	true
+DisallowLinkedServers	599673184	100	SERVER	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.203000	2021-01-19 10:05:39.203000	false	false
+LogonAudit	631673298	100	SERVER	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.370000	2021-01-19 10:05:39.370000	false	false
+Showing 3 out of 3 rows
+
+
+
+
+
+
+
+
+1
+Get the name, object_id, and parent_class_desc for all the disabled triggers.
+-- Get the disabled triggers
+SELECT name,
+	   object_id,
+	   parent_class_desc
+FROM sys.triggers
+WHERE is_disabled = 1;
+
+--query result
+name	object_id	parent_class_desc
+ViewSecurityTrigger	1269579561	DATABASE
+IndexSecurityTrigger	1285579618	DATABASE
+ProcedureSecurityTrigger	1301579675	DATABASE
+Showing 3 out of 3 rows
+
+
+
+
+
+2
+Get the unmodified server-level triggers.
+An unmodified trigger's create date is the same as the modify date.
+-- Check for unchanged server triggers
+SELECT *
+FROM sys.server_triggers
+WHERE create_date = modify_date;
+
+
+--query result
+name	object_id	parent_class	parent_class_desc	parent_id	type	type_desc	create_date	modify_date	is_ms_shipped	is_disabled
+DisallowLinkedServers	599673184	100	SERVER	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.203000	2021-01-19 10:05:39.203000	false	false
+LogonAudit	631673298	100	SERVER	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.370000	2021-01-19 10:05:39.370000	false	false
+Showing 2 out of 2 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3
+Use sys.triggers to extract information only about database-level triggers.
+-- Get the database triggers
+SELECT *
+FROM sys.triggers
+WHERE parent_class_desc = 'DATABASE';
+
+
+--query result
+name	object_id	parent_class	parent_class_desc	parent_id	type	type_desc	create_date	modify_date	is_ms_shipped	is_disabled	is_not_for_replication	is_instead_of_trigger
+ViewSecurityTrigger	1269579561	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.110000	2021-01-19 10:05:39.373000	false	true	false	false
+IndexSecurityTrigger	1285579618	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.140000	2021-01-19 10:05:39.377000	false	true	false	false
+ProcedureSecurityTrigger	1301579675	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.190000	2021-01-19 10:05:39.380000	false	true	false	false
+TrackTableChanges	1429580131	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.363000	2021-01-19 10:05:39.363000	false	false	false	false
+PreventTableDeletion	1445580188	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.367000	2021-01-19 10:05:39.367000	false	false	false	false
+DatabaseAudit	1493580359	0	DATABASE	0	TR	SQL_TRIGGER	2021-01-19 10:05:39.387000	2021-01-19 10:05:39.387000	false	false	false	false
+Showing 6 out of 6 rows
+
+
+
+#SQL Server system views can be used to get information on existing triggers.
