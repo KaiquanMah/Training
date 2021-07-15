@@ -1,0 +1,173 @@
+output from shell cmd captured in ipython = SList object
+
+SList methods
+Three main methods for the SList object
+-fields
+-grep
+-sort
+
+
+
+
+
+
+
+
+Use SList fields to parse shell output
+A Data Scientist who you highly respect at work mentioned that IPython has a powerful data type called SList that enables a user to perform powerful operations on shell commands. In particular they mention that they were able to easily extract fields from the output of the df command. In this exercise you investigate what you can accomplish with the SList data type.
+An IPython script, script.ipy, has been provided for you to work in. You can run the script by running ipython script.ipy in the console.
+
+
+Extract the display of the free disk usage and store it in disk_space.
+Use the .fields() method on disk_space to select the column that shows total size of the mounted volumes.
+
+
+
+!df -> file system, used space, available space, used %
+script.ipy
+!df
+
+shell
+repl:~/workspace$ ipython script.ipy
+Filesystem     1K-blocks     Used Available Use% Mounted on
+overlay        203070420 59613564 143440472  30% /
+tmpfs              65536        0     65536   0% /dev
+tmpfs           16443460        0  16443460   0% /sys/fs/cgroup
+/dev/sda1      203070420 59613564 143440472  30% /etc/hosts
+shm                65536      240     65296   1% /dev/shm
+tmpfs           16443460       12  16443448   1% /run/secrets/kubernetes.io/serviceaccount
+tmpfs           16443460        0  16443460   0% /proc/acpi
+tmpfs           16443460        0  16443460   0% /proc/scsi
+tmpfs           16443460        0  16443460   0% /sys/firmware
+
+
+
+
+
+
+
+-> prints each row as a string in a list
+script.ipy
+disk_usage = !df -h
+print(disk_usage)
+
+shell
+repl:~/workspace$ ipython script.ipy
+['Filesystem      Size  Used Avail Use% Mounted on', 'overlay         194G   57G  137G  30% /', 'tmpfs            64M     0   64M   0% /dev', 'tmpfs            16G     0   16G   0% /sys/fs/cgroup', '/dev/sda1       194G   57G  137G  30% /etc/hosts', 'shm              64M  240K   64M   1% /dev/shm', 'tmpfs            16G   12K   16G   1% /run/secrets/kubernetes.io/serviceaccount', 'tmpfs            16G     0   16G   0% /proc/acpi', 'tmpfs            16G     0   16G   0% /proc/scsi', 'tmpfs            16G     0   16G   0% /sys/firmware']
+
+
+
+
+
+
+
+
+
+
+-> prints each row as a list, with each word/phrase as a string -> strings in a list
+-> across all rows -> list of lists (rows)
+script.ipy
+disk_usage = !df -h
+print(disk_usage.fields())
+
+shell
+repl:~/workspace$ ipython script.ipy
+[['Filesystem', 'Size', 'Used', 'Avail', 'Use%', 'Mounted', 'on'], ['overlay', '194G', '57G', '137G', '30%', '/'], ['tmpfs', '64M', '0', '64M', '0%', '/dev'], ['tmpfs', '16G', '0', '16G', '0%', '/sys/fs/cgroup'], ['/dev/sda1', '194G', '57G', '137G', '30%', '/etc/hosts'], ['shm', '64M', '240K', '64M', '1%', '/dev/shm'], ['tmpfs', '16G', '12K', '16G', '1%', '/run/secrets/kubernetes.io/serviceaccount'], ['tmpfs', '16G', '0', '16G', '0%', '/proc/acpi'], ['tmpfs', '16G', '0', '16G', '0%', '/proc/scsi'], ['tmpfs', '16G', '0', '16G', '0%', '/sys/firmware']]
+
+
+
+
+
+
+
+
+
+
+
+
+-> prints ONLY COL 1
+script.ipy
+disk_usage = !df -h
+print(disk_usage.fields(0))
+
+shell
+repl:~/workspace$ ipython script.ipy
+['Filesystem', 'overlay', 'tmpfs', 'tmpfs', '/dev/sda1', 'shm', 'tmpfs', 'tmpfs', 'tmpfs', 'tmpfs']
+
+
+
+
+-> prints ONLY COLS 1 AND 2
+script.ipy
+disk_usage = !df -h
+print(disk_usage.fields(0, 1))
+
+shell
+repl:~/workspace$ ipython script.ipy
+['Filesystem Size', 'overlay 194G', 'tmpfs 64M', 'tmpfs 16G', '/dev/sda1 194G', 'shm 64M', 'tmpfs 16G', 'tmpfs 16G', 'tmpfs 16G', 'tmpfs 16G']
+
+
+
+
+
+
+
+
+-> prints ONLY ROW 1
+script.ipy
+disk_usage = !df -h
+print(disk_usage.fields()[0])
+
+shell
+repl:~/workspace$ ipython script.ipy
+['Filesystem', 'Size', 'Used', 'Avail', 'Use%', 'Mounted', 'on']
+
+
+
+
+-> prints ONLY ROWS 1 AND 2
+script.ipy
+disk_usage = !df -h
+print(disk_usage.fields()[0:2])
+
+shell
+repl:~/workspace$ ipython script.ipy
+[['Filesystem', 'Size', 'Used', 'Avail', 'Use%', 'Mounted', 'on'], ['overlay', '194G', '57G', '137G', '30%', '/']]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#MY ANS
+script.ipy
+disk_usage = !df -h
+print(disk_usage.fields(1))
+
+shell
+repl:~/workspace$ ipython script.ipy
+['Size', '194G', '64M', '16G', '194G', '64M', '16G', '16G', '16G', '16G']
+
+
+
+
+
+
+
+#'model' ans -> BUT HOW DOES THIS COL SHOW ME THE TOTAL SIZE OF MOUNTED VOL?!?! THERE IS NO SPACE INFO AT ALL!
+script.ipy
+disk_space = !df -h
+print(disk_space.fields(0))
+
+shell
+repl:~/workspace$ ipython script.ipy
+['Filesystem', 'overlay', 'tmpfs', 'tmpfs', '/dev/sda1', 'shm', 'tmpfs', 'tmpfs', 'tmpfs', 'tmpfs']
