@@ -1,0 +1,326 @@
+A coworker is proficient in Bash tells you that most data engineering tasks should be done in the shell. You mention a scripting language like Python can build robust production systems that have high quality. The code is often easier in practice to write and maintain, even if you are directly calling shell commands. You demonstrate how this works using a small Python script that you write that finds all of the Python packages installed.
+Use Python, subprocess.Popen(), and the bash command pip list --format=json command, to find all of the installed packages. The pip tool is a common method of installing Python packages. The result will be a byte string, a Python3 construct. The Popen command will use PIPE to send the JSON output to stdout.
+
+
+Use the with context manager to run subprocess.Popen().
+Pipe the output of subprocess.Popen() to stdout as an iterator.
+Convert the JSON payload to a Python dictionary with json.loads after extracting the only element of the results list.
+Print the result using the pprint function of the pprint package.
+
+
+
+
+script.py
+from subprocess import Popen, PIPE
+import json
+import pprint
+
+# Use the with context manager to run subprocess.Popen()
+with Popen(["pip","list","--format=json"], stdout=PIPE) as proc:
+  # Pipe the output of subprocess.Popen() to stdout
+  result = proc.stdout.readlines()
+  
+# Convert the JSON payload to a Python dictionary
+# JSON is a datastructure similar to a Python dictionary
+converted_result = json.loads(result[0])
+
+# Display the result in the IPython terminal
+pprint.pprint(converted_result)
+
+
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+You are using pip version 19.0.3, however version 21.1.3 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+[{'name': 'alembic', 'version': '0.8.10'},
+ {'name': 'aniso8601', 'version': '7.0.0'},
+ {'name': 'apache-airflow', 'version': '1.10.1'},
+ {'name': 'apispec', 'version': '2.0.2'},
+ {'name': 'asn1crypto', 'version': '0.24.0'},
+ {'name': 'astroid', 'version': '2.2.5'},
+ {'name': 'asttokens', 'version': '1.1.11'},
+ {'name': 'attrs', 'version': '19.1.0'},
+ {'name': 'autopep8', 'version': '1.4.4'},
+ {'name': 'Babel', 'version': '2.7.0'},
+ {'name': 'backcall', 'version': '0.2.0'},
+ {'name': 'bleach', 'version': '2.1.4'},
+ {'name': 'certifi', 'version': '2019.6.16'},
+ {'name': 'chardet', 'version': '3.0.4'},
+ {'name': 'Click', 'version': '7.0'},
+ {'name': 'colorama', 'version': '0.4.1'},
+ {'name': 'configparser', 'version': '3.5.3'},
+ {'name': 'croniter', 'version': '0.3.30'},
+ {'name': 'cryptography', 'version': '2.1.4'},
+ {'name': 'decorator', 'version': '5.0.9'},
+ {'name': 'defusedxml', 'version': '0.6.0'},
+ {'name': 'dill', 'version': '0.2.9'},
+ {'name': 'distro-info', 'version': '0.18ubuntu0.18.04.1'},
+ {'name': 'docutils', 'version': '0.15.2'},
+ {'name': 'Flask', 'version': '0.12.4'},
+ {'name': 'Flask-Admin', 'version': '1.4.1'},
+ {'name': 'Flask-AppBuilder', 'version': '1.13.1'},
+ {'name': 'Flask-Babel', 'version': '0.12.2'},
+ {'name': 'Flask-Caching', 'version': '1.3.3'},
+ {'name': 'Flask-JWT-Extended', 'version': '3.22.0'},
+ {'name': 'Flask-Login', 'version': '0.4.1'},
+ {'name': 'Flask-OpenID', 'version': '1.2.5'},
+ {'name': 'Flask-RESTful', 'version': '0.3.7'},
+ {'name': 'Flask-SQLAlchemy', 'version': '2.4.0'},
+ {'name': 'flask-swagger', 'version': '0.2.13'},
+ {'name': 'Flask-WTF', 'version': '0.14.2'},
+ {'name': 'funcsigs', 'version': '1.0.0'},
+ {'name': 'future', 'version': '0.16.0'},
+ {'name': 'gitdb2', 'version': '2.0.5'},
+ {'name': 'GitPython', 'version': '3.0.2'},
+ {'name': 'gunicorn', 'version': '19.9.0'},
+ {'name': 'html5lib', 'version': '1.0.1'},
+ {'name': 'idna', 'version': '2.8'},
+ {'name': 'importlib-metadata', 'version': '0.20'},
+ {'name': 'ipython', 'version': '7.8.0'},
+ {'name': 'ipython-genutils', 'version': '0.2.0'},
+ {'name': 'iso8601', 'version': '0.1.12'},
+ {'name': 'isort', 'version': '4.3.21'},
+ {'name': 'itsdangerous', 'version': '1.1.0'},
+ {'name': 'jedi', 'version': '0.14.1'},
+ {'name': 'Jinja2', 'version': '2.8.1'},
+ {'name': 'joblib', 'version': '0.14.1'},
+ {'name': 'jsonschema', 'version': '3.0.2'},
+ {'name': 'keyring', 'version': '10.6.0'},
+ {'name': 'keyrings.alt', 'version': '3.0'},
+ {'name': 'lazy-object-proxy', 'version': '1.4.2'},
+ {'name': 'lockfile', 'version': '0.12.2'},
+ {'name': 'lxml', 'version': '4.4.1'},
+ {'name': 'Mako', 'version': '1.1.0'},
+ {'name': 'Markdown', 'version': '2.6.11'},
+ {'name': 'markdown2', 'version': '2.3.7'},
+ {'name': 'MarkupSafe', 'version': '1.1.1'},
+ {'name': 'marshmallow', 'version': '2.19.5'},
+ {'name': 'marshmallow-enum', 'version': '1.5.1'},
+ {'name': 'marshmallow-sqlalchemy', 'version': '0.17.2'},
+ {'name': 'mccabe', 'version': '0.6.1'},
+ {'name': 'monotonic', 'version': '1.5'},
+ {'name': 'more-itertools', 'version': '7.2.0'},
+ {'name': 'numpy', 'version': '1.16.3'},
+ {'name': 'ordereddict', 'version': '1.1'},
+ {'name': 'pandas', 'version': '0.24.1'},
+ {'name': 'parso', 'version': '0.5.1'},
+ {'name': 'pendulum', 'version': '1.4.4'},
+ {'name': 'pexpect', 'version': '4.8.0'},
+ {'name': 'pickleshare', 'version': '0.7.5'},
+ {'name': 'pip', 'version': '19.0.3'},
+ {'name': 'pluggy', 'version': '0.12.0'},
+ {'name': 'prison', 'version': '0.1.0'},
+ {'name': 'prompt-toolkit', 'version': '2.0.10'},
+ {'name': 'protobackend', 'version': '0.2.3'},
+ {'name': 'protowhat', 'version': '2.0.1'},
+ {'name': 'psutil', 'version': '4.4.2'},
+ {'name': 'ptyprocess', 'version': '0.7.0'},
+ {'name': 'pycrypto', 'version': '2.6.1'},
+ {'name': 'pyflakes', 'version': '2.1.1'},
+ {'name': 'Pygments', 'version': '2.4.2'},
+ {'name': 'pygobject', 'version': '3.26.1'},
+ {'name': 'PyJWT', 'version': '1.7.1'},
+ {'name': 'pyrsistent', 'version': '0.15.4'},
+ {'name': 'python-apt', 'version': '1.6.3+ubuntu1'},
+ {'name': 'python-crontab', 'version': '2.3.6'},
+ {'name': 'python-daemon', 'version': '2.1.2'},
+ {'name': 'python-dateutil', 'version': '2.8.0'},
+ {'name': 'python-debian', 'version': '0.1.32'},
+ {'name': 'python-editor', 'version': '1.0.4'},
+ {'name': 'python-jsonrpc-server', 'version': '0.2.0'},
+ {'name': 'python-language-server', 'version': '0.28.3'},
+ {'name': 'python-nvd3', 'version': '0.15.0'},
+ {'name': 'python-slugify', 'version': '3.0.3'},
+ {'name': 'python3-openid', 'version': '3.1.0'},
+ {'name': 'pythonbackend', 'version': '0.13.1'},
+ {'name': 'pythonwhat', 'version': '2.23.1'},
+ {'name': 'pytz', 'version': '2019.2'},
+ {'name': 'pytzdata', 'version': '2019.2'},
+ {'name': 'pyxdg', 'version': '0.25'},
+ {'name': 'PyYAML', 'version': '5.1.2'},
+ {'name': 'requests', 'version': '2.21.0'},
+ {'name': 'rope', 'version': '0.14.0'},
+ {'name': 'scikit-learn', 'version': '0.20.3'},
+ {'name': 'scipy', 'version': '1.5.4'},
+ {'name': 'SecretStorage', 'version': '2.3.1'},
+ {'name': 'setproctitle', 'version': '1.1.10'},
+ {'name': 'setuptools', 'version': '39.0.1'},
+ {'name': 'simplegeneric', 'version': '0.8.1'},
+ {'name': 'six', 'version': '1.15.0'},
+ {'name': 'smmap2', 'version': '2.0.5'},
+ {'name': 'snowballstemmer', 'version': '1.9.0'},
+ {'name': 'SQLAlchemy', 'version': '1.1.18'},
+ {'name': 'tabulate', 'version': '0.8.2'},
+ {'name': 'tenacity', 'version': '4.8.0'},
+ {'name': 'text-unidecode', 'version': '1.2'},
+ {'name': 'thrift', 'version': '0.11.0'},
+ {'name': 'traitlets', 'version': '4.3.3'},
+ {'name': 'typed-ast', 'version': '1.4.0'},
+ {'name': 'tzlocal', 'version': '2.0.0'},
+ {'name': 'unicodecsv', 'version': '0.14.1'},
+ {'name': 'urllib3', 'version': '1.24.3'},
+ {'name': 'wcwidth', 'version': '0.2.5'},
+ {'name': 'webencodings', 'version': '0.5.1'},
+ {'name': 'Werkzeug', 'version': '0.14.1'},
+ {'name': 'wheel', 'version': '0.30.0'},
+ {'name': 'wrapt', 'version': '1.11.2'},
+ {'name': 'WTForms', 'version': '2.2.1'},
+ {'name': 'yapf', 'version': '0.28.0'},
+ {'name': 'zipp', 'version': '0.6.0'},
+ {'name': 'zope.deprecation', 'version': '4.4.0'}]
+
+
+
+
+
+
+
+Nice work finding the installed packages! 
+Because the pip tool was able to emit JSON data, you can use the built in json module to convert JSON data to a Python dictionary via json.loads(). 
+This was important because it allowed you to deserialize the output and create a Python data structure and pprint it in a nicely formatted fashion.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+script.py
+from subprocess import Popen, PIPE
+import json
+import pprint
+
+# Use the with context manager to run subprocess.Popen()
+with Popen(["pip","list","--format=json"], stdout=PIPE) as proc:
+  # Pipe the output of subprocess.Popen() to stdout
+  result = proc.stdout.readlines()
+  
+# Convert the JSON payload to a Python dictionary
+# JSON is a datastructure similar to a Python dictionary
+#converted_result = json.loads(result[0])
+
+# Display the result in the IPython terminal
+pprint.pprint(result)
+
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+You are using pip version 19.0.3, however version 21.1.3 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+[b'[{"name": "alembic", "version": "0.8.10"}, {"name": "aniso8601", "version": '
+ b'"7.0.0"}, {"name": "apache-airflow", "version": "1.10.1"}, {"name": "apispec'
+ b'", "version": "2.0.2"}, {"name": "asn1crypto", "version": "0.24.0"}, {"name"'
+ b': "astroid", "version": "2.2.5"}, {"name": "asttokens", "version": "1.1.11"}'
+ b', {"name": "attrs", "version": "19.1.0"}, {"name": "autopep8", "version": "1'
+ b'.4.4"}, {"name": "Babel", "version": "2.7.0"}, {"name": "backcall", "version'
+ b'": "0.2.0"}, {"name": "bleach", "version": "2.1.4"}, {"name": "certifi", "ve'
+ b'rsion": "2019.6.16"}, {"name": "chardet", "version": "3.0.4"}, {"name": "Cli'
+ b'ck", "version": "7.0"}, {"name": "colorama", "version": "0.4.1"}, {"name": "'
+ b'configparser", "version": "3.5.3"}, {"name": "croniter", "version": "0.3.30"'
+ b'}, {"name": "cryptography", "version": "2.1.4"}, {"name": "decorator", "vers'
+ b'ion": "5.0.9"}, {"name": "defusedxml", "version": "0.6.0"}, {"name": "dill",'
+ b' "version": "0.2.9"}, {"name": "distro-info", "version": "0.18ubuntu0.18.04.'
+ b'1"}, {"name": "docutils", "version": "0.15.2"}, {"name": "Flask", "version":'
+ b' "0.12.4"}, {"name": "Flask-Admin", "version": "1.4.1"}, {"name": "Flask-App'
+ b'Builder", "version": "1.13.1"}, {"name": "Flask-Babel", "version": "0.12.2"}'
+ b', {"name": "Flask-Caching", "version": "1.3.3"}, {"name": "Flask-JWT-Extende'
+ b'd", "version": "3.22.0"}, {"name": "Flask-Login", "version": "0.4.1"}, {"nam'
+ b'e": "Flask-OpenID", "version": "1.2.5"}, {"name": "Flask-RESTful", "version"'
+ b': "0.3.7"}, {"name": "Flask-SQLAlchemy", "version": "2.4.0"}, {"name": "flas'
+ b'k-swagger", "version": "0.2.13"}, {"name": "Flask-WTF", "version": "0.14.2"}'
+ b', {"name": "funcsigs", "version": "1.0.0"}, {"name": "future", "version": "0'
+ b'.16.0"}, {"name": "gitdb2", "version": "2.0.5"}, {"name": "GitPython", "vers'
+ b'ion": "3.0.2"}, {"name": "gunicorn", "version": "19.9.0"}, {"name": "html5li'
+ b'b", "version": "1.0.1"}, {"name": "idna", "version": "2.8"}, {"name": "impor'
+ b'tlib-metadata", "version": "0.20"}, {"name": "ipython", "version": "7.8.0"},'
+ b' {"name": "ipython-genutils", "version": "0.2.0"}, {"name": "iso8601", "vers'
+ b'ion": "0.1.12"}, {"name": "isort", "version": "4.3.21"}, {"name": "itsdanger'
+ b'ous", "version": "1.1.0"}, {"name": "jedi", "version": "0.14.1"}, {"name": "'
+ b'Jinja2", "version": "2.8.1"}, {"name": "joblib", "version": "0.14.1"}, {"nam'
+ b'e": "jsonschema", "version": "3.0.2"}, {"name": "keyring", "version": "10.6.'
+ b'0"}, {"name": "keyrings.alt", "version": "3.0"}, {"name": "lazy-object-proxy'
+ b'", "version": "1.4.2"}, {"name": "lockfile", "version": "0.12.2"}, {"name": '
+ b'"lxml", "version": "4.4.1"}, {"name": "Mako", "version": "1.1.0"}, {"name": '
+ b'"Markdown", "version": "2.6.11"}, {"name": "markdown2", "version": "2.3.7"},'
+ b' {"name": "MarkupSafe", "version": "1.1.1"}, {"name": "marshmallow", "versio'
+ b'n": "2.19.5"}, {"name": "marshmallow-enum", "version": "1.5.1"}, {"name": "m'
+ b'arshmallow-sqlalchemy", "version": "0.17.2"}, {"name": "mccabe", "version": '
+ b'"0.6.1"}, {"name": "monotonic", "version": "1.5"}, {"name": "more-itertools"'
+ b', "version": "7.2.0"}, {"name": "numpy", "version": "1.16.3"}, {"name": "ord'
+ b'ereddict", "version": "1.1"}, {"name": "pandas", "version": "0.24.1"}, {"nam'
+ b'e": "parso", "version": "0.5.1"}, {"name": "pendulum", "version": "1.4.4"}, '
+ b'{"name": "pexpect", "version": "4.8.0"}, {"name": "pickleshare", "version": '
+ b'"0.7.5"}, {"name": "pip", "version": "19.0.3"}, {"name": "pluggy", "version"'
+ b': "0.12.0"}, {"name": "prison", "version": "0.1.0"}, {"name": "prompt-toolki'
+ b't", "version": "2.0.10"}, {"name": "protobackend", "version": "0.2.3"}, {"na'
+ b'me": "protowhat", "version": "2.0.1"}, {"name": "psutil", "version": "4.4.2"'
+ b'}, {"name": "ptyprocess", "version": "0.7.0"}, {"name": "pycrypto", "version'
+ b'": "2.6.1"}, {"name": "pyflakes", "version": "2.1.1"}, {"name": "Pygments", '
+ b'"version": "2.4.2"}, {"name": "pygobject", "version": "3.26.1"}, {"name": "P'
+ b'yJWT", "version": "1.7.1"}, {"name": "pyrsistent", "version": "0.15.4"}, {"n'
+ b'ame": "python-apt", "version": "1.6.3+ubuntu1"}, {"name": "python-crontab", '
+ b'"version": "2.3.6"}, {"name": "python-daemon", "version": "2.1.2"}, {"name":'
+ b' "python-dateutil", "version": "2.8.0"}, {"name": "python-debian", "version"'
+ b': "0.1.32"}, {"name": "python-editor", "version": "1.0.4"}, {"name": "python'
+ b'-jsonrpc-server", "version": "0.2.0"}, {"name": "python-language-server", "v'
+ b'ersion": "0.28.3"}, {"name": "python-nvd3", "version": "0.15.0"}, {"name": "'
+ b'python-slugify", "version": "3.0.3"}, {"name": "python3-openid", "version": '
+ b'"3.1.0"}, {"name": "pythonbackend", "version": "0.13.1"}, {"name": "pythonwh'
+ b'at", "version": "2.23.1"}, {"name": "pytz", "version": "2019.2"}, {"name": "'
+ b'pytzdata", "version": "2019.2"}, {"name": "pyxdg", "version": "0.25"}, {"nam'
+ b'e": "PyYAML", "version": "5.1.2"}, {"name": "requests", "version": "2.21.0"}'
+ b', {"name": "rope", "version": "0.14.0"}, {"name": "scikit-learn", "version":'
+ b' "0.20.3"}, {"name": "scipy", "version": "1.5.4"}, {"name": "SecretStorage",'
+ b' "version": "2.3.1"}, {"name": "setproctitle", "version": "1.1.10"}, {"name"'
+ b': "setuptools", "version": "39.0.1"}, {"name": "simplegeneric", "version": "'
+ b'0.8.1"}, {"name": "six", "version": "1.15.0"}, {"name": "smmap2", "version":'
+ b' "2.0.5"}, {"name": "snowballstemmer", "version": "1.9.0"}, {"name": "SQLAlc'
+ b'hemy", "version": "1.1.18"}, {"name": "tabulate", "version": "0.8.2"}, {"nam'
+ b'e": "tenacity", "version": "4.8.0"}, {"name": "text-unidecode", "version": "'
+ b'1.2"}, {"name": "thrift", "version": "0.11.0"}, {"name": "traitlets", "versi'
+ b'on": "4.3.3"}, {"name": "typed-ast", "version": "1.4.0"}, {"name": "tzlocal"'
+ b', "version": "2.0.0"}, {"name": "unicodecsv", "version": "0.14.1"}, {"name":'
+ b' "urllib3", "version": "1.24.3"}, {"name": "wcwidth", "version": "0.2.5"}, {'
+ b'"name": "webencodings", "version": "0.5.1"}, {"name": "Werkzeug", "version":'
+ b' "0.14.1"}, {"name": "wheel", "version": "0.30.0"}, {"name": "wrapt", "versi'
+ b'on": "1.11.2"}, {"name": "WTForms", "version": "2.2.1"}, {"name": "yapf", "v'
+ b'ersion": "0.28.0"}, {"name": "zipp", "version": "0.6.0"}, {"name": "zope.dep'
+ b'recation", "version": "4.4.0"}]\n']
+
+
+
