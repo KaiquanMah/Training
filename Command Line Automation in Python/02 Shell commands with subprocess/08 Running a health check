@@ -1,0 +1,103 @@
+The data science team at your company has been working closely with the DevOps team to ensure the production machine learning systems are reliable, elastic and fault-tolerant. Recently, there was an outage of a critical system that cost the company hundreds of thousands of dollars in lost revenue when a machine learning model began throwing exceptions instead of offering recommendations to shoppers. One solution that can be implemented is to run periodic health checks on production systems to ensure they have the correct environment. The DevOps team has written several bash scripts that your team will need to invoke from Python and run periodically.
+Send the output of an echo 'python3' command to a healthcheck.sh script.
+
+
+Echo 'python3' using subprocess.Popen.
+Send the output of the echo subprocess to the "/home/repl/workspace/healthcheck.sh" script.
+Capture the output of subprocess that invokes "/home/repl/workspace/healthcheck.sh" and use assert to verify python3 is in the output.
+
+
+
+#try 1
+script.py
+import subprocess
+
+# equivalent to 'echo "python3"'
+echo = subprocess.Popen(
+    ["echo", "python3"], stdout=subprocess.PIPE)
+
+# equivalent to: echo "python3" | ./healthcheck.sh
+path = subprocess.Popen(
+    ["/home/repl/workspace/healthcheck.sh"], stdin=echo.stdout, stdout=subprocess.PIPE)
+
+full_path = path.stdout.read().decode("utf-8")
+print(f"...Health Check Output...\n\n {full_path}")
+
+# The assertion will fail if python3 executable path is not found
+assert "/home/repl/workspace/healthcheck.sh" in full_path
+
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+...Health Check Output...
+
+ Enter executable to check: 
+Location: /usr/bin/python3
+
+Traceback (most recent call last):
+  File "script.py", line 15, in <module>
+    assert "/home/repl/workspace/healthcheck.sh" in full_path
+AssertionError
+
+
+
+We checked the file script.py. Are you asserting that the "python3" string is contained in the full_path?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#try 2
+script.py
+import subprocess
+
+# equivalent to 'echo "python3"'
+echo = subprocess.Popen(
+    ["echo", "python3"], stdout=subprocess.PIPE)
+
+# equivalent to: echo "python3" | ./healthcheck.sh
+path = subprocess.Popen(
+    ["/home/repl/workspace/healthcheck.sh"], stdin=echo.stdout, stdout=subprocess.PIPE)
+
+full_path = path.stdout.read().decode("utf-8")
+print(f"...Health Check Output...\n\n {full_path}")
+
+# The assertion will fail if python3 executable path is not found
+assert "python3" in full_path
+
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+...Health Check Output...
+
+ Enter executable to check: 
+Location: /usr/bin/python3
+
+
+
+Great job building a health check utility! You were able to validate that python3 was installed and assert it. Monitoring tasks like these are an essential DevOps best practice and DevOps best practices heavily influence work in Data Engineering and Machine Learning.
+
+
