@@ -1,0 +1,42 @@
+Your company has an internship program that involves training non-developers how to program in Python. One of the challenges is that it is often difficult to explain how to debug code to the interns. You have an idea to write a debugging decorator that interns can use that will print out both the arguments and the keyword arguments when they are applied to a function. You are confident this will be a very useful skill to teach them because of how much you use decorators to debug code and enhance automation tasks.
+Write a decorator that will wrap a function and print any *args or **kw arguments out. Remember a decorator must return the the function is wraps. This is the last line of a decorator.
+
+
+Create a decorator that prints the *args and **kw arguments passed into it.
+Apply that decorator to the mult function and run it.
+
+
+
+
+script.py
+from functools import wraps
+
+# Create decorator
+def debug(f):
+	@wraps(f)
+	def wrapper(*args, **kw):
+		result = f(*args, **kw)
+		print(f"function name: {f.__name__}, args: [{args}], kwargs: [{kw}]")
+		return result
+	return wrapper
+  
+# Apply decorator
+@debug
+def mult(x, y=10):
+	return x*y
+
+print(mult(5, y=5))
+
+
+
+
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+function name: mult, args: [(5,)], kwargs: [{'y': 5}]
+25
+
+Congratulations on writing and using decorator! Decorators or useful not just in instrumentation, but also automation workflows. You were able to intercept argument and keyword argument calls and print them out which will enhance your ability to debug production code.
+
