@@ -1,0 +1,116 @@
+In the real-world code is messy. There are edge cases that have to be handled, and things don't always go as planned. Dealing with data increases the complexity of the mess.
+In this example you will be using the subprocess module to launch a "misbehaving" process that will run for six seconds. This will be simulated by using linux sleep command. The sleep command will suspend execution of a shell for a period of time. You will use the subprocess.communicate() method to wait for the command to finish running for up to five seconds. The process will then timeout and it will return an Exception: i.e. error detected during execution, which will be caught and the process will be cleaned up by proc.kill(). Popen, PIPE, and TimeoutExpired have all been imported for you.
+
+
+Start a long running process using subprocess.Popen().
+Use subprocess.communicate() to create a timeout.
+Cleanup the process if it takes longer than the timeout.
+Print error message and standard out and standard error streams.
+
+
+script.py
+#round 1
+from subprocess import (Popen, PIPE, TimeoutExpired)
+
+# Start a long running process using subprocess.Popen()
+proc = Popen(["sleep", "6"], stdout=PIPE, stderr=PIPE)
+
+# Use subprocess.communicate() to create a timeout 
+try:
+    output, error = proc.communicate(timeout=5)
+    
+except TimeoutExpired:
+
+	# Cleanup the process if it takes longer than the timeout
+    proc.kill()
+    
+    # Read standard out and standard error streams and print
+    out, err = proc.communicate()
+    print(f"Process timed out with output: {output}, error: {error}")
+
+
+
+
+
+
+
+shell
+#round 1
+#We checked the file script.py. Check the first try statement. Are you storing the output of proc.communicate() in the variables output and error?
+repl:~/workspace$ python3 script.py
+Traceback (most recent call last):
+  File "script.py", line 8, in <module>
+    output, error = proc.communicate(timeout=5)
+  File "/usr/lib/python3.6/subprocess.py", line 843, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.6/subprocess.py", line 1515, in _communicate
+    self._check_timeout(endtime, orig_timeout)
+  File "/usr/lib/python3.6/subprocess.py", line 871, in _check_timeout
+    raise TimeoutExpired(self.args, orig_timeout)
+subprocess.TimeoutExpired: Command '['sleep', '6']' timed out after 5 seconds
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "script.py", line 17, in <module>
+    print(f"Process timed out with output: {output}, error: {error}")
+NameError: name 'output' is not defined
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+script.py
+#round 2
+from subprocess import (Popen, PIPE, TimeoutExpired)
+
+# Start a long running process using subprocess.Popen()
+proc = Popen(["sleep", "6"], stdout=PIPE, stderr=PIPE)
+
+# Use subprocess.communicate() to create a timeout 
+try:
+    output, error = proc.communicate(timeout=5)
+    
+except TimeoutExpired:
+
+	# Cleanup the process if it takes longer than the timeout
+    proc.kill()
+    
+    # Read standard out and standard error streams and print
+    output, error = proc.communicate()
+    print(f"Process timed out with output: {output}, error: {error}")
+
+
+
+
+
+
+
+
+shell
+#round 2
+repl:~/workspace$ python3 script.py
+Process timed out with output: b'', error: b''
+
+
+You were able to catch the process as it timed out. The 'rogue' process was killed by using proc.kill() when the TimeoutExpired exception was triggered. You may want to experiment with altering the timeout to be shorter or longer to see what happens.
+
+
