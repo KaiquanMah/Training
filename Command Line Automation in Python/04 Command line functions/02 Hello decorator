@@ -1,0 +1,189 @@
+You are working more and more with decorators and you want to ensure that decorators you write remember to use the @wraps functionality to preserve the name of the function and the docstring. One idea you have to verify this is to create an integration test that loops over decorators you create and prints out the names of the decorated functions. Use this approach to verify two decorated function names.
+
+Decorate two functions with the decorator @nothing which has been imported for you.
+Put both uncalled functions into a list.
+Print the name of each function by using a for loop to pull them out of a list.
+
+
+
+
+
+script.py
+#method 1 - not accepted
+from functools import wraps
+
+def nothing(f):
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        return f(*args, **kwds)
+    return wrapper
+
+# Decorate first function
+@nothing
+def something():
+    pass
+
+# Decorate second function
+@nothing
+def another():
+    pass
+
+# Put uncalled function into a list and print name  
+funcs = ["something", "another"]
+for func in funcs:
+    print(f"function name: {func}")
+
+
+shell
+repl:~/workspace$ python3 script.py
+function name: something
+function name: another
+
+#We checked the file script.py. Did you correctly define the variable funcs? Expected something different.
+
+
+
+
+
+
+
+
+
+
+
+
+
+#method 2 - not accepted
+from functools import wraps
+
+def nothing(f):
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        return f(*args, **kwds)
+    return wrapper
+
+# Decorate first function
+@nothing
+def something():
+    pass
+
+# Decorate second function
+@nothing
+def another():
+    pass
+
+# Put uncalled function into a list and print name  
+funcs = ["something()", "another()"]
+for func in funcs:
+    print(f"function name: {func}")
+
+shell
+repl:~/workspace$ python3 script.py
+function name: something()
+function name: another()
+
+#We checked the file script.py. Did you correctly define the variable funcs? Expected something different.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#method 3
+#https://stackoverflow.com/questions/30799700/function-name-of-wrapped-function
+from functools import wraps
+
+def nothing(f):
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        return f(*args, **kwds)
+    return wrapper
+
+# Decorate first function
+@nothing
+def something():
+    pass
+
+# Decorate second function
+@nothing
+def another():
+    pass
+
+# Put uncalled function into a list and print name  
+funcs = [something.__name__, another.__name__]
+for func in funcs:
+    print(f"function name: {func}")
+
+
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+function name: something
+function name: another
+
+#We checked the file script.py. Did you correctly define the variable funcs? Expected something different.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#method 4 - model ans
+from functools import wraps
+
+def nothing(f):
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        return f(*args, **kwds)
+    return wrapper
+
+# Decorate first function
+@nothing
+def something():
+    pass
+
+# Decorate second function
+@nothing
+def another():
+    pass
+
+# Put uncalled function into a list and print name  
+funcs = [something, another]
+for func in funcs:
+    print(f"function name: {func.__name__}")
+
+
+shell
+repl:~/workspace$ python3 script.py
+function name: something
+function name: another
+#Remember that function names can be printed with .__name__
+#Great work printing out the function names. You were able to use the __name__ method to print out the preserved name of each decorated function.
+
+
+
+
+
+
+
+
