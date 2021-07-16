@@ -1,0 +1,34 @@
+After the last bad experience with corrupt backups at your company, you decide to rewrite the backup script from scratch in Python. One of the improvements you want to make is to audit the number of files in a subdirectory and count them. You will then ensure the exact same number of files exists in a directory tree before and after the backup. This will create a validation step that was missing in the last script.
+Use subprocess.run to pipe the output of the find command to wc -l to print the numbers of files in the directory tree.
+
+
+Use subprocess.run to run unix command find . -type f -print.
+Send the output of the find command to the input of wc -l.
+Decode the bytes to strings.
+Strip the output of spaces and print.
+
+
+script.py
+import subprocess
+
+# Runs find command to search for files
+find = subprocess.Popen(
+    ["find", "/home/repl/workspace/test_dir", "-type", "f", "-print"], stdout=subprocess.PIPE)
+
+# Runs wc and counts the number of lines
+word_count = subprocess.Popen(
+    ["wc", "-l"], stdin=find.stdout, stdout=subprocess.PIPE)
+
+# Print the decoded and formatted output
+output = word_count.stdout.read()
+print(output.decode("utf-8").strip())
+
+
+
+
+repl:~/workspace$ python3 script.py
+200
+
+
+Way to go, you were able to find all 200 files! The find command is a powerful Unix utility and you were able to leverage it to quickly search for files and count them. This highlights a unique strength of Python to glue the output of existing solutions into existing Python workflows. This can be an invaluable skill when working with data in your career.
+
