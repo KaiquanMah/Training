@@ -1,0 +1,93 @@
+5. Defaulting to items in a list
+The best practice for subprocess is to get in the habit of running it with a list. 
+This limits mistakes that are easy to make. 
+For example, you may know that you first need to use shlex to quote and sanitize strings properly, but what if you forget? 
+This could open an attack vector. 
+
+Instead, if you always default to using a list and shell equals False, then it limits the mistakes you may accidentally make.
+
+
+
+6. The problem with security by obscurity
+Thinking about security while writing software is better than hoping someone doesn't discover a security issue in your approach. 
+A good example is in the real-world. Most people wouldn't just leave their key under the door mat, or their door open. 
+This is hoping that intruders don't discover your security backdoor. 
+Likewise, it is no accident that companies that are very secure have key card access not to just the front of the building, but for every room. 
+Integrated security is the opposite of security by obscurity.
+
+
+
+
+7. Security best practices for subprocess
+There are security best practices that can be applied to writing programs that use subprocesses.
+Always use shell=False.
+Always assume that users are malicious.
+Never secure something through obscurity, i.e, key under the doormat.
+Always use the principle of least privilege.
+Never give a script more permissions than it needs. 
+Finally, reduce the complexity of the code so easy mistakes are not made. 
+
+A final note about the principle of least privilege is to consider where you live as a real-world example.
+You don't give the key to your house to the mailman, they only need to get access to your mailbox. 
+Likewise, the gardener only needs access to the backyard. 
+The principle of least privilege is applying the common sense that most people already apply to their life to computer systems. 
+Only give people the privileges they need, not more.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Safely find directories
+At the film studio you work at there is a need to create a tool for animators to search incredibly large file systems as quickly as possible and find all of the directories in them. You benchmarked both regular python code and python code that uses the Unix find command to see which performed better at searches. You have determined for this particular problem that the Unix find performs the best. One concern you have though is ensuring that the command safely processes user input. In the past tools have been released that accidentally deleted large sections of the file server because a user accidentally put the wrong string into a tool.
+Write a tool that safely processes user input and searches a file system for all directories using find and subprocess.Popen.
+
+
+Write a script that safely can test user input in subprocess.Popen.
+Find all of the files in the current working directory.
+Print out all of the directories found.
+
+
+script.py
+import subprocess
+
+#Accepts user input
+print("Enter a path to search for directories: \n")
+user_input = "/home/repl/workspace/file_system"
+print(f"directory to process: {user_input}")
+
+#Pass safe user input into subprocess
+with subprocess.Popen(["find", user_input, "-type", "d"], stdout=subprocess.PIPE) as find:
+    result = find.stdout.readlines()
+    
+    #Process each line and decode it and strip it
+    for line in result:
+        formatted_line = line.decode("utf-8").strip()
+        print(f"Found Directory: {formatted_line}")
+
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+Enter a path to search for directories: 
+
+directory to process: /home/repl/workspace/file_system
+Found Directory: /home/repl/workspace/file_system
+Found Directory: /home/repl/workspace/file_system/movie
+Found Directory: /home/repl/workspace/file_system/mickey
+Found Directory: /home/repl/workspace/file_system/johnny
+Found Directory: /home/repl/workspace/file_system/ronny
+
+Way to go! You were able to use a Python list to safely pass arguments into the Unix find command and find all of the directories. Building smalls scripts like these are an essential skill for Data Engineering.
+
