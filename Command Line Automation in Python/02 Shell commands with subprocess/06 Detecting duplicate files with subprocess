@@ -1,0 +1,97 @@
+Imagine you are a new data scientist at a startup, and you have been tasked with doing machine learning on Terabytes of data. The CEO has mentioned they have a small budget to train your model. You notice many duplicate files when manually inspecting. If you can identify the duplicate files before you begin training, this potentially saves 50% of the cost of training.
+In this exercise, you will find duplicate files by using the subprocess.Popen() module and capturing the output of the md5sum command. The md5sum utility is a shell command that finds the unique hash of each file. There is a list of files available via the files variable that you can iterate over. Popen and PIPE have already been imported for you from the subprocess module. ['file_8.csv'...]
+
+
+Iterate over the list of files filenames.
+Use Popen to call the md5sum utility.
+Append duplicate file to a list.
+Print the duplicates out.
+
+
+shell
+repl:~/workspace$ md5sum --help
+Usage: md5sum [OPTION]... [FILE]...
+Print or check MD5 (128-bit) checksums.
+
+With no FILE, or when FILE is -, read standard input.
+
+  -b, --binary         read in binary mode
+  -c, --check          read MD5 sums from the FILEs and check them
+      --tag            create a BSD-style checksum
+  -t, --text           read in text mode (default)
+
+The following five options are useful only when verifying checksums:
+      --ignore-missing  don't fail or report status for missing files
+      --quiet          don't print OK for each successfully verified file
+      --status         don't output anything, status code shows success
+      --strict         exit non-zero for improperly formatted checksum lines
+  -w, --warn           warn about improperly formatted checksum lines
+
+      --help     display this help and exit
+      --version  output version information and exit
+
+The sums are computed as described in RFC 1321.  When checking, the input
+should be a former output of this program.  The default mode is to print a
+line with checksum, a space, a character indicating input mode ('*' for binary,
+' ' for text or where binary is insignificant), and name for each FILE.
+
+GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
+Full documentation at: <http://www.gnu.org/software/coreutils/md5sum>
+or available locally via: info '(coreutils) md5sum invocation'
+
+
+
+
+
+
+
+
+
+
+script.py
+from subprocess import (Popen, PIPE)
+import os
+
+# Don't change these variables
+checksums = {}
+duplicates = []
+root = "/home/repl/workspace/test_dir"
+#for files in the root dir
+#give me each root dir + file name combo
+#store in a list
+files = [os.path.join(root, f) for f in os.listdir(root)]
+
+
+# Iterate over the list of filenames (in the "files" list)
+for filename in files:
+    # Use Popen to call the md5sum utility
+    with Popen(["md5sum", filename], stdout=PIPE) as proc:
+        checksum, _ = proc.stdout.read().split()
+        
+        # Append duplicate to a list if the checksum is found
+        if checksum in checksums:
+            duplicates.append(filename)
+        checksums[checksum] = filename
+
+print(f"Found Duplicates: {duplicates}")
+
+
+
+
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+Found Duplicates: ['/home/repl/workspace/test_dir/file_1.csv'
+, '/home/repl/workspace/test_dir/file_7.csv'
+, '/home/repl/workspace/test_dir/file_6.csv', '/home/repl/workspace/test_dir/file_2.csv', '/home/repl/workspace/test_dir/file_5.csv', '/home/repl/workspace/test_dir/file_4.csv', '/home/repl/workspace/test_dir/file_3.csv', '/home/repl/workspace/test_dir/file_9.csv'
+, '/home/repl/workspace/test_dir/file_8.csv']
+
+
+
+
+
+There can be too much of a good thing. You used the md5sum utility running inside of Popen to figure out which files had the same digital signature. Now you can decide what you want to do with these duplicate files. Delete them? Archive them?
+
+
