@@ -1,0 +1,62 @@
+"It was the best of times, it was the worst of times…", Charles Dickens said in a Tale of Two Cities. He could also be talking about your startup. Initially things were amazing and you and your co-workers laughed in delight as the CTO churned out machine learning models dozens by the day. Often this would be at 2AM and you would arrive in the morning and find the serialized sklearn models waiting for the Data Science team to deploy to production.
+Unfortunately, this was in fact too good to be true. Many of the models had serious flaws and this ultimately led to the CTO stepping down. IT Auditors want to determine how flawed these ML models were and back test the predictions for accuracy.
+Use the os.walk module to find serialized models and test them for accuracy.
+
+
+Walk the the file system path my using os.walk.
+Look for a file extension named .joblib and load the model into clf using joblib's load() function.
+Use sklearn to predict from the unpickled model by loading it into clf.predict() and pass the input data X_digits to it (X_digits is already in memory).
+Print your predictions.
+
+
+
+
+
+
+script.py
+import os
+from my.models.pca import X_digits
+from sklearn.externals import joblib
+
+# Walk the filesystem starting at the my path
+for root, _, files in os.walk('my'):
+    for name in files:
+      	# Create the full path to the file by using os.path.join()
+        fullpath = os.path.join(root, name)
+        print(f"Processing file: {fullpath}")
+        _, ext = os.path.splitext(fullpath)
+        # Match the extension pattern .joblib
+        if ext == ".joblib":
+            clf = joblib.load(fullpath)
+            break
+
+# Predict from pickled model
+print(clf.transform(X_digits))
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+Processing file: my/models/pca.py
+Processing file: my/models/anotherbadmodel.junk
+Processing file: my/models/badmodel.alsojunk
+Processing file: my/models/good/digits_prediction.joblib
+Processing file: my/models/__pycache__/pca.cpython-36.pyc
+[[-1.25946645e+00  2.12748835e+01 -9.46305462e+00 ...  8.28644438e-16
+  -1.79578112e-16 -6.91392699e-16]
+ [ 7.95761130e+00 -2.07686990e+01  4.43950604e+00 ... -6.45083339e-16
+  -1.17549044e-16  1.67046393e-16]
+ [ 6.99192297e+00 -9.95598641e+00  2.95855808e+00 ... -2.67232343e-15
+  -6.88209005e-16  1.16654252e-16]
+ ...
+ [ 1.08012837e+01 -6.96025223e+00  5.59955453e+00 ...  1.21821757e-15
+  -2.85716033e-15  9.70809841e-17]
+ [-4.87210009e+00  1.24239536e+01 -1.01708664e+01 ... -4.93695294e-17
+  -1.51975037e-15 -1.23762878e-16]
+ [-3.44389631e-01  6.36554919e+00  1.07737085e+01 ...  2.86366789e-15
+  -4.10614730e-17  2.70670966e-16]]
+
+
+
+Crunch! This is the sound of your python script biting into a pickled sklearn model. By walking the filesystem and looking for joblib extensions you were able to speed up the auditing process.
+
