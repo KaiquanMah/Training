@@ -1,0 +1,79 @@
+A colleague has written a Python script that reverse all lines in a file and prints them out one by one. This is an integration tool for some NLP (Natural Language Processing) work your department is involved in. You want to call their script, reverseit.py from a python program you are writing so you can use it as well. Use your knowledge of sys.argv and subprocess to write a file, then pass that file to the script that processes it.
+
+Write two lines to a file input.txt.
+Use the subprocess module to run the /home/repl/workspace/reverseit.py script with input.txt as an argument.
+Print out the results.
+
+
+
+
+script.py
+#my ans
+import subprocess
+
+# Write a file
+with open("input.txt", "w") as input_file:
+    input_file.write("Reverse this string\n")
+    input_file.write("Reverse this too!")
+
+# Runs python script that reverse strings in a file line by line
+run_script = subprocess.Popen(
+    ["/usr/bin/python3", "/home/repl/workspace/reverseit.py", "input_file"], stdout=subprocess.PIPE)
+
+# Print out the script output
+for line in run_script:
+    print(line)
+
+
+
+shell
+repl:~/workspace$ Traceback (most recent call last):
+  File "/home/repl/workspace/reverseit.py", line 5, in <module>
+    for line in input_sent:
+  File "/usr/lib/python3.6/fileinput.py", line 250, in __next__
+    line = self._readline()
+  File "/usr/lib/python3.6/fileinput.py", line 362, in _readline
+    self._file = open(self._filename, self._mode)
+FileNotFoundError: [Errno 2] No such file or directory: 'input_file'
+
+
+
+
+
+
+
+
+
+
+
+
+
+#model ans
+import subprocess
+
+# Write a file
+with open("input.txt", "w") as input_file:
+    input_file.write("Reverse this string\n")
+    input_file.write("Reverse this too!")
+
+# Runs python script that reverse strings in a file line by line
+run_script = subprocess.Popen(
+    ["/usr/bin/python3", "/home/repl/workspace/reverseit.py", "input.txt"], stdout=subprocess.PIPE)
+
+# Print out the script output
+for line in run_script.stdout.readlines():        #I was missing the prefixes in "run_script.stdout.readlines()"
+    print(line)
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+b'\n'
+b'gnirts siht esreveR\n'
+b'!oot siht esreveR\n'
+
+
+
+Great work at reusing your colleagues code! 
+You were able to write a file then pass that file into the input of an existing Python script which processed your text file.
+
