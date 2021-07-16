@@ -1,0 +1,94 @@
+As the CTO of your small startup you often have to perform many roles. Some days this means being the data scientists, data engineer, DevOps engineer and machine learning engineer all at once. Recently you setup a large network file system in your cloud deployment that all of the instances that perform machine learning will communicate with. You are a strong believe in IaC (Infrastructure as Code). As a result you want to verify that when the network filesystem is mounted on a new system, each worker node is able to create files with the correct permissions.
+Write a script that will check for this by using subprocess.Popen and os.stat. Be sure to use the variables in setup in your script!
+
+
+Import the subprocess and os packages.
+Write a script that will use the Unix touch command in subprocess.Popen to create a file.
+Then use the os.stat module to check the correct uid was created on the file.
+If the correct uid was created, print out a success message.
+
+
+script.py
+# Import packages
+import subprocess
+import os
+
+# Setup
+file_location = "/tmp/file.txt"
+expected_uid = 1000
+
+# Create a file
+proc = subprocess.Popen(["touch", "-l"])
+
+# Check user permissions
+stat = os.stat(file_location)
+if stat.st_uid == expected_uid:
+    print(f"File System exported properly: {expected_uid} == {stat.st_uid}")
+else:
+    print(f"File System NOT exported properly: {expected_uid} != {stat.st_uid}")
+
+
+
+
+
+shell
+repl:~/workspace$ ipython script.py
+File System exported properly: 1000 == 1000
+touch: invalid option -- 'l'
+Try 'touch --help' for more information.
+
+
+
+
+
+
+
+
+repl:~/workspace$ touch --help
+Usage: touch [OPTION]... FILE...
+Update the access and modification times of each FILE to the current time.
+
+A FILE argument that does not exist is created empty, unless -c or -h
+is supplied.
+
+A FILE argument string of - is handled specially and causes touch to
+change the times of the file associated with standard output.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -a                     change only the access time
+  -c, --no-create        do not create any files
+  -d, --date=STRING      parse STRING and use it instead of current time
+  -f                     (ignored)
+  -h, --no-dereference   affect each symbolic link instead of any referenced
+                         file (useful only on systems that can change the
+                         timestamps of a symlink)
+  -m                     change only the modification time
+  -r, --reference=FILE   use this file's times instead of current time
+  -t STAMP               use [[CC]YY]MMDDhhmm[.ss] instead of current time
+      --time=WORD        change the specified time:
+                           WORD is access, atime, or use: equivalent to -a
+                           WORD is modify or mtime: equivalent to -m
+      --help     display this help and exit
+      --version  output version information and exit
+
+Note that the -d and -t options accept different time-date formats.
+
+GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
+Full documentation at: <http://www.gnu.org/software/coreutils/touch>
+or available locally via: info '(coreutils) touch invocation'
+
+
+
+
+
+
+
+
+
+
+
+
+You can "touch" a file using the "subprocess" module and then inspect the permissions on the file that was created. 
+You also learned how to use os.stat which gives you useful metadata about files.
+
+
