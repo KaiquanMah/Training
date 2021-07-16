@@ -1,0 +1,49 @@
+The CEO at your startup has been very happy with previous Data Engineering solution you created that eliminates duplicates in a tree full of Terabytes of data. You have been tasked with another similar task of finding all of the .csv files in your company's data lake. These files will need to later move to a specific directory for a machine learning task. Your code could save hours of time if it performs as expected.
+In this exercise, you will search for files that match specific patterns in a directory test_dir. The os module has already been imported for you.
+
+
+Walk the file system starting at the test_dir.
+Create the full path to the file by using os.path.join().
+Match the extension pattern .csv using os.path.splitext() method and append matches to a list.
+Print the matches you find.
+
+
+script.py
+import os
+
+# Walk the filesystem starting at the test_dir
+matches = []
+for root, _, files in os.walk('/home/repl/workspace/test_dir'):
+    for name in files:
+      	# Create the full path to the file by using os.path.join()
+        fullpath = os.path.join(root, name)
+        print(f"Processing file: {fullpath}")
+        # Split off the extension and discard the rest of the path
+        _, ext = os.path.splitext(fullpath)
+        # Match the extension pattern .csv
+        if ext == ".csv":
+            matches.append(fullpath)
+            
+# Print the matches you find          
+print(matches)
+
+
+
+shell
+repl:~/workspace$ python3 script.py
+Processing file: /home/repl/workspace/test_dir/file_0.csv
+Processing file: /home/repl/workspace/test_dir/file_3.txt
+Processing file: /home/repl/workspace/test_dir/file_6.csv
+Processing file: /home/repl/workspace/test_dir/file_2.csv
+Processing file: /home/repl/workspace/test_dir/file_7.txt
+Processing file: /home/repl/workspace/test_dir/file_5.txt
+Processing file: /home/repl/workspace/test_dir/file_4.csv
+Processing file: /home/repl/workspace/test_dir/file_8.csv
+Processing file: /home/repl/workspace/test_dir/file_9.txt
+Processing file: /home/repl/workspace/test_dir/file_1.txt
+['/home/repl/workspace/test_dir/file_0.csv', '/home/repl/workspace/test_dir/file_6.csv', '/home/repl/workspace/test_dir/file_2.csv', '/home/repl/workspace/test_dir/file_4.csv', '/home/repl/workspace/test_dir/file_8.csv']
+
+
+
+
+Great walking the filesystem and finding all of the .csv files. Note, that this code could be made even more sophisticated by taking advantage of other Python features like looking for regular expressions in file content or performing machine learning on each file.
