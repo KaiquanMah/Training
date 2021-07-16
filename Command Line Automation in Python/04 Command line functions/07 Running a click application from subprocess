@@ -1,0 +1,69 @@
+You are building many click command line applications and you realize that it would be powerful to automate their execution by not only humans but other scripts. Take an existing script that performs KMeans clustering and execute it with two different options: help and num. Run this inside of subprocess.run and print both outputs to standard out.
+
+
+Run the cluster.py click application to retrieve a help message using the help flag.
+Run the cluster.py click application with num option of 2.
+Assign the output of the first subprocess to help_out and print stdout.
+Assign the output of the second subprocess to cluster2 and print stdout.
+
+
+
+script.py
+import subprocess
+
+# Run help for click tool
+help_out = subprocess.run(["/usr/bin/python3.6", "./cluster.py", "--help"],
+                     stdout=subprocess.PIPE)
+
+# Run cluster
+cluster2 = subprocess.run(["/usr/bin/python3.6", "./cluster.py", "--num", "2"],
+                     stdout=subprocess.PIPE)
+
+# Print help
+print(help_out.stdout)
+
+# Print cluster output
+print(cluster2.stdout)
+
+
+
+
+
+
+
+
+
+shell #final
+repl:~/workspace$ python3 script.py
+b'Usage: cluster.py [OPTIONS]\n\nOptions:\n  --num INTEGER  Number of clusters\n  --help         Show this message and exit.\n'
+b'Cluster assignments: [1 1 0 1 1 0 1 0 0 1] for total clusters [2]\n'
+
+#Woohoo! You were able to fully exercise the click application by running the --help option and the --num option. This will allow you to take your automation project to the next phase.
+
+
+
+
+
+
+
+
+
+
+
+shell #1 -> used --n from https://click.palletsprojects.com/en/8.0.x/options/
+repl:~/workspace$ python3 script.py
+Usage: cluster.py [OPTIONS]
+Try "cluster.py --help" for help.
+
+Error: no such option: --n  Did you mean --num?
+b'Usage: cluster.py [OPTIONS]\n\nOptions:\n  --num INTEGER  Number of clusters\n  --help         Show this message and exit.\n'
+b''
+
+
+repl:~/workspace$ python3 cluster.py --help
+Usage: cluster.py [OPTIONS]
+
+Options:
+  --num INTEGER  Number of clusters
+  --help         Show this message and exit.
+
