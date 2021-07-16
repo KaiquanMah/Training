@@ -1,0 +1,106 @@
+Sam's pipeline has been running for a long time now. Since the beginning of 2018, her automated system has been diligently uploading her report to the gid-staging bucket.
+In City governments, record retention is a huge issue, and many government officials prefer not to keep records in existence past the mandated retention dates.
+People purging records
+As time has passed, the City Council asked Sam to clean out old CSV files from previous years that have passed the retention period. 2018 is safe to delete.
+Sam has initialized the client and assigned it to the s3 variable. Help her clean out all records for 2018 from S3!
+
+
+List only objects that start with '2018/final_' in 'gid-staging' bucket.
+Iterate over the objects, deleting each one.
+Print the keys of remaining objects in the bucket.
+
+
+
+# List only objects that start with '2018/final_'
+response = s3.list_objects(Bucket='gid-staging', 
+                           Prefix='2018/final_')
+                           
+response
+{'Contents': [{'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2018/final_report_01_00',
+   'LastModified': datetime.datetime(2021, 7, 16, 23, 33, 56, 391000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2018/final_report_01_01',
+   'LastModified': datetime.datetime(2021, 7, 16, 23, 33, 56, 396000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2018/final_report_01_02',
+   'LastModified': datetime.datetime(2021, 7, 16, 23, 33, 56, 399000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2018/final_report_01_03',
+   'LastModified': datetime.datetime(2021, 7, 16, 23, 33, 56, 402000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2018/final_report_01_04',
+   'LastModified': datetime.datetime(2021, 7, 16, 23, 33, 56, 406000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2018/final_report_01_05',
+   'LastModified': datetime.datetime(2021, 7, 16, 23, 33, 56, 409000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2018/final_report_01_06',
+   'LastModified': datetime.datetime(2021, 7, 16, 23, 33, 56, 412000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'}],
+ 'Delimiter': 'None',
+ 'IsTruncated': False,
+ 'MaxKeys': 1000,
+ 'Name': 'gid-staging',
+ 'Prefix': '2018/final_',
+ 'ResponseMetadata': {'HTTPHeaders': {},
+  'HTTPStatusCode': 200,
+  'RetryAttempts': 0}}
+
+
+
+
+
+# Iterate over the objects
+if 'Contents' in response:
+  for obj in response['Contents']:
+      # Delete the object
+      s3.delete_object(Bucket='gid-staging', Key=obj['Key'])
+
+# Print the keys of remaining objects in the bucket
+response = s3.list_objects(Bucket='gid-staging')
+
+for obj in response['Contents']:
+  	print(obj['Key'])
+    
+    
+    
+    
+ <script.py> output:
+    2019/final_report_01_00
+    2019/final_report_01_01
+    2019/final_report_01_02
+    2019/final_report_01_03
+    2019/final_report_01_04
+    
+    
+    
+    
+    
