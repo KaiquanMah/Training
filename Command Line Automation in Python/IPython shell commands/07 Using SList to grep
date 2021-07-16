@@ -1,0 +1,98 @@
+You get woken up in the middle of the night by a frantic phone call from a co-worker. There is a rogue process running in production that is generating hundreds of extra backup files. It was discovered when your co-worker tried to restore from backup, but found hundreds of backup files that are corrupt. You need to write a script to isolate the correct backup file.
+Use the SList object to find all files with the number 2 in them and print out their full path so the backups can be inspected. The reason 2 is so important is this corresponds to the second day of the week Tuesday. This is the last time the backups worked properly.
+
+
+Use the SList result object and the grep method to find all files with the pattern '_2' in them.
+Iterate over the results of the SList query and create a full path to the file.
+Print the full path to files matching this query.
+
+
+
+slist_out.py
+from subprocess import (Popen, PIPE)
+import subprocess
+from IPython.utils.text import SList
+
+root = "/home/repl/workspace/test_dir"
+
+p = subprocess.Popen(["ls", "-l", root], stdout=subprocess.PIPE)
+bytes_out = p.stdout.readlines()
+out = []
+for line in bytes_out:
+	out.append(line.decode("utf-8"))
+    
+slist_out = SList(out)
+
+
+
+
+
+
+script.py
+import os
+from slist_out import slist_out
+
+# Save the name of the root directory
+root = "test_dir"
+
+# Find the backups with "_2" in slist_out
+result = slist_out.grep("_2")
+
+# Extract the filenames
+for res in result:
+	filename = res.split()[-1]
+    
+	# Create the full path
+	fullpath = os.path.join(root, filename)
+	print(f"fullpath of backup file: {fullpath}")
+    
+
+
+
+shell
+repl:~/workspace$ ipython script.py
+fullpath of backup file: test_dir/backup_2.csv
+fullpath of backup file: test_dir/backup_2.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+script.py
+import os
+from slist_out import slist_out
+
+# Save the name of the root directory
+root = "test_dir"
+
+# Find the backups with "_2" in slist_out
+result = slist_out.grep("_2")
+
+for res in result:
+	#filename = res.split()[-1]
+    print(res)
+
+
+shell
+repl:~/workspace$ ipython script.py
+-rw-r--r-- 1 repl repl 13 Jul 16 00:42 backup_2.csv
+-rw-r--r-- 1 repl repl 12 Jul 16 00:42 backup_2.txt
+
