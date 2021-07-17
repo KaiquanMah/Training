@@ -1,0 +1,92 @@
+Transparency is important to City Council. They want to empower residents to analyze Get It Done requests and how they get prioritized.
+They asked Sam to make all previous Get It Done aggregated reports since the beginning of 2019 public as well.
+Sam has initialized the boto3 S3 client and assigned it to the s3 variable.
+In this exercise, you will help Sam open up the data by setting the ACL of every object in the gid-staging bucket to public-read, opening up the objects to the world!
+
+
+List the objects in 'gid-staging' bucket starting with '2019/final_'.
+For each file in the response, give it an ACL of 'public-read'.
+Print the Public Object URL of each object.
+
+
+
+response
+{'Contents': [{'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2019/final_report_01_00.csv',
+   'LastModified': datetime.datetime(2021, 7, 17, 5, 32, 17, 803000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2019/final_report_01_01.csv',
+   'LastModified': datetime.datetime(2021, 7, 17, 5, 32, 17, 808000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2019/final_report_01_02.csv',
+   'LastModified': datetime.datetime(2021, 7, 17, 5, 32, 17, 812000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2019/final_report_01_03.csv',
+   'LastModified': datetime.datetime(2021, 7, 17, 5, 32, 17, 815000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2019/final_report_01_04.csv',
+   'LastModified': datetime.datetime(2021, 7, 17, 5, 32, 17, 818000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'}],
+ 'Delimiter': 'None',
+ 'IsTruncated': False,
+ 'MaxKeys': 1000,
+ 'Name': 'gid-staging',
+ 'Prefix': '2019/final_',
+ 'ResponseMetadata': {'HTTPHeaders': {},
+  'HTTPStatusCode': 200,
+  'RetryAttempts': 0}}
+
+
+
+
+
+
+
+
+# List only objects that start with '2019/final_'
+response = s3.list_objects(
+    Bucket='gid-staging', Prefix='2019/final_')
+
+# Iterate over the objects
+for obj in response['Contents']:
+
+    # Give each object ACL of public-read
+    s3.put_object_acl(Bucket='gid-staging', 
+                      Key=obj['Key'], 
+                      ACL='public-read')
+    
+    # Print the Public Object URL for each object
+    print("https://{}.s3.amazonaws.com/{}".format( 'gid-staging', obj['Key']))
+
+
+
+<script.py> output:
+    https://gid-staging.s3.amazonaws.com/2019/final_report_01_00.csv
+    https://gid-staging.s3.amazonaws.com/2019/final_report_01_01.csv
+    https://gid-staging.s3.amazonaws.com/2019/final_report_01_02.csv
+    https://gid-staging.s3.amazonaws.com/2019/final_report_01_03.csv
+    https://gid-staging.s3.amazonaws.com/2019/final_report_01_04.csv
+
+
+
+Whoo! You are bucket permissions master. You have now made a bunch of objects public. With great power comes great responsibility!
+
