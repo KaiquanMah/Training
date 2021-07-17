@@ -1,0 +1,180 @@
+It's been a month since Sam last ran the report script, and it's time for her to make a new report for February.
+She wants to upload new reports for February and update the file listing, expanding on the work she completed during the last video lesson:
+<Directory listing screenshot>
+She has already created the boto3 S3 client and stored in the s3 variable. She stored the contents of her objects in request_files.
+You will help Sam aggregate the requests from February by downloading files from the gid-requests bucket and concatenating them into one DataFrame!
+
+
+Load each object from s3.
+Read it into pandas and append it to df_list.
+Concatenate all DataFrames in df_list.
+Preview the DataFrame.
+
+
+
+
+request_files
+[{'ETag': '"4a6628ab33eec7eed7fb0f339913c56a"',
+  'Key': '2019_feb_1_gid_requests',
+  'LastModified': datetime.datetime(2021, 7, 17, 6, 27, 8, 265000, tzinfo=tzlocal()),
+  'Owner': {'DisplayName': 'webfile',
+   'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+  'Size': 104628,
+  'StorageClass': 'STANDARD'},
+ {'ETag': '"4a6628ab33eec7eed7fb0f339913c56a"',
+  'Key': '2019_feb_2_gid_requests',
+  'LastModified': datetime.datetime(2021, 7, 17, 6, 27, 8, 270000, tzinfo=tzlocal()),
+  'Owner': {'DisplayName': 'webfile',
+   'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+  'Size': 104628,
+  'StorageClass': 'STANDARD'},
+ {'ETag': '"4a6628ab33eec7eed7fb0f339913c56a"',
+  'Key': '2019_feb_3_gid_requests',
+  'LastModified': datetime.datetime(2021, 7, 17, 6, 27, 8, 274000, tzinfo=tzlocal()),
+  'Owner': {'DisplayName': 'webfile',
+   'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+  'Size': 104628,
+  'StorageClass': 'STANDARD'},
+ {'ETag': '"4a6628ab33eec7eed7fb0f339913c56a"',
+  'Key': '2019_feb_4_gid_requests',
+  'LastModified': datetime.datetime(2021, 7, 17, 6, 27, 8, 278000, tzinfo=tzlocal()),
+  'Owner': {'DisplayName': 'webfile',
+   'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+  'Size': 104628,
+  'StorageClass': 'STANDARD'}]
+
+
+
+
+
+
+#sample obj
+s3_day_reqs
+
+{'Body': <botocore.response.StreamingBody at 0x7f692aa0b860>,
+ 'ContentLength': 104628,
+ 'ETag': '"4a6628ab33eec7eed7fb0f339913c56a"',
+ 'LastModified': datetime.datetime(2021, 7, 17, 6, 27, 8, tzinfo=tzutc()),
+ 'Metadata': {},
+ 'ResponseMetadata': {'HTTPHeaders': {'content-length': '104628',
+   'content-md5': 'SmYoqzPux+7X+w8zmRPFag==',
+   'etag': '"4a6628ab33eec7eed7fb0f339913c56a"',
+   'last-modified': 'Sat, 17 Jul 2021 06:27:08 GMT'},
+  'HTTPStatusCode': 200,
+  'RetryAttempts': 0}}
+
+
+
+
+
+
+#sample df from obj's 'Body'
+day_reqs
+
+     service_request_id  service_request_parent_id  sap_notification_number   requested_datetime  case_age_days                          service_name              case_record_type     updated_datetime  ...        long  council_district  comm_plan_code                comm_plan_name               park_name          case_origin    referred_department                                 public_description
+0               2553572                        NaN                      NaN  2019-04-03T08:58:00            0.0                     72 Hour Violation                       Parking                  NaN  ... -117.149470               6.0            50.0                   Kearny Mesa                     NaN               Mobile                    NaN                           72hr plus tire violation
+1               2553573                        NaN                      NaN  2019-04-03T08:58:00            0.0                      Graffiti Removal                           TSW  2019-04-03T00:00:00  ... -117.109883               9.0            56.0         Mid-City:City Heights                     NaN  Crew/Self Generated                    NaN            Graffiti Reported at 3927 El Cajon Blvd
+2               2553570                        NaN                      NaN  2019-04-03T08:55:00            0.0                     Missed Collection          ESD Complaint/Report                  NaN  ... -117.252362               2.0            18.0                 Mission Beach                     NaN                Phone                    NaN                                       Missed trash
+3               2553568                  2538156.0                      NaN  2019-04-03T08:54:00            0.0                      Street Light Out                           TSW                  NaN  ... -117.098553               7.0            47.0                   Tierrasanta                     NaN                  Web                    NaN  ALL 4 STREET LIGHTS ON THE SIGNAL STANDARDS AR...
+4               2553565                        NaN                      NaN  2019-04-03T08:53:00            0.0                      Graffiti Removal                           TSW                  NaN  ... -117.156827               3.0             4.0                      Downtown                     NaN               Mobile                    NaN                                                NaN
+5               2553566                  2552033.0                      NaN  2019-04-03T08:53:00            0.0                               Pothole                           TSW                  NaN  ... -117.126912               3.0            59.0       Mid-City:Normal Heights                     NaN                  Web                    NaN  At the entrance of the alleyway off of Kenmore...
+6               2553563                        NaN                      NaN  2019-04-03T08:52:00            0.0                                   NaN  Storm Water Code Enforcement                  NaN  ... -117.065996               4.0            11.0         Encanto Neighborhoods                     NaN                Email                    NaN                                                NaN
+7               2553564                        NaN                      NaN  2019-04-03T08:52:00            0.0                Parking Zone Violation                       Parking                  NaN  ... -117.229960               2.0            30.0                     Peninsula                     NaN               Mobile                    NaN  Abandoned trailer parked in red zone, visibili...
+8               2553559                  2547926.0                      NaN  2019-04-03T08:49:00            0.0                     72 Hour Violation                       Parking                  NaN  ... -117.229960               2.0            30.0                     Peninsula                     NaN               Mobile                    NaN  This abandoned trailer has been at this locati...
+9               2553560                        NaN                      NaN  2019-04-03T08:49:00            0.0                     72 Hour Violation                       Parking                  NaN  ... -117.180345               3.0            42.0                        Uptown                     NaN               Mobile                    NaN                                                NaN
+10              2553557                        NaN                      NaN  2019-04-03T08:48:00            0.0          Oversized Vehicle Complaints                       Parking                  NaN  ... -117.190740               2.0            12.0                   Linda Vista                     NaN               Mobile                    NaN  Obstructing part of alleyway entrance making i...
+11              2553556                        NaN                      NaN  2019-04-03T08:47:00            0.0                      Graffiti Removal                           TSW                  NaN  ... -117.038519               4.0            44.0        Skyline-Paradise Hills                     NaN               Mobile                    NaN                                                NaN
+12              2553554                        NaN                      NaN  2019-04-03T08:46:00            0.0                     72 Hour Violation                       Parking                  NaN  ... -117.194180               6.0             6.0               Clairemont Mesa                     NaN                  Web                    NaN  Highly  damaged, inoperable vehicle, left on s...
+13              2553552                        NaN                      NaN  2019-04-03T08:45:00            0.0                      Street Light Out                           TSW                  NaN  ... -117.222181               2.0            30.0                     Peninsula                     NaN                  Web                    NaN  Lights in front of 3675 & 3731 Oleander Drive ...
+14              2553553                        NaN                      NaN  2019-04-03T08:45:00            0.0                     72 Hour Violation                       Parking                  NaN  ... -117.239300               2.0            30.0                     Peninsula                     NaN                  Web                    NaN   Damage on the passanger side, door doesn?t close
+15              2553551                  2553543.0                      NaN  2019-04-03T08:44:00            0.0                 Sidewalk Repair Issue                           TSW                  NaN  ... -117.195149               1.0            51.0                  Del Mar Mesa                     NaN                  Web                    NaN  There are numerous problems in this area.  The...
+16              2553549                        NaN                      NaN  2019-04-03T08:43:00            0.0                       Over Irrigation  Storm Water Code Enforcement                  NaN  ... -117.183456               6.0             6.0               Clairemont Mesa  E CLAIREMONT ATHL AREA                  Web                    NaN  The baseball field has been  plagued by a leak...
+17              2553550                        NaN                      NaN  2019-04-03T08:43:00            0.0                     Missed Collection          ESD Complaint/Report                  NaN  ... -117.238285               2.0            30.0                     Peninsula                     NaN                Phone                    NaN  Trash was missed, caller states block was miss...
+18              2553548                        NaN             4.030012e+10  2019-04-03T08:42:00            0.0                 Sidewalk Repair Issue                           TSW                  NaN  ... -117.223500               2.0            27.0                 Pacific Beach                     NaN                  Web                    NaN  The ?Get it Done?  page is not working.   I wo...
+19              2553547                        NaN                      NaN  2019-04-03T08:41:00            0.0                     72 Hour Violation                       Parking                  NaN  ... -117.082760               8.0            25.0              Otay Mesa-Nestor                     NaN               Mobile                    NaN  Parked over 72 hours....In the City of San Die...
+20              2553545                        NaN                      NaN  2019-04-03T08:40:00            0.0                       Illegal Dumping          ESD Complaint/Report  2019-04-03T00:00:00  ... -117.114598               9.0            56.0         Mid-City:City Heights                     NaN     FO Self Generate                    NaN                                                NaN
+21              2553546                        NaN             4.030012e+10  2019-04-03T08:40:00            0.0                 Sidewalk Repair Issue                           TSW                  NaN  ... -117.115715               9.0            56.0         Mid-City:City Heights                     NaN                Phone                    NaN                           50/50 COST SHARE PROGRAM
+22              2553543                        NaN                      NaN  2019-04-03T08:39:00            0.0                 Sidewalk Repair Issue                           TSW                  NaN  ... -117.195149               1.0            51.0                  Del Mar Mesa                     NaN                  Web                    NaN  There are numerous problems in this area.  The...
+23              2553544                        NaN                      NaN  2019-04-03T08:39:00            0.0                     72 Hour Violation                       Parking                  NaN  ... -117.084218               4.0            11.0         Encanto Neighborhoods                     NaN               Mobile                    NaN                                                NaN
+24              2553542                        NaN                      NaN  2019-04-03T08:38:00            0.0                      Graffiti Removal                           TSW                  NaN  ... -117.063775               4.0            44.0        Skyline-Paradise Hills                     NaN               Mobile                    NaN                           Submitted by Urban Corps
+25              2553541                        NaN                      NaN  2019-04-03T08:37:00            0.0                       Illegal Dumping          ESD Complaint/Report                  NaN  ... -117.114043               9.0            56.0         Mid-City:City Heights                     NaN     FO Self Generate                    NaN                                                NaN
+26              2553540                  2531641.0                      NaN  2019-04-03T08:36:00            0.0                      Street Light Out                           TSW                  NaN  ... -117.215942               1.0            21.0                 Carmel Valley                     NaN               Mobile                    NaN                                                NaN
+27              2553538                        NaN                      NaN  2019-04-03T08:35:00            0.0           Potential Missed Collection          ESD Complaint/Report                  NaN  ... -117.104023               9.0            37.0        Southeastern San Diego                     NaN                Phone                    NaN             Missed Refuse Street has been pick  up
+28              2553539                        NaN                      NaN  2019-04-03T08:35:00            0.0                       Illegal Dumping          ESD Complaint/Report  2019-04-03T00:00:00  ... -117.114331               9.0            56.0         Mid-City:City Heights                     NaN     FO Self Generate                    NaN                                                NaN
+29              2553537                        NaN                      NaN  2019-04-03T08:34:00            0.0                     72 Hour Violation                       Parking                  NaN  ... -117.188755               1.0            99.0                    University                     NaN               Mobile                    NaN  Encampment. Trailer, vehicles, tarps, trash. R...
+..                  ...                        ...                      ...                  ...            ...                                   ...                           ...                  ...  ...         ...               ...             ...                           ...                     ...                  ...                    ...                                                ...
+469             2553035                        NaN                      NaN  2019-04-02T15:44:00            1.0   Graffiti Removal - Code Enforcement                           TSW                  NaN  ... -117.150457               3.0             4.0                      Downtown                     NaN               Mobile                    NaN               Graffiti on windows of vacant retail
+470             2553033                        NaN                      NaN  2019-04-02T15:43:00            NaN                 Sidewalk Repair Issue                           TSW  2019-04-02T00:00:00  ... -117.103127               8.0            37.0        Southeastern San Diego                     NaN                  Web     Water Repair (PUD)  Raised sidewalk due to uneven old rusty water ...
+471             2553031                        NaN                      NaN  2019-04-02T15:42:00            0.0              Tree/Limb Fallen/Hanging                           TSW  2019-04-02T00:00:00  ... -117.067691               8.0            25.0              Otay Mesa-Nestor                     NaN                  Web                    NaN                                    Tree fell down.
+472             2553026                        NaN                      NaN  2019-04-02T15:39:00            1.0                     72 Hour Violation                       Parking                  NaN  ... -117.022310               7.0            20.0                        Navajo                     NaN                  Web                    NaN  Dropped by female late night. March 28. Party ...
+473             2553029                        NaN                      NaN  2019-04-02T15:39:00            1.0                       Illegal Dumping          ESD Complaint/Report                  NaN  ... -117.109573               9.0            56.0         Mid-City:City Heights                     NaN                  Web                    NaN  I've filed 2 previous reports:  02532968 and o...
+474             2553024                        NaN             4.030012e+10  2019-04-02T15:35:00            1.0               Traffic Sign - Maintain                           TSW                  NaN  ... -117.065905               7.0            20.0                        Navajo                     NaN                  Web                    NaN  "Lambda" street sign at the corner of Theta Pl...
+475             2553020                        NaN                      NaN  2019-04-02T15:31:00            1.0                     Missed Collection          ESD Complaint/Report                  NaN  ... -117.148052               6.0            15.0                     Mira Mesa                     NaN                  Web                    NaN               Recycling Trash not collected today.
+476             2553019                        NaN                      NaN  2019-04-02T15:30:00            1.0  Trim Tree for Peds/Vehicle Clearance                           TSW                  NaN  ... -117.098143               9.0            56.0         Mid-City:City Heights                     NaN                  Web                    NaN  The weeds should be trimmed. Let me know if th...
+477             2553016                        NaN                      NaN  2019-04-02T15:27:00            1.0                       Illegal Dumping          ESD Complaint/Report                  NaN  ... -117.038911               4.0            44.0        Skyline-Paradise Hills                     NaN               Mobile                    NaN                                                NaN
+478             2553015                        NaN                      NaN  2019-04-02T15:26:00            1.0                Parking Zone Violation                       Parking                  NaN  ... -117.114080               3.0            59.0       Mid-City:Normal Heights                     NaN               Mobile                    NaN                                  Handicap blocking
+479             2553012                        NaN             4.030012e+10  2019-04-02T15:24:00            1.0           Traffic Signal Timing Issue                           TSW                  NaN  ... -117.170542               6.0            15.0                     Mira Mesa                     NaN               Mobile                    NaN  The left turn signal on to Camino Santa Fe is ...
+480             2553010                        NaN                      NaN  2019-04-02T15:21:00            1.0                     Missed Collection          ESD Complaint/Report                  NaN  ... -117.238274               2.0            30.0                     Peninsula                     NaN                  Web                    NaN                Trash is full and was not collected
+481             2553009                        NaN                      NaN  2019-04-02T15:20:00            1.0                              Out Late          ESD Complaint/Report                  NaN  ... -117.241409               2.0            27.0                 Pacific Beach                     NaN                Phone                    NaN  Resident claims they just moved in yesterday a...
+482             2553007                        NaN                      NaN  2019-04-02T15:19:00            1.0                     72 Hour Violation                       Parking                  NaN  ... -117.110987               5.0            29.0            Rancho Penasquitos                     NaN               Mobile                    NaN                                      Chevrolet suv
+483             2553008                        NaN                      NaN  2019-04-02T15:19:00            1.0                     72 Hour Violation                       Parking                  NaN  ... -117.106730               9.0            58.0  Mid-City:Kensington-Talmadge                     NaN                  Web                    NaN  Car is abandoned. Has not move for 3 weeks. We...
+484             2553006                        NaN                      NaN  2019-04-02T15:18:00            1.0          Illegal Dumping from Vehicle          ESD Complaint/Report                  NaN  ... -117.086299               4.0            11.0         Encanto Neighborhoods                     NaN                  Web                    NaN  Furniture dumped on sidewalk where children wa...
+485             2553004                        NaN                      NaN  2019-04-02T15:17:00            NaN                                 OTHER                           TSW  2019-04-02T00:00:00  ... -117.059860               9.0            57.0         Mid-City:Eastern Area                     NaN               Mobile  Police CRO ? Mid-City                                                NaN
+486             2553001                        NaN                      NaN  2019-04-02T15:15:00            1.0          Illegal Dumping from Vehicle          ESD Complaint/Report                  NaN  ... -117.060957               4.0            44.0        Skyline-Paradise Hills                     NaN                  Web                    NaN  Two large 40' dumpsters left out and now being...
+487             2553000                        NaN                      NaN  2019-04-02T15:14:00            1.0                     Missed Collection          ESD Complaint/Report                  NaN  ... -117.237895               2.0            30.0                     Peninsula                     NaN                  Web                    NaN          Appears the entire cul de sac was missed.
+488             2552997                        NaN                      NaN  2019-04-02T15:12:00            1.0                      Graffiti Removal                           TSW                  NaN  ... -117.111026               3.0            59.0       Mid-City:Normal Heights                     NaN               Mobile                    NaN                   Graffiti on street sweeping sign
+489             2552998                        NaN                      NaN  2019-04-02T15:12:00            1.0                     Missed Collection          ESD Complaint/Report                  NaN  ... -117.114457               5.0            29.0            Rancho Penasquitos                     NaN                Phone                    NaN                                     Missed Recycle
+490             2552999                  2536863.0                      NaN  2019-04-02T15:12:00            1.0                    Container Left Out          ESD Complaint/Report                  NaN  ... -117.237399               2.0            27.0                 Pacific Beach                     NaN               Mobile                    NaN  Cans never returned to property inducing scave...
+491             2552995                        NaN                      NaN  2019-04-02T15:08:00            1.0                     Missed Collection          ESD Complaint/Report                  NaN  ... -117.129256               5.0            29.0            Rancho Penasquitos                     NaN                Phone                    NaN  Missed trash,EMPTY and REMOVE, trash can is br...
+492             2552993                        NaN                      NaN  2019-04-02T15:04:00            1.0           Potential Missed Collection          ESD Complaint/Report                  NaN  ... -117.254281               2.0            18.0                 Mission Beach                     NaN                Phone                    NaN                                      Missed Refuse
+493             2552994                        NaN             4.030012e+10  2019-04-02T15:04:00            1.0                               Pothole                           TSW                  NaN  ... -117.241978               1.0            10.0                      La Jolla                     NaN                  Web                    NaN  multiple potholes as soon as you turn right on...
+494             2552992                        NaN                      NaN  2019-04-02T15:02:00            1.0                     Missed Collection          ESD Complaint/Report                  NaN  ... -117.072306               5.0            31.0               Rancho Bernardo                     NaN                Phone                    NaN                                             Missed
+495             2552990                        NaN             4.030012e+10  2019-04-02T15:01:00            1.0                    Remove/Spray Weeds                           TSW                  NaN  ... -117.093606               4.0            11.0         Encanto Neighborhoods                     NaN                Phone                    NaN                                 VISIBILITY BLOCKED
+496             2552988                        NaN                      NaN  2019-04-02T14:59:00            1.0                     Missed Collection          ESD Complaint/Report                  NaN  ... -117.104552               5.0             9.0           Miramar Ranch North                     NaN                Phone                    NaN                                       Missed trash
+497             2552989                        NaN                      NaN  2019-04-02T14:59:00            1.0           Potential Missed Collection          ESD Complaint/Report                  NaN  ... -117.139045               6.0            29.0            Rancho Penasquitos                     NaN                  Web                    NaN             Recyclable (blue) bin was not emptied!
+498             2552986                        NaN             4.030012e+10  2019-04-02T14:58:00            1.0       Guardrails/Barrier Metal/Wooden                           TSW                  NaN  ... -117.268495               1.0            10.0                      La Jolla                     NaN               Mobile                    NaN                      The post is rotten and unsafe
+
+[499 rows x 18 columns]
+
+
+
+
+
+
+
+
+
+
+
+
+
+df_list = [] 
+
+# Load each object from s3
+for file in request_files:
+    s3_day_reqs = s3.get_object(Bucket='gid-requests', 
+                                Key=file['Key'])
+    # Read the DataFrame into pandas, append it to the list
+    day_reqs = pd.read_csv(s3_day_reqs['Body'])
+    df_list.append(day_reqs)
+
+# Concatenate all the DataFrames in the list
+all_reqs = pd.concat(df_list)
+
+# Preview the DataFrame
+all_reqs.head()
+
+   service_request_id  service_request_parent_id  sap_notification_number   requested_datetime  case_age_days       service_name      case_record_type     updated_datetime      status        lat        long  council_district  comm_plan_code         comm_plan_name park_name          case_origin referred_department                                 public_description
+0             2553572                        NaN                      NaN  2019-04-03T08:58:00            0.0  72 Hour Violation               Parking                  NaN         New  32.830800 -117.149470               6.0            50.0            Kearny Mesa       NaN               Mobile                 NaN                           72hr plus tire violation
+1             2553573                        NaN                      NaN  2019-04-03T08:58:00            0.0   Graffiti Removal                   TSW  2019-04-03T00:00:00      Closed  32.755051 -117.109883               9.0            56.0  Mid-City:City Heights       NaN  Crew/Self Generated                 NaN            Graffiti Reported at 3927 El Cajon Blvd
+2             2553570                        NaN                      NaN  2019-04-03T08:55:00            0.0  Missed Collection  ESD Complaint/Report                  NaN  In Process  32.778948 -117.252362               2.0            18.0          Mission Beach       NaN                Phone                 NaN                                       Missed trash
+3             2553568                  2538156.0                      NaN  2019-04-03T08:54:00            0.0   Street Light Out                   TSW                  NaN  In Process  32.821258 -117.098553               7.0            47.0            Tierrasanta       NaN                  Web                 NaN  ALL 4 STREET LIGHTS ON THE SIGNAL STANDARDS AR...
+4             2553565                        NaN                      NaN  2019-04-03T08:53:00            0.0   Graffiti Removal                   TSW                  NaN  In Process  32.714783 -117.156827               3.0             4.0               Downtown       NaN               Mobile                 NaN                                                NaN
+
+
+
+You just read a bunch of files and combined them together. This is a common thing in data engineering - enjoy this power Cloud Magician!
+
+
+
+
