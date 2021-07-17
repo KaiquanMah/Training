@@ -1,0 +1,126 @@
+In the previous two exercises, Sam has:
+Read the daily Get It Done request logs for February.
+Combined them into a single DataFrame.
+Generated a DataFrame with aggregated metrics (request counts by type)
+Wrote that DataFrame to a CSV and HTML final report files.
+Uploaded these files to S3.
+
+
+
+Now, she wants these files to be accessible through the directory listing. Currently, it only shows links for January reports:< Screenshot of Get It Done reports listing>
+She has created the boto3 S3 client and stored it in the s3 variable.
+Help Sam generate a new directory listing with the February's uploaded reports and store it in a DataFrame.
+
+
+List the 'gid-reports' bucket objects starting with '2019/'.
+Convert the content of the objects list to a DataFrame.
+Create a column 'Link' that contains Public Object URL + key.
+Preview the DataFrame.
+
+
+
+
+
+
+
+
+
+objects_list
+{'Contents': [{'ETag': '"b36c99ee72254e6c30738e4177947c6d"',
+   'Key': '2019/feb/final_chart.html',
+   'LastModified': datetime.datetime(2021, 7, 17, 6, 35, 49, 757000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 7277,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2019/feb/final_report.csv',
+   'LastModified': datetime.datetime(2021, 7, 17, 6, 35, 49, 750000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"03baa6b325d75dff02ef83af39a8205f"',
+   'Key': '2019/feb/final_report.html',
+   'LastModified': datetime.datetime(2021, 7, 17, 6, 35, 49, 753000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 536,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"b36c99ee72254e6c30738e4177947c6d"',
+   'Key': '2019/jan/final_chart.html',
+   'LastModified': datetime.datetime(2021, 7, 17, 6, 35, 49, 746000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 7277,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"1519c57b81bb9257756c04dee24dd728"',
+   'Key': '2019/jan/final_report.csv',
+   'LastModified': datetime.datetime(2021, 7, 17, 6, 35, 49, 738000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 209,
+   'StorageClass': 'STANDARD'},
+  {'ETag': '"03baa6b325d75dff02ef83af39a8205f"',
+   'Key': '2019/jan/final_report.html',
+   'LastModified': datetime.datetime(2021, 7, 17, 6, 35, 49, 743000, tzinfo=tzlocal()),
+   'Owner': {'DisplayName': 'webfile',
+    'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'},
+   'Size': 536,
+   'StorageClass': 'STANDARD'}],
+ 'Delimiter': 'None',
+ 'IsTruncated': False,
+ 'MaxKeys': 1000,
+ 'Name': 'gid-reports',
+ 'Prefix': '2019/',
+ 'ResponseMetadata': {'HTTPHeaders': {},
+  'HTTPStatusCode': 200,
+  'RetryAttempts': 0}}
+  
+  
+  
+  
+  
+  
+  
+objects_df
+                                 ETag                         Key                     LastModified                                                                                                 Owner  Size StorageClass
+0  "b36c99ee72254e6c30738e4177947c6d"  2019/feb/final_chart.html  2021-07-17 06:35:49.757000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  7277  STANDARD   
+1  "1519c57b81bb9257756c04dee24dd728"  2019/feb/final_report.csv  2021-07-17 06:35:49.750000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  209   STANDARD   
+2  "03baa6b325d75dff02ef83af39a8205f"  2019/feb/final_report.html 2021-07-17 06:35:49.753000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  536   STANDARD   
+3  "b36c99ee72254e6c30738e4177947c6d"  2019/jan/final_chart.html  2021-07-17 06:35:49.746000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  7277  STANDARD   
+4  "1519c57b81bb9257756c04dee24dd728"  2019/jan/final_report.csv  2021-07-17 06:35:49.738000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  209   STANDARD   
+5  "03baa6b325d75dff02ef83af39a8205f"  2019/jan/final_report.html 2021-07-17 06:35:49.743000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  536   STANDARD   
+
+
+
+
+
+
+
+
+
+# List the gid-reports bucket objects starting with 2019/
+objects_list = s3.list_objects(Bucket='gid-reports', Prefix='2019/')
+
+# Convert the response contents to DataFrame
+objects_df = pd.DataFrame(objects_list['Contents'])
+
+# Create a column "Link" that contains Public Object URL
+base_url = "http://gid-reports.s3.amazonaws.com/"
+objects_df['Link'] = base_url + objects_df['Key']
+
+# Preview the resulting DataFrame
+objects_df.head()
+
+                                 ETag                         Key                     LastModified                                                                                                 Owner  Size StorageClass                                                            Link
+0  "b36c99ee72254e6c30738e4177947c6d"  2019/feb/final_chart.html  2021-07-17 06:35:49.757000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  7277  STANDARD     http://gid-reports.s3.amazonaws.com/2019/feb/final_chart.html 
+1  "1519c57b81bb9257756c04dee24dd728"  2019/feb/final_report.csv  2021-07-17 06:35:49.750000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  209   STANDARD     http://gid-reports.s3.amazonaws.com/2019/feb/final_report.csv 
+2  "03baa6b325d75dff02ef83af39a8205f"  2019/feb/final_report.html 2021-07-17 06:35:49.753000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  536   STANDARD     http://gid-reports.s3.amazonaws.com/2019/feb/final_report.html
+3  "b36c99ee72254e6c30738e4177947c6d"  2019/jan/final_chart.html  2021-07-17 06:35:49.746000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  7277  STANDARD     http://gid-reports.s3.amazonaws.com/2019/jan/final_chart.html 
+4  "1519c57b81bb9257756c04dee24dd728"  2019/jan/final_report.csv  2021-07-17 06:35:49.738000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  209   STANDARD     http://gid-reports.s3.amazonaws.com/2019/jan/final_report.csv 
+
+
+
+Congratulations! You helped Sam update the directory lesting! Now, let's help her generate the HTML file, upload it, and complete the pipeline!
+
