@@ -1,0 +1,52 @@
+Sam is almost done! In the last exercise, she generated a new directory listing, storing it in the objects_df variable:
+<Screenshot of objects_df>
+
+Sam has created the boto3 S3 client in the s3 variable. objects_df is populated with the new directory listing from the previous exercise.
+The next step is to write objects_df to an HTML file, and upload it to S3 replacing the current 'index.html' file.
+Help Sam update the directory listing, letting the public access reports for February as well as January!
+
+
+Write objects_df to an HTML file 'report_listing.html' with clickable links.
+The HTML file should only contain 'Link', 'LastModified', and 'Size' columns.
+Overwrite the 'index.html' on S3 by uploading the new version of the file.
+
+
+
+
+objects_df
+
+                                 ETag                         Key                     LastModified                                                                                                 Owner  Size StorageClass                                                            Link
+0  "4cf8e81b6a4193934bd260d8c9e10104"  2019/feb/final_chart.html  2021-07-17 06:38:31.253000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  7277  STANDARD     http://gid-reports.s3.amazonaws.com/2019/feb/final_chart.html 
+1  "1519c57b81bb9257756c04dee24dd728"  2019/feb/final_report.csv  2021-07-17 06:38:31.246000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  209   STANDARD     http://gid-reports.s3.amazonaws.com/2019/feb/final_report.csv 
+2  "03baa6b325d75dff02ef83af39a8205f"  2019/feb/final_report.html 2021-07-17 06:38:31.250000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  536   STANDARD     http://gid-reports.s3.amazonaws.com/2019/feb/final_report.html
+3  "4cf8e81b6a4193934bd260d8c9e10104"  2019/jan/final_chart.html  2021-07-17 06:38:31.243000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  7277  STANDARD     http://gid-reports.s3.amazonaws.com/2019/jan/final_chart.html 
+4  "1519c57b81bb9257756c04dee24dd728"  2019/jan/final_report.csv  2021-07-17 06:38:31.235000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  209   STANDARD     http://gid-reports.s3.amazonaws.com/2019/jan/final_report.csv 
+5  "03baa6b325d75dff02ef83af39a8205f"  2019/jan/final_report.html 2021-07-17 06:38:31.239000+00:00  {'DisplayName': 'webfile', 'ID': '75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06a'}  536   STANDARD     http://gid-reports.s3.amazonaws.com/2019/jan/final_report.html
+
+
+
+
+
+
+# Write objects_df to an HTML file
+objects_df.to_html('report_listing.html',
+                    # Set clickable links
+                    render_links=True,
+                    # Isolate the columns
+                    columns=['Link', 'LastModified', 'Size'])
+
+
+# Overwrite index.html key by uploading the new file
+s3.upload_file(
+              Filename='./report_listing.html', 
+              Key='index.html', 
+              Bucket='gid-reports',
+              ExtraArgs = {
+                'ContentType': 'text/html', 
+                'ACL': 'public-read'
+                     }
+              )
+
+
+
+Congratulations! The new index is up, and it includes the new reports!
