@@ -1,0 +1,101 @@
+In the last exercise, Sam downloaded the files for the month from the raw data bucket.
+Then she combined them all into one DataFrame that showcases all of the month's requests and requests type.
+
+
+She stored this DataFrame in the variable all_reqs and used pandas's groupby functionality to count requests by service name, generating a new DataFrame agg_df:
+service_name	count
+0	72 Hour Violation	2910
+1	Chain Link Fence Repair	90
+2	Collections Truck Spill	30
+3	Container Left Out	120
+4	Dead Animal	360
+
+
+She has already created the boto3 S3 client in the s3 variable.
+Help her publish this month's request statistics.
+Write agg_df to CSV and HTML files, and upload them to S3 as public files.
+
+
+Write CSV and HTML versions of agg_df and name them 'feb_final_report.csv' and 'feb_final_report.html' respectively.
+Upload both versions of agg_df to the gid-reports bucket and set them to public read.
+
+
+
+
+
+
+
+agg_df
+
+                            service_name  count
+0                      72 Hour Violation    388
+1                Chain Link Fence Repair     12
+2                Collections Truck Spill      4
+3                     Container Left Out     16
+4                            Dead Animal     48
+5                     Drain Maintenance      16
+6                           Encroachment      4
+7   Evaluate Tree for Removal/Root Prune      4
+8               Evaluate for Resurfacing      4
+9             Free Tree Planting Request      4
+10                      Graffiti Removal    272
+11   Graffiti Removal - Code Enforcement      4
+12       Guardrails/Barrier Metal/Wooden      8
+13                       Illegal Dumping    344
+14          Illegal Dumping from Vehicle     16
+15                                Litter      4
+16                     Missed Collection    148
+17                                 OTHER     16
+18                                 Other    128
+19        Other Right-of-Way Maintenance      4
+20                              Out Late      8
+21                       Over Irrigation      4
+22          Oversized Vehicle Complaints     16
+23                 Paint Curb - Maintain      4
+24             Paint Striping - Maintain     12
+25                Parking Zone Violation     24
+26                 Pavement Repair Issue      4
+27           Potential Missed Collection     20
+28                               Pothole    156
+29               Recycling Contamination      4
+30                    Remove/Spray Weeds     12
+31                            Scavenging     16
+32                 Sidewalk Repair Issue     60
+33        Street Light Knock Over/Damage      4
+34                      Street Light Out     32
+35            Street Light on During Day      4
+36               Street Litter Container      4
+37                       Street Sweeping      8
+38               Traffic Sign - Maintain     28
+39            Traffic Signal Head Turned      8
+40              Traffic Signal Light Out     16
+41           Traffic Signal Timing Issue     32
+42              Tree/Limb Fallen/Hanging     36
+43   Trim Tree - Blocking Traffic Device      4
+44  Trim Tree for Peds/Vehicle Clearance      8
+
+
+
+
+
+# Write agg_df to a CSV and HTML file with no border
+agg_df.to_csv('./feb_final_report.csv')
+agg_df.to_html('./feb_final_report.html', border=0)
+
+# Upload the generated CSV to the gid-reports bucket
+s3.upload_file(Filename='./feb_final_report.csv', 
+	           Key='2019/feb/final_report.html', 
+               Bucket='gid-reports',
+               ExtraArgs = {'ACL': 'public-read'})
+
+# Upload the generated HTML to the gid-reports bucket
+s3.upload_file(Filename='./feb_final_report.html', 
+	           Key='2019/feb/final_report.html', 
+               Bucket='gid-reports',
+               ExtraArgs = {'ContentType': 'text/html', 
+                            'ACL': 'public-read'})
+
+
+
+Excellent! You generated HTML and CSV, and uploaded them to S3. You also helped Sam upload the chart! Let's help her update the listing next!
+
