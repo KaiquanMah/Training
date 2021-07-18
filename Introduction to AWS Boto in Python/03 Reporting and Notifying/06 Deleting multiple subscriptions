@@ -1,0 +1,236 @@
+Now that Sam has a maturing notification system, she is learning that the types of alerts she sends do not bode well for text messaging.
+SMS alerts are great if the user can react that minute, but "We are 500 potholes behind" is not something that a Council Member can jump up and fix.
+She decides to remove all SMS subscribers from the streets_critical topic, but keep all email subscriptions.
+She created the boto3 SNS client in the sns variable, and the streets_critical topic ARN is in the str_critical_arn variable.
+In this exercise, you will help Sam remove all SMS subscribers and make this an email only alerting system.
+
+
+List subscriptions for 'streets_critical' topic.
+For each subscription, if the protocol is 'sms', unsubscribe.
+List subscriptions for 'streets_critical' topic in one line.
+Print the subscriptions
+
+
+
+# List subscriptions for streets_critical topic.
+response = sns.list_subscriptions_by_topic(TopicArn = str_critical_arn)
+
+
+response
+{'ResponseMetadata': {'HTTPHeaders': {'server': 'amazon.com'},
+  'HTTPStatusCode': 200,
+  'RequestId': '384ac68d-3775-11df-8963-01868b7c937a',
+  'RetryAttempts': 0},
+ 'Subscriptions': [{'Endpoint': 'js@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:4f90d06f-358e-4ea4-903d-7896d5f1a6f7',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'whoami@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:265afbff-9335-44cf-b8ca-b4e8798fa0d3',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'Evely@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:689978fb-d531-4e03-aef0-d24c0021a165',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'masdfsx@maksimize.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:1b914dbe-a9bf-47a4-aa76-c4a917ddf4b3',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'fanndyma3@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:6621457c-c5fd-40a0-af6e-35db13f1c91f',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'whddsfsdoami@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:ab6815d4-109e-430d-a08a-80ca2c6405ca',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'msdfsdfsdax@maksimize.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:d313dfa0-7aef-427f-94c9-0fbb270e2c3f',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': '+11224567890',
+   'Owner': '',
+   'Protocol': 'sms',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:e4084d48-741e-4a2e-abdc-750c0cdbe402',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': '+11534567890',
+   'Owner': '',
+   'Protocol': 'sms',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:db3c9c3c-a8ab-4488-aa91-fe9c169e9844',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': '+11234067890',
+   'Owner': '',
+   'Protocol': 'sms',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:fb50649d-6212-49b7-951c-c71a26045c94',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': '+11234517890',
+   'Owner': '',
+   'Protocol': 'sms',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:cf746ef4-f731-4d0b-a67f-cb4faa802b56',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': '+11234597890',
+   'Owner': '',
+   'Protocol': 'sms',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:c52f37c3-562c-4d64-b585-4540c755dd0b',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}]}
+
+
+
+
+
+
+
+response['Subscriptions']
+[{'Endpoint': 'js@fake.com',
+  'Owner': '',
+  'Protocol': 'email',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:4f90d06f-358e-4ea4-903d-7896d5f1a6f7',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': 'whoami@fake.com',
+  'Owner': '',
+  'Protocol': 'email',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:265afbff-9335-44cf-b8ca-b4e8798fa0d3',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': 'Evely@fake.com',
+  'Owner': '',
+  'Protocol': 'email',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:689978fb-d531-4e03-aef0-d24c0021a165',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': 'masdfsx@maksimize.com',
+  'Owner': '',
+  'Protocol': 'email',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:1b914dbe-a9bf-47a4-aa76-c4a917ddf4b3',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': 'fanndyma3@fake.com',
+  'Owner': '',
+  'Protocol': 'email',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:6621457c-c5fd-40a0-af6e-35db13f1c91f',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': 'whddsfsdoami@fake.com',
+  'Owner': '',
+  'Protocol': 'email',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:ab6815d4-109e-430d-a08a-80ca2c6405ca',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': 'msdfsdfsdax@maksimize.com',
+  'Owner': '',
+  'Protocol': 'email',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:d313dfa0-7aef-427f-94c9-0fbb270e2c3f',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': '+11224567890',
+  'Owner': '',
+  'Protocol': 'sms',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:e4084d48-741e-4a2e-abdc-750c0cdbe402',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': '+11534567890',
+  'Owner': '',
+  'Protocol': 'sms',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:db3c9c3c-a8ab-4488-aa91-fe9c169e9844',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': '+11234067890',
+  'Owner': '',
+  'Protocol': 'sms',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:fb50649d-6212-49b7-951c-c71a26045c94',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': '+11234517890',
+  'Owner': '',
+  'Protocol': 'sms',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:cf746ef4-f731-4d0b-a67f-cb4faa802b56',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+ {'Endpoint': '+11234597890',
+  'Owner': '',
+  'Protocol': 'sms',
+  'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:c52f37c3-562c-4d64-b585-4540c755dd0b',
+  'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}]
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+# For each subscription, if the protocol is SMS, unsubscribe
+for sub in response['Subscriptions']:
+  if sub['Protocol'] == 'sms':
+	  sns.unsubscribe(SubscriptionArn=sub['SubscriptionArn'])
+
+# List subscriptions for streets_critical topic in one line
+subs = sns.list_subscriptions_by_topic(TopicArn=str_critical_arn)['Subscriptions']
+
+
+sns.list_subscriptions_by_topic(TopicArn=str_critical_arn)
+{'ResponseMetadata': {'HTTPHeaders': {'server': 'amazon.com'},
+  'HTTPStatusCode': 200,
+  'RequestId': '384ac68d-3775-11df-8963-01868b7c937a',
+  'RetryAttempts': 0},
+ 'Subscriptions': [{'Endpoint': 'js@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:4f90d06f-358e-4ea4-903d-7896d5f1a6f7',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'whoami@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:265afbff-9335-44cf-b8ca-b4e8798fa0d3',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'Evely@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:689978fb-d531-4e03-aef0-d24c0021a165',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'masdfsx@maksimize.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:1b914dbe-a9bf-47a4-aa76-c4a917ddf4b3',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'fanndyma3@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:6621457c-c5fd-40a0-af6e-35db13f1c91f',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'whddsfsdoami@fake.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:ab6815d4-109e-430d-a08a-80ca2c6405ca',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'},
+  {'Endpoint': 'msdfsdfsdax@maksimize.com',
+   'Owner': '',
+   'Protocol': 'email',
+   'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:d313dfa0-7aef-427f-94c9-0fbb270e2c3f',
+   'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}]}
+   
+   
+   
+
+
+# Print the subscriptions
+print(subs)
+
+
+<script.py> output:
+    [{'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:e65b4eef-16bb-449c-9ec1-206d5b3879c9', 'Owner': '', 'Protocol': 'email', 'Endpoint': 'js@fake.com', 'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}, {'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:3059e41c-4ac3-482e-97ea-635e1c554059', 'Owner': '', 'Protocol': 'email', 'Endpoint': 'whoami@fake.com', 'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}, {'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:00029bc8-2805-4929-ad98-88b751f12ebc', 'Owner': '', 'Protocol': 'email', 'Endpoint': 'Evely@fake.com', 'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}, {'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:4c162a8e-0f3d-4d3a-94a0-e98a44f5c9ce', 'Owner': '', 'Protocol': 'email', 'Endpoint': 'masdfsx@maksimize.com', 'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}, {'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:e685508e-fc33-401d-9c45-7086235531fb', 'Owner': '', 'Protocol': 'email', 'Endpoint': 'fanndyma3@fake.com', 'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}, {'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:ab9010ff-17e4-4ade-a83f-a23fecfe7969', 'Owner': '', 'Protocol': 'email', 'Endpoint': 'whddsfsdoami@fake.com', 'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}, {'SubscriptionArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical:3f1432dc-699d-4cc5-9028-2b3ddebac08d', 'Owner': '', 'Protocol': 'email', 'Endpoint': 'msdfsdfsdax@maksimize.com', 'TopicArn': 'arn:aws:sns:us-east-1:123456789012:streets_critical'}]
+
+Perfect! You just helped Sam clean out all SMS subscriptions for the streets_critical topic. Now, let's have her send some notifications!
+
+
+
+
