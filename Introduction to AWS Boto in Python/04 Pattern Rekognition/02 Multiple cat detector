@@ -1,0 +1,253 @@
+After using the Cat Detector for a bit, the Animal Control team found that it was inefficient for them to pursue one cat at a time. It would be better if they could find clusters of cats.
+They asked if Sam could add the count of cats detected to the message in the alerts they receive. They also asked her to lower the confidence floor, allowing the system to have more false positives.
+Cats detected by Rekognition
+
+
+
+Sam has already:
+Created the Rekognition client.
+Called .detect_labels() with the Bucket and Key of the image on S3.
+Stored the result in the response variable.
+Help Sam save cat lives! Help her count the cats in each image and include that in the alert to Animal Control!
+
+
+
+Iterate over each element of the 'Labels' key in response.
+Once you encounter a label with the name 'Cat', iterate over the label's instance.
+If an instance's confidence level exceeds 85, increment cat_counts by 1.
+Print the final cat count.
+
+
+
+
+
+response
+
+{'LabelModelVersion': '2.0',
+ 'Labels': [{'Confidence': 98.1473617553711,
+   'Instances': [],
+   'Name': 'Animal',
+   'Parents': []},
+  {'Confidence': 98.1473617553711,
+   'Instances': [],
+   'Name': 'Pet',
+   'Parents': [{'Name': 'Animal'}]},
+  {'Confidence': 98.1473617553711,
+   'Instances': [],
+   'Name': 'Mammal',
+   'Parents': [{'Name': 'Animal'}]},
+  {'Confidence': 98.1473617553711,
+   'Instances': [{'BoundingBox': {'Height': 0.4400675296783447,
+      'Left': 0.4298146069049835,
+      'Top': 0.5588443279266357,
+      'Width': 0.15593814849853516},
+     'Confidence': 96.06471252441406},
+    {'BoundingBox': {'Height': 0.27956825494766235,
+      'Left': 0.2452712059020996,
+      'Top': 0.7148914337158203,
+      'Width': 0.2575285732746124},
+     'Confidence': 94.57168579101562},
+    {'BoundingBox': {'Height': 0.27789002656936646,
+      'Left': 0.3549089729785919,
+      'Top': 0.20988109707832336,
+      'Width': 0.1072797030210495},
+     'Confidence': 90.86100769042969},
+    {'BoundingBox': {'Height': 0.24573557078838348,
+      'Left': 0.8856199383735657,
+      'Top': 0.7531762719154358,
+      'Width': 0.11156558990478516},
+     'Confidence': 87.62715911865234},
+    {'BoundingBox': {'Height': 0.31820929050445557,
+      'Left': 0.7142759561538696,
+      'Top': 0.5683771371841431,
+      'Width': 0.15374170243740082},
+     'Confidence': 87.27527618408203},
+    {'BoundingBox': {'Height': 0.24135355651378632,
+      'Left': 0.645203709602356,
+      'Top': 0.45182570815086365,
+      'Width': 0.1061469316482544},
+     'Confidence': 87.19461822509766},
+    {'BoundingBox': {'Height': 0.42378097772598267,
+      'Left': 0.19405697286128998,
+      'Top': 0.44934412837028503,
+      'Width': 0.22618338465690613},
+     'Confidence': 86.35213470458984},
+    {'BoundingBox': {'Height': 0.2561591565608978,
+      'Left': 0.4407610595226288,
+      'Top': 0.3595484793186188,
+      'Width': 0.11101195961236954},
+     'Confidence': 85.98690032958984},
+    {'BoundingBox': {'Height': 0.495015949010849,
+      'Left': 0.835455060005188,
+      'Top': 0.3621852993965149,
+      'Width': 0.15247005224227905},
+     'Confidence': 84.67546844482422},
+    {'BoundingBox': {'Height': 0.2945995330810547,
+      'Left': 0.0,
+      'Top': 0.5462849140167236,
+      'Width': 0.06749594956636429},
+     'Confidence': 84.29618072509766},
+    {'BoundingBox': {'Height': 0.114194355905056,
+      'Left': 0.22061434388160706,
+      'Top': 0.12778164446353912,
+      'Width': 0.09530965238809586},
+     'Confidence': 82.56605529785156},
+    {'BoundingBox': {'Height': 0.2702476382255554,
+      'Left': 0.25506067276000977,
+      'Top': 0.004880131222307682,
+      'Width': 0.19860409200191498},
+     'Confidence': 81.89949035644531},
+    {'BoundingBox': {'Height': 0.36641788482666016,
+      'Left': 0.5558294057846069,
+      'Top': 0.6324939727783203,
+      'Width': 0.2083321511745453},
+     'Confidence': 80.85406494140625},
+    {'BoundingBox': {'Height': 0.2951768934726715,
+      'Left': 0.31174227595329285,
+      'Top': 0.0642126202583313,
+      'Width': 0.13007120788097382},
+     'Confidence': 80.82664489746094},
+    {'BoundingBox': {'Height': 0.2800655663013458,
+      'Left': 0.08394046127796173,
+      'Top': 0.04176928475499153,
+      'Width': 0.09795073419809341},
+     'Confidence': 79.87701416015625},
+    {'BoundingBox': {'Height': 0.19684797525405884,
+      'Left': 0.7961733341217041,
+      'Top': 0.027645215392112732,
+      'Width': 0.19354069232940674},
+     'Confidence': 79.6937484741211},
+    {'BoundingBox': {'Height': 0.3074878752231598,
+      'Left': 0.23348453640937805,
+      'Top': 0.3234264850616455,
+      'Width': 0.1102193221449852},
+     'Confidence': 78.34654998779297},
+    {'BoundingBox': {'Height': 0.1879635751247406,
+      'Left': 0.636184573173523,
+      'Top': 0.2900664508342743,
+      'Width': 0.11567041277885437},
+     'Confidence': 77.96302032470703},
+    {'BoundingBox': {'Height': 0.23907782137393951,
+      'Left': 0.6206341981887817,
+      'Top': 0.758401095867157,
+      'Width': 0.15441960096359253},
+     'Confidence': 77.70777130126953},
+    {'BoundingBox': {'Height': 0.3304212987422943,
+      'Left': 0.4913797676563263,
+      'Top': 0.18654800951480865,
+      'Width': 0.10969629138708115},
+     'Confidence': 77.46805572509766},
+    {'BoundingBox': {'Height': 0.2420874834060669,
+      'Left': 0.540132999420166,
+      'Top': 0.45033717155456543,
+      'Width': 0.10464037954807281},
+     'Confidence': 76.001708984375},
+    {'BoundingBox': {'Height': 0.4347103238105774,
+      'Left': 0.017932433634996414,
+      'Top': 0.4704182744026184,
+      'Width': 0.211409792304039},
+     'Confidence': 74.44437408447266},
+    {'BoundingBox': {'Height': 0.3922503590583801,
+      'Left': 0.11081186681985855,
+      'Top': 0.24274420738220215,
+      'Width': 0.130952388048172},
+     'Confidence': 68.8189697265625},
+    {'BoundingBox': {'Height': 0.23045645654201508,
+      'Left': 0.0021959838923066854,
+      'Top': 0.37253469228744507,
+      'Width': 0.1049380972981453},
+     'Confidence': 67.84264373779297},
+    {'BoundingBox': {'Height': 0.27958419919013977,
+      'Left': 0.198642298579216,
+      'Top': 0.6547092199325562,
+      'Width': 0.21386384963989258},
+     'Confidence': 67.28894805908203},
+    {'BoundingBox': {'Height': 0.27344122529029846,
+      'Left': 0.0011084035504609346,
+      'Top': 0.22927360236644745,
+      'Width': 0.12175732105970383},
+     'Confidence': 67.15418243408203},
+    {'BoundingBox': {'Height': 0.3202713131904602,
+      'Left': 0.8865485191345215,
+      'Top': 0.5929198861122131,
+      'Width': 0.11278483271598816},
+     'Confidence': 66.72061157226562},
+    {'BoundingBox': {'Height': 0.246465802192688,
+      'Left': 0.6473951935768127,
+      'Top': 0.7469179034233093,
+      'Width': 0.23291796445846558},
+     'Confidence': 65.89128112792969},
+    {'BoundingBox': {'Height': 0.4312031865119934,
+      'Left': 0.7321408987045288,
+      'Top': 0.23686571419239044,
+      'Width': 0.09686686098575592},
+     'Confidence': 64.2631607055664},
+    {'BoundingBox': {'Height': 0.23986683785915375,
+      'Left': 0.5878943800926208,
+      'Top': 0.26368674635887146,
+      'Width': 0.08268440514802933},
+     'Confidence': 62.16483688354492},
+    {'BoundingBox': {'Height': 0.6576277017593384,
+      'Left': 0.7869774699211121,
+      'Top': 0.12555097043514252,
+      'Width': 0.21235588192939758},
+     'Confidence': 54.951717376708984}],
+   'Name': 'Cat',
+   'Parents': [{'Name': 'Animal'}, {'Name': 'Pet'}, {'Name': 'Mammal'}]},
+  {'Confidence': 98.1473617553711,
+   'Instances': [],
+   'Name': 'Manx',
+   'Parents': [{'Name': 'Animal'},
+    {'Name': 'Pet'},
+    {'Name': 'Mammal'},
+    {'Name': 'Cat'}]}],
+ 'ResponseMetadata': {'HTTPHeaders': {'connection': 'keep-alive',
+   'content-length': '5401',
+   'content-type': 'application/x-amz-json-1.1',
+   'date': 'Sun, 24 Feb 2019 18:06:36 GMT',
+   'x-amzn-requestid': 'ed059d12-385e-11e9-87fc-3108f3f87c5b'},
+  'HTTPStatusCode': 200,
+  'RequestId': 'ed059d12-385e-11e9-87fc-3108f3f87c5b',
+  'RetryAttempts': 0}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Create an empty counter variable
+cats_count = 0
+# Iterate over the labels in the response
+for label in response['Labels']:
+    # Find the cat label, look over the detected instances
+    if label['Name'] == 'Cat':
+        for instance in label['Instances']:
+            # Only count instances with confidence > 85
+            if (instance['Confidence'] > 85):
+                cats_count += 1
+# Print count of cats
+print(cats_count)
+
+
+
+
+<script.py> output:
+    8
+
+
+
+Meeeeeowwwwww! The City's cat rescue rate has significantly increased. Feral cats are being taken off the street, fed, cuddled, then adopted by happy humans!
+
