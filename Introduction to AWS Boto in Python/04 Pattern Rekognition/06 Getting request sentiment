@@ -1,0 +1,43 @@
+After successfully translating Get It Done cases for the Streets Director, he asked for one more thing. He really wants to understand how people in the City feel about his department's work. She believes she can answer that question via sentiment analysis of Get It Done requests. She has already loaded the CSV into the dumping_df variable and subset it to the following columns:
+Get It Done requests in many languages
+In this exercise, you will help Sam better understand the moods of the voices of the people that submit Get It Done cases, and whether they are coming into the interaction with the City in a positive mood or a negative one.
+
+
+Detect the sentiment of 'public_description' for every row.
+Store the result in the 'sentiment' column.
+
+
+response
+{'ResponseMetadata': {'HTTPHeaders': {'content-length': '162',
+   'content-type': 'application/x-amz-json-1.1',
+   'date': 'Wed, 19 Jun 2019 12:26:19 GMT',
+   'x-amzn-requestid': '70f7266a-928d-11e9-a344-d353a8b9fbf7'},
+  'HTTPStatusCode': 200,
+  'RequestId': '70f7266a-928d-11e9-a344-d353a8b9fbf7',
+  'RetryAttempts': 0},
+ 'Sentiment': 'NEUTRAL',
+ 'SentimentScore': {'Mixed': 0.016489867120981216,
+  'Negative': 0.19806478917598724,
+  'Neutral': 0.6771729588508606,
+  'Positive': 0.10827238112688065}}
+
+
+
+for index, row in dumping_df.iterrows():
+  	# Get the translated_desc into a variable
+    description = dumping_df.loc[index, 'public_description']
+    if description != '':
+      	# Get the detect_sentiment response
+        response = comprehend.detect_sentiment(
+          Text=description, 
+          LanguageCode='en')
+        # Get the sentiment key value into sentiment column
+        dumping_df.loc[index, 'sentiment'] = response['Sentiment']
+# Preview the dataframe
+dumping_df.head()
+
+
+Now you know how people feel without ever talking to them. How do you feel about that? Let's put it all together!
+
+
+
