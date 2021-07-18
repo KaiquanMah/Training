@@ -1,0 +1,232 @@
+City planners have millions of images from truck cameras. Since the city does not keep a record of this data, parking regulations would be very valuable for planners to know.
+Sam found detect_text() in the boto3 Rekognition documentation. She is going to use it to extract text out of the images City planners provided.
+
+
+Sam has:
+Created the Rekognition client.
+Called .detect_text() and stored the result in response.
+Help Sam create a data source for parking regulations in the City. Use Rekognition's .detect_text() method to extract lines and words from images of parking signs.
+
+
+
+1
+Iterate over each detected text in response, and append each detected text to words if the text's type is 'WORD'.
+# Create empty list of words
+words = []
+# Iterate over the TextDetections in the response dictionary
+for text_detection in response['TextDetections']:
+  	# If TextDetection type is WORD, append it to words list
+    if text_detection['Type'] == 'WORD':
+        # Append the detected text
+        words.append(text_detection['DetectedText'])
+# Print out the words list
+print(words)
+
+<script.py> output:
+    ['NO', 'PARKING', '7', 'AM', 'TO', '12', 'NOON', 'MONDAY']
+    
+  
+
+
+2
+Iterate over each detected text in response, and append each detected text to lines if the text's type is 'LINE'.
+# Create empty list of lines
+lines = []
+# Iterate over the TextDetections in the response dictionary
+for text_detection in response['TextDetections']:
+  	# If TextDetection type is Line, append it to lines list
+    if text_detection['Type'] == 'LINE':
+        # Append the detected text
+        lines.append(text_detection['DetectedText'])
+# Print out the words list
+print(lines)
+
+<script.py> output:
+    ['NO PARKING', '7 AM', 'TO', '12 NOON', 'MONDAY']
+
+
+
+
+
+response
+{'ResponseMetadata': {'HTTPHeaders': {'connection': 'keep-alive',
+   'content-length': '5473',
+   'content-type': 'application/x-amz-json-1.1',
+   'date': 'Sun, 24 Feb 2019 18:28:40 GMT',
+   'x-amzn-requestid': '01ad0fcf-3862-11e9-982f-673bdedb3603'},
+  'HTTPStatusCode': 200,
+  'RequestId': '01ad0fcf-3862-11e9-982f-673bdedb3603',
+  'RetryAttempts': 0},
+ 'TextDetections': [{'Confidence': 99.779052734375,
+   'DetectedText': 'NO PARKING',
+   'Geometry': {'BoundingBox': {'Height': 0.1014532670378685,
+     'Left': 0.33340224623680115,
+     'Top': 0.24023491144180298,
+     'Width': 0.2240857183933258},
+    'Polygon': [{'X': 0.33340224623680115, 'Y': 0.24023491144180298},
+     {'X': 0.557487964630127, 'Y': 0.22992555797100067},
+     {'X': 0.559799313545227, 'Y': 0.3313788175582886},
+     {'X': 0.33571359515190125, 'Y': 0.3416881561279297}]},
+   'Id': 0,
+   'Type': 'LINE'},
+  {'Confidence': 99.15694427490234,
+   'DetectedText': '7 AM',
+   'Geometry': {'BoundingBox': {'Height': 0.06399908661842346,
+     'Left': 0.3950941264629364,
+     'Top': 0.3990561068058014,
+     'Width': 0.10488763451576233},
+    'Polygon': [{'X': 0.3950941264629364, 'Y': 0.3990561068058014},
+     {'X': 0.49998176097869873, 'Y': 0.39650899171829224},
+     {'X': 0.5007513761520386, 'Y': 0.4605080783367157},
+     {'X': 0.39586374163627625, 'Y': 0.46305519342422485}]},
+   'Id': 1,
+   'Type': 'LINE'},
+  {'Confidence': 99.46369171142578,
+   'DetectedText': 'TO',
+   'Geometry': {'BoundingBox': {'Height': 0.05921052768826485,
+     'Left': 0.41898149251937866,
+     'Top': 0.47697368264198303,
+     'Width': 0.05324074253439903},
+    'Polygon': [{'X': 0.41898149251937866, 'Y': 0.47697368264198303},
+     {'X': 0.4722222089767456, 'Y': 0.47697368264198303},
+     {'X': 0.4722222089767456, 'Y': 0.5361841917037964},
+     {'X': 0.41898149251937866, 'Y': 0.5361841917037964}]},
+   'Id': 2,
+   'Type': 'LINE'},
+  {'Confidence': 99.77044677734375,
+   'DetectedText': '12 NOON',
+   'Geometry': {'BoundingBox': {'Height': 0.06626375019550323,
+     'Left': 0.354169100522995,
+     'Top': 0.555443286895752,
+     'Width': 0.18088223040103912},
+    'Polygon': [{'X': 0.354169100522995, 'Y': 0.555443286895752},
+     {'X': 0.5350513458251953, 'Y': 0.5573099851608276},
+     {'X': 0.5347126722335815, 'Y': 0.6235737204551697},
+     {'X': 0.353830486536026, 'Y': 0.6217070817947388}]},
+   'Id': 3,
+   'Type': 'LINE'},
+  {'Confidence': 99.88557434082031,
+   'DetectedText': 'MONDAY',
+   'Geometry': {'BoundingBox': {'Height': 0.06578947603702545,
+     'Left': 0.35648149251937866,
+     'Top': 0.6348684430122375,
+     'Width': 0.16898147761821747},
+    'Polygon': [{'X': 0.35648149251937866, 'Y': 0.6348684430122375},
+     {'X': 0.5254629850387573, 'Y': 0.6348684430122375},
+     {'X': 0.5254629850387573, 'Y': 0.7006579041481018},
+     {'X': 0.35648149251937866, 'Y': 0.7006579041481018}]},
+   'Id': 4,
+   'Type': 'LINE'},
+  {'Confidence': 99.59719848632812,
+   'DetectedText': 'NO',
+   'Geometry': {'BoundingBox': {'Height': 0.09868421405553818,
+     'Left': 0.33564814925193787,
+     'Top': 0.24013157188892365,
+     'Width': 0.0625},
+    'Polygon': [{'X': 0.33564814925193787, 'Y': 0.24013157188892365},
+     {'X': 0.39814814925193787, 'Y': 0.24013157188892365},
+     {'X': 0.39814814925193787, 'Y': 0.3388157784938812},
+     {'X': 0.33564814925193787, 'Y': 0.3388157784938812}]},
+   'Id': 5,
+   'ParentId': 0,
+   'Type': 'WORD'},
+  {'Confidence': 99.9609146118164,
+   'DetectedText': 'PARKING',
+   'Geometry': {'BoundingBox': {'Height': 0.0690789446234703,
+     'Left': 0.4027777910232544,
+     'Top': 0.25328946113586426,
+     'Width': 0.15523207187652588},
+    'Polygon': [{'X': 0.4027777910232544, 'Y': 0.25328946113586426},
+     {'X': 0.5578703880310059, 'Y': 0.24671052396297455},
+     {'X': 0.5578703880310059, 'Y': 0.31578946113586426},
+     {'X': 0.4027777910232544, 'Y': 0.32236841320991516}]},
+   'Id': 6,
+   'ParentId': 0,
+   'Type': 'WORD'},
+  {'Confidence': 98.89144134521484,
+   'DetectedText': '7',
+   'Geometry': {'BoundingBox': {'Height': 0.05921052768826485,
+     'Left': 0.3958333432674408,
+     'Top': 0.4013157784938812,
+     'Width': 0.030092593282461166},
+    'Polygon': [{'X': 0.3958333432674408, 'Y': 0.4013157784938812},
+     {'X': 0.42592594027519226, 'Y': 0.4013157784938812},
+     {'X': 0.42592594027519226, 'Y': 0.46052631735801697},
+     {'X': 0.3958333432674408, 'Y': 0.46052631735801697}]},
+   'Id': 7,
+   'ParentId': 1,
+   'Type': 'WORD'},
+  {'Confidence': 99.42243957519531,
+   'DetectedText': 'AM',
+   'Geometry': {'BoundingBox': {'Height': 0.0625,
+     'Left': 0.4375,
+     'Top': 0.39802631735801697,
+     'Width': 0.0625},
+    'Polygon': [{'X': 0.4375, 'Y': 0.39802631735801697},
+     {'X': 0.5, 'Y': 0.39802631735801697},
+     {'X': 0.5, 'Y': 0.46052631735801697},
+     {'X': 0.4375, 'Y': 0.46052631735801697}]},
+   'Id': 8,
+   'ParentId': 1,
+   'Type': 'WORD'},
+  {'Confidence': 99.46369171142578,
+   'DetectedText': 'TO',
+   'Geometry': {'BoundingBox': {'Height': 0.05921052768826485,
+     'Left': 0.41898149251937866,
+     'Top': 0.47697368264198303,
+     'Width': 0.05324074253439903},
+    'Polygon': [{'X': 0.41898149251937866, 'Y': 0.47697368264198303},
+     {'X': 0.4722222089767456, 'Y': 0.47697368264198303},
+     {'X': 0.4722222089767456, 'Y': 0.5361841917037964},
+     {'X': 0.41898149251937866, 'Y': 0.5361841917037964}]},
+   'Id': 9,
+   'ParentId': 2,
+   'Type': 'WORD'},
+  {'Confidence': 99.88147735595703,
+   'DetectedText': '12',
+   'Geometry': {'BoundingBox': {'Height': 0.06578947603702545,
+     'Left': 0.3541666567325592,
+     'Top': 0.5559210777282715,
+     'Width': 0.046296294778585434},
+    'Polygon': [{'X': 0.3541666567325592, 'Y': 0.5559210777282715},
+     {'X': 0.40046295523643494, 'Y': 0.5559210777282715},
+     {'X': 0.40046295523643494, 'Y': 0.6217105388641357},
+     {'X': 0.3541666567325592, 'Y': 0.6217105388641357}]},
+   'Id': 10,
+   'ParentId': 3,
+   'Type': 'WORD'},
+  {'Confidence': 99.65941619873047,
+   'DetectedText': 'NOON',
+   'Geometry': {'BoundingBox': {'Height': 0.0625,
+     'Left': 0.4166666567325592,
+     'Top': 0.5592105388641357,
+     'Width': 0.1180555522441864},
+    'Polygon': [{'X': 0.4166666567325592, 'Y': 0.5592105388641357},
+     {'X': 0.5347222089767456, 'Y': 0.5592105388641357},
+     {'X': 0.5347222089767456, 'Y': 0.6217105388641357},
+     {'X': 0.4166666567325592, 'Y': 0.6217105388641357}]},
+   'Id': 11,
+   'ParentId': 3,
+   'Type': 'WORD'},
+  {'Confidence': 99.88557434082031,
+   'DetectedText': 'MONDAY',
+   'Geometry': {'BoundingBox': {'Height': 0.06578947603702545,
+     'Left': 0.35648149251937866,
+     'Top': 0.6348684430122375,
+     'Width': 0.16898147761821747},
+    'Polygon': [{'X': 0.35648149251937866, 'Y': 0.6348684430122375},
+     {'X': 0.5254629850387573, 'Y': 0.6348684430122375},
+     {'X': 0.5254629850387573, 'Y': 0.7006579041481018},
+     {'X': 0.35648149251937866, 'Y': 0.7006579041481018}]},
+   'Id': 12,
+   'ParentId': 4,
+   'Type': 'WORD'}]}
+
+
+
+
+
+
+
+Well done! You have now used computer vision to detect parking regulations, and helped City Planners build an awesome park!
+
