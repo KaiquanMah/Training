@@ -8,8 +8,8 @@ Familiarize yourself with the course.
 
 ## Commands
 Enter commands in MATLAB to perform calculations and create variables.
--Entering Commands
--Naming Variables
+-Entering Commands 
+-Naming Variables 
 -Saving and Loading Variables
 -Using Built-in Functions and Constants
 
