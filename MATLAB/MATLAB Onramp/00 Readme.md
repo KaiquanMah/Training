@@ -1,8 +1,13 @@
 # 00 MATLAB Onramp Syllabus
 
+
+
+
 ## MATLAB Onramp
 Course Overview
+
 Familiarize yourself with the course.
+
 -Course Overview
 
 
