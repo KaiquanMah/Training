@@ -1,0 +1,132 @@
+# Set
+# The set class provides a mapping of unique immutable elements
+
+empty_set = set()					#set()
+print('empty_set ->', empty_set)
+
+
+alpha = set(('a', 'b', 'c', 'd'))	#set = an unordered list
+print('alpha ->', alpha)
+
+
+
+
+
+dup_list = ['c', 'd', 'c', 'd', 'e', 'f']
+
+beta = set(dup_list)				#set(your list) removes duplicates
+print('beta ->', beta)				#beta -> ['c', 'd', 'e', 'f']
+uniq_list = list(beta)				#convert (unique) set into list
+print('uniq_list ->', uniq_list)
+
+
+gamma = alpha.union(beta)			#set1.union(set2) gives us unique elements in both sets 1 and 2
+print('gamma ->', gamma)
+gamma = alpha|beta					# | = union
+print('gamma ->', gamma)
+
+delta = alpha.intersection(beta)	#set1.intersection(set2)
+print('delta ->', delta)			#show shared elements
+delta = alpha & beta				# & = intersection
+print('delta ->', delta)
+
+epsilon = alpha.difference(beta)	#set1.difference(set2)
+print('epsilon ->', epsilon)		#show elements in set1 not shared with set2
+epsilon = alpha - beta				# - = difference
+print('epsilon ->', epsilon)
+
+
+
+eta = alpha.symmetric_difference(beta)	#set1.symmetric_difference(set2)
+print('eta ->', eta)				#show elements not shared between both sets
+eta = alpha ^ beta					# ^ = symmetric_difference
+print('eta ->', eta)				#eta -> {'f', 'e', 'b', 'a'}
+
+
+
+print('epsilon.isdisjoint(delta) ->', epsilon.isdisjoint(delta))	#set1.isdisjoint(set2) = whether both sets have the same elements, TRUE		#epsilon.isdisjoint(delta) -> True
+print('epsilon.isdisjoint(eta) ->', epsilon.isdisjoint(eta))		#if some elements are the same, FALSE										#epsilon.isdisjoint(eta) -> False
+print('epsilon.issubset(eta) ->', epsilon.issubset(eta))			#issubset is more strict; set1.issubset(set2) = whether set 1 has all the elements in set 2/ is set 1 a subset of set 2
+print('epsilon.issubset(beta) ->', epsilon.issubset(beta))			#epsilon contains only some elements of beta, so FALSE
+
+print('eta.issuperset(epsilon) ->', eta.issuperset(epsilon))		#eta.issuperset(epsilon) -> True; eta contains some elements in epsilon, so TRUE
+print('beta.issuperset(epsilon) ->', beta.issuperset(epsilon))		#beta.issuperset(epsilon) -> False; beta does not contain any element in epsilon, so FALSE
+
+feta = frozenset(eta)
+# frozensets are immutable without updating methods
+print('feta ->', feta)			#feta -> frozenset ({'f', 'e', 'a', 'b'})
+
+
+
+
+
+
+
+
+
+
+
+
+
+zeta = set()
+print('zeta ->', zeta)			#zeta -> set()
+zeta.add(3)
+print('zeta ->', zeta)			#zeta -> set(3)
+zeta.add(3)						#adding the same element will not show up in the set
+print('zeta ->', zeta)			#zeta -> set(3)
+zeta.add(4)
+print('zeta ->', zeta) 			#zeta -> set(3,4)
+print('zeta ->', zeta)			#zeta -> set() zeta -> {3} zeta -> {3} zeta -> {3, 4}
+
+
+print('gamma ->', gamma)		#gamma ->  {'f', 'd', 'c', 'e', 'b', 'a'}
+gamma.discard('a')				#discard('element')
+print('gamma ->', gamma)		#gamma ->  {'f', 'd', 'c', 'e', 'b'}
+gamma.discard('z')				#discard an element not found in the set
+print('gamma ->', gamma)
+gamma.remove('b')				
+print('gamma ->', gamma)		#gamma -> {'f', 'd', 'c', 'e'}
+random_element = gamma.pop()	#pop removes a random element
+print('random_element ->', random_element)		#random_element -> f
+print('gamma ->', gamma)		#gamma -> {'d', 'c', 'e'}	; the remaining elements
+
+
+
+
+zeta_ref = zeta
+zeta_copy = zeta.copy()			#create a copy of the original set instead of linking to the original set
+zeta.clear()					#clear ALL elements in the set
+
+print('zeta ->', zeta)			#zeta -> set()
+print('zeta_ref ->', zeta_ref)	#reference set links to the empty original set
+print('zeta_copy ->', zeta_copy)	#zeta_copy -> {3, 4}
+
+
+print('alpha ->', alpha)		#alpha -> ['a', 'b', 'd', 'c']
+alpha_diff = alpha.copy()		#make a copy of the alpha set before you use each method
+
+
+
+
+
+#alpha = set(('a', 'b', 'c', 'd'))
+#beta = set(('c', 'd', 'e', 'f'))
+alpha_diff.difference_update(beta)	#difference_update = find elements in alpha_diff/set1 not found in beta/set2, then update the elements of alpha_diff to only include these few elements
+print('alpha_diff ->', alpha_diff)	#alpha_diff -> ['a', 'b']
+
+alpha_intersect = alpha.copy()	#make a copy of the alpha set before you use each method
+alpha_intersect.intersection_update(beta)
+print('alpha_intersect ->', alpha_intersect)	#alpha_intersect -> ['d', 'c']
+
+alpha_sym_diff = alpha.copy()					#make a copy of the alpha set before you use each method
+alpha_sym_diff.symmetric_difference_update(beta)	#symmetric_difference_update finds ALL elements present in 1 set but not the other set
+print('alpha_sym_diff ->', alpha_sym_diff)		#alpha_sym_diff -> ['f', 'e', 'b', 'a']
+
+
+alpha_union = alpha.copy()
+alpha_union.update(beta)						#update will add all terms from beta/set2 to alpha_union/set1
+print('alpha_union ->', alpha_union)			#alpha_union -> ['f', 'd', 'c', 'e', 'b', 'a']
+
+
+
+
