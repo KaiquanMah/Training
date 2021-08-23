@@ -1,0 +1,226 @@
+#compile a list of (lists of [keyword and list of urls])
+# Define a procedure, add_to_index,
+# that takes 3 inputs:
+
+# - an index: [[<keyword>,[<url>,...]],...]
+# - a keyword: String
+# - a url: String
+
+
+
+# If the keyword is already
+# in the index, add the url
+# to the list of urls associated
+# with that keyword.
+
+
+# If the keyword is not in the index,
+# add an entry to the index: [keyword,[url]]
+
+
+
+
+index = []          #initialise empty list
+
+def add_to_index(index,keyword,url):
+    for entry in index:
+        if entry[0] == keyword:				#do not use index[entry][0]
+            entry[1].append(url)	#when keyword == existing entry, only insert url in the 2nd element, ie the url list of the entry
+			      return					#return exits from for loop; doesnt end the whole procedure like 'break' does
+	      
+        index.append([keyword,[url]])	#since keyword was not found after running through our index list, add keyword and url as a new entry to our index list
+
+
+
+
+# so during the 1st iteration
+# index is an empty list []
+# so dont enter the for loop
+# append keyword and url to the index list []
+
+# iteration 2
+# index e.g. [ ['udacity', ['http://udacity.com']] ]
+# entry => ['udacity', ['http://udacity.com']]
+# entry[0] => 'udacity', i.e. our keyword
+# entry[1] => ['http://udacity.com']
+
+# what i cant wrap my head around is
+# what happens when 'url' e.g. 'http://udacity.com' was already in 'index' after iteration 1 => [ ['udacity', ['http://udacity.com']] ]
+# why do we still run "entry[1].append(url)"??????
+
+
+
+
+
+
+#step 1
+#add_to_index(index,'udacity','http://udacity.com')
+#print index
+#>>> [['udacity', ['http://udacity.com']]
+
+#step 2
+#add_to_index(index,'computing','http://acm.org')
+#print index
+#>>> ['computing', ['http://acm.org']]]
+
+
+#step 3
+#add_to_index(index,'udacity','http://npr.org')
+#print index
+#>>> [['udacity', ['http://udacity.com', 'http://npr.org']], 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Lookup a keyword from an index list; then return list of url
+# Define a procedure, lookup,
+# that takes two inputs:
+
+# - an index
+# - keyword
+
+# The procedure should return a list
+# of the urls associated
+# with the keyword. If the keyword
+# is not in the index, the procedure
+# should return an empty list.
+
+index = [['udacity', ['http://udacity.com', 'http://npr.org']],
+         ['computing', ['http://acm.org']]]
+
+def lookup(index,keyword):
+    for entry in index:
+        if entry[0] == keyword:
+            return entry[1]
+    return []
+
+
+
+print lookup(index,'udacity')
+#>>> ['http://udacity.com','http://npr.org']
+
+
+
+
+
+
+
+
+
+#stringname.split()		#will split all the words in a string into individual elements in a list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#from a web page, add all keywords + url that can appear in a page to our index list
+#then look up another webpage and add keywords + url to our index page
+# Define a procedure, add_page_to_index,
+# that takes three inputs:
+
+#   - index
+#   - url (String)
+#   - content (String)
+
+# It should update the index to include
+# all of the word occurences found in the
+# page content by adding the url to the
+# word's associated url list.
+
+index = []
+
+
+def add_to_index(index,keyword,url):
+    for entry in index:
+        if entry[0] == keyword:
+            entry[1].append(url)
+            return
+    index.append([keyword,[url]])
+
+
+def add_page_to_index(index,url,content):
+	  words = content.split()
+    for word in words:
+		    add_to_index(index, word, url)		#use our previously defined procedure
+		
+#just modify index; dont need to return anything
+
+
+
+
+add_page_to_index(index,'fake.text',"This is a test")
+print index
+#>>> [['This', ['fake.text']], ['is', ['fake.text']], ['a', ['fake.text']],
+#>>> ['test',['fake.text']]]
+
+
+# interpret the code and results above
+# index = []
+# url = 'fake.text'
+# words = ['This', 'is', 'a', 'test']
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#web crawler [L15]
+def crawl_web(seed):
+	tocrawl = [seed]	
+	crawled = []		
+	index = []
+	
+	while tocrawl:					#links on seed page
+		page = tocrawl.pop()		#
+		if page not in crawled:
+			content = get_page(page)
+			add_page_to_index(index,page,content)		#for each page, add content to index
+			union(tocrawl, get_all_links(content))		
+			crawled.append(page)									
+	return index
+
+
