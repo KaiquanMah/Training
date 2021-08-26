@@ -1,0 +1,134 @@
+Audio Frequency
+Audio signals are usually comprised of many different frequencies. For example, in music, the note 'middle C' has a fundamental frequency of 261.6 Hz, and most music consists of several notes (or frequencies) being played at the same time.
+In this project, you will analyze the frequency content of an organ playing the C chord.
+The C chord consists of the C (261.6 Hz), E (329.6 Hz), and G (392.0 Hz) notes. The highlighted points in this frequency plot correspond to each note.
+
+
+Audio Frequency
+Instructions are in the task pane to the left. Complete and submit each task one at a time.
+
+
+
+
+
+
+
+The C chord recording is stored in a file named Cchord.mat. This file contains two variables:
+y: signal from recording
+fs: sampling frequency
+This task uses the numel function to return the number of elements in an array.
+TASK
+Load the file Cchord.mat.
+Create a variable named n that contains the number of elements in y. Then use n to create an evenly-spaced vector t that starts at 0, ends at n-1, and has elements that are spaced by 1.
+
+Task 1
+load("Cchord.mat")
+
+% numel = "number of elements"
+n = numel(y)
+
+t = [0:n-1]
+
+
+
+
+
+
+
+
+
+
+t now has the correct number of points, but it needs to represent the times when the audio signal was sampled. You can use the sampling frequency fs to convert the vector to time (in seconds).
+TASK
+Divide t by fs. Assign the output to the same variable t. Then plot y against t.
+
+Task 2
+t = t/fs
+plot(t, y)
+
+
+
+
+
+
+
+
+
+
+
+
+
+In the plot, notice that y is periodic, but it's not a simple sine wave. It's made up of multiple sine waves with different frequencies.
+A Fourier transform will return information about the frequency content of the signal. The location of the dominant frequencies will show what notes are contained in the chord.
+You can use the fft function to compute the discrete Fourier transform of a vector.
+fft(y)
+The output values from fft are complex numbers. You can use the abs function to get the magnitude.
+TASK
+Create a variable named yfft that contains the absolute value of the discrete Fourier transform of y.
+
+Task 3
+yfft = abs(fft(y))
+
+
+
+
+
+
+
+
+
+
+In Tasks 1 and 2, you calculated the time vector t for the signal y. Similarly, you need to calculate the frequency vector f for your FFT vector yfft.
+TASK
+Create an evenly-spaced vector f that starts at 0, ends at n-1, and has elements that are spaced by 1.
+
+Task 4
+f = [0:n-1]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The vector f now contains n points. To convert these points to frequencies, you can multiply the entire vector by the sampling frequency (fs) and divide it by the number of points (n).
+f will contain frequences from 0 to fs. The dominant frequencies are located at the beginning of f. You can use the xlim function to zoom in on the area of interest.
+xlim([xmin xmax])
+TASK
+Multiply f with fs/n. Assign the output to the same variable f.
+Plot yfft against f using the x-limits 0 and 1000.
+
+Task 5
+f = f * fs/n
+plot(f, yfft)
+xlim([0 1000])
+
+
+
+
+
+
+
+
+
+Use the data cursor in the output pane to see the frequency locations.
+The first three spikes are the notes comprising a middle C chord.
+What are the other three spikes? When a chord is played, the signal contains fundamental frequencies and the associated harmonics. In this case, the harmonics are another octave of the same chord.
+Using the frequencies in the table below, you can see that the 6 spikes in the plot correspond to the fundamental frequencies and the first harmonics of a middle C chord.
+Note	Frequency
+C4    261.6
+E4    329.6
+G4    392.0
+C5    523.3
+E5    659.3
+G5    784.0
+
+
+
