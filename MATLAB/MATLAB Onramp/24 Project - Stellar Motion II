@@ -1,0 +1,273 @@
+Stellar Motion II
+In the previous project, you determined if one star's spectrum was redshifted or blueshifted, and calculated the star’s speed relative to the Earth. In this project, you will calculate all the stars' speed at once. Then you'll create the plot below.
+
+
+Stellar Motion - Part 2
+Instructions are in the task pane to the left. Complete and submit each task one at a time.
+
+This code loads the data from the previous project.
+load starData
+
+
+
+
+>> size(spectra)
+ans =
+   357     7
+
+>> size(lambda)
+ans =
+   357     1
+
+
+
+
+
+
+
+
+
+
+On line 2 of the displayed script, the spectrum data is extracted for the second star in the matrix spectra. Then lines 3 through 5 calculate the speed based on that data. How would you calculate the speed of all the stars in spectra?
+You could repeat the calculations in a for loop, but it is more efficient to use array operations instead.
+TASK
+Modify line 2 of the script. Delete (:,2) to calculate the speed of all the stars.
+
+Task 1
+[sHa,idx] = min(spectra);
+lambdaHa = lambda(idx);
+z = lambdaHa/656.28 - 1;
+speed = z*299792.458
+
+
+
+
+
+>> sHa
+
+sHa =
+
+   1.0e-12 *
+
+   0.163400000000000   0.072400000000000   0.031440000000000   0.053640000000000   0.068980000000000   0.098010000000000   0.022140000000000
+
+>> idx
+
+idx =
+
+   188   187   188   189   189   191   185
+
+>> lambdaHa
+
+lambdaHa =
+
+   1.0e+02 *
+
+   6.562000000000000
+   6.560600000000001
+   6.562000000000000
+   6.563400000000001
+   6.563400000000001
+   6.566200000000000
+   6.557799999999999
+
+>> z
+
+z =
+
+   1.0e-03 *
+
+  -0.121899189370334
+  -0.335222770768473
+  -0.121899189370334
+   0.091424392027806
+   0.091424392027806
+   0.518071554824306
+  -0.761869933564974
+
+>> speed
+
+speed =
+
+   1.0e+02 *
+
+  -0.365444576095398
+  -1.004972584262511
+  -0.365444576095398
+   0.274083432071715
+   0.274083432071715
+   1.553139448406606
+  -2.284028600597402
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Notice that speed is now a vector. A positive speed means that the star is moving away from us (redshifted spectrum), and a negative speed means the star is moving towards us (blueshifted spectrum).
+In the next few tasks, you'll plot the spectra of all seven stars using different line properties for redshifted and blueshifted spectra. It is convenient to use a for loop to access each star's data one at a time.
+TASK2
+Create a for loop with a loop index called v. The loop index should progress through all columns of spectra (1 to 7).
+In the loop body, extract the vth column of spectra to a variable named s.
+
+
+Tasks 2 - 4
+for v = 1:7
+    s = spectra(:,v);
+
+    if speed(v) <= 0
+        loglog(lambda,s,"--")
+    else
+       loglog(lambda,s,"LineWidth",3) 
+    end
+    hold on
+end
+hold off
+
+
+
+
+
+
+
+
+
+
+
+Since you'll use different styles for redshifted and blueshifted spectra, you can use an if statement.
+First, you'll plot the blueshifted spectra using dashed lines.
+TASK3
+Add an if statement to the for loop body. If speed(v) is less than or equal to 0, create a loglog plot of s against lambda using a dashed line (--).
+Add the command hold on between the two end statements so that only one plot is created.
+
+
+
+
+
+You'll plot the redshifted spectra using a thick line.
+TASK4
+Add an else statement. If speed(v) is greater than 0, create a loglog plot of s against lambda using a line width of 3.
+After the for loop is complete, enter hold off.
+
+
+
+
+
+
+
+
+You can pass a string array directly to the legend function.
+The string array starnames contains the name of each star in spectra.
+TASK5
+Add a legend to the plot using the array starnames.
+
+Task 5
+legend(starnames)
+
+>> starnames
+
+starnames = 
+
+  7×1 string array
+
+    "HD  30584"
+    "HD  10032"
+    "HD  64191"
+    "HD   5211"
+    "HD  56030"
+    "HD  94028"
+    "SAO102986"
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+In the plot, you can use the line styles to identify the stars with redshifted spectra, then look up their names in the legend. Can you determine the names of the redshifted spectra without a for loop?
+Recall that you can use logical indexing to find elements that match a condition.
+c = b(a < 6)
+TASK
+Create a variable movaway that contains the elements in starnames corresponding to where speed is greater than 0.
+
+Task 6
+movaway = starnames(speed > 0) 
+
+
+
+
+
+>> speed>0
+
+ans =
+
+  7×1 logical array
+
+   0
+   0
+   0
+   1
+   1
+   1
+   0
+
+>> movaway
+
+movaway = 
+
+  3×1 string array
+
+    "HD   5211"
+    "HD  56030"
+    "HD  94028"
+    
+    
+    
+    
+    
+    
+    
+   
+    
+
+
+
+
+
+
+Like many functions in MATLAB, plotting commands can be applied to matrices. plot(A) or loglog(A) will create a line for each column in A.
+If you do not want to differentiate between redshifted and blueshifted spectra, you do not need to use a for loop.
+loglog(lambda,spectra)
+legend(starnames)
+
+Further Practice
+loglog(lambda,spectra)
+legend(starnames)
+
+
+
+
