@@ -1,0 +1,343 @@
+Defining the Objective Function
+Instructions are in the task pane to the left. Complete and submit each task one at a time.
+Do not edit. This code initializes the optimization problem and defines the optimization variables.
+prob = optimproblem("Description","Factory Location");
+x = optimvar("x");
+y = optimvar("y");
+X = [5 40 70];
+Y = [20 50 15];
+
+
+
+
+
+
+
+>> x
+
+x = 
+
+  OptimizationVariable with properties:
+
+          Name: 'x'
+          Type: 'continuous'
+    IndexNames: {{}  {}}
+    LowerBound: -Inf
+    UpperBound: Inf
+
+  See variables with show.
+  See bounds with showbounds.
+
+>> y
+
+y = 
+
+  OptimizationVariable with properties:
+
+          Name: 'y'
+          Type: 'continuous'
+    IndexNames: {{}  {}}
+    LowerBound: -Inf
+    UpperBound: Inf
+
+  See variables with show.
+  See bounds with showbounds.
+  
+  
+  
+  
+>> X
+
+X =
+
+     5    40    70
+
+>> Y
+
+Y =
+
+    20    50    15
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+The x- and y-coordinates of the three stores have been stored in vectors X and Y for you.
+The distance between the factory and the three stores is calculated using the following equation:
+d= sqrt( (x−X)^2+(y−Y)^2 )
+
+Where x and y are your symbolic optimization variables, and X and Y are the coordinates of the stores.
+Performing MATLAB operations on your optimization variables will create an optimization expression.
+TASK
+Create an optimization expression for the distance between the factory location (x,y) and the location of each of the stores (X,Y). Make sure to use element-wise exponentiation (.^) when squaring the differences between the x- and y-coordinates and store the result in a variable d.
+
+% x 1x1
+% y 1x1
+% X 1x3
+% Y 1x3
+
+
+Task 1
+d = sqrt((x-X).^2 + (y-Y).^2)
+
+
+
+
+
+Computing the Shipping Distance
+While the calculation you just performed is relatively simple in MATLAB, it may not be immediately obvious what you've just created.
+Underneath the square root, you are first taking the difference between your symbolic optimization variables and two 1x3 vectors representing the store locations: (5,20), (40,50), and (70,15).
+This results in two 1x3 optimization expression arrays inside the parentheses.
+Using the element-wise exponentiation (.^) results in taking the square of each element of the two optimization expression arrays.
+Adding the two arrays results in a single new optimization expression array.
+Finally, the square root is applied to each element of the array resulting in a 1x3 optimization array for d. Each element of d represents the distance to one of the stores.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Variable d is a 1-by-3 optimization expression array. Each element represents the distance to one of the three stores.
+TASK 2
+Use d to create an optimization expression that represents the total distance between the factory and the three stores. Name the new optimization expression dTotal.
+
+Task 2
+dTotal = sum(d)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Note that any variables that are passed to the objective function that are not symbolic optimization variables, like the store position vectors, will be displayed as ExtraParams in the output pane.
+You can store optimization expressions in the Objective field of your optimization problem using dot notation.
+prob.Objective = expression
+TASK
+Store the total shipping distance dTotal in the Objective field of the optimization problem prob. 
+
+Task 3
+prob.Objective = dTotal
+
+
+
+
+
+
+
+
+
+
+
+
+TASK
+Use the show function to display the current optimization problem.
+
+Task 4
+show(d)
+show(dTotal)
+show(prob)
+
+
+
+>> show(d)
+
+  sqrt(((x - extraParams{1}).^2 + (y - extraParams{2}).^2))
+
+  extraParams
+
+
+>> show(dTotal)
+  sum(sqrt(((x - extraParams{1}).^2 + (y - extraParams{2}).^2)))
+
+  extraParams
+
+
+>> show(prob)
+  OptimizationProblem : Factory Location
+
+	Solve for:
+       x, y
+
+	minimize :
+       sum(sqrt(((x - extraParams{1}).^2 + (y - extraParams{2}).^2)))
+
+       extraParams
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Notice that the Description, ObjectiveSense, Variables, and Objective fields are all filled in your optimization problem. There is only one thing left to do: solve the problem!
+When your optimization problem consists of only one or two variables, it can be useful to visualize the objective function to get a sense of where the solution is located.
+This code creates a two-dimensional contour map of the objective function where the color corresponds to the total shipping distance. Try copy and pasting it into the Further Practice section. 
+
+xvec = linspace(0,75);
+yvec = linspace(0,75);
+[x,y] = meshgrid(xvec,yvec);
+distance = sqrt((x-X(1)).^2 + (y-Y(1)).^2)+...
+    sqrt((x-X(2)).^2 + (y-Y(2)).^2)+...
+    sqrt((x-X(3)).^2 + (y-Y(3)).^2);
+contourf(x,y,distance)
+ylabel("Y-Coordinate")
+xlabel("X-Coordinate")
+colorbar
+
+Once you have pasted the code, click "Run Section" to visualize the objective function.
+
+
+
+
+>> xvec
+
+xvec =
+
+  Columns 1 through 20
+
+         0    0.7576    1.5152    2.2727    3.0303    3.7879    4.5455    5.3030    6.0606    6.8182    7.5758    8.3333    9.0909    9.8485   10.6061   11.3636   12.1212   12.8788   13.6364   14.3939
+
+  Columns 21 through 40
+
+   15.1515   15.9091   16.6667   17.4242   18.1818   18.9394   19.6970   20.4545   21.2121   21.9697   22.7273   23.4848   24.2424   25.0000   25.7576   26.5152   27.2727   28.0303   28.7879   29.5455
+
+  Columns 41 through 60
+
+   30.3030   31.0606   31.8182   32.5758   33.3333   34.0909   34.8485   35.6061   36.3636   37.1212   37.8788   38.6364   39.3939   40.1515   40.9091   41.6667   42.4242   43.1818   43.9394   44.6970
+
+  Columns 61 through 80
+
+   45.4545   46.2121   46.9697   47.7273   48.4848   49.2424   50.0000   50.7576   51.5152   52.2727   53.0303   53.7879   54.5455   55.3030   56.0606   56.8182   57.5758   58.3333   59.0909   59.8485
+
+  Columns 81 through 100
+
+   60.6061   61.3636   62.1212   62.8788   63.6364   64.3939   65.1515   65.9091   66.6667   67.4242   68.1818   68.9394   69.6970   70.4545   71.2121   71.9697   72.7273   73.4848   74.2424   75.0000
+
+
+
+
+>> yvec
+
+yvec =
+
+  Columns 1 through 20
+
+         0    0.7576    1.5152    2.2727    3.0303    3.7879    4.5455    5.3030    6.0606    6.8182    7.5758    8.3333    9.0909    9.8485   10.6061   11.3636   12.1212   12.8788   13.6364   14.3939
+
+  Columns 21 through 40
+
+   15.1515   15.9091   16.6667   17.4242   18.1818   18.9394   19.6970   20.4545   21.2121   21.9697   22.7273   23.4848   24.2424   25.0000   25.7576   26.5152   27.2727   28.0303   28.7879   29.5455
+
+  Columns 41 through 60
+
+   30.3030   31.0606   31.8182   32.5758   33.3333   34.0909   34.8485   35.6061   36.3636   37.1212   37.8788   38.6364   39.3939   40.1515   40.9091   41.6667   42.4242   43.1818   43.9394   44.6970
+
+  Columns 61 through 80
+
+   45.4545   46.2121   46.9697   47.7273   48.4848   49.2424   50.0000   50.7576   51.5152   52.2727   53.0303   53.7879   54.5455   55.3030   56.0606   56.8182   57.5758   58.3333   59.0909   59.8485
+
+  Columns 81 through 100
+
+   60.6061   61.3636   62.1212   62.8788   63.6364   64.3939   65.1515   65.9091   66.6667   67.4242   68.1818   68.9394   69.6970   70.4545   71.2121   71.9697   72.7273   73.4848   74.2424   75.0000
+
+
+
+
+Further Practice
+% https://www.mathworks.com/help/matlab/ref/linspace.html
+% linspace => 100 evenly spaced points between starting # and ending # (inclusive)
+xvec = linspace(0,75);
+yvec = linspace(0,75);
+
+% >> size(meshgrid(xvec,yvec))
+%ans =
+%   100   100
+% meshgrid creates combinations of each x # and y #
+% then extract the x-y coordinate pairs/combos
+[x,y] = meshgrid(xvec,yvec);
+
+% then compare each x-y coordinate
+% to the 3 shop locations -> stored as X-Y coordinates e.g. the X(1),Y(1) pair
+distance = sqrt((x-X(1)).^2 + (y-Y(1)).^2)+...
+    sqrt((x-X(2)).^2 + (y-Y(2)).^2)+...
+    sqrt((x-X(3)).^2 + (y-Y(3)).^2);
+
+%create a contour plot
+contourf(x,y,distance)
+
+%label the plot
+ylabel("Y-Coordinate")
+xlabel("X-Coordinate")
+% colorbar legend
+colorbar
+
+
+
+
+
+
+
+
+
+Try adding the store locations (X,Y) to the plot before moving on.
+
+% plot the shop coordinates found in the X/Y vectors as individual elements
+% as white asterisks
+hold on
+
+for i = 1:3,
+   
+    plot(X(i),Y(i),'w*')
+    
+end
+
+
+
+
+
+
+
+
+
+
+
+
