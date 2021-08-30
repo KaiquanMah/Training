@@ -1,0 +1,399 @@
+The Optimal Breakfast - Including Linear Equality Constraints
+Instructions are in the task pane to the left. Complete and submit each task one at a time.
+Do not edit.  This code replicates what you have done thus far. 
+load Nutrition.mat 
+food
+
+prob = optimproblem("Description","An Optimal Breakfast");
+servings = optimvar("servings",16,"LowerBound",0);
+C = food.Price .* servings;
+prob.Objective = sum(C);
+
+
+>> food
+
+food =
+
+  16×6 table
+
+            Name             Price    Calories    Carbs    Protein    VitaminC
+    _____________________    _____    ________    _____    _______    ________
+
+    Broccoli                 0.48        50       13.6         8       160.2  
+    Corn                     0.54       100       17.1       2.5         5.2  
+    Lettuce                  0.06         5        0.4       0.2         0.8  
+    Potatoes                 0.18       110         37       4.3          19  
+    Tofu                     0.93        94        2.3        10         0.1  
+    Donut                    0.38       195         22       2.1         0.6  
+    Bacon                    0.87        43        0.1         3           0  
+    Apple                    0.72        95         25       0.5         8.4  
+    Banana                   0.45       105         27       1.3        10.3  
+    Toast                    0.15        79         15       2.7           0  
+    Oatmeal                  0.27       158         27         6           0  
+    Yogurt                    1.1       100          6        17           0  
+    Scrambled Eggs           0.13        91          1         6           0  
+    Steak                     2.2       679          0        62           0  
+    Chocolate Chip Cookie    0.09        78          9       1.5           0  
+    Orange                   0.75        45         11       0.9        51.1  
+
+
+
+
+
+
+
+
+
+
+
+
+
+Calories are an important aspect of your daily diet. The average person is recommended to eat around 350 calories for breakfast each day.
+TASK 1
+Compute the number of calories consumed during breakfast by multiplying the Calories column of the food table and the optimization variable vector servings. Name the resulting optimization expression cals. Be sure to use the .* operator when multiplying.
+
+Task 1
+cals = food.Calories .* servings
+
+>> cals
+
+cals = 
+
+  16×1 Linear OptimizationExpression array with properties:
+
+    IndexNames: {{}  {}}
+     Variables: [1×1 struct] containing 1 OptimizationVariable
+
+  See expression formulation with show.
+
+
+
+
+
+
+
+
+
+
+
+
+
+TASK
+Create an optimization expression for the total number of calories consumed by summing the elements of cals. Name this expression totalCals
+
+Task 2
+totalCals = sum(cals)
+
+>> totalCals
+
+totalCals = 
+
+  Linear OptimizationExpression
+
+    50*servings(1) + 100*servings(2) + 5*servings(3) + 110*servings(4) + 94*servings(5) + 195*servings(6) + 43*servings(7) + 95*servings(8) + 105*servings(9) + 79*servings(10) + 158*servings(11)
++ 100*servings(12) + 91*servings(13) + 679*servings(14) + 78*servings(15) + 45*servings(16)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+An equality constraint is stored in the Constraints field of the optimization problem. Since you can apply multiple constraints to any given problem, each constraint is given a unique name.
+Optimization problem structure with the Constraints field emphasized.
+To store an equality constraint in your optimization problem, you must set an optimization expression equal to your desired numerical value as in
+prob.Constraints.Name = expression == value.
+
+TASK 3
+Set the optimization expression totalCals equal to 350 and store it in the Constraints field of the optimization problem. Name the constraint calories.
+
+Task 3
+prob.Constraints.calories = totalCals == 350
+
+
+>> prob.Constraints
+ans = 
+  struct with fields:
+
+    calories: [1×1 optim.problemdef.OptimizationConstraint]
+
+
+
+
+>> prob.Constraints.calories
+ans = 
+  Linear OptimizationConstraint
+
+    50*servings(1) + 100*servings(2) + 5*servings(3) + 110*servings(4) + 94*servings(5) + 195*servings(6) + 43*servings(7) + 95*servings(8) + 105*servings(9) + 79*servings(10) + 158*servings(11)
++ 100*servings(12) + 91*servings(13) + 679*servings(14) + 78*servings(15) + 45*servings(16) == 350
+
+
+
+
+
+
+
+
+
+
+
+TASK 4
+Solve the optimization problem. Store the first and second outputs in variables sol and optval, respectively. Remember, you do not need to provide an initial guess because the objective function is linear.
+
+Task 4
+[sol, optval] = solve(prob)
+
+>> prob
+
+prob = 
+
+  OptimizationProblem with properties:
+
+       Description: 'An Optimal Breakfast'
+    ObjectiveSense: 'minimize'
+         Variables: [1×1 struct] containing 1 OptimizationVariable
+         Objective: [1×1 OptimizationExpression]
+       Constraints: [1×1 struct] containing 1 OptimizationConstraint
+
+  See problem formulation with show.
+
+>> sol
+
+sol = 
+
+  struct with fields:
+
+    servings: [16×1 double]
+
+>> optval
+
+optval =
+
+   0.403846153846154
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You can access the optimal set of optimization variables using dot notation:
+sol.variableName
+TASK
+Store the optimal number of servings in a variable called optServings.
+
+Task 5
+optServings = sol.servings
+
+>> sol.servings
+
+ans =
+
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+   4.487179487179487
+                   0
+
+
+
+
+
+
+
+
+To visualize the results, you can create a bar graph using the bar function.
+bar(x,y)
+TASK
+Use the bar function to create a bar graph with the Name column of the table food as the first input and optServings as the second input.
+
+Task 6
+% somehow we need to eat 4.5 servings of chocolate chip cookies
+% to get 350 calories
+bar(food.Name, optServings)
+
+
+
+
+
+
+
+
+
+
+
+This seems strange... MATLAB is telling you that you should eat 4.5 cookies for breakfast and nothing else. When you are faced with a solution that seems odd to you, one thing you can do is check to make sure that your constraint has been met.
+You can use the evaluate function to evaluate the optimization expression that was included in your constraint at the solution.
+val = evaluate(expression,solution)
+
+TASK 7
+Evaluate the optimization expression totalCals at the solution sol to make sure the equality constraint was met. Store the output in a variable check. You may want to leave off the semicolon to display the result.
+
+Task 7
+check = evaluate(totalCals, sol)
+
+>> check
+
+check =
+
+   350
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Great! You have now confirmed that 4.5 cookies will provide you with exactly 350 calories. So that must be the cheapest 350-calorie breakfast. Let's look at the calories-per-dollar of each food to confirm our suspicion.
+TASK
+Compute the calories per dollar spent by dividing the Calories column by the Price column. Store the result in caloriesPerDollar. Then use bar to create a bar graph with the Name column as the first input and caloriesPerDollar as the second input.
+
+Task 8
+caloriesPerDollar = food.Calories ./ food.Price
+
+% chocolate chip cookies offer the highest calorie count per dollar
+bar(food.Name, caloriesPerDollar)
+
+
+>> caloriesPerDollar
+
+caloriesPerDollar =
+
+   1.0e+02 *
+
+   1.041666666666667
+   1.851851851851852
+   0.833333333333333
+   6.111111111111111
+   1.010752688172043
+   5.131578947368421
+   0.494252873563218
+   1.319444444444445
+   2.333333333333333
+   5.266666666666667
+   5.851851851851851
+   0.909090909090909
+   7.000000000000000
+   3.086363636363636
+   8.666666666666668
+   0.600000000000000
+
+
+
+
+
+
+
+The algorithm recognized the chocolate chip cookies as the "biggest bang for your buck", since each serving is inexpensive and contributes a great deal of calories. In other words, it has the highest calorie-to-cost ratio. So although the solution seemed odd from a practical standpoint, the algorithm gave you the optimal solution you asked for.
+While this is a more realistic diet compared to no food at all, eating only chocolate chip cookies for breakfast might not be the healthiest choice.
+In the next section, we will impose additional nutritional constraints that will make your breakfast choices more realistic.
+
+
+
+
+
+
+
+>> prob
+prob = 
+  OptimizationProblem with properties:
+
+       Description: 'An Optimal Breakfast'
+    ObjectiveSense: 'minimize'
+         Variables: [1×1 struct] containing 1 OptimizationVariable
+         Objective: [1×1 OptimizationExpression]
+       Constraints: [1×1 struct] containing 1 OptimizationConstraint
+
+  See problem formulation with show.
+
+
+
+
+>> prob.Description
+ans =
+    'An Optimal Breakfast'
+
+
+
+
+
+>> prob.Variables
+ans = 
+  struct with fields:
+
+    servings: [16×1 optim.problemdef.OptimizationVariable]
+
+
+
+
+
+>> prob.servings
+Unrecognized method, property, or field 'servings' for class 'optim.problemdef.OptimizationProblem'.
+ 
+ 
+>> prob.Variables.servings
+ans = 
+  16×1 OptimizationVariable array with properties:
+
+  Array-wide properties:
+          Name: 'servings'
+          Type: 'continuous'
+    IndexNames: {{}  {}}
+
+  Elementwise properties:
+    LowerBound: [16×1 double]
+    UpperBound: [16×1 double]
+
+  See variables with show.
+  See bounds with showbounds.
+
+
+
+
+
+>> prob.Objective
+ans = 
+  Linear OptimizationExpression
+
+    0.48*servings(1) + 0.54*servings(2) + 0.06*servings(3) + 0.18*servings(4) + 0.93*servings(5) + 0.38*servings(6) + 0.87*servings(7) + 0.72*servings(8) + 0.45*servings(9) + 0.15*servings(10)
++ 0.27*servings(11) + 1.1*servings(12) + 0.13*servings(13) + 2.2*servings(14) + 0.09*servings(15) + 0.75*servings(16)
+
+
+
