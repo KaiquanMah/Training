@@ -1,0 +1,231 @@
+The Optimal Breakfast - Including Bound Constraints
+Instructions are in the task pane to the left. Complete and submit each task one at a time.
+Do not edit. This code loads the data for the problem
+load Nutrition.mat 
+food
+
+>> food
+
+food =
+
+  16×6 table
+
+            Name             Price    Calories    Carbs    Protein    VitaminC
+    _____________________    _____    ________    _____    _______    ________
+
+    Broccoli                 0.48        50       13.6         8       160.2  
+    Corn                     0.54       100       17.1       2.5         5.2  
+    Lettuce                  0.06         5        0.4       0.2         0.8  
+    Potatoes                 0.18       110         37       4.3          19  
+    Tofu                     0.93        94        2.3        10         0.1  
+    Donut                    0.38       195         22       2.1         0.6  
+    Bacon                    0.87        43        0.1         3           0  
+    Apple                    0.72        95         25       0.5         8.4  
+    Banana                   0.45       105         27       1.3        10.3  
+    Toast                    0.15        79         15       2.7           0  
+    Oatmeal                  0.27       158         27         6           0  
+    Yogurt                    1.1       100          6        17           0  
+    Scrambled Eggs           0.13        91          1         6           0  
+    Steak                     2.2       679          0        62           0  
+    Chocolate Chip Cookie    0.09        78          9       1.5           0  
+    Orange                   0.75        45         11       0.9        51.1  
+
+
+
+
+
+
+
+
+
+A table of available foods and their associated price per serving and nutritional value per serving has been loaded for you.
+TASK
+Create an optimization problem with the description "An Optimal Breakfast". Assign this to a variable named prob. 
+
+Task 1
+prob =  optimproblem("Description","An Optimal Breakfast")
+
+>> prob
+
+prob = 
+
+  OptimizationProblem with properties:
+
+       Description: 'An Optimal Breakfast'
+    ObjectiveSense: 'minimize'
+         Variables: [1×1 struct] containing 1 OptimizationVariable
+         Objective: [1×1 OptimizationExpression]
+       Constraints: [0×0 struct] containing 0 OptimizationConstraints
+
+  See problem formulation with show.
+
+
+
+
+
+
+
+
+
+
+You would like to determine the number of servings of each food in the table food that yield the cheapest breakfast. This means that you must have 16 different optimization variables. 
+Luckily, you do not need to define 16 separate variables. Instead, you can create a single optimization variable vector with 16 elements. In general, an Nx1 vector of optimization variables with a lower bound can be defined in the following way
+varname = optimvar("varname",N,...
+"LowerBound",lowerBoundValue)
+
+TASK 2
+Create a 16x1 vector of optimization variables named servings. Include a lower bound of zero, since you can't eat negative amounts food.
+
+Task 2
+servings = optimvar("servings", 16, "LowerBound", 0)
+
+>> servings
+
+servings = 
+
+  16×1 OptimizationVariable array with properties:
+
+  Array-wide properties:
+          Name: 'servings'
+          Type: 'continuous'
+    IndexNames: {{}  {}}
+
+  Elementwise properties:
+    LowerBound: [16×1 double]
+    UpperBound: [16×1 double]
+
+  See variables with show.
+  See bounds with showbounds.
+
+
+
+
+
+
+
+
+
+
+
+
+The objective function for this problem is the total cost of each food type, which is the product of the number of servings of each food and the associated cost per serving. 
+TASK
+Compute the total cost of each food type by multiplying the Price column of the table food and the optimization variable servings.  Name the resulting optimization expression C.  Make sure to use element-wise operator  .* when performing the multiplication. 
+
+Task 3
+% servings 16x1
+% food.Price 16x1
+% after elementwise multiplication of servings and price => we get back 16x1
+% we want 1x1 => i.e. the SUM/TOTAL cost at that serving + price point
+% combination
+
+C = sum(food.Price .* servings)
+
+
+>> C
+
+C = 
+
+  Linear OptimizationExpression
+
+    0.48*servings(1) + 0.54*servings(2) + 0.06*servings(3) + 0.18*servings(4) + 0.93*servings(5) + 0.38*servings(6) + 0.87*servings(7) + 0.72*servings(8) + 0.45*servings(9) + 0.15*servings(10)
++ 0.27*servings(11) + 1.1*servings(12) + 0.13*servings(13) + 2.2*servings(14) + 0.09*servings(15) + 0.75*servings(16)
+
+
+
+
+
+
+
+
+TASK
+Store the sum of all elements in C in the Objective field of your optimization problem prob.
+
+Task 4
+% Objective has to be a 1x1 scalar/item
+prob.Objective = C
+
+>> prob
+
+prob = 
+
+  OptimizationProblem with properties:
+
+       Description: 'An Optimal Breakfast'
+    ObjectiveSense: 'minimize'
+         Variables: [1×1 struct] containing 1 OptimizationVariable
+         Objective: [1×1 OptimizationExpression]
+       Constraints: [0×0 struct] containing 0 OptimizationConstraints
+
+  See problem formulation with show.
+
+
+
+
+
+
+
+
+
+
+TASK
+Solve the optimization problem and store the output in variables sol and optval. Note that since the objective is linear with respect to the optimization variables, you do not need to provide an initial guess structure. You may want to leave off the semicolon to display the result. 
+
+Task 5
+[sol, optval] = solve(prob)
+
+>> sol
+
+sol = 
+
+  struct with fields:
+
+    servings: [16×1 double]
+
+>> optval
+
+optval =
+
+     0
+
+
+
+
+
+
+
+
+
+
+
+You can display the optimal servings for each food by entering sol.servings in the Further Practice section. Notice that the optimal number of servings for each food turned out to be zero! This clearly doesn't make much sense in reality.
+In this example, you managed to minimize the cost of your breakfast. You don't have to spend any money, but you'll end up starving! You need to provide more information to the optimization problem so that it knows you need a certain amount of calories.
+In the next section, you will include some additional constraints on your minimal nutritional requirements that will make the result more practical.
+
+Further Practice
+sol.servings
+
+
+>> sol.servings
+
+ans =
+
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+     0
+
+
+
