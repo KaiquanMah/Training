@@ -1,0 +1,531 @@
+The Optimal Breakfast - Including Linear Inequality Constraints
+Instructions are in the task pane to the left. Complete and submit each task one at a time.
+Do not edit. This code implements what you have done thus far. 
+load Nutrition.mat 
+food
+
+prob = optimproblem("Description","An Optimal Breakfast");
+servings = optimvar("servings",16,"LowerBound",0);
+C = food.Price .* servings;
+prob.Objective = sum(C);
+cals = food.Calories .* servings;
+prob.Constraints.calories = sum(cals) == 350;
+show(prob)
+
+
+
+>> food
+
+food =
+
+  16×6 table
+
+            Name             Price    Calories    Carbs    Protein    VitaminC
+    _____________________    _____    ________    _____    _______    ________
+
+    Broccoli                 0.48        50       13.6         8       160.2  
+    Corn                     0.54       100       17.1       2.5         5.2  
+    Lettuce                  0.06         5        0.4       0.2         0.8  
+    Potatoes                 0.18       110         37       4.3          19  
+    Tofu                     0.93        94        2.3        10         0.1  
+    Donut                    0.38       195         22       2.1         0.6  
+    Bacon                    0.87        43        0.1         3           0  
+    Apple                    0.72        95         25       0.5         8.4  
+    Banana                   0.45       105         27       1.3        10.3  
+    Toast                    0.15        79         15       2.7           0  
+    Oatmeal                  0.27       158         27         6           0  
+    Yogurt                    1.1       100          6        17           0  
+    Scrambled Eggs           0.13        91          1         6           0  
+    Steak                     2.2       679          0        62           0  
+    Chocolate Chip Cookie    0.09        78          9       1.5           0  
+    Orange                   0.75        45         11       0.9        51.1  
+
+>> show(prob)
+
+  OptimizationProblem : An Optimal Breakfast
+
+	Solve for:
+       servings
+
+	minimize :
+       0.48*servings(1) + 0.54*servings(2) + 0.06*servings(3) + 0.18*servings(4) + 0.93*servings(5) + 0.38*servings(6) + 0.87*servings(7) + 0.72*servings(8) + 0.45*servings(9) + 0.15*servings(10)
+     + 0.27*servings(11) + 1.1*servings(12) + 0.13*servings(13) + 2.2*servings(14) + 0.09*servings(15) + 0.75*servings(16)
+
+
+	subject to calories:
+       50*servings(1) + 100*servings(2) + 5*servings(3) + 110*servings(4) + 94*servings(5) + 195*servings(6) + 43*servings(7) + 95*servings(8) + 105*servings(9) + 79*servings(10) + 158*servings(11)
+     + 100*servings(12) + 91*servings(13) + 679*servings(14) + 78*servings(15) + 45*servings(16) == 350
+
+	subject to carbs:
+       13.6*servings(1) + 17.1*servings(2) + 0.4*servings(3) + 37*servings(4) + 2.3*servings(5) + 22*servings(6) + 0.1*servings(7) + 25*servings(8) + 27*servings(9) + 15*servings(10)
+     + 27*servings(11) + 6*servings(12) + servings(13) + 9*servings(15) + 11*servings(16) >= 45
+
+	variable bounds:
+       0 <= servings(1)
+       0 <= servings(2)
+       0 <= servings(3)
+       0 <= servings(4)
+       0 <= servings(5)
+       0 <= servings(6)
+       0 <= servings(7)
+       0 <= servings(8)
+       0 <= servings(9)
+       0 <= servings(10)
+       0 <= servings(11)
+       0 <= servings(12)
+       0 <= servings(13)
+       0 <= servings(14)
+       0 <= servings(15)
+       0 <= servings(16)
+
+
+
+
+
+
+
+
+
+
+
+Solving your optimization problem in it's current state gives you a breakfast that includes exactly 350 calories. You may also be interested in consuming at least 45 grams of carbohydrates.
+Inequality constraints can be implemented in the same way as equality constraints, with the == (equality) replaced by <= (less than or equal to) or >= (greater than or equal to).
+
+prob.Constraints.name = expression <= value
+
+or
+
+prob.Constraints.name = expression >= value
+TASK 1
+Add a constraint that the total carbohydrates consumed over breakfast is at least 45g.
+Compute the carbohydrates consumed over breakfast for each food by multiplying the Carbs column by servings and store the result in a variable named carbs. Make sure to use the .* operator when multiplying.
+Compute the total carbs consumed by summing the elements of carbs. Store the result in a variable named totalCarbs.
+Store totalCarbs in the Constraints field of your optimization problem with the value set to 45. Name the constraint carbs.
+
+
+
+Task 1
+carbs = food.Carbs .* servings
+totalCarbs = sum(carbs)
+
+prob.Constraints.carbs = totalCarbs >= 45;
+
+
+
+
+>> carbs
+
+carbs = 
+
+  16×1 Linear OptimizationExpression array with properties:
+
+    IndexNames: {{}  {}}
+     Variables: [1×1 struct] containing 1 OptimizationVariable
+
+  See expression formulation with show.
+
+>> totalCarbs
+
+totalCarbs = 
+
+  Linear OptimizationExpression
+
+    13.6*servings(1) + 17.1*servings(2) + 0.4*servings(3) + 37*servings(4) + 2.3*servings(5) + 22*servings(6) + 0.1*servings(7) + 25*servings(8) + 27*servings(9) + 15*servings(10)
++ 27*servings(11) + 6*servings(12) + servings(13) + 9*servings(15) + 11*servings(16)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TASK
+Solve the optimization problem. Store the output in a single variable sol.
+
+Task 2
+[sol, optval] = solve(prob)
+
+
+
+
+>> sol
+
+sol = 
+
+  struct with fields:
+
+    servings: [16×1 double]
+
+>> optval
+
+optval =
+
+   0.413924050632911
+
+
+
+
+>> sol.servings
+
+ans =
+
+                   0
+                   0
+                   0
+   0.189873417721519
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+   4.219409282700421
+                   0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TASK
+Create a bar graph with the Name column plotted on the horizontal axis and the servings field of sol on the vertical axis.
+
+Task 3
+bar(food.Name, sol.servings)
+
+
+
+
+
+
+
+
+
+
+TASK
+Evaluate the expression totalCarbs at the solution. Store the result in a variable named optCarbs
+
+Task 4
+optCarbs = evaluate(totalCarbs, sol)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TASK
+Follow the steps from Tasks 1-4 to implement the constraint that you must intake at least 15 grams of protein, re-solve the optimization problem, and plot the result.
+Compute the total protein consumed over breakfast and store it in an expression named totalProtein.
+Store the constraint in your optimization problem, and name the constraint protein.
+Solve the optimization problem and store the output in sol2.
+Create a bar graph with the food names on the horizontal axis and the optimal servings on the vertical axis.
+Evaluate the protein constraint at sol2 and store in a variable optProtein.
+
+Task 5
+protein = food.Protein .* servings
+totalProtein = sum(protein)
+prob.Constraints.protein = totalProtein >= 15
+
+[sol2, optval2] = solve(prob)
+bar(food.Name, sol2.servings)
+
+optProtein = evaluate(totalProtein, sol2)
+
+
+
+
+
+
+>> protein
+protein = 
+  16×1 Linear OptimizationExpression array with properties:
+
+    IndexNames: {{}  {}}
+     Variables: [1×1 struct] containing 1 OptimizationVariable
+
+  See expression formulation with show.
+
+
+
+
+>> totalProtein
+totalProtein = 
+  Linear OptimizationExpression
+
+    8*servings(1) + 2.5*servings(2) + 0.2*servings(3) + 4.3*servings(4) + 10*servings(5) + 2.1*servings(6) + 3*servings(7) + 0.5*servings(8) + 1.3*servings(9) + 2.7*servings(10) + 6*servings(11)
++ 17*servings(12) + 6*servings(13) + 62*servings(14) + 1.5*servings(15) + 0.9*servings(16)
+
+
+
+% what does optval2 store???
+>> optval2
+optval2 =
+   0.484320746527778
+
+
+>> optProtein
+optProtein =
+  15.000000000000004
+
+
+
+
+>> sol2.servings
+ans =
+                   0
+                   0
+                   0
+   0.791325644841270
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+   1.538938492063493
+                   0
+   1.575779183201056
+                   0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TASK
+Repeat the process from Task 5 to implement one final constraint that you must intake at least 60 milligrams of vitamin C.
+Compute the total vitamin C consumed over breakfast and store it in an expression named totalVitaminC.
+Store the constraint in your optimization problem, and name the constraint vitaminC.
+Solve the optimization problem and store the output in sol3.
+Create a bar graph with the food names on the horizontal axis and the optimal servings on the vertical axis.
+Evaluate the vitamin C constraint at sol3 and store in a variable optVitaminC.
+
+Task 6
+vitaminC = food.VitaminC .* servings
+totalVitaminC = sum(vitaminC)
+prob.Constraints.vitaminC = totalVitaminC >= 60
+
+[sol3, optval3] = solve(prob)
+bar(food.Name, sol3.servings)
+optVitaminC = evaluate(totalVitaminC, sol3)
+
+
+
+
+>> totalVitaminC
+totalVitaminC = 
+  Linear OptimizationExpression
+
+    160.2*servings(1) + 5.2*servings(2) + 0.8*servings(3) + 19*servings(4) + 0.1*servings(5) + 0.6*servings(6) + 8.4*servings(8) + 10.3*servings(9) + 51.1*servings(16)
+
+
+
+
+>> prob.Constraints.vitaminC
+ans = 
+  Linear OptimizationConstraint
+
+    160.2*servings(1) + 5.2*servings(2) + 0.8*servings(3) + 19*servings(4) + 0.1*servings(5) + 0.6*servings(6) + 8.4*servings(8) + 10.3*servings(9) + 51.1*servings(16) >= 60
+
+
+
+
+
+
+>> show(prob)
+
+  OptimizationProblem : An Optimal Breakfast
+
+	Solve for:
+       servings
+
+	minimize :
+       0.48*servings(1) + 0.54*servings(2) + 0.06*servings(3) + 0.18*servings(4) + 0.93*servings(5) + 0.38*servings(6) + 0.87*servings(7) + 0.72*servings(8) + 0.45*servings(9) + 0.15*servings(10)
+     + 0.27*servings(11) + 1.1*servings(12) + 0.13*servings(13) + 2.2*servings(14) + 0.09*servings(15) + 0.75*servings(16)
+
+
+	subject to calories:
+       50*servings(1) + 100*servings(2) + 5*servings(3) + 110*servings(4) + 94*servings(5) + 195*servings(6) + 43*servings(7) + 95*servings(8) + 105*servings(9) + 79*servings(10) + 158*servings(11)
+     + 100*servings(12) + 91*servings(13) + 679*servings(14) + 78*servings(15) + 45*servings(16) == 350
+
+	subject to carbs:
+       13.6*servings(1) + 17.1*servings(2) + 0.4*servings(3) + 37*servings(4) + 2.3*servings(5) + 22*servings(6) + 0.1*servings(7) + 25*servings(8) + 27*servings(9) + 15*servings(10)
+     + 27*servings(11) + 6*servings(12) + servings(13) + 9*servings(15) + 11*servings(16) >= 45
+
+	subject to protein:
+       8*servings(1) + 2.5*servings(2) + 0.2*servings(3) + 4.3*servings(4) + 10*servings(5) + 2.1*servings(6) + 3*servings(7) + 0.5*servings(8) + 1.3*servings(9) + 2.7*servings(10) + 6*servings(11)
+     + 17*servings(12) + 6*servings(13) + 62*servings(14) + 1.5*servings(15) + 0.9*servings(16) >= 15
+
+	subject to vitaminC:
+       160.2*servings(1) + 5.2*servings(2) + 0.8*servings(3) + 19*servings(4) + 0.1*servings(5) + 0.6*servings(6) + 8.4*servings(8) + 10.3*servings(9) + 51.1*servings(16) >= 60
+
+	variable bounds:
+       0 <= servings(1)
+       0 <= servings(2)
+       0 <= servings(3)
+       0 <= servings(4)
+       0 <= servings(5)
+       0 <= servings(6)
+       0 <= servings(7)
+       0 <= servings(8)
+       0 <= servings(9)
+       0 <= servings(10)
+       0 <= servings(11)
+       0 <= servings(12)
+       0 <= servings(13)
+       0 <= servings(14)
+       0 <= servings(15)
+       0 <= servings(16)
+
+
+
+
+
+
+>> sol3.servings
+ans =
+   0.042147230416974
+                   0
+                   0
+   2.802527036168460
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+                   0
+   0.435325983523305
+                   0
+                   0
+                   0
+
+
+
+
+>> optVitaminC
+optVitaminC =
+  60.000000000000021
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+In some situations, an optimal solution may not exist because one or more constraints cannot be met. In which case, MATLAB will notify you that it was unable to find a solution within the constraints you have defined.
+TASK
+Change the three constraints you previously defined in this example to see what happens when a solution cannot be found.
+Set totalCarbs to be less than or equal to 30g and store it in the carbs constraint.
+Set totalProtein to be greater than or equal to 60g and store it in the protein constraint.
+Set totalVitaminC to be greater than or equal to 60mg and store it in the vitaminC constraint.
+Solve the new optimization problem. Store the first and second outputs in the variables sol4 and optval, respectively. Leave off the semicolon to display the result.
+
+Task 7
+prob.Constraints.carbs = totalCarbs <= 30;
+prob.Constraints.protein = totalProtein >= 60;
+prob.Constraints.vitaminC = totalVitaminC >= 60;
+
+[sol4, optval] = solve(prob)
+
+
+
+
+
+
+
+
+>> [sol4, optval] = solve(prob)
+
+Solving problem using linprog.
+No feasible solution found.
+Linprog stopped because no point satisfies the constraints.
+
+
+>> sol4
+sol4 = 
+  struct with fields:
+
+    servings: []
+
+>> optval
+optval =
+     []
+     
+     
+     
+     
+     
+     
+
+
+
+
+
+
+The code in the Further Practice section allows you to interactively change the constraints in this example. Uncomment the code in the section by highlighting the code and clicking Remove comment toolstrip symbol in the Code section of the toolbar.
+Experiment with different constraint values using the sliders. For example, what is the optimal breakfast for a low carb, high protein diet?
+
+Further Practice
+prob.Constraints.carbs = totalCarbs <= 0
+prob.Constraints.protein = totalProtein >= 14
+prob.Constraints.vitaminC = totalVitaminC >= 43
+[sol,optval] = solve(prob)
+bar(food.Name,sol.servings)
+
+
