@@ -1,0 +1,407 @@
+Radiation Therapy 
+Instructions are in the task pane to the left. Complete and submit each task one at a time.
+
+
+
+TASK 1
+Define the optimization problem, give it a description "Radiation Therapy Optimization" and store it in prob.
+Define the 8-by-1 optimization variable for the intensities of each beamlet and include a lowerbound of zero. Store the variables in an optimization variable vector I
+
+Task 1
+prob = optimproblem("Description", "Radiation Therapy Optimization")
+I = optimvar("I", 8, "LowerBound", 0)
+
+>> prob
+prob = 
+  OptimizationProblem with properties:
+
+       Description: 'Radiation Therapy Optimization'
+    ObjectiveSense: 'minimize'
+         Variables: [1×1 struct] containing 1 OptimizationVariable
+         Objective: [1×1 OptimizationExpression]
+       Constraints: [1×1 struct] containing 5 OptimizationConstraints
+
+  See problem formulation with show.
+
+
+
+>> I
+I = 
+  8×1 OptimizationVariable array with properties:
+
+  Array-wide properties:
+          Name: 'I'
+          Type: 'continuous'
+    IndexNames: {{}  {}}
+
+  Elementwise properties:
+    LowerBound: [8×1 double]
+    UpperBound: [8×1 double]
+
+  See variables with show.
+  See bounds with showbounds.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%==================================================================================================
+The Objective Function
+The objective function is constructed by multiplying the intensity of each beamlet by the dosage it delivers to each healthy cell or spinal cord cell, then summing to get the total.
+<Schematic of horizontal beamlets #1 through #4 targeting the rows of the 4x4 grid.>
+4  3   2  1
+4  3~  2  1
+4~ 3~  2* 1
+4  3   2~ 1
+
+no annotation => healthy tissue
+* => spinal cord
+~ => tumour
+
+Each cell will react to the beamlet intensity according to the numbers in the grid. The more material the beam travels through, the less of a dose it delivers.
+
+The dose a beamlet delivers to any cell is the product of the intensity of that beam and the value that appears in the cell.
+
+The dosage delivered to the healthy tissue in the top row is computed by adding these four terms. 
+The first cell receives 4 units, the second receives 3 units, and so on. 
+The total dosage delivered to the top row is therefore 10 times the intensity of beamlet 1.
+4 I_1 + 3 I_1 + 2 I_1 + 1 I_1 = 10 I_1 
+
+Here is the dosage delivered to the second row. 
+Again, the first cell receives 4 units, but the second cell is not included in the calculation because it is not healthy tissue or spinal cord material. 
+The third cell receives 2 units, 
+and the fourth cell receives 1 unit.
+The total dosage delivered to the row is then 7 times the intensity of beamlet 2.
+
+Here is the dosage delivered to the cells in the third row. 
+Notice now that the only two cells that contribute to the calculation are the healthy cell and the spinal cord cell. 
+The total dosage delivered to this row is 3 times the intensity of beamlet 3.
+
+Finally, here is the dosage delivered to the fourth row.
+4 + 3 + _ + 1 = 8 I_4
+
+If you were to create an array that contains the total cell response for each row, 
+you can multiply by the intensities to obtain the total dose delivered to healthy cells in that row. 
+This is only half of the objective function. 
+e.g.
+10 I_1
+7 I_2
+3 I_3
+8 I_4
+=> [10 7 3 8]  X [I_1
+                  I_2
+                  I_3
+                  I_4]   => 1X4 X 4X1 => 1X1 => TOTAL DOSE DELIVERED TO ROWS
+
+
+In order to create the entire objective, you must repeat this process for all the columns (beamlets 5-8).
+%==================================================================================================
+The cell response to radiation is represented by the numbers in the grid. The dose delivered to any cell in the grid is computed by multiplying the cell response and the intensity of the beamlet passing through the cell.
+You just saw that adding the numbers in the light or blue cells give the total healthy cell response for each of the rows in the grid. These are the rows impacted by beamlets 1-4. Now you must do the same for each of the columns, which are impacted by beamlets 5-8.
+TASK 2
+Compute the total radiation dose delivered to the healthy tissue and the spinal cord following the steps below:
+Store the total cell response for the healthy tissue and spinal cord cells in a 1-by-8 array d, The first four elements should correspond to the cell response of the rows as shown below. The last four elements correspond to the cell response of the columns. These are obtained by adding the numbers in the light and dark blue cells down each column. 
+Multiply the cell responses d by the radiation intensities I to obtain the total radiation does delivered. Store the result in a variable D.
+
+Task 2
+
+d = [10 7 3 8 8 5 9 10]
+D = d*I
+
+>> d
+d =
+    10     7     3     8     8     5     9    10
+
+
+
+>> D
+D = 
+  Linear OptimizationExpression
+
+    10*I(1) + 7*I(2) + 3*I(3) + 8*I(4) + 8*I(5) + 5*I(6) + 9*I(7) + 10*I(8)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The objective function is the sum of all of the doses delivered to the healthy tissue and spinal cord.
+Because you defined the radiation intensities as an 8-by-1 column vector and the cell responses as a 1-by-8 row vector, the sum was performed for you during the matrix multiplication.
+TASK 3
+Store the total radiation dose D in the Objective field of your optimization problem.
+
+Task 3
+% D is already 1x1
+prob.Objective = D
+
+
+
+
+
+
+
+
+
+
+
+
+The spinal cord should not receive a dose of more than 5 units. 
+This translates to the constraint: 2I_3+2I_7≤5, 
+where I_3 and I_7, are the intensities of the third and seventh beamlets, respectively.
+<spinal cord cell with two beams passing through it.Beam I7 and I3 both deliver two doses to the cell>
+TASK 4
+Store this inequality constraint in your optimization problem. Give the constraint the name spinal
+
+Task 4
+% Hint
+% You can index into optimization variables the same as any vector in MATLAB. 
+% % So, the third beamlet intensity can be found in the third element of your optimization variable vector: I(3)
+
+% the '2' prefix/coefficient is for spinal cord, which receives twice the
+% intensity (of radiation) delivered by each laser beam
+prob.Constraints.spinal = (2*I(3) + 2*I(7) <= 5)
+
+
+
+
+
+
+
+Every tumor cell needs to receive a sufficiently lethal dose of at least 7 units. Since there are four tumor cells containing cancerous material, this corresponds to four inequality constraints as indicated below.
+<Schematic for constructing constraints on each tumor cell.>
+Whenever two beamlets intersect on an orange tumor cell, a constraint must be defined. Each constraint is imposed on the sum of the products of the intersecting beams and the dosage, which is represented by the numbers adjacent to each tumor cell.
+The constraints are:
+A: 3I_2+3I_6≥7
+B: 4I_3+2I_5≥7
+C: 3I_3+2I_6≥7
+and
+D: 2I_4+I_7≥7
+TASK 5
+Store each of the constraints listed above in your optimization problem. Give the constraints names A, B, C, and D.
+
+Task 5
+prob.Constraints.A = (3*I(2) + 3*I(6) >= 7) 
+prob.Constraints.B = (4*I(3) + 2*I(5) >= 7) 
+prob.Constraints.C = (3*I(3) + 2*I(6) >= 7) 
+prob.Constraints.D = (2*I(4) + 1*I(7) >= 7) 
+
+
+
+
+
+
+
+TASK 6
+Solve the optimization problem. This time, only include a single output and name it sol. Remember, since this is a linear objective function you do not need to include an initial guess.
+
+Task 6
+sol = solve(prob)
+
+
+
+
+
+
+
+
+
+TASK7
+Create a bar graph of the optimal beamlet intensities stored in sol.
+
+Task 7
+sol.I
+bar(sol.I)
+
+>> sol
+sol = 
+  struct with fields:
+
+    I: [8×1 double]
+
+
+
+>> sol.I
+ans =
+         0
+         0
+    1.7500
+    3.5000
+         0
+    2.3333
+         0
+         0
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+TASK
+Define an optimization expression for the dose delivered to the spinal cord. Then, check to see if the optimal solution satisfied the constraint spinal. Store the result in a variable check. You may want to leave off the semi-colon to display the result.
+
+Task 8
+% The dose delivered to the spinal cord is 2I(3)+2I(7).
+% RECALL prob.Constraints.spinal = (2*I(3) + 2*I(7) <= 5)
+2*sol.I(3) + 2*sol.I(7)         % 3.5000
+
+% my original 'check'
+% check = (2*sol.I(3) + 2*sol.I(7) <= 5)      %1
+% not sure why the above 'check' was wrong, 
+% since I believe we were checking for 0/1,
+% i.e. FALSE/TRUE whether the check passes!
+check = (2*sol.I(3) + 2*sol.I(7))
+
+
+
+
+
+
+
+
+
+
+
+
+
+Notice that the optimal radiation intensity is zero for beamlets 1, 2, 7, and 8. This is due to the fact that they encounter a lot of healthy tissue that is highly susceptible to radiation.
+Also, we wanted the dose delivered to the spinal cord to be less than 5, and our result was 3.5, which is even better.
+Now you can visualize the doses delivered to each cell using the following code.
+verticalBeamTable = [4 4 4 4; 3 3 3 3; 2 2 2 2; 1 1 1 1];
+horizontalBeamTable = [4 3 2 1; 4 3 2 1; 4 3 2 1; 4 3 2 1];
+
+verticalIntensity = [0 2.33 0 0];
+horizontalIntensity = [0 0 1.75 3.5];
+
+horizontalDose = horizontalBeamTable .* horizontalIntensity';
+verticalDose = verticalBeamTable .* verticalIntensity;
+
+Doses = horizontalDose + verticalDose;
+
+imagesc(Doses)
+hold on
+plot([.5 .5 1.5 1.5 2.5 2.5 3.5 3.5 2.5 2.5 0.5],...
+ [3.5 2.5 2.5 1.5 1.5 3.5 3.5 4.5 4.5 3.5 3.5], 'r-', "LineWidth",2)
+hold off
+colorbar
+
+
+
+i.e. Further Practice
+verticalBeamTable = [4 4 4 4; 3 3 3 3; 2 2 2 2; 1 1 1 1];
+horizontalBeamTable = [4 3 2 1; 4 3 2 1; 4 3 2 1; 4 3 2 1];
+
+verticalIntensity = [0 2.33 0 0];
+horizontalIntensity = [0 0 1.75 3.5];
+
+horizontalDose = horizontalBeamTable .* horizontalIntensity';
+verticalDose = verticalBeamTable .* verticalIntensity;
+
+Doses = horizontalDose + verticalDose;
+
+% https://www.mathworks.com/help/matlab/ref/imagesc.html
+% image with scaled colours
+% base image based on 'dosage' intensities
+imagesc(Doses)
+
+hold on
+% go up; a solid line is traced between these 2 coordinates
+% then go right and up; the LHS trailing line is automatically drawn
+% move right and down; the LHS trailing line is automatically drawn
+% move right and down; the LHS trailing line is automatically drawn
+% move left and up; the RHS trailing line is automatically drawn
+% move left to the last coordinate, i.e. the starting point; the RHS trailing line is automatically drawn
+plot([.5 .5 1.5 1.5 2.5 2.5 3.5 3.5 2.5 2.5 0.5],...
+ [3.5 2.5 2.5 1.5 1.5 3.5 3.5 4.5 4.5 3.5 3.5], 'r-', "LineWidth",2)
+hold off
+
+colorbar
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>> show(prob)
+
+  OptimizationProblem : Radiation Therapy Optimization
+
+	Solve for:
+       I
+
+	minimize :
+       10*I(1) + 7*I(2) + 3*I(3) + 8*I(4) + 8*I(5) + 5*I(6) + 9*I(7) + 10*I(8)
+
+
+	subject to spinal:
+       2*I(3) + 2*I(7) <= 5
+
+	subject to A:
+       3*I(2) + 3*I(6) >= 7
+
+	subject to B:
+       4*I(3) + 2*I(5) >= 7
+
+	subject to C:
+       3*I(3) + 2*I(6) >= 7
+
+	subject to D:
+       2*I(4) + I(7) >= 7
+
+	variable bounds:
+       0 <= I(1)
+       0 <= I(2)
+       0 <= I(3)
+       0 <= I(4)
+       0 <= I(5)
+       0 <= I(6)
+       0 <= I(7)
+       0 <= I(8)
+       
+       
