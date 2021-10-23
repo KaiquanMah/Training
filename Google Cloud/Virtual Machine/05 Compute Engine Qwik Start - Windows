@@ -1,0 +1,167 @@
+#https://www.cloudskillsboost.google/focuses/560?parent=catalog
+Overview
+Compute Engine lets you create and run virtual machines on Google infrastructure. Compute Engine offers scale, performance, and value that allows you to easily launch large compute clusters on Google's infrastructure.
+You can run your Windows applications on Compute Engine and take advantage of many benefits available to virtual machine instances, such as reliable storage options, the speed of the Google network, and Autoscaling.
+In this hands-on lab, you learn how to launch a Windows Server instance in Compute Engine and use Remote Desktop Protocol (RDP) to connect to it.
+
+
+
+
+
+Create a virtual machine instance
+-In the Cloud Console, on the Navigation menu Navigation menu, click Compute Engine > VM instances, and then click Create Instance.
+-In the Machine configuration section, for Series select N1.
+-In the Boot disk section, click Change to begin configuring your boot disk.
+-Under Operating system select Windows Server and under Version select Windows Server 2012 R2 Datacenter, and then click Select. Leave all other settings as their defaults.
+-Click Create to create the instance.
+
+
+
+
+Activate Cloud Shell
+Cloud Shell is a virtual machine that is loaded with development tools. It offers a persistent 5GB home directory and runs on the Google Cloud. Cloud Shell provides command-line access to your Google Cloud resources.
+In the Cloud Console, in the top right toolbar, click the Activate Cloud Shell button.
+Click Continue.
+
+
+
+It takes a few moments to provision and connect to the environment. When you are connected, you are already authenticated, and the project is set to your PROJECT_ID. For example:
+
+Cloud Shell Terminal
+
+gcloud is the command-line tool for Google Cloud. It comes pre-installed on Cloud Shell and supports tab-completion.
+
+You can list the active account name with this command:
+gcloud auth list
+
+
+(Output)
+Credentialed accounts:
+ - <myaccount>@<mydomain>.com (active)
+
+(Example output)
+Credentialed accounts:
+ - google1623327_student@qwiklabs.net
+
+You can list the project ID with this command:
+gcloud config list project
+
+
+(Output)
+[core]
+project = <project_ID>
+
+(Example output)
+[core]
+project = qwiklabs-gcp-44776a13dea667a6
+
+For full documentation of gcloud see the gcloud command-line tool overview. 
+https://cloud.google.com/sdk/gcloud
+
+
+
+
+
+
+
+
+*Remote Desktop (RDP) into the Windows Server*
+
+Test the status of Windows Startup
+After a short time, the Windows Server instance will be provisioned and listed on the VM Instances page with a green status icon Green Status Icon.
+
+However the server instance may not yet be ready to accept RDP connections, as it takes a while for all the OS components to initialize.
+
+To see whether the server instance is ready for an RDP connection, run the following command at your Cloud Shell terminal command line:
+gcloud compute instances get-serial-port-output instance-1
+
+
+If prompted, type n and press Enter.
+Repeat the command until you see the following in the command output, which tells you that the OS components have initialized and the Windows Server is ready to accept your RDP connection (attempt in the next step).
+------------------------------------------------------------
+Instance setup finished. instance-1 is ready to use.
+------------------------------------------------------------
+
+
+
+
+
+
+
+
+RDP into the Windows Server
+To set a password for logging into the RDP, run the following command in Cloud Shell terminal and replace [instance] with the VM Instance that you have created and set [username] as admin.
+gcloud compute reset-windows-password [instance] --zone us-central1-a --user [username]
+
+
+If asked Would you like to set or reset the password for [admin] (Y/n)?, enter Y.
+
+There are different ways to connect to your server through RDP, depending on whether you are on Windows or not:
+
+If you are using a Chromebook or other machine at a Google Cloud event there is likely an RDP app already installed on the computer. Click the icon as below, if it is present, in the lower left corner of the screen and enter the external IP of your VM.
+
+
+
+If you are not on Windows but using Chrome, you can connect to your server through RDP directly from the browser using the Chrome RDP for Google Cloud Platform extension. Click on RDP.
+https://chrome.google.com/webstore/detail/chrome-rdp-for-google-clo/mpbbnannobiobpnfblimoapbephgifkm
+
+This will prompt you to install Chrome RDP Extension. Once it is installed, it will open up a login page where you can specify Windows username admin and password from the output of above mentioned command to log in (ignore the Domain: field).
+
+
+
+Alternatively, if you are on a Windows machine, you can download the RDP file by selecting it from the RDP menu.
+On Windows, you can simply double click on the RDP file and login using the Windows user and password.
+
+
+If you are on a Macintosh, there are several freely accessible RDP Client packages available to install, such as CoRD. After installing, connect as above to the External IP address of the Windows server. Once it has connected, it will open up a login page where you can specify Windows username admin and password from the output of above mentioned command to log in (ignore the Domain: field).
+http://cord.sourceforge.net/
+Once logged in, you should see the Windows desktop!
+
+
+
+
+
+
+
+
+
+Copy and pasting with the RDP client
+Once you are securely logged in to your instance, you may find yourself copying and pasting commands from the lab manual.
+
+To paste, hold the CTRL-V keys (if you are a Mac user, using CMND-V will not work.) If you are in a Powershell window, be sure that you have clicked in to the window or else the paste shortcut won't work.
+
+If you are pasting into putty, right click.
+
+
+
+
+
+
+
+
+
+Test your understanding
+The following multiple-choice questions can reinforce your understanding of this lab's concepts.
+
+
+We can create a Windows instance in Google Cloud by changing its ____ in the VM instance console.
+API Access
+Machine Type
+Boot disk to Windows image
+Firewall rules
+
+
+Which command is used to check whether the server is ready for an RDP connection?
+gcloud compute ssh
+gcloud compute instances create
+gcloud compute instances get-serial-port-output
+gcloud compute instances list
+
+
+
+
+
+
+
+
+
