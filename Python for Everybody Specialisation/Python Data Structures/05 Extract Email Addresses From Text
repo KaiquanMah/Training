@@ -1,0 +1,249 @@
+8.5 Open the file mbox-short.txt and read it line by line. When you find a line that starts with 'From ' like the following line:
+From stephen.marquard@uct.ac.za Sat Jan  5 09:14:16 2008
+You will parse the From line using split() and print out the second word in the line (i.e. the entire address of the person who sent the message). Then print out a count at the end.
+Hint: make sure not to include the lines that start with 'From:'. Also look at the last line of the sample output to see how to print the count.
+
+
+#initial solution
+fname = input("Enter file name: ")
+if len(fname) < 1:
+    fname = "mbox-short.txt"
+
+fh = open(fname)
+count = 0
+
+for line in fh:
+    line = line.rstrip()
+
+    if line.startswith('From '):
+        #use the 'spaces' to detect when the email address starts and ends on the line
+        indexFirstSpace = line.find(' ')
+        indexSecondSpace = line[indexFirstSpace+1:].find(' ')
+
+        #extract the email address
+        tempEmail = line[indexFirstSpace+1:indexSecondSpace]
+        count += 1
+
+    else:
+        continue
+
+
+print("There were", count, "lines in the file with From as the first word")
+
+
+
+
+
+
+
+
+
+#solution 2 using lineString.split()
+fname = input("Enter file name: ")
+if len(fname) < 1:
+    fname = "mbox-short.txt"
+
+fh = open(fname)
+count = 0
+listEmails = list()
+
+for line in fh:
+    line = line.rstrip()
+
+    if line.startswith('From '):
+        tempList = line.split(' ')
+
+        for word in tempList:
+            if '@' in word:
+                listEmails.append(word)
+                count += 1
+
+    else:
+        continue
+
+
+for email in listEmails:
+    print(email)
+print("There were", count, "lines in the file with From as the first word")
+
+
+
+
+
+
+
+
+stephen.marquard@uct.ac.za
+louis@media.berkeley.edu
+zqian@umich.edu
+rjlowe@iupui.edu
+zqian@umich.edu
+rjlowe@iupui.edu
+cwen@iupui.edu
+cwen@iupui.edu
+gsilver@umich.edu
+gsilver@umich.edu
+zqian@umich.edu
+gsilver@umich.edu
+wagnermr@iupui.edu
+zqian@umich.edu
+antranig@caret.cam.ac.uk
+gopal.ramasammycook@gmail.com
+david.horwitz@uct.ac.za
+david.horwitz@uct.ac.za
+david.horwitz@uct.ac.za
+david.horwitz@uct.ac.za
+stephen.marquard@uct.ac.za
+louis@media.berkeley.edu
+louis@media.berkeley.edu
+ray@media.berkeley.edu
+cwen@iupui.edu
+cwen@iupui.edu
+cwen@iupui.edu
+There were 27 lines in the file with From as the first word
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You can download the sample data at http://www.py4e.com/code3/mbox-short.txt
+From stephen.marquard@uct.ac.za Sat Jan  5 09:14:16 2008
+Return-Path: <postmaster@collab.sakaiproject.org>
+Received: from murder (mail.umich.edu [141.211.14.90])
+	 by frankenstein.mail.umich.edu (Cyrus v2.3.8) with LMTPA;
+	 Sat, 05 Jan 2008 09:14:16 -0500
+X-Sieve: CMU Sieve 2.3
+Received: from murder ([unix socket])
+	 by mail.umich.edu (Cyrus v2.2.12) with LMTPA;
+	 Sat, 05 Jan 2008 09:14:16 -0500
+Received: from holes.mr.itd.umich.edu (holes.mr.itd.umich.edu [141.211.14.79])
+	by flawless.mail.umich.edu () with ESMTP id m05EEFR1013674;
+	Sat, 5 Jan 2008 09:14:15 -0500
+Received: FROM paploo.uhi.ac.uk (app1.prod.collab.uhi.ac.uk [194.35.219.184])
+	BY holes.mr.itd.umich.edu ID 477F90B0.2DB2F.12494 ; 
+	 5 Jan 2008 09:14:10 -0500
+Received: from paploo.uhi.ac.uk (localhost [127.0.0.1])
+	by paploo.uhi.ac.uk (Postfix) with ESMTP id 5F919BC2F2;
+	Sat,  5 Jan 2008 14:10:05 +0000 (GMT)
+Message-ID: <200801051412.m05ECIaH010327@nakamura.uits.iupui.edu>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Received: from prod.collab.uhi.ac.uk ([194.35.219.182])
+          by paploo.uhi.ac.uk (JAMES SMTP Server 2.1.3) with SMTP ID 899
+          for <source@collab.sakaiproject.org>;
+          Sat, 5 Jan 2008 14:09:50 +0000 (GMT)
+Received: from nakamura.uits.iupui.edu (nakamura.uits.iupui.edu [134.68.220.122])
+	by shmi.uhi.ac.uk (Postfix) with ESMTP id A215243002
+	for <source@collab.sakaiproject.org>; Sat,  5 Jan 2008 14:13:33 +0000 (GMT)
+Received: from nakamura.uits.iupui.edu (localhost [127.0.0.1])
+	by nakamura.uits.iupui.edu (8.12.11.20060308/8.12.11) with ESMTP id m05ECJVp010329
+	for <source@collab.sakaiproject.org>; Sat, 5 Jan 2008 09:12:19 -0500
+Received: (from apache@localhost)
+	by nakamura.uits.iupui.edu (8.12.11.20060308/8.12.11/Submit) id m05ECIaH010327
+	for source@collab.sakaiproject.org; Sat, 5 Jan 2008 09:12:18 -0500
+Date: Sat, 5 Jan 2008 09:12:18 -0500
+X-Authentication-Warning: nakamura.uits.iupui.edu: apache set sender to stephen.marquard@uct.ac.za using -f
+To: source@collab.sakaiproject.org
+From: stephen.marquard@uct.ac.za
+Subject: [sakai] svn commit: r39772 - content/branches/sakai_2-5-x/content-impl/impl/src/java/org/sakaiproject/content/impl
+X-Content-Type-Outer-Envelope: text/plain; charset=UTF-8
+X-Content-Type-Message-Body: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8
+X-DSPAM-Result: Innocent
+X-DSPAM-Processed: Sat Jan  5 09:14:16 2008
+X-DSPAM-Confidence: 0.8475
+X-DSPAM-Probability: 0.0000
+
+Details: http://source.sakaiproject.org/viewsvn/?view=rev&rev=39772
+
+Author: stephen.marquard@uct.ac.za
+Date: 2008-01-05 09:12:07 -0500 (Sat, 05 Jan 2008)
+New Revision: 39772
+
+Modified:
+content/branches/sakai_2-5-x/content-impl/impl/src/java/org/sakaiproject/content/impl/ContentServiceSqlOracle.java
+content/branches/sakai_2-5-x/content-impl/impl/src/java/org/sakaiproject/content/impl/DbContentService.java
+Log:
+SAK-12501 merge to 2-5-x: r39622, r39624:5, r39632:3 (resolve conflict from differing linebreaks for r39622)
+
+----------------------
+This automatic notification message was sent by Sakai Collab (https://collab.sakaiproject.org/portal) from the Source site.
+You can modify how you receive notifications at My Workspace > Preferences.
+
+
+
+From louis@media.berkeley.edu Fri Jan  4 18:10:48 2008
+Return-Path: <postmaster@collab.sakaiproject.org>
+Received: from murder (mail.umich.edu [141.211.14.97])
+	 by frankenstein.mail.umich.edu (Cyrus v2.3.8) with LMTPA;
+	 Fri, 04 Jan 2008 18:10:48 -0500
+X-Sieve: CMU Sieve 2.3
+Received: from murder ([unix socket])
+	 by mail.umich.edu (Cyrus v2.2.12) with LMTPA;
+	 Fri, 04 Jan 2008 18:10:48 -0500
+Received: from icestorm.mr.itd.umich.edu (icestorm.mr.itd.umich.edu [141.211.93.149])
+	by sleepers.mail.umich.edu () with ESMTP id m04NAbGa029441;
+	Fri, 4 Jan 2008 18:10:37 -0500
+Received: FROM paploo.uhi.ac.uk (app1.prod.collab.uhi.ac.uk [194.35.219.184])
+	BY icestorm.mr.itd.umich.edu ID 477EBCE3.161BB.4320 ; 
+	 4 Jan 2008 18:10:31 -0500
+Received: from paploo.uhi.ac.uk (localhost [127.0.0.1])
+	by paploo.uhi.ac.uk (Postfix) with ESMTP id 07969BB706;
+	Fri,  4 Jan 2008 23:10:33 +0000 (GMT)
+Message-ID: <200801042308.m04N8v6O008125@nakamura.uits.iupui.edu>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Received: from prod.collab.uhi.ac.uk ([194.35.219.182])
+          by paploo.uhi.ac.uk (JAMES SMTP Server 2.1.3) with SMTP ID 710
+          for <source@collab.sakaiproject.org>;
+          Fri, 4 Jan 2008 23:10:10 +0000 (GMT)
+Received: from nakamura.uits.iupui.edu (nakamura.uits.iupui.edu [134.68.220.122])
+	by shmi.uhi.ac.uk (Postfix) with ESMTP id 4BA2F42F57
+	for <source@collab.sakaiproject.org>; Fri,  4 Jan 2008 23:10:10 +0000 (GMT)
+Received: from nakamura.uits.iupui.edu (localhost [127.0.0.1])
+	by nakamura.uits.iupui.edu (8.12.11.20060308/8.12.11) with ESMTP id m04N8vHG008127
+	for <source@collab.sakaiproject.org>; Fri, 4 Jan 2008 18:08:57 -0500
+Received: (from apache@localhost)
+	by nakamura.uits.iupui.edu (8.12.11.20060308/8.12.11/Submit) id m04N8v6O008125
+	for source@collab.sakaiproject.org; Fri, 4 Jan 2008 18:08:57 -0500
+Date: Fri, 4 Jan 2008 18:08:57 -0500
+X-Authentication-Warning: nakamura.uits.iupui.edu: apache set sender to louis@media.berkeley.edu using -f
+To: source@collab.sakaiproject.org
+From: louis@media.berkeley.edu
+Subject: [sakai] svn commit: r39771 - in bspace/site-manage/sakai_2-4-x/site-manage-tool/tool/src: bundle java/org/sakaiproject/site/tool
+X-Content-Type-Outer-Envelope: text/plain; charset=UTF-8
+X-Content-Type-Message-Body: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8
+X-DSPAM-Result: Innocent
+X-DSPAM-Processed: Fri Jan  4 18:10:48 2008
+X-DSPAM-Confidence: 0.6178
+X-DSPAM-Probability: 0.0000
+
+Details: http://source.sakaiproject.org/viewsvn/?view=rev&rev=39771
+
+Author: louis@media.berkeley.edu
+Date: 2008-01-04 18:08:50 -0500 (Fri, 04 Jan 2008)
+New Revision: 39771
+
+Modified:
+bspace/site-manage/sakai_2-4-x/site-manage-tool/tool/src/bundle/sitesetupgeneric.properties
+bspace/site-manage/sakai_2-4-x/site-manage-tool/tool/src/java/org/sakaiproject/site/tool/SiteAction.java
+Log:
+BSP-1415 New (Guest) user Notification
+
+----------------------
+This automatic notification message was sent by Sakai Collab (https://collab.sakaiproject.org/portal) from the Source site.
+You can modify how you receive notifications at My Workspace > Preferences.
+
