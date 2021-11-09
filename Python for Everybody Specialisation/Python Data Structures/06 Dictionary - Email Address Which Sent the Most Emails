@@ -1,0 +1,29 @@
+name = input("Enter file:")
+if len(name) < 1:
+    name = "mbox-short.txt"
+handle = open(name)
+
+dictEmailCount = dict()
+count = 0
+
+for line in handle:
+    line = line.rstrip()
+    
+    if line.startsWith("From "):
+        #use the 'spaces' to detect when the email address starts and ends on the line
+        indexFirstSpace = line.find(' ')
+        indexSecondSpace = line[indexFirstSpace+1:].find(' ')
+        tempEmail = line[indexFirstSpace+1:indexSecondSpace]
+        
+        dictEmailCount.get(tempEmail, 1)
+        
+    else:
+        continue
+
+        
+maxKey = max(dictEmailCount, key=dictEmailCount.get)
+allValues = dictEmailCount.values()
+maxValue = max(allValues)
+
+        
+print(maxKey, maxValue)
