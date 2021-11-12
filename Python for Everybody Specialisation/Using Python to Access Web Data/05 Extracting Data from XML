@@ -1,0 +1,434 @@
+Extracting Data from XML
+In this assignment you will write a Python program somewhat similar to http://www.py4e.com/code3/geoxml.py. The program will prompt for a URL, read the XML data from that URL using urllib and then parse and extract the comment counts from the XML data, compute the sum of the numbers in the file.
+
+We provide two files for this assignment. One is a sample file where we give you the sum for your testing and the other is the actual data you need to process for the assignment.
+Sample data: http://py4e-data.dr-chuck.net/comments_42.xml (Sum=2553)
+Actual data: http://py4e-data.dr-chuck.net/comments_1332993.xml (Sum ends with 85)
+
+You do not need to save these files to your folder since your program will read the data directly from the URL. Note: Each student will have a distinct data url for the assignment - so only use your own data url for analysis.
+
+
+Data Format and Approach
+The data consists of a number of names and comment counts in XML as follows:
+<comment>
+  <name>Matthias</name>
+  <count>97</count>
+</comment>
+
+
+You are to look through all the <comment> tags and find the <count> values sum the numbers. The closest sample code that shows how to parse XML is geoxml.py. But since the nesting of the elements in our data is different than the data we are parsing in that sample code you will have to make real changes to the code.
+
+To make the code a little simpler, you can use an XPath selector string to look through the entire tree of XML for any tag named 'count' with the following line of code:
+counts = tree.findall('.//count')
+
+Take a look at the Python ElementTree documentation and look for the supported XPath syntax for details. You could also work from the top of the XML down to the comments node and then loop through the child nodes of the comments node.
+
+
+
+
+
+Sample Execution
+$ python3 solution.py
+Enter location: http://py4e-data.dr-chuck.net/comments_42.xml
+Retrieving http://py4e-data.dr-chuck.net/comments_42.xml
+Retrieved 4189 characters
+Count: 50
+Sum: 2...
+=================================================================
+#explore sample
+
+from urllib.request import urlopen
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import parse
+
+file = urlopen('http://py4e-data.dr-chuck.net/comments_42.xml')
+'''
+#file.read is bytes-data
+# print(file.read())
+b'<?xml version="1.0" encoding="UTF-8"?>\n<commentinfo>\n  <note>This file contains the sample data for testing</note>\n\n  <comments>\n    <comment>\n       <name>Romina</name>\n       <count>97</count>\n    </comment>\n    <comment>\n       <name>Laurie</name>\n       <count>97</count>\n    </comment>\n    <comment>\n       <name>Bayli</name>\n       <count>90</count>\n    </comment>\n    <comment>\n       <name>Siyona</name>\n       <count>90</count>\n    </comment>\n    <comment>\n       <name>Taisha</name>\n       <count>88</count>\n    </comment>\n    <comment>\n       <name>Alanda</name>\n       <count>87</count>\n    </comment>\n    <comment>\n       <name>Ameelia</name>\n       <count>87</count>\n    </comment>\n    <comment>\n       <name>Prasheeta</name>\n       <count>80</count>\n    </comment>\n    <comment>\n       <name>Asif</name>\n       <count>79</count>\n    </comment>\n    <comment>\n       <name>Risa</name>\n       <count>79</count>\n    </comment>\n    <comment>\n       <name>Zi</name>\n       <count>78</count>\n    </comment>\n    <comment>\n       <name>Danyil</name>\n       <count>76</count>\n    </comment>\n    <comment>\n       <name>Ediomi</name>\n       <count>76</count>\n    </comment>\n    <comment>\n       <name>Barry</name>\n       <count>72</count>\n    </comment>\n    <comment>\n       <name>Lance</name>\n       <count>72</count>\n    </comment>\n    <comment>\n       <name>Hattie</name>\n       <count>66</count>\n    </comment>\n    <comment>\n       <name>Mathu</name>\n       <count>66</count>\n    </comment>\n    <comment>\n       <name>Bowie</name>\n       <count>65</count>\n    </comment>\n    <comment>\n       <name>Samara</name>\n       <count>65</count>\n    </comment>\n    <comment>\n       <name>Uchenna</name>\n       <count>64</count>\n    </comment>\n    <comment>\n       <name>Shauni</name>\n       <count>61</count>\n    </comment>\n    <comment>\n       <name>Georgia</name>\n       <count>61</count>\n    </comment>\n    <comment>\n       <name>Rivan</name>\n       <count>59</count>\n    </comment>\n    <comment>\n       <name>Kenan</name>\n       <count>58</count>\n    </comment>\n    <comment>\n       <name>Hassan</name>\n       <count>57</count>\n    </comment>\n    <comment>\n       <name>Isma</name>\n       <count>57</count>\n    </comment>\n    <comment>\n       <name>Samanthalee</name>\n       <count>54</count>\n    </comment>\n    <comment>\n       <name>Alexa</name>\n       <count>51</count>\n    </comment>\n    <comment>\n       <name>Caine</name>\n       <count>49</count>\n    </comment>\n    <comment>\n       <name>Grady</name>\n       <count>47</count>\n    </comment>\n    <comment>\n       <name>Anne</name>\n       <count>40</count>\n    </comment>\n    <comment>\n       <name>Rihan</name>\n       <count>38</count>\n    </comment>\n    <comment>\n       <name>Alexei</name>\n       <count>37</count>\n    </comment>\n    <comment>\n       <name>Indie</name>\n       <count>36</count>\n    </comment>\n    <comment>\n       <name>Rhuairidh</name>\n       <count>36</count>\n    </comment>\n    <comment>\n       <name>Annoushka</name>\n       <count>32</count>\n    </comment>\n    <comment>\n       <name>Kenzi</name>\n       <count>25</count>\n    </comment>\n    <comment>\n       <name>Shahd</name>\n       <count>24</count>\n    </comment>\n    <comment>\n       <name>Irvine</name>\n       <count>22</count>\n    </comment>\n    <comment>\n       <name>Carys</name>\n       <count>21</count>\n    </comment>\n    <comment>\n       <name>Skye</name>\n       <count>19</count>\n    </comment>\n    <comment>\n       <name>Atiya</name>\n       <count>18</count>\n    </comment>\n    <comment>\n       <name>Rohan</name>\n       <count>18</count>\n    </comment>\n    <comment>\n       <name>Nuala</name>\n       <count>14</count>\n    </comment>\n    <comment>\n       <name>Maram</name>\n       <count>12</count>\n    </comment>\n    <comment>\n       <name>Carlo</name>\n       <count>12</count>\n    </comment>\n    <comment>\n       <name>Japleen</name>\n       <count>9</count>\n    </comment>\n    <comment>\n       <name>Breeanna</name>\n       <count>7</count>\n    </comment>\n    <comment>\n       <name>Zaaine</name>\n       <count>3</count>\n    </comment>\n    <comment>\n       <name>Inika</name>\n       <count>2</count>\n    </comment>\n  </comments>\n</commentinfo>\n'
+
+print(type(file.read()))
+#<class 'bytes'>
+
+data = file.read()
+file.close()
+
+
+# strData = str(str(file.read()))
+# tree = ET.fromstring(strData)
+# tree.find('count').text
+# print(strData)
+# print(type(strData))
+
+tree = ET.fromstring(data)
+print(tree)
+'''
+
+
+
+
+
+#segment which worked
+doc = parse(file)
+# print(doc)
+#<xml.etree.ElementTree.ElementTree object at 0x000002250C2DD6A0>
+
+sum = 0
+counter = 0
+for comment in doc.iterfind('comments/comment'):
+    commentCount = comment.findtext('count')
+    print('Number', counter, '')
+    counter += 1
+
+    commentCount = int(commentCount)
+    print(commentCount)
+
+    sum += commentCount
+    print(sum)
+
+print(sum)
+
+'''
+Number 0
+97
+97
+Number 1
+97
+194
+Number 2
+90
+284
+Number 3
+90
+374
+Number 4
+88
+462
+Number 5
+87
+549
+Number 6
+87
+636
+Number 7
+80
+716
+Number 8
+79
+795
+Number 9
+79
+874
+Number 10
+78
+952
+Number 11
+76
+1028
+Number 12
+76
+1104
+Number 13
+72
+1176
+Number 14
+72
+1248
+Number 15
+66
+1314
+Number 16
+66
+1380
+Number 17
+65
+1445
+Number 18
+65
+1510
+Number 19
+64
+1574
+Number 20
+61
+1635
+Number 21
+61
+1696
+Number 22
+59
+1755
+Number 23
+58
+1813
+Number 24
+57
+1870
+Number 25
+57
+1927
+Number 26
+54
+1981
+Number 27
+51
+2032
+Number 28
+49
+2081
+Number 29
+47
+2128
+Number 30
+40
+2168
+Number 31
+38
+2206
+Number 32
+37
+2243
+Number 33
+36
+2279
+Number 34
+36
+2315
+Number 35
+32
+2347
+Number 36
+25
+2372
+Number 37
+24
+2396
+Number 38
+22
+2418
+Number 39
+21
+2439
+Number 40
+19
+2458
+Number 41
+18
+2476
+Number 42
+18
+2494
+Number 43
+14
+2508
+Number 44
+12
+2520
+Number 45
+12
+2532
+Number 46
+9
+2541
+Number 47
+7
+2548
+Number 48
+3
+2551
+Number 49
+2
+2553
+2553
+'''
+
+
+
+
+
+
+
+=================================================================
+#actual
+
+from urllib.request import urlopen
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import parse
+
+file = urlopen('http://py4e-data.dr-chuck.net/comments_1332993.xml')
+doc = parse(file)
+# print(doc)
+#<xml.etree.ElementTree.ElementTree object at 0x000002250C2DD6A0>
+
+sum = 0
+counter = 1
+for comment in doc.iterfind('comments/comment'):
+    commentCount = comment.findtext('count')
+    print('Number', counter, ':')
+    counter += 1
+
+    commentCount = int(commentCount)
+    print(commentCount)
+
+    sum += commentCount
+    print('Cumulative sum :', sum)
+
+print('Total sum :', sum)
+
+'''
+Number 1 :
+97
+Cumulative sum : 97
+Number 2 :
+96
+Cumulative sum : 193
+Number 3 :
+95
+Cumulative sum : 288
+Number 4 :
+95
+Cumulative sum : 383
+Number 5 :
+93
+Cumulative sum : 476
+Number 6 :
+92
+Cumulative sum : 568
+Number 7 :
+92
+Cumulative sum : 660
+Number 8 :
+92
+Cumulative sum : 752
+Number 9 :
+89
+Cumulative sum : 841
+Number 10 :
+88
+Cumulative sum : 929
+Number 11 :
+88
+Cumulative sum : 1017
+Number 12 :
+81
+Cumulative sum : 1098
+Number 13 :
+81
+Cumulative sum : 1179
+Number 14 :
+80
+Cumulative sum : 1259
+Number 15 :
+78
+Cumulative sum : 1337
+Number 16 :
+75
+Cumulative sum : 1412
+Number 17 :
+74
+Cumulative sum : 1486
+Number 18 :
+69
+Cumulative sum : 1555
+Number 19 :
+68
+Cumulative sum : 1623
+Number 20 :
+63
+Cumulative sum : 1686
+Number 21 :
+62
+Cumulative sum : 1748
+Number 22 :
+61
+Cumulative sum : 1809
+Number 23 :
+59
+Cumulative sum : 1868
+Number 24 :
+54
+Cumulative sum : 1922
+Number 25 :
+54
+Cumulative sum : 1976
+Number 26 :
+53
+Cumulative sum : 2029
+Number 27 :
+51
+Cumulative sum : 2080
+Number 28 :
+50
+Cumulative sum : 2130
+Number 29 :
+50
+Cumulative sum : 2180
+Number 30 :
+44
+Cumulative sum : 2224
+Number 31 :
+43
+Cumulative sum : 2267
+Number 32 :
+42
+Cumulative sum : 2309
+Number 33 :
+31
+Cumulative sum : 2340
+Number 34 :
+30
+Cumulative sum : 2370
+Number 35 :
+29
+Cumulative sum : 2399
+Number 36 :
+24
+Cumulative sum : 2423
+Number 37 :
+24
+Cumulative sum : 2447
+Number 38 :
+20
+Cumulative sum : 2467
+Number 39 :
+17
+Cumulative sum : 2484
+Number 40 :
+17
+Cumulative sum : 2501
+Number 41 :
+14
+Cumulative sum : 2515
+Number 42 :
+13
+Cumulative sum : 2528
+Number 43 :
+11
+Cumulative sum : 2539
+Number 44 :
+10
+Cumulative sum : 2549
+Number 45 :
+10
+Cumulative sum : 2559
+Number 46 :
+7
+Cumulative sum : 2566
+Number 47 :
+7
+Cumulative sum : 2573
+Number 48 :
+6
+Cumulative sum : 2579
+Number 49 :
+3
+Cumulative sum : 2582
+Number 50 :
+3
+Cumulative sum : 2585
+Total sum : 2585
+'''
+
+
+
+
