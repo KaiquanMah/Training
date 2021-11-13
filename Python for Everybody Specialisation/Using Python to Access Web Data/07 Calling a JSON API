@@ -1,0 +1,277 @@
+Calling a JSON API
+In this assignment you will write a Python program somewhat similar to http://www.py4e.com/code3/geojson.py. The program will prompt for a location, contact a web service and retrieve JSON for the web service and parse that data, and retrieve the first place_id from the JSON. A place ID is a textual identifier that uniquely identifies a place as within Google Maps.
+API End Points
+
+To complete this assignment, you should use this API endpoint that has a static subset of the Google Data:
+http://py4e-data.dr-chuck.net/json?
+
+This API uses the same parameter (address) as the Google API. This API also has no rate limit so you can test as often as you like. If you visit the URL with no parameters, you get "No address..." response.
+To call the API, you need to include a key= parameter and provide the address that you are requesting as the address= parameter that is properly URL encoded using the urllib.parse.urlencode() function as shown in http://www.py4e.com/code3/geojson.py
+
+Make sure to check that your code is using the API endpoint is as shown above. You will get different results from the geojson and json endpoints so make sure you are using the same end point as this autograder is using.
+
+
+
+
+Test Data / Sample Execution
+You can test to see if your program is working with a location of "South Federal University" which will have a place_id of "ChIJLzabHQ7i2IgRzeZb_AgUj0Q".
+$ python3 solution.py
+Enter location: South Federal University
+Retrieving http://...
+Retrieved 2146 characters
+Place id ChIJLzabHQ7i2IgRzeZb_AgUj0Q
+
+
+Turn In
+Please run your program to find the place_id for this location:
+Kokshetau Institute of Economics and Management
+
+Make sure to enter the name and case exactly as above and enter the place_id and your Python code below. Hint: The first seven characters of the place_id are "ChIJsSO ..."
+Make sure to retreive the data from the URL specified above and not the normal Google API. Your program should work with the Google API - but the place_id may not match for this assignment.
+
+
+
+
+
+===================================================================
+Call sample JSON API
+
+from urllib import request, parse, error
+import json
+from random import randrange
+
+#1ST TRY
+#seems that 'key' is a random number
+# key = randrange(10)
+#random integer between 0 to 9  https://docs.python.org/3/library/random.html
+#print(url)
+#http://py4e-data.dr-chuck.net/json?key=7&address=South+Federal+University
+
+#2ND TRY
+# SEEMS THAT THE 'HINT' WAS HIDDEN IN THE ASSIGNMENT TEXT
+# finding from https://www.py4e.com/code3/geojson.py?PHPSESSID=56f3d5a543fa49966fbc6cacf722abbf, api_key = 42
+key = 42
+address = 'South Federal University'
+url = 'http://py4e-data.dr-chuck.net/json?'
+url += parse.urlencode({"key": key,
+                        "address": address})
+
+
+connection = request.urlopen(url)
+# print(connection)
+# <http.client.HTTPResponse object at 0x000002294608FE50>
+# print(connection.read())
+# b'{\n   "results" : [\n      {\n         "address_components" : [\n            {\n               "long_name" : "925",\n               "short_name" : "925",\n               "types" : [ "street_number" ]\n            },\n            {\n               "long_name" : "South Federal Highway",\n               "short_name" : "S Federal Hwy",\n               "types" : [ "route" ]\n            },\n            {\n               "long_name" : "Boca Raton",\n               "short_name" : "Boca Raton",\n               "types" : [ "locality", "political" ]\n            },\n            {\n               "long_name" : "Palm Beach County",\n               "short_name" : "Palm Beach County",\n               "types" : [ "administrative_area_level_2", "political" ]\n            },\n            {\n               "long_name" : "Florida",\n               "short_name" : "FL",\n               "types" : [ "administrative_area_level_1", "political" ]\n            },\n            {\n               "long_name" : "United States",\n               "short_name" : "US",\n               "types" : [ "country", "political" ]\n            },\n            {\n               "long_name" : "33432",\n               "short_name" : "33432",\n               "types" : [ "postal_code" ]\n            },\n            {\n               "long_name" : "6145",\n               "short_name" : "6145",\n               "types" : [ "postal_code_suffix" ]\n            }\n         ],\n         "formatted_address" : "925 S Federal Hwy, Boca Raton, FL 33432, USA",\n         "geometry" : {\n            "location" : {\n               "lat" : 26.3416119,\n               "lng" : -80.0867329\n            },\n            "location_type" : "ROOFTOP",\n            "viewport" : {\n               "northeast" : {\n                  "lat" : 26.3429608802915,\n                  "lng" : -80.08538391970849\n               },\n               "southwest" : {\n                  "lat" : 26.3402629197085,\n                  "lng" : -80.08808188029151\n               }\n            }\n         },\n         "place_id" : "ChIJLzabHQ7i2IgRzeZb_AgUj0Q",\n         "types" : [ "establishment", "point_of_interest", "university" ]\n      }\n   ],\n   "status" : "OK"\n}\n'
+
+file = connection.read().decode()
+# print(file)
+'''
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "925",
+               "short_name" : "925",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "South Federal Highway",
+               "short_name" : "S Federal Hwy",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "Boca Raton",
+               "short_name" : "Boca Raton",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Palm Beach County",
+               "short_name" : "Palm Beach County",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Florida",
+               "short_name" : "FL",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "United States",
+               "short_name" : "US",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "33432",
+               "short_name" : "33432",
+               "types" : [ "postal_code" ]
+            },
+            {
+               "long_name" : "6145",
+               "short_name" : "6145",
+               "types" : [ "postal_code_suffix" ]
+            }
+         ],
+         "formatted_address" : "925 S Federal Hwy, Boca Raton, FL 33432, USA",
+         "geometry" : {
+            "location" : {
+               "lat" : 26.3416119,
+               "lng" : -80.0867329
+            },
+            "location_type" : "ROOFTOP",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 26.3429608802915,
+                  "lng" : -80.08538391970849
+               },
+               "southwest" : {
+                  "lat" : 26.3402629197085,
+                  "lng" : -80.08808188029151
+               }
+            }
+         },
+         "place_id" : "ChIJLzabHQ7i2IgRzeZb_AgUj0Q",
+         "types" : [ "establishment", "point_of_interest", "university" ]
+      }
+   ],
+   "status" : "OK"
+}
+'''
+# print(type(file))
+# <class 'str'>
+
+file = json.loads(file)
+'''
+print(file)
+{'results': [{'address_components': [{'long_name': '925', 'short_name': '925', 'types': ['street_number']}, {'long_name': 'South Federal Highway', 'short_name': 'S Federal Hwy', 'types': ['route']}, {'long_name': 'Boca Raton', 'short_name': 'Boca Raton', 'types': ['locality', 'political']}, {'long_name': 'Palm Beach County', 'short_name': 'Palm Beach County', 'types': ['administrative_area_level_2', 'political']}, {'long_name': 'Florida', 'short_name': 'FL', 'types': ['administrative_area_level_1', 'political']}, {'long_name': 'United States', 'short_name': 'US', 'types': ['country', 'political']}, {'long_name': '33432', 'short_name': '33432', 'types': ['postal_code']}, {'long_name': '6145', 'short_name': '6145', 'types': ['postal_code_suffix']}], 'formatted_address': '925 S Federal Hwy, Boca Raton, FL 33432, USA', 'geometry': {'location': {'lat': 26.3416119, 'lng': -80.0867329}, 'location_type': 'ROOFTOP', 'viewport': {'northeast': {'lat': 26.3429608802915, 'lng': -80.08538391970849}, 'southwest': {'lat': 26.3402629197085, 'lng': -80.08808188029151}}}, 'place_id': 'ChIJLzabHQ7i2IgRzeZb_AgUj0Q', 'types': ['establishment', 'point_of_interest', 'university']}], 'status': 'OK'}
+'''
+
+print(file["results"][0]["place_id"])
+# ChIJLzabHQ7i2IgRzeZb_AgUj0Q
+
+
+
+
+
+
+
+
+
+
+
+===================================================================
+Call actual JSON API
+
+from urllib import request, parse, error
+import json
+from random import randrange
+
+#1ST TRY
+#seems that 'key' is a random number
+# key = randrange(10)
+#random integer between 0 to 9  https://docs.python.org/3/library/random.html
+#print(url)
+#http://py4e-data.dr-chuck.net/json?key=7&address=South+Federal+University
+
+#2ND TRY
+# SEEMS THAT THE 'HINT' WAS HIDDEN IN THE ASSIGNMENT TEXT
+# finding from https://www.py4e.com/code3/geojson.py?PHPSESSID=56f3d5a543fa49966fbc6cacf722abbf, api_key = 42
+key = 42
+address = 'Kokshetau Institute of Economics and Management'
+url = 'http://py4e-data.dr-chuck.net/json?'
+url += parse.urlencode({"key": key,
+                        "address": address})
+
+
+connection = request.urlopen(url)
+# print(connection)
+# <http.client.HTTPResponse object at 0x000002294608FE50>
+
+file = connection.read().decode()
+# print(file)
+'''
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "Kokshetau",
+               "short_name" : "Kokshetau",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Zerendi District",
+               "short_name" : "Zerendi District",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Akmola Province",
+               "short_name" : "Akmola Province",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "Kazakhstan",
+               "short_name" : "KZ",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "020000",
+               "short_name" : "020000",
+               "types" : [ "postal_code" ]
+            }
+         ],
+         "formatted_address" : "Kokshetau 020000, Kazakhstan",
+         "geometry" : {
+            "location" : {
+               "lat" : 53.285023,
+               "lng" : 69.3695728
+            },
+            "location_type" : "GEOMETRIC_CENTER",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 53.28637198029149,
+                  "lng" : 69.37092178029151
+               },
+               "southwest" : {
+                  "lat" : 53.2836740197085,
+                  "lng" : 69.3682238197085
+               }
+            }
+         },
+         "place_id" : "ChIJsSOItU6UTEIRrnxreKuTy4Q",
+         "plus_code" : {
+            "compound_code" : "79P9+2R Kokshetau, Kazakhstan",
+            "global_code" : "9J5F79P9+2R"
+         },
+         "types" : [ "establishment", "point_of_interest", "university" ]
+      }
+   ],
+   "status" : "OK"
+}
+'''
+# print(type(file))
+# <class 'str'>
+
+file = json.loads(file)
+'''
+print(file)
+{'results': [{'address_components': [{'long_name': 'Kokshetau', 'short_name': 'Kokshetau', 'types': ['locality', 'political']}, {'long_name': 'Zerendi District', 'short_name': 'Zerendi District', 'types': ['administrative_area_level_2', 'political']}, {'long_name': 'Akmola Province', 'short_name': 'Akmola Province', 'types': ['administrative_area_level_1', 'political']}, {'long_name': 'Kazakhstan', 'short_name': 'KZ', 'types': ['country', 'political']}, {'long_name': '020000', 'short_name': '020000', 'types': ['postal_code']}], 'formatted_address': 'Kokshetau 020000, Kazakhstan', 'geometry': {'location': {'lat': 53.285023, 'lng': 69.3695728}, 'location_type': 'GEOMETRIC_CENTER', 'viewport': {'northeast': {'lat': 53.28637198029149, 'lng': 69.37092178029151}, 'southwest': {'lat': 53.2836740197085, 'lng': 69.3682238197085}}}, 'place_id': 'ChIJsSOItU6UTEIRrnxreKuTy4Q', 'plus_code': {'compound_code': '79P9+2R Kokshetau, Kazakhstan', 'global_code': '9J5F79P9+2R'}, 'types': ['establishment', 'point_of_interest', 'university']}], 'status': 'OK'}
+'''
+
+print(file["results"][0]["place_id"])
+# ChIJsSOItU6UTEIRrnxreKuTy4Q
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
