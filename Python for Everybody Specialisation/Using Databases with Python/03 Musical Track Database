@@ -59,7 +59,8 @@ For Those About To Rock (We Salute You)	AC/DC	  Who Made Who	Rock
 
 
 ================================
-base 'tracks.py' file
+#base 'tracks.py' file
+
 import xml.etree.ElementTree as ET
 import sqlite3
 
@@ -84,11 +85,13 @@ CREATE TABLE Album (
 );
 
 CREATE TABLE Track (
-    id  INTEGER NOT NULL PRIMARY KEY 
+    id  INTEGER NOT NULL PRIMARY KEY
         AUTOINCREMENT UNIQUE,
     title TEXT  UNIQUE,
     album_id  INTEGER,
-    len INTEGER, rating INTEGER, count INTEGER
+    len INTEGER,
+    rating INTEGER,
+    count INTEGER
 );
 ''')
 
@@ -101,17 +104,34 @@ if ( len(fname) < 1 ) : fname = 'Library.xml'
 # <key>Artist</key><string>Queen</string>
 def lookup(d, key):
     found = False
+
+    #within the 'dict' item
+    #iterate through each 'child' line
     for child in d:
+        #get each 'child' line text
         if found : return child.text
+
+        #next
+        #if the tag name is 'key'
+        #and the tag value is the same as the <fieldName> we want to lookup/search
+        #tell me 'found'
         if child.tag == 'key' and child.text == key :
             found = True
+
+    #if didnt find any 'child' - return 'None'
     return None
 
+
+
+
 stuff = ET.parse(fname)
+#find a list of 'dict' items
 all = stuff.findall('dict/dict/dict')
 print('Dict count:', len(all))
+#for each 'dict' item
 for entry in all:
     if ( lookup(entry, 'Track ID') is None ) : continue
+
 
     name = lookup(entry, 'Name')
     artist = lookup(entry, 'Artist')
@@ -120,27 +140,831 @@ for entry in all:
     rating = lookup(entry, 'Rating')
     length = lookup(entry, 'Total Time')
 
-    if name is None or artist is None or album is None : 
+    if name is None or artist is None or album is None :
         continue
 
     print(name, artist, album, count, rating, length)
 
-    cur.execute('''INSERT OR IGNORE INTO Artist (name) 
+
+    #insert into ARTIST table
+    cur.execute('''INSERT OR IGNORE INTO Artist (name)
         VALUES ( ? )''', ( artist, ) )
+    #get the record's ID for use later
     cur.execute('SELECT id FROM Artist WHERE name = ? ', (artist, ))
     artist_id = cur.fetchone()[0]
 
-    cur.execute('''INSERT OR IGNORE INTO Album (title, artist_id) 
+    #ALBUM
+    cur.execute('''INSERT OR IGNORE INTO Album (title, artist_id)
         VALUES ( ?, ? )''', ( album, artist_id ) )
     cur.execute('SELECT id FROM Album WHERE title = ? ', (album, ))
     album_id = cur.fetchone()[0]
 
+    #TRACK
     cur.execute('''INSERT OR REPLACE INTO Track
-        (title, album_id, len, rating, count) 
-        VALUES ( ?, ?, ?, ?, ? )''', 
+        (title, album_id, len, rating, count)
+        VALUES ( ?, ?, ?, ?, ? )''',
         ( name, album_id, length, rating, count ) )
 
     conn.commit()
 
+
+
+Enter file name:
+Dict count: 404
+Another One Bites The Dust Queen Greatest Hits 55 100 217103
+Asche Zu Asche Rammstein Herzeleid 79 100 231810
+Beauty School Dropout Various Grease 48 100 239960
+Black Dog Led Zeppelin IV 109 100 296620
+Bring The Boys Back Home Pink Floyd The Wall [Disc 2] 33 100 87118
+Circles Bryan Lee Blues Is 54 60 355369
+Comfortably Numb Pink Floyd The Wall [Disc 2] 36 100 384130
+Crazy Little Thing Called Love Queen Greatest Hits 38 100 163631
+Electric Funeral Black Sabbath Paranoid 44 100 293015
+Fat Bottomed Girls Queen Greatest Hits 38 100 257515
+For Those About To Rock (We Salute You) AC/DC Who Made Who 84 100 353750
+Four Sticks Led Zeppelin IV 84 100 284421
+Furious Angels Rob Dougan The Matrix Reloaded 54 100 330004
+Gelle Bryan Lee Blues Is 45 60 199836
+Going To California Led Zeppelin IV 100 100 215666
+Grease Various Grease 42 100 205792
+Hand of Doom Black Sabbath Paranoid 36 100 429609
+Hells Bells AC/DC Who Made Who 82 100 312946
+Hey You Pink Floyd The Wall [Disc 2] 23 100 282305
+I Worry Bryan Lee Blues Is 33 100 341315
+Iron Man Black Sabbath Paranoid 39 100 358530
+Is There Anybody Out There? Pink Floyd The Wall [Disc 2] 26 100 160679
+It was a Very Good Year Frank Sinatra Greatest Hits 39 100 268852
+Its Your Move Bryan Lee Blues Is 40 100 245002
+Jack the Stripper/Fairies Wear Boots Black Sabbath Paranoid 35 100 373995
+Killer Queen Queen Greatest Hits 34 100 181368
+Laichzeit Rammstein Herzeleid 41 100 262844
+Let me Down Easy Bryan Lee Blues Is 43 100 331441
+Misty Mountain Hop Led Zeppelin IV 88 100 278831
+No Low Down Bryan Lee Blues Is 39 100 245760
+Now You Are Gone America Greatest Hits 52 100 187559
+Outside The Wall Pink Floyd The Wall [Disc 2] 16 100 104437
+Paranoid Black Sabbath Paranoid 36 100 172930
+Planet Caravan Black Sabbath Paranoid 38 100 274938
+Pretty Jeanie Bryan Lee Blues Is 34 100 225175
+Rammstein Rammstein Herzeleid 45 100 265090
+Rat Salad Black Sabbath Paranoid 46 100 150230
+Rock & Roll Led Zeppelin IV 109 100 220891
+Rode Across the Desert America Greatest Hits 60 100 249887
+Sandy Various Grease 36 100 155742
+Shake Your Foundations AC/DC Who Made Who 85 100 233769
+Sister Golden Hair America Greatest Hits 60 100 202057
+Somebody To Love Queen Greatest Hits 17 100 297586
+Stairway To Heaven Led Zeppelin IV 93 100 481567
+Strangers in the Night Frank Sinatra Greatest Hits 42 100 158484
+Summer Nights Various Grease 35 100 216973
+Summer Wind Frank Sinatra Greatest Hits 46 100 177554
+Thats Life Frank Sinatra Greatest Hits 43 100 189988
+The Battle Of Evermore Led Zeppelin IV 110 100 351529
+The Blues "Is" Bryan Lee Blues Is 45 100 252238
+There it Is Bryan Lee Blues Is 35 100 395441
+Think Bryan Lee Blues Is 41 100 320339
+This Town Frank Sinatra Greatest Hits 44 100 185051
+Tin Man America Greatest Hits 50 100 210076
+Track 01 Billy Price Danger Zone 47 100 261825
+Track 02 Billy Price Danger Zone 42 100 165459
+Track 03 Billy Price Danger Zone 41 100 206471
+Messin with the Kid The Canettes Blues Band Self Titled 23 100 226377
+Track 04 Billy Price Danger Zone 37 100 257175
+Stormy Monday The Canettes Blues Band Self Titled 29 100 464143
+Track 05 Billy Price Danger Zone 42 100 230295
+Waiting on Ice Bryan Lee Blues Is 37 100 289384
+War Pigs/Luke's Wall Black Sabbath Paranoid 38 100 478197
+We Are The Champions Queen Greatest Hits 24 100 181864
+We Will Rock You Queen Greatest Hits 33 100 123559
+When Somebody Loves You Frank Sinatra Greatest Hits 43 100 117263
+When The Levee Breaks Led Zeppelin IV 83 100 427624
+You are the One that I Want Various Grease 31 100 169900
+You Done Me Wrong Bryan Lee Blues Is 35 100 200097
+You Shook Me All Night Long AC/DC Who Made Who 92 100 210938
+You're My Best Friend Queen Greatest Hits 31 100 172643
+Zion Fluke The Matrix Reloaded 47 100 273528
+Who Made Who AC/DC Who Made Who 110 100 207203
+D.T. AC/DC Who Made Who 90 None 173714
+Sink the Pink AC/DC Who Made Who 83 None 253466
+Ride On AC/DC Who Made Who 75 None 351268
+Chase the Ace AC/DC Who Made Who 93 None 181420
+Wollt Ihr Das Bett In Flammen Sehen Rammstein Herzeleid 50 None 317387
+Der Meister Rammstein Herzeleid 46 None 250801
+Weisses Fleisch Rammstein Herzeleid 52 None 215902
+Seemann Rammstein Herzeleid 34 None 288235
+Du Riechst So Gut Rammstein Herzeleid 50 None 289332
+Das Alte Leid Rammstein Herzeleid 46 None 344581
+Heirate Mich Rammstein Herzeleid 39 None 284734
+Herzeleid Rammstein Herzeleid 42 None 223425
+Baba O'Riley The Who Who's Next 45 None 298448
+Bargain The Who Who's Next 37 None 331676
+Love Ain't for Keeping The Who Who's Next 24 None 130560
+My Wife The Who Who's Next 17 None 213786
+The Song Is Over The Who Who's Next 14 None 375797
+Getting In Tune The Who Who's Next 27 None 288809
+Going Mobile The Who Who's Next 28 100 221910
+Behind Blue Eyes The Who Who's Next 43 None 221570
+Won't Get Fooled Again The Who Who's Next 21 None 511111
+Folsom Prison Blues Johnny Cash The Legend Of Johnny Cash 47 100 170004
+I Walk The Line Johnny Cash The Legend Of Johnny Cash 33 100 165720
+Get Rhythm Johnny Cash The Legend Of Johnny Cash 35 100 134530
+Big River Johnny Cash The Legend Of Johnny Cash 51 None 152711
+Guess Things Happen That Way Johnny Cash The Legend Of Johnny Cash 35 None 111386
+Ring Of Fire Johnny Cash The Legend Of Johnny Cash 30 100 157100
+Jackson Johnny Cash The Legend Of Johnny Cash 35 100 166530
+A Boy Named Sue (live) Johnny Cash The Legend Of Johnny Cash 37 None 226063
+You Raise Me Up Selah Hiding Place 9 None 302262
+Hold On, I'm Coming The Canettes Blues Band On Tap & In the Can 34 100 282566
+Got my Mojo Working The Canettes Blues Band On Tap & In the Can 52 100 310517
+Sweet Home Chicago The Canettes Blues Band On Tap & In the Can 27 100 375849
+Heavy Love The Canettes Blues Band On Tap & In the Can 28 100 253544
+Cold Cold Feeling The Canettes Blues Band On Tap & In the Can 43 100 261929
+Lonely Avenue The Canettes Blues Band On Tap & In the Can 24 100 292022
+Good Morning Little Schoolgirl The Canettes Blues Band On Tap & In the Can 20 100 278648
+Dust My Broom The Canettes Blues Band On Tap & In the Can 24 100 299311
+Gimme' Some Lovin The Canettes Blues Band On Tap & In the Can 35 100 227239
+Everybody Needs Somebody to Love The Canettes Blues Band On Tap & In the Can 24 100 195186
+Black Magic Woman The Canettes Blues Band On Tap & In the Can 31 100 442644
+Steppin' Rooster The Canettes Blues Band On Tap & In the Can 21 100 704862
+Our Love is Drifting The Canettes Blues Band On Tap & In the Can 15 100 292649
+Doin' 100 The Canettes Blues Band On Tap & In the Can 20 100 343980
+Mother Joy Matt Ender Natural Wonders Music Sampler 1999 463 None 287294
+Soldier's Lament Steve McDonald Natural Wonders Music Sampler 1999 371 None 347193
+Dulaman Altan Natural Wonders Music Sampler 1999 403 None 223007
+The Arrow Chris Spheeris Natural Wonders Music Sampler 1999 416 None 319869
+Spanish Eyes La Esperanza Natural Wonders Music Sampler 1999 375 None 259030
+Banana Bay Luis Villegas Natural Wonders Music Sampler 1999 403 None 198060
+Aguas De Marco Rosa Passos Natural Wonders Music Sampler 1999 407 None 179408
+Tamborea Energipsy Natural Wonders Music Sampler 1999 355 None 235389
+Gone Hollie Smith Natural Wonders Music Sampler 1999 362 None 196414
+The Immigrant Joanie Madden Natural Wonders Music Sampler 1999 350 None 362631
+Pahrump-Big Water Cusco Natural Wonders Music Sampler 1999 342 None 191634
+Seeker's Quest Cheryl Gunn Natural Wonders Music Sampler 1999 337 None 236434
+Floating To Forever Dean Everson Natural Wonders Music Sampler 1999 337 None 351686
+Open Road Jeff Bailey Relaxing Jazz 10 None 318563
+Ruby Kaiser Chiefs Yours Truly, Angry Mob 13 None 205008
+The Angry Mob Kaiser Chiefs Yours Truly, Angry Mob 41 None 288313
+Heat Dies Down Kaiser Chiefs Yours Truly, Angry Mob 12 None 237061
+Highroyds Kaiser Chiefs Yours Truly, Angry Mob 10 None 199575
+Love's Not A Competition (But I'm Winning) Kaiser Chiefs Yours Truly, Angry Mob 11 None 197799
+Thank You Very Much Kaiser Chiefs Yours Truly, Angry Mob 11 None 157753
+I Can Do It Without You Kaiser Chiefs Yours Truly, Angry Mob 11 None 204199
+My Kind Of Guy Kaiser Chiefs Yours Truly, Angry Mob 10 None 246595
+Everything Is Average Nowadays Kaiser Chiefs Yours Truly, Angry Mob 16 None 164754
+Learnt My Lesson Well Kaiser Chiefs Yours Truly, Angry Mob 9 None 325955
+Try Your Best Kaiser Chiefs Yours Truly, Angry Mob 8 None 222511
+Retirement Kaiser Chiefs Yours Truly, Angry Mob 10 None 237426
+The Angry Mob [Live From Berlin] Kaiser Chiefs Yours Truly, Angry Mob 40 None 279066
+I Like To Fight Kaiser Chiefs Yours Truly, Angry Mob 8 None 218566
+From The Neck Down Kaiser Chiefs Yours Truly, Angry Mob 15 None 147226
+Bomb Squad (TECH) Brent Brent's Album 4 None 208065
+BYURY ME Brent Peanut Butter & Jam  4 None 274076
+Charlie and the Rising Moon Charlie And The Rising Moon Charlie and The Rising Moon None None 161645
+clay techno  Brent Brent's Album 5 None 276062
+Cloud Nine Times Over  Charlie And The Rising Moon Charlie and The Rising Moon 3 None 135131
+Depression in Session Brent Peanut Butter and Jam  4 None 213211
+Heavy Brent Brent's Album 2 None 188055
+Hi metal man Brent Brent's Album 4 None 260153
+Mistro Brent Brent's Album 5 None 178076
+Pirate spirit Brent Brent's Album 3 None 180480
+Run Away (New)  Brent Brent's Album 1 None 154383
+Star Gaze (Inspired) Charlie And The Rising Moon Charlie and The Rising Moon None None 181498
+The Dictator (New Brent Peanut Butter & Jam  5 None 143830
+Town From Town Brent Brent's Album 4 None 86073
+The Wisdom of Crowds: Why the Many Are Smarter than the Few Part 1 of 3 James Surowiecki The Wisdom of Crowds: Why the Many Are Smarter than the Few (Abridged Nonfiction) 15 None 8586749
+The Wisdom of Crowds: Why the Many Are Smarter than the Few Part 2 of 3 James Surowiecki The Wisdom of Crowds: Why the Many Are Smarter than the Few (Abridged Nonfiction) 9 None 8443432
+The Wisdom of Crowds: Why the Many Are Smarter than the Few Part 3 of 3 James Surowiecki The Wisdom of Crowds: Why the Many Are Smarter than the Few (Abridged Nonfiction) 3 None 4168829
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 1 of 5 James Surowiecki The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) 4 None 7920893
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 2 of 5 James Surowiecki The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) None None 7921106
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 3 of 5 James Surowiecki The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) None None 7965736
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 4 of 5 James Surowiecki The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) 1 None 9653330
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 5 of 5 James Surowiecki The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) None None 746536
+Misty David Osborne Moonlight And Love Songs 302 None 249312
+My Funny Valentine David Osborne Moonlight And Love Songs 301 None 235885
+Since I Don't Have You David Osborne Moonlight And Love Songs 288 None 251846
+Tenderly David Osborne Moonlight And Love Songs 284 None 227395
+When I Fall In Love David Osborne Moonlight And Love Songs 281 None 187768
+Unforgettable David Osborne Moonlight And Love Songs 280 None 272927
+The Way You Look Tonight David Osborne Moonlight And Love Songs 277 None 247222
+I've Grown Accustomed To Your Face David Osborne Moonlight And Love Songs 280 None 148035
+Smoke Gets In Your Eyes David Osborne Moonlight And Love Songs 277 None 198504
+Fly Me To The Moon David Osborne Moonlight And Love Songs 275 None 182543
+Unchained Melody David Osborne Moonlight And Love Songs 265 None 259369
+These Foolish Things Remind Me Of You David Osborne Moonlight And Love Songs 267 None 184711
+La Vie En Rose David Osborne Moonlight And Love Songs 259 None 276767
+As Time Goes By David Osborne Moonlight And Love Songs 290 None 257985
+Pilot Fairly Legal Fairly Legal, Season 1 1 None 3847006
+Jobs2a csev csev's Album None None 541074
+hte postal service - the impor The Postal Service unreleased demo None None 193959
+Winter Wonderland Bing Crosby Seasons Greatings 163 None 144744
+Jingle Bells Frank Sinatra Seasons Greatings 271 None 121756
+White Christmas Bing Crosby Seasons Greatings 158 None 95634
+The Christmas Song Frank Sinatra Seasons Greatings 272 None 209632
+Little Drummer Boy Bing Crosby Seasons Greatings 154 None 178311
+Silent Night Frank Sinatra Seasons Greatings 257 None 149054
+Let It Snow Bing Crosby Seasons Greatings 154 None 125126
+Mistletoe And Holly Frank Sinatra Seasons Greatings 257 None 138501
+O Holy Night Bing Crosby Seasons Greatings 150 None 214021
+Have Yourself A Merry Little Christmas Frank Sinatra Seasons Greatings 252 None 208248
+Do You Hear What I Hear Bing Crosby Seasons Greatings 155 None 164728
+I'll Be Home For Christmas Frank Sinatra Seasons Greatings 249 None 190876
+Voices Disturbed The Sickness None None 191764
+The Game Disturbed The Sickness 1 None 227134
+Stupify Disturbed The Sickness 1 None 274233
+Down With The Sickness Disturbed The Sickness 1 None 278726
+Violence Fetish Disturbed The Sickness None None 203833
+Fear Disturbed The Sickness 4 None 227004
+Numb Disturbed The Sickness None None 224940
+Want Disturbed The Sickness None None 232803
+Conflict Disturbed The Sickness 5 None 275330
+Shout 2000 Disturbed The Sickness 1 None 257802
+Droppin' Plates Disturbed The Sickness 4 None 229302
+Meaning Of Life Disturbed The Sickness 3 None 242599
+PY4INF-01-Intro.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. 1 None 3428075
+Eben Upton: Raspberry Pi IEEE Computer Society Computing Conversations 2 None 661368
+Andrew Tanenbaum: Writing the Book on Networks IEEE Computer Society Computing Conversations 4 None 535040
+Massimo Banzi: Building Arduino IEEE Computer Society Computing Conversations 1 None 567745
+PY4INF-04-Functions.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1683800
+PY4INF-02-Expressions.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2578416
+PY4INF-03-Conditional.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2296058
+PY4INF-05-Iterations.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. 1 None 2804297
+PY4INF-06-Strings.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1677844
+PY4INF-07-Files.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1478713
+PY4INF-08-Lists.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1636231
+PY4INF-09-Dictionaries.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2254445
+PY4INF-10-Tuples.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1597596
+PY4INF-11-Regex.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2123702
+John C. Hollar: History of Computing IEEE Computer Society Computing Conversations 1 None 694073
+Bob Metcalfe: Ethernet at Forty IEEE Computer Society Computing Conversations None None 1031392
+Gordon Bell: Building Blocks of Computing IEEE Computer Society Computing Conversations 1 None 744620
+Ian Horrocks: Standardizing OWL IEEE Computer Society Computing Conversations 1 None 572212
+Katie Hafner: The Origins of the Internet IEEE Computer Society Computing Conversations 1 None 652460
+Larry Smarr: Building Mosaic IEEE Computer Society Computing Conversations None None 894693
+Len Kleinrock: The Theory of Packets IEEE Computer Society Computing Conversations 1 None 674742
+Mitchell Baker: The Mozilla Foundation IEEE Computer Society Computing Conversations None None 994246
+Pooja Sankar: Building the Piazza Collaboration System IEEE Computer Society Computing Conversations None None 496404
+Van Jacobson: Content-Centric Networking IEEE Computer Society Computing Conversations None None 780251
+The Apache Software Foundation IEEE Computer Society Computing Conversations None None 542484
+A Brief History of Packets IEEE Computer Society Computing Conversations None None 1004643
+Discovering JavaScript Object Notation IEEE Computer Society Computing Conversations None None 650971
+Inventing PHP IEEE Computer Society Computing Conversations None None 494915
+Monash Museum of Computing History IEEE Computer Society Computing Conversations None None 362657
+The Rise of JavaScript IEEE Computer Society Computing Conversations None None 526132
+Joseph Hardin: NCSA Mosaic IEEE Computer Society Computing Conversations None None 845635
+Len Kleinrock on the Internet's First Two Packets IEEE Computer Society Computing Conversations 1 None 594390
+Doug Van Houweling on Building the NSFNet IEEE Computer Society Computing Conversations None None 773146
+Computing Conversations: Nathaniel Borenstein on MIME IEEE Computer Society Computing Conversations None None 682135
+You Don't Mess Around With Jim Jim Croce Classic Hits None None 184398
+Andrew S. Tanenbaum on MINIX IEEE Computer Society Computing Conversations None None 603000
+Computing Conversations: Elizabeth Fong on SQL Standards IEEE Computer Society Computing Conversations None None 533577
+Nii Quaynor on Bringing the Internet to Africa IEEE Computer Society Computing Conversations 1 None 673332
+PHP-09-Transactions.mp3 Created by Sakai SI 664 W14's official Podcast. None None 1728888
+PHP-01-Intro.mp3 Created by Sakai SI 664 W14's official Podcast. None None 2250624
+PHP-02-Install.mp3 Created by Sakai SI 664 W14's official Podcast. 1 None None
+PHP-04-Expressions.mp3 Created by Sakai SI 664 W14's official Podcast. None None 2168064
+PHP-05-Functions.mp3 Created by Sakai SI 664 W14's official Podcast. None None 1446792
+PHP-06-Strings.mp3 Created by Sakai SI 664 W14's official Podcast. None None 417696
+PHP-12-Sessions.mp3 Created by Sakai SI 664 W14's official Podcast. None None 3624312
+PHP-06-Objects.mp3 Created by Sakai SI 664 W14's official Podcast. None None 2455368
+SI664-13-JSON-A.mp3 Created by Sakai SI 664 W14's official Podcast. None None 4407672
+PHP-13-JavaScript.mp3 Created by Sakai SI 664 W14's official Podcast. None None 3650088
+PHP-09-Database-Design.mp3 Created by Sakai SI 664 W14's official Podcast. None None 3591072
+PHP-Tsugi-Install.mp3 Created by Sakai SI 664 W14's official Podcast. None None 3181656
+PHP-10-MySQL-PDO.mp3 Created by Sakai SI 664 W14's official Podcast. None None 4536685
+PHP-08-MySQL.mp3 Created by Sakai SI 664 W14's official Podcast. None None 3994656
+SI664-13-JSON-B.mp3 Created by Sakai SI 664 W14's official Podcast. None None 1484616
+IMS-Learning-Tools-Interoperability.mp3 Created by Sakai SI 664 W14's official Podcast. None None 2185848
+An Interview with Don Waters Matt Pasiewicz CNI Event Coverage 2 None 1411082
+PY4INF-11-Regex.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2123702
+PY4INF-10-Tuples.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1597596
+PY4INF-09-Dictionaries.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2254445
+PY4INF-08-Lists.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1636231
+PY4INF-07-Files.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1478713
+PY4INF-06-Strings.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1677844
+PY4INF-05-Iterations.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2804297
+PY4INF-04-Functions.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1683800
+PY4INF-03-Conditional.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2296058
+PY4INF-02-Expressions.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2578416
+PY4INF-01-Intro.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 3428075
+Py4Inf-11-Regex.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2123702
+Py4Inf-10-Tuples.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1597596
+Py4Inf-09-Dictionaries.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2254445
+Py4Inf-08-Lists.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1636231
+Py4Inf-07-Files.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1478713
+Py4Inf-06-Strings.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1677844
+Py4Inf-05-Iterations.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2804297
+Py4Inf-04-Functions.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 1683800
+Py4Inf-03-Conditional.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2296058
+Py4Inf-02-Expressions.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 2578416
+Py4Inf-01-Intro.mp3 Recording by Dr. Chuck Python for Informatics's official Podcast. None None 3428075
+Ian Foster on the Globus Project IEEE Computer Society Computing Conversations 1 None 538305
+Khan Academy and Computer Science IEEE Computer Society Computing Conversations 1 None 558837
+Guido van Rossumon the Early Years of Python IEEE Computer Society Computing Conversations 1 None 701884
+Guido van Rossum on the Modern Era of Python IEEE Computer Society Computing Conversations None None 741616
+John Resig on Building jQuery IEEE Computer Society Computing Conversations None None 595983
+Roy T. Fielding on Understanding the REST Style IEEE Computer Society Computing Conversations 1 None 683650
+Anil Jain: 25 Years of Biometric Recognition IEEE Computer Society Computing Conversations None None 661368
+Waste Management Undercover Boss Undercover Boss, Season 1 1 None 2565232
+Sleep Like a Baby Tonight U2 Songs of Innocence None None 301641
+Evergreen The Black Crowes Warpaint None None 261373
+Oh Josephine The Black Crowes Warpaint None None 398907
+Movin' On Down the Line The Black Crowes Warpaint None None 342693
+Wounded Bird The Black Crowes Warpaint None None 263453
+Volcano U2 Songs of Innocence None None 194116
+Wee Who See the Deep The Black Crowes Warpaint None None 290520
+Cedarwood Road U2 Songs of Innocence None None 265268
+Locust Street The Black Crowes Warpaint None None 255240
+Raised By Wolves U2 Songs of Innocence None None 245599
+The Troubles U2 Songs of Innocence None None 285843
+This Is Where You Can Reach Me Now U2 Songs of Innocence None None 305134
+God's Got It The Black Crowes Warpaint None None 202653
+California (There Is No End to Love) U2 Songs of Innocence None None 239846
+Every Breaking Wave U2 Songs of Innocence None None 252162
+Interview With the Onion News Network Onion News Network Onion News Network, Season 1 1 None 302002
+Song for Someone U2 Songs of Innocence None None 226763
+The Miracle (Of Joey Ramone) U2 Songs of Innocence None None 255382
+Iris (Hold Me Close) U2 Songs of Innocence None None 319457
+Goodbye Daughters of the Revolution The Black Crowes Warpaint None None 304147
+Walk Believer Walk The Black Crowes Warpaint None None 280253
+Choice Hotels International Undercover Boss Undercover Boss, Season 2 1 None 2614047
+Microchip Jason Farnham YouTube Audio Library None None 114336
+Anant Agarwal IEEE Computer Society Computing Conversations None None 494000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 =============================================
+#actual 'tracks.py' file for the assignment
+
+import xml.etree.ElementTree as ET
+import sqlite3
+
+conn = sqlite3.connect('trackdb.sqlite')
+cur = conn.cursor()
+
+# Make some fresh tables using executescript()
+cur.executescript('''
+DROP TABLE IF EXISTS Artist;
+DROP TABLE IF EXISTS Genre;
+DROP TABLE IF EXISTS Album;
+DROP TABLE IF EXISTS Track;
+
+
+CREATE TABLE Artist (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    name    TEXT UNIQUE
+);
+
+CREATE TABLE Genre (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    name    TEXT UNIQUE
+);
+
+CREATE TABLE Album (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    artist_id  INTEGER,
+    title   TEXT UNIQUE
+);
+
+CREATE TABLE Track (
+    id  INTEGER NOT NULL PRIMARY KEY
+        AUTOINCREMENT UNIQUE,
+    title TEXT  UNIQUE,
+    album_id  INTEGER,
+    genre_id  INTEGER,
+    len INTEGER,
+    rating INTEGER,
+    count INTEGER
+);
+
+''')
+
+
+fname = input('Enter file name: ')
+if ( len(fname) < 1 ) : fname = 'Library.xml'
+
+# <key>Track ID</key><integer>369</integer>
+# <key>Name</key><string>Another One Bites The Dust</string>
+# <key>Artist</key><string>Queen</string>
+def lookup(d, key):
+    found = False
+
+    #within the 'dict' item
+    #iterate through each 'child' line
+    for child in d:
+        #get each 'child' line text
+        if found : return child.text
+
+        #next
+        #if the tag name is 'key'
+        #and the tag value is the same as the <fieldName> we want to lookup/search
+        #tell me 'found'
+        if child.tag == 'key' and child.text == key :
+            found = True
+
+    #if didnt find any 'child' - return 'None'
+    return None
+
+
+
+
+stuff = ET.parse(fname)
+#find a list of 'dict' items
+all = stuff.findall('dict/dict/dict')
+print('Dict count:', len(all))
+#for each 'dict' item
+for entry in all:
+    if ( lookup(entry, 'Track ID') is None ) : continue
+
+
+    name = lookup(entry, 'Name')
+    artist = lookup(entry, 'Artist')
+    album = lookup(entry, 'Album')
+    count = lookup(entry, 'Play Count')
+    rating = lookup(entry, 'Rating')
+    length = lookup(entry, 'Total Time')
+    genre = lookup(entry, 'Genre')
+
+
+    #if we dont check for 'None' here
+    #we get an error
+    '''
+    Traceback (most recent call last):
+    File "C:\...\Py4e\tracks.py", line 108, in <module>
+    genre_id = cur.fetchone()[0]
+    TypeError: 'NoneType' object is not subscriptable
+    '''
+    if name is None or artist is None or album is None or genre is None:
+        continue
+
+    print(name, artist, genre, album, count, rating, length)
+
+
+    #insert into ARTIST table
+    cur.execute('''INSERT OR IGNORE INTO Artist (name)
+        VALUES ( ? )''', ( artist, ) )
+    #get the record's ID for use later
+    cur.execute('SELECT id FROM Artist WHERE name = ? ', (artist, ))
+    artist_id = cur.fetchone()[0]
+
+    #GENRE
+    cur.execute('''INSERT OR IGNORE INTO Genre (name)
+                VALUES (?)''', (genre, ))
+    cur.execute('SELECT id from Genre WHERE name = ?', (genre, ))
+    genre_id = cur.fetchone()[0]
+
+    #ALBUM
+    cur.execute('''INSERT OR IGNORE INTO Album (title, artist_id)
+        VALUES ( ?, ? )''', ( album, artist_id ) )
+    cur.execute('SELECT id FROM Album WHERE title = ? ', (album, ))
+    album_id = cur.fetchone()[0]
+
+    #TRACK
+    #if we forget to add an additional '?', we get an error
+    # Traceback (most recent call last):
+    # File "C:\...\Py4e\tracks.py", line 118, in <module>
+    # cur.execute('''INSERT OR REPLACE INTO Track
+    # sqlite3.OperationalError: 5 values for 6 columns
+    cur.execute('''INSERT OR REPLACE INTO Track
+        (title, album_id, genre_id, len, rating, count)
+        VALUES ( ?, ?, ?, ?, ?, ? )''',
+        ( name, album_id, genre_id, length, rating, count ) )
+
+    conn.commit()
+
+
+
+
+
+
+'''
+Dict count: 404
+Another One Bites The Dust Queen Rock Greatest Hits 55 100 217103
+Asche Zu Asche Rammstein Industrial Herzeleid 79 100 231810
+Beauty School Dropout Various Soundtrack Grease 48 100 239960
+Black Dog Led Zeppelin Rock IV 109 100 296620
+Bring The Boys Back Home Pink Floyd Rock The Wall [Disc 2] 33 100 87118
+Circles Bryan Lee Funk Blues Is 54 60 355369
+Comfortably Numb Pink Floyd Rock The Wall [Disc 2] 36 100 384130
+Crazy Little Thing Called Love Queen Rock Greatest Hits 38 100 163631
+Electric Funeral Black Sabbath Metal Paranoid 44 100 293015
+Fat Bottomed Girls Queen Rock Greatest Hits 38 100 257515
+For Those About To Rock (We Salute You) AC/DC Rock Who Made Who 84 100 353750
+Four Sticks Led Zeppelin Rock IV 84 100 284421
+Furious Angels Rob Dougan Soundtrack The Matrix Reloaded 54 100 330004
+Gelle Bryan Lee Blues/R&B Blues Is 45 60 199836
+Going To California Led Zeppelin Rock IV 100 100 215666
+Grease Various Soundtrack Grease 42 100 205792
+Hand of Doom Black Sabbath Metal Paranoid 36 100 429609
+Hells Bells AC/DC Rock Who Made Who 82 100 312946
+Hey You Pink Floyd Rock The Wall [Disc 2] 23 100 282305
+I Worry Bryan Lee Blues/R&B Blues Is 33 100 341315
+Iron Man Black Sabbath Metal Paranoid 39 100 358530
+Is There Anybody Out There? Pink Floyd Rock The Wall [Disc 2] 26 100 160679
+It was a Very Good Year Frank Sinatra Easy Listening Greatest Hits 39 100 268852
+Its Your Move Bryan Lee Blues/R&B Blues Is 40 100 245002
+Jack the Stripper/Fairies Wear Boots Black Sabbath Metal Paranoid 35 100 373995
+Killer Queen Queen Rock Greatest Hits 34 100 181368
+Laichzeit Rammstein Industrial Herzeleid 41 100 262844
+Let me Down Easy Bryan Lee Blues/R&B Blues Is 43 100 331441
+Misty Mountain Hop Led Zeppelin Rock IV 88 100 278831
+No Low Down Bryan Lee Blues/R&B Blues Is 39 100 245760
+Now You Are Gone America Easy Listening Greatest Hits 52 100 187559
+Outside The Wall Pink Floyd Rock The Wall [Disc 2] 16 100 104437
+Paranoid Black Sabbath Metal Paranoid 36 100 172930
+Planet Caravan Black Sabbath Metal Paranoid 38 100 274938
+Pretty Jeanie Bryan Lee Blues/R&B Blues Is 34 100 225175
+Rammstein Rammstein Industrial Herzeleid 45 100 265090
+Rat Salad Black Sabbath Metal Paranoid 46 100 150230
+Rock & Roll Led Zeppelin Rock IV 109 100 220891
+Rode Across the Desert America Easy Listening Greatest Hits 60 100 249887
+Sandy Various Soundtrack Grease 36 100 155742
+Shake Your Foundations AC/DC Rock Who Made Who 85 100 233769
+Sister Golden Hair America Easy Listening Greatest Hits 60 100 202057
+Somebody To Love Queen Rock Greatest Hits 17 100 297586
+Stairway To Heaven Led Zeppelin Rock IV 93 100 481567
+Strangers in the Night Frank Sinatra Easy Listening Greatest Hits 42 100 158484
+Summer Nights Various Soundtrack Grease 35 100 216973
+Summer Wind Frank Sinatra Easy Listening Greatest Hits 46 100 177554
+Thats Life Frank Sinatra Easy Listening Greatest Hits 43 100 189988
+The Battle Of Evermore Led Zeppelin Rock IV 110 100 351529
+The Blues "Is" Bryan Lee Blues/R&B Blues Is 45 100 252238
+There it Is Bryan Lee Blues/R&B Blues Is 35 100 395441
+Think Bryan Lee Blues/R&B Blues Is 41 100 320339
+This Town Frank Sinatra Easy Listening Greatest Hits 44 100 185051
+Tin Man America Easy Listening Greatest Hits 50 100 210076
+Track 01 Billy Price Blues/R&B Danger Zone 47 100 261825
+Track 02 Billy Price Blues/R&B Danger Zone 42 100 165459
+Track 03 Billy Price Blues/R&B Danger Zone 41 100 206471
+Messin with the Kid The Canettes Blues Band Blues/R&B Self Titled 23 100 226377
+Track 04 Billy Price Blues/R&B Danger Zone 37 100 257175
+Stormy Monday The Canettes Blues Band Blues/R&B Self Titled 29 100 464143
+Track 05 Billy Price Blues/R&B Danger Zone 42 100 230295
+Waiting on Ice Bryan Lee Blues/R&B Blues Is 37 100 289384
+War Pigs/Luke's Wall Black Sabbath Metal Paranoid 38 100 478197
+We Are The Champions Queen Rock Greatest Hits 24 100 181864
+We Will Rock You Queen Rock Greatest Hits 33 100 123559
+When Somebody Loves You Frank Sinatra Easy Listening Greatest Hits 43 100 117263
+When The Levee Breaks Led Zeppelin Rock IV 83 100 427624
+You are the One that I Want Various Soundtrack Grease 31 100 169900
+You Done Me Wrong Bryan Lee Blues/R&B Blues Is 35 100 200097
+You Shook Me All Night Long AC/DC Rock Who Made Who 92 100 210938
+You're My Best Friend Queen Rock Greatest Hits 31 100 172643
+Zion Fluke Soundtrack The Matrix Reloaded 47 100 273528
+Who Made Who AC/DC Rock Who Made Who 110 100 207203
+D.T. AC/DC Rock Who Made Who 90 None 173714
+Sink the Pink AC/DC Rock Who Made Who 83 None 253466
+Ride On AC/DC Rock Who Made Who 75 None 351268
+Chase the Ace AC/DC Rock Who Made Who 93 None 181420
+Wollt Ihr Das Bett In Flammen Sehen Rammstein Industrial Herzeleid 50 None 317387
+Der Meister Rammstein Industrial Herzeleid 46 None 250801
+Weisses Fleisch Rammstein Industrial Herzeleid 52 None 215902
+Seemann Rammstein Industrial Herzeleid 34 None 288235
+Du Riechst So Gut Rammstein Industrial Herzeleid 50 None 289332
+Das Alte Leid Rammstein Industrial Herzeleid 46 None 344581
+Heirate Mich Rammstein Industrial Herzeleid 39 None 284734
+Herzeleid Rammstein Industrial Herzeleid 42 None 223425
+Baba O'Riley The Who Rock Who's Next 45 None 298448
+Bargain The Who Rock Who's Next 37 None 331676
+Love Ain't for Keeping The Who Rock Who's Next 24 None 130560
+My Wife The Who Rock Who's Next 17 None 213786
+The Song Is Over The Who Rock Who's Next 14 None 375797
+Getting In Tune The Who Rock Who's Next 27 None 288809
+Going Mobile The Who Rock Who's Next 28 100 221910
+Behind Blue Eyes The Who Rock Who's Next 43 None 221570
+Won't Get Fooled Again The Who Rock Who's Next 21 None 511111
+Folsom Prison Blues Johnny Cash Country The Legend Of Johnny Cash 47 100 170004
+I Walk The Line Johnny Cash Country The Legend Of Johnny Cash 33 100 165720
+Get Rhythm Johnny Cash Country The Legend Of Johnny Cash 35 100 134530
+Big River Johnny Cash Country The Legend Of Johnny Cash 51 None 152711
+Guess Things Happen That Way Johnny Cash Country The Legend Of Johnny Cash 35 None 111386
+Ring Of Fire Johnny Cash Country The Legend Of Johnny Cash 30 100 157100
+Jackson Johnny Cash Country The Legend Of Johnny Cash 35 100 166530
+A Boy Named Sue (live) Johnny Cash Country The Legend Of Johnny Cash 37 None 226063
+You Raise Me Up Selah Gospel & Religious Hiding Place 9 None 302262
+Hold On, I'm Coming The Canettes Blues Band Blues/R&B On Tap & In the Can 34 100 282566
+Got my Mojo Working The Canettes Blues Band Blues/R&B On Tap & In the Can 52 100 310517
+Sweet Home Chicago The Canettes Blues Band Blues/R&B On Tap & In the Can 27 100 375849
+Heavy Love The Canettes Blues Band Blues/R&B On Tap & In the Can 28 100 253544
+Cold Cold Feeling The Canettes Blues Band Blues/R&B On Tap & In the Can 43 100 261929
+Lonely Avenue The Canettes Blues Band Blues/R&B On Tap & In the Can 24 100 292022
+Good Morning Little Schoolgirl The Canettes Blues Band Blues/R&B On Tap & In the Can 20 100 278648
+Dust My Broom The Canettes Blues Band Blues/R&B On Tap & In the Can 24 100 299311
+Gimme' Some Lovin The Canettes Blues Band Blues/R&B On Tap & In the Can 35 100 227239
+Everybody Needs Somebody to Love The Canettes Blues Band Blues/R&B On Tap & In the Can 24 100 195186
+Black Magic Woman The Canettes Blues Band Blues/R&B On Tap & In the Can 31 100 442644
+Steppin' Rooster The Canettes Blues Band Blues/R&B On Tap & In the Can 21 100 704862
+Our Love is Drifting The Canettes Blues Band Blues/R&B On Tap & In the Can 15 100 292649
+Doin' 100 The Canettes Blues Band Blues/R&B On Tap & In the Can 20 100 343980
+Mother Joy Matt Ender New Age Natural Wonders Music Sampler 1999 463 None 287294
+Soldier's Lament Steve McDonald New Age Natural Wonders Music Sampler 1999 371 None 347193
+Dulaman Altan New Age Natural Wonders Music Sampler 1999 403 None 223007
+The Arrow Chris Spheeris New Age Natural Wonders Music Sampler 1999 416 None 319869
+Spanish Eyes La Esperanza New Age Natural Wonders Music Sampler 1999 375 None 259030
+Banana Bay Luis Villegas New Age Natural Wonders Music Sampler 1999 403 None 198060
+Aguas De Marco Rosa Passos New Age Natural Wonders Music Sampler 1999 407 None 179408
+Tamborea Energipsy New Age Natural Wonders Music Sampler 1999 355 None 235389
+Gone Hollie Smith New Age Natural Wonders Music Sampler 1999 362 None 196414
+The Immigrant Joanie Madden New Age Natural Wonders Music Sampler 1999 350 None 362631
+Pahrump-Big Water Cusco New Age Natural Wonders Music Sampler 1999 342 None 191634
+Seeker's Quest Cheryl Gunn New Age Natural Wonders Music Sampler 1999 337 None 236434
+Floating To Forever Dean Everson New Age Natural Wonders Music Sampler 1999 337 None 351686
+Open Road Jeff Bailey Jazz Relaxing Jazz 10 None 318563
+Ruby Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 13 None 205008
+The Angry Mob Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 41 None 288313
+Heat Dies Down Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 12 None 237061
+Highroyds Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 10 None 199575
+Love's Not A Competition (But I'm Winning) Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 11 None 197799
+Thank You Very Much Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 11 None 157753
+I Can Do It Without You Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 11 None 204199
+My Kind Of Guy Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 10 None 246595
+Everything Is Average Nowadays Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 16 None 164754
+Learnt My Lesson Well Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 9 None 325955
+Try Your Best Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 8 None 222511
+Retirement Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 10 None 237426
+The Angry Mob [Live From Berlin] Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 40 None 279066
+I Like To Fight Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 8 None 218566
+From The Neck Down Kaiser Chiefs Alternative & Punk Yours Truly, Angry Mob 15 None 147226
+The Wisdom of Crowds: Why the Many Are Smarter than the Few Part 1 of 3 James Surowiecki Business The Wisdom of Crowds: Why the Many Are Smarter than the Few (Abridged Nonfiction) 15 None 8586749
+The Wisdom of Crowds: Why the Many Are Smarter than the Few Part 2 of 3 James Surowiecki Business The Wisdom of Crowds: Why the Many Are Smarter than the Few (Abridged Nonfiction) 9 None 8443432
+The Wisdom of Crowds: Why the Many Are Smarter than the Few Part 3 of 3 James Surowiecki Business The Wisdom of Crowds: Why the Many Are Smarter than the Few (Abridged Nonfiction) 3 None 4168829
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 1 of 5 James Surowiecki Nonfiction The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) 4 None 7920893
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 2 of 5 James Surowiecki Nonfiction The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) None None 7921106
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 3 of 5 James Surowiecki Nonfiction The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) None None 7965736
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 4 of 5 James Surowiecki Nonfiction The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) 1 None 9653330
+The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) Part 5 of 5 James Surowiecki Nonfiction The Wisdom of Crowds: Why the Many Are Smarter Than the Few (Unabridged) None None 746536
+Misty David Osborne Classical Moonlight And Love Songs 302 None 249312
+My Funny Valentine David Osborne Classical Moonlight And Love Songs 301 None 235885
+Since I Don't Have You David Osborne Classical Moonlight And Love Songs 288 None 251846
+Tenderly David Osborne Classical Moonlight And Love Songs 284 None 227395
+When I Fall In Love David Osborne Classical Moonlight And Love Songs 281 None 187768
+Unforgettable David Osborne Classical Moonlight And Love Songs 280 None 272927
+The Way You Look Tonight David Osborne Classical Moonlight And Love Songs 277 None 247222
+I've Grown Accustomed To Your Face David Osborne Classical Moonlight And Love Songs 280 None 148035
+Smoke Gets In Your Eyes David Osborne Classical Moonlight And Love Songs 277 None 198504
+Fly Me To The Moon David Osborne Classical Moonlight And Love Songs 275 None 182543
+Unchained Melody David Osborne Classical Moonlight And Love Songs 265 None 259369
+These Foolish Things Remind Me Of You David Osborne Classical Moonlight And Love Songs 267 None 184711
+La Vie En Rose David Osborne Classical Moonlight And Love Songs 259 None 276767
+As Time Goes By David Osborne Classical Moonlight And Love Songs 290 None 257985
+Pilot Fairly Legal Drama Fairly Legal, Season 1 1 None 3847006
+hte postal service - the impor The Postal Service Electronic unreleased demo None None 193959
+Winter Wonderland Bing Crosby Holiday Seasons Greatings 163 None 144744
+Jingle Bells Frank Sinatra Holiday Seasons Greatings 271 None 121756
+White Christmas Bing Crosby Holiday Seasons Greatings 158 None 95634
+The Christmas Song Frank Sinatra Holiday Seasons Greatings 272 None 209632
+Little Drummer Boy Bing Crosby Holiday Seasons Greatings 154 None 178311
+Silent Night Frank Sinatra Holiday Seasons Greatings 257 None 149054
+Let It Snow Bing Crosby Holiday Seasons Greatings 154 None 125126
+Mistletoe And Holly Frank Sinatra Holiday Seasons Greatings 257 None 138501
+O Holy Night Bing Crosby Holiday Seasons Greatings 150 None 214021
+Have Yourself A Merry Little Christmas Frank Sinatra Holiday Seasons Greatings 252 None 208248
+Do You Hear What I Hear Bing Crosby Holiday Seasons Greatings 155 None 164728
+I'll Be Home For Christmas Frank Sinatra Holiday Seasons Greatings 249 None 190876
+Voices Disturbed Alternative The Sickness None None 191764
+The Game Disturbed Alternative The Sickness 1 None 227134
+Stupify Disturbed Alternative The Sickness 1 None 274233
+Down With The Sickness Disturbed Alternative The Sickness 1 None 278726
+Violence Fetish Disturbed Alternative The Sickness None None 203833
+Fear Disturbed Alternative The Sickness 4 None 227004
+Numb Disturbed Alternative The Sickness None None 224940
+Want Disturbed Alternative The Sickness None None 232803
+Conflict Disturbed Alternative The Sickness 5 None 275330
+Shout 2000 Disturbed Alternative The Sickness 1 None 257802
+Droppin' Plates Disturbed Alternative The Sickness 4 None 229302
+Meaning Of Life Disturbed Alternative The Sickness 3 None 242599
+PY4INF-01-Intro.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. 1 None 3428075
+Eben Upton: Raspberry Pi IEEE Computer Society Podcast Computing Conversations 2 None 661368
+Andrew Tanenbaum: Writing the Book on Networks IEEE Computer Society Podcast Computing Conversations 4 None 535040
+Massimo Banzi: Building Arduino IEEE Computer Society Podcast Computing Conversations 1 None 567745
+PY4INF-04-Functions.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1683800
+PY4INF-02-Expressions.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2578416
+PY4INF-03-Conditional.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2296058
+PY4INF-05-Iterations.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. 1 None 2804297
+PY4INF-06-Strings.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1677844
+PY4INF-07-Files.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1478713
+PY4INF-08-Lists.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1636231
+PY4INF-09-Dictionaries.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2254445
+PY4INF-10-Tuples.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1597596
+PY4INF-11-Regex.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2123702
+John C. Hollar: History of Computing IEEE Computer Society Podcast Computing Conversations 1 None 694073
+Bob Metcalfe: Ethernet at Forty IEEE Computer Society Podcast Computing Conversations None None 1031392
+Gordon Bell: Building Blocks of Computing IEEE Computer Society Podcast Computing Conversations 1 None 744620
+Ian Horrocks: Standardizing OWL IEEE Computer Society Podcast Computing Conversations 1 None 572212
+Katie Hafner: The Origins of the Internet IEEE Computer Society Podcast Computing Conversations 1 None 652460
+Larry Smarr: Building Mosaic IEEE Computer Society Podcast Computing Conversations None None 894693
+Len Kleinrock: The Theory of Packets IEEE Computer Society Podcast Computing Conversations 1 None 674742
+Mitchell Baker: The Mozilla Foundation IEEE Computer Society Podcast Computing Conversations None None 994246
+Pooja Sankar: Building the Piazza Collaboration System IEEE Computer Society Podcast Computing Conversations None None 496404
+Van Jacobson: Content-Centric Networking IEEE Computer Society Podcast Computing Conversations None None 780251
+The Apache Software Foundation IEEE Computer Society Podcast Computing Conversations None None 542484
+A Brief History of Packets IEEE Computer Society Podcast Computing Conversations None None 1004643
+Discovering JavaScript Object Notation IEEE Computer Society Podcast Computing Conversations None None 650971
+Inventing PHP IEEE Computer Society Podcast Computing Conversations None None 494915
+Monash Museum of Computing History IEEE Computer Society Podcast Computing Conversations None None 362657
+The Rise of JavaScript IEEE Computer Society Podcast Computing Conversations None None 526132
+Joseph Hardin: NCSA Mosaic IEEE Computer Society Podcast Computing Conversations None None 845635
+Len Kleinrock on the Internet's First Two Packets IEEE Computer Society Podcast Computing Conversations 1 None 594390
+Doug Van Houweling on Building the NSFNet IEEE Computer Society Podcast Computing Conversations None None 773146
+Computing Conversations: Nathaniel Borenstein on MIME IEEE Computer Society Podcast Computing Conversations None None 682135
+You Don't Mess Around With Jim Jim Croce Folk Classic Hits None None 184398
+Andrew S. Tanenbaum on MINIX IEEE Computer Society Podcast Computing Conversations None None 603000
+Computing Conversations: Elizabeth Fong on SQL Standards IEEE Computer Society Podcast Computing Conversations None None 533577
+Nii Quaynor on Bringing the Internet to Africa IEEE Computer Society Podcast Computing Conversations 1 None 673332
+PHP-09-Transactions.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 1728888
+PHP-01-Intro.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 2250624
+PHP-02-Install.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. 1 None None
+PHP-04-Expressions.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 2168064
+PHP-05-Functions.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 1446792
+PHP-06-Strings.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 417696
+PHP-12-Sessions.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 3624312
+PHP-06-Objects.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 2455368
+SI664-13-JSON-A.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 4407672
+PHP-13-JavaScript.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 3650088
+PHP-09-Database-Design.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 3591072
+PHP-Tsugi-Install.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 3181656
+PHP-10-MySQL-PDO.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 4536685
+PHP-08-MySQL.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 3994656
+SI664-13-JSON-B.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 1484616
+IMS-Learning-Tools-Interoperability.mp3 Created by Sakai Podcast SI 664 W14's official Podcast. None None 2185848
+An Interview with Don Waters Matt Pasiewicz Speech CNI Event Coverage 2 None 1411082
+PY4INF-11-Regex.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2123702
+PY4INF-10-Tuples.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1597596
+PY4INF-09-Dictionaries.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2254445
+PY4INF-08-Lists.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1636231
+PY4INF-07-Files.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1478713
+PY4INF-06-Strings.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1677844
+PY4INF-05-Iterations.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2804297
+PY4INF-04-Functions.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1683800
+PY4INF-03-Conditional.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2296058
+PY4INF-02-Expressions.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2578416
+PY4INF-01-Intro.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 3428075
+Py4Inf-11-Regex.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2123702
+Py4Inf-10-Tuples.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1597596
+Py4Inf-09-Dictionaries.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2254445
+Py4Inf-08-Lists.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1636231
+Py4Inf-07-Files.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1478713
+Py4Inf-06-Strings.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1677844
+Py4Inf-05-Iterations.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2804297
+Py4Inf-04-Functions.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 1683800
+Py4Inf-03-Conditional.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2296058
+Py4Inf-02-Expressions.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 2578416
+Py4Inf-01-Intro.mp3 Recording by Dr. Chuck Podcast Python for Informatics's official Podcast. None None 3428075
+Ian Foster on the Globus Project IEEE Computer Society Podcast Computing Conversations 1 None 538305
+Khan Academy and Computer Science IEEE Computer Society Podcast Computing Conversations 1 None 558837
+Guido van Rossumon the Early Years of Python IEEE Computer Society Podcast Computing Conversations 1 None 701884
+Guido van Rossum on the Modern Era of Python IEEE Computer Society Podcast Computing Conversations None None 741616
+John Resig on Building jQuery IEEE Computer Society Podcast Computing Conversations None None 595983
+Roy T. Fielding on Understanding the REST Style IEEE Computer Society Podcast Computing Conversations 1 None 683650
+Anil Jain: 25 Years of Biometric Recognition IEEE Computer Society Podcast Computing Conversations None None 661368
+Waste Management Undercover Boss Reality TV Undercover Boss, Season 1 1 None 2565232
+Sleep Like a Baby Tonight U2 Rock Songs of Innocence None None 301641
+Evergreen The Black Crowes Rock Warpaint None None 261373
+Oh Josephine The Black Crowes Rock Warpaint None None 398907
+Movin' On Down the Line The Black Crowes Rock Warpaint None None 342693
+Wounded Bird The Black Crowes Rock Warpaint None None 263453
+Volcano U2 Rock Songs of Innocence None None 194116
+Wee Who See the Deep The Black Crowes Rock Warpaint None None 290520
+Cedarwood Road U2 Rock Songs of Innocence None None 265268
+Locust Street The Black Crowes Rock Warpaint None None 255240
+Raised By Wolves U2 Rock Songs of Innocence None None 245599
+The Troubles U2 Rock Songs of Innocence None None 285843
+This Is Where You Can Reach Me Now U2 Rock Songs of Innocence None None 305134
+God's Got It The Black Crowes Rock Warpaint None None 202653
+California (There Is No End to Love) U2 Rock Songs of Innocence None None 239846
+Every Breaking Wave U2 Rock Songs of Innocence None None 252162
+Interview With the Onion News Network Onion News Network Comedy Onion News Network, Season 1 1 None 302002
+Song for Someone U2 Rock Songs of Innocence None None 226763
+The Miracle (Of Joey Ramone) U2 Rock Songs of Innocence None None 255382
+Iris (Hold Me Close) U2 Rock Songs of Innocence None None 319457
+Goodbye Daughters of the Revolution The Black Crowes Rock Warpaint None None 304147
+Walk Believer Walk The Black Crowes Rock Warpaint None None 280253
+Choice Hotels International Undercover Boss Reality TV Undercover Boss, Season 2 1 None 2614047
+Microchip Jason Farnham Dance & Electronic YouTube Audio Library None None 114336
+Anant Agarwal IEEE Computer Society Podcast Computing Conversations None None 494000
+'''
+
+
+
+
+
+
+
+
 
