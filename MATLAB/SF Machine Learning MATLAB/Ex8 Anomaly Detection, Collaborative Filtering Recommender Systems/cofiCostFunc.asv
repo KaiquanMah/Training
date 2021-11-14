@@ -1,0 +1,215 @@
+function [J, grad] = cofiCostFunc(params, Y, R, num_users, num_movies, ...
+                                  num_features, lambda)
+%COFICOSTFUNC Collaborative filtering cost function
+%   [J, grad] = COFICOSTFUNC(params, Y, R, num_users, num_movies, ...
+%   num_features, lambda) returns the cost and gradient for the
+%   collaborative filtering problem.
+%
+
+
+
+% ====================UNIT TEST DATA=========================
+% [J, grad] = cofiCostFunc(params, Y, R, n_u, n_m, ...n, 1.5);
+% X = reshape(params(1:n_m*n), n_m, n);
+% Theta = reshape(params(n_m*n+1:end), ...
+%                 n_u, n);
+% X 4x5
+% X =
+%     0.8415   -0.9589    0.4121    0.4202   -0.9614
+%     0.9093   -0.2794   -0.5440    0.9906   -0.7510
+%     0.1411    0.6570   -1.0000    0.6503    0.1499
+%    -0.7568    0.9894   -0.5366   -0.2879    0.9129
+% 
+% Theta 3x5
+% Theta =
+%     0.5403   -0.6536    0.7539   -0.8391    0.9074
+%    -0.4161    0.2837   -0.1455    0.0044    0.1367
+%    -0.9900    0.9602   -0.9111    0.8439   -0.7597
+
+
+% Y 4x3
+% Y =
+%     0.8415         0         0
+%          0         0         0
+%          0         0    0.8367
+%     0.6570    0.6503         0
+
+    
+% R 4x3
+% R =
+%   4×3 logical array
+% 
+%    1   0   0
+%    0   0   0
+%    0   0   1
+%    1   1   0
+%=========================================================
+
+
+
+
+% Unfold the U and W matrices from params
+% reshape from col vector into a matrix form
+X = reshape(params(1:num_movies*num_features), num_movies, num_features);
+% from where the previous 'params' element left off
+% use the next element onwards
+% and put in the 'Theta' matrix
+Theta = reshape(params(num_movies*num_features+1:end), ...
+                num_users, num_features);
+
+            
+% You need to return the following values correctly
+J = 0;
+X_grad = zeros(size(X));
+Theta_grad = zeros(size(Theta));
+
+% ====================== YOUR CODE HERE ======================
+% Instructions: Compute the cost function and gradient for collaborative
+%               filtering. 
+% 
+% Concretely, you should first implement the cost
+%               function (without regularization) and make sure it is
+%               matches our costs. 
+% 
+
+
+% Initial method
+% computed predicted Y values => X*Theta'
+% then find the difference between predicted vs actual 'Y' values
+% X 4x5
+% Theta 3x5, Theta' 5x3
+% Y 4x3
+% so we want a 4x3 matrix to get the difference against 'Y', based on #
+% movies x # users 
+% => so we use X*Theta' 
+% => X 4x5 x Theta' 5x3 = 4x3
+% AND REMEMBR TO ONLY compute differences if the user has reviewed a movie!
+% so perform an element-wise multiplication 
+% between the difference and matrix 'R'
+
+%m1
+% diff = (X*Theta'-Y).* R;
+
+
+
+% unregularised cost component
+% sum(diff.^2)/2 => gives us 3 SUM values => 1 for each user
+% sum(diff.^2)/2
+% ans =
+%     2.7056    0.4979    2.0981
+% SO to SUM up cost over ALL users, we need an 'OUTER SUM'
+% sum(sum(diff.^2))/2
+% ans =
+%     5.3016
+
+%m1
+% JUnreg = sum(sum(diff.^2))/2;
+
+
+
+%m1
+% regularised cost component for
+% Theta
+% JRegTheta = sum(sum(Theta.^2))*lambda/2;
+% X
+% JRegX = sum(sum(X.^2))*lambda/2;
+% full regularised cost
+% J = JUnreg + JRegTheta + JRegX;
+
+
+
+% After that, you should implement the 
+%               gradient and use the checkCostFunction routine to check
+%               that the gradient is correct. 
+% 
+% Finally, you should implement
+%               regularization.
+%
+
+
+
+% unregularised gradient component
+% recall diff 4x3, R 4x3
+%        X 4x5
+%        Theta 3x5                
+% (diff.*R) => 4x3
+% to get gradient across each movie, 4 in total, (diff.*R)*Theta
+% => 4x3 x 3x5 = 4x5
+%m1
+% XGradUnreg = (diff.*R)*Theta; 
+% to get gradient across each Theta/user, 3 in total,
+% we need to transpose (diff.*R)
+% (diff.*R) => 3x4
+% then (diff.*R)'*X => 3x4 x 4x5 = 3x5
+%m1
+% ThetaGradUnreg = (diff.*R)'*X; 
+
+
+%m1
+% regularised gradient component
+% XGradReg = lambda * X;
+% ThetaGradReg = lambda * Theta;
+
+%m1
+% full regularised gradient
+% X_grad = XGradUnreg + XGradReg;
+% Theta_grad = ThetaGradUnreg + ThetaGradReg;
+
+
+
+
+% Notes: X - num_movies  x num_features matrix of movie features
+%        Theta - num_users  x num_features matrix of user features
+%        Y - num_movies x num_users matrix of user ratings of movies
+%        R - num_movies x num_users matrix, where R(i, j) = 1 if the 
+%            i-th movie was rated by the j-th user
+% 
+% You should set the following variables correctly:
+
+%        X_grad - num_movies x num_features matrix, containing the 
+%                 partial derivatives w.r.t. to each element of X
+%               i.e. each movie? YES
+%        Theta_grad - num_users x num_features matrix, containing the 
+%                     partial derivatives w.r.t. to each element of Theta
+%                   i.e. Theta params for each user? YES
+
+
+
+
+
+
+% =====================Method 2 - subsequently===========================
+% Compute cost function J
+pred = X*Theta';
+diff = (pred - Y) .* R;
+
+J = sum((diff.^2).*(R==1))/2;
+J = J + lambda/2 * sum(sum(X.^2));      % regularised term of x
+J = J + lambda/2 * sum(sum(Theta.^2));  % regularised term of theta
+
+
+% Normally sum(X(:)), but that looks weird here.
+J = 1/2 * sum(sum(D .^ 2)) + lambda / 2 * sum(sum(Theta .^ 2)) ...
+                           + lambda / 2 * sum(sum(X .^ 2));
+
+X_grad = D * Theta + lambda * X;
+Theta_grad = D' * X + lambda * Theta;
+
+
+
+
+% Compute gradients
+% For X gradient
+X_grad = (diff.*R)*Theta;                   % unregularised vectorised implementation
+X_grad = X_grad + (lambda * X);             % regularised
+
+% For Theta gradient
+Theta_grad = ((diff.*R)'*X);                 % unregularised vectorised implementation
+Theta_grad = Theta_grad + (lambda * Theta);  % regularised
+
+
+% =============================================================
+
+grad = [X_grad(:); Theta_grad(:)];
+
+end
