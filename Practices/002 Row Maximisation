@@ -1,0 +1,152 @@
+# Find the number of operations to put the max # in each row in the 1st col
+# If the 1st col of the corresponding row already has the max #, no operation is required for that row
+
+input_matrix = '''
+3
+3
+38 40 9
+23 40 25
+45 10 20
+'''
+
+
+
+
+
+def row_maximisation(input_matrix): # '\n3\n3\n38 40 9\n23 40 25\n45 10 20\n'
+    # Write your code here
+    # split on newline character
+    whole_input = input_matrix.split('\n') # ['', '3', '3', '38 40 9', '23 40 25', '45 10 20', '']
+    
+    # remove blank strings
+    cleaned_input = []
+    for i in range(len(whole_input)):
+        if whole_input[i] != "":
+            cleaned_input.append(whole_input[i]) # ['3', '3', '38 40 9', '23 40 25', '45 10 20']
+        
+    row_count = int(cleaned_input[0]) # 3
+    col_count = int(cleaned_input[1]) # 3
+    
+    number_of_operations = 0
+    
+    start_pos = 2
+    for i in range(start_pos, len(cleaned_input)):
+        row_entries = cleaned_input[i].split() # ['38', '40', '9']     ['23', '40', '25']     ['45', '10', '20']
+        
+        highest_this_row = -999
+        for num in row_entries:
+            if int(num) > highest_this_row:
+                highest_this_row = int(num) # 40 40 45           
+        
+        row_first_col = int(row_entries[0]) # 38 23 45
+        
+        if(row_first_col == highest_this_row):
+            continue
+        else:
+            number_of_operations += 1
+        
+        # max_this_row = max(row_entries)
+        # print(number_of_operations)
+        # print(row_first_col, highest_this_row)
+    
+    return number_of_operations
+
+
+
+row_maximisation(input_matrix)
+# 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+# EXTRA EXERCISE
+# RETURN THE MATRIX WITH THE HIGHEST #s for each row entry in the 1st col
+
+import numpy as np
+
+def row_max(input_matrix): # '\n3\n3\n38 40 9\n23 40 25\n45 10 20\n'
+    # Write your code here
+    # split on newline character
+    whole_input = input_matrix.split('\n') # ['', '3', '3', '38 40 9', '23 40 25', '45 10 20', '']
+    
+    # remove blank strings
+    cleaned_input = []
+    for i in range(len(whole_input)):
+        if whole_input[i] != "":
+            cleaned_input.append(whole_input[i]) # ['3', '3', '38 40 9', '23 40 25', '45 10 20']
+        
+    row_count = int(cleaned_input[0]) # 3
+    col_count = int(cleaned_input[1]) # 3
+    
+    
+    arr_row_entries_fixed = np.zeros((row_count, col_count))
+    number_of_operations = 0
+    start_pos = 2
+    for i in range(start_pos, len(cleaned_input)):
+        row_entries = cleaned_input[i].split() # ['38', '40', '9']     ['23', '40', '25']     ['45', '10', '20']
+        row_entries = [int(num) for num in row_entries]
+        
+        highest_this_row = -999
+        for num in row_entries:
+            if num > highest_this_row:
+                highest_this_row = num # 40 40 45           
+        
+        row_first_col = row_entries[0] # 38 23 45
+        
+        row_entries_fixed = []
+        # IF NO CHANGE TO THIS ROW, ASSIGN THE ENTRIES TO THE ARRAY
+        if(row_first_col == highest_this_row):
+            row_entries_fixed = row_entries
+            # continue
+            
+            j = 0
+            for num in row_entries_fixed:
+                arr_row_entries_fixed[i-2, j] = num
+                j += 1
+        
+        # IF CHANGE TO THIS ROW, FIND THE MAX ENTRY THEN ASSIGN THE ENTRIES TO THE ARRAY
+        else:
+            number_of_operations += 1
+            
+            # find the max entry for that row
+            max_this_row = max(row_entries) # 40 40
+            # col index # for the max entry
+            col_max_this_row = row_entries.index(max_this_row) # 1 1
+            
+            # then rearrange the row entries to have the max entry in the 1st col
+            row_entries_fixed.append(max_this_row)
+            # then append the subsequent row entries
+            for num in row_entries:
+                if num != max_this_row:
+                    row_entries_fixed.append(num)
+            
+            j = 0
+            for num in row_entries_fixed:
+                arr_row_entries_fixed[i-2, j] = num
+                j += 1
+                
+            
+            # np.append(arr_row_entries_fixed, np.array(row_entries_fixed))
+        # row_entries_fixed = np.array(row_entries_fixed) # array([45, 10, 20])   
+        # np.append(arr_row_entries_fixed, row_entries_fixed)
+        # print(row_entries_fixed) # [40, 38, 9]  [40, 23, 25]  [45, 10, 20]
+    # arr_row_entries_fixed = np.array([np.array(xi) for xi in row_entries_fixed])
+        
+        
+    return arr_row_entries_fixed
+
+
+
+row_max(input_matrix)
+# array([[40., 38.,  9.],
+#       [40., 23., 25.],
+#       [45., 10., 20.]])
