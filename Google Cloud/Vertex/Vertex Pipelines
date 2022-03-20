@@ -18,4 +18,51 @@ Schedule a pipeline job with Cloud Scheduler
 
 
 
+Create an Vertex Notebooks instance
+Click on the Navigation Menu.
+Navigate to Vertex AI, then to Workbench.
+On the Notebook instances page, navigate to the User-Managed Notebooks tab and wait until ai-notebook is fully created.
+It should take a few minutes for the notebook to be fully created.
+Once the instance has been created, select Open JupyterLab
+
+
+
+
+
+
+
+
+
+Vertex Pipelines setup
+There are a few additional libraries you'll need to install in order to use Vertex Pipelines:
+Kubeflow Pipelines: This is the SDK used to build the pipeline. Vertex Pipelines supports running pipelines built with both Kubeflow Pipelines or TFX.
+Google Cloud Pipeline Components: This library provides pre-built components that make it easier to interact with Vertex AI services from your pipeline steps.
+
+
+Step 1: Create Python notebook and install libraries
+From the Launcher menu in your Notebook instance, create a notebook by selecting Python 3.
+You can access the Launcher menu by clicking on the + sign in the top left of your notebook instance.
+
+To install both services needed for this lab, first set the user flag in a notebook cell:
+USER_FLAG = "--user"
+
+Then run the following from your notebook:
+!pip3 install {USER_FLAG} google-cloud-aiplatform==1.0.0 --upgrade
+!pip3 install {USER_FLAG} kfp google-cloud-pipeline-components==0.1.1 --upgrade
+
+After installing these packages you'll need to restart the kernel:
+import os
+if not os.getenv("IS_TESTING"):
+    # Automatically restart kernel after installs
+    import IPython
+    app = IPython.Application.instance()
+    app.kernel.do_shutdown(True)
+
+Finally, check that you have correctly installed the packages. The KFP SDK version should be >=1.6:
+!python3 -c "import kfp; print('KFP SDK version: {}'.format(kfp.__version__))"
+!python3 -c "import google_cloud_pipeline_components; print('google_cloud_pipeline_components version: {}'.format(google_cloud_pipeline_components.__version__))"
+
+
+
+
 
