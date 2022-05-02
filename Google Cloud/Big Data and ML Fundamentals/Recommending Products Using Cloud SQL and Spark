@@ -1,0 +1,1007 @@
+Overview
+In this lab, you populate rentals data in Cloud SQL for the rentals recommendation engine to use. The recommendations engine itself will run on Dataproc using Spark ML.
+
+Objectives
+In this lab, you learn how to perform the following tasks:
+Create a Cloud SQL instance
+Create database tables by importing .sql files from Cloud Storage
+Populate the tables by importing .csv files from Cloud Storage
+Allow access to Cloud SQL
+Explore the rentals data using SQL statements from Cloud Shell
+
+
+
+
+
+Check project permissions
+Before you begin your work on Google Cloud, you need to ensure that your project has the correct permissions within Identity and Access Management (IAM).
+In the Google Cloud console, on the Navigation menu (Navigation menu icon), click IAM & Admin > IAM.
+
+Confirm that the default compute Service Account {project-number}-compute@developer.gserviceaccount.com is present and has the editor role assigned. The account prefix is the project number, which you can find on Navigation menu > Home.
+https://cdn.qwiklabs.com/SMuu68pzAXGA%2F%2FgiwoeYr02rez30D0rBU8FvkNAciFM%3D
+325323576376-compute@developer.gserviceaccount.com	Compute Engine default service account	
+Editor
+
+If the account is not present in IAM or does not have the editor role, follow the steps below to assign the required role.
+In the Google Cloud console, on the Navigation menu, click Home.
+Copy the project number (e.g. 729328892908).
+On the Navigation menu, click IAM & Admin > IAM.
+At the top of the IAM page, click Add.
+For New principals, type:
+  {project-number}-compute@developer.gserviceaccount.com
+Replace {project-number} with your project number.
+For Role, select Project (or Basic) > Editor. Click Save.
+
+
+
+
+
+
+
+Task 1. Create a Cloud SQL instance
+In the Google Cloud Console, Select Navigation menu > SQL (in the Databases section).
+Click Create instance.
+Click Choose MySQL.
+For Instance ID, type rentals.
+https://cdn.qwiklabs.com/4enBBCqiOP%2FMoylbsMJSGz%2Fddg%2BmLbJ1r7xOyokmf6Y%3D
+Scroll down and specify a Root password. Before you forget, note down the root password.
+For Region select us-central1.
+Click Create instance to create the instance. It will take a minute or so for your Cloud SQL instance to be provisioned.
+
+
+
+
+
+
+Task 2. Create tables
+While you wait for your instance to be created, read the below mySQL script and answer the questions that follow.
+
+CREATE DATABASE IF NOT EXISTS recommendation_spark;
+USE recommendation_spark;
+DROP TABLE IF EXISTS Recommendation;
+DROP TABLE IF EXISTS Rating;
+DROP TABLE IF EXISTS Accommodation;
+CREATE TABLE IF NOT EXISTS Accommodation
+(
+  id varchar(255),
+  title varchar(255),
+  location varchar(255),
+  price int,
+  rooms int,
+  rating float,
+  type varchar(255),
+  PRIMARY KEY (ID)
+);
+CREATE TABLE  IF NOT EXISTS Rating
+(
+  userId varchar(255),
+  accoId varchar(255),
+  rating int,
+  PRIMARY KEY(accoId, userId),
+  FOREIGN KEY (accoId)
+    REFERENCES Accommodation(id)
+);
+CREATE TABLE  IF NOT EXISTS Recommendation
+(
+  userId varchar(255),
+  accoId varchar(255),
+  prediction float,
+  PRIMARY KEY(userId, accoId),
+  FOREIGN KEY (accoId)
+    REFERENCES Accommodation(id)
+);
+SHOW DATABASES;
+
+
+
+How many tables will this script create?
+3
+When a user rates a house (giving it four stars for example), an entry is added to the _______ table.
+Rating
+General information about houses, such as the number of rooms they have and their average rating is stored in the _________ table.
+Accommodation
+The job of the recommendation engine is to fill out the ___________ table for each user and house: this is the predicted rating of that house by that user.
+Recommendation
+
+
+In Cloud SQL, click rentals to view instance information.
+
+
+
+Connect to the database
+Find the Connect to this instance box on the page and click on Open Cloud Shell.
+Note: You could also connect to your instance from a dedicated Cloud Compute Engine VM but for now you'll have Cloud Shell create a micro-VM for you and operate from there.
+If required, click Continue. Wait for Cloud Shell to load.
+
+Once Cloud Shell loads, you will see the below command already typed:
+gcloud sql connect rentals --user=root --quiet
+Press ENTER.
+
+Wait for your IP Address to be whitelisted.
+  Allowlisting your IP for incoming connection for 5 minutes...⠹
+
+When prompted, enter your password and press ENTER (note: you will not see your password typed in or even ****).
+You can now run commands against your database!
+https://cdn.qwiklabs.com/9w6LTrHn0vWVgSiXjs166kSpFDAKhCkpf4Tct48Yy8w%3D
+
+
+----------------
+student_00_f7b34d48888e@cloudshell:~ (qwiklabs-gcp-03-c12ed534980d)$ gcloud sql connect rentals --user=root --quiet
+Allowlisting your IP for incoming connection for 5 minutes...done.     
+Connecting to database with SQL user [root].Enter password:Welcome to the MySQL monitor.  Commands end with ; or \g.Your MySQL connection id is 56Server version: 8.0.26-google (Google)
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+----------------
+
+
+mysql> help
+For information about MySQL products and services, visit:
+   http://www.mysql.com/
+For developer information, including the MySQL Reference Manual, visit:
+   http://dev.mysql.com/
+To buy MySQL Enterprise support, training, or other products, visit:
+   https://shop.mysql.com/
+
+List of all MySQL commands:
+Note that all text commands must be first on line and end with ';'
+?         (\?) Synonym for `help'.
+clear     (\c) Clear the current input statement.
+connect   (\r) Reconnect to the server. Optional arguments are db and host.
+delimiter (\d) Set statement delimiter.
+edit      (\e) Edit command with $EDITOR.
+ego       (\G) Send command to mysql server, display result vertically.
+exit      (\q) Exit mysql. Same as quit.
+go        (\g) Send command to mysql server.
+help      (\h) Display this help.
+nopager   (\n) Disable pager, print to stdout.
+notee     (\t) Don't write into outfile.
+pager     (\P) Set PAGER [to_pager]. Print the query results via PAGER.
+print     (\p) Print current command.
+prompt    (\R) Change your mysql prompt.
+quit      (\q) Quit mysql.
+rehash    (\#) Rebuild completion hash.
+source    (\.) Execute an SQL script file. Takes a file name as an argument.
+status    (\s) Get status information from the server.
+system    (\!) Execute a system shell command.
+tee       (\T) Set outfile [to_outfile]. Append everything into given outfile.
+use       (\u) Use another database. Takes database name as argument.
+charset   (\C) Switch to another charset. Might be needed for processing binlog with multi-byte charsets.
+warnings  (\W) Show warnings after every statement.
+nowarning (\w) Don't show warnings after every statement.
+resetconnection(\x) Clean session context.
+query_attributes Sets string parameters (name1 value1 name2 value2 ...) for the next query to pick up.
+ssl_session_data_print Serializes the current SSL session data to stdout or file
+
+For server side help, type 'help contents'
+
+
+
+
+mysql> help contents
+You asked for help about help category: "Contents"
+For more information, type 'help <item>', where <item> is one of the following
+categories:
+   Account Management
+   Administration
+   Components
+   Compound Statements
+   Contents
+   Data Definition
+   Data Manipulation
+   Data Types
+   Functions
+   Geographic Features
+   Help Metadata
+   Language Structure
+   Loadable Functions
+   Plugins
+   Prepared Statements
+   Replication Statements
+   Storage Engines
+   Table Maintenance
+   Transactions
+   Utility
+
+
+
+
+
+
+student_00_f7b34d48888e@cloudshell:~ (qwiklabs-gcp-03-c12ed534980d)$ cloudshell aliases
+alias edit="cloudshell edit-files";
+alias dl="cloudshell download-files";
+alias teachme="cloudshell launch-tutorial";
+alias dt="cloudshell launch-tutorial -d";
+
+
+
+
+
+Run the following command:
+  SHOW DATABASES;
+  
+You should see the default system databases:
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+
+Note: You must always end your mySQL commands with a semi-colon ;
+
+
+
+
+Copy and paste the below SQL statement you analyzed earlier into the command line.
+CREATE DATABASE IF NOT EXISTS recommendation_spark;
+USE recommendation_spark;
+DROP TABLE IF EXISTS Recommendation;
+DROP TABLE IF EXISTS Rating;
+DROP TABLE IF EXISTS Accommodation;
+CREATE TABLE IF NOT EXISTS Accommodation
+(
+  id varchar(255),
+  title varchar(255),
+  location varchar(255),
+  price int,
+  rooms int,
+  rating float,
+  type varchar(255),
+  PRIMARY KEY (ID)
+);
+CREATE TABLE  IF NOT EXISTS Rating
+(
+  userId varchar(255),
+  accoId varchar(255),
+  rating int,
+  PRIMARY KEY(accoId, userId),
+  FOREIGN KEY (accoId)
+    REFERENCES Accommodation(id)
+);
+CREATE TABLE  IF NOT EXISTS Recommendation
+(
+  userId varchar(255),
+  accoId varchar(255),
+  prediction float,
+  PRIMARY KEY(userId, accoId),
+  FOREIGN KEY (accoId)
+    REFERENCES Accommodation(id)
+);
+SHOW DATABASES;
+
+
+
+
+Press ENTER.
+Confirm that you now see recommendation_spark as a database:
++----------------------+
+| Database             |
++----------------------+
+| information_schema   |
+| mysql                |
+| performance_schema   |
+| recommendation_spark |
+| sys                  |
++----------------------+
+
+
+Run the following command to show the tables:
+USE recommendation_spark;
+SHOW TABLES;
+
+Press ENTER.
+Confirm that you see the three tables:
++--------------------------------+
+| Tables_in_recommendation_spark |
++--------------------------------+
+| Accommodation                  |
+| Rating                         |
+| Recommendation                 |
++--------------------------------+
+
+
+Run the following query:
+mysql> SELECT * FROM Accommodation;
+Empty set (0.20 sec)
+
+How many rows are in the Accommodation table?
+Empty set (0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Stage data in Cloud Storage
+Option 1: Use the command line
+Open a new Cloud Shell tab (do not use your existing mySQL Cloud Shell tab).
+
+Copy and paste the following commands:
+echo "Creating bucket: gs://$DEVSHELL_PROJECT_ID"
+gsutil mb gs://$DEVSHELL_PROJECT_ID
+
+echo "Copying data to our storage from public dataset"
+gsutil cp gs://cloud-training/bdml/v2.0/data/accommodation.csv gs://$DEVSHELL_PROJECT_ID
+gsutil cp gs://cloud-training/bdml/v2.0/data/rating.csv gs://$DEVSHELL_PROJECT_ID
+
+echo "Show the files in our bucket"
+gsutil ls gs://$DEVSHELL_PROJECT_ID
+
+echo "View some sample data"
+gsutil cat gs://$DEVSHELL_PROJECT_ID/accommodation.csv
+
+Press ENTER.
+
+student_00_f7b34d48888e@cloudshell:~ (qwiklabs-gcp-03-c12ed534980d)$DEVSHELL_PROJECT_ID
+qwiklabs-gcp-03-c12ed534980d
+
+
+
+Creating bucket: gs://qwiklabs-gcp-03-c12ed534980d
+Creating gs://qwiklabs-gcp-03-c12ed534980d/...
+
+Copying data to our storage from public dataset
+Copying gs://cloud-training/bdml/v2.0/data/accommodation.csv [Content-Type=text/csv]...
+/ [1 files][  4.8 KiB/  4.8 KiB]
+Operation completed over 1 objects/4.8 KiB.
+
+Copying gs://cloud-training/bdml/v2.0/data/rating.csv [Content-Type=text/csv]...
+/ [1 files][  8.7 KiB/  8.7 KiB]
+Operation completed over 1 objects/8.7 KiB.
+
+
+Show the files in our bucket
+gs://qwiklabs-gcp-03-c12ed534980d/accommodation.csv
+gs://qwiklabs-gcp-03-c12ed534980d/rating.csv
+
+View some sample data
+1,Comfy Quiet Chalet,Vancouver,50,3,3.1,cottage
+2,Cozy Calm Hut,London,65,2,4.1,cottage
+3,Agreable Calm Place,London,65,4,4.8,house
+4,Colossal Quiet Chateau,Paris,3400,16,2.7,castle
+5,Homy Quiet Shack,Paris,50,1,1.1,cottage
+6,Pleasant Quiet Place,Dublin,35,5,4.3,house
+7,Vast Peaceful Fortress,Seattle,3200,24,1.9,castle
+8,Giant Quiet Fortress,San Francisco,3400,12,4.1,castle
+9,Giant Peaceful Palace,London,1500,20,3.5,castle
+10,Sizable Calm Country House,Auckland,650,9,4.9,mansion
+11,Homy Quiet Shanty,Melbourne,50,1,2.8,cottage
+12,Beautiful Peaceful Villa,Seattle,90,2,2.1,house
+13,Enormous Peaceful Fortress,Melbourne,3300,12,2.3,castle
+14,Colossal Peaceful Palace,Melbourne,1200,21,1.5,castle
+15,Vast Private Fort,London,1300,18,2.6,castle
+16,Large Calm House,Melbourne,45,3,4.1,house
+17,Large Calm Sately House,NYC,850,9,1.2,mansion
+18,Big Peaceful Hut,Melbourne,60,2,2.4,cottage
+19,Giant Quiet Castle,Paris,4500,18,1.6,castle
+20,Big Private Hall,Buenos Aires,650,12,1.2,mansion
+21,Big Peaceful Cabin,Seattle,80,2,4.9,cottage
+22,Pleasant Peaceful House,Auckland,50,5,3.5,house
+23,Homy Calm House,Paris,70,2,2.0,cottage
+24,Nice Private Cottage,San Francisco,40,2,1.1,cottage
+25,Nice Calm Chalet,Seattle,55,2,4.5,cottage
+26,Enormous Peaceful Palace,Paris,1300,18,1.1,castle
+27,Enormous Calm Castle,Berlin,1500,12,2.3,castle
+28,Beautiful Calm Villa,Tokyo,110,2,4.2,house
+29,Big Quiet Manor,San Francisco,650,12,4.3,mansion
+30,Large Peaceful House,Berlin,110,5,2.3,house
+31,Colossal Private Castle,Buenos Aires,1400,15,3.3,castle
+32,Immense Private Hall,Seattle,850,12,1.0,mansion
+33,Pleasant Calm Place,Tokyo,30,2,4.8,house
+34,Vast Private Fort,NYC,4400,21,1.7,castle
+35,Colossal Quiet Chateau,NYC,2300,14,4.6,castle
+36,Comfy Private Shanty,NYC,80,1,3.7,cottage
+37,Enormous Quiet Chateau,Berlin,2000,20,2.7,castle
+38,Big Private House,San Francisco,70,4,2.9,house
+39,Beautiful Calm Villa,Vancouver,50,3,3.5,house
+40,Colossal Private Castle,Seattle,2900,24,1.5,castle
+41,Big Calm Manor,Seattle,800,11,2.7,mansion
+42,Large Calm Residence,London,900,12,2.4,mansion
+43,Nice Private Hut,Melbourne,60,3,2.8,cottage
+44,Big Peaceful Chateau,Melbourne,3400,21,3.2,castle
+45,Vast Quiet Chateau,Tokyo,1100,19,2.3,castle
+46,Colossal Private Castle,San Francisco,1900,15,3.7,castle
+47,Sizable Calm Sately House,Seattle,900,10,1.5,mansion
+48,Big Calm Fort,Vancouver,4500,22,4.0,castle
+49,Big Private Villa,NYC,90,2,4.8,house
+50,Enormous Calm Fort,Seattle,2300,22,4.5,castle
+51,Nice Quiet Hut,Auckland,70,3,1.4,cottage
+52,Giant Private Palace,Melbourne,1800,23,2.7,castle
+53,Comfy Private Shanty,Buenos Aires,40,2,4.6,cottage
+54,Enormous Quiet Chateau,Melbourne,4400,20,1.7,castle
+55,Cozy Peaceful Hut,London,75,2,1.7,cottage
+56,Sizable Private Residence,London,800,11,3.5,mansion
+57,Immense Quiet Residence,Auckland,800,11,3.5,mansion
+58,Nice Calm Cottage,Berlin,40,3,3.9,cottage
+59,Large Peaceful Place,Tokyo,55,5,1.2,house
+60,Vast Peaceful Palace,Seattle,1600,19,1.1,castle
+61,Large Calm Place,NYC,60,2,1.3,house
+62,Comfy Calm Cabin,Buenos Aires,65,2,4.3,cottage
+63,Big Private Chateau,Buenos Aires,2400,23,4.5,castle
+64,Enormous Peaceful Fort,Berlin,3500,13,1.8,castle
+65,Comfy Private Chalet,NYC,45,2,1.0,cottage
+66,Beautiful Private Villa,London,80,2,2.4,house
+67,Giant Calm Chateau,Vancouver,2300,13,3.2,castle
+68,Giant Peaceful Fort,Paris,1800,21,1.1,castle
+69,Homy Quiet House,NYC,65,1,3.1,cottage
+70,Great Calm Sately House,Paris,1050,10,2.2,mansion
+71,Cozy Calm Hut,San Francisco,55,2,3.8,cottage
+72,Beautiful Calm Place,Paris,80,4,2.1,house
+73,Nice Peaceful Cabin,London,60,1,3.4,cottage
+74,Giant Calm Fort,Melbourne,2400,12,2.3,castle
+75,Large Private Place,Berlin,50,4,3.6,house
+76,Pleasant Calm Villa,Berlin,30,2,2.4,house
+77,Great Private Country House,Dublin,1150,10,2.4,mansion
+78,Giant Private Fortress,Tokyo,2100,17,2.5,castle
+79,Large Private Manor,Vancouver,1050,10,4.8,mansion
+80,Big Quiet Cabin,San Francisco,40,3,4.3,cottage
+81,Homy Quiet Shack,Seattle,70,3,2.2,cottage
+82,Cozy Peaceful Cabin,San Francisco,75,1,1.6,cottage
+83,Comfy Calm Shack,San Francisco,40,3,3.4,cottage
+84,Great Peaceful Sately House,Melbourne,700,8,3.2,mansion
+85,Nice Private Shack,Auckland,55,1,4.9,cottage
+86,Large Quiet House,London,100,4,4.0,house
+87,Immense Peaceful Hall,San Francisco,850,12,4.4,mansion
+88,Colossal Quiet Palace,Seattle,4100,16,3.6,castle
+89,Nice Private House,Seattle,45,2,3.2,cottage
+90,Big Quiet House,Seattle,35,5,3.2,house
+91,Large Peaceful Hall,Melbourne,650,10,1.9,mansion
+92,Cozy Quiet Bungalow,San Francisco,85,3,3.5,cottage
+93,Giant Quiet Chateau,Vancouver,1800,16,3.9,castle
+94,Giant Peaceful Castle,Auckland,2900,25,3.3,castle
+95,Great Calm Hall,San Francisco,800,11,3.8,mansion
+96,Immense Private Country House,Tokyo,800,9,3.8,mansion
+97,Cozy Quiet Chalet,Auckland,75,1,2.3,cottage
+98,Big Private Castle,Paris,2000,23,4.6,castle
+99,Pleasant Quiet Place,NYC,80,4,3.2,house
+
+
+
+
+
+
+
+
+Option 2: Use the Cloud Console UI
+Skip these steps if you have already loaded your data using the command line.
+Navigate to Storage and select Cloud Storage > Browser.
+Click Create Bucket (if one does not already exist).
+Specify your project name as the bucket name.
+Click Create.
+Download the below files locally and then upload them inside of your new bucket:
+https://storage.googleapis.com/cloud-training/bdml/v2.0/data/accommodation.csv
+https://storage.googleapis.com/cloud-training/bdml/v2.0/data/rating.csv
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Load data from Cloud Storage into Cloud SQL tables
+Navigate back to SQL.
+Click on rentals.
+
+Import accommodation data
+Click Import (top menu).
+Specify the following:
+Source: Click Browse > [Your-Bucket-Name] > accommodation.csv
+Click Select.
+Format of import: CSV
+Database: select recommendation_spark from the dropdown list
+Table: copy and paste: Accommodation
+Click Import.
+https://cdn.qwiklabs.com/3wQKVM1HtbxupJQkgHeOCMDdJ8vye5Bl6GRiZS4IKGY%3D
+You will be redirected back to the Overview page. Wait one minute for the data to load.
+
+
+Import user rating data
+Click Import (top menu).
+Specify the following:
+Source: Click Browse > [Your-Bucket-Name] > rating.csv
+Click Select.
+Format of import: CSV
+Database: select recommendation_spark from the dropdown list
+Table: copy and paste: Rating
+Click Import.
+You will be redirected back to the Overview page. Wait one minute for the data to load.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5. Explore Cloud SQL data
+If you closed your Cloud Shell connection to mySQL, open it again by finding Connect to this instance and clicking Open Cloud Shell.
+Press ENTER when prompted to log in.
+Provide your password and press ENTER.
+
+Query the ratings data:
+USE recommendation_spark;
+SELECT * FROM Rating
+LIMIT 15;
+
++--------+--------+--------+
+| userId | accoId | rating |
++--------+--------+--------+
+| 10     | 1      |      1 |
+| 13     | 1      |      1 |
+| 18     | 1      |      2 |
+| 12     | 10     |      3 |
+| 18     | 10     |      1 |
+| 21     | 10     |      2 |
+| 4      | 10     |      1 |
+| 1      | 11     |      1 |
+| 10     | 11     |      1 |
+| 11     | 11     |      1 |
+| 12     | 11     |      2 |
+| 13     | 11     |      3 |
+| 14     | 11     |      3 |
+| 15     | 11     |      1 |
+| 16     | 11     |      2 |
++--------+--------+--------+
+15 rows in set (0.19 sec)
+
+
+Use a SQL aggregation function to count the number of rows in the table.
+SELECT COUNT(*) AS num_ratings
+FROM Rating;
+
++-------------+
+| num_ratings |
++-------------+
+|        1186 |
++-------------+
+1 row in set (0.19 sec)
+
+
+
+How many ratings are in the table?
+1186
+
+
+
+What is the average review rating of accommodations?
+SELECT
+    COUNT(userId) AS num_ratings,
+    COUNT(DISTINCT userId) AS distinct_user_ratings,
+    MIN(rating) AS worst_rating,
+    MAX(rating) AS best_rating,
+    AVG(rating) AS avg_rating
+FROM Rating;
+
++-------------+-----------------------+--------------+-------------+------------+
+| num_ratings | distinct_user_ratings | worst_rating | best_rating | avg_rating |
++-------------+-----------------------+--------------+-------------+------------+
+|        1186 |                    25 |            1 |           5 |     2.4646 |
++-------------+-----------------------+--------------+-------------+------------+
+1 row in set (0.20 sec)
+
+What is the average rating across all reviews?
+2.46
+What does the 25 for distinct_user_ratings mean?
+There are 25 unique users who provided the ratings
+
+
+
+In machine learning, you will need a rich history of user preferences for the model to learn from. Run the below query to see which users have provided the most ratings.
+SELECT
+    userId,
+    COUNT(rating) AS num_ratings
+FROM Rating
+GROUP BY userId
+ORDER BY num_ratings DESC;
+
++--------+-------------+
+| userId | num_ratings |
++--------+-------------+
+| 16     |          75 |
+| 4      |          70 |
+| 7      |          69 |
+| 10     |          66 |
+| 23     |          66 |
+| 21     |          63 |
+| 8      |          58 |
+| 13     |          48 |
+| 19     |          48 |
+| 12     |          46 |
+| 1      |          46 |
+| 20     |          44 |
+| 2      |          43 |
+| 18     |          42 |
+| 17     |          42 |
+| 3      |          42 |
+| 6      |          42 |
+| 11     |          41 |
+| 24     |          39 |
+| 5      |          39 |
+| 9      |          39 |
+| 14     |          37 |
+| 15     |          37 |
+| 22     |          35 |
+| 0      |           9 |
++--------+-------------+
+25 rows in set (0.20 sec)
+
+
+How many reviews did the top user leave?
+75
+Exit the mysql prompt by typing exit.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 6. Launch Dataproc
+You use Dataproc to train the recommendations machine learning model based on users' previous ratings. You then apply that model to create a list of recommendations for every user in the database
+To launch Dataproc and configure it so that each of the machines in the cluster can access Cloud SQL:
+In the Cloud Console, on the Navigation menu (Navigation menu), click SQL and note the region of your Cloud SQL instance:
+https://cdn.qwiklabs.com/rruQxE8GWYDTbXn5pREQ02XbkgvaVI4j9%2FVjjQj7Suk%3D
+In the snapshot above, the region is us-central1 and zone is us-central1-c.
+
+
+
+In the Cloud Console, on the Navigation menu (Navigation menu), click Dataproc and click Enable API if prompted.
+Once enabled, click Create cluster and name your cluster rentals.
+Leave the Region as it is i.e. us-central1 and change the Zone to us-central1-c (in the same zone as your Cloud SQL instance). This will minimize network latency between the cluster and the database.
+Click on Configure nodes.
+For Master node, for Machine type, select n1-standard-2 (2 vCPUs, 7.5 GB memory).
+For Worker nodes, for Machine type, select n1-standard-2 (2 vCPUs, 7.5 GB memory).
+Leave all other values with their default and click Create. It will take 1-3 minutes to provision your cluster.
+
+Note the Name, Zone and Total worker nodes in your cluster.
+Zone                  us-central1-b	
+Total worker nodes    2
+
+
+
+Copy and paste the below bash script into your Cloud Shell (optionally change CLUSTER, ZONE, NWORKERS if necessary before running)
+echo "Authorizing Cloud Dataproc to connect with Cloud SQL"
+CLUSTER=rentals
+CLOUDSQL=rentals
+ZONE=us-central1-b
+NWORKERS=2
+machines="$CLUSTER-m"
+for w in `seq 0 $(($NWORKERS - 1))`; do
+   machines="$machines $CLUSTER-w-$w"
+done
+echo "Machines to authorize: $machines in $ZONE ... finding their IP addresses"
+ips=""
+for machine in $machines; do
+    IP_ADDRESS=$(gcloud compute instances describe $machine --zone=$ZONE --format='value(networkInterfaces.accessConfigs[].natIP)' | sed "s/\['//g" | sed "s/'\]//g" )/32
+    echo "IP address of $machine is $IP_ADDRESS"
+    if [ -z  $ips ]; then
+       ips=$IP_ADDRESS
+    else
+       ips="$ips,$IP_ADDRESS"
+    fi
+done
+echo "Authorizing [$ips] to access cloudsql=$CLOUDSQL"
+gcloud sql instances patch $CLOUDSQL --authorized-networks $ips
+
+
+
+
+
+Authorizing Cloud Dataproc to connect with Cloud SQL
+Machines to authorize: rentals-m rentals-w-0 rentals-w-1 in us-central1-b ... finding their IP addresses
+
+IP address of rentals-m is 35.223.176.108/32
+IP address of rentals-w-0 is 34.135.44.46/32
+IP address of rentals-w-1 is 146.148.85.122/32
+
+Authorizing [35.223.176.108/32,34.135.44.46/32,146.148.85.122/32] to access cloudsql=rentals
+When adding a new IP address to authorized networks, make sure to also include any IP
+addresses that have already been authorized. Otherwise, they will be overwritten and
+de-authorized.
+Do you want to continue (Y/n)?  Y
+The following message will be used for the patch API method.
+{"name": "rentals", "project": "qwiklabs-gcp-03-c12ed534980d", "settings": {"ipConfiguration": {"authorizedNetworks": [{"value": "35.223.176.108/32"}, {"value": "34.135.44.46/32"}, {"value": "146.148.85.122/32"}]}}}
+Patching Cloud SQL instance...done.     
+Updated [https://sqladmin.googleapis.com/sql/v1beta4/projects/qwiklabs-gcp-03-c12ed534980d/instances/rentals].
+
+
+
+
+
+
+
+
+
+
+
+Press ENTER. When prompted, type Y, then press ENTER again to continue.
+Wait for the patching to complete. You will see the following:
+Patching Cloud SQL instance...done.
+On the main Cloud SQL page, under Connect to this instance, copy your Public IP Address to your clipboard. (Alternatively, write it down because you're using it next.)
+https://cdn.qwiklabs.com/8h09Htw7yZBY%2BiNM24EvcaBcgLV07JqooTd9MXt1la4%3D
+34.133.38.120
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 7. Run the ML model
+Next, you create a trained model and apply it to all the users in the system. Your data science team has created a recommendation model using Apache Spark and is written in Python. Copy it over into your staging bucket.
+
+Copy over the model code by executing the below commands in Cloud Shell:
+gsutil cp gs://cloud-training/bdml/v2.0/model/train_and_apply.py train_and_apply.py
+cloudshell edit train_and_apply.py
+
+Copying gs://cloud-training/bdml/v2.0/model/train_and_apply.py...
+- [1 files][  3.0 KiB/  3.0 KiB]
+Operation completed over 1 objects/3.0 KiB.
+When prompted, select Open in New Window.
+Wait for the Editor UI to load.
+
+
+Open the train_and_apply.py file, find line 30: CLOUDSQL_INSTANCE_IP, and paste the Cloud SQL IP address you copied earlier.
+# MAKE EDITS HERE
+CLOUDSQL_INSTANCE_IP = '<paste-your-cloud-sql-ip-here>'   # <---- CHANGE (database server IP)
+CLOUDSQL_DB_NAME = 'recommendation_spark' # <--- leave as-is
+CLOUDSQL_USER = 'root'  # <--- leave as-is
+CLOUDSQL_PWD  = '<type-your-cloud-sql-password-here>'  # <---- CHANGE
+
+Find line 33: CLOUDSQL_PWD and type in your Cloud SQL password,
+The editor will autosave but to be sure, select File > Save.
+From the Cloud Shell ribbon, click on the Open Terminal icon and copy this file to your Cloud Storage bucket using this Cloud Shell command:
+gsutil cp train_and_apply.py gs://$DEVSHELL_PROJECT_ID
+
+Copying file://train_and_apply.py [Content-Type=text/x-python]...
+/ [1 files][  3.0 KiB/  3.0 KiB]
+Operation completed over 1 objects/3.0 KiB.
+
+
+
+
+
+
+------------------------
+train_and_apply.py
+
+#!/usr/bin/env python
+"""
+Copyright Google Inc. 2016
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+
+import os
+import sys
+import pickle
+import itertools
+from math import sqrt
+from operator import add
+from os.path import join, isfile, dirname
+from pyspark import SparkContext, SparkConf, SQLContext
+from pyspark.mllib.recommendation import ALS, MatrixFactorizationModel, Rating
+from pyspark.sql.types import StructType, StructField, StringType, FloatType
+
+# MAKE EDITS HERE
+CLOUDSQL_INSTANCE_IP = '34.133.38.120'   # <---- CHANGE (database server IP)
+CLOUDSQL_DB_NAME = 'recommendation_spark' # <--- leave as-is
+CLOUDSQL_USER = 'root'  # <--- leave as-is
+CLOUDSQL_PWD  = 'root'  # <---- CHANGE
+
+# DO NOT MAKE EDITS BELOW
+conf = SparkConf().setAppName("train_model")
+sc = SparkContext(conf=conf)
+sqlContext = SQLContext(sc)
+
+jdbcDriver = 'com.mysql.jdbc.Driver'
+jdbcUrl    = 'jdbc:mysql://%s:3306/%s?user=%s&password=%s' % (CLOUDSQL_INSTANCE_IP, CLOUDSQL_DB_NAME, CLOUDSQL_USER, CLOUDSQL_PWD)
+
+# checkpointing helps prevent stack overflow errors
+sc.setCheckpointDir('checkpoint/')
+
+# Read the ratings and accommodations data from Cloud SQL
+dfRates = sqlContext.read.format('jdbc').options(driver=jdbcDriver, url=jdbcUrl, dbtable='Rating', useSSL='false').load()
+dfAccos = sqlContext.read.format('jdbc').options(driver=jdbcDriver, url=jdbcUrl, dbtable='Accommodation', useSSL='false').load()
+print("read ...")
+
+# train the model
+model = ALS.train(dfRates.rdd, 20, 20) # you could tune these numbers, but these are reasonable choices
+print("trained ...")
+
+# use this model to predict what the user would rate accommodations that she has not rated
+allPredictions = None
+for USER_ID in range(0, 100):
+  dfUserRatings = dfRates.filter(dfRates.userId == USER_ID).rdd.map(lambda r: r.accoId).collect()
+  rddPotential  = dfAccos.rdd.filter(lambda x: x[0] not in dfUserRatings)
+  pairsPotential = rddPotential.map(lambda x: (USER_ID, x[0]))
+  predictions = model.predictAll(pairsPotential).map(lambda p: (str(p[0]), str(p[1]), float(p[2])))
+  predictions = predictions.takeOrdered(5, key=lambda x: -x[2]) # top 5
+  print("predicted for user={0}".format(USER_ID))
+  if (allPredictions == None):
+    allPredictions = predictions
+  else:
+    allPredictions.extend(predictions)
+
+# write them
+schema = StructType([StructField("userId", StringType(), True), StructField("accoId", StringType(), True), StructField("prediction", FloatType(), True)])
+dfToSave = sqlContext.createDataFrame(allPredictions, schema)
+dfToSave.write.jdbc(url=jdbcUrl, table='Recommendation', mode='overwrite')
+------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 8. Run your ML job on Dataproc
+In the Dataproc console, click rentals cluster.
+Click Submit job.
+For Job type, select PySpark and for Main python file, specify the location of the Python file you uploaded to your bucket. Your <bucket-name> is likely to be your Project ID, which you can find by clicking on the Project ID dropdown in the top navigation menu.
+https://cdn.qwiklabs.com/ZXUqBAvJllcO09HWGJTJeYw%2FgimAj%2B%2BoU%2FGwmaHJHU0%3D
+gs://<bucket-name>/train_and_apply.py
+gs://qwiklabs-gcp-03-c12ed534980d/train_and_apply.py
+
+
+For Max restarts per hour, enter 1.
+Click Submit.
+Select Navigation menu > Dataproc > Job tab to see the Job status.
+Note: It will take up to 5 minutes for the job to change from Running to Succeeded. You can continue to the next section on querying the results while the job runs. If the job Failed, please troubleshoot using the logs and fix the errors. You may need to re-upload the changed Python file to Cloud Storage and clone the failed job to resubmit.
+
+
+
+
+
+
+
+
+
+Task 9. Explore inserted rows with SQL
+In a new browser tab, open SQL (in the Databases section).
+Click rentals to view details related to your Cloud SQL instance.
+Under Connect to this instance section, click Open Cloud Shell. This will start a new Cloud Shell tab. In the Cloud Shell tab press ENTER.
+It will take a few minutes to allow your IP for the incoming connection.
+When prompted, type the root password you configured, then press ENTER.
+
+At the mysql prompt, type:
+USE recommendation_spark;
+SELECT COUNT(*) AS count FROM Recommendation;
++-------+
+| count |
++-------+
+|   125 |
++-------+
+1 row in set (0.19 sec)
+
+
+If you are getting an Empty Set (0) - wait for your Dataproc job to complete. If it's been more than 5 minutes, your job has likely failed and will require troubleshooting.
+Tip: You can use the up arrow in Cloud Shell to return your previous command (or query in this case)
+
+How many recommendations did the model provide?
+125
+
+
+Find the recommendations for a user:
+SELECT
+    r.userid,
+    r.accoid,
+    r.prediction,
+    a.title,
+    a.location,
+    a.price,
+    a.rooms,
+    a.rating,
+    a.type
+FROM Recommendation as r
+JOIN Accommodation as a
+ON r.accoid = a.id
+WHERE r.userid = 10;
+
+
+
+
+Your result should be similar to the below result:
++--------+--------+------------+-----------------------------+...
+| userid | accoid | prediction | title                       |...
++--------+--------+------------+-----------------------------+...
+| 10     | 41     |  1.7748766 | Big Calm Manor              |...
+| 10     | 21     |  1.7174504 | Big Peaceful Cabin          |...
+| 10     | 46     |  1.7159091 | Colossal Private Castle     |...
+| 10     | 31     |  1.5783813 | Colossal Private Castle     |...
+| 10     | 32     |  1.5584077 | Immense Private Hall        |...
++--------+--------+------------+-----------------------------+...
+
++--------+--------+------------+-------------------------+---------------+-------+-------+--------+---------+
+| userid | accoid | prediction | title                   | location      | price | rooms | rating | type    |
++--------+--------+------------+-------------------------+---------------+-------+-------+--------+---------+
+| 10     | 46     |  1.6309378 | Colossal Private Castle | San Francisco |  1900 |    15 |    3.7 | castle  |
+| 10     | 40     |   1.526078 | Colossal Private Castle | Seattle       |  2900 |    24 |    1.5 | castle  |
+| 10     | 41     |  1.4461036 | Big Calm Manor          | Seattle       |   800 |    11 |    2.7 | mansion |
+| 10     | 35     |  1.3633262 | Colossal Quiet Chateau  | NYC           |  2300 |    14 |    4.6 | castle  |
+| 10     | 31     |  1.3197463 | Colossal Private Castle | Buenos Aires  |  1400 |    15 |    3.3 | castle  |
++--------+--------+------------+-------------------------+---------------+-------+-------+--------+---------+
+5 rows in set (0.20 sec)
+
+
+
+These are the five accommodations that you would recommend. Note that the quality of the recommendations is not great because the dataset was so small (note that the predicted ratings are not very high). Still, this lab illustrates the process you'd go through to create product recommendations.
+
+
+
+
+
+
