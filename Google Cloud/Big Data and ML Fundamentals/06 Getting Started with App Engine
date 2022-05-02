@@ -1,0 +1,435 @@
+Overview
+Objectives
+Set up your lab environment
+Task 1: Initialize App Engine
+Task 2: Run Hello World application locally
+Task 3: Deploy and run Hello World on App Engine
+Task 4: Disable the application
+
+
+
+Overview
+In this lab, you create and deploy a simple App Engine application using a virtual environment in the Google Cloud Shell.
+
+Objectives
+In this lab, you learn how to perform the following tasks:
+Initialize App Engine.
+Preview an App Engine application running locally in Cloud Shell.
+Deploy an App Engine application, so that others can reach it.
+Disable an App Engine application, when you no longer want it to be visible.
+
+
+
+gcloud is the command-line tool for Google Cloud Platform. It comes pre-installed on Cloud Shell and supports tab-completion.
+gcloud auth list
+
+Output:
+Credentialed accounts:
+ - <myaccount>@<mydomain>.com (active)
+
+
+student_03_dd959d3010ee@cloudshell:~ (qwiklabs-gcp-04-92b5e3f97ab9)$ gcloud auth list
+Credentialed Accounts
+ACTIVE: *
+ACCOUNT: student-03-dd959d3010ee@qwiklabs.net
+To set the active account, run:
+    $ gcloud config set account `ACCOUNT`
+
+
+
+You can list the project ID with this command:
+gcloud config list project
+
+student_03_dd959d3010ee@cloudshell:~ (qwiklabs-gcp-04-92b5e3f97ab9)$ gcloud config list project
+[core]
+project = qwiklabs-gcp-04-92b5e3f97ab9
+Your active configuration is: [cloudshell-8113]
+
+
+https://cloud.google.com/sdk/gcloud
+
+
+
+
+
+
+
+
+
+
+
+Task 1: Initialize App Engine
+Initialize your App Engine app with your project and choose its region:
+gcloud app create --project=$DEVSHELL_PROJECT_ID
+
+When prompted, select the region where you want your App Engine application located.
+
+You are creating an app for project [qwiklabs-gcp-04-92b5e3f97ab9].
+WARNING: Creating an App Engine application for a project is irreversible and the region
+cannot be changed. More information about regions is at
+<https://cloud.google.com/appengine/docs/locations>.
+
+Please choose the region where you want your App Engine application located:
+
+ [1] asia-east1    (supports standard and flexible)
+ [2] asia-east2    (supports standard and flexible and search_api)
+ [3] asia-northeast1 (supports standard and flexible and search_api)
+ [4] asia-northeast2 (supports standard and flexible and search_api)
+ [5] asia-northeast3 (supports standard and flexible and search_api)
+ [6] asia-south1   (supports standard and flexible and search_api)
+ [7] asia-southeast1 (supports standard and flexible)
+ [8] asia-southeast2 (supports standard and flexible and search_api)
+ [9] australia-southeast1 (supports standard and flexible and search_api)
+ [10] europe-central2 (supports standard and flexible)
+ [11] europe-west   (supports standard and flexible and search_api)
+ [12] europe-west2  (supports standard and flexible and search_api)
+ [13] europe-west3  (supports standard and flexible and search_api)
+ [14] europe-west6  (supports standard and flexible and search_api)
+ [15] northamerica-northeast1 (supports standard and flexible and search_api)
+ [16] southamerica-east1 (supports standard and flexible and search_api)
+ [17] us-central    (supports standard and flexible and search_api)
+ [18] us-east1      (supports standard and flexible and search_api)
+ [19] us-east4      (supports standard and flexible and search_api)
+ [20] us-west1      (supports standard and flexible)
+ [21] us-west2      (supports standard and flexible and search_api)
+ [22] us-west3      (supports standard and flexible and search_api)
+ [23] us-west4      (supports standard and flexible and search_api)
+ [24] cancel
+Please enter your numeric choice:  17
+
+Creating App Engine application in project [qwiklabs-gcp-04-92b5e3f97ab9] and region [us-cent
+ral]....done.     
+Success! The app is now created. Please use `gcloud app deploy` to deploy your first app.
+
+
+
+
+
+Clone the source code repository for a sample application in the hello_world directory:
+git clone https://github.com/GoogleCloudPlatform/python-docs-samples
+
+student_03_dd959d3010ee@cloudshell:~ (qwiklabs-gcp-04-92b5e3f97ab9)$ git clone https://github.com/GoogleCloudPlatform/python-docs-samples
+Cloning into 'python-docs-samples'...
+remote: Enumerating objects: 64315, done.
+remote: Total 64315 (delta 0), reused 0 (delta 0), pack-reused 64315
+Receiving objects: 100% (64315/64315), 74.12 MiB | 12.96 MiB/s, done.
+Resolving deltas: 100% (36922/36922), done.
+
+
+
+Navigate to the source directory:
+cd python-docs-samples/appengine/standard_python3/hello_world
+
+student_03_dd959d3010ee@cloudshell:~/python-docs-samples/appengine/standard_python3/hello_world (qwiklabs-gcp-04-92b5e3f97ab9)$ pwd
+/home/student_03_dd959d3010ee/python-docs-samples/appengine/standard_python3/hello_world
+student_03_dd959d3010ee@cloudshell:~/python-docs-samples/appengine/standard_python3/hello_world (qwiklabs-gcp-04-92b5e3f97ab9)$ ls
+app.yaml  main.py  main_test.py  requirements-test.txt  requirements.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2: Run Hello World application locally
+In this task, you run the Hello World application in a local, virtual environment in Cloud Shell.
+Ensure that you are at the Cloud Shell command prompt.
+
+
+student_03_dd959d3010ee@cloudshell:~/python-docs-samples/appengine/standard_python3/hello_world (qwiklabs-gcp-04-92b5e3f97ab9)$ nano Dockerfile
+
+Create a Dockerfile with the following content.
+FROM python:3.7
+WORKDIR /app
+COPY . .
+RUN pip install gunicorn
+RUN pip install -r requirements.txt
+ENV PORT=8080
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app
+
+The Dockerfile will be used to create a local image .
+
+
+
+
+Build a container image to run a Python virtual environment.
+docker build -t test-python . 
+
+
+d (qwiklabs-gcp-04-92b5e3f97ab9)$ docker build -t test-python . 
+docker run --rm -p 8080:8080 test-python Sending build context to Docker daemon  9.216kB
+Step 1/7 : FROM python:3.7
+3.7: Pulling from library/python
+6aefca2dc61d: Pull complete
+967757d56527: Pull complete
+c357e2c68cb3: Pull complete
+c766e27afb21: Pull complete
+32a180f5cf85: Pull complete
+1535e3c1181a: Pull complete
+8ae21bbc5192: Pull complete
+7d9c83d514b0: Extracting 25.3M/38.6M
+52e9a986c056: Download complete
+
+
+
+
+
+
+
+docker run --rm -p 8080:8080 test-python Sending build context to Docker daemon  9.216kB
+Step 1/7 : FROM python:3.7
+3.7: Pulling from library/python
+6aefca2dc61d: Pull complete
+967757d56527: Pull complete
+c357e2c68cb3: Pull complete
+c766e27afb21: Pull complete
+32a180f5cf85: Pull complete
+1535e3c1181a: Pull complete
+8ae21bbc5192: Pull complete
+7d9c83d514b0: Pull complete
+52e9a986c056: Pull complete
+Digest: sha256:7160fc73878a5f035e932f0d88f6e606f593580c442270c30765c7768bc7bc3f
+Status: Downloaded newer image for python:3.7
+ ---> 7c891de3e220
+Step 2/7 : WORKDIR /app
+ ---> Running in 6b23cd8a48ca
+Removing intermediate container 6b23cd8a48ca
+ ---> ebbce31dc9d9
+Step 3/7 : COPY . .
+ ---> fcdc89b78305
+Step 4/7 : RUN pip install gunicorn
+ ---> Running in cec82507b7e7
+Collecting gunicorn
+  Downloading gunicorn-20.1.0-py3-none-any.whl (79 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 79.5/79.5 KB 6.9 MB/s eta 0:00:00
+Requirement already satisfied: setuptools>=3.0 in /usr/local/lib/python3.7/site-packages (from gunicorn) (57.5.0)
+Installing collected packages: gunicorn
+Successfully installed gunicorn-20.1.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+Removing intermediate container cec82507b7e7
+ ---> 6d09182e2def
+Step 5/7 : RUN pip install -r requirements.txt
+ ---> Running in cebbe89a1b7a
+Collecting Flask==2.1.0
+  Downloading Flask-2.1.0-py3-none-any.whl (95 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 95.2/95.2 KB 9.3 MB/s eta 0:00:00
+Collecting click>=8.0
+  Downloading click-8.1.3-py3-none-any.whl (96 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 96.6/96.6 KB 13.2 MB/s eta 0:00:00
+Collecting Werkzeug>=2.0
+  Downloading Werkzeug-2.1.2-py3-none-any.whl (224 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 224.9/224.9 KB 23.0 MB/s eta 0:00:00
+Collecting itsdangerous>=2.0
+  Downloading itsdangerous-2.1.2-py3-none-any.whl (15 kB)
+Collecting importlib-metadata
+  Downloading importlib_metadata-4.11.3-py3-none-any.whl (18 kB)
+Collecting Jinja2>=3.0
+  Downloading Jinja2-3.1.2-py3-none-any.whl (133 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 133.1/133.1 KB 16.4 MB/s eta 0:00:00
+Collecting MarkupSafe>=2.0
+  Downloading MarkupSafe-2.1.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (25 kB)
+Collecting zipp>=0.5
+  Downloading zipp-3.8.0-py3-none-any.whl (5.4 kB)
+Collecting typing-extensions>=3.6.4
+  Downloading typing_extensions-4.2.0-py3-none-any.whl (24 kB)
+Installing collected packages: zipp, Werkzeug, typing-extensions, MarkupSafe, itsdangerous, Jinja2, importlib-metadata, click, Flask
+Successfully installed Flask-2.1.0 Jinja2-3.1.2 MarkupSafe-2.1.1 Werkzeug-2.1.2 click-8.1.3 importlib-metadata-4.11.3 itsdangerous-2.1.2 typing-extensions-4.2.0 zipp-3.8.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+Removing intermediate container cebbe89a1b7a
+ ---> 2b5248fe8889
+Step 6/7 : ENV PORT=8080
+ ---> Running in ed0dde4b4cb6
+Removing intermediate container ed0dde4b4cb6
+ ---> 1a408ae9f874
+Step 7/7 : CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app
+ ---> Running in 70d9b08ca9b9
+Removing intermediate container 70d9b08ca9b9
+ ---> ace984705ca9
+Successfully built ace984705ca9
+Successfully tagged test-python:latest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Run the application:
+docker run --rm -p 8080:8080 test-python 
+
+student_03_dd959d3010ee@cloudshell:~/python-docs-samples/appengine/standard_python3/hello_world (qwiklabs-gcp-04-92b5e3f97ab9)$ docker run --rm -p 8080:8080 test-python 
+[2022-05-02 04:06:48 +0000] [1] [INFO] Starting gunicorn 20.1.0
+[2022-05-02 04:06:48 +0000] [1] [INFO] Listening at: http://0.0.0.0:8080 (1)
+[2022-05-02 04:06:48 +0000] [1] [INFO] Using worker: gthread
+[2022-05-02 04:06:48 +0000] [9] [INFO] Booting worker with pid: 9
+[2022-05-02 04:07:16 +0000] [1] [INFO] Handling signal: winch
+[2022-05-02 04:07:27 +0000] [1] [INFO] Handling signal: winch
+
+
+
+In Cloud Shell, click Web preview (Web Preview) > Preview on port 8080 to preview the application.
+To access the Web preview icon, you may need to collapse the Navigation menu.
+https://cdn.qwiklabs.com/vTRhzjVoW3LX%2BaFG6ox7ZExJHDQvTdMK8fAyRGBQCDQ%3D
+
+https://8080-1dc64f23-16bd-46fb-b3d4-828c118ef8d7.ql-asia-southeast1-mijh.cloudshell.dev/?authuser=0
+
+
+
+To end the test, return to Cloud Shell and press Ctrl+C to abort the deployed service.
+^C
+[2022-05-02 04:08:45 +0000] [1] [INFO] Handling signal: int
+[2022-05-02 04:08:45 +0000] [9] [INFO] Worker exiting (pid: 9)
+[2022-05-02 04:08:45 +0000] [1] [INFO] Shutting down: Master
+
+Using the Cloud Console, verify that the app is not deployed. In the Cloud Console, on the Navigation menu (Navigation menu), click App Engine > Dashboard.
+Notice that no resources are deployed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3: Deploy and run Hello World on App Engine
+To deploy your application to the App Engine Standard environment:
+Navigate to the source directory:
+cd ~/python-docs-samples/appengine/standard_python3/hello_world
+
+Deploy your Hello World application.
+gcloud app deploy
+
+
+
+student_04_4fdead29bbce@cloudshell:~/python-docs-samples/appengine/standard_python3/hello_world (qwiklabs-gcp-03-d8b8ed67a057)$ gcloud app deploy
+Services to deploy:
+
+descriptor:                  [/home/student_04_4fdead29bbce/python-docs-samples/appengine/standard_python3/hello_world/app.yaml]
+source:                      [/home/student_04_4fdead29bbce/python-docs-samples/appengine/standard_python3/hello_world]
+target project:              [qwiklabs-gcp-03-d8b8ed67a057]
+target service:              [default]
+target version:              [20220502t041806]
+target url:                  [https://qwiklabs-gcp-03-d8b8ed67a057.uc.r.appspot.com]
+target service account:      [App Engine default service account]
+
+
+Do you want to continue (Y/n)?  Y
+
+Beginning deployment of service [default]...
+Created .gcloudignore file. See `gcloud topic gcloudignore` for details.
+Uploading 7 files to Google Cloud Storage
+14%
+29%
+43%
+57%
+71%
+86%
+100%
+100%
+File upload done.
+Updating service [default]...working.  
+
+Updating service [default]...done.     
+Setting traffic split for service [default]...done.   
+Deployed service [default] to [https://qwiklabs-gcp-03-d8b8ed67a057.uc.r.appspot.com]
+
+You can stream logs from the command line by running:
+  $ gcloud app logs tail -s default
+
+To view your application in the web browser run:
+  $ gcloud app browse
+
+
+
+
+
+If prompted "Do you want to continue (Y/n)?", press Y and then Enter.
+This app deploy command uses the app.yaml file to identify project configuration.
+Note: If you get a Gaia propagation related error message, re-run the gcloud app deploy command.
+Launch your browser to view the app at http://YOUR_PROJECT_ID.appspot.com
+gcloud app browse
+
+Copy and paste the URL into a new browser window.
+https://cdn.qwiklabs.com/fnmJeOzuz%2BgxMdMg175OIbQRE84kwir5fKVcB1kXihg%3D
+https://qwiklabs-gcp-03-d8b8ed67a057.appspot.com/
+
+Congratulations! You created your first application using App Engine.
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4: Disable the application
+App Engine offers no option to Undeploy an application. After an application is deployed, it remains deployed, although you could instead replace the application with a simple page that says something like "not in service."
+However, you can disable the application, which causes it to no longer be accessible to users.
+In the Cloud Console, on the Navigation menu (Navigation menu), click App Engine > Settings.
+
+Click Disable application.
+
+Read the dialog message. Enter the App ID and click DISABLE.
+
+If you refresh the browser window you used to view to the application site, you'll get a 404 error.
+https://cdn.qwiklabs.com/jVzvehqMDLGdJxcGG6aHjrT1zG6SRd443bZo%2BTO383I%3D
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inspiration on how to create Dockerfile
+https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-docker/manage-windows-dockerfile
+
+
+
