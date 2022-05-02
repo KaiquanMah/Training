@@ -1,0 +1,489 @@
+Overview
+Set up your environments
+Task 1. Source a public Pub/Sub topic and create a BigQuery dataset
+Task 2. Create a Cloud Storage bucket
+Task 3. Set up a Dataflow Pipeline
+Task 4. Analyze the taxi data using BigQuery
+Task 5. Perform aggregations on the stream for reporting
+Task 6. Stop the Dataflow job
+Task 7. Create a real-time dashboard
+Task 8. Create a time series dashboard
+
+
+Overview
+In this lab, you own a fleet of New York City taxi cabs and are looking to monitor how well your business is doing in real-time. You will build a streaming data pipeline to capture taxi revenue, passenger count, ride status, and much more and visualize the results in a management dashboard.
+
+
+
+
+
+
+Task 1. Source a public Pub/Sub topic and create a BigQuery dataset
+Pub/Sub is an asynchronous global messaging service. By decoupling senders and receivers, it allows for secure and highly available communication between independently written applications. Pub/Sub delivers low-latency, durable messaging.
+In Pub/Sub, publisher applications and subscriber applications connect with one another through the use of a shared string called a topic. A publisher application creates and sends messages to a topic. Subscriber applications create a subscription to a topic to receive messages from it.
+Google maintains a few public Pub/Sub streaming data topics for labs like this one. We'll be using the NYC Taxi & Limousine Commission’s open dataset.
+https://data.cityofnewyork.us/
+BigQuery is a serverless data warehouse. Tables in BigQuery are organized into datasets. In this lab, messages published into Pub/Sub will be aggregated and stored in BigQuery.
+
+
+To create a new BigQuery dataset:
+Option 1: The command-line tool
+Open Cloud Shell (Cloud Shell icon) and run the below command to create the taxirides dataset.
+bq mk taxirides
+
+student_03_38c121b8fbe3@cloudshell:~ (qwiklabs-gcp-00-352901923d0e)$ bq mk taxirides
+Dataset 'qwiklabs-gcp-00-352901923d0e:taxirides' successfully created.
+
+
+
+Run this command to create the taxirides.realtime table (empty schema that you will stream into later).
+bq mk \
+--time_partitioning_field timestamp \
+--schema ride_id:string,point_idx:integer,latitude:float,longitude:float,\
+timestamp:timestamp,meter_reading:float,meter_increment:float,ride_status:string,\
+passenger_count:integer -t taxirides.realtime
+
+Table 'qwiklabs-gcp-00-352901923d0e:taxirides.realtime' successfully created.
+
+
+
+
+Option 2: The BigQuery Console UI
+Note: Skip these steps if you created the tables using the command line.
+In the Google Cloud Console, select Navigation menu > Analytics > BigQuery:
+The Welcome to BigQuery in the Cloud Console message box opens. This message box provides a link to the quickstart guide and lists UI updates.
+Click on the View actions icon next to your Project ID and click Create dataset.
+Set the Dataset ID as taxirides, leave all the other fields the way they are, and click CREATE DATASET.
+If you look at the left-hand resources menu, you should see your newly created dataset.
+Click on the View actions icon next to the taxirides dataset and click Open.
+Click CREATE TABLE.
+Name the table realtime
+
+For the schema, click Edit as text and paste in the below:
+ride_id:string,
+point_idx:integer,
+latitude:float,
+longitude:float,
+timestamp:timestamp,
+meter_reading:float,
+meter_increment:float,
+ride_status:string,
+passenger_count:integer
+
+Under Partition and cluster settings, select the timestamp option for the Partitioning field.
+Click the CREATE TABLE button.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Create a Cloud Storage bucket
+Cloud Storage allows world-wide storage and retrieval of any amount of data at any time. You can use Cloud Storage for a range of scenarios including serving website content, storing data for archival and disaster recovery, or distributing large data objects to users via direct download. In this lab, you use Cloud Storage to provide working space for your Dataflow pipeline.
+In the Cloud Console, go to Navigation menu > Cloud Storage.
+Click CREATE BUCKET.
+For Name, paste in your GCP Project ID and then click Continue. (qwiklabs-gcp-00-352901923d0e)
+For Location type, click Multi-region if it is not already selected.
+Click CREATE.
+
+
+
+
+
+
+
+
+Task 3. Set up a Dataflow Pipeline
+Dataflow is a serverless way to carry out data analysis. In this lab, you set up a streaming data pipeline to read sensor data from Pub/Sub, compute the maximum temperature within a time window, and write this out to BigQuery.
+
+Restart the connection to the Dataflow API.
+In the Cloud Console, enter Dataflow API in the top search bar.
+Click on the result for Dataflow API.
+Click Manage.
+Click Disable API.
+If asked to confirm, click Disable.
+Click Enable.
+
+To create a new streaming pipeline:
+In the Cloud Console, go to Navigation menu > Dataflow.
+In the top menu bar, click CREATE JOB FROM TEMPLATE.
+Enter streaming-taxi-pipeline as the Job name for your Dataflow job.
+Under Dataflow template, select the Pub/Sub Topic to BigQuery template.
+Under Input Pub/Sub topic, enter projects/pubsub-public-data/topics/taxirides-realtime
+Under BigQuery output table, enter <myprojectid>:taxirides.realtime
+qwiklabs-gcp-00-352901923d0e:taxirides.realtime
+Note: There is a colon : between the project and dataset name and a dot . between the dataset and table name.
+
+Under Temporary location, enter gs://<mybucket>/tmp/.
+gs://qwiklabs-gcp-00-352901923d0e/tmp/
+
+Click Show Optional Parameters and input the following values as listed below:
+Max workers: 2
+Number of workers: 2
+Click the RUN JOB button.
+A new streaming job has started! You can now see a visual representation of the data pipeline.
+Note: If the dataflow job fails for the first time then re-create a new job template with new job name and run the job.
+
+
+
+
+
+
+
+
+Task 4. Analyze the taxi data using BigQuery
+To analyze the data as it is streaming:
+In the Cloud Console, select Navigation menu > BigQuery.
+Enter the following query in the query EDITOR and click RUN:
+SELECT * FROM taxirides.realtime LIMIT 10
+
+If no records are returned, wait another minute and re-run the above query (Dataflow takes 3-5 minutes to setup the stream). You will receive a similar output:
+https://cdn.qwiklabs.com/Xa5TnUWvlo2F%2FjUzZKsajghlWksIOQR9UF94DlMuSB0%3D
+
+{  "ride_id": "879d32aa-046a-4bc5-8530-fa8f56ea1cb3",  "point_idx": "274",  "latitude": "40.77409",  "longitude": "-73.982700000000008",  "timestamp": "2022-05-02T02:24:36.605Z",  "meter_reading": "10.248732",  "meter_increment": "0.03740413",  "ride_status": "enroute",  "passenger_count": "5"}
+{  "ride_id": "1c1e2a64-74d2-4b0f-8ccf-ad2f285a72d4",  "point_idx": "61",  "latitude": "40.72567",  "longitude": "-73.9867",  "timestamp": "2022-05-02T02:24:28.064Z",  "meter_reading": "3.0943635",  "meter_increment": "0.05072727",  "ride_status": "enroute",  "passenger_count": "2"}
+{  "ride_id": "9758de59-c5d6-462e-b53f-3bacb7b4af3d",  "point_idx": "42",  "latitude": "40.800990000000006",  "longitude": "-73.96804",  "timestamp": "2022-05-02T02:24:37.377Z",  "meter_reading": "2.550685",  "meter_increment": "0.060730595",  "ride_status": "enroute",  "passenger_count": "1"}
+{  "ride_id": "497204cb-9519-4266-bb09-61191fc4fe2f",  "point_idx": "2328",  "latitude": "40.73823",  "longitude": "-73.93828",  "timestamp": "2022-05-02T02:24:37.519Z",  "meter_reading": "54.205956",  "meter_increment": "0.023284346",  "ride_status": "enroute",  "passenger_count": "1"}
+{  "ride_id": "57e6f67a-000b-4ee6-9b0f-8294e475673c",  "point_idx": "505",  "latitude": "40.74407",  "longitude": "-73.948720000000009",  "timestamp": "2022-05-02T02:24:32.717Z",  "meter_reading": "15.048831",  "meter_increment": "0.029799666",  "ride_status": "enroute",  "passenger_count": "1"}
+{  "ride_id": "ca716ad3-f8f2-4af6-842a-d31ca5d52f4c",  "point_idx": "650",  "latitude": "40.75824",  "longitude": "-73.938330000000008",  "timestamp": "2022-05-02T02:24:29.680Z",  "meter_reading": "20.690716",  "meter_increment": "0.03183187",  "ride_status": "enroute",  "passenger_count": "1"}
+{  "ride_id": "a153b720-f123-461a-941f-ffea31c8a48e",  "point_idx": "209",  "latitude": "40.767120000000006",  "longitude": "-73.95046",  "timestamp": "2022-05-02T02:24:29.743Z",  "meter_reading": "11.546961",  "meter_increment": "0.055248618",  "ride_status": "enroute",  "passenger_count": "1"}
+{  "ride_id": "4b5a68fa-572d-439c-b9ed-63328473227d",  "point_idx": "266",  "latitude": "40.731570000000005",  "longitude": "-73.97381",  "timestamp": "2022-05-02T02:24:34.155Z",  "meter_reading": "7.9008336",  "meter_increment": "0.029702382",  "ride_status": "enroute",  "passenger_count": "1"}
+{  "ride_id": "f5c5ec15-5ce5-4ad3-8814-300b906d0cbf",  "point_idx": "954",  "latitude": "40.71647",  "longitude": "-73.936190000000011",  "timestamp": "2022-05-02T02:24:34.816Z",  "meter_reading": "20.449125",  "meter_increment": "0.021435142",  "ride_status": "enroute",  "passenger_count": "1"}
+{  "ride_id": "31881652-e5ed-4e2b-afad-db58ce8d9dda",  "point_idx": "114",  "latitude": "40.72941",  "longitude": "-74.01054",  "timestamp": "2022-05-02T02:24:30.527Z",  "meter_reading": "3.7580109",  "meter_increment": "0.03296501",  "ride_status": "enroute",  "passenger_count": "1"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5. Perform aggregations on the stream for reporting
+Copy and paste the below query and click RUN.
+WITH streaming_data AS (
+SELECT
+  timestamp,
+  TIMESTAMP_TRUNC(timestamp, HOUR, 'UTC') AS hour,
+  TIMESTAMP_TRUNC(timestamp, MINUTE, 'UTC') AS minute,
+  TIMESTAMP_TRUNC(timestamp, SECOND, 'UTC') AS second,
+  ride_id,
+  latitude,
+  longitude,
+  meter_reading,
+  ride_status,
+  passenger_count
+FROM
+  taxirides.realtime
+WHERE ride_status = 'dropoff'
+ORDER BY timestamp DESC
+LIMIT 1000
+)
+
+
+# calculate aggregations on stream for reporting:
+SELECT
+ ROW_NUMBER() OVER() AS dashboard_sort,
+ minute,
+ COUNT(DISTINCT ride_id) AS total_rides,
+ SUM(meter_reading) AS total_revenue,
+ SUM(passenger_count) AS total_passengers
+FROM streaming_data
+GROUP BY minute, timestamp
+
+Note: Ensure dataflow is registering data in BigQuery before proceeding to the next task.
+The result shows key metrics by the minute for every taxi drop-off.
+
+{  "dashboard_sort": "1",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "9",  "total_revenue": "103.2000007",  "total_passengers": "15"}
+{  "dashboard_sort": "2",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "7",  "total_revenue": "106.55",  "total_passengers": "10"}
+{  "dashboard_sort": "3",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "11",  "total_revenue": "147.21",  "total_passengers": "16"}
+{  "dashboard_sort": "4",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "13",  "total_revenue": "215.700001",  "total_passengers": "35"}
+{  "dashboard_sort": "5",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "9",  "total_revenue": "158.21",  "total_passengers": "11"}
+{  "dashboard_sort": "6",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "10",  "total_revenue": "116.66999999999999",  "total_passengers": "13"}
+{  "dashboard_sort": "7",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "9",  "total_revenue": "96.429999999999993",  "total_passengers": "15"}
+{  "dashboard_sort": "8",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "9",  "total_revenue": "110.7599993",  "total_passengers": "19"}
+{  "dashboard_sort": "9",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "5",  "total_revenue": "74.36999999999999",  "total_passengers": "5"}
+{  "dashboard_sort": "10",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "2",  "total_revenue": "22.599999",  "total_passengers": "2"}
+{  "dashboard_sort": "11",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "7",  "total_revenue": "113.900001",  "total_passengers": "9"}
+{  "dashboard_sort": "12",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "7",  "total_revenue": "94.6800001",  "total_passengers": "14"}
+{  "dashboard_sort": "13",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "11",  "total_revenue": "150.650001",  "total_passengers": "13"}
+{  "dashboard_sort": "14",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "7",  "total_revenue": "62.760000700000006",  "total_passengers": "10"}
+{  "dashboard_sort": "15",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "4",  "total_revenue": "62.699999000000005",  "total_passengers": "6"}
+{  "dashboard_sort": "16",  "minute": "2022-05-02T02:27:00Z",  "total_rides": "4",  "total_revenue": "57.709999999999994",  "total_passengers": "5"}
+{  "dashboard_sort": "17",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "8",  "total_revenue": "87.05",  "total_passengers": "8"}
+{  "dashboard_sort": "18",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "13",  "total_revenue": "147.9099997",  "total_passengers": "26"}
+{  "dashboard_sort": "19",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "84.400001",  "total_passengers": "10"}
+{  "dashboard_sort": "20",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "12",  "total_revenue": "135.77000370000002",  "total_passengers": "18"}
+{  "dashboard_sort": "21",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "10",  "total_revenue": "181.91",  "total_passengers": "12"}
+{  "dashboard_sort": "22",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "6",  "total_revenue": "64.46",  "total_passengers": "7"}
+{  "dashboard_sort": "23",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "5",  "total_revenue": "69.030001",  "total_passengers": "10"}
+{  "dashboard_sort": "24",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "10",  "total_revenue": "166.809999",  "total_passengers": "28"}
+{  "dashboard_sort": "25",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "111.54000099999999",  "total_passengers": "18"}
+{  "dashboard_sort": "26",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "5",  "total_revenue": "125.53",  "total_passengers": "6"}
+{  "dashboard_sort": "27",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "2",  "total_revenue": "27.4",  "total_passengers": "3"}
+{  "dashboard_sort": "28",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "10",  "total_revenue": "144.91000000000003",  "total_passengers": "18"}
+{  "dashboard_sort": "29",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "94.42",  "total_passengers": "9"}
+{  "dashboard_sort": "30",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "70.1",  "total_passengers": "14"}
+{  "dashboard_sort": "31",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "4",  "total_revenue": "52.210002",  "total_passengers": "4"}
+{  "dashboard_sort": "32",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "9",  "total_revenue": "111.960002",  "total_passengers": "22"}
+{  "dashboard_sort": "33",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "80.059997",  "total_passengers": "17"}
+{  "dashboard_sort": "34",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "9",  "total_revenue": "107.91",  "total_passengers": "17"}
+{  "dashboard_sort": "35",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "119.70000099999999",  "total_passengers": "12"}
+{  "dashboard_sort": "36",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "11",  "total_revenue": "133.75000169999998",  "total_passengers": "12"}
+{  "dashboard_sort": "37",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "5",  "total_revenue": "101.28999999999999",  "total_passengers": "11"}
+{  "dashboard_sort": "38",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "220.82000000000002",  "total_passengers": "8"}
+{  "dashboard_sort": "39",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "6",  "total_revenue": "66.3",  "total_passengers": "10"}
+{  "dashboard_sort": "40",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "6",  "total_revenue": "82.76",  "total_passengers": "19"}
+{  "dashboard_sort": "41",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "5",  "total_revenue": "126.10999999999999",  "total_passengers": "15"}
+{  "dashboard_sort": "42",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "4",  "total_revenue": "47.0",  "total_passengers": "6"}
+{  "dashboard_sort": "43",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "10",  "total_revenue": "124.56000099999999",  "total_passengers": "18"}
+{  "dashboard_sort": "44",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "9",  "total_revenue": "130.069999",  "total_passengers": "17"}
+{  "dashboard_sort": "45",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "5",  "total_revenue": "62.7000002",  "total_passengers": "5"}
+{  "dashboard_sort": "46",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "12",  "total_revenue": "136.79999999999998",  "total_passengers": "28"}
+{  "dashboard_sort": "47",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "18",  "total_revenue": "222.19999970000003",  "total_passengers": "23"}
+{  "dashboard_sort": "48",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "9",  "total_revenue": "209.70000199999998",  "total_passengers": "16"}
+{  "dashboard_sort": "49",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "8",  "total_revenue": "79.039998",  "total_passengers": "10"}
+{  "dashboard_sort": "50",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "8",  "total_revenue": "101.20999959999999",  "total_passengers": "13"}
+{  "dashboard_sort": "51",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "83.969999999999985",  "total_passengers": "11"}
+{  "dashboard_sort": "52",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "5",  "total_revenue": "58.550001999999992",  "total_passengers": "9"}
+{  "dashboard_sort": "53",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "10",  "total_revenue": "148.8799997",  "total_passengers": "18"}
+{  "dashboard_sort": "54",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "6",  "total_revenue": "86.910001",  "total_passengers": "15"}
+{  "dashboard_sort": "55",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "5",  "total_revenue": "76.8499994",  "total_passengers": "9"}
+{  "dashboard_sort": "56",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "5",  "total_revenue": "73.080002000000007",  "total_passengers": "10"}
+{  "dashboard_sort": "57",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "111.959998",  "total_passengers": "14"}
+{  "dashboard_sort": "58",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "4",  "total_revenue": "50.400000000000006",  "total_passengers": "4"}
+{  "dashboard_sort": "59",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "4",  "total_revenue": "56.200001",  "total_passengers": "9"}
+{  "dashboard_sort": "60",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "11",  "total_revenue": "219.85000010000005",  "total_passengers": "13"}
+{  "dashboard_sort": "61",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "5",  "total_revenue": "58.7999987",  "total_passengers": "7"}
+{  "dashboard_sort": "62",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "4",  "total_revenue": "88.72",  "total_passengers": "5"}
+{  "dashboard_sort": "63",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "10",  "total_revenue": "151.000001",  "total_passengers": "15"}
+{  "dashboard_sort": "64",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "6",  "total_revenue": "64.849999",  "total_passengers": "12"}
+{  "dashboard_sort": "65",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "82.510000699999992",  "total_passengers": "9"}
+{  "dashboard_sort": "66",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "7",  "total_revenue": "78.05",  "total_passengers": "13"}
+{  "dashboard_sort": "67",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "12",  "total_revenue": "184.6300004",  "total_passengers": "28"}
+{  "dashboard_sort": "68",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "8",  "total_revenue": "139.82000000000002",  "total_passengers": "10"}
+{  "dashboard_sort": "69",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "3",  "total_revenue": "28.630001",  "total_passengers": "3"}
+{  "dashboard_sort": "70",  "minute": "2022-05-02T02:26:00Z",  "total_rides": "11",  "total_revenue": "191.93",  "total_passengers": "17"}
+{  "dashboard_sort": "71",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "8",  "total_revenue": "101.95",  "total_passengers": "17"}
+{  "dashboard_sort": "72",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "9",  "total_revenue": "100.15000199999999",  "total_passengers": "21"}
+{  "dashboard_sort": "73",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "12",  "total_revenue": "276.800001",  "total_passengers": "18"}
+{  "dashboard_sort": "74",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "79.7999994",  "total_passengers": "10"}
+{  "dashboard_sort": "75",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "129.129999",  "total_passengers": "10"}
+{  "dashboard_sort": "76",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "118.67999900000002",  "total_passengers": "9"}
+{  "dashboard_sort": "77",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "62.21",  "total_passengers": "18"}
+{  "dashboard_sort": "78",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "142.449995",  "total_passengers": "19"}
+{  "dashboard_sort": "79",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "5",  "total_revenue": "50.650000000000006",  "total_passengers": "6"}
+{  "dashboard_sort": "80",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "12",  "total_revenue": "210.8900017",  "total_passengers": "18"}
+{  "dashboard_sort": "81",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "179.17000000000002",  "total_passengers": "6"}
+{  "dashboard_sort": "82",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "101.660001",  "total_passengers": "9"}
+{  "dashboard_sort": "83",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "72.45",  "total_passengers": "15"}
+{  "dashboard_sort": "84",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "5",  "total_revenue": "48.29",  "total_passengers": "11"}
+{  "dashboard_sort": "85",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "11",  "total_revenue": "169.65999799999997",  "total_passengers": "17"}
+{  "dashboard_sort": "86",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "4",  "total_revenue": "44.25",  "total_passengers": "5"}
+{  "dashboard_sort": "87",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "8",  "total_revenue": "84.850001999999989",  "total_passengers": "13"}
+{  "dashboard_sort": "88",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "109.43",  "total_passengers": "11"}
+{  "dashboard_sort": "89",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "5",  "total_revenue": "75.509999000000008",  "total_passengers": "7"}
+{  "dashboard_sort": "90",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "2",  "total_revenue": "22.3",  "total_passengers": "2"}
+{  "dashboard_sort": "91",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "13",  "total_revenue": "169.83000070000003",  "total_passengers": "17"}
+{  "dashboard_sort": "92",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "13",  "total_revenue": "200.82000100000002",  "total_passengers": "17"}
+{  "dashboard_sort": "93",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "8",  "total_revenue": "93.559999999999988",  "total_passengers": "12"}
+{  "dashboard_sort": "94",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "5",  "total_revenue": "47.05",  "total_passengers": "10"}
+{  "dashboard_sort": "95",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "8",  "total_revenue": "107.44999999999999",  "total_passengers": "13"}
+{  "dashboard_sort": "96",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "66.1",  "total_passengers": "10"}
+{  "dashboard_sort": "97",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "86.35",  "total_passengers": "11"}
+{  "dashboard_sort": "98",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "9",  "total_revenue": "100.99999869999999",  "total_passengers": "20"}
+{  "dashboard_sort": "99",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "132.46",  "total_passengers": "9"}
+{  "dashboard_sort": "100",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "118.45999599999999",  "total_passengers": "9"}
+{  "dashboard_sort": "101",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "109.45000099999999",  "total_passengers": "11"}
+{  "dashboard_sort": "102",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "84.350001",  "total_passengers": "24"}
+{  "dashboard_sort": "103",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "11",  "total_revenue": "112.849999",  "total_passengers": "24"}
+{  "dashboard_sort": "104",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "8",  "total_revenue": "160.900004",  "total_passengers": "11"}
+{  "dashboard_sort": "105",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "95.330000400000017",  "total_passengers": "16"}
+{  "dashboard_sort": "106",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "72.66",  "total_passengers": "10"}
+{  "dashboard_sort": "107",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "9",  "total_revenue": "162.0100007",  "total_passengers": "14"}
+{  "dashboard_sort": "108",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "13",  "total_revenue": "126.44999899999999",  "total_passengers": "24"}
+{  "dashboard_sort": "109",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "10",  "total_revenue": "168.69",  "total_passengers": "14"}
+{  "dashboard_sort": "110",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "10",  "total_revenue": "133.04999999999998",  "total_passengers": "17"}
+{  "dashboard_sort": "111",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "9",  "total_revenue": "186.70000000000002",  "total_passengers": "18"}
+{  "dashboard_sort": "112",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "135.47",  "total_passengers": "10"}
+{  "dashboard_sort": "113",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "8",  "total_revenue": "103.350001",  "total_passengers": "10"}
+{  "dashboard_sort": "114",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "8",  "total_revenue": "98.120000999999988",  "total_passengers": "12"}
+{  "dashboard_sort": "115",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "14",  "total_revenue": "157.32000100000002",  "total_passengers": "17"}
+{  "dashboard_sort": "116",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "78.320000499999992",  "total_passengers": "11"}
+{  "dashboard_sort": "117",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "5",  "total_revenue": "72.050001",  "total_passengers": "8"}
+{  "dashboard_sort": "118",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "5",  "total_revenue": "59.0500007",  "total_passengers": "14"}
+{  "dashboard_sort": "119",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "2",  "total_revenue": "23.6",  "total_passengers": "6"}
+{  "dashboard_sort": "120",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "11",  "total_revenue": "146.940002",  "total_passengers": "13"}
+{  "dashboard_sort": "121",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "3",  "total_revenue": "35.7499987",  "total_passengers": "6"}
+{  "dashboard_sort": "122",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "111.08999999999999",  "total_passengers": "7"}
+{  "dashboard_sort": "123",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "2",  "total_revenue": "32.8600007",  "total_passengers": "3"}
+{  "dashboard_sort": "124",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "5",  "total_revenue": "57.949998699999995",  "total_passengers": "8"}
+{  "dashboard_sort": "125",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "5",  "total_revenue": "49.689998",  "total_passengers": "6"}
+{  "dashboard_sort": "126",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "9",  "total_revenue": "152.16000000000003",  "total_passengers": "13"}
+{  "dashboard_sort": "127",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "82.110001",  "total_passengers": "7"}
+{  "dashboard_sort": "128",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "7",  "total_revenue": "120.93",  "total_passengers": "21"}
+{  "dashboard_sort": "129",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "88.179999999999993",  "total_passengers": "10"}
+{  "dashboard_sort": "130",  "minute": "2022-05-02T02:25:00Z",  "total_rides": "6",  "total_revenue": "89.83",  "total_passengers": "6"}
+{  "dashboard_sort": "131",  "minute": "2022-05-02T02:24:00Z",  "total_rides": "9",  "total_revenue": "130.500001",  "total_passengers": "26"}
+{  "dashboard_sort": "132",  "minute": "2022-05-02T02:24:00Z",  "total_rides": "5",  "total_revenue": "74.7",  "total_passengers": "11"}
+{  "dashboard_sort": "133",  "minute": "2022-05-02T02:24:00Z",  "total_rides": "4",  "total_revenue": "42.499999700000004",  "total_passengers": "5"}
+{  "dashboard_sort": "134",  "minute": "2022-05-02T02:24:00Z",  "total_rides": "10",  "total_revenue": "163.82000060000001",  "total_passengers": "15"}
+{  "dashboard_sort": "135",  "minute": "2022-05-02T02:24:00Z",  "total_rides": "1",  "total_revenue": "39.15",  "total_passengers": "1"}
+
+
+
+
+SELECT *
+FROM streaming_data
+
+{  "timestamp": "2022-05-02T02:33:46.555Z",  "hour": "2022-05-02T02:00:00Z",  "minute": "2022-05-02T02:33:00Z",  "second": "2022-05-02T02:33:46Z",  "ride_id": "c9e717b2-94b1-4e3a-a8b9-466b2bd54887",  "latitude": "40.77707",  "longitude": "-73.94378",  "meter_reading": "18.8",  "ride_status": "dropoff",  "passenger_count": "1"}
+{  "timestamp": "2022-05-02T02:33:46.555Z",  "hour": "2022-05-02T02:00:00Z",  "minute": "2022-05-02T02:33:00Z",  "second": "2022-05-02T02:33:46Z",  "ride_id": "c06adf24-8ec2-48b0-a7e8-0db588bfb6aa",  "latitude": "40.716890000000006",  "longitude": "-73.98968",  "meter_reading": "20.3",  "ride_status": "dropoff",  "passenger_count": "1"}
+{  "timestamp": "2022-05-02T02:33:46.555Z",  "hour": "2022-05-02T02:00:00Z",  "minute": "2022-05-02T02:33:00Z",  "second": "2022-05-02T02:33:46Z",  "ride_id": "c6a2d3fc-084e-4994-8a43-ba830ad67c97",  "latitude": "40.76028",  "longitude": "-73.973890000000011",  "meter_reading": "13.4",  "ride_status": "dropoff",  "passenger_count": "2"}
+
+https://cloud.google.com/bigquery/docs/reference/standard-sql/timestamp_functions
+TIMESTAMP_TRUNC
+# HOUR => data type still timestamp, but round down to the nearest hour
+# MINUTE => data type still timestamp, but round down to the nearest minute
+# SECOND => data type still timestamp, but round down to the nearest second
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 6. Stop the Dataflow job
+Navigate back to Dataflow.
+Click the streaming-taxi-pipeline or the new job name.
+Click STOP and select Cancel > STOP JOB.
+This will free up resources for your project.
+
+
+
+
+
+Task 7. Create a real-time dashboard
+Open this Google Data Studio link in a new incognito browser tab.
+
+On the Reports page, in the Start with a Template section, click the [+] Blank Report template.
+
+If prompted with the Welcome to Google Studio window, click Get started.
+
+Check the checkbox to acknowledge the Google Data Studio Additional Terms, and click Continue.
+
+Select No to all the questions, then click Continue.
+
+Switch back to the BigQuery Console.
+
+Click EXPLORE DATA > Explore with Data Studio in BigQuery page.
+
+Click GET STARTED, then click AUTHORIZE.
+
+Specify the below settings:
+Chart type: Combo chart
+Date range Dimension: dashboard_sort
+Dimension: dashboard_sort
+Drill Down: dashboard_sort (Make sure that Drill down option is turned ON)
+Metric: SUM() total_rides, SUM() total_passengers, SUM() total_revenue
+Sort: dashboard_sort, Ascending (latest rides first)
+
+Your chart should look similar to this:
+https://cdn.qwiklabs.com/5Dg6ORZo6JY2wq%2BTsujwhkVVxJHNS3HnVPVlz6YPWn8%3D
+
+Note: Visualizing data at a minute-level granularity is currently not supported in Data Studio as a timestamp. This is why we created our own dashboard_sort dimension.
+When you're happy with your dashboard, click Save to save this data source.
+Whenever anyone visits your dashboard, it will be up-to-date with the latest transactions. You can try it yourself by clicking on the Refresh button near the Save button.
+
+
+
+
+
+NOTE:
+NOT SURE WHAT 'dashboard_sort' CORRESPONDS TO
+METRICS DONT WORK AS SUM()s => JUST click on total_rides, total_passengers, total_revenue
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 8. Create a time series dashboard
+Click this Google Data Studio link to open Data Studio in a new browser tab.
+
+On the Reports page, in the Start with a Template section, click the [+] Blank Report template.
+
+A new, empty report opens with Add data to report.
+
+From the list of Google Connectors, select the BigQuery tile.
+
+Under CUSTOM QUERY, click qwiklabs-gcp-xxxxxxx > Enter Custom Query, add the following query.
+SELECT
+  *
+FROM
+  taxirides.realtime
+WHERE
+  ride_status='dropoff'
+  
+Click Add > ADD TO REPORT.
+
+
+  
+  
+  
+  
+Create a time series chart
+In the Data panel, scroll down to the bottom right and click ADD A FIELD. Click All Fields on the left corner.
+
+Change the field timestamp type to Date & Time > Date Hour Minute (YYYYMMDDhhmm).
+
+Click Continue and then click Done.
+
+Click Add a chart.
+
+Choose Time series chart.
+
+Position the chart in the bottom left corner - in the blank space.
+
+In the Data panel on the right, change the following:
+Dimension: timestamp
+Metric: meter_reading(SUM)
+
+Your time series chart should look similar to this:
+https://cdn.qwiklabs.com/vVTV%2FQiUABSyp7zlqUtBr%2Bs9fh%2BP%2B8kJF79iH48nJmI%3D
+
+
+Note: if Dimension is timestamp(Date), then click on calendar icon next to timestamp(Date), and select type to Date & Time > Date Hour Minute.
+
+
+
