@@ -1,0 +1,399 @@
+qwiklabs-gcp-01-637f588a5126
+
+Overview
+Set up your environments
+Task 1. Set up AutoML Vision
+Task 2. Upload training images to Cloud Storage
+Task 3. Create an AutoML Vision training dataset
+Task 4. Inspect the images
+Task 5. Train your model
+Task 6. Evaluate your model
+Task 7. Generate predictions
+
+
+Overview
+In this lab, you upload images to Cloud Storage and use them to train a custom model to recognize different types of clouds (cumulus, cumulonimbus, etc.).
+
+What you learn
+In this lab, you learn how to perform the following tasks:
+Upload a labeled dataset to Cloud Storage and connect it to AutoML Vision with a CSV label file
+Train a model with AutoML Vision and evaluate its accuracy
+Generate predictions on your trained model
+
+
+
+
+
+
+
+
+
+Task 1. Set up AutoML Vision
+AutoML Vision provides an interface for all the steps in training an image classification model and generating predictions on it. Start by enabling the AutoML API.
+Open the navigation menu and and select APIs & Services > Library. In the search bar type in "Cloud AutoML API". Click on the Cloud AutoML API result and then click Enable.
+This may take a minute. You should now be on the following page (ensure that the Activation Status is Enabled):
+https://cdn.qwiklabs.com/cdcetSmvdSFhzDjgTQOqd0%2F5SXolCUUIxSnos7RI%2B6U%3D
+
+
+Create a Cloud Storage bucket for your training data
+On the GCP Console title bar, click Activate Cloud Shell (Cloud_shell.png).
+When prompted, click Continue.
+In Cloud Shell, paste the below command to make a new bucket to hold your training. We use the magic variable $DEVSHELL_PROJECT_ID, which knows your current project, and simply add -vcm to the end.
+
+Run the below command in Cloud Shell:
+gsutil mb -p $DEVSHELL_PROJECT_ID \
+    -c regional    \
+    -l us-central1 \
+    gs://$DEVSHELL_PROJECT_ID-vcm/
+
+Leave your Cloud Shell window open for additional steps to follow.
+Open a new browser tab and navigate to the AutoML UI.
+You will be taken to the AutoML Vision datasets page once the APIs are verified.
+https://cdn.qwiklabs.com/98VPTpEJjEeJ20gdGWgx1sAolKY8Lz1X7Mz6jsiimko%3D
+
+Creating gs://qwiklabs-gcp-01-637f588a5126-vcm/...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Upload training images to Cloud Storage
+In order to train a model to classify images of clouds, you need to provide labeled training data so the model can develop an understanding of the image features associated with different types of clouds. In this example, your model will learn to classify three different types of clouds: cirrus, cumulus, and cumulonimbus. To use AutoML Vision you need to put your training images in Cloud Storage.
+In the Cloud Console, open the Navigation menu and select Cloud Storage > Browser:
+https://cdn.qwiklabs.com/mH1CZDUbdYIAYXT9WA9zbja0VKVC2fpZOAVOjsryBbM%3D
+
+Once there, you should see the bucket from the last step.
+The training images are publicly available in a Cloud Storage bucket. Use the gsutil command-line utility for Cloud Storage to copy the training images into your bucket:
+gsutil -m cp -r gs://cloud-training/automl-lab-clouds/* gs://$DEVSHELL_PROJECT_ID-vcm/
+
+
+Copying gs://cloud-training/automl-lab-clouds/cirrus/14.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cirrus/12.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cirrus/10.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cirrus/1.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/data.csv [Content-Type=text/csv]...
+Copying gs://cloud-training/automl-lab-clouds/cirrus/13.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cumulonimbus/1.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cumulonimbus/10.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cumulonimbus/11.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cumulus/1.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cumulus/10.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cumulus/12.jpg [Content-Type=image/jpeg]...
+Copying gs://cloud-training/automl-lab-clouds/cumulus/11.jpg [Content-Type=image/jpeg]...
+...
+
+
+Once copying is complete you can view the CSV file and three types of clouds you have images for:
+gsutil ls gs://$DEVSHELL_PROJECT_ID-vcm/
+
+student_00_f7b34d48888e@cloudshell:~ (qwiklabs-gcp-01-637f588a5126)$ gsutil ls gs://$DEVSHELL_PROJECT_ID-vcm/
+gs://qwiklabs-gcp-01-637f588a5126-vcm/data.csv
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/
+
+
+Which types of clouds do you have training data (images) for?
+Cumulus
+Cirrus
+Cumulonimbus
+
+
+
+
+Optional: View the images using the Cloud Storage Console UI
+When the images finish copying, click the Refresh button at the top of the Cloud Storage browser. Then click on your bucket name. You should see a data.csv file and 3 folders of photos for each of the 3 different cloud types to be classified:
+https://cdn.qwiklabs.com/wU8QZXiMok1VCdcdrmBVdzOI4B83kQOf%2FDwhy7BwXyE%3D
+If you click on the individual image files in each folder, and then click once more when you see the URL, you can see the photos you'll be using to train your model for each type of cloud.
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Create an AutoML Vision training dataset
+Now that your training data is in Cloud Storage, you need a way for AutoML Vision to access it. You'll create a CSV file where each row contains a URL to a training image and the associated label for that image. This CSV file has been created for you; you just need to update it with your bucket name.
+
+Run the following commands which:
+Copy the template file to your Cloud Shell instance
+Update the CSV with the files in your project
+Upload this updated CSV file to your Cloud Storage bucket
+
+Show the bucket to confirm the data.csv file is present
+gsutil cp gs://cloud-training/automl-lab-clouds/data.csv .
+head --lines=10 data.csv
+sed -i -e "s/placeholder/$DEVSHELL_PROJECT_ID-vcm/g" ./data.csv
+head --lines=10 data.csv
+gsutil cp ./data.csv gs://$DEVSHELL_PROJECT_ID-vcm/
+gsutil ls gs://$DEVSHELL_PROJECT_ID-vcm/
+
+
+
+Copying gs://cloud-training/automl-lab-clouds/data.csv...
+- [1 files][  2.5 KiB/  2.5 KiB]
+Operation completed over 1 objects/2.5 KiB.
+gs://placeholder/cirrus/1.jpg,cirrus
+gs://placeholder/cirrus/10.jpg,cirrus
+gs://placeholder/cirrus/11.jpg,cirrus
+gs://placeholder/cirrus/12.jpg,cirrus
+gs://placeholder/cirrus/13.jpg,cirrus
+gs://placeholder/cirrus/14.jpg,cirrus
+gs://placeholder/cirrus/15.jpg,cirrus
+gs://placeholder/cirrus/16.jpg,cirrus
+gs://placeholder/cirrus/17.jpg,cirrus
+gs://placeholder/cirrus/18.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/1.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/10.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/11.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/12.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/13.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/14.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/15.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/16.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/17.jpg,cirrus
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/18.jpg,cirrus
+Copying file://./data.csv [Content-Type=text/csv]...
+- [1 files][  3.7 KiB/  3.7 KiB]
+Operation completed over 1 objects/3.7 KiB.
+gs://qwiklabs-gcp-01-637f588a5126-vcm/data.csv
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/
+
+
+
+
+
+
+
+https://storage.cloud.google.com/cloud-training/automl-lab-clouds/data.csv
+gs://placeholder/cirrus/1.jpg,cirrus
+...
+gs://placeholder/cumulonimbus/1.jpg,cumulonimbus
+...
+
+gs://placeholder/cumulus/9.jpg,cumulus
+
+
+
+copied data.csv
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/1.jpg,cirrus
+...
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/1.jpg,cumulonimbus
+...
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/9.jpg,cumulus
+
+
+
+
+
+
+
+
+
+View all the folders and files in your bucket you can add a wildcard to gsutil ls like so:
+gsutil ls gs://$DEVSHELL_PROJECT_ID-vcm/*
+
+gs://qwiklabs-gcp-01-637f588a5126-vcm/data.csv
+
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/:
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/1.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/10.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/11.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/12.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/13.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/14.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/15.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/16.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/17.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/18.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/19.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/2.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/20.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/3.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/4.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/5.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/6.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/7.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/8.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cirrus/9.jpg
+
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/:
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/1.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/10.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/11.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/12.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/13.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/14.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/15.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/16.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/17.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/18.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/19.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/2.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/20.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/3.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/4.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/5.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/6.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/7.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/8.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulonimbus/9.jpg
+
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/:
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/1.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/10.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/11.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/12.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/13.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/14.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/15.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/16.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/17.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/18.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/19.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/2.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/20.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/3.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/4.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/5.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/6.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/7.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/8.jpg
+gs://qwiklabs-gcp-01-637f588a5126-vcm/cumulus/9.jpg
+
+
+
+Highlight and copy the location of your data file to your clipboard which will look similar to: gs://qwiklabs-gcp-your-project-id-will-be-here-vcm/data.csv
+gs://qwiklabs-gcp-01-637f588a5126-vcm/data.csv
+Navigate back to the AutoML Vision datasets page.
+https://cdn.qwiklabs.com/98VPTpEJjEeJ20gdGWgx1sAolKY8Lz1X7Mz6jsiimko%3D
+
+At the top of the Cloud Console, click + New dataset.
+Type clouds for the dataset name.
+Leave Single-Label Classification checked.
+Click Create dataset to continue.
+https://cdn.qwiklabs.com/kcW88jGJf8MImoDhmT94CogyHkcWM9WC%2BFVx3%2F%2Bt4Cg%3D
+
+On the next screen you will choose the location of your training images (the ones you uploaded in the previous step).
+Choose Select a CSV file on Cloud Storage and add the file name to the URL for the file that is in your clipboard from the previous step. You may also use the browse function to find the csv file. Once you see the white in green checkbox you may select Continue to proceed.
+https://cdn.qwiklabs.com/kos32CKiB4D2YGyLvTlFy8AvENlU4f7fAHsd%2BegCkWY%3D
+
+Once the import has completed click the Images tab to see the images in your dataset.
+It will take 8 to 12 minutes while the image metadata is processed ("Running: Importing Images" will appear on the screen). Once complete, the images will appear by category.
+
+
+
+
+
+
+
+
+
+
+Task 4. Inspect the images
+Next, proceed with a brief examination of the images.
+https://cdn.qwiklabs.com/HQI8YiKTkZbC5AtkVWLK%2FlMIIGtGtn0lyWXC8CitmGc%3D
+
+Try filtering by different labels in the left menu (i.e. click cumulus) to review the training images:
+https://cdn.qwiklabs.com/JCLK1LJX2s8Ys6F1h%2BU8sk%2FfzbM7MHd6GqGvk3AWL9U%3D
+Note: If you were building a production model, you'd want at least 100 images per label to ensure high accuracy. This is just a demo so only 20 images of each type were used so the model could train quickly.
+If any images are labeled incorrectly you can click on them to switch the label or delete the image from your training set:
+https://cdn.qwiklabs.com/kHAeXRUT6rmAE9L40spHuXF65dCze2qExoLglLFGCpU%3D
+
+To see a summary of how many images you have for each label, click on Label stats. You should see the following pop-out box show up on the right side of your browser. Press Done after reviewing the list.
+https://cdn.qwiklabs.com/8vN19tDLY5XwIefGRRQcb9odx%2BCf6tlhyxbk%2Bn5uBmE%3D
+Note: If you are working with a dataset that isn't already labeled, AutoML Vision provides an in-house human labeling service.
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5. Train your model
+You're ready to start training your model! AutoML Vision handles this for you automatically, without requiring you to write any of the model code.
+To train your clouds model, go to the Train tab and click Start training.
+https://cdn.qwiklabs.com/i7vE%2FtFHV4FkAfcYCPGPMs45qJQuV87tkUJsPxFGaNc%3D
+
+Enter a name for your model, or use the default auto-generated name.
+Leave Cloud hosted selected and click Continue.
+https://cdn.qwiklabs.com/un1uIWJoWbt%2BkAK7oa9TMsuayRJgZdzXYJLf%2Bv%2FHXAE%3D
+
+For the next step, type the value "8" into the Set your budget * box and check Deploy model to 1 node after training. This process (auto-deploy) will make your model immediately available for predictions after testing is complete.
+Click Start training.
+https://cdn.qwiklabs.com/oXtpuux6dk8eTh6uFixd2XAlB15iDN8Suic7UV6uv%2BY%3D
+Note: Training this custom model can be expected to take over an hour to complete (55 to 90 minutes on average). The total training time includes node training time as well as infrastructure set up and tear down. To get full credit for the lab you do not need to wait for training to complete and can simply review at the below screenshots from Evaluation and Prediction.
+
+
+
+
+
+
+
+
+
+
+
+
+Task 6. Evaluate your model
+After training is complete, select the Evaluate tab. Here you'll see information about Precision and Recall of the model. It should resemble the following:
+https://cdn.qwiklabs.com/hSTvxQGNOHApKgRpoIOy0XB8CnkrRxANkhbxYeruSGM%3D
+
+You can also adjust the Confidence threshold slider to see its impact.
+Finally, scroll down to take a look at the Confusion matrix.
+https://cdn.qwiklabs.com/ykc%2B2wRfelH8KE2%2F1TyNIJDHz6DAq9SuBRqCT0XsDQA%3D
+This tab provides some common machine learning metrics to evaluate your model accuracy and see where you can improve your training data. Since the focus for this lab was not on accuracy, move on to the next section about predictions section. Feel free to browse the accuracy metrics on your own.
+
+
+
+
+
+
+
+
+
+
+
+
+Task 7. Generate predictions
+Now it's time for the most important part: generating predictions on your trained model using data it hasn't seen before.
+There are a few ways to generate predictions. In this lab you use the UI to upload images. You'll see how your model does classifying these two images (the first is a cirrus cloud, the second is a cumulonimbus).
+First, download these images to your local machine by right-clicking on each of them (Note: You may want to assign a simple name like 'Image1' and 'Image2' to assist with uploading later):
+https://cdn.qwiklabs.com/N2psyplM3kFK9NEjjpak3CPIhh8IurY7Tn9vqzi4r8M%3D
+https://cdn.qwiklabs.com/GZlBRmAKGzsDoT8yNRCh6VmxflxLEQEkiKPohYwja94%3D
+
+Navigate to the Test & Use tab in the AutoML UI:
+
+On this page you will see that the model you just trained and deployed is listed in the Model pick list.
+
+Click Upload images and upload the cloud sample images you just saved to your local disk (you can select both images at the same time).
+https://cdn.qwiklabs.com/Ir1KSf2Q7BRsmj6Hg4AcgyUE2PwNldl9HQ%2FStBqwJr4%3D
+
+When the prediction request completes you should see something like the following:
+https://cdn.qwiklabs.com/btq3FuO13W1gt3MdHgzlJO1mr11X5VzDQKj%2FdDosvoQ%3D
+https://cdn.qwiklabs.com/HH5%2FheO%2BD08L8SAdzpHSumH9yDdAeYAv9dMk%2FHu4EtA%3D
+
+
