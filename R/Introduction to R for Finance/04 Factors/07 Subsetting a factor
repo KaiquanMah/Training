@@ -1,0 +1,65 @@
+You can subset factors in a similar way that you subset vectors. As usual, [ ] is the key! However, R has some interesting behavior when you want to remove a factor level from your analysis. For example, what if you wanted to remove the AAA bond from your portfolio?
+
+credit_factor
+[1] AAA AA  A   BBB AA  BBB A  
+Levels: BBB < A < AA < AAA
+
+credit_factor[-1]
+[1] AA  A   BBB AA  BBB A  
+Levels: BBB < A < AA < AAA
+R removed the AAA bond at the first position, but left the AAA level behind! If you were to plot this, you would end up with the bar chart over to the right. A better plan would have been to tell R to drop the AAA level entirely. To do that, add drop = TRUE:
+
+
+
+credit_factor[-1, drop = TRUE]
+[1] AA  A   BBB AA  BBB A  
+Levels: BBB < A < AA
+That's what you wanted!
+
+
+
+Using the same data, remove the "A" bonds from positions 3 and 7 of credit_factor. For now, do not use drop = TRUE. Assign this to keep_level.
+Plot keep_level.
+Now, remove "A" from credit_factor again, but this time use drop = TRUE. Assign this to drop_level.
+Plot drop_level.
+
+
+
+
+>
+credit_factor
+[1] AAA AA  A   BBB AA  BBB A  
+Levels: BBB < A < AA < AAA
+
+
+
+# Remove the A bonds at positions 3 and 7. Don't drop the A level.
+keep_level <- credit_factor[-7]
+keep_level
+[1] AAA AA  A   BBB AA  BBB
+Levels: BBB < A < AA < AAA
+
+keep_level <- keep_level[-3]
+keep_level
+[1] AAA AA  BBB AA  BBB
+Levels: BBB < A < AA < AAA
+
+
+# Plot keep_level
+plot(keep_level)
+
+
+# Remove the A bonds at positions 3 and 7. Drop the A level.
+drop_level <- credit_factor[c(-3, -7), drop=TRUE]
+drop_level
+[1] AAA AA  BBB AA  BBB
+Levels: BBB < AA < AAA
+
+
+# Plot drop_level
+plot(drop_level)
+
+
+Great! The drop argument will help you get rid of those pesky factor levels that stick around.
+
+
