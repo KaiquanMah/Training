@@ -1,0 +1,81 @@
+Do you remember back in the data frame chapter when you used str() on your cash data frame? This was the output:
+
+str(cash)
+'data.frame':    3 obs. of  3 variables:
+ $ company  : Factor w/ 2 levels "A","B": 1 1 2
+ $ cash_flow: num  100 200 300
+ $ year     : num  1 3 2
+
+See how the company column has been converted to a factor? R's default behavior when creating data frames is to convert all characters into factors. This has caused countless novice R users a headache trying to figure out why their character columns are not working properly, but not you! You will be prepared!
+To turn off this behavior:
+cash <- data.frame(company, cash_flow, year, stringsAsFactors = FALSE)
+
+str(cash)
+'data.frame':    3 obs. of  3 variables:
+ $ company  : chr  "A" "A" "B"
+ $ cash_flow: num  100 200 300
+ $ year     : num  1 3 2
+
+
+
+
+Two variables, credit_rating and bond_owners have been defined for you. bond_owners is a character vector of the names of some of your friends.
+Create a data frame named bonds from credit_rating and bond_owners, in that order, and use stringsAsFactors = FALSE.
+Use str() to confirm that both columns are characters.
+bond_owners would not be a useful factor, but credit_rating could be! Create a new column in bonds called credit_factor using $ which is created from credit_rating as a correctly ordered factor.
+Use str() again to confirm that credit_factor is an ordered factor.
+
+
+
+
+# Variables
+credit_rating <- c("AAA", "A", "BB")
+bond_owners <- c("Dan", "Tom", "Joe")
+# Create the data frame of character vectors, bonds
+bonds <-data.frame(credit_rating, bond_owners)
+# Use str() on bonds
+str(bonds)
+'data.frame':	3 obs. of  2 variables:
+ $ credit_rating: Factor w/ 3 levels "A","AAA","BB": 2 1 3
+ $ bond_owners  : Factor w/ 3 levels "Dan","Joe","Tom": 1 3 2
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# Variables
+credit_rating <- c("AAA", "A", "BB")
+bond_owners <- c("Dan", "Tom", "Joe")
+
+# Create the data frame of character vectors, bonds
+bonds <-data.frame(credit_rating, 
+                   bond_owners, 
+                   stringsAsFactors = FALSE)
+                   
+# Use str() on bonds
+str(bonds)
+'data.frame':	3 obs. of  2 variables:
+ $ credit_rating: chr  "AAA" "A" "BB"
+ $ bond_owners  : chr  "Dan" "Tom" "Joe"
+ 
+ 
+ 
+# Create a factor column in bonds called credit_factor from credit_rating
+bonds$credit_factor <- factor(bonds$credit_rating, 
+                  ordered = TRUE, 
+                  levels = credit_rating)
+                  
+# Use str() on bonds again
+str(bonds)
+'data.frame':	3 obs. of  3 variables:
+ $ credit_rating: chr  "AAA" "A" "BB"
+ $ bond_owners  : chr  "Dan" "Tom" "Joe"
+ $ credit_factor: Ord.factor w/ 3 levels "AAA"<"A"<"BB": 1 2 3
+ 
+ 
+ 
