@@ -1,0 +1,69 @@
+A common data science problem is to split your data frame by a grouping, apply some transformation to each group, and then recombine those pieces back into one data frame. This is such a common class of problems in R that it has been given the name split-apply-combine. In Intermediate R for Finance, you will explore a number of these problems and functions that are useful when solving them, but, for now, let's do a simple example.
+
+Suppose, for the cash data frame, you are interested in doubling the cash_flow for company A, and tripling it for company B:
+
+grouping <- cash$company
+split_cash <- split(cash, grouping)
+
+# We can access each list element's cash_flow column by:
+split_cash$A$cash_flow
+[1] 1000 4000  550
+
+split_cash$A$cash_flow <- split_cash$A$cash_flow * 2
+split_cash$B$cash_flow <- split_cash$B$cash_flow * 3
+
+new_cash <- unsplit(split_cash, grouping)
+Take a look again at how you access the cash_flow column. The first $ is to access the A element of the split_cash list. The second $ is to access the cash_flow column of the data frame in A.
+
+
+
+
+The split_cash data frame is available for you. Also, the grouping that was used to split cash is available.
+Print split_cash to get a look at the list.
+Print the cash_flow column for company B in split_cash.
+Tragically, you have learned that company A went out of business. Set the cash_flow for company A to 0.
+Use grouping to unsplit() the split_cash data frame. Assign this to cash_no_A.
+Finally, print cash_no_A to see the modified data frame.
+
+
+
+
+# Print split_cash
+split_cash
+$A
+  company cash_flow year
+1       A      1000    1
+2       A      4000    3
+3       A       550    4
+
+$B
+  company cash_flow year
+4       B      1500    1
+5       B      1100    2
+6       B       750    4
+7       B      6000    5
+
+
+# Print the cash_flow column of B in split_cash
+split_cash$B$cash_flow
+[1] 1500 1100  750 6000
+
+
+# Set the cash_flow column of company A in split_cash to 0
+split_cash$A$cash_flow <- 0
+
+# Use the grouping to unsplit split_cash
+cash_no_A <- unsplit(split_cash, grouping)
+
+# Print cash_no_A
+cash_no_A
+  company cash_flow year
+1       A         0    1
+2       A         0    3
+3       A         0    4
+4       B      1500    1
+5       B      1100    2
+6       B       750    4
+7       B      6000    5
+
+
