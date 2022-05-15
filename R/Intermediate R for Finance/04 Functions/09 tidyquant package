@@ -1,0 +1,329 @@
+The tidyquant package is focused on retrieving, manipulating, and scaling financial data analysis in the easiest way possible. To get the tidyquant package and start working with it, you first have to install it.
+
+install.packages("tidyquant")
+This places it on your local computer. You then have to load it into your current R session. This gives you access to all of the functions in the package.
+
+library(tidyquant)
+These steps of installing and librarying packages are necessary for any CRAN package you want to use.
+
+The exercise code is already written for you. You will explore some of the functions that tidyquant has for financial analysis.
+
+
+
+
+
+The code is already written, but these instructions will walk you through the steps.
+First, library the package to access its functions.
+Use the tidyquant function, tq_get() to get the stock price data for Apple.
+Take a look at the data frame it returned.
+Plot the stock price over time.
+Calculate daily returns for the adjusted stock price using tq_mutate(). This function "mutates" your data frame by adding a new column onto it. Here, that new column is the daily returns.
+Sort the returns.
+Plot the sorted returns. You can see that Apple had a few days of losses >10%, and a number of days with gains of >5%.
+
+
+
+
+# Library tidquant
+library(tidyquant)
+-----------------------------
+Loading required package: lubridate
+
+Attaching package: ‘lubridate’
+The following objects are masked from ‘package:base’:
+
+    date, intersect, setdiff, union
+Loading required package: PerformanceAnalytics
+Loading required package: xts
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+Attaching package: ‘PerformanceAnalytics’
+The following object is masked from ‘package:graphics’:
+
+    legend
+Loading required package: quantmod
+Loading required package: TTR
+══ Need to Learn tidyquant? ════════════════════════════════════════════════════
+Business Science offers a 1-hour course - Learning Lab #9: Performance Analysis & Portfolio Optimization with tidyquant!
+</> Learn more at: https://university.business-science.io/p/learning-labs-pro </>
+
+Attaching package: ‘tidyquant’
+The following object is masked _by_ ‘.GlobalEnv’:
+
+    tq_get
+
+-----------------------------
+
+
+# Pull Apple stock data
+apple <- tq_get("AAPL", get = "stock.prices", 
+                from = "2007-01-03", to = "2017-06-05")
+
+
+
+# Take a look at what it returned
+head(apple)
+# A tibble: 6 x 7
+  date        open  high   low close    volume adjusted
+  <date>     <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>
+1 2007-01-03  86.3  86.6  81.9  83.8 309579900     12.0
+2 2007-01-04  84.0  86.0  83.8  85.7 211815100     12.2
+3 2007-01-05  85.8  86.2  84.4  85.0 208685400     12.2
+4 2007-01-08  86.0  86.5  85.3  85.5 199276700     12.2
+5 2007-01-09  86.4  93.0  85.2  92.6 837324600     13.2
+6 2007-01-10  94.8  97.8  93.4  97   738220000     13.9
+
+
+# Plot the stock price over time
+plot(apple$date, apple$adjusted, type = "l")
+
+
+# Calculate daily stock returns for the adjusted price
+apple <- tq_mutate(data = apple,
+                   ohlc_fun = Ad,
+                   mutate_fun = dailyReturn)
+Warning message: Argument ohlc_fun is deprecated; please use select instead.
+# https://www.rdocumentation.org/packages/tidyquant/versions/1.0.3
+# https://www.rdocumentation.org/packages/tidyquant/versions/1.0.3/topics/tq_mutate
+# select: The columns to send to the mutation function.
+# mutate_fun: The mutation function from either the xts, quantmod, or TTR package. Execute tq_mutate_fun_options() to see the full list of options by package.
+
+
+
+
+# Sort the returns from least to greatest
+sorted_returns <- sort(apple$daily.returns)
+
+
+# Plot them
+plot(sorted_returns)
+
+
+
+
+
+>head(apple)
+# A tibble: 6 x 8
+  date        open  high   low close    volume adjusted daily.returns
+  <date>     <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>         <dbl>
+1 2007-01-03  86.3  86.6  81.9  83.8 309579900     12.0       0      
+2 2007-01-04  84.0  86.0  83.8  85.7 211815100     12.2       0.0222 
+3 2007-01-05  85.8  86.2  84.4  85.0 208685400     12.2      -0.00712
+4 2007-01-08  86.0  86.5  85.3  85.5 199276700     12.2       0.00494
+5 2007-01-09  86.4  93.0  85.2  92.6 837324600     13.2       0.0831 
+6 2007-01-10  94.8  97.8  93.4  97   738220000     13.9       0.0479 
+
+
+>head(sorted_returns)
+[1] -0.17919525 -0.12355795 -0.10646355 -0.09150193 -0.08614524 -0.08266132
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>tq_mutate_fun_options()
+$zoo
+ [1] "rollapply"          "rollapplyr"         "rollmax"           
+ [4] "rollmax.default"    "rollmaxr"           "rollmean"          
+ [7] "rollmean.default"   "rollmeanr"          "rollmedian"        
+[10] "rollmedian.default" "rollmedianr"        "rollsum"           
+[13] "rollsum.default"    "rollsumr"          
+
+$xts
+ [1] "apply.daily"     "apply.monthly"   "apply.quarterly" "apply.weekly"   
+ [5] "apply.yearly"    "diff.xts"        "lag.xts"         "period.apply"   
+ [9] "period.max"      "period.min"      "period.prod"     "period.sum"     
+[13] "periodicity"     "to_period"       "to.daily"        "to.hourly"      
+[17] "to.minutes"      "to.minutes10"    "to.minutes15"    "to.minutes3"    
+[21] "to.minutes30"    "to.minutes5"     "to.monthly"      "to.period"      
+[25] "to.quarterly"    "to.weekly"       "to.yearly"      
+
+$quantmod
+ [1] "allReturns"      "annualReturn"    "ClCl"            "dailyReturn"    
+ [5] "Delt"            "HiCl"            "Lag"             "LoCl"           
+ [9] "LoHi"            "monthlyReturn"   "Next"            "OpCl"           
+[13] "OpHi"            "OpLo"            "OpOp"            "periodReturn"   
+[17] "quarterlyReturn" "seriesAccel"     "seriesDecel"     "seriesDecr"     
+[21] "seriesHi"        "seriesIncr"      "seriesLo"        "weeklyReturn"   
+[25] "yearlyReturn"   
+
+$TTR
+ [1] "adjRatios"          "ADX"                "ALMA"              
+ [4] "aroon"              "ATR"                "BBands"            
+ [7] "CCI"                "chaikinAD"          "chaikinVolatility" 
+[10] "CLV"                "CMF"                "CMO"               
+[13] "CTI"                "DEMA"               "DonchianChannel"   
+[16] "DPO"                "DVI"                "EMA"               
+[19] "EMV"                "EVWMA"              "GMMA"              
+[22] "growth"             "HMA"                "KST"               
+[25] "lags"               "MACD"               "MFI"               
+[28] "momentum"           "OBV"                "PBands"            
+[31] "ROC"                "rollSFM"            "RSI"               
+[34] "runCor"             "runCov"             "runMAD"            
+[37] "runMax"             "runMean"            "runMedian"         
+[40] "runMin"             "runPercentRank"     "runSD"             
+[43] "runSum"             "runVar"             "SAR"               
+[46] "SMA"                "SMI"                "SNR"               
+[49] "stoch"              "TDI"                "TRIX"              
+[52] "ultimateOscillator" "VHF"                "VMA"               
+[55] "volatility"         "VWAP"               "VWMA"              
+[58] "wilderSum"          "williamsAD"         "WMA"               
+[61] "WPR"                "ZigZag"             "ZLEMA"             
+
+$PerformanceAnalytics
+[1] "Return.annualized"        "Return.annualized.excess"
+[3] "Return.clean"             "Return.cumulative"       
+[5] "Return.excess"            "Return.Geltner"          
+[7] "zerofill"                
+
+
+
+
+
+
+
+
+
+
+
+>head(tq_mutate(data = apple,
+                   ohlc_fun = Ad,
+                   mutate_fun = dailyReturn))
+Warning message: Argument ohlc_fun is deprecated; please use select instead.
+# A tibble: 6 x 9
+  date        open  high   low close    volume adjusted daily.returns
+  <date>     <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>         <dbl>
+1 2007-01-03  86.3  86.6  81.9  83.8 309579900     12.0       0      
+2 2007-01-04  84.0  86.0  83.8  85.7 211815100     12.2       0.0222 
+3 2007-01-05  85.8  86.2  84.4  85.0 208685400     12.2      -0.00712
+4 2007-01-08  86.0  86.5  85.3  85.5 199276700     12.2       0.00494
+5 2007-01-09  86.4  93.0  85.2  92.6 837324600     13.2       0.0831 
+6 2007-01-10  94.8  97.8  93.4  97   738220000     13.9       0.0479 
+# … with 1 more variable: daily.returns..1 <dbl>
+
+
+
+
+>head(tq_mutate(data = apple,
+                   ohlc_fun = adjusted,
+                   mutate_fun = dailyReturn))
+#Warning message: Argument ohlc_fun is deprecated; please use select instead.
+#Error: OHLCV extractor is not valid. Cannot coerce to `select` equivalent.
+
+
+
+
+
+> apple <- tq_mutate(data = apple,
+                   select = adjusted,
+                   mutate_fun = dailyReturn)
+head(apple)
+# A tibble: 6 x 9
+  date        open  high   low close    volume adjusted daily.returns
+  <date>     <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>         <dbl>
+1 2007-01-03  86.3  86.6  81.9  83.8 309579900     12.0       0      
+2 2007-01-04  84.0  86.0  83.8  85.7 211815100     12.2       0.0222 
+3 2007-01-05  85.8  86.2  84.4  85.0 208685400     12.2      -0.00712
+4 2007-01-08  86.0  86.5  85.3  85.5 199276700     12.2       0.00494
+5 2007-01-09  86.4  93.0  85.2  92.6 837324600     13.2       0.0831 
+6 2007-01-10  94.8  97.8  93.4  97   738220000     13.9       0.0479 
+# … with 1 more variable: daily.returns..1 <dbl>
+
+
+
+
+
+
+
+>head(tq_mutate(data = apple,
+                   ohlc_fun = close,
+                   mutate_fun = dailyReturn))
+#Warning message: Argument ohlc_fun is deprecated; please use select instead.
+#Error: OHLCV extractor is not valid. Cannot coerce to `select` equivalent.
+                   
+                   
+                   
+
+
+>apple <- tq_mutate(data = apple,
+                   ohlc_fun = Cl,
+                   mutate_fun = dailyReturn)
+head(apple)
+# A tibble: 6 x 9
+  date        open  high   low close    volume adjusted daily.returns
+  <date>     <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>         <dbl>
+1 2007-01-03  86.3  86.6  81.9  83.8 309579900     12.0       0      
+2 2007-01-04  84.0  86.0  83.8  85.7 211815100     12.2       0.0222 
+3 2007-01-05  85.8  86.2  84.4  85.0 208685400     12.2      -0.00712
+4 2007-01-08  86.0  86.5  85.3  85.5 199276700     12.2       0.00494
+5 2007-01-09  86.4  93.0  85.2  92.6 837324600     13.2       0.0831 
+6 2007-01-10  94.8  97.8  93.4  97   738220000     13.9       0.0479 
+# … with 1 more variable: daily.returns..1 <dbl>
+
+
+
+
+
+>apple <- tq_mutate(data = apple,
+                   select = close,
+                   mutate_fun = dailyReturn)
+head(apple)                   
+# A tibble: 6 x 12
+  date        open  high   low close    volume adjusted daily.returns
+  <date>     <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>         <dbl>
+1 2007-01-03  86.3  86.6  81.9  83.8 309579900     12.0       0      
+2 2007-01-04  84.0  86.0  83.8  85.7 211815100     12.2       0.0222 
+3 2007-01-05  85.8  86.2  84.4  85.0 208685400     12.2      -0.00712
+4 2007-01-08  86.0  86.5  85.3  85.5 199276700     12.2       0.00494
+5 2007-01-09  86.4  93.0  85.2  92.6 837324600     13.2       0.0831 
+6 2007-01-10  94.8  97.8  93.4  97   738220000     13.9       0.0479 
+# … with 4 more variables: daily.returns..1 <dbl>, daily.returns..2 <dbl>,
+#   daily.returns..3 <dbl>, daily.returns..4 <dbl>
+                   
+                   
+
+>colnames(apple)
+ [1] "date"             "open"             "high"             "low"             
+ [5] "close"            "volume"           "adjusted"         "daily.returns"   
+ [9] "daily.returns..1" "daily.returns..2" "daily.returns..3" "daily.returns..4"
+
+
+
+
+
+
+
+
+>head(apple[c("date", "daily.returns", "daily.returns..1", "daily.returns..2", "daily.returns..3", "daily.returns..4")])
+# A tibble: 6 x 6
+  date       daily.returns daily.returns..1 daily.returns..2 daily.returns..3
+  <date>             <dbl>            <dbl>            <dbl>            <dbl>
+1 2007-01-03       0                0                0                0      
+2 2007-01-04       0.0222           0.0222           0.0222           0.0222 
+3 2007-01-05      -0.00712         -0.00712         -0.00712         -0.00712
+4 2007-01-08       0.00494          0.00494          0.00494          0.00494
+5 2007-01-09       0.0831           0.0831           0.0831           0.0831 
+6 2007-01-10       0.0479           0.0479           0.0479           0.0479 
+# … with 1 more variable: daily.returns..4 <dbl>
+
+
+
+
+>head(apple[["daily.returns..4"]])
+[1]  0.000000000  0.022195620 -0.007121189  0.004938342  0.083070070
+[6]  0.047855677
+
