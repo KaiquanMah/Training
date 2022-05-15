@@ -1,0 +1,68 @@
+xts objects get their power from the index attribute that holds the time dimension. One major difference between xts and most other time series objects in R is the ability to use any one of various classes that are used to represent time. Whether POSIXct, Date, or some other class, xts will convert this into an internal form to make subsetting as natural to the user as possible.
+
+a <- xts(x = 1:2, as.Date("2012-01-01") + 0:1)
+a[index(a)]
+We'll get into more detail on subsetting xts objects in a later chapter. For now you can simply use date objects to index appropriate rows from your time series. You can think of this as effectively matching the rownames you see in the object. This works as anticipated for time objects because the rownames are really dates!
+
+For this exercise you'll create two time series using two different time classes. You will then subset each object using the other object's index.
+
+
+
+
+Create an object of 5 dates called dates starting at "2016-01-01".
+Create a time series ts_a using the numbers 1 through 5 as your data, and dates as your order.by index.
+Create a time series ts_b using the numbers 1 through 5 as your data, and the same dates, but as POSIXct objects.
+Use the index from ts_b to extract the dates from ts_a.
+Now do the reverse, indexing ts_b using the times from ts_a.
+
+
+# Create dates
+dates <- as.Date("2016-01-01") + 0:4
+
+# Create ts_a
+ts_a <- xts(x = 1:5, order.by = dates)
+
+# Create ts_b
+ts_b <- xts(x = 1:5, order.by = as.POSIXct(dates))
+
+
+
+
+# Extract the rows of ts_a using the index of ts_b
+ts_a[index(ts_b)]
+           [,1]
+2016-01-01    1
+2016-01-02    2
+2016-01-03    3
+2016-01-04    4
+2016-01-05    5
+
+# Extract the rows of ts_b using the index of ts_a
+ts_b[index(ts_a)]
+           [,1]
+2016-01-01    1
+2016-01-02    2
+2016-01-03    3
+2016-01-04    4
+2016-01-05    5
+
+
+
+>str(ts_a)
+An 'xts' object on 2016-01-01/2016-01-05 containing:
+  Data: int [1:5, 1] 1 2 3 4 5
+  Indexed by objects of class: [Date] TZ: UTC
+  xts Attributes:  
+ NULL
+
+
+>str(ts_b)
+An 'xts' object on 2016-01-01/2016-01-05 containing:
+  Data: int [1:5, 1] 1 2 3 4 5
+  Indexed by objects of class: [POSIXct,POSIXt] TZ: 
+  xts Attributes:  
+ NULL
+ 
+ 
+ 
+ 
