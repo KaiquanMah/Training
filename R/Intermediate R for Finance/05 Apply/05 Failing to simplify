@@ -1,0 +1,70 @@
+For interactive use, sapply() is great. It guesses the output type so that it can simplify, and normally that is fine. However, sapply() is not a safe option to be used when writing functions. If sapply() cannot simplify your output, then it will default to returning a list just like lapply(). This can be dangerous and break custom functions if you wrote them expecting sapply() to return a simplified vector.
+Let's look at an exercise using a list containing information about the stock market crash of 2008.
+
+
+
+The list market_crash has been created for you.
+-Use sapply() to get the class() of each element in market_crash.
+A new list, market_crash2 has been created. The difference is in the creation of the date!
+-Use lapply() to get the class() of each element in market_crash2.
+-Use sapply() to get the class() of each element in market_crash2.
+date in market_crash2 has multiple classes. Why couldn't sapply() simplify this?
+
+
+
+
+
+# Market crash with as.Date()
+market_crash <- list(dow_jones_drop = 777.68, 
+                     date = as.Date("2008-09-28"))
+     
+     
+# Find the classes with sapply()
+sapply(market_crash, FUN=class)
+dow_jones_drop           date 
+     "numeric"         "Date" 
+     
+     
+     
+     
+     
+     
+# Market crash with as.POSIXct()
+market_crash2 <- list(dow_jones_drop = 777.68, 
+                      date = as.POSIXct("2008-09-28"))
+
+
+# Find the classes with lapply()
+lapply(market_crash2, FUN=class)
+$dow_jones_drop
+[1] "numeric"
+
+$date
+[1] "POSIXct" "POSIXt" 
+
+
+
+# Find the classes with sapply()
+sapply(market_crash2, FUN=class)
+$dow_jones_drop
+[1] "numeric"
+
+$date
+[1] "POSIXct" "POSIXt" 
+
+
+
+Nice job! See how sapply() returns a list like lapply() when it fails to simplify?
+
+
+
+
+
+
+>class(sapply(market_crash, FUN=class))
+[1] "character"
+
+>class(lapply(market_crash2, FUN=class))
+[1] "list"
+>class(sapply(market_crash2, FUN=class))
+[1] "list"
