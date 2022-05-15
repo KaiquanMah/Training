@@ -1,0 +1,55 @@
+You can now convert data to xts using as.xts(). However, in most real world applications you will often need to read raw data from files on disk or the web. This can be challenging without knowing the right commands.
+
+In the first part of this exercise, you will start by reading a csv file from disk using the base-R read.csv. After you read the data, the next step is to convert it to xts. Here you will be required to use the xts() constructor as well as deal with converting non-standard dates into something that xts understands.
+https://www.rdocumentation.org/packages/utils/topics/read.table
+In part two of this exercise, you will read the same data into a zoo object using read.zoo and then convert the zoo object into an xts object.
+https://www.rdocumentation.org/packages/zoo/topics/read.zoo
+The data in this exercise are quite simple, but will require some effort to properly import and clean. The full name of the file you will be working with has been saved as the value of tmp_file. On disk, the data look like:
+
+a,b
+1/02/2015, 1, 3
+2/03/2015, 2, 4
+
+
+
+
+
+Read the data located at the value of tmp_file using read.csv() to a new variable called dat.
+Convert dat into an xts object using the xts() constructor. Use as.Date() with rownames(dat) as the first argument.
+Create dat_zoo by using read.zoo() to read in the same tmp_file, and set the argument format equal to "%m/%d/%Y".
+Create dat_xts by converting dat_zoo to xts by using as.xts().
+
+
+>tmp_file
+[1] "https://s3.amazonaws.com/assets.datacamp.com/production/course_1127/datasets/tmp_file.csv"
+
+
+# Create dat by reading tmp_file
+dat <- read.csv(tmp_file)
+
+# Convert dat into xts
+xts(dat, order.by = as.Date(rownames(dat), "%m/%d/%Y"))
+           a b
+2015-01-02 1 3
+2015-02-03 2 4
+
+
+# Read tmp_file using read.zoo
+dat_zoo <- read.zoo(tmp_file, index.column = 0, sep = ",", format = "%m/%d/%Y")
+
+# Convert dat_zoo to xts
+dat_xts <- xts(dat_zoo)
+
+
+
+>dat_zoo
+           a b
+2015-01-02 1 3
+2015-02-03 2 4
+
+>dat_xts
+           a b
+2015-01-02 1 3
+2015-02-03 2 4
+
+
