@@ -1,0 +1,56 @@
+In the last example, sapply() failed to simplify because the date element of market_crash2 had two classes (POSIXct and POSIXt). Notice, however, that no error was thrown! If a function you had written expected a simplified vector to be returned by sapply(), this would be confusing.
+
+To account for this, there is a more strict apply function called vapply(), which contains an extra argument FUN.VALUE where you can specify the type and length of the output that should be returned each time your applied function is called.
+
+If you expected the return value of class() to be a character vector of length 1, you can specify that using vapply():
+
+vapply(market_crash, class, FUN.VALUE = character(1))
+dow_jones_drop           date 
+     "numeric"         "Date"
+Other examples of FUN.VALUE might be numeric(2) or logical(1).
+
+
+
+
+
+market_crash2 is again defined for you.
+
+Use sapply() again to find the class() of market_crash2 elements. Notice how it returns a list and not an error.
+Use vapply() on market_crash2 to find the class(). Specify FUN.VALUE = character(1). It should appropriately fail.
+
+
+# FUN.VALUE = character(1)
+# character(1) => return a character vector of length 1 => i.e. 1 element ONLY which should be a 'character element'
+
+
+
+
+
+
+
+# Market crash with as.POSIXct()
+market_crash2 <- list(dow_jones_drop = 777.68, 
+                      date = as.POSIXct("2008-09-28"))
+                      
+                      
+                      
+                      
+# Find the classes with sapply()
+sapply(market_crash2, class)
+$dow_jones_drop
+[1] "numeric"
+
+$date
+[1] "POSIXct" "POSIXt" 
+
+
+
+
+# Find the classes with vapply()
+vapply(market_crash2, class, FUN.VALUE = character(1))
+Error: values must be length 1,
+ but FUN(X[[2]]) result is length 2
+ 
+ 
+ 
+ 
