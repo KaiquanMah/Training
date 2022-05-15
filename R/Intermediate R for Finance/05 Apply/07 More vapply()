@@ -1,0 +1,66 @@
+The difference between vapply() and sapply() was shown in the last example to demonstrate vapply() appropriately failing, but what about when it doesn't fail? When there are no errors, vapply() returns a simplified result according to the FUN.VALUE argument.
+
+The stock_return dataset is in your workspace containing daily returns for Apple, IBM, and Microsoft. The sharpe() function is also available.
+Calculate the sharpe ratio for each stock using vapply().
+Use summary() on the apple column to get a 6 number summary.
+vapply() the summary() function across stock_return to summarize each column.
+
+
+
+
+>stock_return
+           apple          ibm          micr
+1   0.0037446342  0.001251408  0.0008445946
+2  -0.0071883530 -0.001124859  0.0163713080
+3   0.0076986527  0.003190691 -0.0044835603
+4   0.0098226467  0.027689429  0.0236864053
+5   0.0098171665  0.003458948 -0.0058660583
+6   0.0163217981  0.007014998  0.0157351254
+7  -0.0057042563 -0.006125390  0.0032273681
+8   0.0166813769  0.016858006  0.0130287920
+9   0.0000000000  0.001307267 -0.0047634170
+10  0.0054692248 -0.002907839 -0.0015954052
+11  0.0012951131 -0.007677657 -0.0044742729
+12  0.0057773562 -0.000299886  0.0211878010
+13  0.0026577503  0.005519558 -0.0012574662
+14  0.0009405729 -0.001610979  0.0000000000
+15 -0.0065778233 -0.001613578  0.0001573812
+16  0.0019778141 -0.002095056 -0.0048780488
+17  0.0063508411  0.002579329  0.0006325111
+18 -0.0042640287 -0.005683858 -0.0045828066
+19 -0.0002569373  0.002467056 -0.0014287982
+20 -0.0077957680 -0.003661465 -0.0120826709
+
+
+
+# Sharpe ratio for all stocks
+vapply(stock_return, sharpe, FUN.VALUE = numeric(1))
+    apple       ibm      micr 
+0.3546496 0.2000819 0.2185190 
+
+
+
+
+# Summarize Apple
+summary(stock_return$apple)
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+-0.007796 -0.001259  0.002318  0.002838  0.006688  0.016681 
+
+
+
+
+# Summarize all stocks
+vapply(stock_return, summary, FUN.VALUE = numeric(6))
+               apple           ibm          micr
+Min.    -0.007795768 -0.0076776574 -0.0120826709
+1st Qu. -0.001258710 -0.0022982516 -0.0045083719
+Median   0.002317782  0.0004757609 -0.0006287331
+Mean     0.002838389  0.0019268062  0.0024729391
+3rd Qu.  0.006687794  0.0032577550  0.0056777241
+Max.     0.016681377  0.0276894294  0.0236864053
+
+
+vapply() requires more thought when writing the function, but its robustness far outweighs that cost!
+
+
+
