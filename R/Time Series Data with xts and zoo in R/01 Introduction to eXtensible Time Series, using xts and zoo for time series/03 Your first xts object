@@ -1,0 +1,80 @@
+xts objects are simple. Think of them as a matrix of observations combined with an index of corresponding dates and times.
+  xts = matrix + times
+The main xts constructor takes a number of arguments, but the two most important are x for the data and order.by for the index. x must be a vector or matrix. order.by is a vector which must be the same length or number of rows as x, be a proper time or date object (very important!), and be in increasing order.
+
+xts also allows you to bind arbitrary key-value attributes to your data. This lets you keep metadata about your object inside your object. To add these at creation, you simply pass additional name = value arguments to the xts() function.
+
+Since we are focusing here on the mechanics, we'll use random numbers as our data so we can focus on creating the object rather than worry about its contents.
+
+
+
+Create an object called data that contains five random numbers using rnorm().
+Create a Date class index from "2016-01-01" of length five called dates.
+Use the xts constructor to create an object called smith using data and dates as the index.
+Create an object called bday which contains a POSIXct date object containing the date "1899-05-08".
+Create an xts object called hayek using data, dates, and a new attribute called born, which should contain the birthday object you just created.
+
+
+
+# Create the object data using 5 random numbers
+data <- rnorm(5)
+>data
+[1] -1.2070657  0.2774292  1.0844412 -2.3456977  0.4291247
+
+# Create dates as a Date class object starting from 2016-01-01
+dates <- seq(as.Date("2016-01-01"), length = 5, by = "days")
+>dates
+[1] "2016-01-01" "2016-01-02" "2016-01-03" "2016-01-04" "2016-01-05"
+
+# Use xts() to create smith
+smith <- xts(x = data, order.by = dates)
+
+
+
+
+# Create bday (1899-05-08) using a POSIXct date class object
+bday <- as.POSIXct("1899-05-08")
+>bday
+[1] "1899-05-08 UTC"
+
+# Create hayek and add a new attribute called born
+hayek <- xts(x = data, order.by = dates, born = bday)
+
+
+
+
+
+
+
+>smith
+                 [,1]
+2016-01-01 -1.2070657
+2016-01-02  0.2774292
+2016-01-03  1.0844412
+2016-01-04 -2.3456977
+2016-01-05  0.4291247
+>hayek
+                 [,1]
+2016-01-01 -1.2070657
+2016-01-02  0.2774292
+2016-01-03  1.0844412
+2016-01-04 -2.3456977
+2016-01-05  0.4291247
+
+
+>str(smith)
+An 'xts' object on 2016-01-01/2016-01-05 containing:
+  Data: num [1:5, 1] -1.207 0.277 1.084 -2.346 0.429
+  Indexed by objects of class: [Date] TZ: UTC
+  xts Attributes:  
+ NULL
+ 
+>str(hayek)
+An 'xts' object on 2016-01-01/2016-01-05 containing:
+  Data: num [1:5, 1] -1.207 0.277 1.084 -2.346 0.429
+  Indexed by objects of class: [Date] TZ: UTC
+  xts Attributes:  
+List of 1
+ $ born: POSIXct[1:1], format: "1899-05-08"
+
+
