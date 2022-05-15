@@ -1,0 +1,115 @@
+Now that you can read raw data into xts and zoo objects, it is only natural that you learn how to reverse the process.
+
+There are two main use cases for exporting xts objects. First, you may require an object to persist across sessions for use in later analysis. In this case, it is almost always best to use saveRDS() and readRDS() to serialize single R objects.
+https://www.rdocumentation.org/packages/base/topics/readRDS
+https://www.rdocumentation.org/packages/base/topics/readRDS
+Alternatively, you may find yourself needing to share the results of your analysis with others, often expecting the data to be consumed by processes unaware of both R and xts. Most of us would prefer not to think of this horrible fate for our data, but the real world mandates that we at least understand how this works.
+
+One of the best ways to write an xts object from R is to use the zoo function write.zoo(). In this exercise you'll take your temporary data and write it to disk using write.zoo().
+https://www.rdocumentation.org/packages/zoo/topics/read.zoo
+
+
+
+
+Convert sunspots to xts and save it as sunspots_xts.
+The temporary file name will be loaded for you.
+Using write.zoo(), save the sunspots_xts data to the tmp file.
+Read the tmp file back into R using read.zoo(). Call this sun.
+Convert sun to xts using the as.xts() function. Call this sun_xts.
+
+
+>head(sunspots)
+[1] 58.0 62.6 70.0 55.7 85.0 83.5
+
+>str(sunspots)
+ Time-Series [1:2820] from 1749 to 1984: 58 62.6 70 55.7 85 83.5 94.8 66.3 75.9 75.5 ...
+ 
+>class(sunspots)
+[1] "ts"
+
+>tempfile()
+[1] "/tmp/RtmpRw75q1/file16efe88f0"
+
+
+
+# Convert sunspots to xts using as.xts().
+sunspots_xts <- as.xts(sunspots)
+
+# Get the temporary file name
+tmp <- tempfile()
+
+# Write the xts object using zoo to tmp 
+write.zoo(sunspots_xts, sep = ",", file = tmp)
+
+# Read the tmp file. FUN = as.yearmon converts strings such as Jan 1749 into a proper time class
+sun <- read.zoo(tmp, sep = ",", FUN = as.yearmon)
+
+# Convert sun into xts. Save this as sun_xts
+sun_xts <- as.xts(sun)
+
+
+
+
+
+
+
+
+
+
+
+----------------------
+>head(sunspots_xts)
+         [,1]
+Jan 1749 58.0
+Feb 1749 62.6
+Mar 1749 70.0
+Apr 1749 55.7
+May 1749 85.0
+Jun 1749 83.5
+
+>str(sunspots_xts)
+An 'xts' object on Jan 1749/Dec 1983 containing:
+  Data: num [1:2820, 1] 58 62.6 70 55.7 85 83.5 94.8 66.3 75.9 75.5 ...
+  Indexed by objects of class: [yearmon] TZ: UTC
+  xts Attributes:  
+ NULL
+ 
+>class(sunspots_xts)
+[1] "xts" "zoo"
+
+----------------------
+
+
+>head(sun)
+Jan 1749 Feb 1749 Mar 1749 Apr 1749 May 1749 Jun 1749 
+    58.0     62.6     70.0     55.7     85.0     83.5 
+
+>str(sun)
+'zoo' series from Jan 1749 to Dec 1983
+  Data: num [1:2820] 58 62.6 70 55.7 85 83.5 94.8 66.3 75.9 75.5 ...
+  Index: Class 'yearmon'  num [1:2820] 1749 1749 1749 1749 1749 ...
+    
+>class(sun)
+[1] "zoo"
+
+-----------------------
+
+>head(sun_xts)
+         [,1]
+Jan 1749 58.0
+Feb 1749 62.6
+Mar 1749 70.0
+Apr 1749 55.7
+May 1749 85.0
+Jun 1749 83.5
+
+>str(sun_xts)
+An 'xts' object on Jan 1749/Dec 1983 containing:
+  Data: num [1:2820, 1] 58 62.6 70 55.7 85 83.5 94.8 66.3 75.9 75.5 ...
+  Indexed by objects of class: [yearmon] TZ: UTC
+  xts Attributes:  
+ NULL
+ 
+>class(sun_xts)
+[1] "xts" "zoo"
+
