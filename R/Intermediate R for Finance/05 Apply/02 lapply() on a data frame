@@ -1,0 +1,95 @@
+If, instead of a list, you had a data frame of stock returns, could you still use lapply()? Yes! Perhaps surprisingly, data frames are actually lists under the hood, and an lapply() call would apply the function to each column of the data frame.
+
+df
+  a b
+1 1 4
+2 2 6
+
+class(df)
+[1] "data.frame"
+
+lapply(df, FUN = sum)
+$a
+[1] 3
+
+$b
+[1] 10
+lapply() summed each column in the data frame, but still follows its convention of always returning a list.
+
+
+
+
+
+
+
+
+In your workspace is a data frame of daily stock returns as decimals called stock_return.
+
+Print stock_return to see the data frame.
+Use lapply() to get the average (mean) of each column.
+Create a function for the sharpe ratio. It should take the average of the returns, subtract the risk free rate (.03%) from it, and then divide by the standard deviation of the returns.
+Use lapply() to calculate the sharpe ratio of each column.
+
+
+
+
+# Print stock_return
+stock_return
+           apple          ibm          micr
+1   0.0037446342  0.001251408  0.0008445946
+2  -0.0071883530 -0.001124859  0.0163713080
+3   0.0076986527  0.003190691 -0.0044835603
+4   0.0098226467  0.027689429  0.0236864053
+5   0.0098171665  0.003458948 -0.0058660583
+6   0.0163217981  0.007014998  0.0157351254
+7  -0.0057042563 -0.006125390  0.0032273681
+8   0.0166813769  0.016858006  0.0130287920
+9   0.0000000000  0.001307267 -0.0047634170
+10  0.0054692248 -0.002907839 -0.0015954052
+11  0.0012951131 -0.007677657 -0.0044742729
+12  0.0057773562 -0.000299886  0.0211878010
+13  0.0026577503  0.005519558 -0.0012574662
+14  0.0009405729 -0.001610979  0.0000000000
+15 -0.0065778233 -0.001613578  0.0001573812
+16  0.0019778141 -0.002095056 -0.0048780488
+17  0.0063508411  0.002579329  0.0006325111
+18 -0.0042640287 -0.005683858 -0.0045828066
+19 -0.0002569373  0.002467056 -0.0014287982
+20 -0.0077957680 -0.003661465 -0.0120826709
+
+
+
+
+# lapply to get the average returns
+lapply(stock_return, FUN=mean)
+$apple
+[1] 0.002838389
+
+$ibm
+[1] 0.001926806
+
+$micr
+[1] 0.002472939
+
+
+# Sharpe ratio
+sharpe <- function(returns) {
+    (mean(returns) - .0003) / sd(returns)
+}
+
+
+# lapply to get the sharpe ratio
+lapply(stock_return, FUN=sharpe)
+$apple
+[1] 0.3546496
+
+$ibm
+[1] 0.2000819
+
+$micr
+[1] 0.218519
+
+
+
+
+
