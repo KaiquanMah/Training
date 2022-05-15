@@ -1,0 +1,83 @@
+Often, the function that you want to apply will have other optional arguments that you may want to tweak. Consider the percent_to_decimal() function that allows the user to specify the number of decimal places.
+
+percent_to_decimal(5.4, digits = 3)
+[1] 0.054
+In the call to lapply() you can specify the named optional arguments after the FUN argument, and they will get passed to the function that you are applying.
+
+my_list
+$a
+[1] 2.444 3.500
+
+$b
+[1] 1.100 2.678 3.450
+
+lapply(my_list, FUN = percent_to_decimal, digits = 4)
+$a
+[1] 0.0244 0.0350
+
+$b
+[1] 0.0110 0.0268 0.0345
+In the exercise, you will extend the capability of your sharpe ratio function to allow the user to input the risk free rate as an argument, and then use this with lapply().
+
+
+
+
+
+In your workspace is a data frame of daily stock returns as decimals called stock_return.
+Extend sharpe to allow the input of the risk free rate as an optional argument. The default should be set at .0003.
+Use lapply() on stock_return to find the sharpe ratio if the risk free rate is .0004.
+Use lapply() on stock_return to find the sharpe ratio if the risk free rate is .0009.
+
+
+
+# Extend sharpe() to allow optional argument
+sharpe <- function(returns, rf = .0003) {
+    (mean(returns) - rf) / sd(returns)
+}
+
+
+
+
+
+
+# First lapply()
+lapply(stock_return, FUN=sharpe)
+$apple
+[1] 0.3546496
+
+$ibm
+[1] 0.2000819
+
+$micr
+[1] 0.218519
+
+
+
+
+
+lapply(stock_return, FUN=sharpe, rf=0.0004)
+$apple
+[1] 0.3406781
+
+$ibm
+[1] 0.1877828
+
+$micr
+[1] 0.2084626
+
+
+
+
+
+# Second lapply()
+lapply(stock_return, FUN=sharpe, rf=0.0009)
+$apple
+[1] 0.2708209
+
+$ibm
+[1] 0.1262875
+
+$micr
+[1] 0.1581807
+
+
