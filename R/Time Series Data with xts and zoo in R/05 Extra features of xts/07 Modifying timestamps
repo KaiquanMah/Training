@@ -1,0 +1,109 @@
+Most time series we've seen have been daily or lower frequency. Depending on your field, you might encounter higher frequency data - think intraday trading intervals, or sensor data from medical equipment.
+
+In these situations, there are two functions in xts that are handy to know.
+
+If you find that you have observations with identical timestamps, it might be useful to perturb or remove these times to allow for uniqueness. xts provides the function make.index.unique() for just this purpose. The eps argument, short for epsilon or small change, controls how much identical times should be perturbed, and drop = TRUE lets you just remove duplicate observations entirely.
+https://www.rdocumentation.org/packages/xts/topics/make.index.unique
+
+On other occasions you might find your timestamps a bit too precise. In these instances it might be better to round up to some fixed interval, for example an observation may occur at any point in an hour, but you want to record the latest as of the beginning of the next hour. For this situation, the align.time() command will do what you need, setting the n argument to the number of seconds you'd like to round to.
+https://www.rdocumentation.org/packages/xts/topics/align.time?
+make.index.unique(x, eps = 1e-4)  # Perturb
+make.index.unique(x, drop = TRUE) # Drop duplicates
+align.time(x, n = 60) # Round to the minute
+In this exercise, you'll try the three use cases on an xts object called z.
+
+
+
+Convert the z series times to a unique series using make.index.unique(), where eps = 1e-4. Save this to z_unique.
+Remove duplicate times in z. Save this to z_dup.
+Align z to the nearest hour using align.time(). Save this to z_round.
+
+#eps epsilon or small change => controls how much identical times should be perturbed
+#drop => drop dupe records at a particular 'less granular timing'
+
+
+
+
+
+
+
+
+>z
+                            [,1]
+2022-05-17 21:31:15 -1.539950042
+2022-05-18 06:22:20 -0.928567035      <= REAL DUPLICATE
+2022-05-18 06:22:20 -0.928567035      <= REAL DUPLICATE
+2022-05-19 08:55:51 -0.294720447
+2022-05-20 13:44:53 -0.005767173
+2022-05-21 21:47:46  2.404653389
+2022-05-22 04:50:25  0.763593461
+2022-05-23 21:33:36 -0.799009249      <= REAL DUPLICATE
+2022-05-23 21:33:36 -0.799009249      <= REAL DUPLICATE
+2022-05-24 22:40:14 -1.147657009
+2022-05-25 15:51:28 -0.289461574
+2022-05-26 15:05:50 -0.299215118
+
+
+
+
+
+# Make z have unique timestamps
+z_unique <- make.index.unique(z, eps = 1e-4)
+Warning message: index value is unique but will be replaced; it is less than the cumulative epsilon for the preceding duplicate index values
+z_unique
+                            [,1]
+2022-05-17 21:31:15 -1.539950042
+2022-05-18 06:22:20 -0.928567035      <= REAL DUPLICATE
+2022-05-18 06:22:20 -0.928567035      <= REAL DUPLICATE
+2022-05-19 08:55:51 -0.294720447
+2022-05-20 13:44:53 -0.005767173
+2022-05-21 21:47:46  2.404653389
+2022-05-22 04:50:25  0.763593461
+2022-05-23 21:33:36 -0.799009249      <= REAL DUPLICATE
+2022-05-23 21:33:36 -0.799009249      <= REAL DUPLICATE
+2022-05-24 22:40:14 -1.147657009
+2022-05-25 15:51:28 -0.289461574
+2022-05-26 15:05:50 -0.299215118
+
+
+
+
+# Remove duplicate times in z
+z_dup <- make.index.unique(z, drop = TRUE)
+z_dup
+                            [,1]
+2022-05-17 21:31:15 -1.539950042
+2022-05-18 06:22:20 -0.928567035      <= REMOVED DUPLICATE
+2022-05-19 08:55:51 -0.294720447
+2022-05-20 13:44:53 -0.005767173
+2022-05-21 21:47:46  2.404653389
+2022-05-22 04:50:25  0.763593461
+2022-05-23 21:33:36 -0.799009249      <= REMOVED DUPLICATE
+2022-05-24 22:40:14 -1.147657009
+2022-05-25 15:51:28 -0.289461574
+2022-05-26 15:05:50 -0.299215118
+
+
+
+
+
+# Round observations in z to the next hour
+# n = 60 for 1 minute
+z_round <- align.time(z, n = 3600)
+z_round
+                            [,1]
+2022-05-17 22:00:00 -1.539950042      <= ROUND TO THE NEXT HOUR
+2022-05-18 07:00:00 -0.928567035
+2022-05-18 07:00:00 -0.928567035
+2022-05-19 09:00:00 -0.294720447
+2022-05-20 14:00:00 -0.005767173
+2022-05-21 22:00:00  2.404653389
+2022-05-22 05:00:00  0.763593461
+2022-05-23 22:00:00 -0.799009249
+2022-05-23 22:00:00 -0.799009249
+2022-05-24 23:00:00 -1.147657009
+2022-05-25 16:00:00 -0.289461574
+2022-05-26 16:00:00 -0.299215118
+
+
+
