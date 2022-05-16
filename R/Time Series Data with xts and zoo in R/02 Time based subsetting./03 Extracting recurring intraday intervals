@@ -1,0 +1,54 @@
+The most common time series data "in the wild" is daily. On occasion, you may find yourself working with intraday data, which contains both dates and times. In this case it is sometimes necessary to view only a subset of time for each day over multiple days. Using xts, you can slice days easily by using special notation in the i = argument to the single bracket extraction (i.e. [i, j]).
+
+As you learned in the previous exercise, the trick to this is to not specify explicit dates, but rather to use the special T/T notation designed for intraday repeating intervals.
+
+# Intraday times for all days
+NYSE["T09:30/T16:00"] 
+In this exercise, you will extract recurring morning hours from the time series irreg, which holds irregular data from the month of January 2010. Remember, you can always use the R console to experiment with irreg or to view the help pages with ?xts.
+
+
+
+Using the irregular time series irreg, assign all observations between 8AM and 10AM to morn_2010.
+Using morn_2010, extract only those observations from the morning of January 13th, 2010.
+
+>head(irreg)
+                    [,1]
+2010-01-05 02:30:00    1
+2010-01-05 10:32:00    2
+2010-01-05 12:03:00    3
+2010-01-06 06:01:00    4
+2010-01-06 17:55:00    5
+2010-01-06 23:42:00    6
+
+
+>str(irreg)
+An 'xts' object on 2010-01-05 02:30:00/2010-01-15 21:18:00 containing:
+  Data: int [1:50, 1] 1 2 3 4 5 6 7 8 9 10 ...
+  Indexed by objects of class: [POSIXct,POSIXt] TZ: 
+  xts Attributes:  
+ NULL
+ 
+ 
+>class(irreg)
+[1] "xts" "zoo"
+
+
+
+
+
+# Extract all data from irreg between 8AM and 10AM
+morn_2010 <- irreg["T08:00/T10:00"]
+head(morn_2010)
+                    [,1]
+2010-01-07 09:40:00    9
+2010-01-08 08:16:00   20
+2010-01-13 08:07:00   41
+2010-01-13 09:28:00   42
+
+
+# Extract the observations in morn_2010 for January 13th, 2010
+morn_2010["2010-01-13"]
+                    [,1]
+2010-01-13 08:07:00   41
+2010-01-13 09:28:00   42
+
