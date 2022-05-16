@@ -1,0 +1,64 @@
+Sometimes you need to locate data by relative time. Something that is easier said than put into code. This is equivalent to requesting the head or tail of a series, but instead of using an absolute offset, you describe a relative position in time. A simple example would be something like the last 3 weeks of a series, or the first day of current month.
+
+Without a time aware object, this gets quite complicated very quickly. Luckily, xts has the necessary prerequisites built in for you to use with very little learning required. Using the first() and last() functions it is actually quite easy!
+https://www.rdocumentation.org/packages/xts/topics/first
+https://www.rdocumentation.org/packages/xts/topics/first
+For this exercise, you'll extract relative observations from a data set called temps, a time series of summer temperature data from Chicago, IL, USA.
+
+
+
+Create a new variable lastweek by extracting the last 1 week from temps.
+Using your newly created data, extract the last 2 observations without respect to time.
+Now extract every day from lastweek except the first two days (this is tricky!).
+
+
+>temps
+           Temp.Max Temp.Mean Temp.Min
+2016-07-01       74        69       60
+2016-07-02       78        66       56
+2016-07-03       79        68       59
+2016-07-04       80        76       69
+2016-07-05       90        79       68
+2016-07-06       89        79       70
+2016-07-07       87        78       72
+2016-07-08       89        80       72
+2016-07-09       81        73       67
+2016-07-10       83        72       64
+2016-07-11       93        81       69
+2016-07-12       89        82       77
+2016-07-13       86        78       68
+2016-07-14       89        80       68
+2016-07-15       75        72       60
+2016-07-16       79        69       60
+
+
+
+# Create lastweek using the last 1 week of temps
+lastweek <- last(temps, "1 week")
+>lastweek
+           Temp.Max Temp.Mean Temp.Min
+2016-07-11       93        81       69
+2016-07-12       89        82       77
+2016-07-13       86        78       68
+2016-07-14       89        80       68
+2016-07-15       75        72       60
+2016-07-16       79        69       60
+
+
+
+# Print the last 2 observations in lastweek
+last(lastweek, n=2)
+           Temp.Max Temp.Mean Temp.Min
+2016-07-15       75        72       60
+2016-07-16       79        69       60
+
+
+# Extract all but the first two days of lastweek
+first(lastweek, "-2 days")
+           Temp.Max Temp.Mean Temp.Min
+2016-07-13       86        78       68
+2016-07-14       89        80       68
+2016-07-15       75        72       60
+2016-07-16       79        69       60
+
+
