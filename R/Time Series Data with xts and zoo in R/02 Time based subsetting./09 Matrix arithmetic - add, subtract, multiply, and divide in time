@@ -1,0 +1,46 @@
+xts objects respect time. By design when you perform any binary operation using two xts objects, these objects are first aligned using the intersection of the indexes. This may be surprising when first encountered.
+
+The reason for this is that you want to preserve the point-in-time aspect of your data, assuring that you don't introduce accidental look ahead (or look behind!) bias into your calculations.
+
+What this means in practice is that you will sometimes be tasked with handling this behavior if you want to preserve the dimensions of your data.
+
+Your options include:
+
+Use coredata() or as.numeric() (drop one to a matrix or vector).
+Manually shift index values - i.e. use lag().
+Reindex your data (before or after the calculation).
+In this exercise, you'll look at the normal behavior, as well as an example using the first option. For now you will use two small objects a and b. Examine these objects in the console before you start.
+
+
+
+Add a and b. Notice the behavior of the dates, which ones remain?
+Add a with the numeric value of b. b will need to be converted to a numeric for this to work.
+
+>a
+           a
+2015-01-24 1
+2015-01-25 1
+2015-01-26 1
+
+
+>b
+           b
+2015-01-24 2
+
+
+
+# Add a and b
+a + b
+           a
+2015-01-24 3
+
+
+# Add a with the numeric value of b
+a + as.numeric(b)
+           a
+2015-01-24 3
+2015-01-25 3
+2015-01-26 3
+
+
+As you can see, adding two xts objects returns only the dates common to both. Adding a numeric to an xts object is a bit more intuitive.
