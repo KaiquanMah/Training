@@ -1,0 +1,39 @@
+Another common modification for time series is the ability to lag a series. Also known as a backshift operation, it's typically shown in literature using L^k notation, indicating a transformation in time L^k * X = X_(t-k). 
+This lets you see observations like yesterday's value in the context of today.
+
+Both zoo and xts implement this behavior, and in fact extend it from the ts original in R. There are two major differences between xts and zoo implementations that you need to be aware of. One is the direction of the lag for a given k. The second is how missingness is handled afterwards.
+
+For historical reasons in R, zoo uses a convention for the sign of k in which negative values indicate lags and positive values indicate leads. That is, in zoo lag(x, k = 1) will shift future values one step back in time. This is inconsistent with the vast majority of the time series literature, but is consistent with behavior in base R. xts implements the exact opposite, namely for a positive k, the series will shift the last value in time one period forward; this is consistent with intuition, but quite different than zoo.
+
+In this exercise, you will construct a single xts object with three columns. The first column is data one day ahead, the second column is the original data, and the third column is the one day behind - all using xts. A simple xts object, x, has been loaded into your workspace.
+
+# Your final object
+cbind(lead_x, x, lag_x)
+
+
+
+
+Create a one period lead of x called lead_x.
+Create a one period lag of x called lag_x.
+Using the merge() function, combine lead + x + lag into a new object z.
+
+
+# Create a leading object called lead_x
+lead_x <- lag(x, k = -1)
+
+
+# Create a lagging object called lag_x
+lag_x <- lag(x, k = 1)
+
+
+# Merge your three series together and assign to z
+z <- merge(lead_x, x, lag_x)
+z
+            x x.1 x.2
+2022-05-11  6   5  NA
+2022-05-12  7   6   5
+2022-05-13  8   7   6
+2022-05-14  9   8   7
+2022-05-15 NA   9   8
+
+
