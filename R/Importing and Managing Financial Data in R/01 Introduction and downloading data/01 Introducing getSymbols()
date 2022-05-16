@@ -1,0 +1,79 @@
+The getSymbols() function from the quantmod package provides a consistent interface to import data from various sources into your workspace. By default, getSymbols() imports the data as a xts object.
+
+This exercise will introduce you to getSymbols(). You will use it to import QQQ data from Yahoo! Finance. QQQ is an exchange-traded fund that tracks the Nasdaq 100 index, and Yahoo! Finance is the default data source for getSymbols().
+https://finance.yahoo.com/
+You use the Symbols argument to specify the instrument (i.e. the ticker symbol) you want to import. Since Symbols is the first argument to getSymbols(), you usually just type the instrument name and omit Symbols =.
+
+
+
+
+
+Load the quantmod package using the library() function.
+Now use getSymbols() to import QQQ data. Make sure the data gets assigned to QQQ (auto.assign = TRUE).
+Use the str() function to view the structure of the QQQ object that getSymbols() created. Note the src and updated attributes.
+Use the head() function to view the first few rows of QQQ
+
+
+
+# Load the quantmod package
+library(quantmod)
+
+# Import QQQ data from Yahoo! Finance
+getSymbols("QQQ")
+[1] "QQQ"
+
+
+
+# Look at the structure of the object getSymbols created
+str(QQQ)
+An 'xts' object on 2007-01-03/2022-05-13 containing:
+  Data: num [1:3869, 1:6] 43.5 43.3 44 43.9 44 ...
+ - attr(*, "dimnames")=List of 2
+  ..$ : NULL
+  ..$ : chr [1:6] "QQQ.Open" "QQQ.High" "QQQ.Low" "QQQ.Close" ...
+  Indexed by objects of class: [Date] TZ: UTC
+  xts Attributes:  
+List of 2
+ $ src    : chr "yahoo"
+ $ updated: POSIXct[1:1], format: "2022-05-16 13:31:42"
+ 
+ 
+ 
+# Look at the first few rows of QQQ
+head(QQQ)
+           QQQ.Open QQQ.High QQQ.Low QQQ.Close QQQ.Volume QQQ.Adjusted
+2007-01-03    43.46    44.06   42.52     43.24  167689500     38.02726
+2007-01-04    43.30    44.21   43.15     44.06  136853500     38.74840
+2007-01-05    43.95    43.95   43.48     43.85  138958800     38.56370
+2007-01-08    43.89    44.12   43.64     43.88  106401600     38.59008
+2007-01-09    44.01    44.29   43.63     44.10  121577500     38.78358
+2007-01-10    43.96    44.66   43.82     44.62  121070100     39.24089
+
+
+
+
+
+
+
+>getSymbols("QQQ", src = "google")
+Error: 'getSymbols.google' is defunct.
+Google Finance stopped providing data in March, 2018.
+You could try setting src = "yahoo" instead.
+See help("Defunct") and help("quantmod-defunct")
+
+
+
+
+>getSymbols("USD/EUR",src="oanda",from="2005-01-01")
+Warning message: Oanda only provides historical data for the past 180 days. Symbol: USD/EUR
+[1] "USD/EUR"
+
+
+>getSymbols("USD/EUR",src="oanda",from="2022-01-01")
+[1] "USD/EUR"
+
+>head(getSymbols("USD/EUR",src="oanda",from="2022-01-01"))
+[1] "USD/EUR"
+
+
+>head(getSymbols("USD/EUR",src="oanda",from="2022-01-01", to="2022-05-16"))
