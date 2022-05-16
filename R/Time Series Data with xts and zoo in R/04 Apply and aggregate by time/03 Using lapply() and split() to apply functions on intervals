@@ -1,0 +1,91 @@
+Along the same lines as the previous exercise, xts gives you an additional mechanism to dive into periods of your data. Often it is useful to physically split your data into disjoint chunks by time and perform some calculation on these periods.
+
+For this exercise you'll make use of the xts split() command to chunk your data by time. The split() function creates a list containing an element for each split. The f argument in split() is a character string describing the period to split by (i.e. "months", "years", etc.).
+
+Here you will follow the same process you followed in the previous exercise. However, this time you will manually split your data first, and then apply the mean() function to each chunk. The function lapply() is used for the most efficient calculations. In cases where you don't want to return a time series, this proves to be very intuitive and effective.
+
+
+
+
+Use split() to split your temps data by weeks. Call this temps_weekly
+Use lapply() to get the weekly mean of temps_weekly. Call this temps_avg. Print this list.
+
+
+>temps
+           Temp.Max Temp.Mean Temp.Min
+2016-07-01       74        69       60
+2016-07-02       78        66       56
+2016-07-03       79        68       59
+2016-07-04       80        76       69
+2016-07-05       90        79       68
+2016-07-06       89        79       70
+2016-07-07       87        78       72
+2016-07-08       89        80       72
+2016-07-09       81        73       67
+2016-07-10       83        72       64
+2016-07-11       93        81       69
+2016-07-12       89        82       77
+2016-07-13       86        78       68
+2016-07-14       89        80       68
+2016-07-15       75        72       60
+2016-07-16       79        69       60
+
+
+
+
+
+
+
+
+# Split temps by week
+temps_weekly <- split(temps, f = "weeks")
+temps_weekly
+[[1]]
+           Temp.Max Temp.Mean Temp.Min
+2016-07-01       74        69       60
+2016-07-02       78        66       56
+2016-07-03       79        68       59
+
+[[2]]
+           Temp.Max Temp.Mean Temp.Min
+2016-07-04       80        76       69
+2016-07-05       90        79       68
+2016-07-06       89        79       70
+2016-07-07       87        78       72
+2016-07-08       89        80       72
+2016-07-09       81        73       67
+2016-07-10       83        72       64
+
+[[3]]
+           Temp.Max Temp.Mean Temp.Min
+2016-07-11       93        81       69
+2016-07-12       89        82       77
+2016-07-13       86        78       68
+2016-07-14       89        80       68
+2016-07-15       75        72       60
+2016-07-16       79        69       60
+
+
+
+
+
+
+
+
+# Create a list of weekly means, temps_avg, and print this list
+temps_avg <- lapply(X = temps_weekly, FUN = mean)
+temps_avg
+[[1]]
+[1] 67.66667
+
+[[2]]
+[1] 77.04762
+
+[[3]]
+[1] 76.38889
+
+
+
+
+
+s you can see, period.apply() is similar to using a combination of split() and lapply()
