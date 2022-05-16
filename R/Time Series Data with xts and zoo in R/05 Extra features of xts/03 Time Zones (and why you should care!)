@@ -1,0 +1,71 @@
+One of the trickiest parts to working with time series in general is dealing with time zones. xts provides a simple way to leverage time zones on a per-series basis. While R provides time zone support in native classes POSIXct and POSIXlt, xts extends this power to the entire object, allowing you to have multiple time zones across various objects.
+
+Some internal operation system functions require a time zone to do date math. If a time zone isn't explicitly set, one is chosen for you! Be careful to always set a time zone in your environment to prevent errors when working with dates and times.
+
+xts provides the function tzone(), which allows you to extract or set time zones.
+https://www.rdocumentation.org/packages/xts/topics/indexTZ
+tzone(x) <- "Time_Zone"
+In this exercise you will work with an object called times to practice constructing your own xts objects with custom time zones.
+
+
+
+
+Construct an xts time series of the numbers 1 through 10 called times_xts, with tzone set to "America/Chicago", and indexed by the times object.
+Modify times_xts to show time in "Asia/Hong_Kong".
+Extract the current time zone as a string.
+
+
+>times
+ [1] "2022-05-16 09:01:32 GMT" "2022-05-16 09:03:12 GMT"
+ [3] "2022-05-16 09:04:52 GMT" "2022-05-16 09:06:32 GMT"
+ [5] "2022-05-16 09:08:12 GMT" "2022-05-16 09:09:52 GMT"
+ [7] "2022-05-16 09:11:32 GMT" "2022-05-16 09:13:12 GMT"
+ [9] "2022-05-16 09:14:52 GMT" "2022-05-16 09:16:32 GMT"
+ 
+ 
+ 
+ 
+ 
+# Construct times_xts with tzone set to America/Chicago
+times_xts <- xts(1:10, order.by = times, tzone = "America/Chicago")
+times_xts
+Warning message: timezone of object (America/Chicago) is different than current timezone (GMT).
+                    [,1]
+2022-05-16 04:01:32    1
+2022-05-16 04:03:12    2
+2022-05-16 04:04:52    3
+2022-05-16 04:06:32    4
+2022-05-16 04:08:12    5
+2022-05-16 04:09:52    6
+2022-05-16 04:11:32    7
+2022-05-16 04:13:12    8
+2022-05-16 04:14:52    9
+2022-05-16 04:16:32   10
+
+
+
+# Change the time zone of times_xts to Asia/Hong_Kong
+tzone(times_xts) <- "Asia/Hong_Kong"
+  
+  
+  
+  
+# Extract the current time zone of times_xts
+tzone(times_xts)
+[1] "Asia/Hong_Kong"
+times_xts
+Warning message: timezone of object (Asia/Hong_Kong) is different than current timezone (GMT).
+                    [,1]
+2022-05-16 17:01:32    1
+2022-05-16 17:03:12    2
+2022-05-16 17:04:52    3
+2022-05-16 17:06:32    4
+2022-05-16 17:08:12    5
+2022-05-16 17:09:52    6
+2022-05-16 17:11:32    7
+2022-05-16 17:13:12    8
+2022-05-16 17:14:52    9
+2022-05-16 17:16:32   10
+
+
+
