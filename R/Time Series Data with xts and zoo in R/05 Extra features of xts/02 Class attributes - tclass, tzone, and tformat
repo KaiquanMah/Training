@@ -1,0 +1,164 @@
+xts objects are somewhat tricky when it comes to time. Internally, we have now seen that the index attribute is really a vector of numeric values corresponding to the seconds since the UNIX epoch (1970-01-01).
+
+How these values are displayed on printing and how they are returned to the user when using the index() function is dependent on a few key internal attributes.
+
+The information that controls this behavior can be viewed and even changed through a set of accessor functions detailed here:
+The index class using indexClass() (e.g. from Date to chron)
+https://www.rdocumentation.org/packages/xts/topics/indexClass
+The time zone using indexTZ() (e.g. from America/Chicago to Europe/London)
+https://www.rdocumentation.org/packages/xts/topics/indexTZ
+The time format to be displayed via indexFormat() (e.g. YYYY-MM-DD)
+
+
+In this exercise, you will practice each of these functions and view the results of your changes. To do so, you'll once again use the temps data that has been pre-loaded into your workspace.
+
+
+
+
+
+View the first three rows of the index in the current temps data.
+Find the index class of temps using the most relevant command above.
+Find the time zone of temps, again using the most relevant command above.
+Change the index format of temps to "%b-%d-%Y".
+View the new index format using head().
+
+
+# my answer using the latest functions, BUT NOT ACCEPTED BY THE GRADER WHICH WERE LOOKING FOR THE OLD DEPRECATED FUNCTIONS
+# tclass, tzone, tformat
+
+
+head(temps)
+Warning message: timezone of object (America/New_York) is different than current timezone (GMT).
+                    Temp.Max Temp.Mean Temp.Min
+2016-06-30 20:00:00       74        69       60
+2016-07-01 20:00:00       78        66       56
+2016-07-02 20:00:00       79        68       59
+2016-07-03 20:00:00       80        76       69
+2016-07-04 20:00:00       90        79       68
+2016-07-05 20:00:00       89        79       70
+
+
+# View the first three indexes of temps
+index(temps)[1:3]
+[1] "2016-06-30 20:00:00 EDT" "2016-07-01 20:00:00 EDT"
+[3] "2016-07-02 20:00:00 EDT"
+
+# Get the index class of temps
+tclass(temps)
+[1] "POSIXct" "POSIXt" 
+
+# Get the timezone of temps
+tzone(temps)
+[1] "America/New_York"
+
+
+# Change the format of the time display
+# indexFormat(temps) <- "___"
+tformat(temps) <- "%b-%d-%Y"
+Error: could not find function "tFormat<-"
+
+
+# View the new format
+head(temps)
+Warning message: timezone of object (America/New_York) is different than current timezone (GMT).
+            Temp.Max Temp.Mean Temp.Min
+Jun-30-2016       74        69       60
+Jul-01-2016       78        66       56
+Jul-02-2016       79        68       59
+Jul-03-2016       80        76       69
+Jul-04-2016       90        79       68
+Jul-05-2016       89        79       70
+
+
+
+>indexFormat
+function (x) 
+{
+    .Deprecated("tformat", "xts")
+    tformat(x)
+}
+<environment: namespace:xts>
+
+
+
+>tformat
+function (x) 
+{
+    UseMethod("tformat")
+}
+<environment: namespace:xts>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# using old functions
+head(temps)
+Warning message: timezone of object (America/New_York) is different than current timezone (GMT).
+                    Temp.Max Temp.Mean Temp.Min
+2016-06-30 20:00:00       74        69       60
+2016-07-01 20:00:00       78        66       56
+2016-07-02 20:00:00       79        68       59
+2016-07-03 20:00:00       80        76       69
+2016-07-04 20:00:00       90        79       68
+2016-07-05 20:00:00       89        79       70
+
+
+# View the first three indexes of temps
+index(temps)[1:3]
+[1] "2016-06-30 20:00:00 EDT" "2016-07-01 20:00:00 EDT"
+[3] "2016-07-02 20:00:00 EDT"
+
+
+# Get the index class of temps
+indexClass(temps)
+Warning message: 'indexClass' is deprecated.
+Use 'tclass' instead.
+See help("Deprecated") and help("xts-deprecated").
+[1] "POSIXct" "POSIXt" 
+
+
+# Get the timezone of temps
+indexTZ(temps)
+Warning message: 'indexTZ' is deprecated.
+Use 'tzone' instead.
+See help("Deprecated") and help("xts-deprecated").
+[1] "America/New_York"
+
+
+# Change the format of the time display
+# indexFormat(temps) <- "___"
+indexFormat(temps) <- "%b-%d-%Y"
+Warning message: 'indexFormat<-' is deprecated.
+Use 'tformat<-' instead.
+See help("Deprecated") and help("xts-deprecated").
+
+
+# View the new format
+head(temps)
+Warning message: timezone of object (America/New_York) is different than current timezone (GMT).
+            Temp.Max Temp.Mean Temp.Min
+Jun-30-2016       74        69       60
+Jul-01-2016       78        66       56
+Jul-02-2016       79        68       59
+Jul-03-2016       80        76       69
+Jul-04-2016       90        79       68
+Jul-05-2016       89        79       70
+
+
+
+
+
+
+
