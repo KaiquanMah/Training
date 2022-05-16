@@ -1,0 +1,99 @@
+xts uses a very special attribute called index to provide time support to your objects. For performance and design reasons, the index is stored in a special way. This means that regardless of the class of your index (e.g. Date or yearmon) everything internally looks the same to xts. The raw index is actually a simple vector of fractional seconds since the UNIX epoch.
+
+Normally you want to access the times you stored. index() does this magically for you by using your indexClass. To get to the raw vector of the index, you can use .index(). Note the critical dot before the function name.
+
+More useful than extracting raw seconds is the ability to extract time components similar to the POSIXlt class, which closely mirrors the underlying POSIX internal compiled structure tm. This functionality is provided by a handful of commands such as .indexday(), .indexmon(), .indexyear(), and more.
+https://www.rdocumentation.org/packages/base/topics/DateTimeClasses
+https://pubs.opengroup.org/onlinepubs/7908799/xsh/time.h.html
+In this exercise, you'll take a look at the weekend weather in our pre-loaded temps data using the .indexwday() command. Note that the values range from 0-6, with Sunday equal to 0. Recall that you can use a logical vector to extract elements of an xts object.
+https://www.rdocumentation.org/packages/xts/topics/indexClass
+
+
+
+
+Practice extracting the underlying units of your index in the temps data. Use .index() to see the number of seconds, and .indexwday() to see the day of the week of your observations.
+Create index using the which() function to extract weekend observations in temps.
+Select the indexed values from temps.
+
+
+# Explore underlying units of temps in two commands: .index() and .indexwday()
+.index(temps)
+ [1] 1467331200 1467417600 1467504000 1467590400 1467676800 1467763200
+ [7] 1467849600 1467936000 1468022400 1468108800 1468195200 1468281600
+[13] 1468368000 1468454400 1468540800 1468627200
+attr(,"tzone")
+[1] ""
+attr(,"tclass")
+[1] "POSIXct" "POSIXt" 
+
+
+
+
+.indexday(temps)
+ [1] 16983 16984 16985 16986 16987 16988 16989 16990 16991 16992 16993 16994
+[13] 16995 16996 16997 16998
+attr(,"tzone")
+[1] ""
+attr(,"tclass")
+[1] "POSIXct" "POSIXt" 
+
+
+
+#day of the week, starting from 0/Sunday
+.indexwday(temps) 
+ [1] 5 6 0 1 2 3 4 5 6 0 1 2 3 4 5 6
+ 
+ 
+ # not sure why .indexmon is 0-indexed => July returns a '6'
+.indexmon(temps)
+ [1] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+ 
+ 
+ # year 0 - 1900
+.indexyear(temps)
+ [1] 116 116 116 116 116 116 116 116 116 116 116 116 116 116 116 116
+ 
+ 
+# Create an index of weekend days using which()
+index <- which(.indexwday(temps) == 0 | .indexwday(temps) == 6)
+index
+[1]  2  3  9 10 16
+
+
+# Select the index
+temps[index]
+           Temp.Max Temp.Mean Temp.Min
+2016-07-02       78        66       56
+2016-07-03       79        68       59
+2016-07-09       81        73       67
+2016-07-10       83        72       64
+2016-07-16       79        69       60
+
+
+
+
+
+
+
+
+
+>temps
+           Temp.Max Temp.Mean Temp.Min
+2016-07-01       74        69       60
+2016-07-02       78        66       56
+2016-07-03       79        68       59
+2016-07-04       80        76       69
+2016-07-05       90        79       68
+2016-07-06       89        79       70
+2016-07-07       87        78       72
+2016-07-08       89        80       72
+2016-07-09       81        73       67
+2016-07-10       83        72       64
+2016-07-11       93        81       69
+2016-07-12       89        82       77
+2016-07-13       86        78       68
+2016-07-14       89        80       68
+2016-07-15       75        72       60
+2016-07-16       79        69       60
+
+
