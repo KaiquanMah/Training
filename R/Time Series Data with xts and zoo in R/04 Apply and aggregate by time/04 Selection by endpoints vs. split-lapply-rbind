@@ -1,0 +1,48 @@
+By now you have seen that even in xts there is more than one way to accomplish a task. In this exercise we'll highlight this explicitly by tackling the same challenge using two different methods. When you are on your own, you will likely find situations where one or the other will be more intuitive, but for now you should make sure you are able to do both.
+
+Starting with the same daily series temps, the challenge will be to find the last observation in each week.
+
+Note that these functions will always find the dates that are in the closed interval [start of period, end of period] even if there is no observation at the exact start or end. xts represents irregular time series, so it is perfectly valid to have holes in the data where one might expect an observation.
+
+Using the slides and video examples as a reference, find the last observation for each week in our temps data.
+
+
+
+Use the split()-lapply()-rbind() paradigm, given for you in the script, to find the last observation in each week in temps. It is stored in temps_1.
+Use endpoints() to find the last days of the week in temps. Store the resulting vector in last_day_of_weeks.
+Create temps_2 by subsetting temps using last_day_of_weeks.
+
+
+
+
+# Method 1
+# Use the proper combination of split, lapply and rbind
+# split xtsObj on weeks
+# per week => lapply fn => last '1 day'
+# rbind the last day entry per week
+# using do.call => which seems to call rbind (recursively?) on the multiple row entries
+# https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/do.call
+temps_1 <- do.call(rbind, lapply(split(temps, "weeks"), function(w) last(w, n = "1 day")))
+temps_1
+           Temp.Max Temp.Mean Temp.Min
+2016-07-03       79        68       59
+2016-07-10       83        72       64
+2016-07-16       79        69       60
+
+
+
+
+
+# Method 2
+# Create last_day_of_weeks using endpoints()
+last_day_of_weeks <- endpoints(temps, on ="weeks")
+
+# Subset temps using last_day_of_weeks 
+temps_2 <- temps[last_day_of_weeks]
+temps_2
+           Temp.Max Temp.Mean Temp.Min
+2016-07-03       79        68       59
+2016-07-10       83        72       64
+2016-07-16       79        69       60
+
+
