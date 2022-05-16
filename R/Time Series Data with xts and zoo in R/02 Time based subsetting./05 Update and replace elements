@@ -1,0 +1,67 @@
+Replacing values in xts objects is just as easy as extracting them. You can use either ISO-8601 strings, date objects, logicals, or integers to locate the rows you want to replace. One reason you may want to do this would be to replace known intervals or observations with NA, say due to a malfunctioning sensor on a particular day or a set of outliers given a holiday.
+
+For individual observations located sporadically throughout your data dates, integers or logical vectors are a great choice. For continuous blocks of time, ISO-8601 is the preferred method.
+
+In this exercise, you'll continue using the vector dates from the previous exercise to modify your x object. Both are already loaded in your workspace.
+
+
+Use the vector dates to replace values in x with NA values.
+Replace all values in x for dates (not referring to the vector) from June 9, 2016 onward with 0. Use ISO-8601 style replacement.
+Use the console to look at the value for June 11, 2016 to show that your hard work has paid off!
+
+
+>x
+           [,1]
+2016-06-02    1
+2016-06-03    2
+2016-06-04    3
+2016-06-05    4
+2016-06-06    5
+2016-06-07    6
+2016-06-08    7
+2016-06-09    8
+2016-06-10    9
+2016-06-11   10
+
+>dates
+[1] "2016-06-04" "2016-06-08"
+
+>index(x)
+ [1] "2016-06-02 UTC" "2016-06-03 UTC" "2016-06-04 UTC" "2016-06-05 UTC"
+ [5] "2016-06-06 UTC" "2016-06-07 UTC" "2016-06-08 UTC" "2016-06-09 UTC"
+ [9] "2016-06-10 UTC" "2016-06-11 UTC"
+
+
+
+
+
+
+
+
+# Replace the values in x contained in the dates vector with NA
+x[dates] <- NA
+
+
+# Replace all values in x for dates starting June 9, 2016 with 0
+x[index(x) >= "2016-06-09"] <- 0
+x
+           [,1]
+2016-06-02    1
+2016-06-03    2
+2016-06-04   NA
+2016-06-05    4
+2016-06-06    5
+2016-06-07    6
+2016-06-08   NA
+2016-06-09    0
+2016-06-10    0
+2016-06-11    0
+
+
+# Verify that the value in x for June 11, 2016 is now indeed 0
+x["2016-06-11"] == 0
+           [,1]
+2016-06-11 TRUE
+
+
+
