@@ -1,0 +1,60 @@
+As you've encountered already, it's not uncommon to find yourself with missing values (i.e. NAs) in your time series. This may be the result of a data omission or some mathematical or merge operation you do on your data.
+
+The xts package leverages the power of zoo for help with this. zoo provides a variety of missing data handling functions which are usable by xts.
+
+In this exercise you will use the most basic of these, na.locf(). This function takes the last observation carried forward approach. In most circumstances this is the correct thing to do. It both preserves the last known value and prevents any look-ahead bias from entering into the data.
+
+You can also apply next observation carried backward by setting fromLast = TRUE.
+
+# Last obs. carried forward
+na.locf(x)                
+
+# Next obs. carried backward
+na.locf(x, fromLast = TRUE) 
+
+
+
+
+Using a subset of temps, fill missing NA observations with the last observation known. Store them in temps_last.
+Using another subset of temps, backfill missing NA observations with the next observation. Store them in temps_next.
+
+>temps
+           Temp.Max Temp.Mean Temp.Min
+2016-07-01       74        69       60
+2016-07-02       78        NA       56
+2016-07-03       79        NA       59
+2016-07-04       80        76       69
+2016-07-05       90        79       68
+
+
+
+# Fill missing values in temps using the last observation
+temps_last <- na.locf(temps)
+# Fill missing values in temps using the next observation
+temps_next <- na.locf(temps, fromLast = TRUE)
+
+
+>temps_last
+           Temp.Max Temp.Mean Temp.Min
+2016-07-01       74        69       60
+2016-07-02       78        69       56
+2016-07-03       79        69       59
+2016-07-04       80        76       69
+2016-07-05       90        79       68
+
+
+>temps_next
+           Temp.Max Temp.Mean Temp.Min
+2016-07-01       74        69       60
+2016-07-02       78        76       56
+2016-07-03       79        76       59
+2016-07-04       80        76       69
+2016-07-05       90        79       68
+
+
+
+
+
+
+As you can see, the na.locf() command is useful for replacing missing values in xts objects.
+
