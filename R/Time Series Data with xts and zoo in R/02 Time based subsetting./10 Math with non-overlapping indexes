@@ -1,0 +1,38 @@
+The previous exercise illustrated the ins and outs of doing basic math with xts objects. At this point you are aware that xts respects time and will only return the intersection of times when doing various mathematical operations.
+
+We alluded to another way to handle this behavior in the last exercise. Namely, re-indexing your data before an operation. This makes it possible to preserve the dimensions of your data by leveraging the same mechanism that xts uses internally in its own Ops method (the code dispatched when you call + or similar).
+
+The third way involves modifying the two series you want by assuring you have some union of dates - the dates you require in your final output. To do this you will need a few functions that won't be dealt with in depth until Chapter 3, but are very useful here.
+
+merge(b, index(a))
+Don't worry if you aren't yet familiar with merge(). This exercise may be easier if you just follow along with the instructions.
+
+
+>a
+           a
+2015-01-24 1
+2015-01-25 1
+2015-01-26 1
+
+
+>b
+           b
+2015-01-24 2
+
+
+# Add a to b, and fill all missing rows of b with 0
+a + merge(b, index(a), fill = 0)
+           a
+2015-01-24 3
+2015-01-25 1
+2015-01-26 1
+
+
+# Add a to b and fill NAs with the last observation
+a + merge(b, index(a), fill = na.locf)
+           a
+2015-01-24 3
+2015-01-25 3
+2015-01-26 3
+
+
