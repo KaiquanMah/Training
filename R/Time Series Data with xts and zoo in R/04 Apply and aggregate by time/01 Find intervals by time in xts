@@ -1,0 +1,47 @@
+One of the benefits to working with time series objects is how easy it is to apply functions by time.
+
+The main function in xts to facilitate this is endpoints(). It takes a time series (or a vector of times) and returns the locations of the last observations in each interval.
+https://www.rdocumentation.org/packages/xts/topics/endpoints
+For example, the code below locates the last observation of each year for the AirPass data set.
+
+endpoints(AirPass, on = "years")
+[1] 0 12 24 36 48 60 72 84 96 108 120 132 144
+The argument on supports a variety of periods, including "years", "quarters", "months", as well as intraday intervals such as "hours", and "minutes". What is returned is a vector starting with 0 and ending with the extent (last row) of your data.
+
+In addition to each period, you can find the  period by utilizing the k argument. For example, setting the arguments of your endpoints() call to on = "weeks", k = 2, would generate the final day of every other week in your data. Note that the last value returned will always be the length of your input data, even if it doesn't correspond to a skipped interval.
+
+In this exercise you'll use endpoints() to find two sets of endpoints for the daily temps data.
+
+
+
+
+>temps
+           Temp.Max Temp.Mean Temp.Min     <= first
+2016-07-01       74        69       60
+2016-07-02       78        66       56
+2016-07-03       79        68       59     <= Sunday; end of 'week 1'
+2016-07-04       80        76       69
+2016-07-05       90        79       68
+2016-07-06       89        79       70
+2016-07-07       87        78       72
+2016-07-08       89        80       72
+2016-07-09       81        73       67
+2016-07-10       83        72       64     <= Sunday; end of 'week 2'
+2016-07-11       93        81       69
+2016-07-12       89        82       77
+2016-07-13       86        78       68
+2016-07-14       89        80       68
+2016-07-15       75        72       60
+2016-07-16       79        69       60     <= last
+
+
+# Locate the weeks
+endpoints(temps, on = "weeks")
+[1]  0  3 10 16
+
+
+# Locate every two weeks
+endpoints(temps, on = "weeks", k = 2)
+[1]  0 10 16
+
+
