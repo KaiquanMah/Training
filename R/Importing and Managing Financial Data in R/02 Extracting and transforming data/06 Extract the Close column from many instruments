@@ -1,0 +1,41 @@
+The previous exercise taught you how to use do.call(merge, eapply(env, fun)) to apply a function to each object in an environment and then combine all the results into one object.
+Let's use what you learned to solve a very common problem. Often you will need to load similar data for many instruments, extract a column, and create one object that contains that specific column for every instrument.
+
+
+Use new.env() to create a new environment named data_env.
+Use getSymbols() to load data into data_env by using the env argument.
+Finish the commands that have been started for you. Fill in the blanks with the appropriate functions.
+View the first few rows of close_data.
+
+
+# Symbols
+symbols <- c("AAPL", "MSFT", "IBM")
+
+# Create new environment
+data_env <- new.env()
+data_env
+<environment: 0x55e9a3ef8650>
+
+# Load symbols into data_env
+getSymbols(Symbols = symbols, env=data_env)
+[1] "AAPL" "MSFT" "IBM" 
+
+#head(data_env)
+#Error: object of type 'environment' is not subsettable
+
+
+# Extract the close column from each object and combine into one xts object
+close_data <- do.call(merge, eapply(data_env, Cl))
+
+# View the head of close_data
+head(close_data)
+           AAPL.Close IBM.Close MSFT.Close
+2007-01-03   2.992857  92.99236      29.86
+2007-01-04   3.059286  93.98662      29.81
+2007-01-05   3.037500  93.13576      29.64
+2007-01-08   3.052500  94.55067      29.93
+2007-01-09   3.306071  95.66921      29.96
+2007-01-10   3.464286  94.54111      29.66
+
+
+
