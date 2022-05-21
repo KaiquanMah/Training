@@ -1,0 +1,81 @@
+What if you need to aggregate or transform your data in ways Quandl() does not support? In those cases, you can use the flexibility of R.
+
+One paradigm involves importing data into a new environment. Then you can use eapply() to call a function on each object in the environment, much like what lapply() does for each element of a list. Also like lapply(), eapply() returns a list.
+
+Then you can merge all the elements of the list into one object by using do.call(), which is like having R programmatically type and run a command for you. Instead of typing merge(my_list[[1]], my_list[[2]]], ...), you can type do.call(merge, my_list).
+
+
+Use eapply() to call head() on each object in data_env. Assign the result to data_list.
+Use do.call() and merge() to combine all the elements of data_list into one xts object named data_merged.
+Since objects in an environment aren't ordered, there's no guarantee what order the columns of data_merged are in. Use OHLC() to order them, and store the data in data_ohlc.
+
+
+# Call head on each object in data_env using eapply
+data_list <- eapply(data_env, head)
+
+data_list
+$Close
+              Close
+2007-01-02 50.11778
+2007-01-03 50.39767
+2007-01-04 50.33236
+2007-01-05 50.33459
+2007-01-06 50.18112
+2007-01-07 49.99185
+
+$Low
+                Low
+2007-01-02 49.95041
+2007-01-03 50.23050
+2007-01-04 50.26414
+2007-01-05 50.22103
+2007-01-06 50.11121
+2007-01-07 49.99185
+
+$High
+               High
+2007-01-02 50.11778
+2007-01-03 50.42188
+2007-01-04 50.42096
+2007-01-05 50.37347
+2007-01-06 50.24433
+2007-01-07 50.21561
+
+$Open
+               Open
+2007-01-02 50.03978
+2007-01-03 50.23050
+2007-01-04 50.42096
+2007-01-05 50.37347
+2007-01-06 50.24433
+2007-01-07 50.13211
+
+
+
+
+
+# Merge all the data_list elements into one xts object
+data_merged <- do.call(merge, data_list)
+data_merged
+              Close      Low     High     Open
+2007-01-02 50.11778 49.95041 50.11778 50.03978
+2007-01-03 50.39767 50.23050 50.42188 50.23050
+2007-01-04 50.33236 50.26414 50.42096 50.42096
+2007-01-05 50.33459 50.22103 50.37347 50.37347
+2007-01-06 50.18112 50.11121 50.24433 50.24433
+2007-01-07 49.99185 49.99185 50.21561 50.13211
+
+
+
+
+
+# Ensure the columns are ordered: open, high, low, close
+data_ohlc <- OHLC(data_merged)
+data_ohlc
+               Open     High      Low    Close
+2007-01-02 50.03978 50.11778 49.95041 50.11778
+2007-01-03 50.23050 50.42188 50.23050 50.39767
+2007-01-04 50.42096 50.42096 50.26414 50.33236
+2007-01-05 50.37347 50.37347 50.22103 50.33459
+2007-01-06 50.24433 50.24433 50.11121 50.18112
+2007-01-07 50.13211 50.21561 49.99185 49.99185
