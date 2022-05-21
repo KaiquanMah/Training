@@ -1,0 +1,139 @@
+The Quandl() function returns a data.frame by default. It can return other classes via the type argument.
+
+The possible values for type are:
+"raw" (a data.frame),
+"ts" (time-series objects from the stats package),
+"zoo",
+"xts", and
+"timeSeries" (from the timeSeries package in the RMetrics suite).
+
+In this exercise, you will learn how to use the type argument to make Quandl() return an xts and a zoo object.
+
+The Quandl package has already been loaded for you.
+
+
+
+
+Use the type argument to make Quandl() import the GDP data as a xts object. Assign the result to gdp_xts.
+Use str() to view the structure of gdp_xts.
+Use the type argument to make Quandl() import the GDP data as a zoo object. Assign the result to gdp_zoo.
+Use str() to view the structure of gdp_zoo.
+
+
+
+
+
+# timeSeries
+library(timeSeries)
+# Error: there is no package called 'timeSeries'
+
+gdp_timeseries <- Quandl(code = "FRED/GDP", type = "timeSeries")
+# Error: Package timeSeries needed to use this type
+
+str(gdp_timeseries)
+head(gdp_timeseries)
+
+
+
+
+
+
+# Import GDP data from FRED as xts
+gdp_xts <- Quandl(code = "FRED/GDP", type = "xts")
+
+# Look at the structure of gdp_xts
+str(gdp_xts)
+An 'xts' object on 1947 Q1/2021 Q4 containing:
+  Data: num [1:300, 1] 243 246 250 260 266 ...
+  Indexed by objects of class: [yearqtr] TZ: UTC
+  xts Attributes:  
+ NULL
+ 
+ 
+head(gdp_xts)
+           [,1]
+1947 Q1 243.164
+1947 Q2 245.968
+1947 Q3 249.585
+1947 Q4 259.745
+1948 Q1 265.742
+1948 Q2 272.567
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Import GDP data from FRED as zoo
+gdp_zoo <- Quandl(code = "FRED/GDP", type = "zoo")
+
+# Look at the structure of gdp_zoo
+str(gdp_zoo)
+'zooreg' series from 1947 Q1 to 2021 Q4
+  Data: num [1:300] 243 246 250 260 266 ...
+  Index:  'yearqtr' num [1:300] 1947 Q1 1947 Q2 1947 Q3 1947 Q4 ...
+  Frequency: 4 
+  
+  
+head(gdp_zoo)
+1947 Q1 1947 Q2 1947 Q3 1947 Q4 1948 Q1 1948 Q2 
+243.164 245.968 249.585 259.745 265.742 272.567 
+
+
+
+
+
+
+
+
+# ts
+gdp_ts <- Quandl(code = "FRED/GDP", type = "ts")
+
+str(gdp_ts)
+ Time-Series [1:300] from 1947 to 2022: 243 246 250 260 266 ...
+ 
+ 
+head(gdp_ts)
+[1] 243.164 245.968 249.585 259.745 265.742 272.567
+
+
+
+
+
+
+
+
+# df/raw
+gdp_ts <- Quandl(code = "FRED/GDP", type = "raw")
+str(gdp_ts)
+head(gdp_ts)
+'data.frame':	300 obs. of  2 variables:
+ $ Date : Date, format: "2021-10-01" "2021-07-01" ...
+ $ Value: num  23992 23202 22741 22038 21478 ...
+ - attr(*, "freq")= chr "quarterly"
+        Date    Value
+1 2021-10-01 23992.35
+2 2021-07-01 23202.34
+3 2021-04-01 22740.96
+4 2021-01-01 22038.23
+5 2020-10-01 21477.60
+6 2020-07-01 21138.57
+
+
+
+
+
+
+
+raw - yyyy-MM-dd
+xts - yyyy Q#
+zoo - yyyy Q# 
+ts - without dates
+
