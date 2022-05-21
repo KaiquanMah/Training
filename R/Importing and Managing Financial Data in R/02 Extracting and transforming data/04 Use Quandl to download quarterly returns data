@@ -1,0 +1,126 @@
+Sometimes you need to aggregate and/or transform raw data before you can continue your analysis. The Quandl() function allows you to specify common aggregations and transformations via the collapse and/or transform arguments. The Quandl API takes care of the details for you.
+
+You will use the same CL and BZ data from the CME as last exercise, but this time you will apply some aggregations and transformations on the raw data. The quandl codes for CL and BZ are provided in the object quandl_codes.
+
+
+Use the collapse and type arguments with Quandl() to download quarterly data as an xts object named qtr_price.
+Use a quantmod extractor function to view the high prices for both instruments.
+Modify the command to the first instruction to create a qtr_return object that contains the % change of the raw data. See the Quandl API documentation for how to specify row-on-row % change.
+Use getPrice() to view the Settle returns.
+https://docs.quandl.com/docs/parameters-2#section-transformations
+
+
+>quandl_codes
+[1] "CHRIS/CME_CL1" "CHRIS/CME_BZ1"
+
+# Download quarterly CL and BZ prices
+qtr_price <- Quandl(quandl_codes, type = "xts", collapse = "quarterly")
+
+# View the high prices for both series
+Hi(qtr_price)
+        CME.CLH2016 - High CME.BZH2016 - High
+2010 Q4              92.94                 NA
+2011 Q1             101.43                 NA
+2011 Q2             100.19                 NA
+2011 Q3              91.59                 NA
+2011 Q4               0.00               0.00
+2012 Q1               0.00               0.00
+2012 Q2               0.00               0.00
+2012 Q3               0.00               0.00
+2012 Q4               0.00               0.00
+2013 Q1               0.00               0.00
+2013 Q2               0.00               0.00
+2013 Q3               0.00               0.00
+2013 Q4               0.00               0.00
+2014 Q1              86.00               0.00
+2014 Q2              93.05                 NA
+2014 Q3               0.00                 NA
+2014 Q4              61.03              69.45
+2015 Q1              57.17              64.45
+2015 Q2              61.63              66.72
+2015 Q3              47.95              51.37
+2015 Q4              38.87              38.34
+2016 Q1              32.05              35.00
+
+
+
+
+
+
+
+
+
+# Download quarterly CL and BZ returns
+qtr_return <- Quandl(quandl_codes, type = "xts", collapse = "quarterly", transform = "rdiff")
+head(qtr_return)
+        CME.CLH2016 - Open CME.CLH2016 - High CME.CLH2016 - Low
+2011 Q1                 NA         0.09134926        0.09134926
+2011 Q2                 NA        -0.01222518       -0.01222518
+2011 Q3                 NA        -0.08583691       -0.08583691
+2011 Q4                 NA        -1.00000000       -1.00000000
+2012 Q1                 NA                 NA                NA
+2012 Q2                 NA                 NA                NA
+        CME.CLH2016 - Last CME.CLH2016 - Change CME.CLH2016 - Settle
+2011 Q1                 NA                   NA           0.09134926
+2011 Q2                 NA                   NA          -0.01222518
+2011 Q3                 NA                   NA          -0.08583691
+2011 Q4                 NA                   NA          -0.01233759
+2012 Q1                 NA                   NA           0.03603803
+2012 Q2                 NA                   NA          -0.07479727
+        CME.CLH2016 - Volume CME.CLH2016 - Open Interest CME.BZH2016 - Open
+2011 Q1                   NA                          NA                 NA
+2011 Q2                   NA                          NA                 NA
+2011 Q3                   NA                          NA                 NA
+2011 Q4                   NA                          NA                 NA
+2012 Q1                   NA                          NA                 NA
+2012 Q2                   NA                           0                 NA
+        CME.BZH2016 - High CME.BZH2016 - Low CME.BZH2016 - Last
+2011 Q1                 NA                NA                 NA
+2011 Q2                 NA                NA                 NA
+2011 Q3                 NA                NA                 NA
+2011 Q4                 NA                NA                 NA
+2012 Q1                 NA                NA                 NA
+2012 Q2                 NA                NA                 NA
+        CME.BZH2016 - Change CME.BZH2016 - Settle CME.BZH2016 - Volume
+2011 Q1                   NA                   NA                   NA
+2011 Q2                   NA                   NA                   NA
+2011 Q3                   NA                   NA                   NA
+2011 Q4                   NA                   NA                   NA
+2012 Q1                   NA           0.04050851                   NA
+2012 Q2                   NA          -0.04038103                   NA
+        CME.BZH2016 - Open Interest
+2011 Q1                          NA
+2011 Q2                          NA
+2011 Q3                          NA
+2011 Q4                          NA
+2012 Q1                          NA
+2012 Q2                          NA
+
+
+
+# View the settle price returns for both series
+getPrice(qtr_return, prefer = "Settle")
+        CME.CLH2016 - Settle CME.BZH2016 - Settle
+2011 Q1          0.091349258                   NA
+2011 Q2         -0.012225180                   NA
+2011 Q3         -0.085836910                   NA
+2011 Q4         -0.012337591                   NA
+2012 Q1          0.036038028          0.040508511
+2012 Q2         -0.074797268         -0.040381031
+2012 Q3          0.016030446          0.029779888
+2012 Q4          0.008286039          0.006496228
+2013 Q1         -0.011595182          0.001561524
+2013 Q2         -0.045899772         -0.041679659
+2013 Q3          0.025784887          0.027440347
+2013 Q4         -0.011521005          0.038847250
+2014 Q1          0.014480810          0.008535718
+2014 Q2          0.079377974          0.052191436
+2014 Q3         -0.069454897         -0.070669348
+2014 Q4         -0.295436164         -0.306543019
+2015 Q1         -0.073958675         -0.073551263
+2015 Q2          0.088188419          0.071692061
+2015 Q3         -0.229129373         -0.237503741
+2015 Q4         -0.194215748         -0.260647694
+2016 Q1         -0.175268535         -0.079108044
+
+
