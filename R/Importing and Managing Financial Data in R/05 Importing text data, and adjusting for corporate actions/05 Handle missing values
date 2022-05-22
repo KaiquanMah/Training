@@ -1,0 +1,103 @@
+In chapter 3, you used na.locf() to fill missing values with the previous non-missing value. You can use interpolation when carrying the previous value forward isn't appropriate. In this exercise, you will explore two interpolation methods: linear and spline.
+
+Linear interpolation calculates values that lie on a line between two known data points. This is a good choice for fairly linear data, like a series with a strong trend. Spline interpolation is more appropriate for series without a strong trend, because it calculates a non-linear approximation using multiple data points.
+
+Use these two methods to interpolate the three missing values for the 10-year Treasury rate in the object DGS10. Then compare the results with the output of na.locf().
+
+Complete the command to use na.approx() to fill in missing values using linear interpolation.
+Complete the command to use na.spline() to fill in missing values using spline interpolation.
+Merge locf, approx, and spline into one object named na_filled.
+Complete the command to plot na_filled.
+
+# fill NA using last observation carried forward
+locf <- na.locf(DGS10)
+# fill NA using linear interpolation
+approx <- na.approx(DGS10)
+# fill NA using spline interpolation
+spline <- na.spline(DGS10)
+
+# merge into one object
+na_filled <- merge(locf, approx, spline)
+
+
+# plot combined object
+plot(na_filled, col = c("black", "red", "green"))
+
+
+Now you know multiple ways to interpolate missing values.
+
+
+
+
+>locf
+           DGS10
+2001-08-27  4.94
+2001-08-28  4.85
+2001-08-29  4.78
+2001-08-30  4.79
+2001-08-31  4.85        <=  last value
+2001-09-03  4.85        <= forwardfill
+2001-09-04  4.99        <= next actual value
+2001-09-05  4.97
+2001-09-06  4.86
+2001-09-07  4.80
+ [ reached getOption("max.print") -- omitted 6 rows ]
+>approx
+              DGS10
+2001-08-27 4.940000
+2001-08-28 4.850000
+2001-08-29 4.780000
+2001-08-30 4.790000
+2001-08-31 4.850000        <=  last value
+2001-09-03 4.955000        <= linear interpolation
+2001-09-04 4.990000        <= next actual value
+2001-09-05 4.970000
+2001-09-06 4.860000
+2001-09-07 4.800000
+ [ reached getOption("max.print") -- omitted 6 rows ]
+>spline
+              DGS10
+2001-08-27 4.940000
+2001-08-28 4.850000
+2001-08-29 4.780000
+2001-08-30 4.790000
+2001-08-31 4.850000        <=  last value
+2001-09-03 4.974548        <= non-linear interpolation
+2001-09-04 4.990000        <= next actual value
+2001-09-05 4.970000
+2001-09-06 4.860000
+2001-09-07 4.800000
+ [ reached getOption("max.print") -- omitted 6 rows ]
+
+
+
+
+
+
+
+
+
+
+>locf["2001-09-10/2001-09-14"]
+           DGS10
+2001-09-10  4.84        <=  last value
+2001-09-11  4.84        <= forwardfill
+2001-09-12  4.84        <= forwardfill
+2001-09-13  4.64        <= next actual value
+2001-09-14  4.57
+>approx["2001-09-10/2001-09-14"]
+              DGS10
+2001-09-10 4.840000        <=  last value
+2001-09-11 4.773333        <=  linear interpolation
+2001-09-12 4.706667        <=  linear interpolation
+2001-09-13 4.640000        <= next actual value
+2001-09-14 4.570000
+>spline["2001-09-10/2001-09-14"]
+              DGS10
+2001-09-10 4.840000        <=  last value
+2001-09-11 4.799677        <=  non-linear interpolation
+2001-09-12 4.724492        <=  non-linear interpolation
+2001-09-13 4.640000        <= next actual value
+2001-09-14 4.570000
+
+
