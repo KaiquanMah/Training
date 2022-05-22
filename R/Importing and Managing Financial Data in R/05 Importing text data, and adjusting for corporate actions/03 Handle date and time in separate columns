@@ -1,0 +1,44 @@
+read.zoo() makes it easy to import data when the date and time are in separate columns. The index.column argument allows you to specify the name or number of the column(s) containing the index data. That's all you need to do if the date and time are specified in the standard format ("%Y-%m-%d" for date, and "%H:%M:%S" for time).
+
+In this exercise, you will use the index.column argument to specify the date and time columns of the file. Your working directory has a file named UNE.csv that contains some 5-minute OHLC data for the energy company, Unron. You will still use read.csv() find the column names of the date and time columns.
+
+Import the first 5 lines of UNE.csv using read.csv(). Assign the output to une_data.
+Look at the structure of une_data and note the column names and locations.
+Use read.zoo() to import UNE.csv, specifying index.columns as the names of the date and time columns. Assign the output to une_zoo.
+Look at the first few rows of une_zoo.
+
+
+# Read data with read.csv
+une_data <- read.csv("UNE.csv", nrows = 5)
+une_data
+        Date     Time  Open  High   Low Close
+1 2016-11-14 09:05:00 10.38 10.38 10.21 10.22
+ [ reached 'max' / getOption("max.print") -- omitted 4 rows ]
+ 
+ 
+ 
+# Look at the structure of une_data
+str(une_data)
+'data.frame':	5 obs. of  6 variables:
+ $ Date : Factor w/ 1 level "2016-11-14": 1 1 1 1 1
+ $ Time : Factor w/ 5 levels "09:05:00","09:10:00",..: 1 2 3 4 5
+ $ Open : num  10.4 10.1 10.2 10.1 10.2
+ $ High : num  10.4 10.2 10.2 10.2 10.2
+ $ Low  : num  10.2 10.1 10.2 10.1 10.2
+ $ Close: num  10.2 10.2 10.2 10.2 10.2
+ 
+ 
+ 
+ 
+# Specify Date and Time index column names
+une_zoo <- read.zoo("UNE.csv", index.column = c("Date", "Time"), sep = ",", header = TRUE)
+
+# Look at first few rows of data
+head(une_zoo)
+                     Open  High   Low Close
+2016-11-14 09:05:00 10.38 10.38 10.21 10.22
+2016-11-14 09:10:00 10.12 10.22 10.12 10.22
+ [ reached getOption("max.print") -- omitted 4 rows ]
+
+
+
