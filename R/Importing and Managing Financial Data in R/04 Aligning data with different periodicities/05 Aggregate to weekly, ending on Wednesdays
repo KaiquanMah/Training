@@ -1,0 +1,49 @@
+In this exercise, you will learn a general aggregation technique to aggregate daily data to weekly, but with weeks ending on Wednesdays. This is often done in stock market research to avoid intra-week seasonality.
+
+The period.apply() function takes an xts object, time period end points, and an aggregation function. Then it applies the function to each group of data between the end points.
+
+The endpoints() function can calculate the time period end points for period.apply(), and you can use custom end points too. But your custom end points vector must start with zero and end with the total number of observations you're going to aggregate, just like the output of endpoints().
+
+You'll use .indexwday() to find the Wednesday of each week. It returns a number between 0-6, where Sunday=0.
+
+This exercise will use the daily Fed Funds data (DFF) from prior exercises.
+
+
+
+
+Use .indexwday() to get the week days from the DFF index. Assign the result to index_weekdays.
+Use the which() function to find the locations of the Wednesdays in index_weekdays. Store the result in wednesdays.
+Complete the command to make the end_points start with 0 and end with the total number of rows, like the output of endpoints().
+Use period.apply() and end_points to aggregate DFF to weekly averages. Assign the result to weekly_mean.
+
+
+
+# Extract index weekdays (Sunday = 0)
+index_weekdays <- .indexwday(DFF)
+head(index_weekdays)
+[1] 4 5 6 0 1 2
+
+
+# Find locations of Wednesdays
+wednesdays <- which(index_weekdays == 3)
+head(wednesdays)
+[1]  7 14 21 28 35 42
+
+
+# Create custom end points
+end_points <- c(0, wednesdays, nrow(DFF))
+head(end_points)
+[1]  0  7 14 21 28 35
+
+
+# Calculate weekly mean using custom end points
+weekly_mean <- period.apply(DFF, end_points, mean)
+head(weekly_mean)
+                 DFF
+1954-07-07 1.0014286
+1954-07-14 1.2157143
+1954-07-21 0.5714286
+1954-07-28 0.6257143
+1954-08-04 0.2700000
+1954-08-11 1.3071429
+
