@@ -1,0 +1,113 @@
+Recall that xts objects store the time index as seconds since midnight, 1970-01-01 in the UTC timezone. merge() uses this underlying index and returns a result with the first object's timezone.
+
+This exercise provides an example. The two objects in your workspace are identical except for the index timezone. The index values are the same instances in time, but measured in different locations. The london object's timezone is Europe/London and the chicago object's timezone is America/Chicago.
+
+Fill in the object names so the result of the merge() will have a London timezone.
+Use str() to look at the structure of tz_london and note the TZ and the local time range printed in the first line of output.
+Now complete the merge() command so the result will have a Chicago timezone.
+Use str() to look at the structure of tz_chicago and note how the TZ and local time range have changed.
+
+
+>head(london)
+Warning message: timezone of object (Europe/London) is different than current timezone ().
+                    London
+2010-01-06 06:00:00      1
+2010-01-11 16:00:00      2
+2010-01-11 19:00:00      3
+2010-01-11 20:00:00      4
+2010-01-14 08:00:00      5
+
+
+>head(chicago)
+Warning message: timezone of object (America/Chicago) is different than current timezone ().
+                    Chicago
+2010-01-06 00:00:00       1
+2010-01-11 10:00:00       2
+2010-01-11 13:00:00       3
+2010-01-11 14:00:00       4
+2010-01-14 02:00:00       5
+
+
+>str(london)
+An 'xts' object on 2010-01-06 06:00:00/2010-01-14 08:00:00 containing:
+  Data: int [1:5, 1] 1 2 3 4 5
+ - attr(*, "dimnames")=List of 2
+  ..$ : NULL
+  ..$ : chr "London"
+  Indexed by objects of class: [POSIXct,POSIXt] TZ: Europe/London
+  xts Attributes:  
+ NULL
+ 
+ 
+>str(chicago)
+An 'xts' object on 2010-01-06/2010-01-14 02:00:00 containing:
+  Data: int [1:5, 1] 1 2 3 4 5
+ - attr(*, "dimnames")=List of 2
+  ..$ : NULL
+  ..$ : chr "Chicago"
+  Indexed by objects of class: [POSIXct,POSIXt] TZ: America/Chicago
+  xts Attributes:  
+ NULL
+ 
+ 
+ 
+ 
+ 
+ 
+# Create merged object with a London timezone
+tz_london <- merge(london, chicago)
+
+# Look at tz_london structure
+str(tz_london)
+An 'xts' object on 2010-01-06 06:00:00/2010-01-14 08:00:00 containing:
+  Data: int [1:5, 1:2] 1 2 3 4 5 1 2 3 4 5
+ - attr(*, "dimnames")=List of 2
+  ..$ : NULL
+  ..$ : chr [1:2] "London" "Chicago"
+  Indexed by objects of class: [POSIXct,POSIXt] TZ: Europe/London
+  xts Attributes:  
+ NULL
+ 
+ 
+# Create merged object with a Chicago timezone
+tz_chicago <- merge(chicago, london)
+
+# Look at tz_chicago structure
+str(tz_chicago)
+An 'xts' object on 2010-01-06/2010-01-14 02:00:00 containing:
+  Data: int [1:5, 1:2] 1 2 3 4 5 1 2 3 4 5
+ - attr(*, "dimnames")=List of 2
+  ..$ : NULL
+  ..$ : chr [1:2] "Chicago" "London"
+  Indexed by objects of class: [POSIXct,POSIXt] TZ: America/Chicago
+  xts Attributes:  
+ NULL
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ >tz_london
+Warning message: timezone of object (Europe/London) is different than current timezone ().
+                    London Chicago
+2010-01-06 06:00:00      1       1
+2010-01-11 16:00:00      2       2
+2010-01-11 19:00:00      3       3
+2010-01-11 20:00:00      4       4
+2010-01-14 08:00:00      5       5
+
+
+
+>tz_chicago
+Warning message: timezone of object (America/Chicago) is different than current timezone ().
+                    Chicago London
+2010-01-06 00:00:00       1      1
+2010-01-11 10:00:00       2      2
+2010-01-11 13:00:00       3      3
+2010-01-11 14:00:00       4      4
+2010-01-14 02:00:00       5      5
+
+
