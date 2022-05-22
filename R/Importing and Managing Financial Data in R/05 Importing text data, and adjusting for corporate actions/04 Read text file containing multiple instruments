@@ -1,0 +1,39 @@
+The previous exercises work if each file contains only one instrument. Some software and data vendors may provide data for all instruments in one file. This exercise will teach you how to import a file that contains multiple instruments.
+
+Once again, you can use read.zoo(). This time you will be using its split argument, which allows you to specify the name or number of the columns(s) that contain the variables that identify unique observations.
+
+The two_symbols.csv file in your working directory contains bid/ask data for two instruments, where each row has one bid or ask observation for one instrument. You will use the split argument to import the data into an object that has both bid and ask prices for both instruments on one row.
+
+Import the first 5 lines of two_symbols.csv using read.csv(). Assign the output to two_symbols_data.
+Look at the structure of two_symbols_data and note the column names and locations.
+Use read.zoo() to import two_symbols.csv, specifying split as the names of the symbol and type columns. Assign the output to two_symbols_zoo.
+Look at the first few rows of two_symbols_zoo.
+
+
+# Read data with read.csv
+two_symbols_data <- read.csv("two_symbols.csv", nrows = 5)
+two_symbols_data
+                 Date Symbol Type Price
+1 2016-01-01 10:43:01      A  Bid 58.23
+2 2016-01-01 10:43:01      A  Ask 58.24
+ [ reached 'max' / getOption("max.print") -- omitted 3 rows ]
+ 
+# Look at the structure of two_symbols_data
+str(two_symbols_data)
+'data.frame':	5 obs. of  4 variables:
+ $ Date  : Factor w/ 2 levels "2016-01-01 10:43:01",..: 1 1 1 1 2
+ $ Symbol: Factor w/ 2 levels "A","B": 1 1 2 2 1
+ $ Type  : Factor w/ 2 levels "Ask","Bid": 2 1 2 1 2
+ $ Price : num  58.2 58.2 29 29 58.2
+ 
+ 
+ 
+# Specify Symbol and Type index column names
+two_symbols_zoo <- read.zoo("two_symbols.csv", split = c("Symbol", "Type"), sep = ",", header = TRUE)
+
+# Look at first few rows of data
+head(two_symbols_zoo)
+                    A.Ask B.Ask A.Bid B.Bid
+2016-01-01 10:43:01 58.24 28.98 58.23 28.96
+2016-01-01 10:43:02 58.25 28.99 58.24 28.97
+
