@@ -1,0 +1,99 @@
+Intraday data can be huge, with hundreds of thousands of observations per day, millions per month, and hundreds of millions per year. These datasets often need to be aggregated before you can work with them.
+
+You learned how to aggregate daily data in the Introduction to xts and zoo course. This exercise will use to.period() to aggregate intraday data to an OHLC series. You often need to specify both period and k arguments to aggregate intraday data.
+
+The intraday_xts object contains one trading day of random data.
+
+Use to.period() to convert intraday_xts into a 5-second price series called xts_5sec.
+Use to.period() to convert intraday_xts into a 10-minute price series called xts_10min.
+Use to.period() to convert intraday_xts into a 1-hour price series called xts_1hour.
+
+>intraday_xts
+                        data
+2010-01-04 08:59:59 20.00052
+2010-01-04 08:59:59 19.99699
+2010-01-04 09:00:00 19.99920
+2010-01-04 09:00:00 19.99907
+2010-01-04 09:00:01 20.00442
+2010-01-04 09:00:01 20.00718
+2010-01-04 09:00:01 20.00734
+2010-01-04 09:00:01 20.00609
+2010-01-04 09:00:02 20.00673
+2010-01-04 09:00:02 20.00509
+ [ reached getOption("max.print") -- omitted 99990 rows ]
+ 
+ 
+ 
+ 
+ 
+# Convert raw prices to 5-second prices
+xts_5sec <- to.period(intraday_xts, period = "seconds", k = 5)
+xts_5sec
+                    intraday_xts.Open intraday_xts.High intraday_xts.Low
+2010-01-04 08:59:59          20.00052          20.00052         19.99699
+2010-01-04 09:00:04          19.99920          20.01165         19.99907
+                    intraday_xts.Close
+2010-01-04 08:59:59           19.99699
+2010-01-04 09:00:04           20.00799
+ [ reached getOption("max.print") -- omitted 5040 rows ]
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# Convert raw prices to 10-minute prices
+xts_10min <-to.period(intraday_xts, period = "minutes", k = 10)
+xts_10min
+                    intraday_xts.Open intraday_xts.High intraday_xts.Low
+2010-01-04 08:59:59          20.00052          20.00052         19.99699
+2010-01-04 09:09:59          19.99920          20.09777         19.96760
+                    intraday_xts.Close
+2010-01-04 08:59:59           19.99699
+2010-01-04 09:09:59           20.07305
+ [ reached getOption("max.print") -- omitted 42 rows ]
+ 
+ 
+ 
+ 
+ 
+ 
+# Convert raw prices to 1-hour prices
+xts_1hour <- to.period(intraday_xts, period = "hours", k = 1)
+xts_1hour
+                    intraday_xts.Open intraday_xts.High intraday_xts.Low
+2010-01-04 08:59:59          20.00052          20.00052         19.99699
+2010-01-04 09:59:59          19.99920          20.42472         19.96760
+                    intraday_xts.Close
+2010-01-04 08:59:59           19.99699
+2010-01-04 09:59:59           20.39853
+ [ reached getOption("max.print") -- omitted 7 rows ]
+
+
+
+
+
+align.time(xts_1hour, n = 60)
+                    intraday_xts.Open intraday_xts.High intraday_xts.Low
+2010-01-04 09:00:00          20.00052          20.00052         19.99699
+2010-01-04 10:00:00          19.99920          20.42472         19.96760
+                    intraday_xts.Close
+2010-01-04 09:00:00           19.99699
+2010-01-04 10:00:00           20.39853
+ [ reached getOption("max.print") -- omitted 7 rows ]
+
+
+
+
+
+
+
+>to.period(intraday_xts, period = "days", k = 1)
+                    intraday_xts.Open intraday_xts.High intraday_xts.Low
+2010-01-04 16:00:00          20.00052          20.54205         19.53125
+                    intraday_xts.Close
+2010-01-04 16:00:00           19.66338
+
+
+
