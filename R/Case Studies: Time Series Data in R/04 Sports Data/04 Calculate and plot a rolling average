@@ -1,0 +1,196 @@
+The final baseball indicator you'd like to generate is the L10, or the moving win/loss average from the previous ten games. While the cumulative win/loss average tells you how the team is doing overall, the L10 indicator provides a more specific picture of the team's recent performance. Beyond the world of sports, this measure is comparable to a financial indicator focused on recent portfolio performance.
+
+To generate a rolling win/loss average, return to the rollapply() command used in the previous chapter. In this case, you'll want to apply the mean function to the last 10 games played by the Red Sox at any given time during the 2013 season.
+
+The redsox_xts object, including the win_loss column, is available in your workspace.
+
+
+Generate a new xts object containing only the 2013 season. Call this object redsox_2013.
+Use rollapply() to calculate your lastten_2013 indicator based on the win_loss column in redsox_2013. Set the width equal to 10 to include the last ten games played by the Red Sox and set the FUN argument to mean to generate an average of the win_loss column.
+Use plot.xts() to view your new indicator during the 2013 season. Leave the ylim argument as is in the prewritten code.
+
+
+
+
+# Select only the 2013 season
+redsox_2013 <- redsox_xts["2013"]
+
+# Use rollapply to generate the last ten average
+lastten_2013 <- rollapply(redsox_2013$win_loss, width = 10, FUN = mean)
+
+# Plot the last ten average during the 2013 season
+plot.xts(lastten_2013, ylim = c(0, 1))
+data:image/png;base64,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
+
+
+You've now used your time series data manipulation skills to generate a closing average, a cumulative average, and a rolling average from basic sports scores. These types of indicators have diverse applications, whether you're a baseball fan or a portfolio analyst.
+
+
+
+
+>lastten_2013
+           win_loss
+2013-04-01       NA
+2013-04-03       NA
+2013-04-04       NA
+2013-04-05       NA
+2013-04-06       NA
+2013-04-07       NA
+2013-04-08       NA
+2013-04-10       NA
+2013-04-11       NA
+2013-04-13      0.6
+2013-04-14      0.6
+2013-04-15      0.6
+2013-04-16      0.7
+2013-04-17      0.7
+2013-04-18      0.8
+2013-04-20      0.8
+2013-04-21      0.7
+2013-04-21      0.7
+2013-04-22      0.8
+2013-04-23      0.7
+2013-04-24      0.7
+2013-04-25      0.7
+2013-04-26      0.7
+2013-04-27      0.7
+2013-04-28      0.7
+2013-04-30      0.6
+2013-05-01      0.7
+2013-05-02      0.8
+2013-05-03      0.7
+2013-05-04      0.7
+2013-05-05      0.6
+2013-05-06      0.6
+2013-05-07      0.5
+2013-05-08      0.4
+2013-05-09      0.3
+2013-05-10      0.4
+2013-05-11      0.3
+2013-05-12      0.2
+2013-05-14      0.2
+2013-05-15      0.3
+2013-05-16      0.4
+2013-05-17      0.4
+2013-05-18      0.5
+2013-05-19      0.6
+2013-05-20      0.6
+2013-05-21      0.5
+2013-05-22      0.6
+2013-05-23      0.6
+2013-05-24      0.7
+2013-05-25      0.7
+2013-05-26      0.7
+2013-05-27      0.7
+2013-05-28      0.6
+2013-05-29      0.5
+2013-05-30      0.6
+2013-05-31      0.6
+2013-06-01      0.6
+2013-06-02      0.7
+2013-06-04      0.7
+2013-06-05      0.6
+2013-06-06      0.6
+2013-06-08      0.5
+2013-06-08      0.6
+2013-06-09      0.7
+2013-06-10      0.7
+2013-06-11      0.7
+2013-06-12      0.7
+2013-06-13      0.6
+2013-06-14      0.5
+2013-06-15      0.6
+2013-06-16      0.5
+2013-06-18      0.6
+2013-06-18      0.6
+2013-06-19      0.5
+2013-06-20      0.4
+2013-06-21      0.5
+2013-06-22      0.4
+2013-06-23      0.4
+2013-06-25      0.5
+2013-06-26      0.5
+2013-06-27      0.6
+2013-06-28      0.6
+2013-06-29      0.5
+2013-06-30      0.6
+2013-07-02      0.7
+2013-07-03      0.7
+2013-07-04      0.8
+2013-07-05      0.9
+2013-07-06      0.8
+2013-07-07      0.7
+2013-07-08      0.6
+2013-07-09      0.6
+2013-07-10      0.7
+2013-07-11      0.7
+2013-07-12      0.7
+2013-07-13      0.6
+2013-07-14      0.5
+2013-07-19      0.5
+2013-07-20      0.5
+2013-07-21      0.6
+2013-07-22      0.6
+2013-07-23      0.6
+2013-07-24      0.5
+2013-07-26      0.4
+2013-07-27      0.4
+2013-07-28      0.5
+2013-07-29      0.5
+2013-07-30      0.5
+2013-07-31      0.6
+2013-08-01      0.6
+2013-08-02      0.6
+2013-08-03      0.6
+2013-08-04      0.7
+2013-08-05      0.7
+2013-08-06      0.7
+2013-08-07      0.7
+2013-08-08      0.7
+2013-08-09      0.6
+2013-08-10      0.6
+2013-08-11      0.5
+2013-08-13      0.6
+2013-08-14      0.5
+2013-08-15      0.4
+2013-08-16      0.4
+2013-08-17      0.4
+2013-08-18      0.3
+2013-08-19      0.4
+2013-08-20      0.4
+2013-08-21      0.4
+2013-08-23      0.4
+2013-08-24      0.4
+2013-08-25      0.5
+2013-08-27      0.6
+2013-08-28      0.7
+2013-08-29      0.6
+2013-08-30      0.7
+2013-08-31      0.7
+2013-09-01      0.8
+2013-09-02      0.7
+2013-09-03      0.8
+2013-09-04      0.8
+2013-09-05      0.8
+2013-09-06      0.8
+2013-09-07      0.8
+2013-09-08      0.8
+2013-09-10      0.8
+2013-09-11      0.8
+2013-09-12      0.7
+2013-09-13      0.8
+2013-09-14      0.8
+2013-09-15      0.8
+2013-09-17      0.7
+2013-09-18      0.6
+2013-09-19      0.6
+2013-09-20      0.7
+2013-09-21      0.6
+2013-09-22      0.6
+2013-09-24      0.6
+2013-09-25      0.6
+2013-09-27      0.6
+2013-09-28      0.5
+2013-09-29      0.5
+
+
