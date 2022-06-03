@@ -1,0 +1,50 @@
+Given that economic trends may take some time to influence tourism, it may be helpful to lag your unemployment data before proceeding with analysis.
+
+Generating a lag in xts is straightforward with the lag() command, which requires that you specify the data being lagged (the x argument) and a k value to determine the direction and scale of the lag.
+
+Be careful to keep your formatting consistent. Base R and the zoo package require that you specify a lag with a negative value, so that a lag of 1 is expressed using "-1" (and a lead of 1 is counterintuitively expressed using "1"). By contrast, the xts package specifies lags using a positive value, so that a lag of 1 is expressed using "1" (and a lead of 1 is expressed using "-1").
+
+
+Use lag() to generate a one-month lag of US unemployment. For a one month lag using monthly data, simply set the k argument equal to 1. Remember that your unemployment object contains time series data on both US unemployment (us) and MA unemployment (ma). You'll need to specify which column you want to lag. Save this new xts object as us_monthlag.
+Use another call to lag() to generate a one-year lag of US unemployment. Once again, make sure you specify the correct column in unemployment and the appropriate k value to generate a lag over an entire year. Save this new xts object as us_yearlag.
+Use merge() to combine your original unemployment data (unemployment) with your new lags (us_monthlag and us_yearlag). Save this combined data as unemployment_lags.
+Use head() to view the first 15 rows of unemployment_lags.
+
+
+
+# Create a one month lag of US unemployment
+us_monthlag <- lag(unemployment$us, k = 1)
+
+
+
+# Create a one year lag of US unemployment
+us_yearlag <- lag(unemployment$us, k = 12)
+
+
+# Merge your original data with your new lags 
+unemployment_lags <- merge(unemployment, us_monthlag, us_yearlag)
+
+
+
+# View the first 15 rows of unemployment_lags
+head(unemployment_lags, 15)
+           us    ma us.1 us.2
+Jan 1976 7.90 11.60   NA   NA
+Feb 1976 7.70 11.25 7.90   NA
+Mar 1976 7.60 10.90 7.70   NA
+Apr 1976 7.70 10.15 7.60   NA
+May 1976 7.40  9.40 7.70   NA
+Jun 1976 7.60  9.80 7.40   NA
+Jul 1976 7.60  9.70 7.60   NA
+Aug 1976 7.60  9.00 7.60   NA
+Sep 1976 7.60  9.00 7.60   NA
+Oct 1976 7.70  8.30 7.60   NA
+Nov 1976 7.80  8.30 7.70   NA
+Dec 1976 7.65  8.20 7.80   NA
+Jan 1977 7.50  9.50 7.65  7.9
+Feb 1977 7.60  9.20 7.50  7.7
+Mar 1977 7.40  8.80 7.60  7.6
+
+
+When it comes to time series analysis, many of the theoretical processes you'll investigate take some time to have an effect. Including lags in your analysis is an easy way to account for this. However, as you may have noticed in your call to head(), lags generated through this process are not intuitively labelled in your data.
+
