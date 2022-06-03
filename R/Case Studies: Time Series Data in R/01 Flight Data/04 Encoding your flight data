@@ -1,0 +1,66 @@
+You're ready to encode your data to an xts object! Remember that flights is a data frame containing four columns of flight data and one column of dates.
+
+To convert to an xts object, you'll need to ensure that your date column is in a time-based format. As you discovered earlier, the date column is currently a character. Once date is saved in a time-based format, you're ready to convert to xts! To do so, you'll use as.xts(), which takes two primary arguments.
+https://www.rdocumentation.org/packages/xts/versions/0.9-7/topics/as.xts.methods
+First, you'll need to specify the object being converted (in this case, flights). To avoid redundancies, you should generally remove the time-based column from the data when you convert to xts. In this case, you'll remove the fifth column (dates), by specifying [, -5] in your as.xts() call.
+
+Second, you'll need to tell xts how to index your object by specifying the order.by argument. In this case, you want to index your object on the date column.
+
+The flights data frame is preloaded for you.
+
+# Load the xts package
+library(xts)
+
+
+# Convert date column to a time-based class
+flights$date <- as.Date(flights$date)
+
+
+# Convert flights to an xts object using as.xts
+# not removing the 'date' col => your xts object will have weird ways to store values later + there will be 2 date cols
+# flights_xts <- as.xts(flights, order.by = flights$date)
+>as.xts(flights, order.by = flights$date)
+           total_flights delay_flights cancel_flights divert_flights
+2010-01-01 " 8912"       "1989"        " 279"         " 9"          
+2010-02-01 " 8418"       "1918"        " 785"         "23"          
+2010-03-01 " 9637"       "2720"        " 242"         "32"          
+2010-04-01 " 9363"       "1312"        "  58"         " 7"          
+2010-05-01 " 9360"       "1569"        " 102"         " 8"          
+
+
+# so after fixing by removing the 'date' col
+flights_xts <- as.xts(flights[ , -5], order.by = flights$date)
+
+
+
+# Check the class of flights_xts
+class(flights_xts)
+[1] "xts" "zoo"
+
+
+str(flights_xts)
+An 'xts' object on 2010-01-01/2015-12-01 containing:
+  Data: num [1:72, 1:4] 8912 8418 9637 9363 9360 ...
+ - attr(*, "dimnames")=List of 2
+  ..$ : NULL
+  ..$ : chr [1:4] "total_flights" "delay_flights" "cancel_flights" "divert_flights"
+  Indexed by objects of class: [Date] TZ: UTC
+  xts Attributes:  
+ NULL
+
+
+
+
+# Examine the first five lines of flights_xts
+head(flights_xts, n = 5)
+           total_flights delay_flights cancel_flights divert_flights
+2010-01-01          8912          1989            279              9
+2010-02-01          8418          1918            785             23
+2010-03-01          9637          2720            242             32
+2010-04-01          9363          1312             58              7
+2010-05-01          9360          1569      
+
+
+Your new xts object contains four columns of information about flights indexed on a series of months and years.
+
+
