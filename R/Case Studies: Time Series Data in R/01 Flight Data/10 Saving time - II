@@ -1,0 +1,48 @@
+You've saved your flights_xts data to a rds file for future use. But what if you'd like to share your data with colleagues who don't use R?
+
+A second option for saving xts objects is to convert them to shareable formats beyond the R environment, including comma-separated values (CSV) files. To do this, you'll use the write.zoo() command.
+https://www.rdocumentation.org/packages/zoo/versions/1.7-13/topics/read.zoo
+Once you've succesfully exported your xts object to a csv file, you can load the data back into R using the read.zoo() command. Unlike readRDS, however, you will need to re-encode your data to an xts object (using as.xts).
+
+
+
+Use write.zoo() to save the flights_xts data to "flights_xts.csv". Be sure to specify comma-separated values (",") using the sep argument.
+Read your file back into R using read.zoo(). Specify the name of the file you exported as well as the method used to separate the data. Take a look at the other arguments but don't change the code. Save this new object as flights2.
+Encode your flights2 object back into xts using as.xts(). Save your new xts object as flights_xts2.
+
+
+
+# Export your xts object to a csv file using write.zoo
+write.zoo(flights_xts, file = "flights_xts.csv", sep = ",")
+
+# Open your saved object using read.zoo
+flights2 <- read.zoo("flights_xts.csv", sep = ",", FUN = as.Date, header = TRUE, index.column = 1)
+
+# Encode your new object back into xts
+flights_xts2 <- as.xts(flights2)
+
+
+
+
+# Examine the first five rows of your new flights_xts2 object
+head(flights_xts2, n=5)
+           total_flights delay_flights cancel_flights divert_flights pct_delay
+2010-01-01          8912          1989            279              9  22.31822
+2010-02-01          8418          1918            785             23  22.78451
+2010-03-01          9637          2720            242             32  28.22455
+2010-04-01          9363          1312             58              7  14.01260
+2010-05-01          9360          1569            102              8  16.76282
+           pct_cancel pct_divert
+2010-01-01  3.1306104 0.10098743
+2010-02-01  9.3252554 0.27322404
+2010-03-01  2.5111549 0.33205354
+2010-04-01  0.6194596 0.07476236
+2010-05-01  1.0897436 0.08547009
+
+
+
+
+
+ou've succesfully completed a full cycle of time series data manipulation, including importing your data, converting it to xts, manipulating it, visualizing it, and saving it for future use. In the next chapter, you'll explore some additional time series data on Boston area weather to gain a deeper understanding of factors affecting flight delays and cancellations.
+
+
