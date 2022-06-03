@@ -1,0 +1,330 @@
+Now that you've explored weather and flight patterns in Boston, your client has asked you to step back and prepare some economic data. You've gathered some data on the US economy, including gross domestic product (GDP) and unemployment in the US in general and the state of Massachusetts (home to Boston) in particular.
+
+As always, your first step in manipulating time series data should be to convert your data to the xts class. In this exercise, you'll examine and encode time series data on US GDP, which is available in your workspace as gdp.
+https://www.rdocumentation.org/packages/xts/versions/0.9-7/topics/xts
+https://www.rdocumentation.org/packages/zoo/versions/1.7-13/topics/yearqtr
+
+
+View information about your gdp data using summary(). What can you conclude from the output of this command?
+Begin the process of encoding gdp to xts by converting the date column to a time object. In this case, it looks like your GDP data are quarterly, so you should use the yearqtr class.
+Use as.xts() to convert gdp to an xts object. Remember to index your xts object on the date column and remove that column from the xts output using the data[, 1] subsetting format.
+Use plot.xts() to view your GDP data over time. Does anything stand out in your plot?
+
+
+
+
+# Get a summary of your GDP data
+summary(gdp)
+      date      gdp_billions    
+ 1947 Q1:  1   Min.   :  243.1  
+ 1947 Q2:  1   1st Qu.:  708.8  
+ 1947 Q3:  1   Median : 3167.3  
+ 1947 Q4:  1   Mean   : 6186.6  
+ 1948 Q1:  1   3rd Qu.:11497.9  
+ 1948 Q2:  1   Max.   :18651.2  
+ (Other):273   NA's   :80    
+ 
+ 
+ 
+# Convert GDP date column to time object
+gdp$date <- as.yearqtr(gdp$date)
+
+
+# Convert GDP data to xts
+gdp_xts <- as.xts(gdp[, -1], order.by = gdp$date)
+
+
+
+# Plot GDP data over time
+plot.xts(gdp_xts)
+data:image/png;base64,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
+
+
+gdp_xts
+           [,1]
+1947 Q1   243.1
+1947 Q2   246.3
+1947 Q3   250.1
+1947 Q4   260.3
+1948 Q1   266.2
+1948 Q2   272.9
+1948 Q3   279.5
+1948 Q4   280.7
+1949 Q1   275.4
+1949 Q2      NA
+1949 Q3      NA
+1949 Q4   271.0
+1950 Q1   281.2
+1950 Q2      NA
+1950 Q3   308.5
+1950 Q4   320.3
+1951 Q1   336.4
+1951 Q2      NA
+1951 Q3   351.8
+1951 Q4   356.6
+1952 Q1      NA
+1952 Q2      NA
+1952 Q3      NA
+1952 Q4   381.2
+1953 Q1   388.5
+1953 Q2      NA
+1953 Q3      NA
+1953 Q4      NA
+1954 Q1      NA
+1954 Q2      NA
+1954 Q3   391.6
+1954 Q4   400.3
+1955 Q1   413.8
+1955 Q2   422.2
+1955 Q3   430.9
+1955 Q4      NA
+1956 Q1      NA
+1956 Q2   446.8
+1956 Q3   452.0
+1956 Q4   461.3
+1957 Q1   470.6
+1957 Q2   472.8
+1957 Q3      NA
+1957 Q4      NA
+1958 Q1      NA
+1958 Q2      NA
+1958 Q3   486.7
+1958 Q4   500.4
+1959 Q1   511.1
+1959 Q2   524.2
+1959 Q3   525.2
+1959 Q4   529.3
+1960 Q1   543.3
+1960 Q2   542.7
+1960 Q3   546.0
+1960 Q4   541.1
+1961 Q1   545.9
+1961 Q2   557.4
+1961 Q3   568.2
+1961 Q4   581.6
+1962 Q1   595.2
+1962 Q2   602.6
+1962 Q3   609.6
+1962 Q4      NA
+1963 Q1      NA
+1963 Q2      NA
+1963 Q3      NA
+1963 Q4   654.8
+1964 Q1   671.1
+1964 Q2   680.8
+1964 Q3   692.8
+1964 Q4   698.4
+1965 Q1   719.2
+1965 Q2   732.4
+1965 Q3      NA
+1965 Q4      NA
+1966 Q1      NA
+1966 Q2      NA
+1966 Q3   820.8
+1966 Q4   834.9
+1967 Q1   846.0
+1967 Q2   851.1
+1967 Q3   866.6
+1967 Q4   883.2
+1968 Q1      NA
+1968 Q2   936.3
+1968 Q3   952.3
+1968 Q4      NA
+1969 Q1   995.4
+1969 Q2  1011.4
+1969 Q3  1032.0
+1969 Q4  1040.7
+1970 Q1  1053.5
+1970 Q2  1070.1
+1970 Q3      NA
+1970 Q4  1091.5
+1971 Q1  1137.8
+1971 Q2  1159.4
+1971 Q3  1180.3
+1971 Q4  1193.6
+1972 Q1  1233.8
+1972 Q2      NA
+1972 Q3      NA
+1972 Q4  1332.0
+1973 Q1  1380.7
+1973 Q2  1417.6
+1973 Q3  1436.8
+1973 Q4  1479.1
+1974 Q1  1494.7
+1974 Q2  1534.2
+1974 Q3      NA
+1974 Q4  1603.0
+1975 Q1      NA
+1975 Q2      NA
+1975 Q3  1713.8
+1975 Q4  1765.9
+1976 Q1  1824.5
+1976 Q2  1856.9
+1976 Q3  1890.5
+1976 Q4  1938.4
+1977 Q1  1992.5
+1977 Q2  2060.2
+1977 Q3  2122.4
+1977 Q4      NA
+1978 Q1      NA
+1978 Q2  2336.6
+1978 Q3  2398.9
+1978 Q4  2482.2
+1979 Q1  2531.6
+1979 Q2      NA
+1979 Q3  2670.4
+1979 Q4  2730.7
+1980 Q1  2796.5
+1980 Q2  2799.9
+1980 Q3  2860.0
+1980 Q4      NA
+1981 Q1  3131.8
+1981 Q2  3167.3
+1981 Q3  3261.2
+1981 Q4  3283.5
+1982 Q1  3273.8
+1982 Q2      NA
+1982 Q3      NA
+1982 Q4      NA
+1983 Q1  3480.3
+1983 Q2  3583.8
+1983 Q3  3692.3
+1983 Q4  3796.1
+1984 Q1      NA
+1984 Q2      NA
+1984 Q3      NA
+1984 Q4      NA
+1985 Q1  4237.0
+1985 Q2  4302.3
+1985 Q3  4394.6
+1985 Q4  4453.1
+1986 Q1      NA
+1986 Q2      NA
+1986 Q3      NA
+1986 Q4      NA
+1987 Q1  4736.2
+1987 Q2  4821.5
+1987 Q3  4900.5
+1987 Q4  5022.7
+1988 Q1      NA
+1988 Q2      NA
+1988 Q3      NA
+1988 Q4      NA
+1989 Q1      NA
+1989 Q2      NA
+1989 Q3  5711.6
+1989 Q4  5763.4
+1990 Q1  5890.8
+1990 Q2      NA
+1990 Q3      NA
+1990 Q4      NA
+1991 Q1      NA
+1991 Q2      NA
+1991 Q3      NA
+1991 Q4      NA
+1992 Q1      NA
+1992 Q2      NA
+1992 Q3      NA
+1992 Q4      NA
+1993 Q1      NA
+1993 Q2      NA
+1993 Q3      NA
+1993 Q4      NA
+1994 Q1      NA
+1994 Q2      NA
+1994 Q3      NA
+1994 Q4      NA
+1995 Q1  7545.3
+1995 Q2  7604.9
+1995 Q3  7706.5
+1995 Q4  7799.5
+1996 Q1  7893.1
+1996 Q2  8061.5
+1996 Q3  8159.0
+1996 Q4  8287.1
+1997 Q1  8402.1
+1997 Q2  8551.9
+1997 Q3  8691.8
+1997 Q4  8788.3
+1998 Q1  8889.7
+1998 Q2  8994.7
+1998 Q3  9146.5
+1998 Q4  9325.7
+1999 Q1  9447.1
+1999 Q2      NA
+1999 Q3  9712.3
+1999 Q4  9926.1
+2000 Q1 10031.0
+2000 Q2 10278.3
+2000 Q3 10357.4
+2000 Q4 10472.3
+2001 Q1 10508.1
+2001 Q2 10638.4
+2001 Q3 10639.5
+2001 Q4 10701.3
+2002 Q1      NA
+2002 Q2      NA
+2002 Q3 11037.1
+2002 Q4 11103.8
+2003 Q1 11230.1
+2003 Q2 11370.7
+2003 Q3 11625.1
+2003 Q4 11816.8
+2004 Q1 11988.4
+2004 Q2 12181.4
+2004 Q3 12367.7
+2004 Q4 12562.2
+2005 Q1 12813.7
+2005 Q2 12974.1
+2005 Q3 13205.4
+2005 Q4 13381.6
+2006 Q1 13648.9
+2006 Q2      NA
+2006 Q3 13908.5
+2006 Q4 14066.4
+2007 Q1 14233.2
+2007 Q2 14422.3
+2007 Q3 14569.7
+2007 Q4 14685.3
+2008 Q1 14668.4
+2008 Q2 14813.0
+2008 Q3 14843.0
+2008 Q4 14549.9
+2009 Q1 14383.9
+2009 Q2 14340.4
+2009 Q3 14384.1
+2009 Q4 14566.5
+2010 Q1 14681.1
+2010 Q2 14888.6
+2010 Q3 15057.7
+2010 Q4 15230.2
+2011 Q1      NA
+2011 Q2 15460.9
+2011 Q3 15587.1
+2011 Q4 15785.3
+2012 Q1 15973.9
+2012 Q2 16121.9
+2012 Q3 16227.9
+2012 Q4 16297.3
+2013 Q1 16475.4
+2013 Q2 16541.4
+2013 Q3 16749.3
+2013 Q4 16999.9
+2014 Q1 17025.2
+2014 Q2 17285.6
+2014 Q3 17569.4
+2014 Q4 17692.2
+2015 Q1      NA
+2015 Q2 17998.3
+2015 Q3 18141.9
+2015 Q4 18222.8
+2016 Q1 18281.6
+2016 Q2 18450.1
+2016 Q3 18651.2
+
+
+
+Your plot shows fairly consistent GDP growth in the United States. 
+However, it looks like you are missing quite a bit of data! 
+One of your interns must have fallen asleep on the keyboard. In the next few exercises, you'll practice some techniques for handling missing data.
+
