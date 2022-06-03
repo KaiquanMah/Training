@@ -1,0 +1,36 @@
+Your next step is to merge your temperature data with the flight data from the previous chapter.
+
+Recall from the previous chapter that your flight data stretches from 2010 through 2015 in monthly periods. By contrast, your temperature data ranges from 2007 through 2015 in daily periods. Before you merge, you should subset your data and adjust the periodicity to monthly.
+
+To convert the periodicity of xts objects, you can use to.period(), which allows you to quickly convert your data to a lower frequency period. By default, this command produces specific values across the entire period (namely, Open-High-Low-Close, or OHLC) which are useful in financial analysis but may not be relevant in all contexts.
+https://www.rdocumentation.org/packages/xts/versions/0.9-7/topics/to.period
+In this case, you should set the argument OHLC to FALSE. Rather than produce OHLC columns in your monthly xts object, this setting will simply take one row from each period as representative of the entire period. You can specify which row using the indexAt command.
+
+Both the temps_xts data and the flights_xts data (from the previous chapter) are available in your workspace.
+
+
+
+Subset your temps_xts object to include only observations from 2010 through 2015. Save this as temps_xts_2.
+Use to.period() to convert your daily temperature data to monthly periodicity. Be sure to specify the period you'd like to convert to ("months"). You also need to set OHLC to FALSE to avoid generating new OHLC columns. Finally, set the indexAt argument to "firstof" to select the first observation each month.
+Use two calls of periodicity() to compare the periodicity and duration of your new monthly temperature data to the flights_xts data from the previous chapter.
+
+
+
+# Subset your temperature data to include only 2010 through 2015: temps_xts_2
+temps_xts_2 <- temps_xts["2010/2015"]
+
+# Use to.period to convert temps_xts_2 to monthly periodicity
+temps_monthly <- to.period(temps_xts_2, period = "months", OHLC = FALSE, indexAt = "firstof")
+
+
+# Compare the periodicity and duration of temps_monthly and flights_xts 
+periodicity(temps_monthly)
+Monthly periodicity from 2010-01-01 to 2015-12-01 
+
+periodicity(flights_xts)
+Monthly periodicity from 2010-01-01 to 2015-12-01 
+
+
+
+You've converted your daily temperature data to monthly and it looks like you are ready to merge with your flights data. Before moving forward, however,you should consider whether the value selected by the to.period() call (in this case, the first of the month) is appropriate for this context.
+
