@@ -1,0 +1,158 @@
+A time series can be thought of as a vector or matrix of numbers along with some information about what times those numbers were recorded. This information is stored in a ts object in R. In most exercises, you will use time series that are part of existing packages. However, if you want to work with your own data, you need to know how to create a ts object in R.
+
+Let's look at an example usnim_2002 below, containing net interest margins for US banks for the year 2002 (source: FFIEC).
+
+> usnim_2002
+               usnim
+1   2002-01-01  4.08
+2   2002-04-01  4.10
+3   2002-07-01  4.06
+4   2002-10-01  4.04
+
+> # ts(data, start, frequency, ...)
+> usnim_ts = ts(usnim_2002[, 2], start = c(2002, 1), frequency = 4)
+
+The function ts() takes in three arguments:
+1-data is set to everything in usnim_2002 except for the date column; it isn't needed since the ts object will store time information separately.
+2-start is set to the form c(year, period) to indicate the time of the first observation. Here, January corresponds with period 1; likewise, a start date in April would refer to 2, July to 3, and October to 4. Thus, period corresponds to the quarter of the year.
+3-frequency is set to 4 because the data are quarterly.
+
+In this exercise, you will read in some time series data from an xlsx file using read_excel(), a function from the readxl package, and store the data as a ts object. Both the xlsx file and package have been loaded into your workspace.
+
+
+
+
+Use the read_excel() function to read the data from "exercise1.xlsx" into mydata.
+Apply head() to mydata in the R console to inspect the first few lines of the data. Take a look at the dates - there are four observations in 1981, indicating quarterly data with a frequency of four rows per year. The first observation or start date is Mar-81, the first of four rows for year 1981, indicating that March corresponds with the first period.
+Create a ts object called myts using ts(). Set data, start and frequency based on what you observed.
+
+
+
+
+# Read the data from Excel into R
+mydata <- read_excel("exercise1.xlsx")
+
+
+# Look at the first few lines of mydata
+head(mydata)
+          Sales AdBudget   GDP
+1 Mar-81 1020.2    659.2 251.8
+2 Jun-81  889.2    589.0 290.9
+3 Sep-81  795.0    512.5 290.8
+4 Dec-81 1003.9    614.1 292.4
+5 Mar-82 1057.7    647.2 279.1
+6 Jun-82  944.4    602.0 254.0
+
+
+# Create a ts object called myts
+# with cols 2 to 4
+myts <- ts(mydata[, c(2:4)], start = c(1981, 1), frequency = 4)
+
+
+
+
+>myts
+         Sales AdBudget   GDP
+1981 Q1 1020.2    659.2 251.8
+1981 Q2  889.2    589.0 290.9
+1981 Q3  795.0    512.5 290.8
+1981 Q4 1003.9    614.1 292.4
+1982 Q1 1057.7    647.2 279.1
+1982 Q2  944.4    602.0 254.0
+1982 Q3  778.5    530.7 295.6
+1982 Q4  932.5    608.4 271.7
+1983 Q1  996.5    637.9 259.6
+1983 Q2  907.7    582.4 280.5
+1983 Q3  735.1    506.8 287.2
+1983 Q4  958.1    606.7 278.0
+1984 Q1 1034.1    658.7 256.8
+1984 Q2  992.8    614.9 271.0
+1984 Q3  791.7    489.9 300.9
+1984 Q4  914.2    586.5 289.8
+1985 Q1 1106.5    663.0 266.8
+1985 Q2  985.1    591.7 273.7
+1985 Q3  823.9    502.2 301.3
+1985 Q4 1025.1    616.4 285.6
+1986 Q1 1064.7    647.1 270.6
+1986 Q2  981.9    615.5 274.6
+1986 Q3  828.3    514.8 299.7
+1986 Q4  940.7    609.1 275.9
+1987 Q1  991.1    641.3 279.3
+1987 Q2 1021.2    620.2 290.8
+1987 Q3  796.7    511.2 295.6
+1987 Q4  986.6    621.3 271.9
+1988 Q1 1054.2    645.3 267.4
+1988 Q2 1018.7    616.0 281.0
+1988 Q3  815.6    503.2 309.0
+1988 Q4 1010.6    617.5 266.7
+1989 Q1 1071.5    642.8 283.5
+1989 Q2  954.0    585.6 282.3
+1989 Q3  822.9    520.6 289.2
+1989 Q4  867.5    608.6 270.7
+1990 Q1 1002.3    645.7 266.5
+1990 Q2  972.0    597.4 287.9
+1990 Q3  782.9    499.8 287.6
+1990 Q4  972.8    601.8 283.4
+1991 Q1 1108.0    650.8 266.4
+1991 Q2  943.7    588.3 292.3
+1991 Q3  806.1    491.6 330.6
+1991 Q4  954.2    603.3 286.2
+1992 Q1 1115.5    663.2 259.2
+1992 Q2  927.1    614.0 263.7
+1992 Q3  800.7    506.3 288.2
+1992 Q4  955.7    606.2 274.1
+1993 Q1 1049.8    639.5 287.1
+1993 Q2  886.0    585.9 285.5
+1993 Q3  786.4    492.2 303.7
+1993 Q4  991.3    610.4 275.6
+1994 Q1 1113.9    660.8 249.3
+1994 Q2  924.5    612.2 272.9
+1994 Q3  771.4    509.2 289.8
+1994 Q4  949.8    612.1 269.2
+1995 Q1  990.5    653.2 261.3
+1995 Q2 1071.4    605.3 292.9
+1995 Q3  854.1    506.6 304.6
+1995 Q4  929.8    597.4 276.3
+1996 Q1  959.6    635.2 268.2
+1996 Q2  991.1    611.6 293.5
+1996 Q3  832.9    503.8 311.1
+1996 Q4 1006.1    609.9 273.7
+1997 Q1 1040.7    645.2 267.5
+1997 Q2 1026.3    609.8 271.9
+1997 Q3  785.9    512.1 308.8
+1997 Q4  997.6    603.7 282.9
+1998 Q1 1055.0    639.4 268.4
+1998 Q2  925.6    601.6 271.4
+1998 Q3  805.6    497.0 292.1
+1998 Q4  934.1    602.8 287.6
+1999 Q1 1081.7    647.3 258.0
+1999 Q2 1062.3    612.5 282.9
+1999 Q3  798.8    492.2 295.0
+1999 Q4 1014.3    610.8 271.2
+2000 Q1 1049.5    646.5 275.4
+2000 Q2  961.7    603.3 284.0
+2000 Q3  793.4    503.8 300.9
+2000 Q4  872.3    598.3 277.4
+2001 Q1 1014.2    649.4 273.8
+2001 Q2  952.6    620.2 288.4
+2001 Q3  792.4    497.9 283.4
+2001 Q4  922.3    609.2 273.4
+2002 Q1 1055.9    665.9 271.5
+2002 Q2  906.2    600.4 283.6
+2002 Q3  811.2    502.3 290.6
+2002 Q4 1005.8    605.6 289.1
+2003 Q1 1013.8    647.6 282.2
+2003 Q2  905.6    583.5 285.6
+2003 Q3  957.3    502.5 304.0
+2003 Q4 1059.5    625.9 271.5
+2004 Q1 1090.6    648.7 263.9
+2004 Q2  998.9    610.7 288.3
+2004 Q3  866.6    519.1 290.2
+2004 Q4 1018.7    634.9 284.0
+2005 Q1 1112.5    663.1 270.9
+2005 Q2  997.4    583.3 294.7
+2005 Q3  826.8    508.6 292.2
+2005 Q4  992.6    634.2 255.1
+
+
+
