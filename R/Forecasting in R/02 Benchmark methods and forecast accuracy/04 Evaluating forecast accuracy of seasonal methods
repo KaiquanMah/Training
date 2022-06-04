@@ -1,0 +1,43 @@
+As you learned in the first chapter, the window() function specifies the start and end of a time series using the relevant times rather than the index values. Either of those two arguments can be formatted as a vector like c(year, period) which you have also previously used as an argument for ts(). Again, period refers to quarter here.
+
+Here, you will use the Melbourne quarterly visitor numbers (vn[, "Melbourne"]) to create three different training sets, omitting the last 1, 2 and 3 years, respectively. Inspect the pre-loaded vn data in your console before beginning the exercise; this will help you determine the correct value to use for the keyword h (which specifies the number of values you want to forecast) in your forecasting methods.
+
+Then for each training set, compute the next year of data, and finally compare the mean absolute percentage error (MAPE) of the forecasts using accuracy(). Why do you think that the MAPE vary so much?
+
+
+
+Use window() to create three training sets from vn[,"Melbourne"], omitting the last 1, 2 and 3 years; call these train1, train2, and train3, respectively. Set the end keyword accordingly.
+Compute one year of forecasts for each training set using the snaive() method. Call these fc1, fc2, and fc3, respectively.
+Following the structure of the sample code, compare the MAPE of the three sets of forecasts using the accuracy() function as your test set.
+
+
+
+>end(vn)
+[1] 2015    4
+
+
+
+
+# Create three training series omitting the last 1, 2, and 3 years
+train1 <- window(vn[, "Melbourne"], end = c(2014, 4))
+train2 <- window(vn[, "Melbourne"], end = c(2013, 4))
+train3 <- window(vn[, "Melbourne"], end = c(2012, 4))
+
+
+
+# Produce forecasts using snaive()
+fc1 <- snaive(train1, h = 4)
+fc2 <- snaive(train2, h = 4)
+fc3 <- snaive(train3, h = 4)
+
+
+
+# Use accuracy() to compare the MAPE of each series
+accuracy(fc1, vn[, "Melbourne"])["Test set", "MAPE"]
+[1] 5.477917
+accuracy(fc2, vn[, "Melbourne"])["Test set", "MAPE"]
+[1] 12.50071
+accuracy(fc3, vn[, "Melbourne"])["Test set", "MAPE"]
+[1] 7.950202
+
+
