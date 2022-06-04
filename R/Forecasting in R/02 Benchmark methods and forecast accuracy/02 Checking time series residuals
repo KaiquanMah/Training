@@ -1,0 +1,53 @@
+When applying a forecasting method, it is important to always check that the residuals are well-behaved (i.e., no outliers or patterns) and resemble white noise. The prediction intervals are computed assuming that the residuals are also normally distributed. You can use the checkresiduals() function to verify these characteristics; it will give the results of a Ljung-Box test.
+
+You haven't used the pipe function (%>%) so far, but this is a good opportunity to introduce it. When there are many nested functions, pipe functions make the code much easier to read. To be consistent, always follow a function with parentheses to differentiate it from other objects, even if it has no arguments. An example is below:
+> function(foo)       # These two
+> foo %>% function()  # are the same!
+
+> foo %>% function    # Inconsistent
+
+In this exercise, you will test the above functions on the forecasts equivalent to what you produced in the previous exercise (fcgoog obtained after applying naive() to goog, and fcbeer obtained after applying snaive() to ausbeer).
+
+
+
+Using the above pipe function, run checkresiduals() on a forecast equivalent to fcgoog.
+Based on this Ljung-Box test results, do the residuals resemble white noise? Assign googwn to either TRUE or FALSE.
+Using a similar pipe function, run checkresiduals() on a forecast equivalent to fcbeer.
+Based on this Ljung-Box test results, do the residuals resemble white noise? Assign beerwn to either TRUE or FALSE.
+
+
+
+
+# Check the residuals from the naive forecasts applied to the goog series
+goog %>% naive() %>% checkresiduals()
+
+	Ljung-Box test
+
+data:  Residuals from Naive method
+Q* = 13.061, df = 10, p-value = 0.2203
+
+Model df: 0.   Total lags used: 10
+
+# Do they look like white noise (TRUE or FALSE)
+googwn <- TRUE
+
+
+
+
+
+# Check the residuals from the seasonal naive forecasts applied to the ausbeer series
+ausbeer %>% snaive() %>% checkresiduals()
+
+	Ljung-Box test
+
+data:  Residuals from Seasonal naive method
+Q* = 60.535, df = 8, p-value = 3.661e-10
+
+Model df: 0.   Total lags used: 8
+
+# Do they look like white noise (TRUE or FALSE)
+beerwn <- FALSE
+
+
+You have naively forecasted non-seasonal and seasonal time series.
+
