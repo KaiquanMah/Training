@@ -1,0 +1,64 @@
+In this exercise, you will apply your knowledge of training and test sets, the subset() function, and the accuracy() function, all of which you learned in Chapter 2, to compare SES and naive forecasts for the marathon data.
+
+You did something very similar to compare the naive and mean forecasts in an earlier exercise "Evaluating forecast accuracy of non-seasonal methods".
+
+Let's review the process:
+First, import and load your data. Determine how much of your data you want to allocate to training, and how much to testing; the sets should not overlap.
+Subset the data to create a training set, which you will use as an argument in your forecasting function(s). Optionally, you can also create a test set to use later.
+Compute forecasts of the training set using whichever forecasting function(s) you choose, and set h equal to the number of values you want to forecast, which is also the length of the test set.
+To view the results, use the accuracy() function with the forecast as the first argument and original data (or test set) as the second.
+Pick a measure in the output, such as RMSE or MAE, to evaluate the forecast(s); a smaller error indicates higher accuracy.
+
+The marathon data is loaded into your workspace.
+
+
+
+Using subset(), create a training set for marathon comprising all but the last 20 years of the data which you will reserve for testing.
+Compute the SES and naive forecasts of this training set and save them to fcses and fcnaive, respectively.
+Calculate forecast accuracy measures of the two sets of forecasts using the accuracy() function in your console.
+Assign the best forecasts (either fcses or fcnaive) based on RMSE to fcbest.
+
+
+
+# Create a training set using subset()
+train <- subset(marathon, end = length(marathon) - 20)
+
+
+# Compute SES and naive forecasts, save to fcses and fcnaive
+fcses <- ses(train, h = 20)
+fcnaive <- naive(train, h = 20)
+
+
+# Calculate forecast accuracy measures
+# accuracy(marathon, fcses)
+# Error: non-numeric argument to binary operator
+# accuracy(marathon, fcnaive)
+# Error: non-numeric argument to binary operator
+accuracy(fcses,  marathon)
+                     ME     RMSE      MAE        MPE     MAPE      MASE
+Training set -1.0851741 5.863790 4.155948 -0.8603998 2.827993 0.8990906
+Test set      0.4574579 2.493971 1.894237  0.3171919 1.463862 0.4097960
+                    ACF1 Theil's U
+Training set -0.01595953        NA
+Test set     -0.12556096 0.6870735
+
+
+
+
+accuracy(fcnaive,  marathon)
+                     ME     RMSE      MAE        MPE     MAPE      MASE
+Training set -0.4638047 6.904742 4.622391 -0.4086317 3.123559 1.0000000
+Test set      0.2266667 2.462113 1.846667  0.1388780 1.429608 0.3995047
+                   ACF1 Theil's U
+Training set -0.3589323        NA
+Test set     -0.1255610 0.6799062
+
+
+# Save the best forecasts as fcbest
+fcbest <- fcnaive
+
+
+
+
+More complex models aren't always better!
+
