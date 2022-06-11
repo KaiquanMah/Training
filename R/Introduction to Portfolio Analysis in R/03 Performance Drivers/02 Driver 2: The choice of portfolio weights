@@ -1,0 +1,117 @@
+Investors can optimize the choice of weight to obtain the highest risk-adjusted return, as measured by the portfolio Sharpe ratio.
+
+In the special case of investing the total portfolio value in only two assets, there is only one weight to determine, because the weight on the second asset equals one minus the weight of the first asset.
+
+Let us do this in the case of a portfolio invested in U.S. equities and U.S. bonds. We will be using the brute force approach of trying a large number of possible weights and keeping the weight that yields the highest value for the portfolio Sharpe ratio (assuming a zero risk-free rate).
+
+
+Create a vector called grid using seq() that begins at 0, ends at 1, by an increment of 0.01.
+Initialize empty vector vsharpe with the same length as grid. A popular way of doing this is by creating a vector that contains NA's using function rep(). You will replace these NA's in the loop that you will create next.
+http://www.rdocumentation.org/packages/base/functions/rep
+In the for loop, you will compute the Sharpe ratio for each of the possible weights in grid. The first command in the for-loop selects the i-th element of grid and stores it in object weight, which changes in each iteration.
+You want to see how the portfolio return changes with a changing weight. Create an object preturns that equals the sum of weight times returns_equities, and (1-weight) times returns_bonds.
+Next, you will replace the NAs in vsharpe with the annualized Sharpe ratio (SharpeRatio.annualized()) of preturns.
+Fill in the plot function where potential weights (grid) is plotted on the x-axis and the Sharpe ratios on the y-axis.
+
+
+
+>
+grid
+  [1] 0.00 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14
+ [16] 0.15 0.16 0.17 0.18 0.19 0.20 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29
+ [31] 0.30 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.40 0.41 0.42 0.43 0.44
+ [46] 0.45 0.46 0.47 0.48 0.49 0.50 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59
+ [61] 0.60 0.61 0.62 0.63 0.64 0.65 0.66 0.67 0.68 0.69 0.70 0.71 0.72 0.73 0.74
+ [76] 0.75 0.76 0.77 0.78 0.79 0.80 0.81 0.82 0.83 0.84 0.85 0.86 0.87 0.88 0.89
+ [91] 0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99 1.00
+ 
+ 
+>
+length(grid)
+[1] 101
+
+>
+str(grid)
+ num [1:101] 0 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 ...
+ 
+ 
+ 
+ 
+ >
+str(returns_equities)
+An 'xts' object on 2006-08-30/2016-08-30 containing:
+  Data: num [1:121, 1] 0.0218 0.027 0.0315 0.0199 0.0134 ...
+ - attr(*, "dimnames")=List of 2
+  ..$ : NULL
+  ..$ : chr "equities"
+  Indexed by objects of class: [Date] TZ: UTC
+  xts Attributes:  
+List of 2
+ $ ret_type        : chr "discrete"
+ $ coredata_content: chr "discreteReturn"
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ # Create a grid
+grid <- seq(from = 0, 
+            to = 1, 
+            by = 0.01)
+            
+            
+# Initialize an empty vector for Sharpe ratios
+vsharpe <- rep(NA, 
+               times = length(grid)-1)
+               
+               
+               
+# Create a for loop to calculate Sharpe ratios
+for(i in 1:length(grid)) {
+    weight <- grid[i]
+
+    # each returns_equities, returns_bonds is a full xts object across dates => used during every ith iteration
+    preturns <- weight * returns_equities + (1 - weight) * returns_bonds
+
+    vsharpe[i] <- SharpeRatio.annualized(preturns)
+}
+
+
+
+# Plot weights and Sharpe ratio
+plot(x = grid, 
+     y = vsharpe, 
+     xlab = "Weights", 
+     ylab= "Ann. Sharpe ratio")
+     
+# match to see where we have the max vsharpe ratio
+# then plot a vertical line to know which weight gives the max vsharpe ratio
+abline(v = grid[vsharpe == max(vsharpe)], 
+       lty = 3)
+      data:image/png;base64,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 
+       
+The portfolio that is 11% invested in equities, 89% in bonds has the largest possible Sharpe ratio.
+
+
+       
+>
+max(vsharpe)
+[1] 1.35772
+>
+grid[vsharpe == max(vsharpe)]
+[1] 0.09
+
+
+       
+       
+       
