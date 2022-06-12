@@ -1,0 +1,79 @@
+The covariance matrix is crucial in determining the portfolio variance in the general case of N assets. 
+Remember that an element on row i and column j 
+correspond to the covariance of the  ith and  jth return. 
+
+Recall also that the covariance of two return series is the product between their volatilities and their correlation, and that the covariance of an asset return with itself is its variance.
+
+In this exercise, you will compute and analyze the covariance and correlation matrix on the monthly returns of the four asset classes from the previous exercise. To refresh, these asset classes are equities, bonds, real estate, and commodities. To create these matrices, you will use the standard functions cov() and cor().
+
+In your workspace are the monthly investments as returns, and the vector of standard deviations sds that you created previously.
+
+
+
+
+Create a diagonal matrix that contains the variances on the diagonal. You can use the function diag() to do this, using a squared sds^2 as the only argument. Call this diag_cov.
+http://www.rdocumentation.org/packages/base/functions/diag
+Compute the covariance matrix of returns. Call this cov_matrix.
+Compute the correlation matrix of returns. Call this cor_matrix.
+Verify that the covariance between bond returns and equity returns equals the product of their standard deviations and correlation, by running the pre-loaded code. Do not alter this code.
+
+
+
+# Create a matrix with variances on the diagonal
+diag_cov <- diag(sds^2)
+
+>sds^2
+[1] 0.0019202181 0.0001222713 0.0054477625 0.0047979718
+
+>diag_cov
+            [,1]         [,2]        [,3]        [,4]
+[1,] 0.001920218 0.0000000000 0.000000000 0.000000000
+[2,] 0.000000000 0.0001222713 0.000000000 0.000000000
+[3,] 0.000000000 0.0000000000 0.005447762 0.000000000
+[4,] 0.000000000 0.0000000000 0.000000000 0.004797972
+
+
+
+
+
+# Create a covariance matrix of returns
+cov_matrix <- cov(returns)
+
+>cov_matrix
+                equities         bonds   realestate   commodities
+equities    1.920218e-03  3.009761e-05 0.0024063778  1.510994e-03
+bonds       3.009761e-05  1.222713e-04 0.0002632232 -6.860821e-05
+realestate  2.406378e-03  2.632232e-04 0.0054477625  1.329142e-03
+commodities 1.510994e-03 -6.860821e-05 0.0013291423  4.797972e-03
+
+
+
+
+
+# Create a correlation matrix of returns
+cor_matrix <- cor(returns)
+
+
+>cor_matrix
+              equities       bonds realestate commodities
+equities    1.00000000  0.06211472  0.7440112  0.49780426
+bonds       0.06211472  1.00000000  0.3225172 -0.08957463
+realestate  0.74401117  0.32251718  1.0000000  0.25997618
+commodities 0.49780426 -0.08957463  0.2599762  1.00000000
+
+
+
+
+
+
+
+
+# Verify covariances equal the product of standard deviations and correlation
+all.equal(cov_matrix[1,2], 
+          cor_matrix[1,2] * sds[1] * sds[2])
+[1] TRUE
+
+>cov_matrix[1,2]
+[1] 3.009761e-05      => EQ,BONDS
+
+
