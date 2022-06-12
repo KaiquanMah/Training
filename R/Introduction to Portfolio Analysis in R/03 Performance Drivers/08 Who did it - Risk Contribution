@@ -1,0 +1,98 @@
+In the previous video, you saw the difference between a capital allocation budget and a risk budget. In this exercise, you will construct a risk budget, and discover how large each asset's percent risk contribution is in the total portfolio volatility.
+
+For this last exercise, you will calculate the risk contributions for a portfolio that is again 
+invested 40% in equities, 40% in bonds, 10% in real estate, and 10% in commodities. 
+
+The function StdDev() plays an important role in this exercise. 
+The StdDev() function creates a list of 
+the assets' standard deviation ($StdDev), 
+their risk contribution ($contribution), and 
+their percent risk contribution ($pct_contrib_StdDev).
+
+You will be using three arguments in the StdDev() function to do this calculation. 
+The first is R, a vector, matrix, data frame, time series, or zoo object of returns. 
+The second is portfolio_method, which you will set to 'component', and 
+the third is weights.
+http://www.rdocumentation.org/packages/PerformanceAnalytics/functions/StdDev
+
+The object returns is loaded in your workspace.
+
+
+
+Create a vector of the portfolio weights called weights. Remember, order matters!
+Calculate your volatility budget using StdDev() on the return series returns. Set portfolio_method = "component" and weights equal to the created vector of weights. Call this vol_budget.
+Combine the weights and the percentage risk contributions in a table called weights_percrisk using cbind().
+Print the table and note how different the percentage risk contributions are compared to the portfolio weights.
+
+
+
+
+# Create portfolio weights
+weights <- c(0.4, 0.4, 0.1, 0.1)
+
+# Create volatility budget
+vol_budget <- StdDev(returns, 
+                     portfolio_method = "component", 
+                     weights = weights)
+
+# Make a table of weights and risk contribution
+weights_percrisk <- cbind(weights, vol_budget$pct_contrib_StdDev)
+colnames(weights_percrisk) <- c("weights", "perc vol contrib")
+
+# Print the table
+print(weights_percrisk)
+
+            weights perc vol contrib
+equities        0.4       0.59004087
+bonds           0.4       0.04048648
+realestate      0.1       0.21972154
+commodities     0.1       0.14975111
+
+
+
+
+
+Note that the percentage volatility risk caused by the bonds is much less than their portfolio weight.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>weights
+[1] 0.4 0.4 0.1 0.1
+
+
+>vol_budget
+$StdDev
+[1] 0.02818561
+
+$contribution
+   equities       bonds  realestate commodities 
+0.016630662 0.001141136 0.006192986 0.004220826 
+
+$pct_contrib_StdDev
+   equities       bonds  realestate commodities 
+ 0.59004087  0.04048648  0.21972154  0.14975111 
+ 
+ 
+ 
+ 
+ 
+>weights_percrisk
+            weights perc vol contrib
+equities        0.4       0.59004087
+bonds           0.4       0.04048648
+realestate      0.1       0.21972154
+commodities     0.1       0.14975111
+
+
