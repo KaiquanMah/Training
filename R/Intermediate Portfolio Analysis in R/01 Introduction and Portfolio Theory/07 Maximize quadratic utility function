@@ -1,0 +1,113 @@
+In the video on challenges of portfolio optimization, you saw how to solve a quadratic utility optimization problem with the package quadprog. 
+This exercise will show you how to solve a quadratic utility problem using the PortfolioAnalytics package. 
+Recall the quadratic utility formulation has two terms, one for portfolio mean return and another for portfolio variance with a risk aversion parameter, lambda.
+https://www.rdocumentation.org/packages/quadprog/versions/1.5-5
+
+Create a portfolio specification object using asset names from the index_returns dataset and name the portfolio specification object port_spec.
+Add a full investment constraint such that the weights sum to 1 to the port_spec object.
+Add a long only constraint such that the weight of an asset is between 0 and 1 to the port_spec object.
+Add an objective to maximize portfolio mean return to the port_spec object.
+Add an objective to minimize portfolio variance to the port_spec object. Risk aversion should be set to 10.
+Run the optimization. This problem can be solved by a quadratic programming solver so we specify optimize_method = "ROI"
+
+
+
+# Create the portfolio specification
+port_spec <- portfolio.spec(assets = colnames(index_returns))
+
+# Add a full investment constraint such that the weights sum to 1
+port_spec <- add.constraint(portfolio = port_spec, 
+                            type = "full_investment")
+
+# Add a long only constraint such that the weight of an asset is between 0 and 1
+port_spec <- add.constraint(portfolio = port_spec, 
+                            type = "long_only")
+
+# Add an objective to maximize portfolio mean return
+port_spec <- add.objective(portfolio = port_spec,
+                           type = "return", 
+                           name = "mean")
+
+# Add an objective to minimize portfolio variance
+port_spec <- add.objective(portfolio = port_spec,
+                           type = "risk", 
+                           name = "var",
+                           risk_aversion = 10)
+
+# Solve the optimization problem
+opt <- optimize.portfolio(R = index_returns, 
+                          portfolio = port_spec, 
+                          optimize_method = "ROI")
+                          
+                          
+ Having a consistent way of solving optimization problems makes this much simpler than what was shown in the slides.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ >port_spec
+**************************************************
+PortfolioAnalytics Portfolio Specification 
+**************************************************
+
+Call:
+portfolio.spec(assets = colnames(index_returns))
+
+Number of assets: 4 
+Asset Names
+[1] "US Bonds"       "US Equities"    "Int'l Equities" "Commodities"   
+
+Constraints
+Enabled constraint types
+		- full_investment 
+		- long_only 
+
+Objectives:
+Enabled objective names
+		- mean 
+		- var 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+>opt
+***********************************
+PortfolioAnalytics Optimization
+***********************************
+
+Call:
+optimize.portfolio(R = index_returns, portfolio = port_spec, 
+    optimize_method = "ROI")
+
+Optimal Weights:
+      US Bonds    US Equities Int'l Equities    Commodities 
+        0.8507         0.1152         0.0000         0.0341 
+
+Objective Measure:
+    mean 
+0.006914 
+
+
+ StdDev
+ 
+ 
+ 
+0.01708 
+
+
