@@ -1,0 +1,186 @@
+A mean-variance efficient portfolio can be obtained as the solution of minimizing the portfolio variance under the constraint that the portfolio expected return equals a target return. A convenient R function for doing so is the function portfolio.optim() in the R package tseries. Its default implementation finds the mean-variance efficient portfolio weights under the constraint that the portfolio return equals the return on the equally-weighted portfolio. The only argument needed is the monthly return data on the portfolio components for which the weights need to be determined.
+
+The variable returns containing the monthly returns of the DJIA stocks is already loaded in the console.
+
+
+Load the library tseries.
+Create a mean-variance efficient portfolio of monthly returns using the default of portfolio.optim() targeting the equally-weighted portfolio return, and assign the output to the variable opt.
+Create a vector of weights from your optimized portfolio. Portfolio weights can be found in opt$pw. Call this pf_weights.
+Assign the names to the assets using the provided code.
+Select the optimum weights from pf_weights that are greater than or equal to 1%, call this opt_weights.
+Use barplot() to visualize the distribution of opt_weights.
+https://www.rdocumentation.org/packages/graphics/versions/3.6.1/topics/barplot
+Print the expect portfolio return (opt$pm) and volatility (opt$ps) of the optimized portfolio.
+
+
+# Load tseries
+library(tseries)
+
+    'tseries' version: 0.10-36
+
+    'tseries' is a package for time series analysis and computational
+    finance.
+
+    See 'library(help="tseries")' for details.
+
+
+
+
+
+# Create an optimized portfolio of returns
+opt <- portfolio.optim(returns)
+
+opt
+$pw
+ [1] -2.363076e-18  4.709721e-02  5.712678e-17 -6.789098e-19  3.305446e-17
+ [6] -2.484138e-17  6.827415e-19 -4.383672e-18  6.328341e-20 -2.257005e-17
+[11]  9.369407e-02  3.718196e-18  2.382872e-02  9.642194e-19  8.182345e-02
+[16]  3.139492e-17  1.577342e-02  4.480823e-02  5.802650e-02  1.784812e-04
+[21]  3.680218e-02  5.823022e-02  1.774000e-02  1.676271e-01  3.426857e-02
+[26] -9.530360e-17 -8.673617e-19  4.077031e-02  2.424344e-01  3.689716e-02
+
+$px
+  [1]  4.639251e-02  6.500998e-02  6.682324e-02 -1.320396e-03  9.708116e-03
+  [6] -4.189021e-02  5.425177e-02  4.526767e-02  7.187954e-03  2.565351e-02
+ [11] -2.405932e-03  1.259594e-01  7.200689e-03 -3.826041e-03 -3.251357e-02
+ [16]  2.522418e-02  2.414128e-02 -2.648454e-02  5.958498e-02 -2.260212e-03
+ [21]  2.564437e-02  2.333253e-02  2.936227e-02  1.915152e-02 -2.487091e-02
+ [26]  1.304910e-02  1.599273e-02 -3.290022e-02  3.461621e-02 -3.474712e-02
+ [31] -3.833523e-02  2.330029e-02 -3.376723e-02  6.059055e-02  1.398268e-02
+ [36] -9.857280e-03  3.146318e-02 -1.964263e-03 -4.051622e-02  2.459762e-02
+ [41]  2.069262e-02 -4.111349e-02  4.521898e-02  5.458274e-02 -3.074730e-02
+ [46]  7.358151e-02 -1.685293e-02  1.585259e-02  3.633164e-02  1.868475e-02
+ [51]  2.692895e-02  3.973556e-02  3.577725e-02  1.699745e-02  1.773766e-02
+ [56] -2.322110e-02  5.391121e-02  3.005455e-02  5.785714e-02  1.557826e-02
+ [61]  4.500256e-03 -9.948877e-03  3.100479e-02  2.221223e-02  4.505838e-02
+ [66]  1.048357e-02 -2.742366e-02  2.566517e-02  5.056606e-02  2.140968e-02
+ [71]  6.033336e-02 -9.082047e-03  6.390057e-02  1.986063e-02 -7.623018e-03
+ [76]  7.152301e-02  4.744454e-02  3.811985e-02  6.181912e-02 -6.156606e-02
+ [81]  4.336263e-02 -2.911187e-02  5.742710e-02 -1.933604e-02  3.008574e-02
+ [86]  9.391169e-02  4.696600e-02  2.424448e-02  1.500093e-03  4.853482e-02
+ [91] -2.117331e-02 -9.192614e-02  5.935856e-02  9.372368e-02  3.530264e-02
+ [96]  5.336596e-02  1.583246e-02 -1.640191e-02  5.396233e-02  6.605411e-02
+[101] -2.867743e-02  2.134232e-02  2.118163e-04  3.588549e-02 -7.343014e-03
+[106]  6.603404e-02  3.213886e-02  4.702109e-02 -5.416481e-02 -1.030544e-01
+[111]  4.091270e-02  4.083367e-03  1.616834e-02 -1.119224e-02  1.317413e-02
+[116]  1.285418e-02  1.617540e-02 -1.479781e-03  4.560629e-04  3.844862e-02
+[121]  3.300465e-03 -5.529615e-02 -3.466023e-02  6.702936e-02  1.560824e-02
+[126] -6.564488e-03  2.688917e-02 -2.745520e-02 -4.057473e-02  2.738891e-02
+[131]  5.609264e-02  3.251684e-02  1.020602e-02  2.075635e-02  3.634337e-02
+[136] -3.729862e-02 -1.759139e-02 -4.203022e-02 -7.568867e-02 -1.150227e-02
+[141] -8.449386e-02  8.455594e-02  7.411059e-03 -3.990422e-02 -3.315274e-02
+[146]  1.633379e-03  4.631186e-02  4.318447e-02  5.237658e-02  4.349631e-03
+[151]  3.576122e-03  2.624961e-02  4.209175e-03  5.772672e-02 -8.376309e-03
+[156]  5.345344e-02  7.325573e-03  2.572558e-02  6.368277e-03  3.161261e-03
+[161]  1.432145e-02  2.208721e-02 -1.205716e-02  2.480003e-02  1.464793e-02
+[166]  2.531046e-02  4.701826e-02  2.129025e-02 -2.047920e-03  6.679571e-02
+[171] -2.919532e-02 -3.023827e-02  2.876019e-02 -1.362141e-02  4.723250e-02
+[176] -4.852840e-03  3.038803e-02 -2.612011e-02  3.979042e-02 -1.364080e-02
+[181]  3.060377e-02 -6.387919e-03 -2.777902e-03  1.270920e-02 -3.253705e-02
+[186]  2.341058e-03  3.456255e-02  2.988984e-02  3.459864e-02  4.587786e-02
+[191]  3.217161e-02  8.023613e-03 -1.570929e-03 -2.082570e-02  1.318344e-02
+[196]  4.742584e-02  3.707520e-02 -3.865560e-03 -7.050825e-03  2.553797e-02
+[201]  4.142059e-02  2.669382e-02 -8.167040e-03  1.405466e-02 -6.599863e-02
+[206] -2.474197e-02  3.991867e-02  4.088073e-02 -1.024549e-02 -6.837466e-02
+[211] -1.039803e-03  4.129172e-02 -3.275231e-02 -7.540644e-02  5.891457e-03
+[216] -1.397410e-02 -7.604549e-02 -8.310085e-02  6.023440e-02  4.434220e-02
+[221]  3.173039e-02  9.318819e-03  6.406131e-02  1.193325e-02  2.760266e-02
+[226]  6.259990e-03  6.574976e-02 -9.173909e-03 -2.901832e-02  3.011457e-02
+[231]  3.848367e-02  2.038189e-02 -6.382406e-02 -4.624385e-02  4.482462e-02
+[236] -1.923137e-02  6.868041e-02  4.231801e-02  6.124515e-03  4.820159e-02
+[241]  2.508268e-02  3.267314e-02 -1.744197e-02  5.038845e-02 -3.957519e-03
+[246] -1.375162e-02 -1.325140e-02 -2.023907e-02 -2.454447e-02  6.977605e-02
+[251]  2.215692e-02  3.875754e-02  1.488103e-02  4.431192e-02  2.024946e-02
+[256] -1.914395e-03 -3.912155e-02  3.427109e-02  2.615429e-02  2.517111e-02
+[261]  2.599044e-02 -1.201852e-02  1.088323e-03 -1.295391e-02  5.510016e-02
+[266]  1.454729e-02  2.879804e-02  2.311171e-02  9.469614e-03 -3.043526e-03
+[271]  3.757782e-02 -3.625911e-02  1.041879e-02  5.250611e-02  4.247613e-02
+[276]  1.757139e-02 -6.441260e-02  4.089929e-02  1.918599e-02  3.293365e-02
+[281]  4.774561e-03  5.444187e-03 -1.163294e-02  4.738929e-02 -2.276475e-03
+[286]  3.467860e-02  2.177481e-02 -5.587068e-05 -3.822578e-02  4.195808e-02
+[291] -2.639213e-02 -1.247297e-03  3.645757e-03 -1.640300e-02  3.868437e-03
+[296] -5.043854e-02  7.325674e-03  8.653364e-02  9.520121e-03 -6.265845e-03
+
+$pm
+[1] 0.01249652
+
+$ps
+[1] 0.0355865
+
+
+
+
+
+# Create pf_weights
+pf_weights <- opt$pw
+
+# Assign asset names
+names(pf_weights) <- colnames(returns)
+
+
+
+
+
+# Select optimum weights opt_weights
+opt_weights <- pf_weights[pf_weights >= 0.01]
+
+
+>opt_weights
+      AAPL         HD       INTC        JNJ         KO        MCD        MMM 
+0.04709721 0.09369407 0.02382872 0.08182345 0.01577342 0.04480823 0.05802650 
+      MSFT        NKE        PFE         PG        TRV        WMT        XOM 
+0.03680218 0.05823022 0.01774000 0.16762710 0.03426857 0.04077031 0.24243439 
+         T 
+0.03689716 
+
+
+
+
+
+
+
+
+
+# Bar plot of opt_weights
+barplot(opt_weights)
+data:image/png;base64,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
+
+
+
+
+# Print expected portfolio return and volatility
+opt$pm
+[1] 0.01249652
+
+opt$ps
+[1] 0.0355865
+
+
+Great! The portfolio you created has an average return of 1.2%!
+
+
+
+
+
+
+
+
+# https://www.rdocumentation.org/packages/tseries/versions/0.10-51/topics/portfolio.optim
+Value
+A list containing the following components:
+
+pw
+the portfolio weights.
+
+px
+the returns of the overall portfolio.
+
+pm
+the expected portfolio return.
+
+ps
+the standard deviation of the portfolio returns.
+
+
+
+
