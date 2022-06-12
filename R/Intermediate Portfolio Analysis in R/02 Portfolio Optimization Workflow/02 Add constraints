@@ -1,0 +1,107 @@
+Constraints are added to the portfolio specification object with the add.constraint() function. Each constraint added is a separate object and stored in the constraints slot in the portfolio object. In this way, the constraints are modular and one can easily add, remove, or modify the constraints in the portfolio object. The required arguments for add.constraint() are the portfolio the constraint is added to, the constraint type, and named arguments passed via ... to the constructor of the constraint type.
+
+
+Basic constraint types:
+
+Specify the constraint on the sum of the weights
+-weight_sum, weight, leverage
+-full_investment is a special case that sets min_sum = max_sum = 1
+-dollar_neutral is a special case that sets min_sum = max_sum = 0
+
+Specify constraints for the individual asset weights
+-box
+-long_only is a special case that sets min = 0 and max = 1
+
+Specify the constraint for the sum of weights of assets by group (sector, region, asset class, etc.)
+-group
+
+Specify a constraint on the target mean return
+-return
+
+In this exercise, you will add a few of the more common constraint types. In addition to the basic constraint types listed above, PortfolioAnalytics also supports position limit, turnover, diversification, factor exposure, and leverage exposure constraint types. If you are interested in the other constraint types, look at the help files for the constraint constructors. The help files include a description of the constraint type as well as example code.
+
+
+
+
+
+
+
+Add a weight_sum constraint such that the minimum sum of weights is 1 and the maximum sum of weights is 1.
+Add a box constraint such that the first five assets have a minimum weight of 10% and the remaining assets have a minimum weight of 5%. All assets have a maximum weight of 40%
+Add a group constraint such that assets 1, 5, 7, 9, 10, and 11 are the first group and assets 2, 3, 4, 6, 8, and 12 are the second group. Set the minimum weight to 40% and maximum weight to 60% for each group.
+
+
+
+
+# Add the weight sum constraint
+port_spec <- add.constraint(portfolio = port_spec, 
+                            type = "weight_sum", 
+                            min_sum = 1, 
+                            max_sum = 1)
+
+
+
+
+
+# Add the box constraint
+port_spec <- add.constraint(portfolio = port_spec, 
+                            type = "box", 
+                            min = c(0.1, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05), 
+                            max = 0.4)
+
+
+
+
+
+# Add the group constraint
+port_spec <- add.constraint(portfolio = port_spec, 
+                            type = "group", 
+                            groups = list(c(1,5,7,9,10,11), c(2,3,4,6,8,12)), 
+                            group_min = 0.4, 
+                            group_max = 0.6)
+
+
+
+
+
+
+
+
+
+# Print the portfolio specification object
+print(port_spec)
+
+**************************************************
+PortfolioAnalytics Portfolio Specification 
+**************************************************
+
+Call:
+portfolio.spec(assets = asset_names)
+
+Number of assets: 13 
+Asset Names
+ [1] "Convertible Arbitrage"  "CTA Global"             "Distressed Securities" 
+ [4] "Emerging Markets"       "Equity Market Neutral"  "Event Driven"          
+ [7] "Fixed Income Arbitrage" "Global Macro"           "Long/Short Equity"     
+[10] "Merger Arbitrage"      
+More than 10 assets, only printing the first 10
+
+Constraints
+Enabled constraint types
+		- weight_sum 
+		- box 
+		- group 
+    
+    
+    
+
+
+
+
+
+
+
+
+There are a number of different constraint types, check them out using ?add.constraint
+
+
