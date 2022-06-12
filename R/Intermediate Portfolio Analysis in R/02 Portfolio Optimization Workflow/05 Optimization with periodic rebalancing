@@ -1,0 +1,78 @@
+Running the optimization with periodic rebalancing and analyzing the out-of-sample results of the backtest is an important step to better understand and potentially refine the constraints and objectives. 
+optimize.portfolio.rebalancing() supports optimization with periodic rebalancing (backtesting) to examine out of sample performance. 
+
+In addition to the arguments for optimize.portfolio(), 
+a periodic rebalancing frequency must be specified with 'rebalance_on', 
+'training_period' to specify the number of periods to use as the training data for the initial optimization, and 
+'rolling_window' to specify the number of periods for the window width of the optimization. 
+If rolling_window is set to NULL each optimization will use all data available at the given period the optimization is run.
+
+To reduce computation time for this exercise, 
+the set of random portfolios, rp, is generated using 50 permutations, and
+search_size, how many portfolios to test, is set to 1000. 
+
+If you are actually optimizing portfolios yourself, you'll probably want to test more portfolios (the default value for search_size is 20,000)!
+
+
+
+
+
+
+
+
+Run the optimization with quarterly rebalancing. Set the training period and rolling window to 60 periods. The dataset is monthly data so we are using 5 years of historical data. Assign the optimization output to a variable named opt_rebal.
+Print the results of the optimization.
+
+# Run the optimization backtest with quarterly rebalancing
+# monthly dataset
+# so to have a window of 5 years each time, we have 5 years x 12 months = 60 periods
+opt_rebal <- optimize.portfolio.rebalancing(R = asset_returns, 
+                                            portfolio = port_spec, 
+                                            optimize_method = "random", 
+                                            rp = rp, 
+                                            trace = TRUE, 
+                                            search_size = 1000, 
+                                            rebalance_on = "quarters",     # quarterly
+                                            training_period = 60, 
+                                            rolling_window = 60)
+
+
+
+
+
+
+
+
+
+# Print the output of the optimization backtest
+print(opt_rebal)
+
+**************************************************
+PortfolioAnalytics Optimization with Rebalancing
+**************************************************
+
+Call:
+optimize.portfolio.rebalancing(R = asset_returns, portfolio = port_spec, 
+    optimize_method = "random", search_size = 1000, trace = TRUE, 
+    rp = rp, rebalance_on = "quarters", training_period = 60, 
+    rolling_window = 60)
+
+Number of rebalancing dates:  73 
+First rebalance date:
+[1] "2001-12-31 UTC"
+Last rebalance date:
+[1] "2019-11-30 UTC"
+
+Annualized Portfolio Rebalancing Return:
+[1] 0.04827115
+
+Annualized Portfolio Standard Deviation:
+[1] 0.03438109
+
+
+
+Using backtesting can give useful insights on how your optimization setup performs under different circumstances.
+
+
+
+
