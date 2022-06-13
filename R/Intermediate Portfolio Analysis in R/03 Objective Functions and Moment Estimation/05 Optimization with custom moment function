@@ -1,0 +1,119 @@
+Now we would like to run the optimization using our custom moment function. Recall that the portfolio moments are set in optimize.portfolio() when the moment function is evaluated. We use the custom moment function by passing in the name to the momentFUN argument in optimize.portfolio(). Note how we can use PortfolioAnalytics to easily run optimizations using different methods for estimating moments, which will allow us to evaluate different techniques for moment estimates and refine those estimates by analyzing the optimization results.
+
+
+A portfolio specification object, port_spec, and custom moment function, moments_robust(), have already been created for use with this exercise.
+Run the optimization with the custom moment estimates. Assign this to a variable named opt_custom.
+Print the output of opt_custom.
+Run the optimization with sample moment estimates. Assign this to a variable named opt_sample.
+Print the output of opt_sample.
+
+
+# Run the optimization with custom moment estimates
+opt_custom <- optimize.portfolio(R = asset_returns, 
+                                 portfolio = port_spec, 
+                                 optimize_method = "random", 
+                                 rp = rp, 
+                                 momentFUN = "moments_robust")
+Leverage constraint min_sum and max_sum are restrictive, 
+              consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01
+Warning message: executing %dopar% sequentially: no parallel backend registered
+
+
+
+
+
+
+
+
+
+# Print the results of the optimization with custom moment estimates
+print(opt_custom)
+***********************************
+PortfolioAnalytics Optimization
+***********************************
+
+Call:
+optimize.portfolio(R = asset_returns, portfolio = port_spec, 
+    optimize_method = "random", rp = rp, momentFUN = "moments_robust")
+
+Optimal Weights:
+ Convertible Arbitrage             CTA Global  Distressed Securities 
+                 0.000                  0.594                  0.032 
+      Emerging Markets  Equity Market Neutral           Event Driven 
+                 0.000                  0.022                  0.208 
+Fixed Income Arbitrage           Global Macro      Long/Short Equity 
+                 0.002                  0.138                  0.000 
+      Merger Arbitrage         Relative Value          Short Selling 
+                 0.000                  0.000                  0.004 
+        Funds of Funds 
+                 0.000 
+
+Objective Measures:
+StdDev 
+0.0152 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Run the optimization with sample moment estimates
+# i.e. dont specify momentFUN???
+opt_sample <- optimize.portfolio(R = asset_returns, 
+                                 portfolio = port_spec, 
+                                 optimize_method = "random", 
+                                 rp = rp)
+Leverage constraint min_sum and max_sum are restrictive, 
+              consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01
+
+
+
+
+
+
+# Print the results of the optimization with sample moment estimates
+print(opt_sample)
+***********************************
+PortfolioAnalytics Optimization
+***********************************
+
+Call:
+optimize.portfolio(R = asset_returns, portfolio = port_spec, 
+    optimize_method = "random", rp = rp)
+
+Optimal Weights:
+ Convertible Arbitrage             CTA Global  Distressed Securities 
+                 0.024                  0.014                  0.540 
+      Emerging Markets  Equity Market Neutral           Event Driven 
+                 0.174                  0.010                  0.002 
+Fixed Income Arbitrage           Global Macro      Long/Short Equity 
+                 0.034                  0.018                  0.010 
+      Merger Arbitrage         Relative Value          Short Selling 
+                 0.038                  0.130                  0.000 
+        Funds of Funds 
+                 0.006 
+
+Objective Measures:
+ StdDev 
+0.01651 
+
+
+
+
+
+
+
+Looks like our custom moment function had a lower standard deviation than the sample method.
+
+
