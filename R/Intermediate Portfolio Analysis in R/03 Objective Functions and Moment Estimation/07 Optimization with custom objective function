@@ -1,0 +1,102 @@
+This exercise builds on the previous exercise and we will run the optimization with the custom objective function that computes portfolio annualized standard deviation. Because an objective function can be any valid R function, we add a risk objective for the pasd() function. The set.portfolio.moments() function will not recognize the pasd() objective name, so we need to create a custom moment function to calculate the second moment, sigma. We will solve the problem using random portfolios as the optimization method.
+
+
+Add the custom objective function you created in the previous exercise to the portfolio specification object.
+Print the portfolio specification object to see the constraints and objective.
+Run the optimization. The name of the custom moment function is set_sigma.
+Print the results of the optimization.
+
+
+
+# Add custom objective to portfolio specification
+port_spec <- add.objective(portfolio = port_spec, 
+                           type = "risk", 
+                           name = "pasd")
+                           
+                           
+                           
+                           
+                           
+                           
+                           
+# Print the portfolio specificaton object
+print(port_spec)
+**************************************************
+PortfolioAnalytics Portfolio Specification 
+**************************************************
+
+Call:
+portfolio.spec(assets = asset_names)
+
+Number of assets: 13 
+Asset Names
+ [1] "Convertible Arbitrage"  "CTA Global"             "Distressed Securities" 
+ [4] "Emerging Markets"       "Equity Market Neutral"  "Event Driven"          
+ [7] "Fixed Income Arbitrage" "Global Macro"           "Long/Short Equity"     
+[10] "Merger Arbitrage"      
+More than 10 assets, only printing the first 10
+
+Constraints
+Enabled constraint types
+		- full_investment 
+		- long_only 
+
+Objectives:
+Enabled objective names
+		- pasd 
+
+
+
+
+
+
+
+
+
+
+
+# Run the optimization
+opt <- optimize.portfolio(R = asset_returns, 
+                          portfolio = port_spec, 
+                          momentFUN = set_sigma, 
+                          optimize_method = "random", 
+                          rp = rp)
+Leverage constraint min_sum and max_sum are restrictive, 
+              consider relaxing. e.g. 'full_investment' constraint should be min_sum=0.99 and max_sum=1.01
+
+
+
+
+
+
+
+
+
+# Print the results of the optimization
+print(opt)
+***********************************
+PortfolioAnalytics Optimization
+***********************************
+
+Call:
+optimize.portfolio(R = asset_returns, portfolio = port_spec, 
+    optimize_method = "random", rp = rp, momentFUN = set_sigma)
+
+Optimal Weights:
+ Convertible Arbitrage             CTA Global  Distressed Securities 
+                0.0769                 0.0769                 0.0769 
+      Emerging Markets  Equity Market Neutral           Event Driven 
+                0.0769                 0.0769                 0.0769 
+Fixed Income Arbitrage           Global Macro      Long/Short Equity 
+                0.0769                 0.0769                 0.0769 
+      Merger Arbitrage         Relative Value          Short Selling 
+                0.0769                 0.0769                 0.0769 
+        Funds of Funds 
+                0.0769 
+
+Objective Measures:
+   pasd 
+0.03449 
+
+
+
