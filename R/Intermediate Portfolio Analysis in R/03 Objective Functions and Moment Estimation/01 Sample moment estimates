@@ -1,0 +1,314 @@
+The default method for estimating portfolio moments is the sample method. The moments are calculated in optimize.portfolio() by evaluating the function passed to the momentFUN argument. The default for momentFUN is set.portfolio.moments() which defaults to calculating the sample moments. The moments are then used as inputs to the objective functions. The moments that must be estimated depend on the objectives. For example, an objective to minimize portfolio standard deviation requires only an estimate of the second moment. Compare that to the objective to maximize Sharpe Ratio which requires the first and second moments to be estimated. Sample estimates of the moments have disadvantages including estimation error and the curse of dimensionality. There is an increased risk of estimation error as the dimension of assets and parameters to estimate increase.
+
+
+Add a return objective with "mean" as the objective name.
+Calculate the sample moments using set.portfolio.moments. Assign to a variable named moments.
+Check if the first moment is equal to the sample estimate of mean returns.
+Add a risk objective with "StdDev" as the objective name.
+Calculate the sample moments using set.portfolio.moments. Assign to a variable named moments.
+Check if the second moment is equal to the sample estimate of the variance-covariance matrix.
+
+
+
+# Add a return objective with "mean" as the objective name
+port_spec <- add.objective(portfolio = port_spec, 
+                           type = "return", 
+                           name = "mean")
+
+
+
+
+
+# Calculate the sample moments
+moments <- set.portfolio.moments(R = asset_returns, 
+                                 portfolio = port_spec)
+moments
+$mu
+              [,1]
+ [1,]  0.005500364
+ [2,]  0.004158182
+ [3,]  0.006621818
+ [4,]  0.006245818
+ [5,]  0.004356000
+ [6,]  0.006216364
+ [7,]  0.004266909
+ [8,]  0.005377818
+ [9,]  0.006260000
+[10,]  0.005292727
+[11,]  0.005701091
+[12,] -0.001934182
+[13,]  0.004229818
+
+
+
+
+
+# Check if moments$mu is equal to the sample estimate of mean returns
+moments$mu == colMeans(asset_returns)
+      [,1]
+ [1,] TRUE
+ [2,] TRUE
+ [3,] TRUE
+ [4,] TRUE
+ [5,] TRUE
+ [6,] TRUE
+ [7,] TRUE
+ [8,] TRUE
+ [9,] TRUE
+[10,] TRUE
+[11,] TRUE
+[12,] TRUE
+[13,] TRUE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Add a risk objective with "StdDev" as the objective name
+port_spec <- add.objective(portfolio = port_spec, 
+                           type = "risk", 
+                           name = "StdDev")
+
+port_spec
+**************************************************
+PortfolioAnalytics Portfolio Specification 
+**************************************************
+
+Call:
+portfolio.spec(assets = asset_names)
+
+Number of assets: 13 
+Asset Names
+ [1] "Convertible Arbitrage"  "CTA Global"             "Distressed Securities" 
+ [4] "Emerging Markets"       "Equity Market Neutral"  "Event Driven"          
+ [7] "Fixed Income Arbitrage" "Global Macro"           "Long/Short Equity"     
+[10] "Merger Arbitrage"      
+More than 10 assets, only printing the first 10
+
+Objectives:
+Enabled objective names
+		- mean 
+		- StdDev 
+    
+
+
+
+
+
+
+
+
+
+# Calculate the sample moments using set.portfolio.moments. Assign to a variable named moments.
+moments <- set.portfolio.moments(R = asset_returns, 
+                                 portfolio = port_spec)
+
+moments
+$mu
+              [,1]
+ [1,]  0.005500364
+ [2,]  0.004158182
+ [3,]  0.006621818
+ [4,]  0.006245818
+ [5,]  0.004356000
+ [6,]  0.006216364
+ [7,]  0.004266909
+ [8,]  0.005377818
+ [9,]  0.006260000
+[10,]  0.005292727
+[11,]  0.005701091
+[12,] -0.001934182
+[13,]  0.004229818
+
+$sigma
+                       Convertible Arbitrage    CTA Global
+Convertible Arbitrage           2.655904e-04 -7.693306e-06
+CTA Global                     -7.693306e-06  5.356257e-04
+Distressed Securities           2.010327e-04 -8.075690e-06
+Emerging Markets                3.118903e-04  3.030127e-05
+Equity Market Neutral           6.467184e-05  3.676564e-05
+Event Driven                    1.980107e-04  4.868898e-06
+Fixed Income Arbitrage          1.435624e-04  2.504670e-06
+Global Macro                    9.419822e-05  1.906151e-04
+Long/Short Equity               1.947659e-04  4.798880e-05
+Merger Arbitrage                8.539289e-05  7.017031e-06
+Relative Value                  1.567390e-04  6.623951e-06
+Short Selling                  -2.672111e-04  1.232504e-04
+Funds of Funds                  1.618375e-04  6.856001e-05
+                       Distressed Securities Emerging Markets
+Convertible Arbitrage           2.010327e-04     3.118903e-04
+CTA Global                     -8.075690e-06     3.030127e-05
+Distressed Securities           2.851051e-04     4.227101e-04
+Emerging Markets                4.227101e-04     1.031733e-03
+Equity Market Neutral           8.002100e-05     1.327055e-04
+Event Driven                    2.603222e-04     4.414277e-04
+Fixed Income Arbitrage          1.260098e-04     1.946044e-04
+Global Macro                    1.307207e-04     3.055824e-04
+Long/Short Equity               2.581116e-04     5.158822e-04
+Merger Arbitrage                1.012180e-04     1.851389e-04
+Relative Value                  1.619863e-04     2.821355e-04
+Short Selling                  -4.462426e-04    -9.867494e-04
+Funds of Funds                  2.113832e-04     4.191186e-04
+                       Equity Market Neutral  Event Driven
+Convertible Arbitrage           6.467184e-05  1.980107e-04
+CTA Global                      3.676564e-05  4.868898e-06
+Distressed Securities           8.002100e-05  2.603222e-04
+Emerging Markets                1.327055e-04  4.414277e-04
+Equity Market Neutral           6.439437e-05  8.357766e-05
+Event Driven                    8.357766e-05  2.791701e-04
+Fixed Income Arbitrage          3.717259e-05  1.123519e-04
+Global Macro                    6.522760e-05  1.441187e-04
+Long/Short Equity               1.049925e-04  2.953015e-04
+Merger Arbitrage                4.040125e-05  1.277296e-04
+Relative Value                  5.774800e-05  1.705139e-04
+Short Selling                  -1.165317e-04 -5.091334e-04
+Funds of Funds                  8.494175e-05  2.274402e-04
+                       Fixed Income Arbitrage  Global Macro Long/Short Equity
+Convertible Arbitrage            1.435624e-04  9.419822e-05      0.0001947659
+CTA Global                       2.504670e-06  1.906151e-04      0.0000479888
+Distressed Securities            1.260098e-04  1.307207e-04      0.0002581116
+Emerging Markets                 1.946044e-04  3.055824e-04      0.0005158822
+Equity Market Neutral            3.717259e-05  6.522760e-05      0.0001049925
+Event Driven                     1.123519e-04  1.441187e-04      0.0002953015
+Fixed Income Arbitrage           1.281665e-04  6.951193e-05      0.0001033687
+Global Macro                     6.951193e-05  2.104682e-04      0.0001984837
+Long/Short Equity                1.033687e-04  1.984837e-04      0.0003938366
+Merger Arbitrage                 4.049542e-05  6.702119e-05      0.0001367379
+Relative Value                   9.424350e-05  9.464721e-05      0.0001887806
+Short Selling                   -1.046465e-04 -2.418978e-04     -0.0006709621
+Funds of Funds                   9.719223e-05  1.736135e-04      0.0002809229
+                       Merger Arbitrage Relative Value Short Selling
+Convertible Arbitrage      8.539289e-05   1.567390e-04 -0.0002672111
+CTA Global                 7.017031e-06   6.623951e-06  0.0001232504
+Distressed Securities      1.012180e-04   1.619863e-04 -0.0004462426
+Emerging Markets           1.851389e-04   2.821355e-04 -0.0009867494
+Equity Market Neutral      4.040125e-05   5.774800e-05 -0.0001165317
+Event Driven               1.277296e-04   1.705139e-04 -0.0005091334
+Fixed Income Arbitrage     4.049542e-05   9.424350e-05 -0.0001046465
+Global Macro               6.702119e-05   9.464721e-05 -0.0002418978
+Long/Short Equity          1.367379e-04   1.887806e-04 -0.0006709621
+Merger Arbitrage           8.948455e-05   7.809125e-05 -0.0002225156
+Relative Value             7.809125e-05   1.280061e-04 -0.0002921572
+Short Selling             -2.225156e-04  -2.921572e-04  0.0021847087
+Funds of Funds             1.042492e-04   1.442704e-04 -0.0004507483
+                       Funds of Funds
+Convertible Arbitrage    1.618375e-04
+CTA Global               6.856001e-05
+Distressed Securities    2.113832e-04
+Emerging Markets         4.191186e-04
+Equity Market Neutral    8.494175e-05
+Event Driven             2.274402e-04
+Fixed Income Arbitrage   9.719223e-05
+Global Macro             1.736135e-04
+Long/Short Equity        2.809229e-04
+Merger Arbitrage         1.042492e-04
+Relative Value           1.442704e-04
+Short Selling           -4.507483e-04
+Funds of Funds           2.362855e-04
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Check if moments$sigma is equal to the sample estimate of the variance-covariance matrix
+moments$sigma == cov(asset_returns)
+                       Convertible Arbitrage CTA Global Distressed Securities
+Convertible Arbitrage                   TRUE       TRUE                  TRUE
+CTA Global                              TRUE       TRUE                  TRUE
+Distressed Securities                   TRUE       TRUE                  TRUE
+Emerging Markets                        TRUE       TRUE                  TRUE
+Equity Market Neutral                   TRUE       TRUE                  TRUE
+Event Driven                            TRUE       TRUE                  TRUE
+Fixed Income Arbitrage                  TRUE       TRUE                  TRUE
+Global Macro                            TRUE       TRUE                  TRUE
+Long/Short Equity                       TRUE       TRUE                  TRUE
+Merger Arbitrage                        TRUE       TRUE                  TRUE
+Relative Value                          TRUE       TRUE                  TRUE
+Short Selling                           TRUE       TRUE                  TRUE
+Funds of Funds                          TRUE       TRUE                  TRUE
+                       Emerging Markets Equity Market Neutral Event Driven
+Convertible Arbitrage              TRUE                  TRUE         TRUE
+CTA Global                         TRUE                  TRUE         TRUE
+Distressed Securities              TRUE                  TRUE         TRUE
+Emerging Markets                   TRUE                  TRUE         TRUE
+Equity Market Neutral              TRUE                  TRUE         TRUE
+Event Driven                       TRUE                  TRUE         TRUE
+Fixed Income Arbitrage             TRUE                  TRUE         TRUE
+Global Macro                       TRUE                  TRUE         TRUE
+Long/Short Equity                  TRUE                  TRUE         TRUE
+Merger Arbitrage                   TRUE                  TRUE         TRUE
+Relative Value                     TRUE                  TRUE         TRUE
+Short Selling                      TRUE                  TRUE         TRUE
+Funds of Funds                     TRUE                  TRUE         TRUE
+                       Fixed Income Arbitrage Global Macro Long/Short Equity
+Convertible Arbitrage                    TRUE         TRUE              TRUE
+CTA Global                               TRUE         TRUE              TRUE
+Distressed Securities                    TRUE         TRUE              TRUE
+Emerging Markets                         TRUE         TRUE              TRUE
+Equity Market Neutral                    TRUE         TRUE              TRUE
+Event Driven                             TRUE         TRUE              TRUE
+Fixed Income Arbitrage                   TRUE         TRUE              TRUE
+Global Macro                             TRUE         TRUE              TRUE
+Long/Short Equity                        TRUE         TRUE              TRUE
+Merger Arbitrage                         TRUE         TRUE              TRUE
+Relative Value                           TRUE         TRUE              TRUE
+Short Selling                            TRUE         TRUE              TRUE
+Funds of Funds                           TRUE         TRUE              TRUE
+                       Merger Arbitrage Relative Value Short Selling
+Convertible Arbitrage              TRUE           TRUE          TRUE
+CTA Global                         TRUE           TRUE          TRUE
+Distressed Securities              TRUE           TRUE          TRUE
+Emerging Markets                   TRUE           TRUE          TRUE
+Equity Market Neutral              TRUE           TRUE          TRUE
+Event Driven                       TRUE           TRUE          TRUE
+Fixed Income Arbitrage             TRUE           TRUE          TRUE
+Global Macro                       TRUE           TRUE          TRUE
+Long/Short Equity                  TRUE           TRUE          TRUE
+Merger Arbitrage                   TRUE           TRUE          TRUE
+Relative Value                     TRUE           TRUE          TRUE
+Short Selling                      TRUE           TRUE          TRUE
+Funds of Funds                     TRUE           TRUE          TRUE
+                       Funds of Funds
+Convertible Arbitrage            TRUE
+CTA Global                       TRUE
+Distressed Securities            TRUE
+Emerging Markets                 TRUE
+Equity Market Neutral            TRUE
+Event Driven                     TRUE
+Fixed Income Arbitrage           TRUE
+Global Macro                     TRUE
+Long/Short Equity                TRUE
+Merger Arbitrage                 TRUE
+Relative Value                   TRUE
+Short Selling                    TRUE
+Funds of Funds                   TRUE
+
+
+
+
+Simple sample moments might not always be a good estimate. Let's look at some other methods for estimating moments.
+
+
