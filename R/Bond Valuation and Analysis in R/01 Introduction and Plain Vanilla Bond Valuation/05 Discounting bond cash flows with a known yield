@@ -1,0 +1,49 @@
+After laying out the bond's cash flows, we can now go through the steps of calculating the present value of each cash flow and value the bond. Recall that the value of the bond is the sum of the present value of its cash flows.
+
+In this exercise, you will calculate the appropriate present value factor, pv_factor, for each cash flow, so we can calculate each cash flow's present value pv. You will then sum the pv to find the value of the bond.
+
+Recall that this bond has a yield of 6%, which acts as the discount rate. The data frame you created in the prior exercise, cf, is present in your workspace.
+
+
+Create a new column, t, in your cf data frame to indicate the year in which cash flow is received. Note that for your purposes, the year is equivalent to the name of the rows in your data frame (1, 2, 3, etc.). This means you can simply use rownames() to name t. Use as.numeric() to make sure the values of t are numeric.
+Create another new column, pv_factor in your cf object to store each year's present value factor. Recall that each year's present value factor is calculated as 1 divided by 1 + the yield rate (in this case 6%, or 0.06) set to the power of your time variable (t).
+Create a pv column in cf to store the present value of each year's cash flow. The present value is calculated as cash flow (cf) multiplied by the year's present value factor (pv_factor).
+Finally, use sum() to sum the values in pv to find the value of the bond.
+
+
+
+>rownames(cf)
+[1] "1" "2" "3" "4" "5"
+
+
+# Add column t to cf
+cf$t <- as.numeric(rownames(cf))
+
+
+# Calculate pv_factor
+cf$pv_factor <- 1 / (1 + 0.06)^cf$t
+
+
+# Calculate pv
+cf$pv <- cf$cf * cf$pv_factor
+
+
+# Calculate the bond price
+sum(cf$pv)
+[1] 95.78764
+
+
+
+
+cf
+   cf t pv_factor        pv
+1   5 1 0.9433962  4.716981
+2   5 2 0.8899964  4.449982
+3   5 3 0.8396193  4.198096
+4   5 4 0.7920937  3.960468
+5 105 5 0.7472582 78.462108
+
+
+Calculating bond price using data frames in R allows you to keep track of a handful of complex variables. In this case, the overall bond price should be set at about $96.
+
+
