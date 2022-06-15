@@ -1,0 +1,41 @@
+In the prior exercises, you worked through in a step-by-step fashion how to calculate the value of a bond. However, performing all those steps repeatedly to value many bonds will be cumbersome. Fortunately, you can create a function to perform those same calculations repeatedly for different bonds.
+
+The function you create must have the flexibility to allow you to input key features of the bond. Specific to our prior example, you'll need the function to be able to incorporate a bond's par value, coupon rate, time to maturity, and yield.
+
+In this exercise, you'll create the function bondprc that takes these four inputs to calculate the value of a bond. Recall that to create a function you can use function(input 1, input 2, ...) { [lines of code] }.
+
+
+
+A partially built function, bondprc, has been generated in your workspace. Complete the function by constructing the function() command and providing the names of four inputs: p for par value, r for coupon rate, ttm for time to maturity, and y for yield.
+Verify that the bondprc function gives us a price of $95.79 for the value of a bond with a $100 par value, 5% coupon rate, 5 years to maturity, and 6% yield to maturity.
+
+
+
+
+# Create function
+# p = par value
+# r = coupon rate
+# ttm = time to maturity in years
+# y = yield to maturity, i.e. discount rate
+bondprc <- function(p, r, ttm, y) {
+  cf <- c(rep(p * r, ttm - 1), p * (1 + r))
+  cf <- data.frame(cf)
+  cf$t <- as.numeric(rownames(cf))
+  cf$pv_factor <- 1 / (1 + y)^cf$t
+  cf$pv <- cf$cf * cf$pv_factor
+  sum(cf$pv)
+}
+
+
+
+# Verify prior result
+bondprc(100, 0.05, 5, 0.06)
+[1] 95.78764
+
+
+
+Although it is important to walk through each step in the process to understand 
+how to calculate bond prices, you should always attempt to 
+create an appropriate function when faced with a complex and repetitive calculation.
+
+
