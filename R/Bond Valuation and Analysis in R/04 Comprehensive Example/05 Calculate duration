@@ -1,0 +1,72 @@
+In Chapter Three, you learned to use the approximate duration formula. As a refresher, the formula for approximate duration is:
+(P_down - P_up) / (2 x P x change_y)
+
+where P is the price of the bond today,
+P_up is the price of the bond if yields increase,
+P_down is the price of the bond if yields decrease, and 
+change_y is the expected change in yield.
+
+In this exercise, you will calculate duration. Specifically, you'll use the bondprc() function to calculate px_up and px_down.
+
+The objects px and aaa_yield from the prior exercises are preloaded in your workspace. For this exercise, assume that the expected change in yield is an increase of 1%. As before, the coupon rate is 3% (0.03) and the time to maturity 8 years.
+
+
+
+
+Use bondprc() to calculate the price of the bond when yields increase by 1%. Save this to px_up.
+Use bondprc() to calculate the price of the bond when yields decrease by 1%. Save this to px_down.
+Use px, px_up, and px_down to calculate duration with the formula above.
+Calculate and view the percentage effect of duration on price (duration_pct_change) based on duration.
+Calculate and view the dollar effect of duration on price (duration_dollar_change) based on duration.
+
+
+
+# Calculate bond price when yield increases
+# px [1] 97.17106
+coupon <- 0.03
+ttm <- 8
+aaa_yield
+[1] 0.0341
+
+# exercise ALSO ASSUMES INITIAL PRICE P = 100, NOT px!
+px_up <- bondprc(p = 100, 
+                 r = coupon, 
+                 ttm = ttm, 
+                 y = aaa_yield+0.01)
+                 
+                 
+# Calculate bond price when yield decreases
+px_down <- bondprc(p = 100, 
+                   r = coupon, 
+                   ttm = ttm, 
+                   y = aaa_yield-0.01)
+
+
+
+
+# Calculate duration
+# 1% point change in yield => 0.01
+duration <- (px_down - px_up) / (2 * px * 0.01)
+
+
+
+# Calculate percentage effect of duration on price
+# 1% point change in yield => 0.01
+# remember to add '-' minus sign before duration!!!
+duration_pct_change <- - duration * 0.01
+duration_pct_change
+[1] -0.06988271
+
+
+
+# Calculate dollar effect of duration on price
+duration_dollar_change <- px * duration_pct_change
+duration_dollar_change
+[1] -6.790577
+
+
+
+
+You derived several important values, including duration itself, the percentage effect of duration on price and the dollar effect of duration on price, based on relatively few inputs.
+
+
