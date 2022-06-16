@@ -1,0 +1,60 @@
+A useful approximation of the duration formula is called the approximate duration, which is given by
+(P_down - P_up) / (2 x P x change_y)
+
+where P is the price of the bond,
+P_down is the price of the bond if yield decreases,
+P_up is the price of the bond if yield increases, and 
+change_y is the expected change in yield.
+
+
+
+The full duration formula is more complex. If you're interested, you can refer to the "Fixed Income" chapter of my book as a reference for that formula.
+
+In this exercise, you will calculate the approximate duration of a bond with $100 par value, 10% coupon rate, 20 years to maturity, 10% yield to maturity, and a 1% expected change in yield. To make this calculation, use your familiar bondprc() function, which has been preloaded in the workspace.
+
+
+
+
+Use bondprc() to calculate the bond price today given 10% yield. Save this to px and then view px.
+Use another call to bondprc() to calculate the bond price (pc_up) if the yield increases by 1%.
+Use a third call to bondprc() to calculate the bond price (pc_down) if the yield decreases by 1%.
+Use your three objects (px, px_up, px_down) to calculate the approximate duration assuming a 1% change in yields.
+
+
+
+# Calculate bond price today
+px <- bondprc(p = 100, 
+              r = 0.1, 
+              ttm = 20, 
+              y = 0.1)
+px
+[1] 100
+
+
+# Calculate bond price if yields increase by 1% POINT
+px_up <- bondprc(p = 100, 
+                 r = 0.1, 
+                 ttm = 20, 
+                 y = 0.11)
+px_up
+[1] 92.03667
+
+
+# Calculate bond price if yields decrease by 1% POINT
+px_down <- bondprc(p = 100, 
+                   r = 0.1, 
+                   ttm = 20, 
+                   y = 0.09)
+px_down
+[1] 109.1285
+
+
+# Calculate approximate duration
+duration <- (px_down - px_up) / (2 * px * abs(0.1-0.09))
+duration
+[1] 8.545937
+
+
+This formula provides a simple way to estimate duration without getting into the nitty-gritty of the full duration formula.
+
+
