@@ -1,0 +1,48 @@
+Trial-and-error is a very cumbersome process. An alternative is to use an algorithm that does the work for you. In this particular case, the solution to the problem is the same as finding the root of a function.
+
+In this exercise, you will use the uniroot() function to find the root.
+https://www.rdocumentation.org/packages/stats/topics/uniroot
+
+The uniroot() function requires us to setup a vector of cash flows, cf, that begins with the price of the bond (as a negative number) as the first element and the cash flows you expect to receive from the bond (i.e., coupon and principal payments) as the remaining elements.
+Recall that the price of the bond is $95.79 and the bond has a $100 par value, 5% coupon rate, and 5 years to maturity.
+
+
+
+Create a vector of cash flows, cf, which includes the initial bond price (negative) and payments until maturity (positive).
+Use the pre-written code to create a simple bond valuation function, bval(), which calculates the value of the bond at each time period.
+Use the pre-written code to create the ytm() function using uniroot().
+Use ytm() with your cf vector to find the bond's yield to maturity.
+
+
+
+# Create cash flow vector
+cf <- c(-95.79, 5, 5, 5, 5, 105)
+
+
+
+# Create bond valuation function
+bval <- function(i, 
+                cf,
+                t=seq(along = cf))
+        sum(cf / (1 + i)^t)
+        
+        
+        
+# Create ytm() function using uniroot
+ytm <- function(cf) {
+    uniroot(bval, 
+            c(0, 1), 
+            cf = cf)$root
+}
+
+
+
+# Use ytm() function to find yield
+ytm(cf)
+[1] 0.05999552
+
+
+Your custom ytm() function produced an output of approximately 0.06, representing a 6% yield. Now that you've created the necessary functions, this estimation process will be much easier in the future.
+
+
+
