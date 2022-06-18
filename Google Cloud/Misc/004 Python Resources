@@ -78,6 +78,40 @@ pd.DatetimeIndex(df['dateColName']).day
 
 
 
+>get hour, day, month from datetime column
+https://pythontic.com/datetime/date/fromisoformat
+https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat
+from datetime import datetime
+hour = pd.Series(map(lambda dt: datetime.fromisoformat(dt).hour,
+                     df.loc[:, 'datetimeCol'].values))
+df['hour'] = hour
+print(datetime.fromisoformat("2022-06-15 17:53:29").year)       # 2022
+print(datetime.fromisoformat("2022-06-15 17:53:29").month)       # 6
+print(datetime.fromisoformat("2022-06-15 17:53:29").day)       # 15
+print(datetime.fromisoformat("2022-06-15 17:53:29").hour)       # 17
+print(datetime.fromisoformat("2022-06-15 17:53:29").minute)       # 53
+print(datetime.fromisoformat("2022-06-15 17:53:29").second)       # 29
+
+
+
+
+
+>pandas.tseries.offsets.DateOffset
+https://pandas.pydata.org/docs/reference/api/pandas.tseries.offsets.DateOffset.html
+# e.g. turn from dateoffsetcol into seconds
+from pandas.tseries.offsets import DateOffset
+type(DateOffset())
+df["dateOffsetCol"].fillna(DateOffset(days = 0,
+                                    microseconds = 0,
+                                    nanoseconds = 0),
+                         inplace = TRUE)
+df["dateOffsetCol"] = pd.Series(map(lambda time: int(time.microseconds/1000000),         # micro is 1 x 10^-6 => so we are adjusting back (divide by 10^6) from microseconds to seconds
+                             df.loc[:, "dateOffsetCol"].values
+                             ))
+
+
+
+
 >pandas.DataFrame.dropna
 https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html
 df.dropna()                   # Drop the rows where at least one element is missing.
@@ -128,6 +162,38 @@ e.g. ("categoricalColName", "count)
 ========================================================================
 
 Sklearn
+
+>sklearn.model_selection.train_test_split
+https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
+https://stackoverflow.com/questions/34842405/parameter-stratify-from-method-train-test-split-scikit-learn
+
+#stratify => SAME RELATIVE PERCENTAGE between (e.g. categorical/numeric) values in train and test set of Y
+stratify parameter makes a split so that the proportion of values in the sample produced 
+will be the same as the proportion of values provided to parameter stratify.
+For example, if variable y is a binary categorical variable with values 0 and 1 
+and there are 25% of zeros and 75% of ones, 
+stratify=y will make sure that your random split has 25% of 0's and 75% of 1's.
+
+X_train, X_test, y_train, y_test = train_test_split(X,
+                                                    y,
+                                                    test_size = 0.3,
+                                                    random_state,
+                                                    stratify = y)
+
+
+
+>sklearn.model_selection.StratifiedKFold
+https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html
+
+
+
+
+
+
+
+
+
+
 
 >sklearn.preprocessing.OrdinalEncoder
 https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html
@@ -247,6 +313,14 @@ weighted_prediction = df.model1 * 0.3 + df.model2 * 0.7           30% to model 1
 
 
 
+========================================================================
+
+Matplotlib
+
+plt.rcParams['figure.figsize'] = [15.0, 8.0]
+
+
+
 
 
 
@@ -255,7 +329,8 @@ weighted_prediction = df.model1 * 0.3 + df.model2 * 0.7           30% to model 1
 Seaborn
 
 # https://www.statology.org/seaborn-font-size/
-sns.set(font_scale = 3)
+# https://seaborn.pydata.org/generated/seaborn.plotting_context.html
+sns.set(font_scale = 3)       
 
 # plot 2x3 grid
 plt.subplots(figsize = (30, 20))
@@ -304,6 +379,57 @@ plt.show()
 
 
  
+
+
+>seaborn.pairplot
+https://seaborn.pydata.org/generated/seaborn.pairplot.html
+https://pythonbasics.org/seaborn-pairplot/
+sns.pairplot(data = df,
+             hue = 'categoricalColName')      # different colour for different category
+plt.show()
+
+
+
+
+
+
+
+
+
+
+>seaborn.heatmap, correlation matrix
+https://seaborn.pydata.org/generated/seaborn.heatmap.html
+https://towardsdatascience.com/clearly-explained-pearson-v-s-spearman-correlation-coefficient-ada2f473b8#:~:text=The%20fundamental%20difference%20between%20the,with%20monotonic%20relationships%20as%20well.
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (30, 15))        # 1x2 grid
+sns.heatmap(df.corr(method = "pearson/spearman"),
+            vmin = -1,                              # vmin optional
+                                                    # Values to anchor the colormap, otherwise they are inferred from the data and other keyword arguments.
+                                                    # over here, vmin = -1 => uses the last col of the df as the 'anchor' for intensity of colour
+            cmap = 'coolwarm',
+            annot = TRUE,
+            ax = ax1/ax2)
+plt.tight_layout()
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+=================================================
+
+Reduce bias in dataset
+
+>imblearn.under_sampling.RandomUnderSampler
+https://imbalanced-learn.org/stable/references/generated/imblearn.under_sampling.RandomUnderSampler.html
+Under-sample the majority class(es) by randomly picking samples with or without replacement.    => consideration: you will lose those 'extra' observations you are 'throwing away'
+
 
 
 
