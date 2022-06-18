@@ -3,12 +3,28 @@ Python
 >Python List pop()
 https://www.programiz.com/python-programming/methods/list/pop
 list.pop(index)   => pop element at that index
+list.pop(df.index('colName'))     => find col index # for a particular col name => pop that colName elemnent from your list of col names
 list.pop()        => pop last element
 
 
 >Python sorted()
 https://www.programiz.com/python-programming/methods/built-in/sorted
 Sort list, dictionary
+sorted(dict.items(), key = lambda x: x[1])                          Sort on the value for each key-value pair in the dictionary => ascending order
+sorted_dict = dict(sorted(dict.items(), key = lambda x: x[1]))      => assign to a 'new dict'
+
+
+
+>.format  show dp
+https://docs.python.org/3/tutorial/inputoutput.html
+value = 13456.23456789
+print("a is : {:,.5f}".format(value))
+# Output: a is : 13,456.23457             => , comma for comma before the decimal point
+                                          => 5f for number of digits behind decimal point; rounded up/down
+                                          
+value = 13456.23456489
+print("a is : {:,.5f}".format(value))
+# Output: a is : 13,456.23456
 
 
 
@@ -17,39 +33,279 @@ Sort list, dictionary
 
 
 
-
+========================================================================
 
 Pandas
+
+>display # rows, cols in Jupyter notebook
+pd.set_option("display.max_rows", #)
+pd.set_option("display.max_columns", #)
+pd.set_option("display.width", #)
+
+
+
+
 >pandas.DataFrame.describe
 https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html
+df.describe(include = "all")              describe FOR ALL COLS in the df => min 25% 50% 75% max, count, unique count
+
+
+
+
+>show percentage of NA values in df cols => then sort in descending order
+percent = df.isnull().sum() / len(df) * 100     => percentage of NA values in df cols
+percent_df = pd.DataFrame( {'col_name' : df.columns,
+                            'percent_NA' : percent} )
+percent_df.sort_values('percent_NA',
+                       ascending = FALSE,
+                       inplace = TRUE)
+
+
+
+>value_counts
+df.colName.value_counts(dropna = FALSE)
+
 
 
 
 >pandas.DatetimeIndex
 https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html
 https://stackoverflow.com/questions/27032052/how-do-i-properly-set-the-datetimeindex-for-a-pandas-datetime-object-in-a-datafr
-df = df.set_index('DatetimeColName')
+# df = df.set_index('DatetimeColName')
+pd.DatetimeIndex(df['dateColName']).year
+pd.DatetimeIndex(df['dateColName']).month
+pd.DatetimeIndex(df['dateColName']).day
+
+
 
 >pandas.DataFrame.dropna
 https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html
 df.dropna()                   # Drop the rows where at least one element is missing.
 df.dropna(axis='columns')     # Drop the columns where at least one element is missing.
+df.dropna(subset = 'specificColName')     # drop rows with NA in specific col/s only
+
+
 
 >pandas.DataFrame.mode
 https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.mode.html
 df.mode(axis='columns', numeric_only=True)               # To compute the mode over columns and not rows, use the axis parameter:
+df_X_without_na.fillna(df_X_without_na.mode())           # 2 dataframes => start with 1 df with NA, 
+                                                         # => then (1) dropna from Y/label col
+                                                         # => (2) impute categorical cols' NA values with something else, e.g. Unknown, None
+                                                         # now our intermediate df only has NAs in numeric X/feature cols
+                                                         # => then in the numeric X/feature cols => fill NA values with the mode
+                                                         # now our final df no longer has NAs in Y col (dropped), categorical X cols (imputed with another label), numeric X cols (imputed with mode)
 
 
 
 
 
+>rename cols
+df.rename(columns = {"origName1" : "newName1", ...},
+          inplace = TRUE)
 
 
 
 
 
+>.agg Aggregation and multiindex
+https://pandas.pydata.org/docs/user_guide/advanced.html
+df.groupby(['primaryKey']).agg({
+                              "categoricalColName" : "count",
+                              "numericColName1" : "sum",
+                              "numericColName2" : "min",
+                              "numericColName3" : [min, max, "mean", "median", "std", sum],         # supply a list of operations to perform on a col
+                              "dateColName" : [min, max, "nunique"]
+                              }).reset_index()
+=> you will have 2-level/layer column indexes                               
+e.g. ("categoricalColName", "count)
+     ("numericColName3", "min")
+     ("numericColName3", "max")
+
+
+
+
+========================================================================
 
 Sklearn
+
+>sklearn.preprocessing.OrdinalEncoder
+https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OrdinalEncoder.html
+OrdinalEncoder().fit_transform(df[["categoricalCol1", ...]])
+
+
+
+>sklearn.preprocessing.OneHotEncoder
+https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html
+OneHotEncoder(handle_unknown = 'ignore', sparse = FALSE)            # Sparse => return sparse matrix if set to True, else will return an array.
+                                                                    # Handle_unknown => ‘ignore’ : When an unknown category is encountered during transform, the resulting one-hot encoded columns for this feature will be all zeros.
+df_onehot_cols = pd.DataFrame( onehot_encoder.fit_transform(df[<variableListOfCategoricalCols>]) )
+df_onehot_cols.columns = onehot_encoder.get_feature_names(variableListOfCategoricalCols)
+
+
+
+
+
+
+
+>sklearn.ensemble.RandomForestRegressor
+https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html
+rf = RandomForestRegressor(max_depth, min_samples_leaf, min_samples_split, n_estimators)
+rf.fit(X_train, y_train)
+y_pred = rf.predict(X_test)
+mean_absolute_error(y_pred, y_test)
+print("MAE is: {:,.2f}".format( mean_absolute_error(y_pred, y_test) ))        # print MAE with 2 dp
+
+
+
+
+
+>sklearn.cluster.KMeans clustering
+https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
+kmeans = KMeans(n_clusters, random_state)
+kmeans.fit_predict(df)
+
+#Check optimal number of clusters
+from matplotlib import pyplot as plt
+list_sum_squared_distance = []
+K = range(1, 11)      # list of integers 1 to 10
+
+for n_cluster in K:
+  kmeans = KMeans(n_clusters = k, random_state)
+  kmeans.fit_predict(df)
+  list_sum_squared_distance.append(kmeans.inertia_)
+
+plt.plot(x = K, y = list_sum_squared_distance, '.-')          # . point marker
+                                                              # - solid line style
+                                                              # https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
+plt.xlabel('Number of clusters')
+plt.ylabel('Sum of squared distance')
+plt.title('Find optimal number of clusters - Elbow method')
+plt.show()
+
+# identify cluster centers
+cluster_center_coordinates = pd.DataFrame(kmeans.cluster_centers_,
+                                          columns = df.columns)
+=> e.g. there were 3 clusters
+      col1      col2      col3
+0      #         #         #
+1      #         #         #
+2      #         #         #
+
+
+
+========================================================================
+
+lightgbm
+
+>lightgbm.LGBMRegressor
+https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.LGBMRegressor.html
+https://www.programcreek.com/python/example/88794/lightgbm.LGBMRegressor
+lgbm_model = LGBMRegressor(n_estimators, learning_rate = 0.001)
+lgbm_model.fit(X_train, y_train)
+y_pred = lgbm_model.predict(X_test)
+mean_absolute_error(y_pred, y_test)
+print("MAE is: {:,.2f}".format( mean_absolute_error(y_pred, y_test) ))        # print MAE with 2 dp
+
+
+
+
+
+
+
+
+
+
+========================================================================
+XGBoost
+
+>xgboost.XGBRegressor
+https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.XGBRegressor
+xgb = XGBRegressor(n_estimators, learning_rate)
+xgb.fit(X_train, y_train)
+y_pred = xgb.predict(X_test)
+mean_absolute_error(y_pred, y_test)
+print("MAE is: {:,.2f}".format( mean_absolute_error(y_pred, y_test) ))        # print MAE with 2 dp
+
+
+
+
+
+
+
+
+
+===============================================================
+Combine outputs from multiple models
+
+df = df.DataFrame('model1': model1_prediction, 'model2': model2_prediction)
+weighted_prediction = df.model1 * 0.3 + df.model2 * 0.7           30% to model 1, 70% to model 2
+
+
+
+
+
+
+
+
+
+
+========================================================================
+
+Seaborn
+
+# https://www.statology.org/seaborn-font-size/
+sns.set(font_scale = 3)
+
+# plot 2x3 grid
+plt.subplots(figsize = (30, 20))
+plt.subplot(2,3,1)
+sns.lineplot(...);
+plt.subplot(2,3,2)
+...
+plt.subplot(2,3,6)
+sns.lineplot(...)
+plt.show()
+# goes from left to right cols in row 1
+# then move to the next row, and repeat
+
+
+
+>seaborn.boxplot
+https://seaborn.pydata.org/generated/seaborn.boxplot.html
+sns.boxplot(x, 
+            y, 
+            data = df,
+            showfliers = TRUE,                # showfliers = show outliers
+                                              # https://www.mikulskibartosz.name/how-to-remove-outliers-from-seaborn-boxplot-charts/
+            palette = <list of colour schemes>,
+            order = [2, 1, 0]
+            )
+
+
+
+
+
+>horizontal (left to right) seaborn.countplot
+https://seaborn.pydata.org/generated/seaborn.countplot.html
+ax = sns.countplot(y = 'categoricalCol',
+                   data = df,
+                   palette = <list of colour schemes>)
+ax.bar_label(ax.containers[0])      # add count of each categorical 'col' in the plot, to the right of each bar
+                                    # https://stackoverflow.com/questions/69810130/seaborn-display-values-on-barplot
+                                    # seaborn countplot ".containers"
+ax.set(xlabel = "count", 
+       ylabel = "categories")
+plt.show()
+
+
+
+
+
+
+ 
+
+
 
 
 
