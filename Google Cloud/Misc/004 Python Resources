@@ -33,6 +33,9 @@ print("a is : {:,.5f}".format(value))
 
 
 
+
+
+
 ========================================================================
 
 Pandas
@@ -142,6 +145,19 @@ df.rename(columns = {"origName1" : "newName1", ...},
 
 
 
+
+>create binary/dummy variables from categorical cols
+df["is_category1"] = df["categoricalCol"] == "category1"
+df.is_category1 = df.is_category1.replace({TRUE : 1,
+                                           FALSE : 0})
+
+
+
+
+
+
+
+
 >.agg Aggregation and multiindex
 https://pandas.pydata.org/docs/user_guide/advanced.html
 df.groupby(['primaryKey']).agg({
@@ -155,6 +171,30 @@ df.groupby(['primaryKey']).agg({
 e.g. ("categoricalColName", "count)
      ("numericColName3", "min")
      ("numericColName3", "max")
+
+
+
+
+
+
+
+
+
+
+
+> exponential weighted moving average
+https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.ewm.html
+https://tedboy.github.io/pandas/computation/computation5.html
+https://www.w3resource.com/pandas/series/series-ewm.php
+https://www.w3resource.com/pandas/dataframe/dataframe-ewm.php
+https://aleksandarhaber.com/exponential-moving-average-in-pandas-and-python/
+# 200-day ewma
+ewm_df = df['numericCol'].ewm(span = 200, adjust = FALSE).mean()
+
+
+
+
+
 
 
 
@@ -208,6 +248,60 @@ OneHotEncoder(handle_unknown = 'ignore', sparse = FALSE)            # Sparse => 
 df_onehot_cols = pd.DataFrame( onehot_encoder.fit_transform(df[<variableListOfCategoricalCols>]) )
 df_onehot_cols.columns = onehot_encoder.get_feature_names(variableListOfCategoricalCols)
 
+
+
+
+
+
+
+
+
+
+>sklearn.linear_model.LogisticRegression
+https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+c_space = np.linspace(0.001, 10, 100)       # from 0.001 up to and including 10; 100 numbers
+param_grid = {'C' : c_space,
+              'class_weight' : [None, 'balanced']}
+
+logreg_initial = Logisticegression()
+# https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html
+logreg = GridSearchCV(logreg_initial,
+                      param_grid,
+                      cv = 5)
+# tuned parameters and score
+logreg.best_params_     
+logreg.best_score_
+
+# from tuned params, fit the logistic regression model
+logreg = LogisticRegression(C = yourBestC,
+                            class_weight = "balanced/None")
+logreg.fit(X_train, y_train)
+# https://stats.stackexchange.com/questions/354709/sklearn-metrics-accuracy-score-vs-logisticregression-score
+logreg.score(X_test, y_test)
+
+#coefficients
+logreg.coef_
+# probability of 0/no, 1/yes
+prob_0 = logreg.predict_proba(X)[:, 0]
+prob_1 = logreg.predict_proba(X)[:, 1]
+# predicted 0/no, 1/yes classification
+y_pred = logreg.predict(X)
+
+#confusion matrix
+matrix = confusion_matrix(y, y_pred, labels = [0, 1])   # count
+matrix = confusion_matrix(y, y_pred, labels = [0, 1]) / len(y)   # 0.xx percentages
+#                 PREDICTED
+#                 NEG             POS
+# ACTUAL    NEG   TRUE NEG        FALSE POS
+#           POS   FALSE NEG       TRUE POS
+tn, fp, fn, tp = confusion_matrix(y, y_pred, labels = [0, 1]).reshape(-1)   # 1 line of output
+# output: tn#, fp#, fn#, tp#
+matrix_report = classification_report(y, y_pred, labels = [0,1])
+#           precision       recall        f1-score            support
+#    0        0.xx            0.xx          0.xx              # of actual neg labels
+#    1        0.xx            0.xx          0.xx              # of actual pos labels
+
+# accuracy                                  0.xx              # actual pos + neg labels
 
 
 
