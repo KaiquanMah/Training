@@ -233,6 +233,27 @@ ewm_df = df['numericCol'].ewm(span = 200, adjust = FALSE).mean()
 
 
 
+>correlation between X variables and y
+numpy.corrcoef
+https://numpy.org/doc/stable/reference/generated/numpy.corrcoef.html
+np.corrcoef(X, y)
+
+
+
+
+
+>IQR interquartile range
+https://www.codegrepper.com/code-examples/python/how+to+calculate+iqr+in+pandas
+q1 = df.quantile(0.25)
+q3 = df.quantile(0.75)
+
+iqr = q3 - q1
+
+lower_bound = q1 -(1.5 * iqr) 
+upper_bound = q3 +(1.5 * iqr)
+
+
+
 
 ========================================================================
 
@@ -265,6 +286,77 @@ https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.Strati
 
 
 
+>PowerTransformer for boxcox transformation
+sklearn.preprocessing.PowerTransformer
+Apply a power transform featurewise to make data more Gaussian-like.
+Box-Cox requires input data to be strictly positive, 
+while Yeo-Johnson supports both positive or negative data.
+
+https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PowerTransformer.html
+from sklearn.preprocessing import PowerTransformer
+pt = PowerTransformer(method = ‘yeo-johnson/box-cox’)
+pt.fit(yourDataset)
+
+
+
+
+
+
+
+
+>Linear Regression
+https://stackabuse.com/linear-regression-in-python-with-scikit-learn/
+regressor.intercept_
+regressor.coef_
+
+
+
+>Linear Regression with interaction terms
+https://towardsdatascience.com/multiple-linear-regression-with-interactions-unveiled-by-genetic-programming-4cc325ac1b65
+import statsmodels.api as sm 
+X = sm.add_constant(df[['x1','x2','x3','x4']])
+
+from sklearn.preprocessing import PolynomialFeatures
+poly = PolynomialFeatures(interaction_only = True)      # => const(i.e. x0), x1, ..., x4 and
+                                                        # => x0x1, ..., x0x4 and
+                                                        # ... x3x4
+X_transformed = poly.fit_transform(X)
+X_transformed = pd.concat([X, pd.DataFrame(X_transformed,
+                                           columns = poly.get_feature_names()
+                                           ).drop([‘1’,’x0',’x1',’x2',’x3',’x4'], 1)      # 1 => drop col
+                           ], 1)                                                          # 1 => concat col
+mod = sm.OLS(y, X)
+res = mod.fit()
+res.summary()
+
+
+
+
+
+
+
+
+>sklearn.linear_model.Lasso
+Linear Model trained with L1 regularisation (aka the Lasso).
+https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html
+clf = linear_model.Lasso(alpha = 0.1,
+                         fit_intercept = True)
+clf.fit(X_train, y_train)
+clf.coef_
+
+
+
+
+
+>sklearn.linear_model.Ridge
+https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html
+clf = linear_model.Ridge(alpha = 0.1,
+                         fit_intercept = True)
+clf.fit(X_train, y_train)
+clf.coef_
+
+
+
 
 
 
@@ -276,12 +368,19 @@ OrdinalEncoder().fit_transform(df[["categoricalCol1", ...]])
 
 
 
+
+
 >sklearn.preprocessing.OneHotEncoder
 https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html
 OneHotEncoder(handle_unknown = 'ignore', sparse = FALSE)            # Sparse => return sparse matrix if set to True, else will return an array.
                                                                     # Handle_unknown => ‘ignore’ : When an unknown category is encountered during transform, the resulting one-hot encoded columns for this feature will be all zeros.
 df_onehot_cols = pd.DataFrame( onehot_encoder.fit_transform(df[<variableListOfCategoricalCols>]) )
 df_onehot_cols.columns = onehot_encoder.get_feature_names(variableListOfCategoricalCols)
+
+https://stackoverflow.com/questions/37292872/how-can-i-one-hot-encode-in-python
+pd.get_dummies(df['categoricalCol'],
+               drop_first = True)         # drop the original column at the same time
+
 
 
 
@@ -343,6 +442,73 @@ matrix_report = classification_report(y, y_pred, labels = [0,1])
 
 
 
+
+
+
+
+
+
+
+
+
+>sklearn.model_selection.GridSearchCV
+https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html
+clf = GridSearchCV(estimator = yourModel, 
+                   param_grid = {'modelParam1' : ('choice1', 'choice2'),
+                                 'modelParam2' : np.linspace(start = 0,             # https://numpy.org/doc/stable/reference/generated/numpy.linspace.html
+                                                             stop = 1,
+                                                             num = 100,             # count of numbers
+                                                             endpoint = TRUE)},     #include stop #/endpoint
+                    cv = 5,
+                    verbose = 0     #>1 : computation time for each fold and parameter candidate is displayed;
+                                    #>2 : score is also displayed;
+                                    #>3 : the fold and candidate parameter indexes are also displayed together with the starting time of the computation.
+                    )
+
+
+
+
+
+
+
+
+
+
+
+>sklearn.tree.DecisionTreeClassifier
+https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html
+clf = DecisionTreeClassifier(max_depth,
+                             min_samples_split,
+                             min_samples_leaf,
+                             random_state = 0)
+clf.fit(X_train, y_train)
+clf.predict(X_test)
+
+
+
+
+
+
+
+>sklearn.ensemble.BaggingClassifier
+https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.BaggingClassifier.html
+clf = BaggingClassifier(base_estimator = yourModel,       # e.g. a Decision Tree Classifier
+                        n_estimators = 10,        # # of model/estimator variations in the ensemble model
+                        random_state = 0, 
+                        verbose = 0)
+clf.fit(X_train, y_train)
+clf.predict(X_test)
+
+
+
+
+
+
+
+
+
+
+
 >sklearn.ensemble.RandomForestRegressor
 https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html
 rf = RandomForestRegressor(max_depth, min_samples_leaf, min_samples_split, n_estimators)
@@ -355,9 +521,46 @@ print("MAE is: {:,.2f}".format( mean_absolute_error(y_pred, y_test) ))        # 
 
 
 
+
+>sklearn.ensemble.RandomForestClassifier
+https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+clf = RandomForestClassifier(n_estimators,
+                             max_depth = 2, 
+                             min_samples_split,       # min # samples/observations before splitting at a node
+                             min_samples_leaf,        # min # samples/observations for a leaf node to exist
+                             max_leaf_nodes,          # keep the best nodes first => based on relative reduction in impurity
+                             random_state = 0)
+clf.fit(X_train, y_train)
+clf.predict(X_test)
+
+
+
+
+
+
+
+
+>Randomforestclassifier Feature importance
+https://scikit-learn.org/stable/auto_examples/ensemble/plot_forest_importances.html
+importances = clf.feature_importances_
+
+
+
+
+
+
+
+
+
+
+
+
+
 >sklearn.cluster.KMeans clustering
 https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
-kmeans = KMeans(n_clusters, random_state)
+kmeans = KMeans(n_clusters,
+                n_init = 10,      # #times to run k-means with different centroid seeds
+                random_state)
 kmeans.fit_predict(df)
 
 #Check optimal number of clusters
@@ -386,6 +589,37 @@ cluster_center_coordinates = pd.DataFrame(kmeans.cluster_centers_,
 0      #         #         #
 1      #         #         #
 2      #         #         #
+
+
+
+
+
+
+
+
+
+
+
+
+>sklearn.metrics.roc_auc_score
+https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html
+sklearn.metrics.roc_auc_score(y_test, 
+                              yourClasssifier.predict_proba(X)[:, 1])
+# multi_class = 'ovr/ovo'     # => ovr one vs rest => 1 class vs the rest
+                              # => ovo one vs one  => calculate avg AUC of all possible combo of classes (class1-class2 combo of observations?)
+
+
+
+
+
+
+
+>sklearn.metrics.r2_score
+https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html
+r2_score(y_test, y_pred)
+
+
+
 
 
 
@@ -472,6 +706,57 @@ sns.lineplot(...)
 plt.show()
 # goes from left to right cols in row 1
 # then move to the next row, and repeat
+
+
+
+
+
+
+
+
+
+>seaborn.scatterplot
+https://seaborn.pydata.org/generated/seaborn.scatterplot.html
+sns,scatterplot(data = df,
+                x = "col1", 
+                y = "col2",
+                hue = "categoricalCol3",      #colour
+                style = "categoricalCol4")    # circle, 'x'
+
+
+
+
+
+
+>seaborn.jointplot
+https://seaborn.pydata.org/generated/seaborn.jointplot.html
+#e.g. scatterplot with histogram of x/y variable on the sides
+sns.jointplot(data = df,
+              x = "col1",
+              y = "col2",
+              hue = "categoricalCol3")      #colour
+
+#kind = "kde"    => kernel density estimate (KDE) plot = visualizing the distribution of observations in a dataset, analagous to a histogram
+                 => looks like contour plots in the middle => center of x/y variable histograms will be at the peak of the respective contour
+
+
+
+
+
+
+>seaborn.lineplot
+https://seaborn.pydata.org/generated/seaborn.lineplot.html
+sns.lineplot(data = df,
+             x = "col1",
+             y = "col2",
+             hue = "categoricalCol3")      #colour
+
+
+
+
+
+
+
 
 
 
