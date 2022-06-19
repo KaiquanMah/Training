@@ -856,7 +856,10 @@ https://pythonbasics.org/seaborn-pairplot/
 sns.pairplot(data = df,
              hue = 'categoricalColName')      # different colour for different category
 plt.show()
-
+# variables on x-axis, y-axis
+# separate plots => 1 plot per variable combo e.g. variable 1 with variable 1/2/3/4
+# variable 1 with variable 1 => show a distribution
+# variable 1 with variable 2/3/4 => show scatterplot
 
 
 
@@ -900,7 +903,7 @@ plt.show()
 
 =================================================
 
-Statsmodels
+Statsmodels, stats stuff
 
 
 >statsmodels.distributions.empirical_distribution.ECDF
@@ -922,6 +925,197 @@ ECDF([3, 2, 1, 6])
 
 
 
+
+
+
+> numpy.random.choice
+https://numpy.org/doc/stable/reference/random/generated/numpy.random.choice.html
+random.choice(yourArray/integer,    # e.g. ['item1', ...]
+              size = None, 
+              replace = True,       # sample with (by default)/without replacement
+              p = None)             # default assumes a uniform distribution for each value in input array, 
+                                    # otherwise use the probabilities u provide
+
+
+np.random.choice(5,                 # np.arange(5)
+                                    # https://numpy.org/doc/stable/reference/generated/numpy.arange.html
+                                    # start from 0, go up to and not including stop # '5'
+                 size = 3)          # select 3 elements
+# array([0, 3, 4]) # random
+
+
+#Generate a non-uniform random sample from np.arange(5) of size 3:
+np.random.choice(5, 
+                 size = 3, 
+                 p = [0.1, 0, 0.3, 0.6, 0])
+# array([3, 3, 0]) # random
+
+
+
+
+
+
+>numpy.random.sample
+https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.random.sample.html
+https://numpy.org/doc/stable/reference/random/generated/numpy.random.random_sample.html#numpy.random.random_sample
+# Return random floats in the half-open interval [0.0, 1.0)     # => from 0.0, up to and not including 1.0
+np.random.random_sample()       # 0.35
+
+np.random.random_sample(size = (5,))
+# array([ 0.30220482,  0.86820401,  0.1654503 ,  0.11659149,  0.54323428])
+
+np.random.random_sample((3, 2))         # 3 rows, 2 cols
+array([[-3.99149989, -0.52338984],
+       [-2.99091858, -0.79479508],
+       [-1.23204345, -1.75224494]])
+
+
+
+
+
+
+
+
+
+
+
+
+>scipy.stats.norm
+https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html
+A normal continuous random variable
+
+
+
+
+
+
+
+
+>scipy.stats.norm => create normal distribution
+https://www.alphacodingskills.com/scipy/scipy-normal-distribution.php
+#scipy.stats.norm.pdf(x, loc=0, scale=1)
+#scipy.stats.norm.cdf(x, loc=0, scale=1)
+#scipy.stats.norm.ppf(q, loc=0, scale=1)
+#scipy.stats.norm.rvs(loc=0, scale=1, size=1)       # size = output shape
+
+# probability density function (pdf)
+x = np.arange(-10, 10, 0.1)
+y = norm.pdf(x, 
+             loc = 0,         # mean of the distribution
+             scale = 2)       # SD; non-negative
+plt.plot(x, y) 
+plt.show()
+
+
+# cumulative distribution function (cdf)
+x = np.arange(-10, 10, 0.1)
+y = norm.cdf(x, 
+             loc = 0,         # mean of the distribution
+             scale = 2)       # SD; non-negative
+plt.plot(x, y) 
+plt.show()
+
+
+# norm.rvs
+# generates an array containing specified number of random numbers of the given normal distribution
+np.random.seed(8)
+y = norm.rvs(loc = 0,             # mean
+             scale = 1,           # sd
+             shape = 10000)       # # observations
+#create bins
+bins = np.arange(-4,4,0.1)  
+plt.hist(y, bins = bins) 
+plt.show()
+#histogram of normally distributed random variables generated
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>binomial distribution
+scipy.stats.binom
+https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binom.html
+https://www.alphacodingskills.com/scipy/scipy-binomial-distribution.php
+
+scipy.stats.binom.pmf(k, n, p, loc=0)       # k	Required. Specify float or array_like of floats representing random variable.
+                                            # n	Required. Specify number of trials, must be >= 0. Floats are also accepted, but they will be truncated to integers.
+                                            # p	Required. Specify probability of success in each trial, must be in range [0, 1]. float or array_like of floats.
+                                            # loc	Optional. Specify the mean/location of the distribution. Default is 0.
+scipy.stats.binom.cdf(k, n, p, loc=0)
+scipy.stats.binom.ppf(q, n, p, loc=0)       # q	Required. Specify float or array_like of floats representing probabilities.
+scipy.stats.binom.rvs(n, p, loc=0, size=1)  # size	Optional. Specify output shape.
+
+# probability mass function (pmf) 
+x = np.arange(0, 20, 1)
+y = binom.pmf(x, 
+              20,             # 20 trials
+              0.5)            # 50% chance of success
+plt.plot(x, y, 'o')           # plot circles denoting points for the PMF
+plt.show()
+
+# cumulative distribution function (cdf) 
+x = np.arange(0, 20, 1)
+y = binom.cdf(x, 
+              20,             # 20 trials
+              0.5)            # 50% chance of success
+plt.plot(x, y, 'o')           # plot circles denoting points for the PMF
+plt.show()
+
+# binom.rvs
+# enerates an array containing the specified number of random values drawn from the given binomial distribution
+np.random.seed(10)
+#creating a vector containing 10,000
+#random values from binomial distribution
+y = binom.rvs(20,             # 20 trials
+              0.5,            # 50% chance of success
+              loc = 10,       # mean = 10
+              10000)          # 10,000 observations
+#creating bins
+bins = np.arange(0,25,1)  
+plt.hist(y, bins = bins) 
+plt.show()
+#histogram of random variables generated
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>scipy stats create hypothesis
+scipy.stats.ttest_ind
+https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html
+stats.ttest_ind(random_variables_arr1, 
+                random_variables_arr2,
+                equal_var = TRUE/FALSE,                               # assume 2-sample test has equal population variances; default is TRUE
+                random_state = 0,
+                alternative = 'two-sided/less/greater')               # default is ‘two-sided’
+
+# Test with sample with identical means
+stats.ttest_ind(random_variables_arr1, 
+                random_variables_arr2)
+stats.ttest_ind(random_variables_arr1, 
+                random_variables_arr2,
+                equal_var = FALSE)
 
 
 
