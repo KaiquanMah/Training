@@ -1,0 +1,555 @@
+Overview
+In this lab, you will learn how to import data from CSV text files into Cloud SQL and then carry out some basic data analysis using simple queries.
+The dataset used in this lab is collected by the NYC Taxi and Limousine Commission and includes trip records from all trips completed in Yellow and Green taxis in NYC from 2009 to present, and all trips in for-hire vehicles (FHV) from 2015 to present. Records include fields capturing pick-up and drop-off dates/times, pick-up and drop-off locations, trip distances, itemized fares, rate types, payment types, and driver-reported passenger counts.
+This dataset can be used to demonstrate a wide range of data science concepts and techniques and will be used in several of the labs in the Data Engineering curriculum.
+https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+
+
+
+Objectives
+Create Cloud SQL instance
+Create a Cloud SQL database
+Import text data into Cloud SQL
+Check the data for integrity
+
+
+
+
+
+
+
+Task 1. Preparing your environment
+Create environment variables that will be used later in the lab for your project ID and the storage bucket that will contain your data:
+export PROJECT_ID=$(gcloud info --format='value(config.project)')
+export BUCKET=${PROJECT_ID}-ml
+
+
+echo $PROJECT_ID
+qwiklabs-gcp-xx-xxxx
+echo $BUCKET
+qwiklabs-gcp-xx-xxxx-ml
+
+
+
+
+$ gcloud info
+Google Cloud SDK [394.0.0]
+
+Platform: [Linux, x86_64] uname_result(system='Linux', node='cs-423660513961-default', release='5.10.127+', version='#1 SMP Sat Jul 16 08:53:19 UTC 2022', machine='x86_64')
+Locale: ('en_US', 'UTF-8')
+Python Version: [3.9.2 (default, Feb 28 2021, 17:03:44)  [GCC 10.2.1 20210110]]
+Python Location: [/usr/bin/python3]
+OpenSSL: [OpenSSL 1.1.1n  15 Mar 2022]
+Requests Version: [2.22.0]
+urllib3 Version: [1.25.9]
+Site Packages: [Disabled]
+
+Installation Root: [/usr/lib/google-cloud-sdk]
+Installed Components:
+  local-extract: [1.5.3]
+  beta: [2022.07.19]
+  cloud-build-local: [0.5.2]
+  bq: [2.0.75]
+  app-engine-python-extras: [1.9.96]
+  bundled-python3-unix: [3.9.12]
+  alpha: [2022.07.19]
+  minikube: [1.26.0]
+  cbt: [0.12.0]
+  core: [2022.07.19]
+  app-engine-java: [1.9.97]
+  kpt: [1.0.0-beta.15]
+  app-engine-python: [1.9.100]
+  pubsub-emulator: [0.6.0]
+  app-engine-go: [1.9.72]
+  bigtable: []
+  gsutil: [5.11]
+  skaffold: [1.39.1]
+  cloud-run-proxy: [0.3.0]
+  cloud-datastore-emulator: [2.2.1]
+  datalab: [20190610]
+System PATH: [/opt/gradle/bin:/opt/maven/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/nvm/versions/node/v16.1.0/bin:/usr/local/rvm/bin:/google/go_appengine:/google/google_appengine:/google/migrate/anthos/:/home/student_02_ac875dd3521a/.gems/bin:/usr/local/rvm/bin:/home/student_02_ac875dd3521a/gopath/bin:/google/gopath/bin:/google/flutter/bin]
+Python PATH: [/usr/bin/../lib/google-cloud-sdk/lib/third_party:/usr/lib/google-cloud-sdk/lib:/usr/lib/python39.zip:/usr/lib/python3.9:/usr/lib/python3.9/lib-dynload]
+Cloud SDK on PATH: [False]
+Kubectl on PATH: [/usr/bin/kubectl]
+
+WARNING: There are other instances of the Google Cloud Platform tools on your system PATH.
+  /google/go_appengine/endpointscfg.py
+  /google/go_appengine/dev_appserver.py
+  /usr/bin/cloud_sql_proxy
+  /usr/local/sbin/datalab
+
+Installation Properties: [/usr/lib/google-cloud-sdk/properties]
+User Config Directory: [/tmp/tmp.p3V4byrbB9]
+Active Configuration Name: [cloudshell-32691]
+Active Configuration Path: [/tmp/tmp.p3V4byrbB9/configurations/config_cloudshell-32691]
+
+Account: [xx@qwiklabs.net]
+Project: [qwiklabs-gcp-xx-xxxx]
+
+Current Properties:
+  [accessibility]
+    screen_reader: [True] (property file)
+  [component_manager]
+    disable_update_check: [True] (property file)
+  [compute]
+    gce_metadata_read_timeout_sec: [30] (property file)
+  [core]
+    account: [xx@qwiklabs.net] (callback)
+    disable_usage_reporting: [True] (property file)
+    project: [qwiklabs-gcp-xx-xxxx] (property file)
+  [metrics]
+    environment: [devshell] (property file)
+
+Logs Directory: [/tmp/tmp.p3V4byrbB9/logs]
+Last Log File: [/tmp/tmp.p3V4byrbB9/logs/2022.08.21/08.48.51.295251.log]
+
+git: [git version 2.30.2]
+ssh: [OpenSSH_8.4p1 Debian-5+deb11u1, OpenSSL 1.1.1n  15 Mar 2022]
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Create a Cloud SQL instance
+Enter the following commands to create a Cloud SQL instance:
+gcloud sql instances create taxi \
+    --tier=db-n1-standard-1 --activation-policy=ALWAYS
+
+This will take a few minutes to complete.
+WARNING: Starting with release 233.0.0, you will need to specify either a region or a zone to create an instance.
+Creating Cloud SQL instance for MYSQL_8_0...done.     
+Created [https://sqladmin.googleapis.com/sql/v1beta4/projects/qwiklabs-gcp-03-6a4b7f48c001/instances/taxi].
+NAME: taxi
+DATABASE_VERSION: MYSQL_8_0
+LOCATION: us-central1-b
+TIER: db-n1-standard-1
+PRIMARY_ADDRESS: 34.173.199.67
+PRIVATE_ADDRESS: -
+STATUS: RUNNABLE
+
+
+
+
+
+Set a root password for the Cloud SQL instance:
+gcloud sql users set-password root --host % --instance taxi \
+ --password passwordUL1ke
+Updating Cloud SQL user...done.   
+
+When prompted for the password, type passwordUL1ke and press enter this will update root password.
+Now create an environment variable with the IP address of the Cloud Shell:
+export ADDRESS=$(wget -qO - http://ipecho.net/plain)/32
+
+echo $ADDRESS
+34.87.132.233/32
+
+
+
+
+
+Whitelist the Cloud Shell instance for management access to your SQL instance:
+gcloud sql instances patch taxi --authorized-networks $ADDRESS
+When prompted press Y to accept the change.
+When adding a new IP address to authorized networks, make sure to also include any IP addresses that have already been authorized. Otherwise, they will be overwritten and de-authorized.
+
+Do you want to continue (Y/n)?  Y
+
+The following message will be used for the patch API method.
+{"name": "taxi", "project": "qwiklabs-gcp-03-6a4b7f48c001", "settings": {"ipConfiguration": {"authorizedNetworks": [{"value": "34.87.132.233/32"}]}}}
+Patching Cloud SQL instance...done.     
+Updated [https://sqladmin.googleapis.com/sql/v1beta4/projects/qwiklabs-gcp-03-6a4b7f48c001/instances/taxi].
+
+
+
+
+Get the IP address of your Cloud SQL instance by running:
+MYSQLIP=$(gcloud sql instances describe \
+taxi --format="value(ipAddresses.ipAddress)")
+
+
+Check the variable MYSQLIP:
+$ echo $MYSQLIP
+34.173.199.67
+
+You should get an IP address as an output.
+
+$ gcloud sql instances describe \
+taxi --format="value(ipAddresses)"
+{'ipAddress': '34.173.199.67', 'type': 'PRIMARY'}
+
+
+
+$ gcloud sql instances describe taxi
+backendType: SECOND_GEN
+connectionName: qwiklabs-gcp-03-6a4b7f48c001:us-central1:taxi
+createTime: '2022-08-21T08:53:18.801Z'
+databaseInstalledVersion: MYSQL_8_0_26
+databaseVersion: MYSQL_8_0
+etag: 2d713ea6f19cb379aec82e63039269595e52f4962c24857f741ffbd96767133d
+gceZone: us-central1-b
+instanceType: CLOUD_SQL_INSTANCE
+ipAddresses:
+- ipAddress: 34.173.199.67
+  type: PRIMARY
+kind: sql#instance
+maintenanceVersion: MYSQL_8_0_26.R20220809.02_00
+name: taxi
+project: qwiklabs-gcp-03-6a4b7f48c001
+region: us-central1
+selfLink: https://sqladmin.googleapis.com/sql/v1beta4/projects/qwiklabs-gcp-03-6a4b7f48c001/instances/taxi
+serverCaCert:
+  cert: |-
+    -----BEGIN CERTIFICATE-----
+    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    -----END CERTIFICATE-----
+  certSerialNumber: '0'
+  commonName: C=US,O=Google\, Inc,CN=Google Cloud SQL Server CA,dnQualifier=8a401000-0896-44e5-85a7-1c7861c4b10d
+  createTime: '2022-08-21T08:54:48.933Z'
+  expirationTime: '2032-08-18T08:55:48.933Z'
+  instance: taxi
+  kind: sql#sslCert
+  sha1Fingerprint: xxxxx
+serviceAccountEmailAddress: pxxxxx-7v7l31@gcp-sa-cloud-sql.iam.gserviceaccount.com
+settings:
+  activationPolicy: ALWAYS
+  availabilityType: ZONAL
+  backupConfiguration:
+    backupRetentionSettings:
+      retainedBackups: 7
+      retentionUnit: COUNT
+    enabled: false
+    kind: sql#backupConfiguration
+    startTime: 09:00
+    transactionLogRetentionDays: 7
+  dataDiskSizeGb: '10'
+  dataDiskType: PD_SSD
+  ipConfiguration:
+    authorizedNetworks:
+    - kind: sql#aclEntry
+      name: ''
+      value: 34.87.132.233/32
+    ipv4Enabled: true
+  kind: sql#settings
+  locationPreference:
+    kind: sql#locationPreference
+    zone: us-central1-b
+  pricingPlan: PER_USE
+  replicationType: SYNCHRONOUS
+  settingsVersion: '3'
+  storageAutoResize: true
+  storageAutoResizeLimit: '0'
+  tier: db-n1-standard-1
+state: RUNNABLE
+
+
+
+
+
+
+
+
+
+Create the taxi trips table by logging into the mysql command line interface:
+mysql --host=$MYSQLIP --user=root \
+      --password --verbose
+When prompted for a password enter passwordUL1ke.
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 99
+Server version: 8.0.26-google (Google)
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Reading history-file /home/student_02_ac875dd3521a/.mysql_history
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
+
+
+
+
+Paste the following content into the command line to create the schema for the trips table:
+create database if not exists bts;
+use bts;
+drop table if exists trips;
+create table trips (
+  vendor_id VARCHAR(16),		
+  pickup_datetime DATETIME,
+  dropoff_datetime DATETIME,
+  passenger_count INT,
+  trip_distance FLOAT,
+  rate_code VARCHAR(16),
+  store_and_fwd_flag VARCHAR(16),
+  payment_type VARCHAR(16),
+  fare_amount FLOAT,
+  extra FLOAT,
+  mta_tax FLOAT,
+  tip_amount FLOAT,
+  tolls_amount FLOAT,
+  imp_surcharge FLOAT,
+  total_amount FLOAT,
+  pickup_location_id VARCHAR(16),
+  dropoff_location_id VARCHAR(16)
+);
+
+
+
+
+
+
+In the mysql command line interface check the import by entering the following commands:
+describe trips;
+--------------
+describe trips
+--------------
++---------------------+-------------+------+-----+---------+-------+
+| Field               | Type        | Null | Key | Default | Extra |
++---------------------+-------------+------+-----+---------+-------+
+| vendor_id           | varchar(16) | YES  |     | NULL    |       |
+| pickup_datetime     | datetime    | YES  |     | NULL    |       |
+| dropoff_datetime    | datetime    | YES  |     | NULL    |       |
+| passenger_count     | int         | YES  |     | NULL    |       |
+| trip_distance       | float       | YES  |     | NULL    |       |
+| rate_code           | varchar(16) | YES  |     | NULL    |       |
+| store_and_fwd_flag  | varchar(16) | YES  |     | NULL    |       |
+| payment_type        | varchar(16) | YES  |     | NULL    |       |
+| fare_amount         | float       | YES  |     | NULL    |       |
+| extra               | float       | YES  |     | NULL    |       |
+| mta_tax             | float       | YES  |     | NULL    |       |
+| tip_amount          | float       | YES  |     | NULL    |       |
+| tolls_amount        | float       | YES  |     | NULL    |       |
+| imp_surcharge       | float       | YES  |     | NULL    |       |
+| total_amount        | float       | YES  |     | NULL    |       |
+| pickup_location_id  | varchar(16) | YES  |     | NULL    |       |
+| dropoff_location_id | varchar(16) | YES  |     | NULL    |       |
++---------------------+-------------+------+-----+---------+-------+
+17 rows in set (0.20 sec)
+
+
+
+
+Query the trips table:
+select distinct(pickup_location_id) from trips;
+This will return an empty set as there is no data in the database yet.
+--------------
+select distinct(pickup_location_id) from trips
+--------------
+Empty set (0.20 sec)
+
+
+
+
+Exit the mysql interactive console:
+exit
+
+Writing history-file /home/student_02_xxxx/.mysql_history
+Bye
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Add data to Cloud SQL instance
+Now you'll copy the New York City taxi trips CSV files stored on Cloud Storage locally. To keep resource usage low, you'll only be working with a subset of the data (~20,000 rows).
+
+Run the following in the command line:
+gsutil cp gs://cloud-training/OCBL013/nyc_tlc_yellow_trips_2018_subset_1.csv trips.csv-1
+gsutil cp gs://cloud-training/OCBL013/nyc_tlc_yellow_trips_2018_subset_2.csv trips.csv-2
+
+Copying gs://cloud-training/OCBL013/nyc_tlc_yellow_trips_2018_subset_1.csv...
+/ [1 files][850.3 KiB/850.3 KiB]
+Operation completed over 1 objects/850.3 KiB.
+Copying gs://cloud-training/OCBL013/nyc_tlc_yellow_trips_2018_subset_2.csv...
+/ [1 files][849.8 KiB/849.8 KiB]
+Operation completed over 1 objects/849.8 KiB.
+
+student_02_ac875dd3521a@cloudshell:~ (qwiklabs-gcp-03-6a4b7f48c001)$ pwd
+/home/student_02_ac875dd3521a
+
+student_02_ac875dd3521a@cloudshell:~ (qwiklabs-gcp-03-6a4b7f48c001)$ ls
+README-cloudshell.txt  trips.csv-1  trips.csv-2
+# SO ESSENTIALLY, WE HAVE ONLY COPIED THE 2 CSV files from
+# the public dataset's google cloud storage bucket
+# to the cloud shell's folder
+# e.g. public dataset accessible from
+# https://storage.googleapis.com/<bucketName>/<folderPath>/nyc_tlc_yellow_trips_2018_subset_1.csv
+
+
+
+
+
+Connect to the mysql interactive console to load local infile data:
+mysql --host=$MYSQLIP --user=root  --password  --local-infile
+When prompted for a password enter passwordUL1ke.
+
+In the mysql interactive console select the database:
+use bts;
+
+Load the local CSV file data using local-infile:
+LOAD DATA LOCAL INFILE 'trips.csv-1' INTO TABLE trips
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(vendor_id,pickup_datetime,dropoff_datetime,passenger_count,trip_distance,rate_code,store_and_fwd_flag,payment_type,fare_amount,extra,mta_tax,tip_amount,tolls_amount,imp_surcharge,total_amount,pickup_location_id,dropoff_location_id);
+
+Query OK, 10018 rows affected (1.67 sec)
+Records: 10018  Deleted: 0  Skipped: 0  Warnings: 0
+
+
+
+LOAD DATA LOCAL INFILE 'trips.csv-2' INTO TABLE trips
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(vendor_id,pickup_datetime,dropoff_datetime,passenger_count,trip_distance,rate_code,store_and_fwd_flag,payment_type,fare_amount,extra,mta_tax,tip_amount,tolls_amount,imp_surcharge,total_amount,pickup_location_id,dropoff_location_id);
+
+Query OK, 10006 rows affected (1.50 sec)
+Records: 10006  Deleted: 0  Skipped: 0  Warnings: 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Checking for data integrity
+Whenever data is imported from a source it's always important to check for data integrity. Roughly, this means making sure the data meets your expectations.
+
+Query the trips table for unique pickup location regions:
+select distinct(pickup_location_id) from trips;
+
+This should return 159 unique ids.
++--------------------+
+| pickup_location_id |
++--------------------+
+| 68                 |
+| 138                |
+| 261                |
+| 262                |
+| 100                |
+| 7                  |
+...
+| 200                |
+| 259                |
+| 188                |
++--------------------+
+159 rows in set (0.22 sec)
+
+
+
+
+
+Let's start by digging into the trip_distance column. Enter the following query into the console:
+select
+  max(trip_distance),
+  min(trip_distance)
+from
+  trips;
+One would expect the trip distance to be greater than 0 and less than, say 1000 miles. 
+The maximum trip distance returned of 85 miles seems reasonable but the minimum trip distance of 0 seems buggy.
++--------------------+--------------------+
+| max(trip_distance) | min(trip_distance) |
++--------------------+--------------------+
+|                 85 |                  0 |
++--------------------+--------------------+
+1 row in set (0.22 sec)
+
+
+
+How many trips in the dataset have a trip distance of 0?
+select count(*) from trips where trip_distance = 0;
+There are 155 such trips in the database. These trips warrant further exploration. You'll find that these trips have non-zero payment amounts associated with them. Perhaps these are fraudulent transactions?
++----------+
+| count(*) |
++----------+
+|      155 |
++----------+
+1 row in set (0.22 sec)
+
+
+
+Let's see if we can find more data that doesn't meet our expectations. We expect the fare_amount column to be positive. Enter the following query to see if this is true in the database:
+select count(*) from trips where fare_amount < 0;
+There should be 14 such trips returned. Again, these trips warrant further exploration. There may be a reasonable explanation for why the fares take on negative numbers. However, it's up to the data engineer to ensure there are no bugs in the data pipeline that would cause such a result.
++----------+
+| count(*) |
++----------+
+|       14 |
++----------+
+1 row in set (0.22 sec)
+
+
+
+
+
+Finally, let's investigate the payment_type column.
+select
+  payment_type,
+  count(*)
+from
+  trips
+group by
+  payment_type;
+  
+The results of the query indicate that there are four different payment types, with:
+Payment type = 1 has 13863 rows
+Payment type = 2 has 6016 rows
+Payment type = 3 has 113 rows
+Payment type = 4 has 32 rows
+Digging into the documentation, a payment type of 1 refers to credit card use, payment type of 2 is cash, and a payment type of 4 refers to a dispute. The figures make sense.
++--------------+----------+
+| payment_type | count(*) |
++--------------+----------+
+| 1            |    13863 |
+| 2            |     6016 |
+| 3            |      113 |
+| 4            |       32 |
++--------------+----------+
+4 rows in set (0.23 sec)
+
+
+
+
+
+Exit the 'mysql' interactive console:
+exit
+
+
+
+
