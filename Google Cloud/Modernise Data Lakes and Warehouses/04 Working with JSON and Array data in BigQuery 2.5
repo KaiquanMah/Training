@@ -49,10 +49,10 @@ For data warehousing, data analysts often go the reverse direction (denormalizat
 
 
 What are some potential issues if you stored all your data in one giant table?
-The table row size could be too large for traditional reporting databases
+Model answer - The table row size could be too large for traditional reporting databases
 Any changes to a value (like customer email) could impact many other rows (like all their orders)
 Data at differing levels of granularity could lead to reporting issues because less granular fields would be repeated.
-YES - All of the above
+My answer - All of the above
 
 
 
@@ -85,6 +85,9 @@ BigQuery visually displays arrays as flattened. It simply lists the value in the
 
 
 
+
+
+
 Try it yourself.
 Enter the following in the BigQuery Query Editor:
 #standardSQL
@@ -92,6 +95,19 @@ SELECT
 ['raspberry', 'blackberry', 'strawberry', 'cherry'] AS fruit_array
 
 Click Run.
+Row	fruit_array	
+1	raspberry
+          blackberry
+          strawberry
+          cherry
+
+
+[{
+  "fruit_array": ["raspberry", "blackberry", "strawberry", "cherry"]
+}]
+
+
+
 
 
 Now try executing this one:
@@ -118,6 +134,29 @@ SELECT person, fruit_array, total_cost FROM `data-to-insights.advanced.fruit_sto
 
 Click Run.
 After viewing the results, click the JSON tab to view the nested structure of the results.
+Row	person	fruit_array	total_cost	
+1	sally     raspberry           10.99
+                    blackberry
+                    strawberry
+                    cherry
+2	frederick orange              5.55
+                    apple
+
+
+[{
+  "person": ["sally"],
+  "fruit_array": ["raspberry", "blackberry", "strawberry", "cherry"],
+  "total_cost": ["10.99"]
+}, {
+  "person": ["frederick"],
+  "fruit_array": ["orange", "apple"],
+  "total_cost": ["5.55"]
+}]
+
+
+
+
+
 
 
 
@@ -152,11 +191,37 @@ Schema: Check Auto detect (Schema and input parameters).
 Call the new table "fruit_details".
 Click Create table.
 In the schema, note that fruit_array is marked as REPEATED which means it's an array.
+$ bq show --format=prettyjson fruit_store.fruit_details | jq '.schema.fields' 
+[
+  {
+    "mode": "NULLABLE",
+    "name": "total_cost",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "REPEATED",
+    "name": "fruit_array",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "person",
+    "type": "STRING"
+  }
+]
+
 
 Recap
 BigQuery natively supports arrays
 Array values must share a data type
 Arrays are called REPEATED fields in BigQuery
+
+
+
+
+
+
+
 
 
 
@@ -187,7 +252,29 @@ WHERE visitId = 1501570398
 ORDER BY date
 
 Click Run and view the results.
+[{
+  "fullVisitorId": "5710379250208908569",
+  "date": "20170731",
+  "v2ProductName": "Google Snapback Hat Black",
+  "pageTitle": "Google RFID Journal"
+}, {
+  "fullVisitorId": "5710379250208908569",
+  "date": "20170731",
+  "v2ProductName": "Google Women\u0027s Lightweight Microfleece Jacket",
+  "pageTitle": "Google Snapback Hat Black"
+}, {
+  "fullVisitorId": "5710379250208908569",
+  "date": "20170801",
+  "v2ProductName": "Plastic Sliding Flashlight",
+  "pageTitle": "Electronics | Google Merchandise Store"
+},
+...]
+
 How many rows are returned?
+111
+
+
+
 
 
 
@@ -203,7 +290,25 @@ GROUP BY fullVisitorId, date
 ORDER BY date
 
 Click Run and view the results.
+[{
+  "fullVisitorId": "5710379250208908569",
+  "date": "20170731",
+  "products_viewed": ["Google Snapback Hat Black", "Google Women\u0027s Lightweight Microfleece Jacket"],
+  "pages_viewed": ["Google RFID Journal", "Google Snapback Hat Black"]
+}, {
+  "fullVisitorId": "5710379250208908569",
+  "date": "20170801",
+  "products_viewed": ["Android Rise 14 oz Mug", "Android Rise 14 oz Mug", "Badge Holder", "Ballpoint LED Light Pen", "Google Twill Cap", "Windup Android", "Google Bib White", "Plastic Sliding Flashlight", "YouTube Custom Decals", "Android Sticker Sheet Ultra Removable", "Google 5-Panel Cap", "Android RFID Journal", "Maze Pen", "Waze Pack of 9 Decal Set", "Keyboard DOT Sticker", "Google Stylus Pen w/ LED Light", "1 oz Hand Sanitizer", "Switch Tone Color Crayon Pen", "Google Sunglasses", "Suitcase Organizer Cubes", "Google Laptop and Cell Phone Stickers", "Android Sticker Sheet Ultra Removable", "Android Hard Cover Journal", "Basecamp Explorer Powerbank Flashlight", "Android RFID Journal", "Micro Wireless Earbud", "Satin Black Ballpoint Pen", "Windup Android", "Windup Android", "Google Device Stand", "Google Men\u0027s 100% Cotton Short Sleeve Hero Tee White", "8 pc Android Sticker Sheet", "Galaxy Screen Cleaning Cloth", "1 oz Hand Sanitizer", "Google Kick Ball", "Android Sticker Sheet Ultra Removable", "Android Twill Cap", "Android RFID Journal", "Google Flashlight", "Google Bib Red", "Seat Pack Organizer", "Google Device Stand", "Android Wool Heather Cap Heather/Black", "Recycled Mouse Pad", "1 oz Hand Sanitizer", "Google Car Clip Phone Holder", "Android Hard Cover Journal", "Windup Android", "Plastic Sliding Flashlight", "Keyboard DOT Sticker", "Keyboard DOT Sticker", "Galaxy Screen Cleaning Cloth", "Switch Tone Color Crayon Pen", "Google 2200mAh Micro Charger", "Gunmetal Roller Ball Pen", "Compact Selfie Stick", "Android Luggage Tag", "Google Luggage Tag", "Google Men\u0027s 100% Cotton Short Sleeve Hero Tee White", "YouTube Custom Decals", "Suitcase Organizer Cubes", "22 oz Android Bottle", "Basecamp Explorer Powerbank Flashlight", "Seat Pack Organizer", "Android Luggage Tag", "8 pc Android Sticker Sheet", "Android Sticker Sheet Ultra Removable", "Android Hard Cover Journal", "Android 17oz Stainless Steel Sport Bottle", "Rocket Flashlight", "Electronics Accessory Pouch", "Waze Dress Socks", "Ballpoint Stylus Pen", "Android Lunch Kit", "Android Lunch Kit", "Suitcase Organizer Cubes", "SPF-15 Slim \u0026 Slender Lip Balm", "Google Flashlight", "Android Wool Heather Cap Heather/Black", "Android Lunch Kit", "Google Doodle Decal", "Android Sticker Sheet Ultra Removable", "Four Color Retractable Pen", "Pen Pencil \u0026 Highlighter Set", "Metal Texture Roller Pen", "Waze Pack of 9 Decal Set", "Google Men\u0027s 100% Cotton Short Sleeve Hero Tee White", "Android Wool Heather Cap Heather/Black", "Switch Tone Color Crayon Pen", "Colored Pencil Set", "Android Hard Cover Journal", "Google Blackout Cap", "Seat Pack Organizer", "Google 4400mAh Power Bank", "Google Device Holder Sticky Pad", "Android Luggage Tag", "8 pc Android Sticker Sheet", "Google Laptop and Cell Phone Stickers", "22 oz Android Bottle", "Google Snapback Hat Black", "Rocket Flashlight", "Rubber Grip Ballpoint Pen 4 Pack", "Recycled Mouse Pad", "Switch Tone Color Crayon Pen", "Google Doodle Decal", "YouTube Twill Cap", "Google 5-Panel Snapback Cap", "Android 17oz Stainless Steel Sport Bottle", "Android RFID Journal"],
+  "pages_viewed": ["Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Other | Office | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Apparel | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Apparel | Google Merchandise Store", "Accessories | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Apparel | Google Merchandise Store", "Office | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Electronics | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Office | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Electronics | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Electronics | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Accessories | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Accessories | Google Merchandise Store", "Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Accessories | Google Merchandise Store", "Apparel | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Accessories | Google Merchandise Store", "Apparel | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Electronics | Google Merchandise Store", "Apparel | Google Merchandise Store", "Accessories | Google Merchandise Store", "Office | Google Merchandise Store", "Electronics | Google Merchandise Store", "Office | Google Merchandise Store", "Accessories | Google Merchandise Store", "Electronics | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Other | Office | Google Merchandise Store", "Office | Google Merchandise Store", "Electronics | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Apparel | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Accessories | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Accessories | Google Merchandise Store", "Electronics | Google Merchandise Store", "Apparel | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Accessories | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Electronics | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Office | Google Merchandise Store", "Apparel | Google Merchandise Store", "Office | Google Merchandise Store", "Electronics | Google Merchandise Store", "Electronics | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Apparel | Google Merchandise Store", "Electronics | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Other | Office | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Apparel | Google Merchandise Store", "Apparel | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Office | Google Merchandise Store"]
+}]
+
 How many rows are returned?
+2 - one for each day
+
+
+
+
+
 
 
 
@@ -221,7 +326,28 @@ WHERE visitId = 1501570398
 GROUP BY fullVisitorId, date
 ORDER BY date
 
+[{
+  "fullVisitorId": "5710379250208908569",
+  "date": "20170731",
+  "products_viewed": ["Google Women\u0027s Lightweight Microfleece Jacket", "Google Snapback Hat Black"],
+  "num_products_viewed": "2",
+  "pages_viewed": ["Google Snapback Hat Black", "Google RFID Journal"],
+  "num_pages_viewed": "2"
+}, {
+  "fullVisitorId": "5710379250208908569",
+  "date": "20170801",
+  "products_viewed": ["Google 4400mAh Power Bank", "Google Device Holder Sticky Pad", "Android Luggage Tag", "8 pc Android Sticker Sheet", "Google Laptop and Cell Phone Stickers", "22 oz Android Bottle", "Google Snapback Hat Black", "Plastic Sliding Flashlight", "YouTube Custom Decals", "Android Sticker Sheet Ultra Removable", "Google 5-Panel Cap", "Android RFID Journal", "Google Device Stand", "Google Men\u0027s 100% Cotton Short Sleeve Hero Tee White", "8 pc Android Sticker Sheet", "Galaxy Screen Cleaning Cloth", "1 oz Hand Sanitizer", "Google Kick Ball", "Android Sticker Sheet Ultra Removable", "Android Twill Cap", "Android RFID Journal", "Google Flashlight", "Google Bib Red", "Seat Pack Organizer", "Compact Selfie Stick", "Android Luggage Tag", "Google Luggage Tag", "Google Men\u0027s 100% Cotton Short Sleeve Hero Tee White", "YouTube Custom Decals", "Suitcase Organizer Cubes", "22 oz Android Bottle", "Basecamp Explorer Powerbank Flashlight", "Seat Pack Organizer", "Android Luggage Tag", "8 pc Android Sticker Sheet", "Android Sticker Sheet Ultra Removable", "Android Hard Cover Journal", "Android 17oz Stainless Steel Sport Bottle", "Metal Texture Roller Pen", "Waze Pack of 9 Decal Set", "Google Men\u0027s 100% Cotton Short Sleeve Hero Tee White", "Android Wool Heather Cap Heather/Black", "Switch Tone Color Crayon Pen", "Colored Pencil Set", "Android Hard Cover Journal", "Google Blackout Cap", "Seat Pack Organizer", "Google Device Stand", "Android Wool Heather Cap Heather/Black", "Recycled Mouse Pad", "1 oz Hand Sanitizer", "Google Car Clip Phone Holder", "Android Hard Cover Journal", "Windup Android", "Rocket Flashlight", "Electronics Accessory Pouch", "Waze Dress Socks", "Ballpoint Stylus Pen", "Android Lunch Kit", "Android Lunch Kit", "Suitcase Organizer Cubes", "SPF-15 Slim \u0026 Slender Lip Balm", "Google Flashlight", "Maze Pen", "Waze Pack of 9 Decal Set", "Keyboard DOT Sticker", "Google Stylus Pen w/ LED Light", "1 oz Hand Sanitizer", "Switch Tone Color Crayon Pen", "Google Sunglasses", "Android Rise 14 oz Mug", "Android Rise 14 oz Mug", "Badge Holder", "Ballpoint LED Light Pen", "Google Twill Cap", "Windup Android", "Google Bib White", "Suitcase Organizer Cubes", "Google Laptop and Cell Phone Stickers", "Android Sticker Sheet Ultra Removable", "Android Hard Cover Journal", "Basecamp Explorer Powerbank Flashlight", "Android RFID Journal", "Micro Wireless Earbud", "Satin Black Ballpoint Pen", "Windup Android", "Windup Android", "Android Wool Heather Cap Heather/Black", "Android Lunch Kit", "Google Doodle Decal", "Android Sticker Sheet Ultra Removable", "Four Color Retractable Pen", "Pen Pencil \u0026 Highlighter Set", "Rocket Flashlight", "Rubber Grip Ballpoint Pen 4 Pack", "Recycled Mouse Pad", "Switch Tone Color Crayon Pen", "Google Doodle Decal", "YouTube Twill Cap", "Google 5-Panel Snapback Cap", "Android 17oz Stainless Steel Sport Bottle", "Android RFID Journal", "Plastic Sliding Flashlight", "Keyboard DOT Sticker", "Keyboard DOT Sticker", "Galaxy Screen Cleaning Cloth", "Switch Tone Color Crayon Pen", "Google 2200mAh Micro Charger", "Gunmetal Roller Ball Pen"],
+  "num_products_viewed": "109",
+  "pages_viewed": ["Electronics | Google Merchandise Store", "Electronics | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Apparel | Google Merchandise Store", "Accessories | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Apparel | Google Merchandise Store", "Office | Google Merchandise Store", "Accessories | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Accessories | Google Merchandise Store", "Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Accessories | Google Merchandise Store", "Apparel | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Accessories | Google Merchandise Store", "Apparel | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Apparel | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Accessories | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Office | Google Merchandise Store", "Apparel | Google Merchandise Store", "Office | Google Merchandise Store", "Electronics | Google Merchandise Store", "Apparel | Google Merchandise Store", "Accessories | Google Merchandise Store", "Office | Google Merchandise Store", "Electronics | Google Merchandise Store", "Office | Google Merchandise Store", "Accessories | Google Merchandise Store", "Accessories | Google Merchandise Store", "Electronics | Google Merchandise Store", "Apparel | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Accessories | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Electronics | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Electronics | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Office | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Other | Office | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Apparel | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Apparel | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Electronics | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Electronics | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Office | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Electronics | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Other | Office | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Apparel | Google Merchandise Store", "Apparel | Google Merchandise Store", "Shop by Brand | Google Merchandise Store", "Office | Google Merchandise Store", "Electronics | Google Merchandise Store", "Office | Google Merchandise Store", "Office | Google Merchandise Store", "Other | Office | Google Merchandise Store", "Office | Google Merchandise Store", "Electronics | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store"],
+  "num_pages_viewed": "109"
+}]
+
 How many pages were visited by this user on 20170801?
+109
+
+
+
+
 
 
 
@@ -240,9 +366,25 @@ WHERE visitId = 1501570398
 GROUP BY fullVisitorId, date
 ORDER BY date
 
+[{
+  "fullVisitorId": "5710379250208908569",
+  "date": "20170731",
+  "products_viewed": ["Google Women\u0027s Lightweight Microfleece Jacket", "Google Snapback Hat Black"],
+  "distinct_products_viewed": "2",
+  "pages_viewed": ["Google Snapback Hat Black", "Google RFID Journal"],
+  "distinct_pages_viewed": "2"
+}, {
+  "fullVisitorId": "5710379250208908569",
+  "date": "20170801",
+  "products_viewed": ["Android Luggage Tag", "8 pc Android Sticker Sheet", "Android Sticker Sheet Ultra Removable", "Android Hard Cover Journal", "Android 17oz Stainless Steel Sport Bottle", "Maze Pen", "Waze Pack of 9 Decal Set", "Keyboard DOT Sticker", "Google Stylus Pen w/ LED Light", "1 oz Hand Sanitizer", "Switch Tone Color Crayon Pen", "Google Sunglasses", "Plastic Sliding Flashlight", "YouTube Custom Decals", "Google 5-Panel Cap", "Android RFID Journal", "Android Wool Heather Cap Heather/Black", "Android Lunch Kit", "Google Doodle Decal", "Four Color Retractable Pen", "Pen Pencil \u0026 Highlighter Set", "Google 4400mAh Power Bank", "Google Device Holder Sticky Pad", "Google Laptop and Cell Phone Stickers", "22 oz Android Bottle", "Google Snapback Hat Black", "Android Rise 14 oz Mug", "Badge Holder", "Ballpoint LED Light Pen", "Google Twill Cap", "Windup Android", "Google Bib White", "Google Device Stand", "Google Men\u0027s 100% Cotton Short Sleeve Hero Tee White", "Galaxy Screen Cleaning Cloth", "Google Kick Ball", "Android Twill Cap", "Google Flashlight", "Google Bib Red", "Seat Pack Organizer", "Rocket Flashlight", "Rubber Grip Ballpoint Pen 4 Pack", "Recycled Mouse Pad", "YouTube Twill Cap", "Google 5-Panel Snapback Cap", "Suitcase Organizer Cubes", "Basecamp Explorer Powerbank Flashlight", "Micro Wireless Earbud", "Satin Black Ballpoint Pen", "Electronics Accessory Pouch", "Waze Dress Socks", "Ballpoint Stylus Pen", "SPF-15 Slim \u0026 Slender Lip Balm", "Google Car Clip Phone Holder", "Compact Selfie Stick", "Google Luggage Tag", "Google 2200mAh Micro Charger", "Gunmetal Roller Ball Pen", "Metal Texture Roller Pen", "Colored Pencil Set", "Google Blackout Cap"],
+  "distinct_products_viewed": "61",
+  "pages_viewed": ["Shop by Brand | Google Merchandise Store", "Office | Google Merchandise Store", "Writing Instruments | Office | Google Merchandise Store", "Electronics | Google Merchandise Store", "Fun | Accessories | Google Merchandise Store", "Accessories | Google Merchandise Store", "Apparel | Google Merchandise Store", "Other | Office | Google Merchandise Store"],
+  "distinct_pages_viewed": "8"
+}]
+
 How many DISTINCT pages were visited by this user on 20170801?
-
-
+model answer - 8
+OUR QUERY/ANSWER - 61 !!!
 
 
 
@@ -250,10 +392,48 @@ How many DISTINCT pages were visited by this user on 20170801?
 
 Recap
 You can do some pretty useful things with arrays like:
-Finding the number of elements with ARRAY_LENGTH(<array>)
-Deduplicating elements with ARRAY_AGG(DISTINCT <field>)
-Ordering elements with ARRAY_AGG(<field> ORDER BY <field>)
+1-Finding the number of elements with ARRAY_LENGTH(<array>)
+2-Deduplicating elements with ARRAY_AGG(DISTINCT <field>)
+3-Ordering elements with ARRAY_AGG(<field> ORDER BY <field>)
+4-Limiting ARRAY_AGG(<field> LIMIT 5)
+
+#3
+ORDER within the 'products_viewed' column of ARRAY datatype
+e.g. 
+SELECT
+  fullVisitorId,
+  date,
+  ARRAY_AGG(v2ProductName ORDER BY v2ProductName) AS products_viewed,
+  ARRAY_LENGTH(ARRAY_AGG(v2ProductName)) AS num_products_viewed,
+  ARRAY_AGG(pageTitle) AS pages_viewed,
+  ARRAY_LENGTH(ARRAY_AGG(pageTitle)) AS num_pages_viewed
+  FROM `data-to-insights.ecommerce.all_sessions`
+WHERE visitId = 1501570398
+GROUP BY fullVisitorId, date
+ORDER BY date
+
+
+
+#4
 Limiting ARRAY_AGG(<field> LIMIT 5)
+=> FOR EACH RECORD, limited to the 1st 5 elements in the 'products_viewed' column of ARRAY datatype
+=> 'excessively truncate elemeents in the ARRAY column'
+e.g.
+SELECT
+  fullVisitorId,
+  date,
+  ARRAY_AGG(v2ProductName ORDER BY v2ProductName LIMIT 5) AS products_viewed,
+  ARRAY_LENGTH(ARRAY_AGG(v2ProductName)) AS num_products_viewed,
+  ARRAY_AGG(pageTitle) AS pages_viewed,
+  ARRAY_LENGTH(ARRAY_AGG(pageTitle)) AS num_pages_viewed
+  FROM `data-to-insights.ecommerce.all_sessions`
+WHERE visitId = 1501570398
+GROUP BY fullVisitorId, date
+ORDER BY date
+
+
+
+
 
 
 
@@ -288,12 +468,13 @@ FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801`
 WHERE visitId = 1501570398
 
 Run the query.
-Scroll right in the results until you see the hits.product.v2ProductName field (we will discuss the multiple field aliases shortly).
 
+
+Scroll right in the results until you see the hits.product.v2ProductName field (we will discuss the multiple field aliases shortly).
 You will notice a lot of seemingly 'empty' cells in the results as you scroll. These cells are grayed out and not marked as null. Why do you think that is?
 BigQuery is still in the process of loading values for the grayed out cells
 The entire dataset has no data values for the grayed out cells
-The grayed out cells are visual placeholders to make it possible to show each item in an array type column on its own row within the context of a row in the result set
+YES - the grayed out cells are visual placeholders to make it possible to show each item in an array type column on its own row within the context of a row in the result set
 
 
 
@@ -328,9 +509,48 @@ UNNEST(hits) AS h
 WHERE visitId = 1501570398
 LIMIT 10
 
+
+
+[{
+  "visitId": "1501570398",
+  "pageTitle": "Fun | Accessories | Google Merchandise Store"
+}, {
+  "visitId": "1501570398",
+  "pageTitle": "Home"
+}, {
+  "visitId": "1501570398",
+  "pageTitle": "Shop by Brand | Google Merchandise Store"
+}, {
+  "visitId": "1501570398",
+  "pageTitle": "Office | Google Merchandise Store"
+}, {
+  "visitId": "1501570398",
+  "pageTitle": "Other | Office | Google Merchandise Store"
+}, {
+  "visitId": "1501570398",
+  "pageTitle": "Writing Instruments | Office | Google Merchandise Store"
+}, {
+  "visitId": "1501570398",
+  "pageTitle": "Accessories | Google Merchandise Store"
+}, {
+  "visitId": "1501570398",
+  "pageTitle": "Electronics | Google Merchandise Store"
+}, {
+  "visitId": "1501570398",
+  "pageTitle": "Apparel | Google Merchandise Store"
+}]
+
+
+
+
 We'll cover UNNEST() more in detail later but for now just know that:
-You need to UNNEST() arrays to bring the array elements back into rows
-UNNEST() always follows the table name in your FROM clause (think of it conceptually like a pre-joined table)
+-You need to UNNEST() arrays to bring the array elements back into rows
+-UNNEST() always follows after the table name in your FROM clause (think of it conceptually like a pre-joined table)
+
+
+
+
+
 
 
 
@@ -381,10 +601,13 @@ Click bigquery-public-data in the pinned project list to expand it.
 Find and open google_analytics_sample.
 Click the ga_sessions table.
 Start scrolling through the schema and answer the following question by using the find feature of your browser (i.e. CTRL + F). Tip: Expand all columns before you begin counting.
+bq show --format=prettyjson bigquery-public-data:google_analytics_sample.ga_sessions_* | jq '.schema.fields' 
+
+
 
 
 In a BigQuery schema, a STRUCT field is noted as a RECORD Type. Search for RECORD in the Google Analytics schema. How many STRUCTs (the RECORD Type columns) are present in this dataset?
-
+32
 
 
 
@@ -393,13 +616,13 @@ Totals
 TrafficSource
 trafficSource.adwordsClickInfo
 device
-All of the above
+YES - All of the above
 
 
 
 
 How can both TrafficSource and trafficSource.adwordsClickInfo both be STRUCTs?
-A STRUCT can have another STRUCT as one of its fields (you can nest STRUCTs)
+YES - A STRUCT can have another STRUCT as one of its fields (you can nest STRUCTs)
 They are not STRUCTs
 Because they are all ARRAYs
 This is an invalid data type
@@ -408,6 +631,8 @@ This is an invalid data type
 
 
 In a BigQuery schema, an ARRAY field is noted as a REPEATED Mode. Search for REPEATED in the Google Analytics schema. How many ARRAYs are present in this dataset?
+11
+
 
 
 
@@ -421,11 +646,46 @@ WHERE visitId = 1501570398
 LIMIT 10
 
 Note: The `.*` syntax tells BigQuery to return all fields for that STRUCT (much like it would if totals.* was a separate table we joined against).
+[{
+  "visitId": "1501570398",
+  "visits": "1",
+  "hits": "11",
+  "pageviews": "11",
+  "timeOnSite": "731",
+  "bounces": null,
+  "transactions": null,
+  "transactionRevenue": null,
+  "newVisits": "1",
+  "screenviews": null,
+  "uniqueScreenviews": null,
+  "timeOnScreen": null,
+  "totalTransactionRevenue": null,
+  "sessionQualityDim": "8",
+  "browser": "Chrome",
+  "browserVersion": "not available in demo dataset",
+  "browserSize": "not available in demo dataset",
+  "operatingSystem": "Android",
+  "operatingSystemVersion": "not available in demo dataset",
+  "isMobile": "true",
+  "mobileDeviceBranding": "not available in demo dataset",
+  "mobileDeviceModel": "not available in demo dataset",
+  "mobileInputSelector": "not available in demo dataset",
+  "mobileDeviceInfo": "not available in demo dataset",
+  "mobileDeviceMarketingName": "not available in demo dataset",
+  "flashVersion": "not available in demo dataset",
+  "javaEnabled": null,
+  "language": "not available in demo dataset",
+  "screenColors": "not available in demo dataset",
+  "screenResolution": "not available in demo dataset",
+  "deviceCategory": "tablet"
+}]
+
+
 
 Storing your large reporting tables as STRUCTs (pre-joined "tables") and ARRAYs (deep granularity) allows you to:
-Gain significant performance advantages by avoiding 32 table JOINs
-Get granular data from ARRAYs when you need it but not be punished if you don't (BigQuery stores each column individually on disk)
-Have all the business context in one table as opposed to worrying about JOIN keys and which tables have the data you need
+-Gain significant performance advantages by avoiding 32 table JOINs
+-Get granular data from ARRAYs when you need it but not be punished if you don't (BigQuery stores each column individually on disk)
+-Have all the business context in one table as opposed to worrying about JOIN keys and which tables have the data you need
 
 
 
@@ -467,7 +727,7 @@ What if the runner has multiple split times for a single race (like time per lap
 How could you have multiple split times within a single record? Hint: the splits all have the same numeric datatype.
 Store each split time in a separate STRING field with STRING_AGG()
 Store each split time in a separate table called race_splits
-Store each split time as an element in an ARRAY of splits
+yes - Store each split time as an element in an ARRAY of splits
 Use a SQL UNION to join the race and split details
 
 
@@ -486,6 +746,8 @@ Row     runner.name     runner.splits
 To recap:
 Structs are containers that can have multiple field names and data types nested inside.
 Arrays can be one of the field types inside of a Struct (as shown above with the splits field).
+
+
 
 
 
@@ -560,6 +822,39 @@ SELECT * FROM racing.race_results
 How many rows were returned?
 Answer: 1
 https://cdn.qwiklabs.com/8ygOJAxnxJxkoRxOSBabLh0T7%2BIwx%2FaE%2BSK%2F46cYexg%3D
+[{
+  "race": "800M",
+  "participants": [{
+    "name": "Rudisha",
+    "splits": ["23.4", "26.3", "26.4", "26.1"]
+  }, {
+    "name": "Makhloufi",
+    "splits": ["24.5", "25.4", "26.6", "26.1"]
+  }, {
+    "name": "Murphy",
+    "splits": ["23.9", "26.0", "27.0", "26.0"]
+  }, {
+    "name": "Bosse",
+    "splits": ["23.6", "26.2", "26.5", "27.1"]
+  }, {
+    "name": "Rotich",
+    "splits": ["24.7", "25.6", "26.9", "26.4"]
+  }, {
+    "name": "Lewandowski",
+    "splits": ["25.0", "25.7", "26.3", "27.2"]
+  }, {
+    "name": "Kipketer",
+    "splits": ["23.2", "26.1", "27.3", "29.4"]
+  }, {
+    "name": "Berian",
+    "splits": ["23.7", "26.1", "27.0", "29.3"]
+  }]
+}]
+
+
+
+
+
 
 
 
@@ -584,11 +879,17 @@ Row     race    participants.name
 3       800M    Murphy
 
 In traditional relational SQL, if you had a races table and a participants table what would you do to get information from both tables? You would JOIN them together. Here the participant STRUCT (which is conceptually very similar to a table) is already part of your races table but is not yet correlated correctly with your non-STRUCT field "race".
+
+
+
+
+
+
+
+
+
 Can you think of what two word SQL command you would use to correlate the 800M race with each of the racers in the first table?
 Answer: CROSS JOIN
-
-
-
 
 Now try running this:
 #standardSQL
@@ -623,6 +924,36 @@ Row   race    name
 7     800M    Kipketer
 8     800M    Berian
 
+
+[{
+  "race": "800M",
+  "name": "Rudisha"
+}, {
+  "race": "800M",
+  "name": "Makhloufi"
+}, {
+  "race": "800M",
+  "name": "Murphy"
+}, {
+  "race": "800M",
+  "name": "Bosse"
+}, {
+  "race": "800M",
+  "name": "Rotich"
+}, {
+  "race": "800M",
+  "name": "Lewandowski"
+}, {
+  "race": "800M",
+  "name": "Kipketer"
+}, {
+  "race": "800M",
+  "name": "Berian"
+}]
+
+
+
+
 You can simplify the last query by:
 Adding an alias for the original table
 Replacing the words "CROSS JOIN" with a comma (a comma implicitly cross joins)
@@ -642,10 +973,10 @@ https://cloud.google.com/bigquery/docs/reference/standard-sql/arrays#flattening-
 
 
 Recap of STRUCTs:
-A SQL STRUCT is simply a container of other data fields which can be of different data types. The word struct means data structure. Recall the example from earlier:
-__STRUCT(__"Rudisha" as name, [23.4, 26.3, 26.4, 26.1] as splits__)__AS runner
-STRUCTs are given an alias (like runner above) and can conceptually be thought of as a table inside of your main table.
-STRUCTs (and ARRAYs) must be unpacked before you can operate over their elements. Wrap an UNNEST() around the name of the struct itself or the struct field that is an array in order to unpack and flatten it.
+- A SQL STRUCT is simply a container of other data fields which can be of different data types. The word struct means data structure. Recall the example from earlier:
+- __STRUCT(__"Rudisha" as name, [23.4, 26.3, 26.4, 26.1] as splits__)__AS runner
+- STRUCTs are given an alias (like runner above) and can conceptually be thought of as a table inside of your main table.
+- STRUCTs (and ARRAYs) must be unpacked before you can operate over their elements. Wrap an UNNEST() around the name of the struct itself or the struct field that is an array in order to unpack and flatten it.
 
 
 
