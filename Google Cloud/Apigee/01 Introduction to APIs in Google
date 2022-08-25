@@ -1,0 +1,815 @@
+Overview
+APIs (Application Programming Interfaces) are software programs that give developers access to computing resources and data. Companies from many different fields offer publicly available APIs so that developers can integrate specialized tools, services, or libraries with their own applications and codebase.
+This lab will teach you about the architecture and basic functioning of APIs. This will be supplemented with hands-on practice, where you will configure and run Cloud Storage API methods in Google Cloud Shell. After taking this lab you will understand key principles of API communication, architecture, and authentication. You will also gain practical experience with APIs, which you can apply to future labs or projects.
+https://cloud.google.com/storage/docs/json_api/
+
+
+In this lab, you will learn about:
+Google APIs
+API architecture
+HTTP protocol and methods
+Endpoints
+REST (Representational State Transfer) and RESTful APIs
+JSON (JavaScript Object Notation)
+API authentication services
+
+
+
+
+
+
+Task 1. APIs - what and why
+As mentioned earlier, an API (Application Programming Interface) is a software program that gives developers access to computing resources and data. APIs adhere to specific rules and methods to clearly communicate requests and responses.
+The ability to access data and computing resources greatly increases a developer's efficiency. It is much easier to use an API than to build every single program, method, or dataset from scratch. APIs are built on the principle of abstraction—you don't need to understand the inner workings or complexities of an API to use it in your own environment.
+APIs are built with the developer in mind and often don't offer a graphical user interface (GUI). However, there are exceptions to this standard. Google has released a new tool called APIs Explorer, which allows you to explore various Google APIs interactively (be sure to check out the APIs Explorer: Qwik Start lab afterwards if you are interested in learning more.)
+https://developers.google.com/apis-explorer/#p/
+Checkout-https://partner.cloudskillsboost.google/focuses/28354?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=17781556
+
+
+
+
+Task 2. Cloud APIs
+Google offers APIs that can be applied to many different fields and sectors. APIs are often used in web development, machine learning, data science, and system administration workflows. However, these are only a handful of use cases. If you explore AnyAPI, for example, you will start to see just how many APIs are available.
+https://any-api.com/
+When Qwiklabs provisions a new Google Cloud Project for a lab instance, it enables most APIs behind the scenes so you can work on the lab's tasks right away. If you create your own projects outside of Qwiklabs, you will have to enable certain APIs yourself.
+
+As you gain proficiency as a Google Cloud user, you will start to use more APIs in your workflow. Experienced users will integrate and use Cloud APIs in their local environments almost exclusively, rarely using the Cloud Console to run tools and services. Dozens of labs are available that give you practice with various Google APIs in different languages. Here are two for example:
+Cloud Natural Language API: Qwik Start https://www.cloudskillsboost.google/catalog_lab/709
+Checkout-https://partner.cloudskillsboost.google/focuses/13311?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=17781565
+Entity and Sentiment Analysis with the Natural Language API https://www.cloudskillsboost.google/focuses/1843?parent=catalog
+Checkout-https://partner.cloudskillsboost.google/focuses/13102?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=17781566
+
+You will now explore the API library to see what Google APIs are available.
+https://console.cloud.google.com/apis/library?project=hello-world-sean-200116&pli=1
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. API library
+Open the Navigation menu and select APIs & Services > Library.
+The API library offers quick access, documentation, and configuration options for 200+ Google APIs. Even though it's housed in the Console, it's important to note that the library offers access to all Google APIs — not only Google Cloud centric ones. This highlights an important theme: APIs are fundamental to all Google services, and Cloud APIs don't all fall under the Google Cloud category.
+
+Time for some hands-on practice enabling an API in the API library. Assume that you are a mobile developer for a fitness site and you want to use the Google Fitness API to build your application.
+https://developers.google.com/fit/
+In the "Search for APIs and Services" search bar, type in Fitness API and press ENTER.
+Click on the Fitness API from the result list. Then, click Enable.
+If you return to the Fitness API in the API library by clicking on the back button in your browser window, you will see that the API is now enabled:
+https://cdn.qwiklabs.com/ITUhZGXAvVpHh%2BxqaIT0Vy9UAMrWL6h8kYpL8PSeKZI%3D
+https://developers.google.com/fit/rest/v1/reference/?apix=true
+
+The API library provides links to tutorials and documentation, terms of service, and interactive methods offered in the APIs Explorer. To see metric and usage information, you will use the APIs & Services dashboard.
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. APIs & Services
+Inspect the Fitness API in the Cloud Console's APIs & Services.
+
+Open the navigation menu and and select APIs & Services > Enabled APIs & Services.
+The APIs & Services details your project's usage of specific APIs, including traffic levels, error rates, and even latencies, which helps you quickly triage problems with applications that use Google services.
+
+From the API list, select Fitness API:
+From this page you can view and request quotas, control access to resources and data, and view metrics.
+
+To see one of these features in action, select Quotas tab.
+
+Expand Requests option. This shows you how many queries this API allows per day and per minute:
+https://cdn.qwiklabs.com/rhj1sU%2FSFZVzQkF%2FS2rlZzS5R3iIKAChNN7vw0ee7ns%3D
+Now that you've gotten experience provisioning a non-Cloud API, the rest of the hands-on practice will involve the Cloud Storage API. You will now learn about the architecture and basic functioning of APIs.
+
+Offers quick access, documentation, and configuration options for 200+ Google APIs.
+NO - APIs & Services
+YES - API Library
+
+Details your project's usage of specific APIs, including traffic levels, error rates, and even latencies.
+YES - APIs & Services
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5. API architecture
+APIs are a set of methods that allow programs to communicate with one another. To communicate effectively, programs need to adhere to a clear protocol that governs the transfer and interpretation of data.
+
+Client-server model
+The internet is the standard communication channel that APIs use to transmit requests and responses between programs. The client-server model is the underlying architecture that web-based APIs use for exchanging information.
+
+The client is a computing device (e.g. a smartphone, laptop, etc.) that makes a request for some computing resource or data. The client's request needs to be formatted in the agreed upon protocol.
+
+The server has data and/or computing resources stored on it. Its job is to interpret and fulfill a client's request.
+
+The following is a visual representation of the client-server model:
+https://cdn.qwiklabs.com/NCUCvY6YCvhRw9iyhaZWY1XcoXU4X0F7iwhzSOyyo6E%3D
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 6. HTTP protocol and request methods
+Since APIs use the web as a communication channel, many of them adhere to the HTTP protocol, which specifies rules and methods for data exchange between clients and servers over the internet. The HTTP protocol is not only used by APIs — it is the standard for web communication where data is sent and received over the internet.
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview
+
+APIs that utilize the HTTP protocol use HTTP request methods (also known as "HTTP verbs") for transmitting client requests to servers. The most commonly used HTTP request methods are GET, POST, PUT, and DELETE.
+The GET request method is used by a client to **fetch data** from a server. **If** the requested resource is **found** on the server, it will then be sent back to the client.
+The PUT method **replaces existing data or creates data if it does not exist**. If you use PUT many times, it will have no effect — there will only be one copy of the dataset on the server.
+The POST method is used primarily to **create new resources**. Using POST many times will add data in multiple places on the server. It is recommended to use PUT to update resources and POST to create new resources.
+The DELETE method will remove data or resources specified by the client on a server.
+Although there are hundreds of APIs out there, all with their own unique purposes and specializations, it's important to realize that at the end of the day they all use the same protocol and underlying methods for client-server communication.
+
+
+A computing device (e.g. a smartphone, laptop, etc.) that makes a request for some computing resource or data.
+NO- Server
+NO- Web-based API
+NO- Client-server model
+YES- Client
+
+
+
+An HTTP method commonly used for creating new resources.
+DELETE
+GET
+YES - POST
+PUT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 7. Endpoints
+APIs use HTTP methods to interact with data or computing services hosted on a server. These methods are useless if there isn't a way to access specific resources with consistency. APIs utilize communication channels called endpoints so that clients can access the resources they need without complication or irregularity.
+https://en.wikipedia.org/wiki/Uniform_Resource_Identifier
+
+Endpoints are access points to data or computing resources hosted on a server and they take the form of an HTTP URI. Endpoints are added to an API's base URL (e.g. http://example.com) to create a path to a specific resource or container of resources. The following are some examples of endpoints:
+http://example.com/storelocations
+http://example.com/accounts
+http://example.com/employees
+
+The following are also valid endpoints:
+http://example.com/storelocations/sanfrancisco
+http://example.com/storelocations/newdelhi
+http://example.com/storelocations/london
+
+You can add query strings to endpoints (e.g. http://example.com/endpoint/?id=1) to pass in variables that may be needed to complete an API's request. Endpoints are referred to as the "nouns" that verbs (HTTP methods) act on, and APIs use this framework to fulfill requests.
+More specifically, a client sends a request composed of an HTTP method (verb) and an endpoint (noun) to receive specific data or to perform a particular action on the server. It's important to realize that the server is the one that fulfills a client's request by translating and performing a specific operation based on the method and endpoint provided.
+Since the backend is where all of the heavy lifting takes place, it could be said that an API that utilizes HTTP methods and endpoints lives on the server, acting as an implementer for client requests. This model loosely defines RESTful APIs, which are examined in more detail in the next section. For hands-on practice building endpoints for an API, please take the lab Cloud Endpoints: Qwik Start.
+Cloud Endpoints: Qwik Start-https://www.cloudskillsboost.google/focuses/767?parent=catalog
+Checkout-https://partner.cloudskillsboost.google/focuses/42288?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=17781648
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 8. RESTful APIs
+APIs that utilize the HTTP protocol, request methods, and endpoints are referred to as RESTful APIs. REST (Representational State Transfer) is an architectural style that prescribes standards for web-based communication. The Google description of a RESTful system:
+https://developers.google.com/photos/library/guides/about-restful-apis
+...resources are stored in a data store; a client sends a request that the server perform a particular action (such as creating, retrieving, updating, or deleting a resource), and the server performs the action and sends a response, often in the form of a representation of the specified resource.
+
+This resource-oriented design is a key principle of REST. RESTful APIs are modelled as:
+https://cloud.google.com/apis/design/resources#what_is_a_rest_api
+...collections of individually-addressable resources... The resources and methods are known as nouns and verbs of APIs. With the HTTP protocol, the resource names naturally map to URLs, and methods naturally map to HTTP methods...
+
+These terms should sound familiar since you examined these building blocks in the previous sections. REST is the most widely used framework for APIs. In 2010, about 74% of public network APIs were HTTP REST APIs.
+
+
+Besides query strings, RESTful APIs can also use the following fields in their requests:
+Headers: parameters that detail the HTTP request itself.
+Body: data that a client wants to send to a server.
+
+The body is written in the JSON or XML data formatting language.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 9. API data formats (JSON)
+RESTful APIs use either XML or JSON (JavaScript Object Notation) as file formats for data held in the body of an HTTP request method.
+
+JSON has surpassed XML in RESTful API use, largely because JSON is lightweight, easier to read, and faster to parse. Next, a brief introduction to JSON syntax and structure will be covered. For a more comprehensive reference, be sure to check out the W3C's JSON syntax documentation.
+https://www.w3.org/TR/json-ld/
+
+JSON supports the following data types:
+Numbers: all types — no distinction between integers and floating point values.
+Strings: text enclosed in quotes.
+Booleans: True or False values.
+Arrays: a list of elements grouped by similar type.
+Null: an "empty" value.
+
+
+JSON data is composed of key-value pairs. These are linked pieces of data that are composed of a unique identifier (a key) that references piece(s) of data (value). The key must be of type string and the value can be any of the data types listed above.
+
+The following is an example of a simple key-value pair in JSON:
+"Key1" : "Value 1"
+
+Here are some more:
+"Key2" : 64
+"Key3" : True
+"Key4" : ["this", "is", "an", "array"]
+
+A JSON object uses curly braces { } to group data that's arranged in key-value pairs. The following is an example of an object that contains three key value pairs:
+{
+	"Name": "Julie",
+	"Hometown": "Los Angeles, CA",
+	"Age": 28
+}
+
+Commas separate the key-value pairs stored in an object.
+
+
+
+
+
+
+
+
+JSON validation
+JSON files can contain any number of key-value pairs and/or objects. In professional development, it's not uncommon for some files to be hundreds, if not thousands, of lines long. As a developer, you know that one small error in formatting or syntax is enough to break your entire codebase.
+
+JSON validators like jsonlint or, if you use Chrome as your primary browser, the JSONView extension quickly identify syntax and formatting issues in your JSON code and pinpoint ways to fix it.
+https://jsonlint.com/
+https://chrome.google.com/webstore/detail/jsonvue/chklaanhfefbnpoihckbnefhakgolnmc?hl=en
+
+
+
+Get some practice with JSON validation.
+Open the jsonlint validator in a new tab.
+
+Paste the following codeblock into the validator:
+
+{
+	"Name": "Julie",
+	"Hometown": "Los Angeles, CA",
+	"Age": 28
+}
+
+Then click Validate JSON. You should receive a green message that says Valid JSON in the results section.
+
+Now paste the following codeblock in the validator:
+
+{
+	"Name": "Julie"
+	   "Hometown": "Los Angeles, CA",
+	"Age": 28
+}
+
+Click Validate JSON.
+You will see that it has a missing comma and does not maintain proper indentation. The indentation gets corrected and the validator highlights where things went wrong:
+https://cdn.qwiklabs.com/muir1%2BFG%2B8Z0D180IaTOjjBKqxTe3A3ffikjWcvM8Pc%3D
+Results include: Error: Parse error on line 2:
+
+The validator identified that there was a missing identifier (a comma) after the second line, which is what was anticipated. If you add a comma after the second line and click Validate JSON you should now receive the following output:
+https://cdn.qwiklabs.com/2XZFWsqNdbKvYexVDOCdKVth8VHSX3dXfTFVPYJTxAk%3D
+Results: Valid JSON
+
+As you work through labs using APIs and JSON, using a JSON validator like this can save you lots of headache, time, and effort in debugging syntax errors.
+
+Access points to data or computing resources hosted on a server and they take the form of an HTTP URI.
+HTTP protocol
+YES - Endpoint
+Base URL
+Query string
+
+An architectural style that prescribes standards for web-based communication.
+Body
+YES - REST
+Headers
+RESTful APIs
+
+A file format that is lightweight, easy to read, and fast to parse.
+Array
+Object
+Java
+YES - JSON
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 10. Creating a JSON File in the Cloud Console
+You will apply what you've learned by making Cloud Storage REST/JSON API calls in Cloud Shell to create buckets and upload content.
+https://cloud.google.com/storage/docs/json_api/v1/
+
+In a new tab, open Google Cloud Storage JSON API to ensure that the Cloud Storage API is enabled. You should see the following:
+https://console.cloud.google.com/apis/library/storage-api.googleapis.com?_ga=2.263178572.-1708473792.1539023585
+https://cdn.qwiklabs.com/TWf9sUlFO8Tmf05nKqMy1V5bTXo7VNa7E0CmSKRm1n8%3D
+
+Now open up a Cloud Shell session. Run the following command to create and edit a file called values.json:
+nano values.json
+
+
+
+Inside the nano text editor copy and paste the following, replacing <YOUR_BUCKET_NAME> with a unique bucket name:
+https://cloud.google.com/storage/docs/naming-buckets
+
+{  "name": "<YOUR_BUCKET_NAME>",
+   "location": "us",
+   "storageClass": "multi_regional"
+}
+
+{  "name": "sample_bucket",
+   "location": "us",
+   "storageClass": "multi_regional"
+}
+
+Once you have, exit out of the nano text editor with CTRL+X → Y → ENTER.
+
+You just created a JSON file that contains an object that has three key-value pairs: name, location, and storageClass. These are the same values that are required when you make a bucket with the gsutil command line tool or in the console.
+student_00_c9e4f26911f5@cloudshell:~ (qwiklabs-gcp-04-c99983e4732c)$ ls
+README-cloudshell.txt  values.json
+
+
+Before a bucket can be created with the Cloud Storage REST/JSON API, you need to get the proper authentication and authorization policies in place.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 11. Authentication and authorization
+The final piece to cover is the scheme of API authentication and authorization.
+
+Authentication refers to the process of determining a client's identity.
+Authorization refers to the process of determining what permissions an authenticated client has for a set of resources.
+Authentication identifies who you are, and authorization determines what you can do.
+
+There are three types of authentication/authorization services that Google APIs use. These are "API Keys", "Service accounts", and "OAuth". An API will use one of these authentication services depending on the resources it requests and from where the API is called from.
+
+1 API keys
+API keys are secret tokens that usually come in the form of an **encrypted string**. 
+API keys are quick to generate and use. 
+APIs that use **public data or methods and want to get developers up and running quickly** will oftentimes use API keys to authenticate users.
+
+In Google Cloud terms, **API keys identify the calling project making the call to an API.** 
+By identifying the calling project, API keys enable usage information to be associated with that project, and they can reject calls from projects that haven't been granted access or enabled by the API.
+
+
+
+2 OAuth
+OAuth tokens are similar to API keys in their format, but they are **more secure and can be linked to user accounts or identities**. 
+These tokens are used primarily when APIs **give a developer the means to access user data.**
+
+While API keys give developers access to all of an API's functionality, OAuth client IDs are all based on scope; 
+**different privileges will be granted to different identities.**
+
+
+
+3 Service Accounts
+A service account is a special type of Google account that belongs to your **application or a virtual machine (VM) instead of to an individual end user**. 
+Your application assumes the identity of the service account to call Google APIs, so that the users aren't directly involved.
+
+You can use a service account by providing its private key to your application, or by using the built-in service accounts available when running on Cloud Functions, Google App Engine, Compute Engine, or Google Kubernetes Engine.
+
+For a lab specifically dealing with service accounts and roles, refer to: Service Accounts and Roles: Fundamentals.
+https://www.cloudskillsboost.google/focuses/1038?parent=catalog
+checkout-https://partner.cloudskillsboost.google/focuses/11640?catalog_rank=%7B%22rank%22%3A2%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=17781731
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 12. Authenticate and authorize the Cloud Storage JSON/REST API
+Since Cloud Storage is a platform that hosts and provides access to user data, you need to generate an OAuth token before you use its services.
+
+Open the OAuth 2.0 playground in a new tab. This is a service that allows you to generate OAuth tokens with ease.
+https://developers.google.com/oauthplayground/
+Scroll down and select Cloud Storage API V1.
+
+Then select the https://www.googleapis.com/auth/devstorage.full_control scope:
+
+Step 1: Select & authorize APIs page
+
+Click on the blue box that says Authorize APIs. This will open a Google Sign-in page.
+
+Select your Qwiklabs username and then click Continue when prompted for permissions.
+
+Step 2 should now have an authorization code generated.
+authorisation code
+4/0AdQt8qgChOP0FlBzExX87hHvXTNPBa7uBTkiap3DHdPEfhFTZvaPR37WLR4p-e3HZPsUyA
+refresh token (to refresh access token)
+1//04Rp7404w07-NCgYIARAAGAQSNwF-L9IrrsAV8TcDSC93Fh0-cSidP6XQuvs4KPMC92_SsNCLH6nuizOgL_csNT9qnARvepud-zY
+access token
+ya29.a0AVA9y1uJrWxuouUVhTMIuSjhZaRYUjJ5PyJrpSHcfuSu9xHapljlTV5lObsttjfzO0qCjwP7h8lN-yshzv4NliK21xdDWQJ8UQXgm_hFcdCQYmwFgTuQx4TIM19LLeCC9c3UwfJ7luS1MLqxVXc1lsZkUvgfaCgYKATASATASFQE65dr8Gf_OYGkGqfM-iJKox2j8cA0163
+
+Click on Exchange authorization code for tokens. If you get moved to Step 3, click on the Step 2 panel. Your page should resemble the following:
+https://cdn.qwiklabs.com/qR7J7L1r4Qc0N038G4COgd5sJAbMeuxbf5YfBZPjXVQ%3D
+The Step 2 panel inlcudes fields for Authorization code, Refresh token, Access token
+
+Copy the access token, it will be used in the following step.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 13. Create a bucket with the Cloud Storage JSON/REST API
+Return to your Cloud Shell session. At the CLI prompt, type in ls and hit enter. You should see the values.json file that you created before and a README-cloudshell.txt file:
+Output:
+
+README-cloudshell.txt    values.json
+
+
+
+
+Run the following command to set your OAuth2 token as an environment variable, replacing <YOUR_TOKEN> with the access token you generated:
+
+export OAUTH2_TOKEN=<YOUR_TOKEN>
+export OAUTH2_TOKEN=ya29.a0AVA9y1uJrWxuouUVhTMIuSjhZaRYUjJ5PyJrpSHcfuSu9xHapljlTV5lObsttjfzO0qCjwP7h8lN-yshzv4NliK21xdDWQJ8UQXgm_hFcdCQYmwFgTuQx4TIM19LLeCC9c3UwfJ7luS1MLqxVXc1lsZkUvgfaCgYKATASATASFQE65dr8Gf_OYGkGqfM-iJKox2j8cA0163
+
+
+
+Run the following command to set your Project ID as an environment variable, replacing <YOUR_PROJECT_ID> with your Qwiklabs project ID:
+
+export PROJECT_ID=<YOUR_PROJECT_ID>
+PROJECT_ID=qwiklabs-gcp-04-c99983e4732c
+
+
+
+Now run the following command to create a Cloud Storage bucket:
+
+curl -X POST --data-binary @values.json \
+    -H "Authorization: Bearer $OAUTH2_TOKEN" \
+    -H "Content-Type: application/json" \
+    "https://www.googleapis.com/storage/v1/b?project=$PROJECT_ID"
+
+
+You should receive a similar output:
+{
+  "kind": "storage#bucket",
+  "selfLink": "https://www.googleapis.com/storage/v1/b/qwiklabs-gcp-02-5d551758b5a7",
+  "id": "qwiklabs-gcp-02-5d551758b5a7",
+  "name": "qwiklabs-gcp-02-5d551758b5a7",
+  "projectNumber": "670840659006",
+  "metageneration": "1",
+  "location": "US",
+  "storageClass": "MULTI_REGIONAL",
+  "etag": "CAE=",
+  "timeCreated": "2020-11-11T06:41:40.901Z",
+  "updated": "2020-11-11T06:41:40.901Z",
+  "iamConfiguration": {
+    "bucketPolicyOnly": {
+      "enabled": false
+    },
+    "uniformBucketLevelAccess": {
+      "enabled": false
+    }
+  },
+  "locationType": "multi-region"
+}
+
+
+
+
+
+Note: If you received an error message like "Use of this bucket name is restricted" or "Sorry, that name is not available", it means that there is a conflict with the universal bucket naming convention. Edit the values.json file and replace the bucket name.
+student_00_c9e4f26911f5@cloudshell:~ (qwiklabs-gcp-04-c99983e4732c)$ curl -X POST --data-binary @values.json \
+    -H "Authorization: Bearer $OAUTH2_TOKEN" \
+    -H "Content-Type: application/json" \
+    "https://www.googleapis.com/storage/v1/b?project=$PROJECT_ID"
+{
+  "error": {
+    "code": 409,
+    "message": "The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.",
+    "errors": [
+      {
+        "message": "The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.",
+        "domain": "global",
+        "reason": "conflict"
+      }
+    ]
+  }
+}
+
+
+
+
+
+
+
+
+
+# try again with some other random bucket name
+bucketname buc_1234567890
+
+student_00_c9e4f26911f5@cloudshell:~ (qwiklabs-gcp-04-c99983e4732c)$ curl -X POST --data-binary @values.json     -H "Authorization: Bearer $OAUTH2_TOKEN"     -H "Content-Type: application/json"     "https://www.googleapis.com/storage/v1/b?project=$PROJECT_ID"
+{
+  "kind": "storage#bucket",
+  "selfLink": "https://www.googleapis.com/storage/v1/b/buc_1234567890",
+  "id": "buc_1234567890",
+  "name": "buc_1234567890",
+  "projectNumber": "395724311817",
+  "metageneration": "1",
+  "location": "US",
+  "storageClass": "MULTI_REGIONAL",
+  "etag": "CAE=",
+  "timeCreated": "2022-08-25T00:56:03.095Z",
+  "updated": "2022-08-25T00:56:03.095Z",
+  "iamConfiguration": {
+    "bucketPolicyOnly": {
+      "enabled": false
+    },
+    "uniformBucketLevelAccess": {
+      "enabled": false
+    },
+    "publicAccessPrevention": "inherited"
+  },
+  "locationType": "multi-region",
+  "rpo": "DEFAULT"
+}
+
+
+
+
+
+
+
+This request is the culmination of everything you've learned about so far. You used the curl CLI tool to make an HTTP POST method request. You passed in the values.json file into the request body. You passed the OAuth token and a JSON specification as request headers. This request was routed to the Cloud Storage endpoint, which contains a query string parameter set to your Project ID.
+
+
+
+
+View your newly created Cloud Storage bucket
+To see your newly created bucket, from the Navigation menu select Cloud Storage > Browser.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 14. Upload a file using the Cloud Storage JSON/REST API
+You can use the Cloud Storage JSON/REST API to upload files to buckets.
+
+Save the following image to your computer and name it demo-image.png:
+https://cdn.qwiklabs.com/E4%2BSx10I0HBeOFPB15BFPzf9%2F%2FOK%2Btf7S0Mbn6aQ8fw%3D
+
+
+
+
+In your Cloud Shell session, click on the three-dotted menu icon in the top-right corner. Click Upload and select demo-image.png file. This will add the image to your directory.
+
+Run the following command to get the path to the image file:
+realpath demo-image.png
+
+
+You should receive a similar output:
+/home/gcpstaging25084_student/demo-image.png
+
+student_00_c9e4f26911f5@cloudshell:~ (qwiklabs-gcp-04-c99983e4732c)$ realpath demo-image.png
+/home/student_00_c9e4f26911f5/demo-image.png
+
+
+
+
+Set the file path as an environment variable by running the following command, replacing <DEMO_IMAGE_PATH> with your output from the previous command:
+export OBJECT=<DEMO_IMAGE_PATH>
+export OBJECT=/home/student_00_c9e4f26911f5/demo-image.png
+
+
+
+Set your bucket name as an environment variable by running the following command, replacing <YOUR_BUCKET> with the name of your bucket:
+export BUCKET_NAME=<YOUR_BUCKET>
+export BUCKET_NAME=buc_1234567890
+
+
+
+
+
+
+Now run the following command to upload the demo image to your Cloud Storage bucket:
+curl -X POST --data-binary @$OBJECT \
+    -H "Authorization: Bearer $OAUTH2_TOKEN" \
+    -H "Content-Type: image/png" \
+    "https://www.googleapis.com/upload/storage/v1/b/$BUCKET_NAME/o?uploadType=media&name=demo-image"
+
+You should receive a similar output:
+
+{
+  "kind": "storage#object",
+  "id": "qwiklabs-gcp-02-5d551758b5a7/demo-image/1605077118178936",
+  "selfLink": "https://www.googleapis.com/storage/v1/b/qwiklabs-gcp-02-5d551758b5a7/o/demo-image",
+  "mediaLink": "https://www.googleapis.com/download/storage/v1/b/qwiklabs-gcp-02-5d551758b5a7/o/demo-image?generation=1605077118178936&alt=media",
+  "name": "demo-image",
+  "bucket": "qwiklabs-gcp-02-5d551758b5a7",
+  "generation": "1605077118178936",
+  "metageneration": "1",
+  "contentType": "image/png",
+  "storageClass": "MULTI_REGIONAL",
+  "size": "401951",
+  "md5Hash": "LbpHpwhnApQKQx9IEXjTsQ==",
+  "crc32c": "j5oPrg==",
+  "etag": "CPis3Zvy+ewCEAE=",
+  "timeCreated": "2020-11-11T06:45:18.178Z",
+  "updated": "2020-11-11T06:45:18.178Z",
+  "timeStorageClassUpdated": "2020-11-11T06:45:18.178Z"
+}
+
+
+
+
+student_00_c9e4f26911f5@cloudshell:~ (qwiklabs-gcp-04-c99983e4732c)$ curl -X POST --data-binary @$OBJECT \
+    -H "Authorization: Bearer $OAUTH2_TOKEN" \
+    -H "Content-Type: image/png" \
+    "https://www.googleapis.com/upload/storage/v1/b/$BUCKET_NAME/o?uploadType=media&name=demo-image"
+Warning: Couldn't read data from file
+Warning: "/home/student_00_c9e4f26911f5/demo-image.png", this makes an empty
+Warning: POST.
+{
+  "kind": "storage#object",
+  "id": "buc_1234567890/demo-image/1661389201429535",
+  "selfLink": "https://www.googleapis.com/storage/v1/b/buc_1234567890/o/demo-image",
+  "mediaLink": "https://www.googleapis.com/download/storage/v1/b/buc_1234567890/o/demo-image?generation=1661389201429535&alt=media",
+  "name": "demo-image",
+  "bucket": "buc_1234567890",
+  "generation": "1661389201429535",
+  "metageneration": "1",
+  "contentType": "image/png",
+  "storageClass": "MULTI_REGIONAL",
+  "size": "0",
+  "md5Hash": "1B2M2Y8AsgTpgAmY7PhCfg==",
+  "crc32c": "AAAAAA==",
+  "etag": "CJ+ovYnl4PkCEAE=",
+  "timeCreated": "2022-08-25T01:00:01.461Z",
+  "updated": "2022-08-25T01:00:01.461Z",
+  "timeStorageClassUpdated": "2022-08-25T01:00:01.461Z"
+}
+
+
+
+
+To see the image that was added to your bucket, open the navigation menu and select Cloud Storage > Browser.
+
+Then click on the name of your bucket. You should see that demo-image has been added:
+
+Clicking on the image will open Object details page.
+
+
+
+
+
+
+
+
+
+
