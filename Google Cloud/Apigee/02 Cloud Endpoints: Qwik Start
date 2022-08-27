@@ -1,0 +1,1375 @@
+Overview
+In this lab you will deploy a sample API with Google Cloud Endpoints, which are a set of tools for generating APIs from within an App Engine application. The sample code will include:
+
+A REST API that you can query to find the name of an airport from its three-letter IATA code (for example, SFO, JFK, AMS).
+A script that uploads the API configuration to Cloud Endpoints.
+A script that deploys a Google App Engine flexible backend to host the sample API.
+After you send some requests to the sample API, you can view the Cloud Endpoints Activity Graphs and Logs. These are tools that allow you to monitor your APIs and gain insights into their usage.
+
+
+
+
+
+
+
+
+Task 1. Getting the sample code
+Enter the following command in Cloud Shell to get the sample API and scripts:
+gsutil cp gs://spls/gsp164/endpoints-quickstart.zip .
+unzip endpoints-quickstart.zip
+
+Change to the directory that contains the sample code:
+cd endpoints-quickstart
+
+
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-b9abac6d679c)$ pwd
+/home/student_00_f3adff700b22
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-b9abac6d679c)$ ls
+endpoints-quickstart  endpoints-quickstart.zip  README-cloudshell.txt
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-b9abac6d679c)$ cd endpoints-quickstart
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Deploying the Endpoints configuration
+To publish a REST API to Endpoints, an OpenAPI configuration file that describes the API is required. The lab's sample API comes with a pre-configured OpenAPI file called openapi.yaml.
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart (qwiklabs-gcp-03-b9abac6d679c)$ ls
+app  CONTRIBUTING  LICENSE  openapi_with_ratelimit.yaml  openapi.yaml  README.md  scripts  travis.sh  travis.yml
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart (qwiklabs-gcp-03-b9abac6d679c)$ cat openapi.yaml
+# Copyright 2017 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+swagger: "2.0"
+info:
+  title: "Airport Codes"
+  description: "Get the name of an airport from its three-letter IATA code."
+  version: "1.0.0"
+# This field will be replaced by the deploy_api.sh script.
+host: "YOUR-PROJECT-ID.appspot.com"
+schemes:
+  - "https"
+paths:
+  "/airportName":
+    get:
+      description: "Get the airport name for a given IATA code."
+      operationId: "airportName"
+      parameters:
+        -
+          name: iataCode
+          in: query
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Success."
+          schema:
+            type: string
+        400:
+          description: "The IATA code is invalid or missing."
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart (qwiklabs-gcp-03-b9abac6d679c)$ cat openapi_with_ratelimit.yaml
+# Copyright 2017 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+swagger: "2.0"
+info:
+  title: "Airport Codes"
+  description: "Get the name of an airport from its three-letter IATA code."
+  version: "1.0.0"
+security:
+  - api_key: []
+# This field will be replaced by the deploy_api.sh script.
+host: "YOUR-PROJECT-ID.appspot.com"
+schemes:
+  - "https"
+paths:
+  "/airportName":
+    get:
+      description: "Get the airport name for a given IATA code."
+      operationId: "airportName"
+      x-google-quota:
+        metricCosts:
+          airport_requests: 1
+      parameters:
+        -
+          name: iataCode
+          in: query
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Success."
+          schema:
+            type: string
+        400:
+          description: "The IATA code is invalid or missing."
+securityDefinitions:
+  # Basic authentication with an API key.
+  api_key:
+    type: "apiKey"
+    name: "key"
+    in: "query"
+
+x-google-management:
+  metrics:
+    - name: airport_requests
+      valueType: INT64
+      metricKind: DELTA
+  quota:
+    limits:
+      - name: limit-on-airport-requests
+        values:
+          STANDARD: 5
+        unit: "1/min/{project}"
+        metric: airport_requests          
+
+
+
+          
+          
+
+
+
+
+
+
+
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart (qwiklabs-gcp-03-b9abac6d679c)$ cat travis.yml
+# Copyright 2017 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+language: bash
+addons:
+  apt:
+    sources:
+    # Grab shellcheck from the Debian repo.
+    # https://github.com/koalaman/shellcheck/wiki/TravisCI
+    - debian-sid
+    packages:
+    - shellcheck
+script: ./travis.sh
+branches:
+  only:
+  - master
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  student_00_f3adff700b22@cloudshell:~/endpoints-quickstart (qwiklabs-gcp-03-b9abac6d679c)$ cat travis.sh
+#!/usr/bin/env bash
+# Copyright 2017 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -e
+set -x
+shopt -s globstar
+
+# Check that all shell scripts in this repo (including this one) pass the
+# Shell Check linter.
+shellcheck ./**/*.sh
+
+
+
+
+
+
+
+
+  
+
+
+
+Endpoints uses Google Service Management, an infrastructure service of Google Cloud, to create and manage APIs and services. 
+To use Endpoints to manage an API, you deploy the API's OpenAPI configuration to Service Management.
+
+To deploy the Endpoints configuration...
+In the endpoints-qwikstart directory, enter the following:
+cd scripts
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ls
+delete_project.sh  deploy_app.sh  generate_traffic.sh           query_api.sh           util.sh
+deploy_api.sh      e2e_test.sh    generate_traffic_with_key.sh  query_api_with_key.sh
+
+
+
+Run the following script, which is included in the sample:
+./deploy_api.sh
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ cat query_api.sh
+#!/bin/bash
+# Copyright 2017 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -euo pipefail
+
+source util.sh
+
+main() {
+  # Get our working project, or exit if it's not set.
+  local project_id=$(get_project_id)
+  if [[ -z "$project_id" ]]; then
+    exit 1
+  fi
+  # Because our included app uses query string parameters, we can include
+  # them directly in the URL.
+  QUERY="curl \"https://${project_id}.appspot.com/airportName?iataCode=${IATA_CODE}\""
+  # First, (maybe) print the command so the user can see what's being executed.
+  if [[ "$QUIET" == "false" ]]; then
+    echo "$QUERY"
+  fi
+  # Then actually execute it.
+  # shellcheck disable=SC2086
+  eval $QUERY
+  # Our API doesn't print newlines. So we do it ourselves.
+  printf '\n'
+}
+
+# Defaults.
+IATA_CODE="SFO"
+QUIET="false"
+
+if [[ "$#" == 0 ]]; then
+  : # Use defaults.
+elif [[ "$#" == 1 ]]; then
+  IATA_CODE="$1"
+elif [[ "$#" == 2 ]]; then
+  # "Quiet mode" won't print the curl command.
+  IATA_CODE="$1"
+  QUIET="true"
+else
+  echo "Wrong number of arguments specified."
+  echo "Usage: query_api.sh [iata-code] [quiet-mode]"
+  exit 1
+fi
+
+main "$@"
+
+
+
+
+
+
+
+
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ source --help
+source: source filename [arguments]
+    Execute commands from a file in the current shell.
+
+    Read and execute commands from FILENAME in the current shell.  The
+    entries in $PATH are used to find the directory containing FILENAME.
+    If any ARGUMENTS are supplied, they become the positional parameters
+    when FILENAME is executed.
+
+    Exit Status:
+    Returns the status of the last command executed in FILENAME; fails if
+    FILENAME cannot be read.
+    
+    
+    
+    
+    
+    
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ cat util.sh
+#!/bin/bash
+# Copyright 2017 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Make Bash a little less error-prone.
+set -euo pipefail
+
+get_latest_config_id() {
+  # Given a service name, this returns the most recent deployment of that
+  # API.
+  service_name="$1"
+  gcloud endpoints configs list \
+    --service="$service_name" \
+    --sort-by="~config_id" --limit=1 --format="value(CONFIG_ID)" \
+    | tr -d '[:space:]'
+}
+
+get_project_id() {
+  # Find the project ID first by DEVSHELL_PROJECT_ID (in Cloud Shell)
+  # and then by querying the gcloud default project.
+  local project="${DEVSHELL_PROJECT_ID:-}"
+  if [[ -z "$project" ]]; then
+    project=$(gcloud config get-value project 2> /dev/null)
+  fi
+  if [[ -z "$project" ]]; then
+    >&2 echo "No default project was found, and DEVSHELL_PROJECT_ID is not set."
+    >&2 echo "Please use the Cloud Shell or set your default project by typing:"
+    >&2 echo "gcloud config set project YOUR-PROJECT-NAME"
+  fi
+  echo "$project"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./deploy_api.sh
+Deploying ../openapi.yaml...
+gcloud endpoints services deploy ../openapi.yaml
+Waiting for async operation operations/services.qwiklabs-gcp-03-b9abac6d679c.appspot.com-0 to complete...
+Waiting for async operation operations/serviceConfigs.qwiklabs-gcp-03-b9abac6d679c.appspot.com:a2665a0f-a006-4b5b-bcb9-ca43f6192e40 to complete...
+Operation finished successfully. The following command can describe the Operation details:
+ gcloud endpoints operations describe operations/serviceConfigs.qwiklabs-gcp-03-b9abac6d679c.appspot.com:a2665a0f-a006-4b5b-bcb9-ca43f6192e40
+
+WARNING: tmp.3dWNaboMDa.yaml: Operation 'get' in path '/airportName': Operation does not require an API key; callers may invoke the method without specifying an associated API-consuming project. To enable API key all the SecurityRequirement Objects (https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#security-requirement-object) inside security definition must reference at least one SecurityDefinition of type : 'apiKey'.
+
+Waiting for async operation operations/rollouts.qwiklabs-gcp-03-b9abac6d679c.appspot.com:01ee8bc1-156a-4c44-abe3-181a20b11754 to complete...
+Operation finished successfully. The following command can describe the Operation details:
+ gcloud endpoints operations describe operations/rollouts.qwiklabs-gcp-03-b9abac6d679c.appspot.com:01ee8bc1-156a-4c44-abe3-181a20b11754
+
+Enabling service [qwiklabs-gcp-03-b9abac6d679c.appspot.com] on project [qwiklabs-gcp-03-b9abac6d679c]...
+Operation "operations/acat.p2-463855932726-8136ab1d-cf88-47fe-8c6d-a7180cf58bdf" finished successfully.
+Service Configuration [2022-08-27r0] uploaded for service [qwiklabs-gcp-03-b9abac6d679c.appspot.com]
+To manage your API, go to: https://console.cloud.google.com/endpoints/api/qwiklabs-gcp-03-b9abac6d679c.appspot.com/overview?project=qwiklabs-gcp-03-b9abac6d679c
+
+
+
+
+    
+    
+    
+
+Cloud Endpoints uses the host field in the OpenAPI configuration file to identify the service. The deploy_api.sh script sets the ID of your Cloud project as part of the name configured in the host field. (When you prepare an OpenAPI configuration file for your own service, you will need to do this manually.)
+The script then deploys the OpenAPI configuration to Service Management using the command: gcloud endpoints services deploy openapi.yaml
+As it is creating and configuring the service, Service Management outputs some information to the console. You can safely ignore the warnings about the paths in openapi.yaml not requiring an API key. On successful completion, you see a line like the following that displays the service configuration ID and the service name:
+Service Configuration [2017-02-13-r2] uploaded for service [airports-api.endpoints.example-project.cloud.goog]
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Deploying the API backend
+So far you have deployed the OpenAPI configuration to Service Management, but you have not yet deployed the code that will serve the API backend. The deploy_app.sh script included in the lab sample creates an App Engine flexible environment to host the API backend, and then the script deploys the API to App Engine.
+To deploy the API backend, make sure you are in the endpoints-quickstart/scripts directory. Then, run the following script:
+./deploy_app.sh
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ cat deploy_app.sh
+#!/bin/bash
+# Copyright 2017 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -euo pipefail
+
+source util.sh
+
+main() {
+  # Get our working project, or exit if it's not set.
+  local project_id="$(get_project_id)"
+  if [[ -z "$project_id" ]]; then
+    exit 1
+  fi
+  # Try to create an App Engine project in our selected region.
+  # If it already exists, return a success ("|| true").
+  echo "gcloud app create --region=$REGION"
+  gcloud app create --region="$REGION" || true
+  # Prepare the necessary variables for substitution in our app configuration
+  # template, and create a temporary file to hold the templatized version.
+  local service_name="${project_id}.appspot.com"
+  export TEMP_FILE="../app/app.yaml"
+  < "$APP" \
+    sed -E "s/SERVICE_NAME/${service_name}/g" \
+    > "$TEMP_FILE"
+  echo "Deploying ${APP}..."
+  echo "gcloud -q app deploy $TEMP_FILE"
+  gcloud -q app deploy "$TEMP_FILE"
+}
+
+cleanup() {
+  rm "$TEMP_FILE"
+}
+
+# Defaults.
+APP="../app/app_template.yaml"
+REGION="us-central"
+
+if [[ "$#" == 0 ]]; then
+  : # Use defaults.
+elif [[ "$#" == 1 ]]; then
+  APP="$1"
+elif [[ "$#" == 2 ]]; then
+  APP="$1"
+  REGION="$2"
+else
+  echo "Wrong number of arguments specified."
+  echo "Usage: deploy_app.sh [app-template] [region]"
+  exit 1
+fi
+
+# Cleanup our temporary files even if our deployment fails.
+trap cleanup EXIT
+
+main "$@"
+
+
+
+
+
+
+
+
+
+
+
+
+The script runs the following command to create an App Engine flexible environment in the us-central region: gcloud app create --region="$REGION"
+
+It takes a couple minutes to create the App Engine flexible backend.
+Note: If you get an ERROR: NOT_FOUND: Unable to retrieve P4SA: from GAIA message, rerun the deploy_app.sh script.
+
+You'll see the following displayed in Cloud Shell after the App Engine is created:
+Success! The app is now created. Please use `gcloud app deploy` to deploy your first app.
+The script goes on to run the gcloud app deploy command to deploy the sample API to App Engine.
+
+You'll then see a line like the following in Cloud Shell:
+Deploying ../app/app_template.yaml...You are about to deploy the following services:
+It takes several minutes for the API to be deployed to App Engine. You'll see a line like the following when the API is successfully deployed to App Engine:
+
+Deployed service [default] to [https://example-project.appspot.com]
+
+
+
+
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./deploy_app.sh
+gcloud app create --region=us-central
+You are creating an app for project [qwiklabs-gcp-03-b9abac6d679c].
+WARNING: Creating an App Engine application for a project is irreversible and the region
+cannot be changed. More information about regions is at
+<https://cloud.google.com/appengine/docs/locations>.
+
+Creating App Engine application in project [qwiklabs-gcp-03-b9abac6d679c] and region [us-central]....done.     
+Success! The app is now created. Please use `gcloud app deploy` to deploy your first app.
+
+
+
+Deploying ../app/app_template.yaml...
+gcloud -q app deploy ../app/app.yaml
+Services to deploy:
+
+descriptor:                  [/home/student_00_f3adff700b22/endpoints-quickstart/app/app.yaml]
+source:                      [/home/student_00_f3adff700b22/endpoints-quickstart/app]
+target project:              [qwiklabs-gcp-03-b9abac6d679c]
+target service:              [default]
+target version:              [20220827t080741]
+target url:                  [https://qwiklabs-gcp-03-b9abac6d679c.uc.r.appspot.com]
+target service account:      [App Engine default service account]
+
+
+Beginning deployment of service [default]...
+Building and pushing image for service [default]
+Started cloud build [f2059cd0-d4a1-467a-87c8-ee44559c1d64].
+To see logs in the Cloud Console: https://console.cloud.google.com/cloud-build/builds/f2059cd0-d4a1-467a-87c8-ee44559c1d64?project=463855932726
+------------------------------------------------------------------- REMOTE BUILD OUTPUT -------------------------------------------------------------------
+starting build "f2059cd0-d4a1-467a-87c8-ee44559c1d64"
+
+FETCHSOURCE
+Fetching storage object: gs://staging.qwiklabs-gcp-03-b9abac6d679c.appspot.com/us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t080741:latest#1661587665729975
+Copying gs://staging.qwiklabs-gcp-03-b9abac6d679c.appspot.com/us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t080741:latest#1661587665729975...
+/ [1 files][  2.3 MiB/  2.3 MiB]
+Operation completed over 1 objects/2.3 MiB.
+BUILD
+Starting Step #0
+Step #0: Pulling image: gcr.io/gcp-runtimes/python/gen-dockerfile@sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa
+Step #0: gcr.io/gcp-runtimes/python/gen-dockerfile@sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa: Pulling from gcp-runtimes/python/gen-dockerfile
+Step #0: Digest: sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa
+Step #0: Status: Downloaded newer image for gcr.io/gcp-runtimes/python/gen-dockerfile@sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa
+Step #0: gcr.io/gcp-runtimes/python/gen-dockerfile@sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa
+Finished Step #0
+Starting Step #1
+Step #1: Pulling image: gcr.io/cloud-builders/docker@sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd
+Step #1: gcr.io/cloud-builders/docker@sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd: Pulling from cloud-builders/docker
+Step #1: 75f546e73d8b: Pulling fs layer
+Step #1: 0f3bb76fc390: Pulling fs layer
+Step #1: 3c2cba919283: Pulling fs layer
+Step #1: 4d168e97939c: Pulling fs layer
+Step #1: 4d168e97939c: Waiting
+Step #1: 3c2cba919283: Verifying Checksum
+Step #1: 3c2cba919283: Download complete
+Step #1: 0f3bb76fc390: Verifying Checksum
+Step #1: 0f3bb76fc390: Download complete
+Step #1: 75f546e73d8b: Verifying Checksum
+Step #1: 75f546e73d8b: Download complete
+Step #1: 75f546e73d8b: Pull complete
+Step #1: 4d168e97939c: Verifying Checksum
+Step #1: 4d168e97939c: Download complete
+Step #1: 0f3bb76fc390: Pull complete
+Step #1: 3c2cba919283: Pull complete
+Step #1: 4d168e97939c: Pull complete
+Step #1: Digest: sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd
+Step #1: Status: Downloaded newer image for gcr.io/cloud-builders/docker@sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd
+Step #1: gcr.io/cloud-builders/docker@sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd
+Step #1: Sending build context to Docker daemon  7.763MB
+Step #1: Step 1/9 : FROM gcr.io/google-appengine/python@sha256:c6480acd38ca4605e0b83f5196ab6fe8a8b59a0288a7b8216c42dbc45b5de8f6
+Step #1: gcr.io/google-appengine/python@sha256:c6480acd38ca4605e0b83f5196ab6fe8a8b59a0288a7b8216c42dbc45b5de8f6: Pulling from google-appengine/python
+Step #1: Digest: sha256:c6480acd38ca4605e0b83f5196ab6fe8a8b59a0288a7b8216c42dbc45b5de8f6
+Step #1: Status: Downloaded newer image for gcr.io/google-appengine/python@sha256:c6480acd38ca4605e0b83f5196ab6fe8a8b59a0288a7b8216c42dbc45b5de8f6
+Step #1:  ce284ab20159
+Step #1: Step 2/9 : LABEL python_version=python3.6
+Step #1:  Running in 690fec892ee9
+Step #1: Removing intermediate container 690fec892ee9
+Step #1:  e87296a98b9f
+Step #1: Step 3/9 : RUN virtualenv --no-download /env -p python3.6
+Step #1:  Running in 6f8c0abe8f17
+Step #1: created virtual environment CPython3.6.10.final.0-64 in 1219ms
+Step #1:   creator CPython3Posix(dest=/env, clear=False, global=False)
+Step #1:   seeder FromAppData(download=False, pip=bundle, wheel=bundle, setuptools=bundle, via=copy, app_data_dir=/root/.local/share/virtualenv)
+Step #1:     added seed packages: pip==20.2.2, setuptools==49.6.0, wheel==0.35.1
+Step #1:   activators PythonActivator,FishActivator,XonshActivator,CShellActivator,PowerShellActivator,BashActivator
+Step #1: Removing intermediate container 6f8c0abe8f17
+Step #1:  d2169cb1aaf1
+Step #1: Step 4/9 : ENV VIRTUAL_ENV /env
+Step #1:  Running in 8eb477527c23
+Step #1: Removing intermediate container 8eb477527c23
+Step #1:  59f58799d9cc
+Step #1: Step 5/9 : ENV PATH /env/bin:$PATH
+Step #1:  Running in b571a571fb3b
+Step #1: Removing intermediate container b571a571fb3b
+Step #1:  361dfb416b78
+Step #1: Step 6/9 : ADD requirements.txt /app/
+Step #1:  c209ca5f0416
+Step #1: Step 7/9 : RUN pip install -r requirements.txt
+Step #1:  Running in d85214e30aa4
+Step #1: Collecting flask
+Step #1:   Downloading Flask-2.0.3-py3-none-any.whl (95 kB)
+Step #1: Collecting gunicorn
+Step #1:   Downloading gunicorn-20.1.0-py3-none-any.whl (79 kB)
+Step #1: Collecting itsdangerous>=2.0
+Step #1:   Downloading itsdangerous-2.0.1-py3-none-any.whl (18 kB)
+Step #1: Collecting Werkzeug>=2.0
+Step #1:   Downloading Werkzeug-2.0.3-py3-none-any.whl (289 kB)
+Step #1: Collecting click>=7.1.2
+Step #1:   Downloading click-8.0.4-py3-none-any.whl (97 kB)
+Step #1: Collecting Jinja2>=3.0
+Step #1:   Downloading Jinja2-3.0.3-py3-none-any.whl (133 kB)
+Step #1: Requirement already satisfied: setuptools>=3.0 in /env/lib/python3.6/site-packages (from gunicorn->-r requirements.txt (line 2)) (49.6.0)
+Step #1: Collecting dataclasses; python_version < "3.7"
+Step #1:   Downloading dataclasses-0.8-py3-none-any.whl (19 kB)
+Step #1: Collecting importlib-metadata; python_version < "3.8"
+Step #1:   Downloading importlib_metadata-4.8.3-py3-none-any.whl (17 kB)
+Step #1: Collecting MarkupSafe>=2.0
+Step #1:   Downloading MarkupSafe-2.0.1-cp36-cp36m-manylinux2010_x86_64.whl (30 kB)
+Step #1: Collecting typing-extensions>=3.6.4; python_version < "3.8"
+Step #1:   Downloading typing_extensions-4.1.1-py3-none-any.whl (26 kB)
+Step #1: Collecting zipp>=0.5
+Step #1:   Downloading zipp-3.6.0-py3-none-any.whl (5.3 kB)
+Step #1: Installing collected packages: itsdangerous, dataclasses, Werkzeug, typing-extensions, zipp, importlib-metadata, click, MarkupSafe, Jinja2, flask, gunicorn
+Step #1: Successfully installed Jinja2-3.0.3 MarkupSafe-2.0.1 Werkzeug-2.0.3 click-8.0.4 dataclasses-0.8 flask-2.0.3 gunicorn-20.1.0 importlib-metadata-4.8.3 itsdangerous-2.0.1 typing-extensions-4.1.1 zipp-3.6.0
+Step #1: WARNING: You are using pip version 20.2.2; however, version 21.3.1 is available.
+Step #1: You should consider upgrading via the '/env/bin/python -m pip install --upgrade pip' command.
+Step #1: Removing intermediate container d85214e30aa4
+Step #1:  60007bc93dbc
+Step #1: Step 8/9 : ADD . /app/
+Step #1:  feda0a2bb4f0
+Step #1: Step 9/9 : CMD exec gunicorn -b :$PORT main:app
+Step #1:  Running in 7c3cde88741d
+Step #1: Removing intermediate container 7c3cde88741d
+Step #1:  5587116718bf
+Step #1: Successfully built 5587116718bf
+Step #1: Successfully tagged us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t080741:latest
+Finished Step #1
+PUSH
+Pushing us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t080741:latest
+The push refers to repository [us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t080741]
+df909c64218a: Preparing
+61c452f400b9: Preparing
+0a61b0b57dd2: Preparing
+d63d3dbb2a0b: Preparing
+087d7553d285: Preparing
+16919ab89eca: Preparing
+74bcef7f7402: Preparing
+bc9e931c388e: Preparing
+20896f2c3dd8: Preparing
+7b80c69caf34: Preparing
+3bbec54fac0c: Preparing
+4006ffa4c683: Preparing
+844d958e8cbe: Preparing
+84ff92691f90: Preparing
+b49bce339f97: Preparing
+dcb7197db903: Preparing
+7b80c69caf34: Waiting
+3bbec54fac0c: Waiting
+4006ffa4c683: Waiting
+844d958e8cbe: Waiting
+84ff92691f90: Waiting
+b49bce339f97: Waiting
+dcb7197db903: Waiting
+74bcef7f7402: Waiting
+bc9e931c388e: Waiting
+20896f2c3dd8: Waiting
+16919ab89eca: Waiting
+087d7553d285: Layer already exists
+16919ab89eca: Layer already exists
+74bcef7f7402: Layer already exists
+bc9e931c388e: Layer already exists
+0a61b0b57dd2: Pushed
+20896f2c3dd8: Layer already exists
+7b80c69caf34: Layer already exists
+3bbec54fac0c: Layer already exists
+4006ffa4c683: Layer already exists
+844d958e8cbe: Layer already exists
+84ff92691f90: Layer already exists
+df909c64218a: Pushed
+61c452f400b9: Pushed
+b49bce339f97: Layer already exists
+dcb7197db903: Layer already exists
+d63d3dbb2a0b: Pushed
+latest: digest: sha256:c965d74341dc6f786eff5d4f50889944d6d8cb6b500f22eb379089e0af788368 size: 3672
+DONE
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+WARNING: The version cannot run because it is unable to generate an access token for the target service account qwiklabs-gcp-03-b9abac6d679c@appspot.gserviceaccount.com. Please check that your project has the App Engine Standard Service Agent role following https://cloud.google.com/appengine/docs/standard/go/service-agent.
+
+Updating service [default] (this may take several minutes)...done.     
+Setting traffic split for service [default]...done.     
+Deployed service [default] to [https://qwiklabs-gcp-03-b9abac6d679c.uc.r.appspot.com]
+
+You can stream logs from the command line by running:
+  $ gcloud app logs tail -s default
+
+To view your application in the web browser run:
+  $ gcloud app browse
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Sending requests to the API
+After deploying the sample API, you can send requests to it by running the following script:
+./query_api.sh
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./query_api.sh
+curl "https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO"
+San Francisco International Airport
+
+
+The script echoes the curl command that it uses to send a request to the API, and then displays the result. You'll see something like the following in Cloud Shell:
+curl "https://example-project.appspot.com/airportName?iataCode=SFO"
+San Francisco International Airport
+The API expects one query parameter, iataCode, that is set to a valid IATA airport code such as SEA or JFK.
+
+
+
+
+To test, run this example in Cloud Shell:
+./query_api.sh JFK
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./query_api.sh JFK
+curl "https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=JFK"
+John F Kennedy International Airport
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5. Tracking API activity
+With APIs deployed with Cloud Endpoints, you can monitor critical operations metrics in the Cloud Console and gain insight into your users and usage with Cloud Logging:
+
+Run this traffic generation script in Cloud Shell to populate the graphs and logs:
+./generate_traffic.sh
+
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ cat generate_traffic.sh
+#!/bin/bash
+# Copyright 2017 Google Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -euo pipefail
+
+source util.sh
+
+# Use this to keep track of what HTTP status codes we receive.
+declare -A codes
+
+# generate_traffic will print a status update every UPDATE_FREQUENCY messages.
+UPDATE_FREQUENCY=25
+
+main() {
+  # Get our working project, or exit if it's not set.
+  local project_id=$(get_project_id)
+  if [[ -z "$project_id" ]]; then
+    exit 1
+  fi
+  export url="https://${project_id}.appspot.com/airportName?iataCode=${IATA_CODE}"
+  echo "This command will exit automatically in $TIMEOUT_SECONDS seconds."
+  echo "Generating traffic to ${url}..."
+  echo "Press Ctrl-C to stop."
+  local endtime=$(($(date +%s) + $TIMEOUT_SECONDS))
+  local request_count=0
+  # Send queries repeatedly until TIMEOUT_SECONDS seconds have elapsed.
+  while [[ $(date +%s) -lt $endtime ]]; do
+    request_count=$(( request_count + 1))
+    if [[ $((request_count % UPDATE_FREQUENCY)) == 0 ]]; then
+      echo "Served ${request_count} requests."
+    fi
+    # Make the HTTP request and save its status in an associative array.
+    http_status=$(curl -so /dev/null -w "%{http_code}" "$url")
+    if [[ "${!codes[@]}" != *"$http_status"* ]]; then
+      codes["$http_status"]="1"
+    else
+      codes["$http_status"]="$(( ${codes[$http_status]} + 1 ))"
+    fi
+  done
+}
+
+print_status() {
+  echo ""
+  echo "HTTP status codes received from ${url}:"
+  for code in "${!codes[@]}"; do
+    echo "${code}: ${codes[$code]}"
+  done
+}
+
+# Defaults.
+IATA_CODE="SFO"
+TIMEOUT_SECONDS=$((5 * 60)) # Timeout after 5 minutes.
+
+if [[ "$#" == 0 ]]; then
+  : # Use defaults.
+elif [[ "$#" == 1 ]]; then
+  IATA_CODE="$1"
+else
+  echo "Wrong number of arguments specified."
+  echo "Usage: generate_traffic.sh [iata-code]"
+  exit 1
+fi
+
+# Print the received codes when we exit.
+trap print_status EXIT
+
+main "$@"
+
+
+
+
+Note: This script generates requests in a loop and automatically times out in 5 minutes. To end the script sooner, enter CTRL+C in Cloud Shell.
+In the Console, click on Endpoints in the Tools section to look at the activity graphs for your API. It may take a few moments for the requests to be reflected in the graphs. You can do this while you wait for data to be displayed:
+
+If the Permissions side panel is not open, click +Permissions. The Permissions panel allows you to control who has access to your API and the level of access.
+
+Click the Deployment history tab. This tab displays a history of your API deployments, including the deployment time and who deployed the change.
+
+Click the Overview tab. Here you'll see the traffic coming in. After the traffic generation script has been running for a minute, scroll down to see the three lines on the Total latency graph (50th, 95th, and 98th percentiles). This data provides a quick estimate of response times.
+
+At the bottom of the Endpoints graphs, under Method, click the View all logs link for GET/airportName. The Logs Viewer page displays the request logs for the API.
+
+Enter CTRL+C in Cloud Shell to stop the script.
+
+
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./generate_traffic.sh
+This command will exit automatically in 300 seconds.
+Generating traffic to https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO...
+Press Ctrl-C to stop.
+Served 25 requests.
+Served 50 requests.
+Served 75 requests.
+Served 100 requests.
+Served 125 requests.
+Served 150 requests.
+Served 175 requests.
+Served 200 requests.
+Served 225 requests.
+Served 250 requests.
+Served 275 requests.
+Served 300 requests.
+^C
+HTTP status codes received from https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO:
+200: 312
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 6. Add a quota to the API
+Note: This is a beta release of Quotas. This feature might be changed in backward-incompatible ways and is not subject to any SLA or deprecation policy.
+Cloud Endpoints lets you set quotas so you can control the rate at which applications can call your API. Quotas can be used to protect your API from excessive usage by a single client.
+
+Deploy the Endpoints configuration that has a quota:
+
+./deploy_api.sh ../openapi_with_ratelimit.yaml
+
+Redeploy your app to use the new Endpoints configuration (this may take a few minutes):
+
+./deploy_app.sh
+
+
+
+
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./deploy_api.sh ../openapi_with_ratelimit.yaml
+Deploying ../openapi_with_ratelimit.yaml...
+gcloud endpoints services deploy ../openapi_with_ratelimit.yaml
+Waiting for async operation operations/serviceConfigs.qwiklabs-gcp-03-b9abac6d679c.appspot.com:c2995928-7c7b-49ee-9b3b-c6dd08ed009a to complete...
+Operation finished successfully. The following command can describe the Operation details:
+ gcloud endpoints operations describe operations/serviceConfigs.qwiklabs-gcp-03-b9abac6d679c.appspot.com:c2995928-7c7b-49ee-9b3b-c6dd08ed009a
+
+WARNING: toplevel: Value STANDARD in limit limit-on-airport-requests can't be set below 100.
+
+Waiting for async operation operations/rollouts.qwiklabs-gcp-03-b9abac6d679c.appspot.com:5b8f6109-4298-4180-b13f-52dfc772b22f to complete...
+Operation finished successfully. The following command can describe the Operation details:
+ gcloud endpoints operations describe operations/rollouts.qwiklabs-gcp-03-b9abac6d679c.appspot.com:5b8f6109-4298-4180-b13f-52dfc772b22f
+
+Service Configuration [2022-08-27r1] uploaded for service [qwiklabs-gcp-03-b9abac6d679c.appspot.com]
+
+To manage your API, go to: https://console.cloud.google.com/endpoints/api/qwiklabs-gcp-03-b9abac6d679c.appspot.com/overview?project=qwiklabs-gcp-03-b9abac6d679c
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./deploy_app.sh
+gcloud app create --region=us-central
+You are creating an app for project [qwiklabs-gcp-03-b9abac6d679c].
+WARNING: Creating an App Engine application for a project is irreversible and the region
+cannot be changed. More information about regions is at
+<https://cloud.google.com/appengine/docs/locations>.
+
+ERROR: (gcloud.app.create) The project [qwiklabs-gcp-03-b9abac6d679c] already contains an App Engine application. You can deploy your application using `gcloud app deploy`.
+Deploying ../app/app_template.yaml...
+gcloud -q app deploy ../app/app.yaml
+Services to deploy:
+
+descriptor:                  [/home/student_00_f3adff700b22/endpoints-quickstart/app/app.yaml]
+source:                      [/home/student_00_f3adff700b22/endpoints-quickstart/app]
+target project:              [qwiklabs-gcp-03-b9abac6d679c]
+target service:              [default]
+target version:              [20220827t082922]
+target url:                  [https://qwiklabs-gcp-03-b9abac6d679c.uc.r.appspot.com]
+target service account:      [App Engine default service account]
+
+
+Beginning deployment of service [default]...
+Building and pushing image for service [default]
+Started cloud build [fe7e611e-0661-484b-b40c-3a1521207f03].
+To see logs in the Cloud Console: https://console.cloud.google.com/cloud-build/builds/fe7e611e-0661-484b-b40c-3a1521207f03?project=463855932726
+------------------------------------------------------------------ REMOTE BUILD OUTPUT -------------------------------------------------------------------
+starting build "fe7e611e-0661-484b-b40c-3a1521207f03"
+
+FETCHSOURCE
+Fetching storage object: gs://staging.qwiklabs-gcp-03-b9abac6d679c.appspot.com/us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t082922:latest#1661588966093549
+Copying gs://staging.qwiklabs-gcp-03-b9abac6d679c.appspot.com/us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t082922:latest#1661588966093549...
+/ [1 files][  2.3 MiB/  2.3 MiB]
+Operation completed over 1 objects/2.3 MiB.
+BUILD
+Starting Step #0
+Step #0: Pulling image: gcr.io/gcp-runtimes/python/gen-dockerfile@sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa
+Step #0: gcr.io/gcp-runtimes/python/gen-dockerfile@sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa: Pulling from gcp-runtimes/python/gen-dockerfile
+Step #0: Digest: sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa
+Step #0: Status: Downloaded newer image for gcr.io/gcp-runtimes/python/gen-dockerfile@sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa
+Step #0: gcr.io/gcp-runtimes/python/gen-dockerfile@sha256:ac444fc620f70ff80c19cde48d18242dbed63056e434f0039bf939433e7464aa
+Finished Step #0
+Starting Step #1
+Step #1: Pulling image: gcr.io/cloud-builders/docker@sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd
+Step #1: gcr.io/cloud-builders/docker@sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd: Pulling from cloud-builders/docker
+Step #1: 75f546e73d8b: Pulling fs layer
+Step #1: 0f3bb76fc390: Pulling fs layer
+Step #1: 3c2cba919283: Pulling fs layer
+Step #1: 4d168e97939c: Pulling fs layer
+Step #1: 4d168e97939c: Waiting
+Step #1: 3c2cba919283: Download complete
+Step #1: 0f3bb76fc390: Verifying Checksum
+Step #1: 0f3bb76fc390: Download complete
+Step #1: 75f546e73d8b: Verifying Checksum
+Step #1: 75f546e73d8b: Download complete
+Step #1: 75f546e73d8b: Pull complete
+Step #1: 4d168e97939c: Download complete
+Step #1: 0f3bb76fc390: Pull complete
+Step #1: 3c2cba919283: Pull complete
+Step #1: 4d168e97939c: Pull complete
+Step #1: Digest: sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd
+Step #1: Status: Downloaded newer image for gcr.io/cloud-builders/docker@sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd
+Step #1: gcr.io/cloud-builders/docker@sha256:08c5443ff4f8ba85c2114576bb9167c4de0bf658818aea536d3456e8d0e134cd
+Step #1: Sending build context to Docker daemon  7.763MB
+Step #1: Step 1/9 : FROM gcr.io/google-appengine/python@sha256:c6480acd38ca4605e0b83f5196ab6fe8a8b59a0288a7b8216c42dbc45b5de8f6
+Step #1: gcr.io/google-appengine/python@sha256:c6480acd38ca4605e0b83f5196ab6fe8a8b59a0288a7b8216c42dbc45b5de8f6: Pulling from google-appengine/python
+Step #1: Digest: sha256:c6480acd38ca4605e0b83f5196ab6fe8a8b59a0288a7b8216c42dbc45b5de8f6
+Step #1: Status: Downloaded newer image for gcr.io/google-appengine/python@sha256:c6480acd38ca4605e0b83f5196ab6fe8a8b59a0288a7b8216c42dbc45b5de8f6
+Step #1:  ce284ab20159
+Step #1: Step 2/9 : LABEL python_version=python3.6
+Step #1:  Running in f1864a49b783
+Step #1: Removing intermediate container f1864a49b783
+Step #1:  55b9d286f868
+Step #1: Step 3/9 : RUN virtualenv --no-download /env -p python3.6
+Step #1:  Running in 99d3f20dd2e4
+Step #1: created virtual environment CPython3.6.10.final.0-64 in 1302ms
+Step #1:   creator CPython3Posix(dest=/env, clear=False, global=False)
+Step #1:   seeder FromAppData(download=False, pip=bundle, wheel=bundle, setuptools=bundle, via=copy, app_data_dir=/root/.local/share/virtualenv)
+Step #1:     added seed packages: pip==20.2.2, setuptools==49.6.0, wheel==0.35.1
+Step #1:   activators PythonActivator,FishActivator,XonshActivator,CShellActivator,PowerShellActivator,BashActivator
+Step #1: Removing intermediate container 99d3f20dd2e4
+Step #1:  3076403eae36
+Step #1: Step 4/9 : ENV VIRTUAL_ENV /env
+Step #1:  Running in a0893f2fdfd0
+Step #1: Removing intermediate container a0893f2fdfd0
+Step #1:  9cab9ff9c3d6
+Step #1: Step 5/9 : ENV PATH /env/bin:$PATH
+Step #1:  Running in e2565fb869b3
+Step #1: Removing intermediate container e2565fb869b3
+Step #1:  41caeddff1f9
+Step #1: Step 6/9 : ADD requirements.txt /app/
+Step #1:  02556628ac9c
+Step #1: Step 7/9 : RUN pip install -r requirements.txt
+Step #1:  Running in 0b444e0e6869
+Step #1: Collecting flask
+Step #1:   Downloading Flask-2.0.3-py3-none-any.whl (95 kB)
+Step #1: Collecting gunicorn
+Step #1:   Downloading gunicorn-20.1.0-py3-none-any.whl (79 kB)
+Step #1: Collecting itsdangerous>=2.0
+Step #1:   Downloading itsdangerous-2.0.1-py3-none-any.whl (18 kB)
+Step #1: Collecting Werkzeug>=2.0
+Step #1:   Downloading Werkzeug-2.0.3-py3-none-any.whl (289 kB)
+Step #1: Collecting click>=7.1.2
+Step #1:   Downloading click-8.0.4-py3-none-any.whl (97 kB)
+Step #1: Collecting Jinja2>=3.0
+Step #1:   Downloading Jinja2-3.0.3-py3-none-any.whl (133 kB)
+Step #1: Requirement already satisfied: setuptools>=3.0 in /env/lib/python3.6/site-packages (from gunicorn->-r requirements.txt (line 2)) (49.6.0)
+Step #1: Collecting dataclasses; python_version < "3.7"
+Step #1:   Downloading dataclasses-0.8-py3-none-any.whl (19 kB)
+Step #1: Collecting importlib-metadata; python_version < "3.8"
+Step #1:   Downloading importlib_metadata-4.8.3-py3-none-any.whl (17 kB)
+Step #1: Collecting MarkupSafe>=2.0
+Step #1:   Downloading MarkupSafe-2.0.1-cp36-cp36m-manylinux2010_x86_64.whl (30 kB)
+Step #1: Collecting zipp>=0.5
+Step #1:   Downloading zipp-3.6.0-py3-none-any.whl (5.3 kB)
+Step #1: Collecting typing-extensions>=3.6.4; python_version < "3.8"
+Step #1:   Downloading typing_extensions-4.1.1-py3-none-any.whl (26 kB)
+Step #1: Installing collected packages: itsdangerous, dataclasses, Werkzeug, zipp, typing-extensions, importlib-metadata, click, MarkupSafe, Jinja2, flask, gunicorn
+Step #1: Successfully installed Jinja2-3.0.3 MarkupSafe-2.0.1 Werkzeug-2.0.3 click-8.0.4 dataclasses-0.8 flask-2.0.3 gunicorn-20.1.0 importlib-metadata-4.8.3 itsdangerous-2.0.1 typing-extensions-4.1.1 zipp-3.6.0
+Step #1: WARNING: You are using pip version 20.2.2; however, version 21.3.1 is available.
+Step #1: You should consider upgrading via the '/env/bin/python -m pip install --upgrade pip' command.
+Step #1: Removing intermediate container 0b444e0e6869
+Step #1:  171478891ed3
+Step #1: Step 8/9 : ADD . /app/
+Step #1:  266d554670bb
+Step #1: Step 9/9 : CMD exec gunicorn -b :$PORT main:app
+Step #1:  Running in 0aadb4c8a74b
+Step #1: Removing intermediate container 0aadb4c8a74b
+Step #1:  9f920d8687cd
+Step #1: Successfully built 9f920d8687cd
+Step #1: Successfully tagged us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t082922:latest
+Finished Step #1
+PUSH
+Pushing us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t082922:latest
+The push refers to repository [us.gcr.io/qwiklabs-gcp-03-b9abac6d679c/appengine/default.20220827t082922]
+37082e195da3: Preparing
+93d30afd739a: Preparing
+6ba37bab9314: Preparing
+4a3357d66ce8: Preparing
+087d7553d285: Preparing
+16919ab89eca: Preparing
+74bcef7f7402: Preparing
+bc9e931c388e: Preparing
+20896f2c3dd8: Preparing
+7b80c69caf34: Preparing
+3bbec54fac0c: Preparing
+4006ffa4c683: Preparing
+844d958e8cbe: Preparing
+84ff92691f90: Preparing
+b49bce339f97: Preparing
+dcb7197db903: Preparing
+3bbec54fac0c: Waiting
+16919ab89eca: Waiting
+74bcef7f7402: Waiting
+bc9e931c388e: Waiting
+20896f2c3dd8: Waiting
+7b80c69caf34: Waiting
+4006ffa4c683: Waiting
+844d958e8cbe: Waiting
+84ff92691f90: Waiting
+b49bce339f97: Waiting
+dcb7197db903: Waiting
+087d7553d285: Layer already exists
+16919ab89eca: Layer already exists
+74bcef7f7402: Layer already exists
+bc9e931c388e: Layer already exists
+20896f2c3dd8: Layer already exists
+7b80c69caf34: Layer already exists
+3bbec54fac0c: Layer already exists
+4006ffa4c683: Layer already exists
+844d958e8cbe: Layer already exists
+84ff92691f90: Layer already exists
+b49bce339f97: Layer already exists
+dcb7197db903: Layer already exists
+6ba37bab9314: Pushed
+37082e195da3: Pushed
+93d30afd739a: Pushed
+4a3357d66ce8: Pushed
+latest: digest: sha256:569508e3b1bfdda80d365b0331f7a948a8e7265c1eb87f8bf198957b44004887 size: 3672
+DONE
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+Updating service [default] (this may take several minutes)...done.     
+Setting traffic split for service [default]...done.     
+Stopping version [qwiklabs-gcp-03-b9abac6d679c/default/20220827t080741].
+Sent request to stop version [qwiklabs-gcp-03-b9abac6d679c/default/20220827t080741]. This operation may take some time to complete. If you would like to verify that it succeeded, run:
+  $ gcloud app versions describe -s default 20220827t080741
+until it shows that the version has stopped.
+Deployed service [default] to [https://qwiklabs-gcp-03-b9abac6d679c.uc.r.appspot.com]
+
+You can stream logs from the command line by running:
+  $ gcloud app logs tail -s default
+
+To view your application in the web browser run:
+  $ gcloud app browse
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+In the Console, navigate to Navigation menu > API & Services > Credentials.
+
+Click Create credentials and choose API key. A new API key is displayed on the screen.
+AIzaSyBmyYSLjUlmiUqI3BPDM7tn6FxmnffeVwM
+Click the double rectangle icon to copy it to your clipboard.
+
+In Cloud Shell, type the following. Replace YOUR-API-KEY with the API key you just created:
+
+export API_KEY=YOUR-API-KEY
+export API_KEY=AIzaSyBmyYSLjUlmiUqI3BPDM7tn6FxmnffeVwM
+
+
+
+
+
+
+Send your API a request using the API key variable you just created:
+./query_api_with_key.sh $API_KEY
+
+You'll see something like the following on the console:
+curl -H 'x-api-key: AIzeSyDbdQdaSdhPMdiAuddd_FALbY7JevoMzAB' "https://example-project.appspot.com/airportName?iataCode=SFO"
+San Francisco International Airport
+
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./query_api_with_key.sh $API_KEY
+curl -H 'x-api-key: AIzaSyBmyYSLjUlmiUqI3BPDM7tn6FxmnffeVwM' "https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO"
+San Francisco International Airport
+
+
+
+
+
+
+
+The API now has a limit of 5 requests per second. Run the following command to send traffic to the API and trigger the quota limit:
+
+./generate_traffic_with_key.sh $API_KEY
+
+
+
+
+
+
+After running the script for 5-10 seconds, enter CTRL+C in Cloud Shell to stop the script.
+Send another authenticated request to the API:
+./query_api_with_key.sh $API_KEY
+
+
+You'll see something like the following on the console:
+
+{
+     "code": 8,
+     "message": "Insufficient tokens for quota 'airport_requests' and limit 'limit-on-airport-requests' of service 'example-project.appspot.com' for consumer 'api_key:AIzeSyDbdQdaSdhPMdiAuddd_FALbY7JevoMzAB'.",
+     "details": [
+      {
+       "@type": "type.googleapis.com/google.rpc.DebugInfo",
+       "stackEntries": [],
+       "detail": "internal"
+      }
+     ]
+    }
+If you get a different response, try running the generate_traffic_with_key.sh script again and retry.
+
+
+
+
+
+
+
+Round 1
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./generate_traffic_with_key.sh $API_KEY
+This command will exit automatically in 300 seconds.
+Generating traffic to https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO&key=AIzaSyBmyYSLjUlmiUqI3BPDM7tn6FxmnffeVwM...
+Press Ctrl-C to stop.
+Served 25 requests.
+^C
+HTTP status codes received from https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO&key=AIzaSyBmyYSLjUlmiUqI3BPDM7tn6FxmnffeVwM:
+429: 26
+200: 16
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./query_api_with_key.sh $API_KEY
+curl -H 'x-api-key: AIzaSyBmyYSLjUlmiUqI3BPDM7tn6FxmnffeVwM' "https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO"
+San Francisco International Airport
+
+
+
+
+
+
+
+Round 2
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./generate_traffic_with_key.sh $API_KEY
+This command will exit automatically in 300 seconds.
+Generating traffic to https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO&key=AIzaSyBmyYSLjUlmiUqI3BPDM7tn6FxmnffeVwM...
+Press Ctrl-C to stop.
+Served 25 requests.
+^C
+HTTP status codes received from https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO&key=AIzaSyBmyYSLjUlmiUqI3BPDM7tn6FxmnffeVwM:
+429: 35
+200: 12
+
+student_00_f3adff700b22@cloudshell:~/endpoints-quickstart/scripts (qwiklabs-gcp-03-b9abac6d679c)$ ./query_api_with_key.sh $API_KEY
+curl -H 'x-api-key: AIzaSyBmyYSLjUlmiUqI3BPDM7tn6FxmnffeVwM' "https://qwiklabs-gcp-03-b9abac6d679c.appspot.com/airportName?iataCode=SFO"
+{
+ "code": 8,
+ "message": "Quota exceeded for quota metric 'airport_requests' and limit 'limit-on-airport-requests' of service 'qwiklabs-gcp-03-b9abac6d679c.appspot.com' for consumer 'project_number:463855932726'.",
+ "details": [
+  {
+   "@type": "type.googleapis.com/google.rpc.DebugInfo",
+   "stackEntries": [],
+   "detail": "internal"
+  }
+ ]
+}
+
+
+
+
+
+
+
+
+
+
+https://cloud.google.com/endpoints/docs/openapi/quotas-overview
+https://cloud.google.com/endpoints/docs/frameworks/quotas-overview
+https://cloud.google.com/endpoints/docs/grpc/quotas-overview
+
+
+
