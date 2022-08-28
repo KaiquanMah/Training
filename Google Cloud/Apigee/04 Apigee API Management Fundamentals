@@ -1,0 +1,1421 @@
+This hands-on lab introduces you to fundamental API Management concepts and the Apigee API Management Platform. It focuses on giving you an overall understanding of how to build a successful API program with a well managed developer ecosystem. In this lab, you will learn how to manage APIs across all phases of the API Lifecycle - including API design, API Security, Developer consumption, as well as API Analytics and Monitoring.
+https://cdn.qwiklabs.com/IUNcJ0yruz8jQnjtNNFO6Z6grNzecHXYNGRtJga1hTw%3D
+
+
+
+Lab Objectives
+In this lab, you will learn how to perform the following tasks:
+API Design & Creation - Design and create an API Proxy from an OpenAPI specification.
+API Products, Apps & API Keys - Secure APIs with API Keys, bundle APIs into API Products and understand the association between Apps, API Products & API Keys.
+Rate Limiting - Control API Consumption based on API Product tier quotas.
+App Developer Experience - Publish an API Products Catalog on a self-service Developer Portal. Test the App Developer on-boarding experience and self-service API consumption, and restrict access to resources using Teams and Audience entitlements.
+API Analytics - Measure API Program success using Apigee Analytics.
+
+
+
+Lab Prerequisites
+For this lab, you will need:
+A modern web browser like Chrome (v50+) to access the Apigee Platform UI.
+A Remote Desktop Protocol (RDP) client.
+A basic understanding of OpenAPI Specification (FKA: Swagger)
+https://github.com/OAI/OpenAPI-Specification
+Any text/code editor of your choice.
+Access to an HTTP client to test the API (eg. cURL, Postman, etc.). If you do not have access to one, you can use the Apigee Debug Tool.
+https://cloud.google.com/apigee/docs/api-platform/debug/trace?hl=en
+
+
+
+
+
+
+Setup
+For this lab, you will need access to an Apigee Organization (Org) and the underlying Google Cloud Platform (GCP) project that the org is tied to.
+Note: The Apigee Organization takes approximately 25 minutes to provision.
+To access your Apigee org, open an incognito browser window and navigate to https://apigee.google.com. 
+There, log in using the lab credentials found on the left.
+https://www.googlecloudcommunity.com/gc/Apigee/bd-p/cloud-apigee
+
+
+
+
+Remote Desktop (RDP) into the Student Workstation
+This lab requires that students perform all steps in the student-workstation virtual machine. To RDP into the student workstation open a new incognito browser window and navigate to https://console.cloud.google.com. Use the Username and Password from the left panel to log into the GCP console.
+Test the status of Windows Startup
+The student-workstation Windows Server instance is automatically provisioned and listed on the VM Instances page of Compute Engine in the GCP Console. To view the instance, navigate to the left menu > Compute Engine > VM Instances.
+Note: The student-workstation instance may take a few minutes before it appears in the instance list.
+https://cdn.qwiklabs.com/tK9Pt%2FnsEAhbJGxa8AldyXP959n2r4NrJzL8%2F%2BMIOEY%3D
+
+The student-workstation instance will not be ready to accept RDP connections immediately as it takes some time for the OS components to initialize. The section below describes methods you can use to RDP into the virtual machine.
+https://cdn.qwiklabs.com/WiIZhKK1CCEGnjc7w%2BhUpq5VzkPOECdY%2BZAM3J5ehqY%3D
+After installing, connect as above to the External IP address of the student-workstation Windows server. Once it has connected, it will open up a login page where you can specify the credentials below to log into the machine:
+Username: student
+Password: Learning123!
+Once logged in, you should see the Windows desktop!
+https://cdn.qwiklabs.com/Y1q952KSlzmn4yBGrk5Z%2BEDlA9cflg2ZWRkDXxDxiJ8%3D
+
+Copy and pasting with the RDP client
+Once you are able to RDP into the student workstation VM you will perform the steps for each section below while connected to the student workstation VM.
+During this lab, you may find yourself copying and pasting commands from the lab manual. You can copy and paste instructions from the lab guide into the student workstation VM.
+To paste, hold the CTRL-V keys (if you are a Mac user, using CMND-V will not work.) If you are in a Powershell window, be sure that you have clicked in to the window or else the paste shortcut won't work.
+If you are pasting into putty, right click.
+
+
+
+
+Accessing the Apigee Org
+To access your Apigee org, open the Chrome browser shortcut found on the desktop of the student-workstation VM. Navigate to https://apigee.google.com and log in using the Username and Password provided earlier.
+You will then be led to the Apigee Platform UI.
+https://cdn.qwiklabs.com/6OvhClgAyf52qfODjWUgsWSMylTUAd3vvwSFKoQwzz4%3D
+You will utilize the student workstation VM to complete the remaining sections of this lab.
+You're now all set to get started with this lab!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 1 - Design & Create an API Proxy with OpenAPI Specification
+Persona : API Team
+
+Use case
+You have a requirement to create an API endpoint for an existing service, to handle requests from various applications/API clients. You have decided to follow a "design first" approach and have built a specification for your API, using OpenAPI specification. Using this specification, you wish to implement your API, generate interactive API documentation, generate API test cases, etc.
+
+How can Apigee help?
+Apigee enables you to quickly build and expose an API. You do this by creating an API proxy, which provides a facade for the backend service and data that you want to expose as an API endpoint. The API proxy decouples your backend service implementation from the API endpoint that developers consume. This shields developers from future changes to your services as well as implementation complexities. As you update services, developers will be insulated from those changes, and can continue to call the API, uninterrupted. On Apigee, the API Proxy is also where runtime policy configuration is applied for API Management capabilities. For further information, please see: Understanding APIs and API Proxies.
+https://cloud.google.com/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies#whatisanapiproxy
+https://cloud.google.com/apigee/docs/api-platform/fundamentals/understanding-apis-and-api-proxies
+Image of Apigee Proxy flow execution order    https://cdn.qwiklabs.com/5%2F5PH0xA2Zl1RXZWgwLwcdP0CA0EXRkVmXi6cw2Yu9o%3D
+Apigee also supports the OpenAPI specification out of the box, allowing you to auto-generate API Proxies and associated documentation. To design and create an OpenAPI specification, you can use an editor/IDE of your choice, there are many options to choose from.
+https://github.com/OAI/OpenAPI-Specification
+https://openapi.tools/#gui-editors
+In this part of the lab, we will learn how to create an API proxy from an OpenAPI spec, that routes inbound requests to an existing HTTP service.
+
+
+
+Create an API Proxy
+First, download this Open API Specification YAML file for the sample API backend description. You will use this file to generate an API proxy, and later in the lab, to document your API.
+https://storage.googleapis.com/apigeexlabs/apijam-lab1/hipster-products-backend-spec.yaml
+Next, if not already logged into the Apigee UI open a new Chrome browser tab in the student-workstation VM and log into the Apigee Management UI at https://apigee.google.com using the credentials on the left panel of the lab.
+Before we create our first API, we need to get the hostname details of our Apigee environment. Navigate to Admin → Environments → Groups in the left navigation bar. Then copy the hostname value assigned to the "eval-group" environment group.
+https://cdn.qwiklabs.com/P0p5TOVWbKCFp%2F70ySUN6ux6SabnBBx8%2BjG4k83rHI4%3D
+Hostnames         eval.cloudlearning.com
+Environments      eval
+This is your API hostname. For simplicity, a mock API has been provisioned for you and is available on this endpoint. You will use this hostname to invoke your APIs throughout this lab. Copy it onto a text pad for later use.
+
+To create an Apigee API Proxy from an OpenAPI Specification. Click on Develop → API Proxies from the side navigation menu.
+https://cdn.qwiklabs.com/JwVNnKkiY6329OaldET8BsZQjaHStxOjlJHW6wR67Wg%3D
+Click the "Create New" button.
+https://cdn.qwiklabs.com/1oK%2B%2FFScULdQdTL5n7n9DiaOKxjz3gJUSaB52JHeZmg%3D
+Click on the "Use OpenAPI Spec" link in the Reverse proxy option.
+https://cdn.qwiklabs.com/82awzttFPfg%2BujyH1XIsoyNWSTm2DcwpwzJ7J5ZSDAo%3D
+Select the "File" tab and upload the previously downloaded OpenAPI specification YAML file.
+https://cdn.qwiklabs.com/0pGZOnjBy0mfMyp6m6twc%2FV9nGM%2FihpfVtRW2VHoq70%3D
+Then click "Select".
+Note: Please make sure to manually update the Proxy Base Path as suggested on next step 8.b to include the prefix /v1
+
+Enter details in the proxy wizard.
+Proxy Name: Hipster-Products-API
+Proxy Base Path: /v1/hipster-products-api
+Target (Existing API): https://{{API-backend}}/    => mine - https://hipster-backend-lytqhgyswq-uc.a.run.app
+{{API-backend}} is the Cloud Run URL hosting the API backend used in this lab. You can find it on the Cloud Console at Navigation Menu > Cloud Run > hipster-backend. On the resulting page copy the URL at the top of the page, it should look similar to the following: https://hipster-backend-oawecuupsa-uc.a.run.app.
+Note: Your URL will be different!
+mine - https://hipster-backend-lytqhgyswq-uc.a.run.app
+
+Note: Please make sure you've manually updated the Proxy Base Path as suggested on step 8.b to include the prefix /v1
+Verify the values and click "Next".
+
+
+
+Select "Pass through (no authorization)" under the authorization policies section. You will apply security policy for the proxy later on in this lab. Click "Next".
+https://cdn.qwiklabs.com/9py5Z0dZoO%2FQ5IlWa8oQ02LCwbtK5InsfwI7OOf7CD0%3D
+You can select which API resources, from the list configured in the OpenAPI Spec, should be exposed. Select all & click "Next"
+https://cdn.qwiklabs.com/SdamgFnt3ItClH89mszXRAX%2FhnamdpvyVo6QdXnv56k%3D - image describing ability to select or deselect individual operations impoted from OpenAPI Spec.  User has selected the default, which is all operations.
+Ensure that the "eval" environment is selected to deploy this proxy to, and click "Create and deploy".
+https://cdn.qwiklabs.com/fvxsRezGeWERpSb8A47y%2FPih5OWORZAMD5W4fK8%2BKeU%3D
+Summary
+Proxy name	      Hipster-Products-API
+Proxy type	      Reverse Proxy
+Proxy base path	  /v1/hipster-products-api
+Target	          https://hipster-backend-lytqhgyswq-uc.a.run.app
+Policies	Authorization - Pass through (no authorization)
+OpenAPI Spec	    Hipster Products API
+Optional Deployment
+eval              - The proxy will begin handling requests only after it's deployed to an environment.
+
+Once the API proxy is created and deployed click "Edit proxy" to view your proxy configuration in the proxy editor.
+https://cdn.qwiklabs.com/l1zZHTGDfFaSXOJgG8k3iEiSiDb4gzg%2FiozjMg84aDE%3D
+Congratulations! ...You have now built an API proxy for an existing backend service. You should see these details in the proxy's "Overview" tab. Wait until the Status of eval Deployment is set as Currently on eval: Revision 1.
+https://cdn.qwiklabs.com/25VEMb%2FA6qB7twQK5UM15mT5LEDBvy8%2BqXpgF%2FaQ9xE%3D
+
+
+
+
+Test the API Proxy
+Test the newly built API proxy. You can use any HTTP client like cURL or Postman, or the Apigee Debug Tool.
+https://cloud.google.com/apigee/docs/api-platform/debug/trace?hl=en
+
+Get API Hostname
+Before we test the API, to get the hostname details of the proxy, navigate to Admin → Environments → Groups in the left navigation bar. Then copy the hostname value assigned to the "eval-group" environment group is eval.cloudlearning.com.
+https://cdn.qwiklabs.com/P0p5TOVWbKCFp%2F70ySUN6ux6SabnBBx8%2BjG4k83rHI4%3D
+This is your API hostname. You will use this hostname to invoke your API throughout this lab. Copy it onto a text pad for later use.
+
+Test Using cURL
+To test the API using curl or a similar command line HTTP client, use the following command:
+curl -X GET "https://eval.cloudlearning.com/v1/hipster-products-api/products"
+
+Troubleshooting:
+In case of 404 errors, make sure of the following:
+You've manually updated the Proxy Base Path to include the /v1 prefix as indicated in the proxy creation steps
+Your API proxy deployment has successfully finished by checking "Overview" → Status
+
+Test Using Apigee Debug
+Follow these steps to test using the Apigee Debug utility:
+Navigate to your API proxy's "Debug" tab.
+Ensure that the deployed API revision is selected in the "Env."dropdown.
+Click the "Start Debug Session" button.
+https://cdn.qwiklabs.com/CB9IkcjDM1UCBQ%2Fh6xNraYGcU0fybfF3JwczAiyT5x0%3D
+Wait for the debug session to start.
+If prompted, ignore the error message "Error fetching debug transactions".
+Now, open the Command Prompt shortcut on the desktop, run the following command:
+curl -X GET "https://eval.cloudlearning.com/v1/hipster-products-api/products"
+
+<Within RDP session>
+C:\Users\student>curl -X GET "https://eval.cloudlearning.com/v1/hipster-products-api/products"
+{"products":[{"id":"OLJCESPC7Z",
+              "name":"Vintage Typewriter",
+              "description":"This typewriter looks good in your living room.",
+              "picture":"/img/products/typewriter.jpg",
+              "priceUsd":67.98,
+              "categories":["vintage"]},
+              {"id":"66VCHSJNUP","name":"Vintage Camera Lens","description":"You won't have a camera to use it and it probably doesn't work anyway.","picture":"/img/products/camera-lens.jpg","priceUsd":12.48,"categories":["photography","vintage"]},{"id":"1YMWWN1N4O","name":"Home Barista Kit","description":"Always wanted to brew coffee with Chemex and Aeropress at home?","picture":"/img/products/barista-kit.jpg","priceUsd":123.99,"categories":["cookware"]},{"id":"L9ECAV7KIM","name":"Terrarium","description":"This terrarium will looks great in your white painted living room.","picture":"/img/products/terrarium.jpg","priceUsd":34.44,"categories":["gardening"]},{"id":"2ZYFJ3GM2N","name":"Film Camera","description":"This camera looks like it's a film camera, but it's actually digital.","picture":"/img/products/film-camera.jpg","priceUsd":2244.99,"categories":["photography","vintage"]},{"id":"0PUK6V6EV0","name":"Vintage Record Player","description":"It still works.","picture":"/img/products/record-player.jpg","priceUsd":65.5,"categories":["music","vintage"]},{"id":"LS4PSXUNUM","name":"Metal Camping Mug","description":"You probably don't go camping that often but this is better than plastic cups.","picture":"/img/products/camp-mug.jpg","priceUsd":24.33,"categories":["cookware"]},{"id":"9SIQT8TOJO","name":"City Bike","description":"This single gear bike probably cannot climb the hills of San Francisco.","picture":"/img/products/city-bike.jpg","priceUsd":789.5,"categories":["cycling"]},{"id":"6E92ZMYYFZ","name":"Air Plant","description":"Have you ever wondered whether air plants need water? Buy one and figure out.","picture":"/img/products/air-plant.jpg","priceUsd":12.29,"categories":["gardening"]}]}
+
+You will see that the API proxy received the request and sent back a HTTP status 200 response which was logged by the Debug session.
+https://cdn.qwiklabs.com/yn%2FbxizPFuOiJg3b%2BUOr6w8HyDEOxyYHkA%2Fd1cLTvYg%3D
+
+
+
+
+Save the API Proxy Locally
+Let's save the API Proxy locally as a Zip Bundle in case you need to reuse it in later labs.
+To save the API Proxy, navigate to the "Develop" tab of your proxy, and click the "Export revision" option under the revisions dropdown.
+https://cdn.qwiklabs.com/HZvzRCxrRo9OXUkdZJf2q%2BHucJA5moMbBCbevQcMLUw%3D
+You should then be able to save the zip bundle locally.
+
+Part 1 - Summary
+That completes this first part of this hands-on lab. So far you've learned how to use Apigee to proxy an existing backend using an OpenAPI Specification and the Apigee proxy wizard.
+
+References
+Apigee Documentation
+Useful Apigee documentation links on API Proxies:
+Build a simple API Proxy from an OpenAPI Spec     https://cloud.google.com/apigee/docs/api-platform/tutorials/create-api-proxy-openapi-spec
+Apigee's API Deployment Lifecycle                 https://cloud.google.com/apigee/docs/api-platform/fundamentals/api-development-lifecycle
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 2 - API Security and API Producer/Consumer Relationship on Apigee
+Persona : API Team
+Use case
+You have an API that you want to secure and expose for consumption by different Apps (API consumers). In addition to setting up authorized access to the API, you also want to be able to identify Apps by their API Key and control which Apps can make calls to the API. You may also want to customize API behavior based on the calling App, or measure API consumption by different Apps through Apigee Analytics.
+
+How can Apigee help?
+API Proxy - API Product - App Relationship
+In order to secure an API Proxy on Apigee, we need to first understand the relationship between API Proxies, API Products, and Apps.
+While the API Proxy allows you to expose the API endpoint according to API design specification, it also serves to decouple the API backend (target service) from the front end (client Apps), and in turn API production from consumption. 
+This is accomplished by creating "API Products", which are configurations that bundle one or more API proxies, and define how the APIs can be consumed. 
+The API Product configuration may contain metadata that defines rules for consumption of the bundles API. 
+These rules may include allowed 
+consumption quota (Eg. 100 API calls per minute), 
+visibility (Public vs Private vs Internal), 
+API resource restrictions (Eg. Only /products resource URL may be called, but not /products/{product ID}), 
+which API deployment environment the caller is allowed to access (Eg. test, prod), etc.
+https://cloud.google.com/apigee/docs/api-platform/publish/what-api-product?hl=en
+Once API Products are created, client Apps can then subscribe to them. On subscription, Apigee automatically generates and provisions an API Key/Secret pair for the App. These credentials can then be used to call the bundled API resources with authentication and authorization, from within App code.
+https://cdn.qwiklabs.com/4m%2FRRxeZ5qxPGufYEYUF8bzOkpFIY%2BkCFKplA3oXmF8%3D
+
+API Proxy Configuration
+While Apigee provides multiple ways of securing an API and authorizing API calls - including API Keys, OAuth, JWT, and SAML - this lab will focus on using simple API Key verification to secure an API.
+https://cloud.google.com/apigee/docs/api-platform/security/api-keys?hl=en
+https://cloud.google.com/apigee/docs/api-platform/security/oauth/oauth-home?hl=en
+https://cloud.google.com/apigee/docs/api-platform/reference/policies/jwt-policies-overview?hl=en
+https://cloud.google.com/apigee/docs/api-platform/security/saml?hl=en
+Within the API Proxy, the Verify API Key Policy can be used to authenticate and authorize incoming API calls, based on API Key verification. As a result of successful API Key verification, the Verify API Key Policy also populates the API Proxy runtime context with details about the App making the call, the App developer, the API product associated with the call, and so on. This context can then be used to parameterize other policies applied, in order to affect API behavior such as quota enforcement or routing based on the client App. The data can also be extracted and used to gain insights through Apigee Analytics.
+https://cloud.google.com/apigee/docs/api-platform/reference/policies/verify-api-key-policy?hl=en
+
+In this part of the lab, you will:
+Configure a Verify API Key Policy for an existing, insecure API proxy, and use the Apigee Debug tool to see the policy in action.
+Bundle the API Proxy into an API Product.
+Register a Developer and an App within your Org, that subscribes to the API Product, to test authorized consumption of the API.
+
+
+Add a Verify API Key Policy to the API proxy
+In your Apigee UI, navigate the API proxy from the last part (Develop → API Proxies → your proxy), and click the "Develop" tab of the proxy.
+Note: To see the flow editor, you may have to move the panes to see the full request and response flow lines.
+Select the Proxy Endpoint PreFlow and click the "+Step" button on the request pipeline.
+https://cdn.qwiklabs.com/ivE8nTzIghTYvGO2%2B8LDV0HL2I8nGElnfjKP2b1c%2FdY%3D
+Select Verify API Key policy from the Security section of the list. And provide the following values:
+Display Name: Verify API Key
+Name: Verify-API-Key
+Click "Add".
+https://cdn.qwiklabs.com/dhU9cd4cw2xLSDRz8QzFiBYvHW%2BcJb77mYj%2BVveDybM%3D
+The policy will be added after any policies you previously had in the Request flow. Since we likely want this to occur first, drag the new policy to be the leftmost of any policies in the flow.
+With the Verify API Key policy selected, you can see its configuration (the default policy configuration is below). Note that the API Key to check is being retrieved from the API proxy's runtime context, when an API call is made, using the context variable request.queryparam.apikey. This is the default but the policy can be configured to retrieve the key from any parameter you prefer, for example, request.header.client-id , etc.
+https://cdn.qwiklabs.com/C%2BUttBz7gUfiLRhzG2dm%2Fc53ceoz6qXsAH4vP1xyK5o%3D
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<VerifyAPIKey async="false" continueOnError="false" enabled="true" name="Verify-API-Key">
+    <DisplayName>Verify API Key</DisplayName>
+    <Properties/>
+    <APIKey ref="request.queryparam.apikey"/>
+</VerifyAPIKey>
+
+
+Save the API proxy.
+https://cdn.qwiklabs.com/YFzp5tEtEUMptpgaeCfLQlHhAWWZsyKkpO9DMgrdbT4%3D
+The proxy changes will be saved to a new Revision. Click OK.
+https://cdn.qwiklabs.com/YF3RZh0i1nDfetFrPvW5hqgAwLSWuT8GgVth2msbo%2FE%3D
+Click the "Deploy to eval" button to deploy the new revision to your Apigee evaluation org's environment (eval).
+https://cdn.qwiklabs.com/ciufOVQxN1dROzy3zasm5OYYxWNLuUpeTSCYoCpaCaU%3D
+https://cdn.qwiklabs.com/KPOpUV4hYln1DxQ4e1aMW%2BuGnzVRZaepZG%2FLGQfTJ4I%3D
+Wait for a minute or two while your proxy revision deploys to the environment.
+
+Click the Debug tab for the proxy, to test the now secured API:
+Select the deployed revision and environment to test from the "Env." dropdown and click "Start Debug Session", to begin a debug session.
+https://cdn.qwiklabs.com/5K3wcixIhOIsMzMSxsTizzwelKYJDaz03XOKeK%2FVWSs%3D
+
+To test the API open the Command Prompt shortcut on the desktop, run the following command:
+curl -X GET "https://eval.cloudlearning.com/v1/hipster-products-api/products"
+
+You should see a 401 (unauthorized) response for your API Call as shown below. This is because the API proxy was expecting an API Key as a query parameter.
+https://cdn.qwiklabs.com/sTnfYGOsFg6JanlVOuldTi0s9Nx15qbVpOPMEB%2BQP1s%3D
+
+C:\Users\student>curl -X GET "https://eval.cloudlearning.com/v1/hipster-products-api/products"
+{"fault":{"faultstring":"Failed to resolve API Key variable request.queryparam.apikey","detail":{"errorcode":"steps.oauth.v2.FailedToResolveAPIKey"}}}
+In the next steps, you will get an API Key that will allow you to make this API call successfully.
+
+
+
+
+Create API Product
+Select Publish → API Products from the side navigation menu, and click the "+ Create" button.
+https://cdn.qwiklabs.com/6EeKMFUKsaT1HFJBHFi%2Ftd03Ub2%2BuwaKLtBOeWI%2FbTw%3D
+
+Populate the following fields
+Product details:
+Name: Hipster-Products-API-Product
+Display name: Hipster Products API Product
+Description: Product that provides access to the Hipster Products API.
+Environment: eval
+Access: Public
+https://cdn.qwiklabs.com/XQcVdwwE8aKZxDhjcgEL4WM98o%2BrdocWLydFZs5mg%2Fg%3D
+
+For API resources, click the "Add an Operation" button under "Operations" section.
+https://cdn.qwiklabs.com/iBI8TuXuHqGq%2FqmyIVlLRw6hgbPpeZjt%2Bs5wRkulF3M%3D
+In the API Proxy dropdown, select the Hipster Products API Proxy and click Add.
+For Path, add the ‘/' wildcard and click Save.
+https://cdn.qwiklabs.com/iBI8TuXuHqGq%2FqmyIVlLRw6hgbPpeZjt%2Bs5wRkulF3M%3D
+Save the API Product.
+https://cdn.qwiklabs.com/JxEmAVkM5B9LKPapg10TOnEny%2Fa2RTykKofStmw0Z7E%3D
+Note: Here we are adding the entire API Proxy to the API Product. We can just as easily select specific API resource paths alone from the proxy, and bundle them together in an API Product.
+
+
+
+Manually register App in Management UI & generate API Key
+Navigate to Publish → Developers in the side navigation menu, and click the "+ Developer" button.
+https://cdn.qwiklabs.com/6JGFp1h%2BLP05ZOAFd9EI%2BzzpyVdT%2Bb0JKLSLr9OYy%2FY%3D
+Populate the following details:
+First Name: Test
+Last Name: Developer
+Username: testdev
+Email: testdev@test.com
+Click "Create".
+https://cdn.qwiklabs.com/zgncgeRjA2EHG3yNqi5MQqIaB1ZT3F1o5eSxorFeSj4%3D
+
+Navigate to Publish → Apps from the side navigation menu, and click the "+ App" button.
+https://cdn.qwiklabs.com/ejNqlfMFS1v1kK9sRzilC9m8FRehuDqvZAPaiZarstk%3D
+Populate the following details:
+Name: Hipster-Products-App
+Display Name: Hipster Products App
+Select the developer you previously created.
+
+Click the "Add Product" button
+https://cdn.qwiklabs.com/JdtHMRCnwjIxpwTS7HwAYht3RPhb40VfofuKzHxI158%3D
+Select the API Product you previously created, and click "Add".
+https://cdn.qwiklabs.com/s%2FeenvSaOdk4Nt9LRhN76egQgKa0GvxjRt0xtTIBSy8%3D
+Click the "Create" button to save.
+https://cdn.qwiklabs.com/p2%2BQnQobEDs%2FzhRyTKUIr%2F%2FMgX3ncAj4iTO0kD%2F8%2F%2FQ%3D
+Once created, you will then see that Apigee has generated an API Key and Secret pair for the App. Click on the "Show" link next to the Key, and copy this API Key.
+https://cdn.qwiklabs.com/as1ynEpKQonRWtmeqP4QypOIphw2XP17vEXGQYdMBsU%3D
+key   NqXXLylfpK4nWRyEn6JUsfcHaGYeGZopAPzM62WRRyL3I3gq
+sec   npIRHPa1LeTTOpuZhLcuBrNIpznEsuAoIwPTfDjqLFQJPDckk0Wg3bWo4odQYmQm
+You can now use this API Key to make a valid API request to your API Proxy.
+
+
+
+
+
+
+Test your API with valid API Key
+Navigate to Develop → API Proxies in the side menu, and open your API proxy. Navigate to the "Debug" tab for the proxy, select the appropriate environment and deployment under "Env.", and click "Start Debug Session" to begin a debug session.
+
+To test the API using curl open the Command Prompt shortcut on the desktop, run the following command:
+curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey={{API Key}}
+curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey=NqXXLylfpK4nWRyEn6JUsfcHaGYeGZopAPzM62WRRyL3I3gq
+
+
+C:\Users\student>curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey={{API Key}}
+curl: (3) [globbing] nested brace in column 73
+curl: (3) [globbing] unmatched close brace/bracket in column 4
+
+C:\Users\student>curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey=NqXXLylfpK4nWRyEn6JUsfcHaGYeGZopAPzM62WRRyL3I3gq
+{"products":[{"id":"OLJCESPC7Z","name":"Vintage Typewriter","description":"This typewriter looks good in your living room.","picture":"/img/products/typewriter.jpg","priceUsd":67.98,"categories":["vintage"]},{"id":"66VCHSJNUP","name":"Vintage Camera Lens","description":"You won't have a camera to use it and it probably doesn't work anyway.","picture":"/img/products/camera-lens.jpg","priceUsd":12.48,"categories":["photography","vintage"]},{"id":"1YMWWN1N4O","name":"Home Barista Kit","description":"Always wanted to brew coffee with Chemex and Aeropress at home?","picture":"/img/products/barista-kit.jpg","priceUsd":123.99,"categories":["cookware"]},{"id":"L9ECAV7KIM","name":"Terrarium","description":"This terrarium will looks great in your white painted living room.","picture":"/img/products/terrarium.jpg","priceUsd":34.44,"categories":["gardening"]},{"id":"2ZYFJ3GM2N","name":"Film Camera","description":"This camera looks like it's a film camera, but it's actually digital.","picture":"/img/products/film-camera.jpg","priceUsd":2244.99,"categories":["photography","vintage"]},{"id":"0PUK6V6EV0","name":"Vintage Record Player","description":"It still works.","picture":"/img/products/record-player.jpg","priceUsd":65.5,"categories":["music","vintage"]},{"id":"LS4PSXUNUM","name":"Metal Camping Mug","description":"You probably don't go camping that often but this is better than plastic cups.","picture":"/img/products/camp-mug.jpg","priceUsd":24.33,"categories":["cookware"]},{"id":"9SIQT8TOJO","name":"City Bike","description":"This single gear bike probably cannot climb the hills of San Francisco.","picture":"/img/products/city-bike.jpg","priceUsd":789.5,"categories":["cycling"]},{"id":"6E92ZMYYFZ","name":"Air Plant","description":"Have you ever wondered whether air plants need water? Buy one and figure out.","picture":"/img/products/air-plant.jpg","priceUsd":12.29,"categories":["gardening"]}]}
+
+
+
+In the above URL:
+{{API Key}} is the API key that you just copied from the newly created App configuration.
+You should now see that the API request returns a 200 OK response, as the Verify API Key policy has found the API key to be valid.
+https://cdn.qwiklabs.com/yEbII5rb7x2CbWyLZA7Z8hTQqjwXVoUiTZY5V9uakjo%3D
+
+
+Part 2 - Summary
+In this part of the lab, you learned how the relationship between API Proxies, API Products and Apps, helps obfuscate API production from API consumption; and how to protect your API proxy using the Verify API Key policy. You then implemented the policy and tested it using the built-in Debug Tool.
+
+References
+Apigee Documentation
+Verify Api Key Policy Documentation       https://cloud.google.com/apigee/docs/api-platform/reference/policies/verify-api-key-policy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 3 - Manage tiered API Product subscription through API call quotas
+Persona : API Product Team & API Dev Team
+Use Case
+API tiering is a new look at API as a Product. With tiering you provide the base level (e.g. bronze) as a free option. This offer is an entry point to leverage your data offering with a potential upsell to premium API Products. The goal is to upsell to additional functional levels. This term is also known as "freemium". The basic approach is as follows – offer basic functions or call quotas as an entry level and if more data access or more functionality is required, offer these options for a fee. This gives developers the chance to have a working prototype and explore your API in a real life scenario before making an informed purchase decision.
+How can Apigee help?
+Apigee offers the concept of API Products abstracted from the functional logic of API proxies. The proxies can access and enforce the limits defined in API Products. This way the API product team can focus on the business model (e.g. establishing usage quotas and entitled API operations on a per API Product basis) while the API development team works with these values to implement the parametrized behavior.
+
+
+Create Tiered API Products (Bronze, Silver, Gold)
+In this lab, we will create different API products that bundle the same API Proxy but with different quotas attached to it.
+In your Apigee UI, navigate to Publish → API Products.
+Click "+ Create".
+https://cdn.qwiklabs.com/f%2FR%2BAlsMY9M1qsNRS0jDVClWJpKGV8XiGKtEHy%2FpX38%3D
+https://cdn.qwiklabs.com/6EeKMFUKsaT1HFJBHFi%2Ftd03Ub2%2BuwaKLtBOeWI%2FbTw%3D
+Populate the following fields
+Product details:
+Name: Hipster-Products-API-Product-Bronze
+Display name: Hipster Products API Product Bronze
+Description: Free version of the Hipster Product API
+Environment: eval
+Access: Public
+Quota: 3 requests every 1 Minute
+https://cdn.qwiklabs.com/9KPmTjbwtqaxLDt5d2nGVkzYrizaU5dIz%2FMPA9BZ3wU%3D
+
+For API resources, click the "Add an Operation" button under "Operations" section.
+Select Hipster-Products-API Proxy and set Path as / and "Save" it.
+https://cdn.qwiklabs.com/iBI8TuXuHqGq%2FqmyIVlLRw6hgbPpeZjt%2Bs5wRkulF3M%3D
+
+Note: API products have a set of fields called "Quota" that allow you to configure how many requests per number of time periods (e.g. 5 requests per 1 [minute/hour/day/month]) you want to allow. Just configuring this does NOT enforce quotas though! Think of these fields as metadata that the Quota Policy (enforcement point) can dynamically reference when enforcing the policy.
+Click "Save" to create and save the API Product.
+https://cdn.qwiklabs.com/CJVN8lOLPdToX0K4yf6KHfNL%2BMBjXvRpZli4BbA0IcI%3D
+
+
+
+Follow the same steps to create 2 similar products that represent our Silver and Gold Products with different Quota settings.
+For the Silver Product populate the following fields:
+Product details:
+Name: Hipster-Products-API-Product-Silver
+Display name: Hipster Products API Product Silver
+Description: Basic version of the Hipster Product API
+Environment: eval
+Access: Public
+Quota: 10 requests every 1 Minute
+For API resources, click the "Add an Operation" button under "Operations" section.
+Select Hipster-Products-API Proxy and set Path as / and "Save" it.
+Click "Save" to save the product.
+
+For the Gold Product populate the following fields:
+Product details:
+Name: Hipster-Products-API-Product-Gold
+Display name: Hipster Products API Product Gold
+Description: Deluxe version of the Hipster Product API
+Environment: eval
+Access: Public
+Quota: 100 requests every 1 Minute
+For API resources, click the "Add an Operation" button under "Operations" section.
+Select Hipster-Products-API Proxy and set Path as / and "Save" it.
+Click "Save" to save the product.
+
+You should end up with 3 API Products resembling the Product tier strategy.
+https://cdn.qwiklabs.com/bujUnXtwFzP6kNlAwphsjqOyCjDOAHnxLoKh0G2LRYY%3D
+
+
+
+
+
+Create Apps to test the tiered API products
+Select Publish → Apps
+Click +App
+https://cdn.qwiklabs.com/%2BtmXQVOvSwG8N9A502hOmV%2F0ppE3YoHn9hka8LSg2Ho%3D
+https://cdn.qwiklabs.com/llTyXEtKcQ0hPylVXPUE6ibcHMhqU1A0nBWYcEejgVA%3D
+
+Populate the following fields
+App Details:
+Name: Hipster-Android-App-Free
+Display name: Hipster Android App Free
+Developer: Chose any existing Developer
+Credentials:
+Click "Add product".
+https://cdn.qwiklabs.com/bQ4XbIPx37pFdd3s66Alsl%2F3RdiFEQLXDUNd%2FKqrOGM%3D
+Select Hipster Product API Product Bronze and click "Add"
+https://cdn.qwiklabs.com/dVX3butLM62GPh%2F%2BYpsSAmcceXNhzCGUb2SwNxGt0%2Bk%3D
+Click "Create" to create the App.
+https://cdn.qwiklabs.com/ho0cHImXLvsSUbgU%2B5o3OihZ5ULe68WTi5%2FSSgS56T8%3D
+Note down the generated API Key to use later, by clicking the "Show" link.
+https://cdn.qwiklabs.com/oBxpunNPy6vacXqXsXqixo8EDIJBq8HNxdbz%2Fx7pgv8%3D
+key     LjGJuA5WJLAGEsMDohPRNQyMd4WDalCs7rHVLNYWj3jcfqBl
+sec     3Gs8j1gWxeikkqw3mJvUssZF1RjAAJ3pyrVkRv26qO3QTtV5l9OqT3xkvdnDM9pC
+
+
+
+
+Repeat the above process for the Apps that use the Silver and Gold tier as well, with using these values:
+For Silver tier App:
+App Details:
+Name: Hipster-Android-App-Basic
+Display name: Hipster Android App Basic
+Developer: Chose any existing Developer
+Credentials:
+Click "Add product".
+Select Hipster Product API Product Silver and click "Add".
+key   sbAG8a839OIrUpSGsZLSdVSejVTogpUyh5S7f39BdBkvn9U3
+sec   cfAa5wcGBaJDaVR0urUyu05AGasctNgTyP6YQRqpa04mOvvw0qzWa3UHSlwjrmfB
+
+
+
+For Gold tier App:
+App Details:
+Name: Hipster-Android-App-Deluxe
+Display name: Hipster Android App Deluxe
+Developer: Chose any existing Developer
+Credentials:
+Click "Add product".
+Select Hipster Product API Product Gold and click "Add".
+key   ogF1jGHu7OOEG90robdFAB6pxfpGlW39et0cTJwlzRkpzv3g  
+sec   DmaEpFgXdMw9WVc5CoOr24vpedJTwTAXTknv5LeShfEkEOixvGoOwfuNS8PzaS5e
+
+You should end up with three Apps with three different API keys, that you have noted down. Each App's API key will have an associated secret that will be used if you are implementing OAuth.
+https://cdn.qwiklabs.com/72imgqJYRNIlmDmCH7KFylywUAys5%2B0wb1WV3pM5Mbw%3D
+
+
+
+
+Create and Configure Quota Policy
+As stated, quotas are only enforced by adding a Quota Policy into your API Proxy. With the configuration of the Quota fields in the API Product, when an API call is made that presents a valid API key, Apigee will automatically fetch the associated API Product's metadata (including the Quota fields), which become available to be dynamically referenced by a quota (or any other) policy.
+Navigate to Develop → API Proxies from the side navigation menu and open the existing API Proxy that you previously created.
+Navigate to the "Develop" tab of the proxy, and verify that the policy for Verify API Key exists with the proper policy name. Click on the policy and look at the XML configuration below for policy name.
+https://cdn.qwiklabs.com/gMaODaSzAvwKEHLkCWOB4Ec6O%2BjMZl8PobOoU0YJeP4%3D
+
+Click PreFlow and "+ Step" to add a new policy as shown below.
+https://cdn.qwiklabs.com/0ht%2Box6rvj4yskLGQwaJKqiBYZXP%2FnwhAtz%2FWljPxb8%3D
+Select Quota Policy and populate the following fields
+Display Name: QU-ProductQuota
+Click "Add" to add the policy to your flow.
+https://cdn.qwiklabs.com/LMnLpvf%2BWyTDx%2B%2FIEW3Tc2JAnrtZy8jEZDJVM9mi0CM%3D
+
+In your proxy, with the VerifyAPIKey policy that you have configured in the previous steps, the following variables should be populated in the proxy's runtime context during an API call, after verification of a valid API key
+verifyapikey.Verify-API-Key.apiproduct.developer.quota.limit
+verifyapikey.Verify-API-Key.apiproduct.developer.quota.interval
+verifyapikey.Verify-API-Key.apiproduct.developer.quota.timeunit
+You will now use these variables to parameterize the Quota policy and enforce a dynamic quota based on whichever API product the key corresponds to.
+
+Set the QU-ProductQuota Quota policy to reference these variables and use this code in the Policy Configuration. 
+https://cdn.qwiklabs.com/agCtHVwvsBgA0QLa1TlGVvo3oitQgMn37yPVklL63uo%3D
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Quota async="false" continueOnError="false" enabled="true" name="QU-ProductQuota">
+    <DisplayName>QU-ProductQuota</DisplayName>
+    <Allow count="3" countRef="verifyapikey.Verify-API-Key.apiproduct.developer.quota.limit"/>
+    <Interval ref="verifyapikey.Verify-API-Key.apiproduct.developer.quota.interval">1</Interval>
+    <TimeUnit ref="verifyapikey.Verify-API-Key.apiproduct.developer.quota.timeunit">minute</TimeUnit>
+    <Distributed>true</Distributed>
+    <Synchronous>true</Synchronous>
+</Quota>
+
+In the above Quota policy configuration, if the field is not set in the API product, this would allow a default of 3 calls per minute.
+Note: Any context variables populated as a result of a policy's execution, will have the policy's name (as defined in your proxy), as part of the variable name in ‘.' (dot) notation. For instance, in the previous step if you had named your Verify API Key policy "Check-API-Key", you would find the "limit" variable (derived from API product metadata associated to the key) in the runtime context variable named: verifyapikey.Check-API-Key.apiproduct.developer.quota.limit
+Click on "Save", and save as a new API revision.
+https://cdn.qwiklabs.com/hfiV%2FmFl8bXU8vOznqg5Ssiuo%2FljCiGFFTYju4tLiLk%3D
+
+Deploy the latest API revision to your environment.
+https://cdn.qwiklabs.com/KPOpUV4hYln1DxQ4e1aMW%2BuGnzVRZaepZG%2FLGQfTJ4I%3D
+
+
+
+
+
+
+Test the tiered product quotas
+Go to the API proxy and enter the "Debug" tab so you can run some tests:
+Select the latest deployed API revision and click "Start Debug Session" 
+https://cdn.qwiklabs.com/yFuhV2aeQptBSweqwsdJSijZuDjxeCGvJhj6%2FBeN3HQ%3D
+
+To test the API using curl open the Command Prompt shortcut on the desktop, run the following command:
+curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey={{API Key}}
+
+
+In the above URL:
+{{API Key}} is the API key that you just copied from the newly created App for the Bronze tier, i.e. Hipster Android App Free.
+Run the curl command above multiple times to trigger quota violations.
+After 3 calls, you see that your free quota of 3 calls is exceeded and the quota policy shows a red exclamation mark sign.
+https://cdn.qwiklabs.com/TLtxPaCIPAE1%2FFNrcoYZ9xEGochz7lxWHiEDKzDq7ZE%3D
+
+curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey=LjGJuA5WJLAGEsMDohPRNQyMd4WDalCs7rHVLNYWj3jcfqBl
+C:\Users\student>curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey=LjGJuA5WJLAGEsMDohPRNQyMd4WDalCs7rHVLNYWj3jcfqBl
+{"products":[{"id":"OLJCESPC7Z","name":"Vintage Typewriter","description":"This typewriter looks good in your living room.","picture":"/img/products/typewriter.jpg","priceUsd":67.98,"categories":["vintage"]},{"id":"66VCHSJNUP","name":"Vintage Camera Lens","description":"You won't have a camera to use it and it probably doesn't work anyway.","picture":"/img/products/camera-lens.jpg","priceUsd":12.48,"categories":["photography","vintage"]},{"id":"1YMWWN1N4O","name":"Home Barista Kit","description":"Always wanted to brew coffee with Chemex and Aeropress at home?","picture":"/img/products/barista-kit.jpg","priceUsd":123.99,"categories":["cookware"]},{"id":"L9ECAV7KIM","name":"Terrarium","description":"This terrarium will looks great in your white painted living room.","picture":"/img/products/terrarium.jpg","priceUsd":34.44,"categories":["gardening"]},{"id":"2ZYFJ3GM2N","name":"Film Camera","description":"This camera looks like it's a film camera, but it's actually digital.","picture":"/img/products/film-camera.jpg","priceUsd":2244.99,"categories":["photography","vintage"]},{"id":"0PUK6V6EV0","name":"Vintage Record Player","description":"It still works.","picture":"/img/products/record-player.jpg","priceUsd":65.5,"categories":["music","vintage"]},{"id":"LS4PSXUNUM","name":"Metal Camping Mug","description":"You probably don't go camping that often but this is better than plastic cups.","picture":"/img/products/camp-mug.jpg","priceUsd":24.33,"categories":["cookware"]},{"id":"9SIQT8TOJO","name":"City Bike","description":"This single gear bike probably cannot climb the hills of San Francisco.","picture":"/img/products/city-bike.jpg","priceUsd":789.5,"categories":["cycling"]},{"id":"6E92ZMYYFZ","name":"Air Plant","description":"Have you ever wondered whether air plants need water? Buy one and figure out.","picture":"/img/products/air-plant.jpg","priceUsd":12.29,"categories":["gardening"]}]}
+
+after running the above multiple times
+C:\Users\student>curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey=LjGJuA5WJLAGEsMDohPRNQyMd4WDalCs7rHVLNYWj3jcfqBl
+{"fault":{"faultstring":"Rate limit quota violation. Quota limit  exceeded. Identifier : _default","detail":{"errorcode":"policies.ratelimit.QuotaViolation"}}}
+
+
+To test the next API product tier i.e. Silver, use the API Key generated for the "Basic" app. Change your apikey parameter to match your Basic App credentials.
+Start the Debug session and run the curl command couple of times again before reaching your limit.
+Let's check out the debug result:
+Click on one of the successful debug results on the left (indicated by a green Status with 200)
+Click the quota policy icon in the Transaction Map
+https://cdn.qwiklabs.com/%2BnZpNwA0d0WMcJgt9628hw8sZMqc3PYVnx2MvZ%2BZukY%3D
+Here you see at the end of our calls that you only have one count available (ratelimit.QU-ProductQuota.available.count) out of the original 20 (ratelimit.QU-ProductQuota.allowed.count).
+Also have a look at the other variables available as part of the proxy flow.
+At this point, you will skip the Deluxe/Gold version of our product, but you get the idea that your developers won't easily reach the limit with this one.
+
+curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey=sbAG8a839OIrUpSGsZLSdVSejVTogpUyh5S7f39BdBkvn9U3
+
+C:\Users\student>curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products?apikey=sbAG8a839OIrUpSGsZLSdVSejVTogpUyh5S7f39BdBkvn9U3
+{"products":[{"id":"OLJCESPC7Z","name":"Vintage Typewriter","description":"This typewriter looks good in your living room.","picture":"/img/products/typewriter.jpg","priceUsd":67.98,"categories":["vintage"]},{"id":"66VCHSJNUP","name":"Vintage Camera Lens","description":"You won't have a camera to use it and it probably doesn't work anyway.","picture":"/img/products/camera-lens.jpg","priceUsd":12.48,"categories":["photography","vintage"]},{"id":"1YMWWN1N4O","name":"Home Barista Kit","description":"Always wanted to brew coffee with Chemex and Aeropress at home?","picture":"/img/products/barista-kit.jpg","priceUsd":123.99,"categories":["cookware"]},{"id":"L9ECAV7KIM","name":"Terrarium","description":"This terrarium will looks great in your white painted living room.","picture":"/img/products/terrarium.jpg","priceUsd":34.44,"categories":["gardening"]},{"id":"2ZYFJ3GM2N","name":"Film Camera","description":"This camera looks like it's a film camera, but it's actually digital.","picture":"/img/products/film-camera.jpg","priceUsd":2244.99,"categories":["photography","vintage"]},{"id":"0PUK6V6EV0","name":"Vintage Record Player","description":"It still works.","picture":"/img/products/record-player.jpg","priceUsd":65.5,"categories":["music","vintage"]},{"id":"LS4PSXUNUM","name":"Metal Camping Mug","description":"You probably don't go camping that often but this is better than plastic cups.","picture":"/img/products/camp-mug.jpg","priceUsd":24.33,"categories":["cookware"]},{"id":"9SIQT8TOJO","name":"City Bike","description":"This single gear bike probably cannot climb the hills of San Francisco.","picture":"/img/products/city-bike.jpg","priceUsd":789.5,"categories":["cycling"]},{"id":"6E92ZMYYFZ","name":"Air Plant","description":"Have you ever wondered whether air plants need water? Buy one and figure out.","picture":"/img/products/air-plant.jpg","priceUsd":12.29,"categories":["gardening"]}]}
+
+
+
+Part 3 - Summary
+In this part of the lab, you have created 3 products aligned with your API product strategy to offer a tiered model and have different quotas attached to each product. You have not defined the limits in our API proxies but made the same proxy available in different API products that define the quota amount.
+
+References
+Apigee Documentation
+Quota policy documentation        https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 4 - Build an App Developer Experience using Apigee's Integrated Developer Portals
+Persona : API Team
+Use case
+You want to provide and manage an easy, self-service on-boarding experience for app developers who wish to consume your API Products via a Developer Portal. You want to enable app developers to learn about, register for, and begin using your APIs, as well as control visibility and access to different API Products.
+
+How can Apigee help?
+Apigee provides multiple options for your Developer Portal. Apigee supports several developer portal solutions, ranging from simple turn-key to fully customizable and extensible. The turn-key Integrated Developer Portal option supports branding and customization of much of the site, such as theme, logos, and page content, and can be published in seconds, directly from the management UI. We also provide a Drupal-based portal if you want full control and to leverage any of the hundreds of Drupal modules available in the Drupal Market. Alternatively, you could also build your own, fully customized portal leveraging Apigee APIs. This lab focuses on the Integrated Developer Portal.
+https://cloud.google.com/apigee/docs/api-platform/publish/portal/build-integrated-portal
+https://cloud.google.com/apigee/docs/api-platform/publish/drupal/open-source-drupal-8
+https://cloud.google.com/apigee/docs/api-platform/publish/intro-portals#custom-portal
+https://cdn.qwiklabs.com/xYRN7I3XiPB2IhBm4dm152DWeKvIHTznMpnalVA0FKE%3D
+
+In this lab, you will create an Integrated Developer Portal wherein you will publish API Products, and through which app developers can
+Learn API usage through OpenAPI specification based interactive documentation
+Register Apps that consume API Products, and thereby
+Generate App client credentials (API Key and Secret) that can be used to consume APIs.
+
+
+Update API Proxy for CORS Support
+CORS (Cross-origin resource sharing) is a standard mechanism that allows JavaScript XMLHttpRequest (XHR) calls executed in a web page to interact with resources from non-origin domains. CORS is a commonly implemented solution to the "same-origin policy" that is enforced by all browsers. For example, if you make an XHR call to your API Proxy from JavaScript code executing in your browser, the call will fail. This is because the domain serving the page to your browser is not the same as the domain serving your API, eg. "{your org name}-{environment name}.apigee.net". CORS provides a solution to this problem by allowing servers to "opt-in" if they wish to provide cross-origin resource sharing.
+https://en.wikipedia.org/wiki/Same-origin_policy
+In this step, we upload and deploy a version of your API proxy which includes configurations that support CORS, before it is published to a Developer Portal where it could be invoked within interactive docs pages. Typically, you would set these configurations up as described under "Adding CORS support to an API proxy". However, in the interest of time, in this lab, we will make use of a pre-configured proxy revision instead.
+https://cloud.google.com/apigee/docs/api-platform/develop/adding-cors-support-api-proxy
+
+Copy this link and paste it into Chrome of the student-workstation VM. This will download a revision of the same Hipster Products API that has been working on so far, but with CORS configurations.
+https://storage.googleapis.com/apigeexlabs/apijam-lab1/Hipster-Products-API_With_CORS_Config.zip
+https://cdn.qwiklabs.com/%2FFvn9NeF7HgOrjZMtlyqUt%2BRrBwHlooTAlhmW9NkASE%3D
+
+CORRECTION: ACTUALLY PASTE INTO OUR OWN CHROME BROWSER > THEN DOWNLOAD > BECAUSE WE WILL UPLOAD INTO THE API BACKEND DEVELOPER'S APIGEE CONSOLE
+NOT UPLOAD TO SOMETHING WITHIN THE RDP'ED STUDENT'S VM
+
+
+Navigate to Develop → API Proxies in the left menu, and select your Hipster-Products-API proxy. Navigate to the Develop tab, then click the Revisions button and select Import Revision.
+https://cdn.qwiklabs.com/1EMPWfCDssJCm5LOZv%2BeqUa3DMlI2PuZiwb4ECX2D%2BI%3D
+In the pop-up dialog, choose the previously downloaded revision of the API proxy, and click "Upload".
+https://cdn.qwiklabs.com/b4lcB%2FJVw00MBebQNvM5hWXclbTzZbWLMmucQQvS9iE%3D
+Once the new revision is uploaded, we must update the Target Endpoint to point to the Apigee lab hostname, where the mock is deployed. Under Develop >> Target Endpoints >> default, update the HTTP TargetConnection URL to the endpoint provided by Cloud Run. You must copy this URL from Navigation menu > Cloud Run > hipster-backend in the Cloud Console. You will see the URL at the top of the resulting page with a copy icon you can click on for convenience.
+This will be similar to the following URL: https://hipster-backend-oawecuupsa-uc.a.run.app
+Note: Your URL will be different!
+https://cdn.qwiklabs.com/VepsgkAMceISUidr2OdiESIl24CwUUjcdOb%2Bfufd%2BmQ%3D   - https://hipster-backend-lytqhgyswq-uc.a.run.app
+https://cdn.qwiklabs.com/ItJxPMH%2BPn8T5cdIAvQi0wn3zsKDDFmu5IfBUqjnZ14%3D
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TargetEndpoint name="default">
+    <PreFlow name="PreFlow">
+        <Request/>
+        <Response>
+            <Step>
+                <Name>Set-CORS-Response-Headers</Name>
+            </Step>
+        </Response>
+    </PreFlow>
+    <Flows/>
+    <PostFlow name="PostFlow">
+        <Request/>
+        <Response/>
+    </PostFlow>
+    <HTTPTargetConnection>
+        <URL>https://hipster-backend-lytqhgyswq-uc.a.run.app</URL>
+    </HTTPTargetConnection>
+</TargetEndpoint>
+
+After updating the TargetEndpoint, click Save and then click Deploy to eval button, to undeploy the older revision and deploy the latest revision of the proxy to the "eval" environment.
+https://cdn.qwiklabs.com/vwrtyWdKzaTCg%2B%2BXI%2FKUGmbuLTbBOmkO%2Ba%2FwfO04IYI%3D
+Your API proxy should now include configurations to support CORS processing.
+
+
+
+
+Update the Open API Spec
+In order to ensure that you have an updated OpenAPI Spec that accurately describes the API endpoint exposed through our API Proxy, first modify the spec that you previously used to create the API proxy - specifically the host, basepath, securityDefinitions and security properties.
+To do this, first download this file using Chrome. Then, using any text editor of your choice, replace <<your API hostname>> in the file with eval.cloudlearning.com (as found under "Admin" >> "Environments" >> "Groups" >> your environment group).
+https://storage.googleapis.com/apigeexlabs/apijam-lab1/hipster-products-API-spec.yaml
+
+swagger: '2.0'
+info:
+  title: Hipster Products API
+  version: "1"
+  description: Products API for Hipster Application
+host: <<your API hostname>>
+basePath:
+  /v1/hipster-products-api
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  APIKeyQuery:
+    type: "apiKey"
+    in: "query"
+    name: "apikey"
+security:
+  - APIKeyQuery: []
+paths:
+  /products:
+    get:
+      operationId: GetProducts
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/hipstershopListProductsResponse'
+      tags:
+        - ProductCatalogService
+  /products/{productId}:
+    get:
+      operationId: GetProductDetails
+      parameters:
+        - in: path
+          name: productId
+          type: string
+          required: true
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/hipstershopProduct'
+      tags:
+        - ProductCatalogService
+definitions:
+  hipstershopListProductsResponse:
+    type: object
+    properties:
+      products:
+        type: array
+        items:
+          $ref: '#/definitions/hipstershopProduct'
+  hipstershopMoney:
+    type: object
+    properties:
+      currency_code:
+        type: string
+        description: The 3-letter currency code defined in ISO 4217.
+      units:
+        type: string
+        format: int64
+        description: |-
+          The whole units of the amount.
+          For example if `currencyCode` is `"USD"`, then 1 unit is one US dollar.
+      nanos:
+        type: integer
+        format: int32
+        description: |-
+          Number of nano (10^-9) units of the amount.
+          The value must be between -999,999,999 and +999,999,999 inclusive.
+          If `units` is positive, `nanos` must be positive or zero.
+          If `units` is zero, `nanos` can be positive, zero, or negative.
+          If `units` is negative, `nanos` must be negative or zero.
+          For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.
+    description: Represents an amount of money with its currency type.
+  hipstershopProduct:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      picture:
+        type: string
+      price_usd:
+        $ref: '#/definitions/hipstershopMoney'
+      categories:
+        type: array
+        items:
+          type: string
+        description: |-
+          Categories such as "vintage" or "gardening" that can be used to look up
+          other related products.
+
+Save this spec locally and name it "hipster-products-API-spec.yaml".
+
+
+
+Create a Developer Portal
+Navigate to Publish → Portals and click the "+ Portal" button, or "Get started" (if you haven't created any portals yet within the org).
+https://cdn.qwiklabs.com/aHk80JJKKk7DKTWw0pE7fVXcTUWwwyiAhoxhAV2oYGQ%3D
+Enter details in the portal creation wizard.
+Name: Hipster API Portal
+Description: Developer portal for consumption of Hipster APIs.
+Click Create.
+https://cdn.qwiklabs.com/S8lwPuoh0Dw7AeVcMgyIYeBnO92bkFyLq3o%2FvSYaj6Q%3D
+
+
+
+Publish the Bronze (Free) API Product to the Portal
+On the portal overview page, click the "API catalog" button.
+https://cdn.qwiklabs.com/DPAwfYEvA6FFklfepVfVB7U65iAiQvkpk7r8J8YgOt4%3D
+Click the "+" button and select the Bronze API Product to publish to the Portal. Select "Hipster Products API Product Bronze" to publish and click "Next".
+https://cdn.qwiklabs.com/TONuWEHinGrKRrTdPh23c%2FbUad1mG85%2B2AmxL3yo5%2FU%3D
+https://cdn.qwiklabs.com/V4iHCgdkZs2lq98teYaQBfJMfGAbmVKD%2BWtyPdGvuF8%3D
+Make sure that the "Published" checkbox is checked, so that the Bronze API Product is visible to authorized App developers through the API catalog, during App creation.
+https://cdn.qwiklabs.com/OMLtuQ1mSd%2BX%2FYjmX33yTLF8UIVuCY0QeNncgCMUfWs%3D
+Under API documentation, select OpenAPI document > Select Document. .
+Upload your local "hipster-products-api-spec.yaml" file that you created and modified in the previous steps. Then click "Select".
+https://cdn.qwiklabs.com/RX12vKyYDZsiYQosA%2Fi7uvJTc9l%2Br5G83zxnDUVWjLI%3D
+Select the "Registered users" option so registered developers on the Developer Portal can view this API through the portal.
+https://cdn.qwiklabs.com/aC2QyhQMfIIntJJAkbhoqC3q5oQkgM66QoeMtX%2B7IeI%3D
+Click the "Select image" button to update the icon image associated with this API product.
+https://cdn.qwiklabs.com/NzvbT4EzT8PZVBWXTP8ybD%2ByFCQHvb0gStAn0jO067I%3D
+Then select "Image URL" and provide the following URL to import the image.
+https://cdn.qwiklabs.com/Efc9Z5r14cXCRcvRXhRvgghI9TMQdvZvV%2BHsWjmfTHg%3D
+Image URL: https://storage.googleapis.com/apigeexlabs/apijam-lab1/HipsterAPIProductImage.png
+https://cdn.qwiklabs.com/xIuyXy077j88e9EIxBA%2BPVJj0IM6QSznsYBzQrcKL%2BU%3D
+Click "Select" and then click "Save" to save and publish the API product to the API catalog.
+https://cdn.qwiklabs.com/kf7N%2BbPNds4V8c6vIxByYJhLyWf7Dn8N5TMRPl4%2BRLg%3D
+The API product is now published to the developer portal.
+
+
+
+
+App Developer sign-up
+Click the "Live Portal" link to launch a browser tab/window with the new Developer Portal.
+https://cdn.qwiklabs.com/tBm%2BrfYM79n3nxyYubCF37mssqyQ6mhiqX%2F%2Bo0e0Lik%3D
+On the developer portal, click the main menu option labeled Sign In. This will take you to the App Developer login page. Here, click Create an Account.
+https://cdn.qwiklabs.com/yxNZJUxbVTvqjMWkzIkVieRudWPJULssm7HV5LAjEbo%3D
+https://cdn.qwiklabs.com/84V%2B0q5axC7OXXCSaq5PlA%2BMjF%2BKg2No0YWZbvlzCqk%3D
+
+Provide the following details, and then click Create Account.
+First Name: {{your first name}}
+Last Name: {{your last name}}
+Email: {{your email address}}
+Password: {{enter a password}}
+Check the "I agree to the terms" box.
+You may need to verify a captcha image.
+https://cdn.qwiklabs.com/XZx0Z13%2BV6kUHUDECGA6ziOU1%2FomAQoBF2PXnVt6kls%3D
+
+You may have to go through a few captcha screens (there may be a few image screens). Finally, click Verify.
+On account creation, the App Developer will receive an email notification with an account verification link.
+https://cdn.qwiklabs.com/3m5N6mUNpMK5X0gghQ0862v%2BrMhRZ4xCJjFXTFNTRck%3D
+
+Since you have provided your own email address as the App Developer in this lab, you should have received this notification. Click the link or copy and paste it into the browser to verify the account.
+Once this account is verified, you can sign in as App Developer into the portal using your credentials.
+18db17922a1a3196.png
+
+
+
+
+
+
+
+View API Documentation
+Log in as App Developer using the account credentials created in the previous steps. Click on the APIs menu link on the Developer Portal. This will take you to the API catalog page. Here you will see that API product you previously published to be visible to all registered developers.
+https://cdn.qwiklabs.com/t7uYbN8c0IYd8wWElRRz%2BnhocdbPPunU2uiCCmrY53A%3D
+Click the API Product icon for the Bronze product in the catalog, to view it's documentation. This will take you to an interactive documentation page generated from the OpenAPI spec that you associated to the API product at the time of publishing.
+https://cdn.qwiklabs.com/Q6GinS0a7yegdYqKg%2BSkKgjL1PkYIfvnbOaV7LNbYsw%3D
+Select one of the API resource paths from the left panel of the docs and click "Execute". You will then see a 401 Unauthorized response in the right panel. 
+This is because you haven't yet registered any Apps and therefore have no API Keys to use for an authorized API call.
+https://cdn.qwiklabs.com/j368bFxsYGXD8Mzqw%2FIOTMeFkrCeiwikr%2BebSdpsdNc%3D
+
+
+Register Apps
+Navigate to the developer account drop down menu on the top right corner, and select the "Apps" link. 
+https://cdn.qwiklabs.com/AXQqMFzNF4RONiyOv%2F3I6T%2BXKfeOkNgzuX7KzrhUKHk%3D
+Click the New App button (either on the page itself or on the top panel, as shown below). 
+https://cdn.qwiklabs.com/4b31qmo5ql9zournfOt1uyXpAArIFDmTybVXJ3wc6n0%3D
+
+Enter the following App details:
+App Name: Hipster-Test-App
+Description: Test app to try out Hipster Products API using the Bronze (Free) API Product
+Select the Bronze (Free) API Product that is available for subscription. Click Enable then click Save.
+https://cdn.qwiklabs.com/m21plvkB7ZDQHfrXBFl8oBZxnEpLXEonvFcwqrH2XKs%3D
+You will find that an API Key/Secret pair has been generated for your newly created App. You can now use this API Key to test the API.
+https://cdn.qwiklabs.com/U%2BMxC%2FCKKrSmksWAT1ePAFxkvtLMKQhIPKc%2B8ldn%2F7A%3D
+key - cWkHUlJ5OlP7IATgRWwR7fYDY3QtSnfb2VZuMsE6wqRJj7Gh
+sec - RCA68j4NMwA4epTNcjvSDYu6uZm37RNGCJrC93GGNFUo97Zmo04JRrkS3uHklOKQ
+
+Navigate to the API Catalog, select the Bronze API Product docs, and test out the GET /products resource again. This time though, first click on the Authorize and select the newly created App's credentials to set authorization information (API Key) for the API call.
+https://cdn.qwiklabs.com/t7uYbN8c0IYd8wWElRRz%2BnhocdbPPunU2uiCCmrY53A%3D
+https://cdn.qwiklabs.com/w4WB%2BBOH8CklPQOTfFBB7n%2B9Zdukx%2FEEREe6pAY97%2F0%3D
+https://cdn.qwiklabs.com/7166pYTa35tBOUCYajvOhjMwJN43L%2BhIt%2FFpUK1tma0%3D
+Click "OK" after authorization information is set.
+https://cdn.qwiklabs.com/K4t6kiLGydtARYkchDzryZe8LQZjFuidaAqVbHGa7No%3D
+Now, click Execute. You will see that a valid 200 OK API response is received. image alt text
+https://cdn.qwiklabs.com/Cm3jpj1%2B%2FCevttPhTzuUk2DcpUnV%2BooXIJUznOEhEFo%3D
+
+
+
+2022.08.28:
+Unknown Error
+An unknown error occurred while making the request. Please verify your connection and try again. If you continue to experience issues please contact support
+
+
+
+
+Part 4 - Summary
+You've learned how to do the following:
+Deploy the Apigee Integrated Developer Portal
+Publish an API Product with an OpenAPI Specification
+Use the Developer Portal UI to browse the API catalog and register Apps to consume API products as a developer.
+
+References
+Apigee Documentation
+Building your integrated portal     https://cloud.google.com/apigee/docs/api-platform/publish/portal/build-integrated-portal
+Managing developer teams            https://cloud.google.com/apigee/docs/api-platform/publish/portal/developer-teams
+Manage the audiences for your portal        https://cloud.google.com/apigee/docs/api-platform/publish/portal/portal-audience
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Part 5 - Measure API Program Success with Apigee Analytics
+Persona : API Product Team
+
+Use Case
+What comes after publishing the first API Product
+After you have some API Products up and running you want to have a look at how the program performs and how successful your API program is.
+How is traffic trending over time?
+When is the traffic flowing fastest?
+Where are the most users?
+What are the most active developers?
+
+
+
+
+Insights help with capacity planning
+With trend usage data you can see how your API calls are trending over time and predict how the traffic will be in the next year, when you need to do your capacity planning.
+Through visualization of the data with out of the box analytics, Apigee helps you with finding the trends and patterns of your APIs.
+
+Tying traffic to API Products
+https://cdn.qwiklabs.com/OIZjN3dgtQ07VcLaRLzhAzmOk9w770i4zas85MUUgpQ%3D
+When registering an application to an API product that metadata is loaded when verifying an API key or Oauth Token so you can identify the Developer, App and the Product. This data is crucial for insights into your program.
+Note: If you have followed previous steps you can probably already see some traffic for the proxies you have created earlier and work with your previous API proxy for the custom analytics. If you haven't followed previous steps, you can follow this part of the lab but will see less data in your dashboards.
+
+
+
+Understand API usage using the pre-built Apigee analytics dashboards
+Apigee comes with a lot of pre built reports. For the purpose of these labs and in the interest of time, we will walk through the different dashboards with screenshots from populated demo environments. Feel free to use the optional load generator to follow along in your own environment.
+If you prefer you can have a look at the API Dashboards by watching this video that gives you an overview of the metrics dashboards with a lot of filled values: https://youtu.be/mElNO44QQFQ?t=126
+To get to the reports open the Analyze menu in the sidebar.
+https://cdn.qwiklabs.com/OTBZYzNqO5sXzqzVnAc2fJSQ1pUGQZmn6qWeBnHxjQI%3D
+
+API Proxy Performance
+The Proxy Performance dashboard helps you see API proxy traffic patterns and processing times. You can easily visualize how much traffic your APIs generate and how long it takes for API calls to be processed, from the time they are received by Apigee until they are returned to the client app.
+https://cdn.qwiklabs.com/dMWs4c0LMkG443e%2BEwPlZH7wKh7aJpcMbUaDgBkQ%2FbU%3D
+
+Cache Performance
+The Cache Performance dashboard lets you see at a glance the value of your Apigee cache. The dashboard helps you visualize the benefit of the cache in terms of lower latency and reduced load backend servers.
+https://cdn.qwiklabs.com/nS%2FMzPnGzjPpFacd1CWXUoJAjhUNx6LzrdwmXRLi5TA%3D
+
+Error Code Analysis
+The Error Code Analysis dashboard tells you about error rates for API proxies and targets. The Error Code Analysis dashboard uses:
+The response code to calculate proxy errors
+The target response code to calculate target errors
+https://cdn.qwiklabs.com/uFp0pUFTod31DTTU%2F09tlC%2FQgGT0sUlLZ9jDsEb2dqw%3D
+
+Target Performance
+The Target Performance dashboard helps you visualize traffic patterns and performance metrics for API proxy backend targets.
+https://cdn.qwiklabs.com/CBC3TzhqvhuTC3X2FmmxTY0dqhwD562VzRRY%2Bsc3Tt4%3D
+
+Developer Engagement
+The Developer Engagement dashboard tells you which of your registered app developers are generating the most API traffic. For each of your developers, you can find out who is generating the most API traffic and the most errors. For example, if a particular developer's app is generating a lot of errors relative to other developers, you can pro-actively address the problem with that developer.
+https://cdn.qwiklabs.com/ONuNOeIzKs6%2BUhtU28DB%2BTOegaCodFVgyQunM6tsVUM%3D
+In the main view, if it is enabled, select the Analyze button under the Actions column for the app to view details about that app and the app developer. The following chart appears:
+https://cdn.qwiklabs.com/tT5%2BoutmWbijgmnThMAUmLD7nVbk9yWejS6u7qhkhG0%3D
+
+
+Traffic Composition
+The Traffic Composition dashboard measures the relative contribution of your top APIs, apps, developers, and products to your overall API program.
+https://cdn.qwiklabs.com/XAhtwnqifkj4WjVQyXe7ShTdaN7V6L%2FjQxCjxGVSJpA%3D
+
+Devices
+The Devices dashboard tells you about the devices and servers that are being used to access your APIs. It lets you spot trends in how users are accessing your APIs. For instance, you might notice that traffic from one type of device is increasing, while another is going down, and then decide if the change requires any action or not.
+https://cdn.qwiklabs.com/80GB9j0ncNO%2BItnnp4qAiHKXfk2t2U57ShK5CacTN6s%3D
+
+Geomap
+The Geo Map dashboard tracks traffic patterns, error patterns, and quality of service across geographical locations. You can view information about all your APIs, or zoom in on specific ones.
+https://cdn.qwiklabs.com/Ve4WVwQgCQ0E4HYna75QD4sCYT0%2Bqy17ypYlb10dCFI%3D
+
+
+
+
+Create Data Collector for custom analytics collection
+In order to collect custom API request/response data and feed it into Apigee Analytics, you must first create a Data Collector REST resource for our organization. To do this, open a new tab in the same Chrome browser window that you have your Apigee Management UI open in, and log into the GCP console at https://console.cloud.google.com.
+https://cloud.google.com/apigee/docs/api-platform/reference/policies/data-capture-policy#data-collector-rest-resource
+If prompted, accept the Google Cloud Platform Terms of Service.
+Open a Cloud Shell to be able to run the Apigee API to create a Data Collector.
+https://cdn.qwiklabs.com/tcGJoJ61oPSXrnuCYqw7VmcDWk4leiZcTjBqU8JPdWU%3D
+
+Run the following command to create a Data Collector REST endpoint in your Apigee org.
+curl -X POST "https://apigee.googleapis.com/v1/organizations/$(gcloud config get-value project)/datacollectors" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" -d '{"name":"dc_product_id","description":"Collects product ID from the URI of Hipster API requests.","type":"STRING"}'
+Where $PROJECT_ID = your Project ID (the project that this lab provisioned for you - see details on left panel of lab).
+
+You will be asked to authorize Cloud Shell to make the Apigee API call.
+Click Authorize.
+You should see a similar response to the one below.
+
+{
+  "name": "dc_product_id",
+  "description": "Collects product ID from the URI of Hipster API requests.",
+  "type": "STRING",
+  "createdAt": "1613082943030",
+  "lastModifiedAt": "1613082943030"
+}
+
+student_00_0d6668abcc91@cloudshell:~ (qwiklabs-gcp-04-055471371f72)$ curl -X POST "https://apigee.googleapis.com/v1/organizations/$(gcloud config get-value project)/datacollectors" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" -d '{"name":"dc_product_id","description":"Collects product ID from the URI of Hipster API requests.","type":"STRING"}'
+Your active configuration is: [cloudshell-6173]
+{
+  "name": "dc_product_id",
+  "description": "Collects product ID from the URI of Hipster API requests.",
+  "type": "STRING",
+  "createdAt": "1661659506553",
+  "lastModifiedAt": "1661659506553"
+}
+
+Note: The name of the Data Collector resource must begin with the prefix "dc_". If you use a Data Collector in multiple policies, the captured data will be overwritten by the last policy that executes.
+This creates a resource named dc_data_collector, which you can use in the DataCapture policy. For a list of the quantities related to API traffic that you can capture using the Data Collector resource, see Metrics.
+https://cloud.google.com/apigee/docs/api-platform/reference/policies/data-capture-policy
+https://cloud.google.com/apigee/docs/api-platform/analytics/analytics-reference
+
+
+
+
+
+
+
+Add DataCapture Policy to API Proxy
+The DataCapture policy captures data (such as payload, HTTP headers, and path or query parameters) from an API Proxy for use in Analytics. You can use captured data in custom Analytics reports, as well as to implement Sense, Monetization, and Monitoring rules.
+Navigate to Develop → API Proxies from side navigation menu. Open the existing Hipster Products API Proxy that you created in previous steps, and go to the "Develop" tab. To get the data from the API URL the path and feed into Apigee Analytics, you need to first extract it into an Apigee Flow variable within the proxy. You do this by adding an Extract Variables policy.
+In the "GetProductDetails" Flow, add a new step to the request by clicking the "+ Step" button.
+https://cdn.qwiklabs.com/qOCkfib12ZFgBtMshPFAl0GKH2is3V299bralkV0U5w%3D
+Add an Extract Variables Policy under the Mediation category.
+https://cdn.qwiklabs.com/fYCu6SWDtelvxuYsOH5xJXC5NdknB85wjh2xihf1fYI%3D
+Add an "Extract Variables" Policy (found under the "Mediation" category) with the following configuration.
+
+<ExtractVariables name="Extract-Variables-1">
+   <DisplayName>EV-ExtractProductID </DisplayName>
+   <Source>request</Source>
+   <URIPath>
+      <Pattern ignoreCase="true">/products/{productId}</Pattern>
+   </URIPath>
+   <VariablePrefix>urirequest</VariablePrefix>
+   <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>
+
+
+
+In the "GetProductDetails" flow, add a new step to the request by clicking the "+ Step" button
+https://cdn.qwiklabs.com/TcHCikHewNe17L2VFqqqdi6lsrFqohpuXVz%2BjnyGM5s%3D
+Add a "Data Capture Policy" under the "Extensions" Category.
+https://cdn.qwiklabs.com/GmdOc5ZpDvXZ1AChvedq3IUzYGl8gfSAbTO4%2F9HCGmY%3D
+Edit the new Data Capture policy and provide it with the following values.
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DataCapture name="Data-Capture-1" continueOnError="false" enabled="true">
+    <DisplayName>Data Capture-1</DisplayName>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    <Capture>
+        <Collect ref="urirequest.productId"/>
+        <DataCollector>dc_product_id</DataCollector>
+    </Capture>
+</DataCapture>
+
+
+Save as a new revision and deploy the new revision to your eval environment.
+https://cdn.qwiklabs.com/c%2FLGf1c3MbJtGpLOQF0iX2tCGDOQQoaDZnImx44pitg%3D
+https://cdn.qwiklabs.com/6QO741uTTdCWGvMTFu13WT1QBaI%2Bqi1ccrQD2V7ErZA%3D
+
+
+
+
+Send API requests to your proxy to generate analytics data
+Go to the API proxy and navigate to the Debug tab so you can run some tests. Select the latest deployed API revision and click Start Debug Session 
+https://cdn.qwiklabs.com/sLdbsd24EtfoysaFEXHiFGVfVkbAszbicdIzTGRVD7U%3D
+
+To test the API using curl open the Command Prompt shortcut on the desktop, run the following command:
+curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products/{{product ID}}?apikey={{API Key}}
+Where:
+{{API Key}} is the API key you generated previously for the Gold tier app (with quota of 100 requests per minute),
+{{product ID}} is any one of "OLJCESPC7Z", "66VCHSJNUP", or "1YMWWN1N4O".
+
+curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products/OLJCESPC7Z?apikey=ogF1jGHu7OOEG90robdFAB6pxfpGlW39et0cTJwlzRkpzv3g
+C:\Users\student>curl -X GET https://eval.cloudlearning.com/v1/hipster-products-api/products/OLJCESPC7Z?apikey=ogF1jGHu7OOEG90robdFAB6pxfpGlW39et0cTJwlzRkpzv3g
+{"id":"OLJCESPC7Z","name":"Vintage Typewriter","description":"This typewriter looks good in your living room.","picture":"/img/products/typewriter.jpg","priceUsd":67.98,"categories":["vintage"]}
+
+
+
+
+
+Press enter after entering the above command to send a request. Send multiple requests to the API, alternating between the product IDs to use in the URL as described above.
+Play around with different api keys and different product IDs.
+https://cdn.qwiklabs.com/RKFaD4o939XAjgy%2BfmQwQU7YYjzrQ2zVxw1q6FMjlVo%3D
+Note: It takes a few minutes for the new data to be added to Apigee analytics after the Data Capture policy is invoked for the first time, for each environment.
+
+
+
+
+
+
+
+
+
+
+
+
+Create custom report
+Now create a custom report that measures the sum of API traffic over time, aggregated by the custom dimension collected using the Data Capture policy - "dc product id collector". To do this, create a custom report.
+
+Under Analyze → Custom Reports → Reports, click the "+ Custom Report" button.
+https://cdn.qwiklabs.com/kH8RoHZ02riYCIY%2F5uqShwv9hVR5kLT7Z2nEK%2BGAHGA%3D
+Enter the following Custom Report details:
+Report Name: API Traffic by App and Hipster Product ID
+Report Description: This custom report measures distribution of total API Traffic to the Hipster-Products-API proxy by App and Hipster Product ID.
+Select the "Line" Chart type.
+https://cdn.qwiklabs.com/%2Ffx0KSnQ6aeEoG3cugJA0bFqheM40AksOr0ynall8QQ%3D
+For our example, you want to see the sum of API Traffic to our proxy. So, under the "Metrics" section, click the "+" button, and in the pop-up select the "Traffic" metric, with Aggregation Function set to "Sum".
+https://cdn.qwiklabs.com/PqZP%2FZ6lPy1mJGJlSnFV9Raj8mKNdtq78EXUwCNve8U%3D
+Next, define the dimensions by which to group API traffic by, i.e Developer App and Product ID. By selecting multiple dimensions, you can drill down our report to find more information on the traffic metric. To do this, click the "+" button in the Dimensions section, and add the dimensions Developer App and dc product id. The dc product id dimension will be found under the Custom tab in the pop-up.
+https://cdn.qwiklabs.com/W4ddgj7ap0mTqRFuzV02MCMu2RyFFmXpdnUIAVZqCMg%3D
+https://cdn.qwiklabs.com/0iqmrxDN9yWZZiETIstuodD%2FHojZCqo2JQqMsOX9OiQ%3D
+Lastly, ensure that this report measures traffic only from the Hipster Products API. Under the "Filter" section, add the following filter:
+Name: Proxy
+Operator: =
+Value: Hipster-Products-API
+https://cdn.qwiklabs.com/91Tslivh9G43yCB%2BuBPTznNRHM3X9aIjSzJWed9pi1s%3D
+Confirm all values, and click Save.
+https://cdn.qwiklabs.com/lttiviIDPF1xv52z8mQpbsuZ%2FJd2lHcGa%2BUJKfU8Jkw%3D
+You are directed back to the reports list page. Here, select the newly created report.
+https://cdn.qwiklabs.com/Iq1Hm2FdAhRJU1HjEgk3cm%2B4mxKrJGNZ5Qp0G6qG%2BnU%3D
+In the report dashboard, you will now see the traffic grouped by our first dimension, i.e. Developer App. You can then drill down into traffic for a specific app, and then drill down based on the second dimension, i.e. Hipster Product ID. You'll also see that this report only measures traffic for the Hipster Products API.
+https://cdn.qwiklabs.com/luYwsCpgQpa7PcN9VB5XM5VzwNOfrUkxPnEHnOZOEns%3D
+https://cdn.qwiklabs.com/eci9vAU%2BKXGNq%2BY8KBokWzODPqV8nGmlBYhaSvM2AWw%3D
+https://cdn.qwiklabs.com/RnBTpgjTDyva8AKllyKUDqP7XhW7F6msQ8xix4x5PM8%3D
+You can also analyze the traffic by dimension, to check for anomalous traffic.
+https://cdn.qwiklabs.com/Vgz8lChI90qrXFWUOJv8THy%2FkID6d0TNcGOkxhOgHxs%3D
+You can also download the data as CSV by clicking the Export button to the top right, or change the report time range.
+https://cdn.qwiklabs.com/HRM%2FvpbutdERkZbB0reR1Mpf%2BjPLdBiKI%2Fpch8nBKTw%3D
+
+
+
+Part 5 - Summary
+In this lab, you have explored all Reports that show you the success and performance of your API Program and give you valuable insights into how to optimize your APIs.
+
+References
+Apigee Documentation
+Apigee Analytics      https://cloud.google.com/apigee/docs/api-platform/analytics/analytics-services-overview
+Extract Variables Policy      https://cloud.google.com/apigee/docs/api-platform/reference/policies/extract-variables-policy
+Data Capture Policy           https://cloud.google.com/apigee/docs/api-platform/reference/policies/data-capture-policy
+Custom Reports documentation      https://cloud.google.com/apigee/docs/api-platform/analytics/create-custom-reports
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Optional: Try out Developer Program, Teams and Audience Management features
+On Apigee, the integrated developer portals have an Accounts management feature to manage App Developer accounts, App Developer identity management configuration, App Developer Teams, and Audience configuration for access to content published on the portal.
+https://cloud.google.com/apigee/docs/api-platform/publish/portal/api-portal-users
+App Developers have the option of creating Teams to share responsibility for an app with other developers. Each developer within a Team is assigned a role (Owner, App Admin or Viewer ) that defines their access level to the shared apps.
+https://cloud.google.com/apigee/docs/api-platform/publish/portal/developer-teams
+https://cdn.qwiklabs.com/buBZDtkCZcq8jAfyUztEiMFf1hJRP%2BQ%2BZsz2iVkQRnI%3D
+
+Audience configurations are used to segment portal users or developer teams to control access to the following resources:
+-Pages in your portal
+-Published API products
+https://cloud.google.com/apigee/docs/api-platform/publish/portal/portal-audience
+
+The following figure shows how audiences are used to control access to a set of resources.
+https://cdn.qwiklabs.com/3Xb4CptEhxTb8Kl02LPoN3hS2C70F29tPw3Tno0GWuE%3D
+
+
+
+Enable Teams and Audience Management features
+To utilize Teams and Audience Management features, you must first enroll into the Beta program within your Apigee org. To do this, navigate to the Publish >> Portals menu, and select your Integrated Developer Portal.
+https://cdn.qwiklabs.com/ikUTkrVO7s3fz8zyvJ37Rqb0SUUOZKFzMT0tDqNXktc%3D
+Click the Enroll button to "Enroll in beta for team and audience management". 
+https://cdn.qwiklabs.com/suVU%2BL6sMMPAV6nyRLwVvR8W2ZUjT6hy9kU6zvND2Ms%3D
+Once enrolled, you will see the Teams and Audience Management features enabled within "Accounts" and "Audiences" sections of your portal admin page.
+https://cdn.qwiklabs.com/a57vtRwn8iSO0Jhlf8Jkdqo1DG8krx9MXSiZ1it4IGo%3D
+
+
+Create Developer Team
+Log into the Developer Portal with your App Developer credentials from the previous steps (you will need to refresh the portal page to see the new Teams menu option). Navigate to the Teams menu from your account drop-down.
+https://cdn.qwiklabs.com/Zl1lLss1EUCEHcK6T328gBdrGQ8j%2BeuS7Iyp6lNauxQ%3D
+Click the + New Team button.
+https://cdn.qwiklabs.com/VuE9wFhjEt2ibU3dP%2FQ1o5PIDjJdb0LGgMKEwo0oy0I%3D
+
+Fill in team details and click Create. Overview section:
+Team name: Hipster App Team
+Description: Team that will work together on Hipster apps, and share API Keys.
+Point of contact: {your App Developer email address}
+Members: Your App Developer email ID has already been added to the team with 'Owner' role. If required, you can add additional Developers with different roles.
+https://cdn.qwiklabs.com/PCndmGbcUC6buoi%2BhqCGDjCNFcLLpKliwaCz2JGrEkc%3D
+
+Once created, you will be able to access this team as a team member from the "Teams" menu option on the developer portal.
+https://cdn.qwiklabs.com/G8neambG0aSSQ0HtTS0zydzHCPiX24BJ7qe3XGm6eps%3D
+As an API producer, you can view teams created via the "Accounts" page within the portal admin page.
+https://cdn.qwiklabs.com/G40dgakPZVexzOH6dXSrWU1qO1EAj8TqezwGERL%2Bd1c%3D
+https://cdn.qwiklabs.com/VTnX25pEwB%2FNOFSbbMgFVT%2Bl72dOeRqiq6w4RnTd8qY%3D
+https://cdn.qwiklabs.com/czOwmKm3FS%2BUu2nftggynnlxLsH%2BRzyBjnKDMC6XY9E%3D
+
+
+Create Audience
+Now see how to publish API products on the Developer Portal, with only certain audiences that have entitlement to view and subscribe to those products.
+https://cdn.qwiklabs.com/ikUTkrVO7s3fz8zyvJ37Rqb0SUUOZKFzMT0tDqNXktc%3D
+Navigate to the Publish >> Portals menu, and select your Integrated Developer Portal. b9cb70bbec39af2a.png
+Navigate to the "Audiences" page.
+https://cdn.qwiklabs.com/xkHd4SdnjcXeLYLohXKm9V8Hp4nI73825JgXX%2BkPSzI%3D
+Click the '+' button to add a new audience.
+https://cdn.qwiklabs.com/yANslyzWw0CnHw0sR%2BeXtfHuqL4Tcs2eNHf%2B4YS%2FaXk%3D
+
+Enter the following details and click "OK".
+Name: Hipster-API-Privileged-Audience
+Description: A privileged audience that is allowed access to the Hipster API Silver and Gold products.
+https://cdn.qwiklabs.com/lqAuq%2B8B2saRgzTd647lutTi9gl5PLSxoOZd9lBP%2FIw%3D
+Once the Audience is created, you define which app developers should be members of this Audience. To do this, click the + button in the "Members" section of the Audience. 
+https://cdn.qwiklabs.com/Vvc3vLswUlXeN0eyQE%2Bnm%2FT1BkZFwGXe%2BaI%2BpvwMaAs%3D
+In the popup, type in the name of the team that you previously created. Select the team and click Add(1). 
+https://cdn.qwiklabs.com/MIDN46orD6%2BZJymkfs1%2F3xr7zsE5K3%2F619N32nMryTU%3D
+Click "Save" to save the member assignment. 
+https://cdn.qwiklabs.com/PDH293EMVmXiYp3FVs52LOmyVbhlpKcZF2CIe1cpFaI%3D
+
+
+
+
+Publish Silver API Products with New Audience Entitlements
+Navigate to Publish → Portals → {{your developer portal}} → API catalog and click the + button.
+https://cdn.qwiklabs.com/NvMEqMYudrvAXGjUMCsd3jY59P8Z%2B41WppelPNLw044%3D
+Select the Silver API Product and click Next.
+https://cdn.qwiklabs.com/u68voWmgNIStdjfQSp6IaHu6%2FMVCrqi38UPqfPiQAxo%3D
+Make sure that the Published checkbox is checked, so that the Silver API Product is visible to authorized App developers through the API catalog, during App creation.
+https://cdn.qwiklabs.com/IBC0NpJDuTSlqIF3EQSNywCSuGkJya68p32bdfjUuow%3D
+Click the Source API spec dropdown and select Choose a different spec....
+https://cdn.qwiklabs.com/w%2FwYK0K8GyshYMJZleopx%2BNpmqPV6iMU1bMhSX8FyNs%3D
+Upload the same spec you used in the previous steps.
+https://cdn.qwiklabs.com/RX12vKyYDZsiYQosA%2Fi7uvJTc9l%2Br5G83zxnDUVWjLI%3D
+Select the "Selected audiences" option under the "API visibility" section, and check the box for the Audience you just created.
+https://cdn.qwiklabs.com/K7Q7HU5WmVxtsv2A2FU3%2BNzitJldIyXpXXn8Ty0rTTQ%3D
+Click the "Select image" button to update the icon image associated with this API product.
+https://cdn.qwiklabs.com/NzvbT4EzT8PZVBWXTP8ybD%2ByFCQHvb0gStAn0jO067I%3D
+Then select Image URL and provide the following URL to import the image.
+https://cdn.qwiklabs.com/Efc9Z5r14cXCRcvRXhRvgghI9TMQdvZvV%2BHsWjmfTHg%3D
+
+Image URL: https://raw.githubusercontent.com/apigee/apijam/master/Apigee%20X%20Resources/HipsterAPIProductImage.png
+https://cdn.qwiklabs.com/H3FlhWAD15H4%2F2zL6oF5KrWiCVNpQgIoyN74C9E3Gi4%3D
+Click Save.
+https://cdn.qwiklabs.com/5wlP1xGcpTgDLSV%2F8cbrmoogbVaJiKH9BWeOLX6HdjQ%3D
+Validate the API visibility setting for the Silver API Product.
+https://cdn.qwiklabs.com/W1zJxv1Gxjt%2F1jyg%2BePDVGWKxQpd4cOWlXpx32EtYoU%3D
+
+
+
+
+Create Team App
+On the developer portal, navigate to the developer account drop down menu on the top right corner, and select the Apps menu option to navigate to the My Apps page.
+Then click the + New App button.
+https://cdn.qwiklabs.com/Y%2Fi%2BM5vcnWKBZScrlgHNd5LbZRi6fs3pz%2FWDlAYAjAs%3D
+
+Enter the following App details and click "Create":
+App Name: Hipster-Team-App
+Description: App that is registered against the team to share App credentials and access Silver tier Hipster API product.
+Owner: Hipster App Team
+
+Select the Silver (Basic) API Product that is available for subscription. Click Enable and then Save.
+https://cdn.qwiklabs.com/zlQplpKq%2BjUI6YKTywH9ZyO72VllGYIw5i8Nbcalm6Q%3D
+You will find that an API Key/Secret pair has been generated for your newly created App. You can now use this API Key to test the API. 
+https://cdn.qwiklabs.com/gmRtyo%2BpJ1FlGN7GRIFXsyvmaRzQtS874nwvRNinJ6w%3D
+Navigate to the API Catalog, select the Silver API Product docs. 
+https://cdn.qwiklabs.com/dckJgDYZ7U2yDyD7HbSMIedcv0mRLrz%2Bm4z3e0pD%2BuA%3D
+Select the GET /products resource. Click on the Authorize button and select the newly created Team App's credentials to set authorization information (API Key) for the API call. Then click Authorize.
+https://cdn.qwiklabs.com/njTymL8mJhaYoaAIAdcYJTyPNTzEmtsXjkpgN3qHI3Y%3D
+Click OK after authorization information is set.
+https://cdn.qwiklabs.com/q%2BuPn4mom6z3Oo6LUn9DnIloWTaJjIhvFU9gT0P2uxI%3D
+Now, click Execute. You will see that a valid 200 OK API response is received.
+https://cdn.qwiklabs.com/f%2FTdVBfqI%2BxlR0eQ8DQzH0J4Wl9MeFgxPuDDHhEYvjw%3D
+
+
+
+
