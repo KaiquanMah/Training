@@ -1,0 +1,520 @@
+Overview
+In this lab, you will open a Dataflow project, use pipeline filtering, and execute the pipeline locally and on the cloud.
+Open Dataflow project
+Pipeline filtering
+Execute the pipeline locally and on the cloud
+
+
+
+
+Objective
+In this lab, you learn how to write a simple Dataflow pipeline and run it both locally and on the cloud.
+Setup a Python Dataflow project using Apache Beam
+Write a simple pipeline in Python
+Execute the query on the local machine
+Execute the query on the cloud
+
+
+
+
+
+Task 1. Ensure that the Dataflow API is successfully enabled
+Execute the following block of code in the Cloud Shell:
+gcloud services disable dataflow.googleapis.com --force
+gcloud services enable dataflow.googleapis.com
+
+student_04_ad3b4bcda042@cloudshell:~ (qwiklabs-gcp-01-5e114ea99034)$ gcloud services disable dataflow.googleapis.com --force
+Operation "operations/acat.p17-98644019781-322f26e9-806d-4de4-b9c0-14d1695f2859" finished successfully.
+student_04_ad3b4bcda042@cloudshell:~ (qwiklabs-gcp-01-5e114ea99034)$ gcloud services enable dataflow.googleapis.com
+Operation "operations/acf.p2-98644019781-489d3e6e-3f22-4b38-bf9d-42f79e48f314" finished successfully.
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Preparation
+Open the SSH terminal and connect to the training VM
+You will be running all code from a curated training VM.
+In the console, on the Navigation menu (Navigation menu icon), click Compute Engine > VM instances.
+Locate the line with the instance called training-vm.
+On the far right, under Connect, click on SSH to open a terminal window.
+In this lab, you will enter CLI commands on the training-vm.
+
+
+Download code repository
+Download a code repository to use in this lab. In the training-vm SSH terminal enter the following:
+git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+
+
+Create a Cloud Storage bucket
+Follow these instructions to create a bucket.
+In the console, on the Navigation menu, click Home.
+Select and copy the Project ID.
+For simplicity use the Project ID found in the Lab details panel is already globally unique. Use it as the bucket name.
+In the console, on the Navigation menu, click Cloud Storage > Browser.
+Click Create Bucket.
+
+Specify the following, and leave the remaining settings as their defaults:
+Property	    Value (type value or select option as specified)
+Name	        <your unique bucket name (Project ID)>
+Location type	Multi-Region
+Location	    <Your location>
+
+Click Create.
+Record the name of your bucket to use in subsequent tasks.
+
+In the training-vm SSH terminal enter the following to create an environment variable named "BUCKET" and verify that it exists with the echo command:
+BUCKET="<your unique bucket name (Project ID)>"
+echo $BUCKET
+
+You can use $BUCKET in terminal commands. And if you need to enter the bucket name <your-bucket> in a text field in the console, you can quickly retrieve the name with echo $BUCKET.
+
+student-04-ad3b4bcda042@training-vm:~$ BUCKET="qwiklabs-gcp-01-5e114ea99034"
+student-04-ad3b4bcda042@training-vm:~$ echo $BUCKET
+qwiklabs-gcp-01-5e114ea99034
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Pipeline filtering
+The goal of this lab is to become familiar with the structure of a Dataflow project and learn how to execute a Dataflow pipeline.
+Return to the training-vm SSH terminal and navigate to the directory /training-data-analyst/courses/data_analysis/lab2/python and view the file grep.py.
+
+View the file with Nano. Do not make any changes to the code:
+cd ~/training-data-analyst/courses/data_analysis/lab2/python
+nano grep.py
+
+Press CTRL+X to exit Nano.
+
+student-04-ad3b4bcda042@training-vm:~$ cd ~/training-data-analyst/courses/data_analysis/lab2/python
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ ls
+grepc.py  install_packages_OLD.sh  is_popular.py                JavaProjectsThatNeedHelp_PY2_Version.py
+grep.py   install_packages.sh      JavaProjectsThatNeedHelp.py  OLD_grepc.py
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ nano grep.py
+
+#!/usr/bin/env python
+
+"""
+Copyright Google Inc. 2016
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+import apache_beam as beam
+import sys
+
+def my_grep(line, term):
+   if line.startswith(term):
+      yield line
+
+if __name__ == '__main__':
+   p = beam.Pipeline(argv=sys.argv)
+   input = '../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/*.java'
+   output_prefix = '/tmp/output'
+   searchTerm = 'import'
+
+   # find all lines that contain the searchTerm
+   (p
+      | 'GetJava' >> beam.io.ReadFromText(input)
+      | 'Grep' >> beam.FlatMap(lambda line: my_grep(line, searchTerm) )
+      | 'write' >> beam.io.WriteToText(output_prefix)
+   )
+
+   p.run().wait_until_finish()
+
+
+
+
+
+
+
+Can you answer these questions about the file grep.py?
+What files are being read?        => input = '../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/*.java'
+What is the search term?          => searchTerm = 'import'
+Where does the output go?         => folder with   output_prefix = '/tmp/output'
+
+There are three transforms in the pipeline:
+What does the transform do?             => Depends on the step. E.g. 1st step - read data from input file
+What does the second transform do?      => apply the 'my_grep' function written to return/keep only lines starting with 'import'
+Where does its input come from?         => input files in the input folder path '../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/*.java'
+What does it do with this input?        => 1st - read data from input file
+What does it write to its output?       => lines starting with 'import'
+Where does the output go?               => folder with   output_prefix = '/tmp/output'
+What does the third transform do?       => write to output file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Execute the pipeline locally - within compute engine's SSH terminal
+In the training-vm SSH terminal, locally execute grep.py:
+python3 grep.py
+
+The output file will be output.txt. If the output is large enough, it will be sharded into separate parts with names like: output-00000-of-00001.
+
+Locate the correct file by examining the file's time:
+ls -al /tmp
+
+Examine the output file(s).
+You can replace "-*" below with the appropriate suffix:
+cat /tmp/output-*
+
+
+
+
+
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ cd ~/training-data-analyst/courses/data_analysis/lab2/python
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ pwd
+/home/student-04-ad3b4bcda042/training-data-analyst/courses/data_analysis/lab2/python
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ ls
+grepc.py  install_packages_OLD.sh  is_popular.py                JavaProjectsThatNeedHelp_PY2_Version.py
+grep.py   install_packages.sh      JavaProjectsThatNeedHelp.py  OLD_grepc.py
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ ls -al /tmp
+total 40
+drwxrwxrwt  9 root                    root           4096 Aug 28 08:18 .
+drwxr-xr-x 23 root                    root           4096 Aug 28 05:42 ..
+drwxrwxrwt  2 root                    root           4096 Aug 28 05:42 .font-unix
+drwxr-xr-x  2 root                    root           4096 Aug 28 05:43 hsperfdata_root
+drwxrwxrwt  2 root                    root           4096 Aug 28 05:42 .ICE-unix
+-rw-r--r--  1 student-04-ad3b4bcda042 google-sudoers 2570 Aug 28 08:18 output-00000-of-00001
+drwx------  2 student-04-ad3b4bcda042 google-sudoers 4096 Aug 28 08:07 ssh-0qPgQJvw8o
+drwxrwxrwt  2 root                    root           4096 Aug 28 05:42 .Test-unix
+drwxrwxrwt  2 root                    root           4096 Aug 28 05:42 .X11-unix
+drwxrwxrwt  2 root                    root           4096 Aug 28 05:42 .XIM-unix
+
+
+
+
+
+
+
+student-04-ad3b4bcda042@training-vm:~$ pwd
+/home/student-04-ad3b4bcda042
+student-04-ad3b4bcda042@training-vm:~$ ls
+training-data-analyst
+
+
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ cd /tmp
+student-04-ad3b4bcda042@training-vm:/tmp$ ls
+hsperfdata_root  output-00000-of-00001  ssh-0qPgQJvw8o
+student-04-ad3b4bcda042@training-vm:/tmp$ pwd
+/tmp
+
+student-04-ad3b4bcda042@training-vm:/tmp$ cat output-00000-of-00001 
+OR
+student-04-ad3b4bcda042@training-vm:/tmp$ cat /tmp/output-00000-of-00001 
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Sum;
+import org.apache.beam.sdk.transforms.Top;
+import org.apache.beam.sdk.values.KV;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Sum;
+import org.apache.beam.sdk.transforms.windowing.SlidingWindows;
+import org.apache.beam.sdk.transforms.windowing.Window;
+import org.joda.time.Duration;
+import com.google.api.services.bigquery.model.TableFieldSchema;
+import com.google.api.services.bigquery.model.TableRow;
+import com.google.api.services.bigquery.model.TableSchema;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import com.google.api.services.bigquery.model.TableRow;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Sum;
+import org.apache.beam.sdk.transforms.Top;
+import org.apache.beam.sdk.transforms.View;
+import org.apache.beam.sdk.values.KV;
+import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PCollectionView;
+
+
+Does the output seem logical?     YES
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5. Execute the pipeline on the cloud
+Copy some Java files to the cloud. In the training-vm SSH terminal, enter the following command:
+gsutil cp ../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/*.java gs://$BUCKET/javahelp
+
+student-04-ad3b4bcda042@training-vm:/tmp$ gsutil cp ../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/*.java gs://$BUCKET/javahelp
+CommandException: No URLs matched: ../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/*.java
+student-04-ad3b4bcda042@training-vm:/tmp$ ls -al /javahelp
+ls: cannot access '/javahelp': No such file or directory
+
+student-04-ad3b4bcda042@training-vm:/tmp$ find / -name javahelp
+/home/student-04-ad3b4bcda042/training-data-analyst/courses/data_analysis/lab2/javahelp
+/home/student-04-ad3b4bcda042/training-data-analyst/courses/data_analysis/lab2/javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp
+...
+find: ‘/proc/10212/map_files’: Permission denied
+find: ‘/proc/10212/fdinfo’: Permission denied
+find: ‘/proc/10212/ns’: Permission denied
+
+student-04-ad3b4bcda042@training-vm:/tmp$ cd
+student-04-ad3b4bcda042@training-vm:~$ cd training-data-analyst/courses/data_analysis/lab2/javahelp
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/javahelp$ gsutil cp ../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/*.java gs://$BUCKET/javahelp
+Copying file://../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/Grep.java [Content-Type=text/x-java]...
+Copying file://../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/IsPopular.java [Content-Type=text/x-java]...
+Copying file://../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/JavaProjectsThatNeedHelp.java [Content-Type=text/x-java]...
+Copying file://../javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp/StreamDemoConsumer.java [Content-Type=text/x-java]...
+| [4 files][ 16.7 KiB/ 16.7 KiB]                                                
+Operation completed over 4 objects/16.7 KiB.  
+
+https://www.cyberciti.biz/faq/howto-find-a-directory-linux-command/
+https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/courses/data_analysis/lab2/javahelp/src/main/java/com/google/cloud/training/dataanalyst/javahelp
+
+
+
+
+
+
+
+Using Nano, edit the Dataflow pipeline in grepc.py:
+nano grepc.py
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/javahelp$ find . -name grepc.py
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/javahelp$ cd
+student-04-ad3b4bcda042@training-vm:~$ find . -name grepc.py
+./training-data-analyst/courses/data_analysis/lab2/python/grepc.py
+
+https://www.plesk.com/blog/various/find-files-in-linux-via-command-line/
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ pwd
+/home/student-04-ad3b4bcda042/training-data-analyst/courses/data_analysis/lab2/python
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ ls
+grepc.py  install_packages_OLD.sh  is_popular.py                JavaProjectsThatNeedHelp_PY2_Version.py
+grep.py   install_packages.sh      JavaProjectsThatNeedHelp.py  OLD_grepc.py
+
+
+
+
+
+
+
+
+Replace PROJECT and BUCKET with your Project ID and Bucket name.
+Example strings before you update:
+PROJECT='cloud-training-demos'
+BUCKET='cloud-training-demos'
+
+Example strings after edit (use your values):
+PROJECT='qwiklabs-gcp-your-value'
+BUCKET='qwiklabs-gcp-your-value'
+Save the file and close Nano by pressing the CTRL+X key, then type Y, and press Enter.
+
+PROJECT='qwiklabs-gcp-01-5e114ea99034'
+BUCKET='qwiklabs-gcp-01-5e114ea99034'
+
+
+
+
+Submit the Dataflow job to the cloud:
+python3 grepc.py
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ python3 grepc.pyWARNING: You are using pip version 22.0.3; however, version 22.2.2 is available.
+You should consider upgrading via the '/usr/local/bin/python3 -m pip install --upgrade pip' command.
+WARNING: You are using pip version 22.0.3; however, version 22.2.2 is available.
+You should consider upgrading via the '/usr/local/bin/python3 -m pip install --upgrade pip' command.
+WARNING:root:Make sure that locally built Python SDK docker image has Python 3.7 interpreter.
+
+Note: Ignore the message: WARNING:root:Make sure that locally built Python SDK docker image has Python 3.7 interpreter. Your Dataflow job will start successfully.
+Because this is such a small job, running on the cloud will take significantly longer than running it locally (on the order of 7-10 minutes).
+
+Return to the browser tab for the console.
+On the Navigation menu, click Dataflow and click on your job to monitor progress.
+Wait for the Job status to be Succeeded.
+Examine the output in the Cloud Storage bucket.
+On the Navigation menu, click Cloud Storage > Browser and click on your bucket.
+
+
+Click the javahelp directory.
+This job generates the file output.txt. If the file is large enough, it will be sharded into multiple parts with names like: output-0000x-of-000y. You can identify the most recent file by name or by the Last modified field.
+
+Click on the file to view it.
+Alternatively, you can download the file via the training-vm SSH terminal and view it:
+
+gsutil cp gs://$BUCKET/javahelp/output* .
+cat output*
+
+
+
+
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ gsutil cp gs://$BUCKET/javahelp/output* .
+Copying gs://qwiklabs-gcp-01-5e114ea99034/javahelp/output-00000-of-00001...
+/ [1 files][  2.5 KiB/  2.5 KiB]                                                
+Operation completed over 1 objects/2.5 KiB.                     
+
+student-04-ad3b4bcda042@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ cat output*
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Sum;
+import org.apache.beam.sdk.transforms.Top;
+import org.apache.beam.sdk.values.KV;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import com.google.api.services.bigquery.model.TableRow;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Sum;
+import org.apache.beam.sdk.transforms.Top;
+import org.apache.beam.sdk.transforms.View;
+import org.apache.beam.sdk.values.KV;
+import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PCollectionView;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Sum;
+import org.apache.beam.sdk.transforms.windowing.SlidingWindows;
+import org.apache.beam.sdk.transforms.windowing.Window;
+import org.joda.time.Duration;
+import com.google.api.services.bigquery.model.TableFieldSchema;
+import com.google.api.services.bigquery.model.TableRow;
+import com.google.api.services.bigquery.model.TableSchema;
+
+
+
+
+
+
+
+
+
