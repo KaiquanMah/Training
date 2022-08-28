@@ -1,0 +1,672 @@
+Overview
+In this lab you will learn how to migrate Apache Spark code to Cloud Dataproc. You will follow a sequence of steps progressively moving more of the job components over to GCP services:
+Run original Spark code on Cloud Dataproc (Lift and Shift)
+Replace HDFS with Cloud Storage (cloud-native)
+Automate everything so it runs on job-specific clusters (cloud-optimized)
+
+
+What you'll learn
+In this lab you will learn how to:
+Migrate existing Spark jobs to Cloud Dataproc
+Modify Spark jobs to use Cloud Storage instead of HDFS
+Optimize Spark jobs to run on Job specific clusters
+
+
+What you'll use
+Cloud Dataproc
+Apache Spark
+
+
+
+Scenario
+You are migrating an existing Spark workload to Cloud Dataproc and then progressively modifying the Spark code to make use of GCP native features and services.
+
+Task 1. Lift and shift
+Migrate existing Spark jobs to Cloud Dataproc
+You will create a new Cloud Dataproc cluster and then run an imported Jupyter notebook that uses the cluster's default local Hadoop Distributed File system (HDFS) to store source data and then process that data just as you would on any Hadoop cluster using Spark. This demonstrates how many existing analytics workloads such as Jupyter notebooks containing Spark code require no changes when they are migrated to a Cloud Dataproc environment.
+Configure and start a Cloud Dataproc cluster
+In the GCP Console, on the Navigation menu, in the Analytics section, click Dataproc.
+Click Create Cluster.
+Click Create for the item Cluster on Compute Engine.
+Enter sparktodp for Cluster Name.
+In the Versioning section, click Change and select 2.0 (Debian 10, Hadoop 3.2, Spark 3.1).
+This version includes Python3, which is required for the sample code used in this lab.
+Click Select.
+In the Components > Component gateway section, select Enable component gateway.
+-Provides access to the web interfaces of default and selected optional components on the cluster. 
+https://cloud.google.com/dataproc/docs/concepts/accessing/dataproc-gateways?_ga=2.201934034.-294366556.1661668679
+Under Optional components, Select Jupyter Notebook.
+https://cloud.google.com/dataproc/docs/concepts/components/overview?_ga=2.175351265.-294366556.1661668679
+Click Create.
+The cluster should start in a few minutes. You can proceed to the next step without waiting for the Cloud Dataproc Cluster to fully deploy.
+
+
+
+
+Clone the source repository for the lab
+In the Cloud Shell you clone the Git repository for the lab and copy the required notebook files to the Cloud Storage bucket used by Cloud Dataproc as the home directory for Jupyter notebooks.
+To clone the Git repository for the lab enter the following command in Cloud Shell:
+git -C ~ clone https://github.com/GoogleCloudPlatform/training-data-analyst
+
+To locate the default Cloud Storage bucket used by Cloud Dataproc enter the following command in Cloud Shell:
+export DP_STORAGE="gs://$(gcloud dataproc clusters describe sparktodp --region=us-central1 --format=json | jq -r '.config.configBucket')"
+
+To copy the sample notebooks into the Jupyter working folder enter the following command in Cloud Shell:
+gsutil -m cp ~/training-data-analyst/quests/sparktobq/*.ipynb $DP_STORAGE/notebooks/jupyter
+
+
+
+
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ git -C ~ clone https://github.com/GoogleCloudPlatform/training-data-analyst
+Cloning into 'training-data-analyst'...
+remote: Enumerating objects: 59907, done.
+remote: Counting objects: 100% (330/330), done.
+remote: Compressing objects: 100% (173/173), done.
+remote: Total 59907 (delta 174), reused 272 (delta 142), pack-reused 59577
+Receiving objects: 100% (59907/59907), 680.30 MiB | 17.52 MiB/s, done.
+Resolving deltas: 100% (37999/37999), done.
+Updating files: 100% (12650/12650), done.
+
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ export DP_STORAGE="gs://$(gcloud dataproc clusters describe sparktodp --region=us-central1 --format=json | jq -r '.config.configBucket')"
+echo student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ echo $DP_STORAGE
+gs://dataproc-staging-us-central1-15244265783-z0ozvvne
+
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ gsutil -m cp ~/training-data-analyst/quests/sparktobq/*.ipynb $DP_STORAGE/notebooks/jupyter
+Copying file:///home/student_00_f3adff700b22/training-data-analyst/quests/sparktobq/05_functions.ipynb [Content-Type=application/octet-stream]...
+Copying file:///home/student_00_f3adff700b22/training-data-analyst/quests/sparktobq/01_spark.ipynb [Content-Type=application/octet-stream]...
+Copying file:///home/student_00_f3adff700b22/training-data-analyst/quests/sparktobq/02_gcs.ipynb [Content-Type=application/octet-stream]...
+Copying file:///home/student_00_f3adff700b22/training-data-analyst/quests/sparktobq/04_bigquery.ipynb [Content-Type=application/octet-stream]...
+Copying file:///home/student_00_f3adff700b22/training-data-analyst/quests/sparktobq/03_automate.ipynb [Content-Type=application/octet-stream]...
+Copying file:///home/student_00_f3adff700b22/training-data-analyst/quests/sparktobq/05_functions_dw.ipynb [Content-Type=application/octet-stream]...
+\ [6/6 files][121.8 KiB/121.8 KiB] 100% Done
+Operation completed over 6 objects/121.8 KiB.
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ pwd
+/home/student_00_f3adff700b22
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ ls
+README-cloudshell.txt  training-data-analyst
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ cd training-data-analyst/
+student_00_f3adff700b22@cloudshell:~/training-data-analyst (qwiklabs-gcp-03-cc1d562d196b)$ ls
+blogs  bootcamps  CODEOWNERS  CONTRIBUTING.md  courses  CPB100  datalab  doc  iot  learning_rate.ipynb  LICENSE  quests  self-paced-labs
+
+student_00_f3adff700b22@cloudshell:~/training-data-analyst (qwiklabs-gcp-03-cc1d562d196b)$ cd quests/
+student_00_f3adff700b22@cloudshell:~/training-data-analyst/quests (qwiklabs-gcp-03-cc1d562d196b)$ ls
+bq-optimize  confluent  dataflow_python  data-science-on-gcp-edition1_tf2  develop-apis-apigee  endtoendml  iotlab  scientific    sparktobq  vertex-ai     windows
+bq-teradata  dataflow   dataflow_scala   dei                               dm_templates         genomics    rl      serverlessml  tpu        vm-migration
+
+student_00_f3adff700b22@cloudshell:~/training-data-analyst/quests (qwiklabs-gcp-03-cc1d562d196b)$ cd sparktobq/
+student_00_f3adff700b22@cloudshell:~/training-data-analyst/quests/sparktobq (qwiklabs-gcp-03-cc1d562d196b)$ ls
+01_spark.ipynb  03_automate.ipynb  05_functions_dw.ipynb  copy_from_gcs.sh  main.py    spark_analysis.py  submit_workflow.sh
+02_gcs.ipynb    04_bigquery.ipynb  05_functions.ipynb     copy_to_gcs.sh    README.md  submit_onejob.sh
+
+
+https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/quests/sparktobq
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Log in to the Jupyter Notebook
+As soon as the cluster has fully started up you can connect to the Web interfaces. Click the refresh button to check as it may be deployed fully by the time you reach this stage.
+On the Dataproc Clusters page wait for the cluster to finish starting and then click the name of your cluster to open the Cluster details page.
+Click Web Interfaces.
+Click the Jupyter link to open a new Jupyter tab in your browser.
+https://jqsxrcakijg7jknmwbbgtrwmuu-dot-us-central1.dataproc.googleusercontent.com/gateway/default/jupyter/tree?
+This opens the Jupyter home page. Here you can see the contents of the /notebooks/jupyter directory in Cloud Storage that now includes the sample Jupyter notebooks used in this lab.
+Under the Files tab, click the GCS folder and then click 01_spark.ipynb notebook to open it.
+Click Cell and then Run All to run all of the cells in the notebook.
+Page back up to the top of the notebook and follow as the notebook completes runs each cell and outputs the results below them.
+You can now step down through the cells and examine the code as it is processed so that you can see what the notebook is doing. In particular pay attention to where the data is saved and processed from.
+The first code cell fetches the source data file, which is an extract from the KDD Cup competition from the Knowledge, Discovery, and Data (KDD) conference in 1999. The data relates to computer intrusion detection events.
+!wget https://archive.ics.uci.edu/ml/machine-learning-databases/kddcup99-mld/kddcup.data_10_percent.gz
+
+
+pwd
+/
+
+ls
+bin@       etc/                       lib@     lost+found/  proc/  srv/  var/
+boot/      hadoop/                    lib32@   media/       root/  sys/
+copyright  home/                      lib64@   mnt/         run/   tmp/
+dev/       kddcup.data_10_percent.gz  libx32@  opt/         sbin@  usr/
+
+
+In the second code cell, the source data is copied to the default (local) Hadoop file system.
+!hadoop fs -put kddcup* /
+
+In the third code cell, the command lists contents of the default directory in the cluster's HDFS file system.
+!hadoop fs -ls /
+
+https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/quests/sparktobq/01_spark.ipynb
+
+
+
+
+
+
+
+
+
+
+
+Reading in data
+The data are gzipped CSV files. In Spark, these can be read directly using the textFile method and then parsed by splitting each row on commas.
+The Python Spark code starts in cell In[4].
+
+In this cell Spark SQL is initialized and Spark is used to read in the source data as text and then returns the first 5 rows.
+from pyspark.sql import SparkSession, SQLContext, Row
+spark = SparkSession.builder.appName("kdd").getOrCreate()
+sc = spark.sparkContext
+data_file = "hdfs:///kddcup.data_10_percent.gz"
+raw_rdd = sc.textFile(data_file).cache()
+raw_rdd.take(5)
+
+In cell In [5] each row is split, using , as a delimiter and parsed using a prepared inline schema in the code.
+csv_rdd = raw_rdd.map(lambda row: row.split(","))
+parsed_rdd = csv_rdd.map(lambda r: Row(
+    duration=int(r[0]),
+    protocol_type=r[1],
+    service=r[2],
+    flag=r[3],
+    src_bytes=int(r[4]),
+    dst_bytes=int(r[5]),
+    wrong_fragment=int(r[7]),
+    urgent=int(r[8]),
+    hot=int(r[9]),
+    num_failed_logins=int(r[10]),
+    num_compromised=int(r[12]),
+    su_attempted=r[14],
+    num_root=int(r[15]),
+    num_file_creations=int(r[16]),
+    label=r[-1]
+    )
+)
+parsed_rdd.take(5)
+
+
+
+
+
+
+
+Spark analysis
+In cell In [6] a Spark SQL context is created and a Spark dataframe using that context is created using the parsed input data from the previous stage.
+
+Row data can be selected and displayed using the dataframe's .show() method to output a view summarizing a count of selected fields:
+sqlContext = SQLContext(sc)
+df = sqlContext.createDataFrame(parsed_rdd)
+connections_by_protocol = df.groupBy('protocol_type').count().orderBy('count', ascending=False)
+connections_by_protocol.show()
+
+The .show() method produces an output table similar to this:
++-------------+------+
+|protocol_type| count|
++-------------+------+
+|         icmp|283602|
+|          tcp|190065|
+|          udp| 20354|
++-------------+------+
+SparkSQL can also be used to query the parsed data stored in the Dataframe.
+
+In cell In [7] a temporary table (connections) is registered that is then referenced inside the subsequent SparkSQL SQL query statement:
+df.registerTempTable("connections")
+attack_stats = sqlContext.sql("""
+    SELECT
+      protocol_type,
+      CASE label
+        WHEN 'normal.' THEN 'no attack'
+        ELSE 'attack'
+      END AS state,
+      COUNT(*) as total_freq,
+      ROUND(AVG(src_bytes), 2) as mean_src_bytes,
+      ROUND(AVG(dst_bytes), 2) as mean_dst_bytes,
+      ROUND(AVG(duration), 2) as mean_duration,
+      SUM(num_failed_logins) as total_failed_logins,
+      SUM(num_compromised) as total_compromised,
+      SUM(num_file_creations) as total_file_creations,
+      SUM(su_attempted) as total_root_attempts,
+      SUM(num_root) as total_root_acceses
+    FROM connections
+    GROUP BY protocol_type, state
+    ORDER BY 3 DESC
+    """)
+attack_stats.show()
+
+
+You will see output similar to this truncated example when the query has finished:
++-------------+---------+----------+--------------+--
+|protocol_type|    state|total_freq|mean_src_bytes|
++-------------+---------+----------+--------------+--
+|         icmp|   attack|    282314|        932.14|
+|          tcp|   attack|    113252|       9880.38|
+|          tcp|no attack|     76813|       1439.31|
+...
+...
+|          udp|   attack|      1177|          27.5|
++-------------+---------+----------+--------------+--
+
+
+And you can now also display this data visually using bar charts.
+The last cell, In [8] uses the %matplotlib inline Jupyter magic function to redirect matplotlib to render a graphic figure inline in the notebook instead of just dumping the data into a variable. This cell displays a bar chart using the attack_stats query from the previous step.
+%matplotlib inline
+ax = attack_stats.toPandas().plot.bar(x='protocol_type', subplots=True, figsize=(10,25))
+
+The first part of the output should look like the following chart once all cells in the notebook have run successfully. You can scroll down in your notebook to see the complete output chart.
+Bar chart
+https://cdn.qwiklabs.com/OzLx%2BtBPE20vJJnT6hGbAQ8jVH7Y%2B6xFNoi38erXuog%3D
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Separate compute and storage
+Modify Spark jobs to use Cloud Storage instead of HDFS
+Taking this original 'Lift & Shift' sample notebook you will now create a copy that decouples the storage requirements for the job from the compute requirements. In this case, all you have to do is replace the Hadoop file system calls with Cloud Storage calls by replacing hdfs:// storage references with gs:// references in the code and adjusting folder names as necessary.
+
+You start by using the cloud shell to place a copy of the source data in a new Cloud Storage bucket.
+In the Cloud Shell create a new storage bucket for your source data:
+export PROJECT_ID=$(gcloud info --format='value(config.project)')
+gsutil mb gs://$PROJECT_ID
+
+student_00_f3adff700b22@cloudshell:~/training-data-analyst/quests/sparktobq (qwiklabs-gcp-03-cc1d562d196b)$ export PROJECT_ID=$(gcloud info --format='value(config.project)')
+gsutil mb gs://$PROJECT_ID
+Creating gs://qwiklabs-gcp-03-cc1d562d196b/...
+student_00_f3adff700b22@cloudshell:~/training-data-analyst/quests/sparktobq (qwiklabs-gcp-03-cc1d562d196b)$ echo $PROJECT_ID
+qwiklabs-gcp-03-cc1d562d196b
+
+
+In the Cloud Shell copy the source data into the bucket:
+wget https://archive.ics.uci.edu/ml/machine-learning-databases/kddcup99-mld/kddcup.data_10_percent.gz
+gsutil cp kddcup.data_10_percent.gz gs://$PROJECT_ID/
+
+student_00_f3adff700b22@cloudshell:~/training-data-analyst/quests/sparktobq (qwiklabs-gcp-03-cc1d562d196b)$ wget https://archive.ics.uci.edu/ml/machine-learning-databases/kddcup99-mld/kddcup.data_10_percent.gz
+gsutil cp kddcup.data_10_percent.gz gs://$PROJECT_ID/
+--2022-08-28 07:02:15--  https://archive.ics.uci.edu/ml/machine-learning-databases/kddcup99-mld/kddcup.data_10_percent.gz
+Resolving archive.ics.uci.edu (archive.ics.uci.edu)... 128.195.10.252
+Connecting to archive.ics.uci.edu (archive.ics.uci.edu)|128.195.10.252|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 2144903 (2.0M) [application/x-httpd-php]
+Saving to: ‘kddcup.data_10_percent.gz’
+
+kddcup.data_10_percent.gz                       100%[=======================================================================================================>]   2.04M  1.68MB/s    in 1.2s
+
+2022-08-28 07:02:17 (1.68 MB/s) - ‘kddcup.data_10_percent.gz’ saved [2144903/2144903]
+
+
+
+Copying file://kddcup.data_10_percent.gz [Content-Type=application/octet-stream]...
+- [1 files][  2.0 MiB/  2.0 MiB]
+Operation completed over 1 objects/2.0 MiB.
+
+
+
+Make sure that the last command completes and the file has been copied to your new storage bucket.
+
+
+Switch back to the 01_spark Jupyter Notebook tab in your browser.
+Click File and then select Make a Copy.
+When the copy opens, click the 01_spark-Copy1 title and rename it to De-couple-storage.
+Open the Jupyter tab for 01_spark.
+Click File and then Save and checkpoint to save the notebook.
+Click File and then Close and Halt to shutdown the notebook.
+
+If you are prompted to confirm that you want to close the notebook click Leave or Cancel.
+Switch back to the De-couple-storage Jupyter Notebook tab in your browser, if necessary.
+You no longer need the cells that download and copy the data onto the cluster's internal HDFS file system so you will remove those first.
+To delete a cell, you click in the cell to select it and then click the cut selected cells icon (the scissors) on the notebook toolbar.
+Delete the initial comment cells and the first three code cells ( In [1], In [2], and In [3]) so that the notebook now starts with the section Reading in Data.
+
+You will now change the code in the first cell ( still called In[4] unless you have rerun the notebook ) that defines the data file source location and reads in the source data. The cell currently contains the following code:
+from pyspark.sql import SparkSession, SQLContext, Row
+spark = SparkSession.builder.appName("kdd").getOrCreate()
+sc = spark.sparkContext
+data_file = "hdfs:///kddcup.data_10_percent.gz"
+raw_rdd = sc.textFile(data_file).cache()
+raw_rdd.take(5)
+
+Replace the contents of cell In [4] with the following code. The only change here is create a variable to store a Cloud Storage bucket name and then to point the data_file to the bucket we used to store the source data on Cloud Storage:
+from pyspark.sql import SparkSession, SQLContext, Row
+gcs_bucket='[Your-Bucket-Name]'
+spark = SparkSession.builder.appName("kdd").getOrCreate()
+sc = spark.sparkContext
+data_file = "gs://"+gcs_bucket+"//kddcup.data_10_percent.gz"
+raw_rdd = sc.textFile(data_file).cache()
+raw_rdd.take(5)
+
+When you have replaced the code the first cell will look similar to the following, with your lab project ID as the bucket name:
+https://cdn.qwiklabs.com/lxRwZFWWNgly1JKdY9s5JNVNwgW4rKxzYKwBIgkHlBw%3D
+In the cell you just updated, replace the placeholder [Your-Bucket-Name] with the name of the storage bucket you created in the first step of this section. You created that bucket using the Project ID as the name, which you can copy here from the Qwiklabs lab login information panel on the left of this screen. Replace all of the placeholder text, including the brackets [].
+Click Cell and then Run All to run all of the cells in the notebook.
+You will see exactly the same output as you did when the file was loaded and run from internal cluster storage. Moving the source data files to Cloud Storage only requires that you repoint your storage source reference from hdfs:// to gs://.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Deploy Spark jobs
+
+Optimize Spark jobs to run on Job specific clusters
+You now create a standalone Python file, that can be deployed as a Cloud Dataproc Job, that will perform the same functions as this notebook. To do this you add magic commands to the Python cells in a copy of this notebook to write the cell contents out to a file. You will also add an input parameter handler to set the storage bucket location when the Python script is called to make the code more portable.
+In the De-couple-storage Jupyter Notebook menu, click File and select Make a Copy.
+When the copy opens, click the De-couple-storage-Copy1 and rename it to PySpark-analysis-file.
+Open the Jupyter tab for De-couple-storage.
+Click File and then Save and checkpoint to save the notebook.
+Click File and then Close and Halt to shutdown the notebook.
+If you are prompted to confirm that you want to close the notebook click Leave or Cancel.
+Switch back to the PySpark-analysis-file Jupyter Notebook tab in your browser, if necessary.
+Click the first cell at the top of the notebook.
+Click Insert and select Insert Cell Above.
+
+Paste the following library import and parameter handling code into this new first code cell:
+%%writefile spark_analysis.py
+import matplotlib
+matplotlib.use('agg')
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--bucket", help="bucket for input and output")
+args = parser.parse_args()
+BUCKET = args.bucket
+
+The %%writefile spark_analysis.py Jupyter magic command creates a new output file to contain your standalone python script. You will add a variation of this to the remaining cells to append the contents of each cell to the standalone script file.
+This code also imports the matplotlib module and explicitly sets the default plotting backend via matplotlib.use('agg') so that the plotting code runs outside of a Jupyter notebook.
+
+
+
+
+For the remaining cells insert %%writefile -a spark_analysis.py at the start of each Python code cell. These are the five cells labelled In [x].
+%%writefile -a spark_analysis.py
+
+For example the next cell should now look as follows:
+%%writefile -a spark_analysis.py
+from pyspark.sql import SparkSession, SQLContext, Row
+spark = SparkSession.builder.appName("kdd").getOrCreate()
+sc = spark.sparkContext
+data_file = "gs://{}/kddcup.data_10_percent.gz".format(BUCKET)
+raw_rdd = sc.textFile(data_file).cache()
+#raw_rdd.take(5)
+
+Repeat this step, inserting %%writefile -a spark_analysis.py at the start of each code cell until you reach the end.
+
+
+In the last cell, where the Pandas bar chart is plotted, remove the %matplotlib inline magic command.
+Note: You must remove this inline matplotlib Jupyter magic directive or your script will fail when you run it.
+Make sure you have selected the last code cell in the notebook then, in the menu bar, click Insert and select Insert Cell Below.
+
+
+
+Paste the following code into the new cell:
+%%writefile -a spark_analysis.py
+ax[0].get_figure().savefig('report.png');
+
+Add another new cell at the end of the notebook and paste in the following:
+%%writefile -a spark_analysis.py
+import google.cloud.storage as gcs
+bucket = gcs.Client().get_bucket(BUCKET)
+for blob in bucket.list_blobs(prefix='sparktodp/'):
+    blob.delete()
+bucket.blob('sparktodp/report.png').upload_from_filename('report.png')
+
+Add a new cell at the end of the notebook and paste in the following:
+%%writefile -a spark_analysis.py
+connections_by_protocol.write.format("csv").mode("overwrite").save(
+    "gs://{}/sparktodp/connections_by_protocol".format(BUCKET))
+
+
+
+
+
+
+Test automation
+You now test that the PySpark code runs successfully as a file by calling the local copy from inside the notebook, passing in a parameter to identify the storage bucket you created earlier that stores the input data for this job. The same bucket will be used to store the report data files produced by the script.
+
+In the PySpark-analysis-file notebook add a new cell at the end of the notebook and paste in the following:
+BUCKET_list = !gcloud info --format='value(config.project)'
+BUCKET=BUCKET_list[0]
+print('Writing to {}'.format(BUCKET))
+!/opt/conda/miniconda3/bin/python spark_analysis.py --bucket=$BUCKET
+
+This code assumes that you have followed the earlier instructions and created a Cloud Storage Bucket using your lab Project ID as the Storage Bucket name. If you used a different name modify this code to set the BUCKET variable to the name you used.
+
+
+Add a new cell at the end of the notebook and paste in the following:
+!gsutil ls gs://$BUCKET/sparktodp/**
+This lists the script output files that have been saved to your Cloud Storage bucket.
+
+
+To save a copy of the Python file to persistent storage, add a new cell and paste in the following:
+!gsutil cp spark_analysis.py gs://$BUCKET/sparktodp/spark_analysis.py
+
+
+Click Cell and then Run All to run all of the cells in the notebook.
+If the notebook successfully creates and runs the Python file you should see output similar to the following for the last two cells. This indicates that the script has run to completion saving the output to the Cloud Storage bucket you created earlier in the lab.
+https://cdn.qwiklabs.com/OsHsS7LQZteKglcq3Pm%2BXSn4kZxdRJPE%2BYxNxmRgNvA%3D
+Note: The most likely source of an error at this stage is that you did not remove the matplotlib directive in In [7]. Recheck that you have modified all of the cells as per the instructions above, and have not skipped any steps.
+
+
+
+
+
+
+
+
+Run the Analysis Job from Cloud Shell.
+Switch back to your Cloud Shell and copy the Python script from Cloud Storage so you can run it as a Cloud Dataproc Job:
+gsutil cp gs://$PROJECT_ID/sparktodp/spark_analysis.py spark_analysis.py
+
+# round 1
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ gsutil cp gs://$PROJECT_ID/sparktodp/spark_analysis.py spark_analysis.py
+InvalidUrlError: Cloud URL scheme should be followed by colon and two slashes: "://". Found: "gs:///sparktodp/spark_analysis.py".
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ echo $PROJECT_ID
+
+# round 2 <- because we launched a new cloud shell session, we need to initialise the variables we need again
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ export PROJECT_ID=$(gcloud info --format='value(config.project)')
+gsutil mb gs://$PROJECT_ID
+Creating gs://qwiklabs-gcp-03-cc1d562d196b/...
+ServiceException: 409 A Cloud Storage bucket named 'qwiklabs-gcp-03-cc1d562d196b' already exists. Try another name. Bucket names must be globally unique across all Google Cloud projects, including those outside of your organization.
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ echo $PROJECT_ID
+qwiklabs-gcp-03-cc1d562d196b
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ gsutil cp gs://$PROJECT_ID/sparktodp/spark_analysis.py spark_analysis.py
+Copying gs://qwiklabs-gcp-03-cc1d562d196b/sparktodp/spark_analysis.py...
+- [1 files][  2.9 KiB/  2.9 KiB]
+Operation completed over 1 objects/2.9 KiB.
+
+
+
+
+
+Create a launch script:
+nano submit_onejob.sh
+
+Paste the following into the script:
+#!/bin/bash
+gcloud dataproc jobs submit pyspark \
+       --cluster sparktodp \
+       --region us-central1 \
+       spark_analysis.py \
+       -- --bucket=$1
+
+Press CTRL+X then Y and Enter key to exit and save.
+
+
+
+
+Make the script executable:
+chmod +x submit_onejob.sh
+
+Launch the PySpark Analysis job:
+./submit_onejob.sh $PROJECT_ID
+
+
+
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-03-cc1d562d196b)$ ./submit_onejob.sh $PROJECT_ID
+Job [6e1ace6749764a6ebef13ae8887249be] submitted.
+Waiting for job output...
+
+
+
+22/08/28 07:38:35 INFO org.apache.spark.SparkEnv: Registering MapOutputTracker
+22/08/28 07:38:35 INFO org.apache.spark.SparkEnv: Registering BlockManagerMaster
+22/08/28 07:38:35 INFO org.apache.spark.SparkEnv: Registering BlockManagerMasterHeartbeat
+22/08/28 07:38:35 INFO org.apache.spark.SparkEnv: Registering OutputCommitCoordinator
+22/08/28 07:38:35 INFO org.sparkproject.jetty.util.log: Logging initialized @3517ms to org.sparkproject.jetty.util.log.Slf4jLog
+22/08/28 07:38:36 INFO org.sparkproject.jetty.server.Server: jetty-9.4.40.v20210413; built: 2021-04-13T20:42:42.668Z; git: b881a572662e1943a14ae12e7e1207989f218b74; jvm 1.8.0_332-b09
+22/08/28 07:38:36 INFO org.sparkproject.jetty.server.Server: Started @3641ms
+22/08/28 07:38:36 INFO org.sparkproject.jetty.server.AbstractConnector: Started ServerConnector@17efc31{HTTP/1.1, (http/1.1)}{0.0.0.0:44815}
+22/08/28 07:38:36 INFO org.apache.hadoop.yarn.client.RMProxy: Connecting to ResourceManager at sparktodp-m/10.128.0.3:8032
+22/08/28 07:38:37 INFO org.apache.hadoop.yarn.client.AHSProxy: Connecting to Application History server at sparktodp-m/10.128.0.3:10200
+22/08/28 07:38:38 INFO org.apache.hadoop.conf.Configuration: resource-types.xml not found
+22/08/28 07:38:38 INFO org.apache.hadoop.yarn.util.resource.ResourceUtils: Unable to find 'resource-types.xml'.
+22/08/28 07:38:39 INFO org.apache.hadoop.yarn.client.api.impl.YarnClientImpl: Submitted application application_1661668943082_0003
+22/08/28 07:38:40 INFO org.apache.hadoop.yarn.client.RMProxy: Connecting to ResourceManager at sparktodp-m/10.128.0.3:8030
+22/08/28 07:38:42 INFO com.google.cloud.hadoop.repackaged.gcs.com.google.cloud.hadoop.gcsio.GoogleCloudStorageImpl: Ignoring exception of type GoogleJsonResponseException; verified object already exists with desired state.
+22/08/28 07:38:44 INFO org.apache.hadoop.mapred.FileInputFormat: Total input files to process : 1
++-------------+------+
+|protocol_type| count|
++-------------+------+
+|         icmp|283602|
+|          tcp|190065|
+|          udp| 20354|
++-------------+------+
+
++-------------+---------+----------+--------------+--------------+-------------+-------------------+-----------------+--------------------+-------------------+------------------+
+|protocol_type|    state|total_freq|mean_src_bytes|mean_dst_bytes|mean_duration|total_failed_logins|total_compromised|total_file_creations|total_root_attempts|total_root_acceses|
++-------------+---------+----------+--------------+--------------+-------------+-------------------+-----------------+--------------------+-------------------+------------------+
+|         icmp|   attack|    282314|        932.14|           0.0|          0.0|                  0|                0|                   0|  0.0|                 0|
+|          tcp|   attack|    113252|       9880.38|        881.41|        23.19|                 57|             2269|                  76|  1.0|               152|
+|          tcp|no attack|     76813|       1439.31|       4263.97|        11.08|                 18|             2776|                 459| 17.0|              5456|
+|          udp|no attack|     19177|         98.01|         89.89|      1054.63|                  0|                0|                   0|  0.0|                 0|
+|         icmp|no attack|      1288|         91.47|           0.0|          0.0|                  0|                0|                   0|  0.0|                 0|
+|          udp|   attack|      1177|          27.5|          0.23|          0.0|                  0|                0|                   0|  0.0|                 0|
++-------------+---------+----------+--------------+--------------+-------------+-------------------+-----------------+--------------------+-------------------+------------------+
+
+22/08/28 07:39:24 INFO com.google.cloud.hadoop.repackaged.gcs.com.google.cloud.hadoop.gcsio.GoogleCloudStorageFileSystem: Successfully repaired 'gs://qwiklabs-gcp-03-cc1d562d196b/sparktodp/connections_by_protocol/' directory.
+22/08/28 07:39:25 INFO org.sparkproject.jetty.server.AbstractConnector: Stopped Spark@17efc31{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+
+
+
+
+Job [6e1ace6749764a6ebef13ae8887249be] finished successfully.
+done: true
+driverControlFilesUri: gs://dataproc-staging-us-central1-15244265783-z0ozvvne/google-cloud-dataproc-metainfo/ddae16df-17f9-4dc5-9715-a3c29bd1ce97/jobs/6e1ace6749764a6ebef13ae8887249be/
+driverOutputResourceUri: gs://dataproc-staging-us-central1-15244265783-z0ozvvne/google-cloud-dataproc-metainfo/ddae16df-17f9-4dc5-9715-a3c29bd1ce97/jobs/6e1ace6749764a6ebef13ae8887249be/driveroutput
+jobUuid: 14188807-abd2-3270-9f9a-fe3fe5e8a519
+placement:
+  clusterName: sparktodp
+  clusterUuid: ddae16df-17f9-4dc5-9715-a3c29bd1ce97
+pysparkJob:
+  args:
+  - --bucket=qwiklabs-gcp-03-cc1d562d196b
+  mainPythonFileUri: gs://dataproc-staging-us-central1-15244265783-z0ozvvne/google-cloud-dataproc-metainfo/ddae16df-17f9-4dc5-9715-a3c29bd1ce97/jobs/6e1ace6749764a6ebef13ae8887249be/staging/spark_analysis.py
+reference:
+  jobId: 6e1ace6749764a6ebef13ae8887249be
+  projectId: qwiklabs-gcp-03-cc1d562d196b
+status:
+  state: DONE
+  stateStartTime: '2022-08-28T07:39:30.107434Z'
+statusHistory:
+- state: PENDING
+  stateStartTime: '2022-08-28T07:38:30.764721Z'
+- state: SETUP_DONE
+  stateStartTime: '2022-08-28T07:38:30.799732Z'
+- details: Agent reported job success
+  state: RUNNING
+  stateStartTime: '2022-08-28T07:38:31.132279Z'
+yarnApplications:
+- name: kdd
+  progress: 1.0
+  state: FINISHED
+  trackingUrl: http://sparktodp-m:8088/proxy/application_1661668943082_0003/
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+In the Cloud Console tab navigate to the Dataproc > Clusters page if it is not already open.
+Click Jobs.
+Click the name of the job that is listed. You can monitor progress here as well as from the Cloud shell. Wait for the Job to complete successfully.
+
+Navigate to your storage bucket and note that the output report, /sparktodp/report.png has an updated time-stamp indicating that the stand-alone job has completed successfully.
+The storage bucket used by this Job for input and output data storage is the bucket that is used just the Project ID as the name.
+
+Navigate back to the Dataproc > Clusters page.
+Select the sparktodp cluster and click Delete. You don't need it any more.
+Click CONFIRM.
+Close the Jupyter tabs in your browser.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
