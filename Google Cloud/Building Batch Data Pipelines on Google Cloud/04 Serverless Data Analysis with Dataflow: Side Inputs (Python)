@@ -1,0 +1,565 @@
+Overview
+In this lab, you learn how to load data into BigQuery and run complex queries. Next, you will execute a Dataflow pipeline that can carry out Map and Reduce operations, use side inputs and stream into BigQuery.
+
+Objective
+In this lab, you learn how to use BigQuery as a data source into Dataflow, and how to use the results of a pipeline as a side input to another pipeline.
+Read data from BigQuery into Dataflow
+Use the output of a pipeline as a side-input to another pipeline
+
+
+
+
+
+
+
+
+
+Task 1. Preparation
+Assign the Dataflow Developer role
+If the account does not have the Dataflow Developer role, follow the steps below to assign the required role.
+On the Navigation menu, click IAM & Admin > IAM.
+Select the default compute Service Account {project-number}-compute@developer.gserviceaccount.com.
+Select the Edit option (the pencil on the far right).
+Click Add Another Role
+Click inside the box for Select a Role. In the Type to filter selector, type and choose Dataflow Developer.
+Click Save.
+https://cdn.qwiklabs.com/eNWdXSBqdk4xC29NKuR4uSKgpOG6Ynw1lVcKkwjuwXo%3D
+
+
+
+
+Ensure that the Dataflow API is successfully enabled
+To ensure access to the necessary API, restart the connection to the Dataflow API.
+In the Cloud Console, enter Dataflow API in the top search bar. Click on the result for Dataflow API.
+Click Manage.
+Click Disable API.
+If asked to confirm, click Disable.
+Click Enable.
+When the API has been enabled again, the page will show the option to disable.
+
+
+Open the SSH terminal and connect to the training VM
+You will be running all code from a curated training VM.
+In the Console, on the Navigation menu (Navigation menu icon), click Compute Engine > VM instances.
+Locate the line with the instance called training-vm.
+On the far right, under Connect, click on SSH to open a terminal window.
+In this lab, you will enter CLI commands on the training-vm.
+
+
+
+
+Download Code Repository
+Next you will download a code repository for use in this lab. In the training-vm SSH terminal enter the following:
+git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+
+Create a Cloud Storage bucket
+Follow these instructions to create a bucket.
+In the Console, on the Navigation menu, click Home.
+Select and copy the Project ID.               -           qwiklabs-gcp-00-7f9c9f22d898
+For simplicity you will use the Qwiklabs Project ID, which is already globally unique, as the bucket name.
+In the Console, on the Navigation menu, click Cloud Storage > Browser.
+Click Create Bucket.
+Specify the following, and leave the remaining settings as their defaults:
+Property	    Value (type value or select option as specified)
+Name	        <your unique bucket name (Project ID)>                  -   qwiklabs-gcp-00-7f9c9f22d898
+Location type	Multi-Region
+Location	    <Your location>
+
+Click Create.
+Record the name of your bucket. You will need it in subsequent tasks.
+In the training-vm SSH terminal enter the following to create two environment variables. One named "BUCKET" and the other named "PROJECT". Verify that each exists with the echo command:
+BUCKET="<your unique bucket name (Project ID)>"
+echo $BUCKET
+
+PROJECT="<your unique project name (Project ID)>"
+echo $PROJECT
+
+
+export BUCKET="qwiklabs-gcp-00-7f9c9f22d898"
+export PROJECT="qwiklabs-gcp-00-7f9c9f22d898"
+echo $BUCKET
+echo $PROJECT
+
+student-01-0b629d77c055@training-vm:~$ export BUCKET="qwiklabs-gcp-00-7f9c9f22d898"
+student-01-0b629d77c055@training-vm:~$ export PROJECT="qwiklabs-gcp-00-7f9c9f22d898"
+student-01-0b629d77c055@training-vm:~$ echo $BUCKET
+qwiklabs-gcp-00-7f9c9f22d898
+student-01-0b629d77c055@training-vm:~$ echo $PROJECT
+qwiklabs-gcp-00-7f9c9f22d898
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Try using BigQuery query
+In the console, on the Navigation menu (Navigation menu icon), click BigQuery.
+If prompted click Done.
+Click Compose new query and type the following query:
+
+SELECT
+  content
+FROM
+  `fh-bigquery.github_extracts.contents_java_2016`
+LIMIT
+  10
+
+Click on Run.
+
+
+What is being returned?
+The BigQuery table fh-bigquery.github_extracts.contents_java_2016 contains the content (and some metadata) of all the Java files present in GitHub in 2016.
+
+[{
+  "content": "package com.celerysoft.bedtime.fragment.main.model;\n\nimport com.celerysoft.bedtime.bean.BaseTimeBean;\n\n/**\n * Created by admin on 16/4/28.\n */\npublic class AlarmTimeBean extends BaseTimeBean {\n    public enum Type {\n        GO_BED,\n        BED_TIME\n    }\n\n    private Type mType;\n    public Type getType() {\n        return mType;\n    }\n\n    public void setType(Type type) {\n        mType \u003d type;\n    }\n\n    @Override\n    public boolean equals(Object o) {\n        AlarmTimeBean bean;\n\n        if (o instanceof AlarmTimeBean) {\n            bean \u003d (AlarmTimeBean) o;\n        } else {\n            return false;\n        }\n\n        if (!bean.getType().equals(getType())) {\n            return false;\n        }\n\n        if (bean.getDayOfTheWeek() !\u003d getDayOfTheWeek()) {\n            return false;\n        }\n\n        if (bean.getHour() !\u003d getHour()) {\n            return false;\n        }\n\n        if (bean.getMinute() !\u003d getMinute()) {\n            return false;\n        }\n\n        return true;\n    }\n}\n"
+}, {
+  "content": "// Created by plusminus on 2:17:46 AM - Mar 6, 2009\npackage org.osmdroid.mtp.util;\n\nimport java.io.File;\nimport java.io.FileInputStream;\nimport java.io.FileNotFoundException;\nimport java.io.FileOutputStream;\nimport java.io.IOException;\nimport java.util.zip.ZipEntry;\nimport java.util.zip.ZipOutputStream;\n\nimport org.osmdroid.tileprovider.util.StreamUtils;\n\npublic class FolderZipper {\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\t// Constants\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\t// Fields\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\t// Constructors\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\t// Getter \u0026 Setter\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\t// Methods from SuperClass/Interfaces\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\t// Methods\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\n\tpublic static void zipFolderToFile(final File pDestinationFile, final File pFolderToZip){\n\t\ttry {\n\t\t\t//create ZipOutputStream object\n\t\t\tfinal ZipOutputStream out \u003d new ZipOutputStream(new FileOutputStream(pDestinationFile));\n\n\t\t\tString baseName \u003d pFolderToZip.getParent();\n               if (baseName\u003d\u003dnull)\n                    baseName\u003d\"\";\n\n\t\t\taddFolderToZip(pFolderToZip, out, baseName);\n\n\t\t\tStreamUtils.closeStream(out);\n\t\t} catch (final FileNotFoundException e) {\n\t\t\te.printStackTrace();\n\t\t} catch (final IOException e) {\n\t\t\te.printStackTrace();\n\t\t}\n\t}\n\n\n\tprivate static void addFolderToZip(final File folder, final ZipOutputStream zip, final String baseName) throws IOException {\n\t\tfinal File[] files \u003d folder.listFiles();\n\t\t/* For each child (subdirectory/child-file). */\n\t\tfor (final File file : files) {\n\t\t\tif (file.isDirectory()) {\n\t\t\t\t/* If the file is a folder, do recursrion with this folder.*/\n\t\t\t\taddFolderToZip(file, zip, baseName);\n\t\t\t} else {\n\t\t\t\t/* Otherwise zip it as usual. */\n\t\t\t\tfinal String name \u003d file.getPath().substring(baseName.length());\n\t\t\t\tfinal ZipEntry zipEntry \u003d new ZipEntry(name);\n\t\t\t\tzip.putNextEntry(zipEntry);\n\t\t\t\tfinal FileInputStream fileIn \u003d new FileInputStream(file);\n\t\t\t\tStreamUtils.copy(fileIn, zip);\n\t\t\t\tStreamUtils.closeStream(fileIn);\n\t\t\t\tzip.closeEntry();\n\t\t\t}\n\t\t}\n\t}\n\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\t// Inner and Anonymous Classes\n\t// \u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\u003d\n\n}\n"
+}, {
+  "content": "/*\n * VITacademics\n * Copyright (C) 2015  Aneesh Neelam \u003cneelam.aneesh@gmail.com\u003e\n * Copyright (C) 2015  Saurabh Joshi \u003csaurabhjoshi94@outlook.com\u003e\n * Copyright (C) 2015  Gaurav Agerwala \u003cgauravagerwala@gmail.com\u003e\n * Copyright (C) 2015  Karthik Balakrishnan \u003ckarthikb351@gmail.com\u003e\n * Copyright (C) 2015  Pulkit Juneja \u003cpulkit.16296@gmail.com\u003e\n * Copyright (C) 2015  Hemant Jain \u003chemanham@gmail.com\u003e\n * Copyright (C) 2015  Darshan Mehta \u003cdarshanmehta17@gmail.com\u003e\n *\n * This file is part of VITacademics.\n *\n * VITacademics is free software: you can redistribute it and/or modify\n * it under the terms of the GNU General Public License as published by\n * the Free Software Foundation, either version 3 of the License, or\n * (at your option) any later version.\n *\n * VITacademics is distributed in the hope that it will be useful,\n * but WITHOUT ANY WARRANTY; without even the implied warranty of\n * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n * GNU General Public License for more details.\n *\n * You should have received a copy of the GNU General Public License\n * along with VITacademics.  If not, see \u003chttp://www.gnu.org/licenses/\u003e.\n */\n\npackage com.karthikb351.vitinfo2.utility;\n\nimport android.support.annotation.Nullable;\n\npublic class StringUtils {\n\n    @Nullable\n    public static String toTitleCase(String string) {\n\n        if (string \u003d\u003d null) {\n            return null;\n        }\n\n        boolean space \u003d true;\n        StringBuilder builder \u003d new StringBuilder(string);\n        final int len \u003d builder.length();\n\n        for (int i \u003d 0; i \u003c len; ++i) {\n            char c \u003d builder.charAt(i);\n            if (space) {\n                if (!Character.isWhitespace(c)) {\n                    // Convert to title case and switch out of whitespace mode.\n                    builder.setCharAt(i, Character.toTitleCase(c));\n                    space \u003d false;\n                }\n            } else if (Character.isWhitespace(c)) {\n                space \u003d true;\n            } else {\n                builder.setCharAt(i, Character.toLowerCase(c));\n            }\n        }\n\n        return builder.toString();\n    }\n\n    public static boolean checkString(String string) {\n        return string !\u003d null \u0026\u0026 !string.isEmpty();\n    }\n\n}\n"
+}, {
+  "content": "package network.exceptions;\n\n/**\n * Thrown to indicate that a node does not exist in a given network.\n */\npublic class NodeNotFoundException extends Exception {\n\n    public NodeNotFoundException(String s) {\n        super(s);\n    }\n}\n"
+}, {
+  "content": "package org.ovirt.engine.core.bll.storage.export;\n\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.List;\nimport java.util.Map;\n\nimport org.ovirt.engine.core.bll.DisableInPrepareMode;\nimport org.ovirt.engine.core.bll.LockMessagesMatchUtil;\nimport org.ovirt.engine.core.bll.VmHandler;\nimport org.ovirt.engine.core.bll.VmTemplateHandler;\nimport org.ovirt.engine.core.bll.context.CommandContext;\nimport org.ovirt.engine.core.bll.storage.ovfstore.OvfUpdateProcessHelper;\nimport org.ovirt.engine.core.bll.validator.storage.StorageDomainValidator;\nimport org.ovirt.engine.core.common.AuditLogType;\nimport org.ovirt.engine.core.common.VdcObjectType;\nimport org.ovirt.engine.core.common.action.LockProperties;\nimport org.ovirt.engine.core.common.action.LockProperties.Scope;\nimport org.ovirt.engine.core.common.action.MoveOrCopyImageGroupParameters;\nimport org.ovirt.engine.core.common.action.MoveOrCopyParameters;\nimport org.ovirt.engine.core.common.action.VdcActionParametersBase;\nimport org.ovirt.engine.core.common.action.VdcActionType;\nimport org.ovirt.engine.core.common.action.VdcReturnValueBase;\nimport org.ovirt.engine.core.common.businessentities.StorageDomainType;\nimport org.ovirt.engine.core.common.businessentities.storage.CopyVolumeType;\nimport org.ovirt.engine.core.common.businessentities.storage.DiskImage;\nimport org.ovirt.engine.core.common.businessentities.storage.ImageDbOperationScope;\nimport org.ovirt.engine.core.common.errors.EngineException;\nimport org.ovirt.engine.core.common.errors.EngineMessage;\nimport org.ovirt.engine.core.common.locks.LockingGroup;\nimport org.ovirt.engine.core.common.utils.Pair;\nimport org.ovirt.engine.core.compat.Guid;\nimport org.ovirt.engine.core.compat.KeyValuePairCompat;\nimport org.ovirt.engine.core.utils.transaction.TransactionSupport;\n\n@DisableInPrepareMode\npublic class ExportVmTemplateCommand\u003cT extends MoveOrCopyParameters\u003e extends MoveOrCopyTemplateCommand\u003cT\u003e {\n\n    private String cachedTemplateIsBeingExportedMessage;\n\n    public ExportVmTemplateCommand(T parameters, CommandContext commandContext) {\n        super(parameters, commandContext);\n        if (getVmTemplate() !\u003d null) {\n            setDescription(getVmTemplateName());\n            setStoragePoolId(getVmTemplate().getStoragePoolId());\n        }\n    }\n\n    public ExportVmTemplateCommand(Guid commandId) {\n        super(commandId);\n    }\n\n    @Override\n    protected LockProperties applyLockProperties(LockProperties lockProperties) {\n        return lockProperties.withScope(Scope.Command);\n    }\n\n    @Override\n    protected void moveOrCopyAllImageGroups(final Guid containerID, final Iterable\u003cDiskImage\u003e disks) {\n        TransactionSupport.executeInNewTransaction(() -\u003e {\n            for (DiskImage disk : disks) {\n                // we force export template image to COW+Sparse but we don\u0027t update\n                // the ovf so the import\n                // will set the original format\n                MoveOrCopyImageGroupParameters p \u003d new MoveOrCopyImageGroupParameters(containerID, disk\n                        .getId(), disk.getImageId(), getParameters().getStorageDomainId(),\n                        getMoveOrCopyImageOperation());\n                p.setParentCommand(getActionType());\n                p.setParentParameters(getParameters());\n                p.setEntityInfo(getParameters().getEntityInfo());\n                p.setUseCopyCollapse(true);\n                p.setCopyVolumeType(CopyVolumeType.SharedVol);\n                p.setVolumeFormat(disk.getVolumeFormat());\n                p.setVolumeType(disk.getVolumeType());\n                p.setForceOverride(getParameters().getForceOverride());\n                p.setRevertDbOperationScope(ImageDbOperationScope.NONE);\n                p.setShouldLockImageOnRevert(false);\n                p.setSourceDomainId(imageFromSourceDomainMap.get(disk.getId()).getStorageIds().get(0));\n                VdcReturnValueBase vdcRetValue \u003d\n                        runInternalActionWithTasksContext(VdcActionType.CopyImageGroup, p);\n\n                if (!vdcRetValue.getSucceeded()) {\n                    throw new EngineException(vdcRetValue.getFault().getError(), vdcRetValue.getFault()\n                            .getMessage());\n                }\n\n                getReturnValue().getVdsmTaskIdList().addAll(vdcRetValue.getInternalVdsmTaskIdList());\n            }\n            return null;\n        });\n    }\n\n    @Override\n    protected Map\u003cString, Pair\u003cString, String\u003e\u003e getExclusiveLocks() {\n        return Collections.singletonMap(getVmTemplateId().toString(),\n                LockMessagesMatchUtil.makeLockingPair(LockingGroup.REMOTE_TEMPLATE, getTemplateIsBeingExportedMessage()));\n    }\n\n    @Override\n    protected Map\u003cString, Pair\u003cString, String\u003e\u003e getSharedLocks() {\n        return Collections.singletonMap(getVmTemplateId().toString(),\n                LockMessagesMatchUtil.makeLockingPair(LockingGroup.TEMPLATE, getTemplateIsBeingExportedMessage()));\n    }\n\n    @Override\n    protected void executeCommand() {\n        VmHandler.updateVmInitFromDB(getVmTemplate(), true);\n        if (!getTemplateDisks().isEmpty()) {\n            moveOrCopyAllImageGroups();\n        } else {\n            endVmTemplateRelatedOps();\n        }\n        setSucceeded(true);\n    }\n\n    private String getTemplateIsBeingExportedMessage() {\n        if (cachedTemplateIsBeingExportedMessage \u003d\u003d null) {\n            StringBuilder builder \u003d new StringBuilder(EngineMessage.ACTION_TYPE_FAILED_TEMPLATE_IS_BEING_EXPORTED.name());\n            if (getVmTemplate() !\u003d null) {\n                builder.append(String.format(\"$TemplateName %1$s\", getVmTemplate().getName()));\n            }\n            cachedTemplateIsBeingExportedMessage \u003d builder.toString();\n        }\n        return cachedTemplateIsBeingExportedMessage;\n    }\n\n    @Override\n    protected boolean validate() {\n        if (getVmTemplate() \u003d\u003d null) {\n            return failValidation(EngineMessage.ACTION_TYPE_FAILED_TEMPLATE_DOES_NOT_EXIST);\n        }\n        StorageDomainValidator storageDomainValidator \u003d new StorageDomainValidator(getStorageDomain());\n        boolean retVal \u003d validate(storageDomainValidator.isDomainExistAndActive());\n\n        if (retVal) {\n            // export must be to export domain\n            if (getStorageDomain().getStorageDomainType() !\u003d StorageDomainType.ImportExport) {\n                addValidationMessage(EngineMessage.ACTION_TYPE_FAILED_SPECIFY_DOMAIN_IS_NOT_EXPORT_DOMAIN);\n                retVal \u003d false;\n            }\n        }\n\n        retVal \u003d retVal \u0026\u0026 super.validate();\n\n        // check if template (with no override option)\n        if (retVal \u0026\u0026 !getParameters().getForceOverride()) {\n            retVal \u003d !ExportVmCommand.checkTemplateInStorageDomain(getVmTemplate().getStoragePoolId(),\n                    getParameters().getStorageDomainId(), getVmTemplateId(), getContext().getEngineContext());\n            if (!retVal) {\n                addValidationMessage(EngineMessage.ACTION_TYPE_FAILED_NAME_ALREADY_USED);\n            }\n        }\n\n        return retVal;\n    }\n\n    @Override\n    protected void setActionMessageParameters() {\n        addValidationMessage(EngineMessage.VAR__ACTION__EXPORT);\n        addValidationMessage(EngineMessage.VAR__TYPE__VM_TEMPLATE);\n    }\n\n    @Override\n    public AuditLogType getAuditLogTypeValue() {\n        switch (getActionState()) {\n        case EXECUTE:\n            return getSucceeded() ? AuditLogType.IMPORTEXPORT_STARTING_EXPORT_TEMPLATE\n                    : AuditLogType.IMPORTEXPORT_EXPORT_TEMPLATE_FAILED;\n\n        case END_SUCCESS:\n            return getSucceeded() ? AuditLogType.IMPORTEXPORT_EXPORT_TEMPLATE\n                    : AuditLogType.IMPORTEXPORT_EXPORT_TEMPLATE_FAILED;\n        }\n        return super.getAuditLogTypeValue();\n    }\n\n    @Override\n    protected void incrementDbGeneration() {\n        // we want to export the Template\u0027s ovf only in case that all tasks has succeeded, otherwise we will attempt to\n        // revert\n        // and there\u0027s no need for exporting the template\u0027s ovf.\n        if (getParameters().getTaskGroupSuccess()) {\n            Map\u003cGuid, KeyValuePairCompat\u003cString, List\u003cGuid\u003e\u003e\u003e metaDictionary \u003d new HashMap\u003c\u003e();\n            OvfUpdateProcessHelper ovfUpdateProcessHelper \u003d new OvfUpdateProcessHelper();\n            ovfUpdateProcessHelper.loadTemplateData(getVmTemplate());\n            VmTemplateHandler.updateDisksFromDb(getVmTemplate());\n            // update the target (export) domain\n            ovfUpdateProcessHelper.buildMetadataDictionaryForTemplate(getVmTemplate(), metaDictionary);\n            ovfUpdateProcessHelper.executeUpdateVmInSpmCommand(getVmTemplate().getStoragePoolId(),\n                    metaDictionary,\n                    getParameters().getStorageDomainId());\n        }\n    }\n\n    @Override\n    protected void endActionOnAllImageGroups() {\n        for (VdcActionParametersBase p : getParameters().getImagesParameters()) {\n            p.setTaskGroupSuccess(getParameters().getTaskGroupSuccess());\n            getBackend().endAction(getImagesActionType(),\n                    p,\n                    getContext().clone().withoutCompensationContext().withoutExecutionContext().withoutLock());\n        }\n    }\n\n    @Override\n    public Map\u003cString, String\u003e getJobMessageProperties() {\n        if (jobProperties \u003d\u003d null) {\n            jobProperties \u003d super.getJobMessageProperties();\n            jobProperties.put(VdcObjectType.VmTemplate.name().toLowerCase(),\n                    (getVmTemplateName() \u003d\u003d null) ? \"\" : getVmTemplateName());\n        }\n        return jobProperties;\n    }\n}\n"
+}, {
+  "content": "/**\n * Copyright (C) 2016  David Strawn\n * \n * This file is part of rainsorter.\n *\n * rainsorter is free software: you can redistribute it and/or modify\n * it under the terms of the GNU Lesser General Public License as published by\n * the Free Software Foundation, either version 2.1 of the License, or\n * (at your option) any later version.\n *\n * rainsorter is distributed in the hope that it will be useful,\n * but WITHOUT ANY WARRANTY; without even the implied warranty of\n * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n * GNU Lesser General Public License for more details.\n\n * You should have received a copy of the GNU Lesser General Public License\n * along with rainsorter.  If not, see http://www.gnu.org/licenses.\n */\npackage strawn.evariant.rainsorter.data;\n\nimport strawn.evariant.rainsorter.calculation.WeatherStation;\nimport strawn.evariant.rainsorter.tools.DataOrganizationMethods;\nimport java.io.IOException;\nimport java.util.HashMap;\nimport java.util.List;\nimport java.util.Set;\nimport org.junit.Assert;\nimport org.junit.Before;\nimport org.junit.Test;\nimport strawn.evariant.rainsorter.data.precipitation.PrecipitationLoader;\nimport strawn.evariant.rainsorter.data.precipitation.PrecipitationRecord;\nimport strawn.evariant.rainsorter.data.qclcdstations.QCWeatherStationLoader;\nimport strawn.evariant.rainsorter.data.qclcdstations.QCWeatherStationRecord;\n\n/**\n * This class is for testing Station and Precipitation data\n */\npublic class StationDataAndPrecipitationIT {\n    \n    List\u003cPrecipitationRecord\u003e precipRecords;\n    List\u003cQCWeatherStationRecord\u003e stations;\n    HashMap\u003cString, WeatherStation\u003e stationsByWBAN;\n    public static final int TOTAL_DAYTIME_HOURS \u003d 527;\n    \n    @Before\n    public void setup() throws IOException {\n        precipRecords \u003d PrecipitationLoader.loadRecordsFromDisk();\n        stations \u003d QCWeatherStationLoader.loadRecordsFromDisk();\n        stationsByWBAN \u003d DataOrganizationMethods.createWBANToStationMap(stations);\n    }\n    \n    /**\n     * Makes sure that for every record of rainfall, there is a station with a matching WBAN\n     */\n    @Test\n    public void testAllPrecipitationCanBeAttributedToHBAN() {\n        Set\u003cString\u003e keys \u003d stationsByWBAN.keySet();\n        for(PrecipitationRecord record : precipRecords) {\n            if(!keys.contains(record.wbanCode)) {\n                Assert.fail();\n            }\n        }\n    }\n    /**\n     * Make sure we either have complete data or no data for every station\n     */\n    @Test\n    public void testAllStationsHaveCompletePrecipitationData() {\n        for(PrecipitationRecord record : precipRecords) {\n            stationsByWBAN.get(record.wbanCode).addPrecipitationRecord(record);\n        }\n        for(WeatherStation station : stationsByWBAN.values()) {\n            int readingsCount \u003d station.readings.size();\n            if(readingsCount !\u003d 0 \u0026\u0026 readingsCount !\u003d 527) {\n                Assert.fail();\n            }\n        }\n    }\n    \n}\n"
+}, {
+  "content": "package com.fundevelop.plugin.sms.impl;\n\nimport com.fundevelop.commons.web.utils.PropertyUtil;\nimport com.fundevelop.plugin.sms.Phone;\nimport com.fundevelop.plugin.sms.ReceiveSms;\nimport com.fundevelop.plugin.sms.SmsChannel;\nimport com.fundevelop.plugin.sms.SmsReport;\nimport org.apache.commons.lang3.StringUtils;\nimport org.slf4j.Logger;\nimport org.slf4j.LoggerFactory;\n\nimport java.util.List;\n\n/**\n * 短信通道默认实现类.\n * \u003ca href\u003d\"mailto:yangmujiang@sohu.com\"\u003eReamy(杨木江)\u003c/a\u003e 创建于 2016/4/29 8:54\n */\npublic abstract class AbstractSmsChannel implements SmsChannel {\n    /** 不需要短信签名 */\n    protected final static String CONTENT_SIGN_POSTION_WITHOUT_ \u003d \"0\";\n    /** 短信签名放置在内容的开头 */\n    protected final static String CONTENT_SIGN_POSTION_FRONT \u003d \"1\";\n    /** 短信签名放置在内容的末尾 */\n    protected final static String CONTENT_SIGN_POSTION_END \u003d \"2\";\n    /** 短信签名放置在内容的开头及末尾 */\n    protected final static String CONTENT_SIGN_POSTION_BOTH \u003d \"3\";\n\n    /**\n     * 对短信内容进行签名.\n     */\n    public String signContent(String smsContent) {\n        if (StringUtils.isNotBlank(smsContent)) {\n            String sign \u003d getSign();\n\n            if (StringUtils.isNotBlank(sign)) {\n                smsContent \u003d StringUtils.remove(smsContent, sign);\n\n                String signPostion \u003d getSignPostion();\n\n                if (CONTENT_SIGN_POSTION_FRONT.equals(signPostion)) {\n                    smsContent \u003d sign + smsContent;\n                } else if (CONTENT_SIGN_POSTION_END.equals(signPostion)) {\n                    smsContent \u003d smsContent + sign;\n                } else if (CONTENT_SIGN_POSTION_BOTH.equals(signPostion)) {\n                    smsContent \u003d sign + smsContent + sign;\n                }\n            }\n        }\n\n        return smsContent;\n    }\n\n    /**\n     * 将所有手机号通过\u003ccode\u003eseparator\u003c/code\u003e进行连接.\n     */\n    protected String linkPhones(List\u003cPhone\u003e phoneList, String separator) {\n        StringBuilder phones \u003d new StringBuilder();\n        boolean isFirst \u003d true;\n\n        for (Phone phone : phoneList) {\n            if (phone !\u003d null \u0026\u0026 StringUtils.isNotBlank(phone.getPhone())) {\n                if (isFirst) {\n                    isFirst \u003d false;\n                } else {\n                    phones.append(separator);\n                }\n\n                phones.append(phone.toString());\n            }\n        }\n\n        return phones.toString();\n    }\n\n    /**\n     * 获取短信签名位置.\n     */\n    protected String getSignPostion() {\n        return PropertyUtil.get(\"sms.content.sign.position.\"+getChannelCode(), PropertyUtil.get(\"sms.content.sign.position\"));\n    }\n\n    /**\n     * 获取短信签名.\n     */\n    protected String getSign() {\n        return PropertyUtil.get(\"sms.content.sign.\"+getChannelCode(), PropertyUtil.get(\"sms.content.sign\"));\n    }\n\n    /**\n     * 获取rrid.\n     */\n    protected String getRrid() {\n        return getChannelCode()+\"_\"+System.currentTimeMillis();\n    }\n\n    @Override\n    public List\u003cReceiveSms\u003e getSms() {\n        return null;\n    }\n\n    @Override\n    public List\u003cSmsReport\u003e getSendReport() {\n        return null;\n    }\n\n    /** 账号. */\n    private String account;\n    /** 密码. */\n    private String password;\n    /** 通道代码. */\n    private String channelCode;\n\n    public String getAccount() {\n        return account;\n    }\n\n    public void setAccount(String account) {\n        this.account \u003d account;\n    }\n\n    public String getPassword() {\n        return password;\n    }\n\n    public void setPassword(String password) {\n        this.password \u003d password;\n    }\n\n    @Override\n    public String getChannelCode() {\n        return channelCode;\n    }\n\n    public void setChannelCode(String channelCode) {\n        this.channelCode \u003d channelCode;\n    }\n\n    protected Logger logger \u003d LoggerFactory.getLogger(getClass());\n}\n"
+}, {
+  "content": "/*\n * Copyright (C) 2015 SoftIndex LLC.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n * http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\npackage io.datakernel.rpc;\n\nimport ch.qos.logback.classic.Level;\nimport ch.qos.logback.classic.Logger;\nimport io.datakernel.async.CompletionCallback;\nimport io.datakernel.async.ResultCallback;\nimport io.datakernel.eventloop.Eventloop;\nimport io.datakernel.rpc.client.RpcClient;\nimport io.datakernel.rpc.protocol.RpcException;\nimport io.datakernel.rpc.server.RpcRequestHandler;\nimport io.datakernel.rpc.server.RpcServer;\nimport io.datakernel.serializer.annotations.Deserialize;\nimport io.datakernel.serializer.annotations.Serialize;\nimport io.datakernel.util.Stopwatch;\nimport org.slf4j.LoggerFactory;\n\nimport java.net.InetSocketAddress;\nimport java.util.concurrent.Executors;\n\nimport static io.datakernel.rpc.client.sender.RpcStrategies.server;\nimport static io.datakernel.rpc.protocol.stream.RpcStreamProtocolFactory.streamProtocol;\nimport static java.util.concurrent.TimeUnit.MILLISECONDS;\n\npublic final class CumulativeBenchmark {\n\tpublic static final class ValueMessage {\n\t\t@Serialize(order \u003d 0)\n\t\tpublic int value;\n\n\t\tpublic ValueMessage(@Deserialize(\"value\") int value) {\n\t\t\tthis.value \u003d value;\n\t\t}\n\t}\n\n\tprivate static final int TOTAL_ROUNDS \u003d 30;\n\tprivate static final int REQUESTS_TOTAL \u003d 1_000_000;\n\tprivate static final int REQUESTS_AT_ONCE \u003d 100;\n\tprivate static final int DEFAULT_TIMEOUT \u003d 2_000;\n\n\tprivate static final int SERVICE_PORT \u003d 55555;\n\n\tprivate final Eventloop serverEventloop \u003d new Eventloop();\n\tprivate final Eventloop clientEventloop \u003d new Eventloop();\n\n\tprivate final RpcServer server \u003d RpcServer.create(serverEventloop)\n\t\t\t.messageTypes(ValueMessage.class)\n\t\t\t.protocol(streamProtocol(64 \u003c\u003c 10, 64 \u003c\u003c 10, true))\n\t\t\t.on(ValueMessage.class, new RpcRequestHandler\u003cValueMessage, ValueMessage\u003e() {\n\t\t\t\tprivate final ValueMessage currentSum \u003d new ValueMessage(0);\n\n\t\t\t\t@Override\n\t\t\t\tpublic void run(ValueMessage request, ResultCallback\u003cValueMessage\u003e callback) {\n\t\t\t\t\tif (request.value !\u003d 0) {\n\t\t\t\t\t\tcurrentSum.value +\u003d request.value;\n\t\t\t\t\t} else {\n\t\t\t\t\t\tcurrentSum.value \u003d 0;\n\t\t\t\t\t}\n\t\t\t\t\tcallback.onResult(currentSum);\n\t\t\t\t}\n\t\t\t})\n\t\t\t.setListenPort(SERVICE_PORT);\n\n\tprivate final RpcClient client \u003d RpcClient.create(clientEventloop)\n\t\t\t.messageTypes(ValueMessage.class)\n\t\t\t.protocol(streamProtocol(64 \u003c\u003c 10, 64 \u003c\u003c 10, true))\n\t\t\t.strategy(server(new InetSocketAddress(SERVICE_PORT)));\n\n\tprivate final ValueMessage incrementMessage;\n\tprivate final int totalRounds;\n\tprivate final int roundRequests;\n\tprivate final int requestsAtOnce;\n\tprivate final int requestTimeout;\n\n\tpublic CumulativeBenchmark() {\n\t\tthis(TOTAL_ROUNDS, REQUESTS_TOTAL, REQUESTS_AT_ONCE, DEFAULT_TIMEOUT);\n\t}\n\n\tpublic CumulativeBenchmark(int totalRounds, int roundRequests, int requestsAtOnce, int requestTimeout) {\n\t\tthis.totalRounds \u003d totalRounds;\n\t\tthis.roundRequests \u003d roundRequests;\n\t\tthis.requestsAtOnce \u003d requestsAtOnce;\n\t\tthis.requestTimeout \u003d requestTimeout;\n\t\tthis.incrementMessage \u003d new ValueMessage(2);\n\t}\n\n\tprivate void printBenchmarkInfo() {\n\t\tSystem.out.println(\"Benchmark rounds   : \" + totalRounds);\n\t\tSystem.out.println(\"Requests per round : \" + roundRequests);\n\t\tSystem.out.println(\"Requests at once   : \" + requestsAtOnce);\n\t\tSystem.out.println(\"Increment value    : \" + incrementMessage.value);\n\t\tSystem.out.println(\"Request timeout    : \" + requestTimeout + \" ms\");\n\t}\n\n\tprivate void run() throws Exception {\n\t\tprintBenchmarkInfo();\n\n\t\tExecutors.defaultThreadFactory().newThread(new Runnable() {\n\t\t\t@Override\n\t\t\tpublic void run() {\n\t\t\t\tserverEventloop.keepAlive(true);\n\t\t\t\tserverEventloop.run();\n\t\t\t}\n\t\t}).start();\n\t\tserver.listen();\n\n\t\ttry {\n\t\t\tfinal CompletionCallback finishCallback \u003d new CompletionCallback() {\n\t\t\t\t@Override\n\t\t\t\tpublic void onException(Exception exception) {\n\t\t\t\t\tSystem.err.println(\"Exception while benchmark: \" + exception);\n\t\t\t\t\tclient.stop();\n\t\t\t\t}\n\n\t\t\t\t@Override\n\t\t\t\tpublic void onComplete() {\n\t\t\t\t\tclient.stop();\n\t\t\t\t}\n\t\t\t};\n\n\t\t\tCompletionCallback startCallback \u003d new CompletionCallback() {\n\t\t\t\t@Override\n\t\t\t\tpublic void onComplete() {\n\t\t\t\t\tstartBenchmarkRound(0, finishCallback);\n\t\t\t\t}\n\n\t\t\t\t@Override\n\t\t\t\tpublic void onException(Exception exception) {\n\t\t\t\t\tfinishCallback.onException(exception);\n\t\t\t\t}\n\t\t\t};\n\n\t\t\tclient.start(startCallback);\n\n\t\t\tclientEventloop.run();\n\n\t\t} finally {\n\t\t\tserverEventloop.execute(new Runnable() {\n\t\t\t\t@Override\n\t\t\t\tpublic void run() {\n\n\t\t\t\t\tserver.close();\n\t\t\t\t}\n\t\t\t});\n\t\t\tserverEventloop.keepAlive(false);\n\n\t\t}\n\t}\n\n\tprivate int success;\n\tprivate int errors;\n\tprivate int overloads;\n\tprivate int lastResponseValue;\n\n\tprivate void startBenchmarkRound(final int roundNumber, final CompletionCallback finishCallback) {\n\t\tif (roundNumber \u003d\u003d totalRounds) {\n\t\t\tfinishCallback.onComplete();\n\t\t\treturn;\n\t\t}\n\n\t\tsuccess \u003d 0;\n\t\terrors \u003d 0;\n\t\toverloads \u003d 0;\n\t\tlastResponseValue \u003d 0;\n\n\t\tfinal Stopwatch stopwatch \u003d Stopwatch.createUnstarted();\n\t\tfinal CompletionCallback roundComplete \u003d new CompletionCallback() {\n\t\t\t@Override\n\t\t\tpublic void onComplete() {\n\t\t\t\tstopwatch.stop();\n\t\t\t\tSystem.out.println((roundNumber + 1) + \": Summary Elapsed \" + stopwatch.toString()\n\t\t\t\t\t\t+ \" rps: \" + roundRequests * 1000.0 / stopwatch.elapsed(MILLISECONDS)\n\t\t\t\t\t\t+ \" (\" + success + \"/\" + roundRequests + \" with \" + overloads + \" overloads) sum\u003d\" + lastResponseValue);\n\n\t\t\t\tclientEventloop.post(new Runnable() {\n\t\t\t\t\t@Override\n\t\t\t\t\tpublic void run() {\n\t\t\t\t\t\tstartBenchmarkRound(roundNumber + 1, finishCallback);\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}\n\n\t\t\t@Override\n\t\t\tpublic void onException(Exception exception) {\n\t\t\t\tfinishCallback.onException(exception);\n\t\t\t}\n\t\t};\n\n\t\tclientEventloop.post(new Runnable() {\n\t\t\t@Override\n\t\t\tpublic void run() {\n\t\t\t\tstopwatch.start();\n\t\t\t\tsendRequests(roundRequests, roundComplete);\n\t\t\t}\n\t\t});\n\t}\n\n\tprivate boolean clientOverloaded;\n\n\tprivate void sendRequests(final int numberRequests, final CompletionCallback completionCallback) {\n\t\tclientOverloaded \u003d false;\n\n\t\tfor (int i \u003d 0; i \u003c requestsAtOnce; i++) {\n\t\t\tif (i \u003e\u003d numberRequests)\n\t\t\t\treturn;\n\n\t\t\tclient.sendRequest(incrementMessage, requestTimeout, new ResultCallback\u003cValueMessage\u003e() {\n\t\t\t\t@Override\n\t\t\t\tpublic void onResult(ValueMessage result) {\n\t\t\t\t\tsuccess++;\n\t\t\t\t\tlastResponseValue \u003d result.value;\n\t\t\t\t\ttryCompete();\n\t\t\t\t}\n\n\t\t\t\tprivate void tryCompete() {\n\t\t\t\t\tint totalCompletion \u003d success + errors;\n\t\t\t\t\tif (totalCompletion \u003d\u003d roundRequests)\n\t\t\t\t\t\tcompletionCallback.onComplete();\n\t\t\t\t}\n\n\t\t\t\t@Override\n\t\t\t\tpublic void onException(Exception exception) {\n\t\t\t\t\tif (exception.getClass() \u003d\u003d RpcException.class) {\n\t\t\t\t\t\tclientOverloaded \u003d true;\n\t\t\t\t\t\toverloads++;\n\t\t\t\t\t} else {\n\t\t\t\t\t\terrors++;\n\t\t\t\t\t}\n\t\t\t\t\ttryCompete();\n\t\t\t\t}\n\t\t\t});\n\n\t\t\tif (clientOverloaded) {\n\t\t\t\t// post to next event loop\n\t\t\t\tscheduleContinue(numberRequests - i, completionCallback);\n\t\t\t\treturn;\n\t\t\t}\n\t\t}\n\t\tpostContinue(numberRequests - requestsAtOnce, completionCallback);\n\t}\n\n\tprivate void postContinue(final int numberRequests, final CompletionCallback completionCallback) {\n\t\tclientEventloop.post(new Runnable() {\n\t\t\t@Override\n\t\t\tpublic void run() {\n\t\t\t\tsendRequests(numberRequests, completionCallback);\n\t\t\t}\n\t\t});\n\t}\n\n\tprivate void scheduleContinue(final int numberRequests, final CompletionCallback completionCallback) {\n\t\tclientEventloop.schedule(clientEventloop.currentTimeMillis() + 1, new Runnable() {\n\t\t\t@Override\n\t\t\tpublic void run() {\n\t\t\t\tsendRequests(numberRequests, completionCallback);\n\t\t\t}\n\t\t});\n\t}\n\n\tpublic static void main(String[] args) throws Exception {\n\t\tloggerLevel(Level.OFF);\n\n\t\tnew CumulativeBenchmark().run();\n\t}\n\n\tprivate static void loggerLevel(Level level) {\n\t\tLogger root \u003d (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);\n\t\troot.setLevel(level);\n\t}\n\n}\n"
+}, {
+  "content": "/**\n * This file is part of Graylog.\n *\n * Graylog is free software: you can redistribute it and/or modify\n * it under the terms of the GNU General Public License as published by\n * the Free Software Foundation, either version 3 of the License, or\n * (at your option) any later version.\n *\n * Graylog is distributed in the hope that it will be useful,\n * but WITHOUT ANY WARRANTY; without even the implied warranty of\n * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n * GNU General Public License for more details.\n *\n * You should have received a copy of the GNU General Public License\n * along with Graylog.  If not, see \u003chttp://www.gnu.org/licenses/\u003e.\n */\npackage org.graylog.collector.inputs.eventlog;\n\nimport com.google.common.collect.Lists;\nimport com.google.common.collect.Sets;\nimport org.graylog.collector.Message;\nimport org.graylog.collector.MessageBuilder;\nimport org.graylog.collector.buffer.Buffer;\nimport org.hyperic.sigar.win32.EventLogRecord;\nimport org.joda.time.DateTime;\nimport org.joda.time.DateTimeZone;\nimport org.junit.Before;\nimport org.junit.Test;\n\nimport java.util.List;\nimport java.util.Map;\n\nimport static org.junit.Assert.assertEquals;\nimport static org.mockito.Mockito.mock;\nimport static org.mockito.Mockito.when;\n\npublic class WindowsEventlogHandlerTest {\n    private static class TestBuffer implements Buffer {\n        private final List\u003cMessage\u003e messages \u003d Lists.newArrayList();\n\n        @Override\n        public void insert(final Message message) {\n            messages.add(message);\n        }\n\n        @Override\n        public Message remove() {\n            return null;\n        }\n\n        public void clear() {\n            messages.clear();\n        }\n\n        public List\u003cMessage\u003e getMessages() {\n            return messages;\n        }\n    }\n\n    private TestBuffer buffer;\n    private MessageBuilder messageBuilder;\n    private EventLogRecord record;\n\n\n    @Before\n    public void setUp() {\n        this.buffer \u003d new TestBuffer();\n        this.messageBuilder \u003d buildMessageBuilder();\n        this.record \u003d buildEventLogRecord();\n    }\n\n    public MessageBuilder buildMessageBuilder() {\n        final MessageBuilder messageBuilder \u003d new MessageBuilder();\n\n        messageBuilder.input(\"input-id\");\n        messageBuilder.outputs(Sets.newHashSet(\"output-id\"));\n        messageBuilder.source(\"foobar.example.net\");\n\n        return messageBuilder;\n    }\n\n    public EventLogRecord buildEventLogRecord() {\n        final EventLogRecord record \u003d mock(EventLogRecord.class);\n\n        when(record.getMessage()).thenReturn(\"The log message\");\n        when(record.getSource()).thenReturn(\"Service Control Manager\");\n        when(record.getCategory()).thenReturn((short) 0);\n        when(record.getCategoryString()).thenReturn(\"None\");\n        when(record.getComputerName()).thenReturn(\"IE10Win7\");\n        when(record.getEventId()).thenReturn(4567L);\n        when(record.getEventType()).thenReturn((short) 4);\n        when(record.getEventTypeString()).thenReturn(\"Information\");\n        when(record.getLogName()).thenReturn(\"System\");\n        when(record.getRecordNumber()).thenReturn(1234L);\n        when(record.getTimeGenerated()).thenReturn(0L);\n        when(record.getTimeWritten()).thenReturn(1L);\n        when(record.getUser()).thenReturn(null);\n\n        return record;\n    }\n\n    @Test\n    public void test() throws Exception {\n        final WindowsEventlogHandler handler \u003d new WindowsEventlogHandler(messageBuilder, buffer);\n\n        handler.handleNotification(record);\n\n        assertEquals(1, buffer.getMessages().size());\n\n        final Message message \u003d buffer.getMessages().get(0);\n\n        assertEquals(\"The log message\", message.getMessage());\n        assertEquals(\"foobar.example.net\", message.getSource());\n        assertEquals(Message.Level.INFO, message.getLevel());\n        assertEquals(new DateTime(0L).withZone(DateTimeZone.UTC), message.getTimestamp());\n\n        final Map\u003cString, Object\u003e fields \u003d message.getFields().asMap();\n\n        assertEquals(\"Service Control Manager\", fields.get(\"event_source\"));\n        assertEquals(0, fields.get(\"event_category\"));\n        assertEquals(\"None\", fields.get(\"event_category_string\"));\n        assertEquals(\"IE10Win7\", fields.get(\"event_computer_name\"));\n        assertEquals(4567L, fields.get(\"event_id\"));\n        assertEquals(4, fields.get(\"event_type\"));\n        assertEquals(\"Information\", fields.get(\"event_type_string\"));\n        assertEquals(\"System\", fields.get(\"event_log_name\"));\n        assertEquals(1234L, fields.get(\"event_record_number\"));\n        assertEquals(\"1970-01-01T00:00:00.000Z\", fields.get(\"event_time_generated\"));\n        assertEquals(\"1970-01-01T00:00:01.000Z\", fields.get(\"event_time_written\"));\n        assertEquals(\"\", fields.get(\"event_user\"));\n    }\n\n    @Test\n    public void testWithEmptyLogMessage() throws Exception {\n        final WindowsEventlogHandler handler \u003d new WindowsEventlogHandler(messageBuilder, buffer);\n\n        when(record.getMessage()).thenReturn(\"\");\n\n        handler.handleNotification(record);\n\n        final Message message \u003d buffer.getMessages().get(0);\n\n        assertEquals(\"empty\", message.getMessage());\n    }\n\n    @Test\n    public void testWithNullLogMessage() throws Exception {\n        final WindowsEventlogHandler handler \u003d new WindowsEventlogHandler(messageBuilder, buffer);\n\n        when(record.getMessage()).thenReturn(null);\n\n        handler.handleNotification(record);\n\n        final Message message \u003d buffer.getMessages().get(0);\n\n        assertEquals(\"empty\", message.getMessage());\n    }\n\n    @Test\n    public void testWithEmptyUser() throws Exception {\n        final WindowsEventlogHandler handler \u003d new WindowsEventlogHandler(messageBuilder, buffer);\n\n        when(record.getUser()).thenReturn(\"\");\n\n        handler.handleNotification(record);\n\n        final Message message \u003d buffer.getMessages().get(0);\n\n        assertEquals(\"\", message.getFields().asMap().get(\"event_user\"));\n    }\n\n    @Test\n    public void testWithNullUser() throws Exception {\n        final WindowsEventlogHandler handler \u003d new WindowsEventlogHandler(messageBuilder, buffer);\n\n        when(record.getUser()).thenReturn(null);\n\n        handler.handleNotification(record);\n\n        final Message message \u003d buffer.getMessages().get(0);\n\n        assertEquals(\"\", message.getFields().asMap().get(\"event_user\"));\n    }\n\n    @Test\n    public void testMessageLevelMapping() throws Exception {\n        final WindowsEventlogHandler handler \u003d new WindowsEventlogHandler(messageBuilder, buffer);\n\n        when(record.getEventType()).thenReturn((short) 1);\n        handler.handleNotification(record);\n\n        when(record.getEventType()).thenReturn((short) 2);\n        handler.handleNotification(record);\n\n        when(record.getEventType()).thenReturn((short) 4);\n        handler.handleNotification(record);\n\n        when(record.getEventType()).thenReturn((short) 8);\n        handler.handleNotification(record);\n\n        when(record.getEventType()).thenReturn((short) 16);\n        handler.handleNotification(record);\n\n        final Message message \u003d buffer.getMessages().get(0);\n\n        assertEquals(Message.Level.ERROR, buffer.getMessages().get(0).getLevel());\n        assertEquals(Message.Level.WARNING, buffer.getMessages().get(1).getLevel());\n        assertEquals(Message.Level.INFO, buffer.getMessages().get(2).getLevel());\n        assertEquals(Message.Level.INFO, buffer.getMessages().get(3).getLevel());\n        assertEquals(Message.Level.ERROR, buffer.getMessages().get(4).getLevel());\n    }\n}"
+}, {
+  "content": "package com.iway.helpers;\n\nimport android.app.Activity;\nimport android.view.View;\nimport android.view.animation.ScaleAnimation;\nimport android.widget.RelativeLayout;\nimport android.widget.RelativeLayout.LayoutParams;\n\n@Deprecated\npublic class ExpandMenu extends AnimatedMenu {\n\n    public ExpandMenu(Activity parent, int backgroundColor) {\n        super(parent, backgroundColor);\n    }\n\n    @Override\n    protected void processContentViewLayoutParams(LayoutParams layoutParams) {\n        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);\n    }\n\n    @Override\n    protected void playShowAnimation(View contentView) {\n        ScaleAnimation expendAnimi \u003d new ScaleAnimation(\n                0, 1, 0, 1,\n                ScaleAnimation.RELATIVE_TO_SELF, 0.5f,\n                ScaleAnimation.RELATIVE_TO_SELF, 0.5f);\n        expendAnimi.setDuration(getAnimationTimeout());\n        contentView.startAnimation(expendAnimi);\n    }\n\n    @Override\n    protected void playHideAnimation(View contentView) {\n        ScaleAnimation reduceAnimi \u003d new ScaleAnimation(\n                1, 0, 1, 0,\n                ScaleAnimation.RELATIVE_TO_SELF, 0.5f,\n                ScaleAnimation.RELATIVE_TO_SELF, 0.5f);\n        reduceAnimi.setDuration(getAnimationTimeout());\n        contentView.startAnimation(reduceAnimi);\n    }\n\n}\n"
+}]
+
+
+
+
+
+
+
+To find out how many Java files this table has, type the following query and click Run:
+SELECT
+  COUNT(*)
+FROM
+  `fh-bigquery.github_extracts.contents_java_2016`
+
+[{
+  "f0_": "2196247"
+}]
+
+
+Why do you think zero bytes of data were processed to return the result?
+BigQuery stores common metadata about the table (like row count). Querying metadata processes 0 bytes.
+
+How many files are there in this dataset?       2,196,247
+Is this a dataset you want to process locally or on the cloud?        cloud, within BigQuery
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Explore the pipeline code
+Return to the training-vm SSH terminal and navigate to the directory /training-data-analyst/courses/data_analysis/lab2/python and view the file JavaProjectsThatNeedHelp.py.
+View the file with Nano. Do not make any changes to the code. Press Ctrl+X to exit Nano.
+cd ~/training-data-analyst/courses/data_analysis/lab2/python
+nano JavaProjectsThatNeedHelp.py
+
+
+student-01-0b629d77c055@training-vm:~$ cd training-data-analyst/courses/data_analysis/lab2/python/
+student-01-0b629d77c055@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ pwd
+/home/student-01-0b629d77c055/training-data-analyst/courses/data_analysis/lab2/python
+student-01-0b629d77c055@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ ls
+grepc.py  grep.py  install_packages_OLD.sh  install_packages.sh  is_popular.py  JavaProjectsThatNeedHelp.py  JavaProjectsThatNeedHelp_PY2_Version.py  OLD_grepc.py
+
+student-01-0b629d77c055@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ cat JavaProjectsThatNeedHelp.py
+
+"""
+Copyright Google Inc. 2018
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+import argparse
+import logging
+import datetime, os
+import apache_beam as beam
+import math
+
+'''
+
+This is a dataflow pipeline that demonstrates Python use of side inputs. The pipeline finds Java packages
+on Github that are (a) popular and (b) need help. Popularity is use of the package in a lot of other
+projects, and is determined by counting the number of times the package appears in import statements.
+Needing help is determined by counting the number of times the package contains the words FIXME or TODO
+in its source.
+
+@author tomstern
+based on original work by vlakshmanan
+
+python JavaProjectsThatNeedHelp.py --project <PROJECT> --bucket <BUCKET> --DirectRunner or --DataFlowRunner
+
+'''
+
+# Global values
+TOPN=1000
+
+
+# ### Functions used for both main and side inputs
+
+def splitPackageName(packageName):
+   """e.g. given com.example.appname.library.widgetname
+           returns com
+                   com.example
+                   com.example.appname
+      etc.
+   """
+   result = []
+   end = packageName.find('.')
+   while end > 0:
+      result.append(packageName[0:end])
+      end = packageName.find('.', end+1)
+   result.append(packageName)
+   return result
+
+def getPackages(line, keyword):
+   start = line.find(keyword) + len(keyword)
+   end = line.find(';', start)
+   if start < end:
+      packageName = line[start:end].strip()
+      return splitPackageName(packageName)
+   return []
+
+def packageUse(record, keyword):
+   if record is not None:
+     lines=record.split('\n')
+     for line in lines:
+       if line.startswith(keyword):
+         packages = getPackages(line, keyword)
+         for p in packages:
+           yield (p, 1)
+
+def is_popular(pcoll):         # new 'wrapper' fn
+ return (pcoll
+    | 'PackageUse' >> beam.FlatMap(lambda rowdict: packageUse(rowdict['content'], 'import'))
+    | 'TotalUse' >> beam.CombinePerKey(sum)
+    | 'Top_NNN' >> beam.transforms.combiners.Top.Of(TOPN, key=lambda kv: kv[1]) ) 
+
+
+
+def packageHelp(record, keyword):         # new fn
+   count=0
+   package_name=''
+   if record is not None:
+     lines=record.split('\n')
+     for line in lines:
+       if line.startswith(keyword):
+         package_name=line
+       if 'FIXME' in line or 'TODO' in line:
+         count+=1
+     packages = (getPackages(package_name, keyword) )
+     for p in packages:
+         yield (p,count)
+
+def needs_help(pcoll):         # new 'wrapper' fn
+ return (pcoll
+    | 'PackageHelp' >> beam.FlatMap(lambda rowdict: packageHelp(rowdict['content'], 'package'))
+    | 'TotalHelp' >> beam.CombinePerKey(sum)
+    | 'DropZero' >> beam.Filter(lambda packages: packages[1]>0 ) )
+
+
+# Calculate the final composite score
+#
+#    For each package that is popular
+#    If the package is in the needs help dictionary, retrieve the popularity count
+#    Multiply to get compositescore
+#      - Using log() because these measures are subject to tournament effects
+#
+
+def compositeScore(popular, help):
+    for element in popular:
+      if help.get(element[0]):
+         composite = math.log(help.get(element[0])) * math.log(element[1])
+         if composite > 0:
+           yield (element[0], composite)
+
+
+# ### main
+
+# Define pipeline runner (lazy execution)
+def run():
+
+  # Command line arguments
+  parser = argparse.ArgumentParser(description='Demonstrate side inputs')
+  parser.add_argument('--bucket', required=True, help='Specify Cloud Storage bucket for output')
+  parser.add_argument('--project',required=True, help='Specify Google Cloud project')
+  group = parser.add_mutually_exclusive_group(required=True)
+  group.add_argument('--DirectRunner',action='store_true')
+  group.add_argument('--DataFlowRunner',action='store_true')
+
+  opts = parser.parse_args()
+
+  if opts.DirectRunner:
+    runner='DirectRunner'
+  if opts.DataFlowRunner:
+    runner='DataFlowRunner'
+
+  bucket = opts.bucket
+  project = opts.project
+
+  #    Limit records if running local, or full data if running on the cloud
+  limit_records=''
+  if runner == 'DirectRunner':
+     limit_records='LIMIT 3000'
+  get_java_query='SELECT content FROM [fh-bigquery:github_extracts.contents_java_2016] {0}'.format(limit_records)
+
+  argv = [
+    '--project={0}'.format(project),
+    '--job_name=javahelpjob',
+    '--save_main_session',
+    '--staging_location=gs://{0}/staging/'.format(bucket),
+    '--temp_location=gs://{0}/staging/'.format(bucket),
+    '--runner={0}'.format(runner),
+    '--region=us-central1',
+    '--max_num_workers=5'
+    ]
+
+  p = beam.Pipeline(argv=argv)
+
+
+  # Read the table rows into a PCollection (a Python Dictionary)
+  bigqcollection = p | 'ReadFromBQ' >> beam.io.Read(beam.io.BigQuerySource(project=project,query=get_java_query))
+
+  popular_packages = is_popular(bigqcollection) # main input - from Exercise/Lab 03 Dataflow - MapReduce in Beam (Python) 2.5
+
+  help_packages = needs_help(bigqcollection) # side input    - additional part of this exercise/lab
+
+  # Use side inputs to view the help_packages as a dictionary
+  results = popular_packages | 'Scores' >> beam.FlatMap(lambda element, the_dict: compositeScore(element,the_dict), beam.pvalue.AsDict(help_packages))
+
+  # Write out the composite scores and packages to an unsharded csv file
+  output_results = 'gs://{0}/javahelp/Results'.format(bucket)
+  results | 'WriteToStorage' >> beam.io.WriteToText(output_results,file_name_suffix='.csv',shard_name_template='')
+
+  # Run the pipeline (all operations are deferred until run() is called).
+
+
+  if runner == 'DataFlowRunner':
+     p.run()
+  else:
+     p.run().wait_until_finish()
+  logging.getLogger().setLevel(logging.INFO)
+
+
+if __name__ == '__main__':
+  run()
+  
+  
+  
+  
+
+
+
+Refer to this diagram as you read the code. The pipeline looks like this:
+https://cdn.qwiklabs.com/DceHrU0hqhp%2FAOJFyQUfIBlPlqP%2Bot6KLUNs3xQVQ5E%3D
+
+
+Answer the following questions:
+Looking at the class documentation at the very top, what is the purpose of this pipeline?         The pipeline finds Java packages
+                                                                                                  on Github that are (a) popular and (b) need help. Popularity is use of the package in a lot of other
+                                                                                                  projects, and is determined by counting the number of times the package appears in import statements.
+                                                                                                  Needing help is determined by counting the number of times the package contains the words FIXME or TODO
+                                                                                                  in its source.
+Where does the content come from?                                               BigQuery query under the get_java_query variable
+What does the left side of the pipeline do?                         From the image, LHS looks at Java packages needing help
+What does the right side of the pipeline do?                        From the image, RHS was what we covered in Lab #3 - packages which are popular (i.e. most number of times found in import statements)
+What does ToLines do? (Hint: look at the content field of the BigQuery result)
+Why is the result of ReadFromBQ stored in a named PCollection instead of being directly passed to another step?
+What are the two actions carried out on the PCollection generated from ReadFromBQ?
+If a file has 3 FIXMEs and 2 TODOs in its content (on different lines), how many calls for help are associated with it?
+If a file is in the package com.google.devtools.build, what are the packages that it is associated with?
+popular_packages and help_packages are both named PCollections and both used in the Scores (side inputs) step of the pipeline. Which one is the main input and which is the side input?
+What is the method used in the Scores step?
+What Python data type is the side input converted into in the Scores step?
+Note: The Java version of this program is slightly different from the Python version. The Java SDK supports AsMap and the Python SDK doesn't. It supports AsDict instead. In Java, the PCollection is converted into a View as a preparatory step before it is used. In Python, the PCollection conversion occurs in the step where it is used.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Execute the pipeline
+The program requires BUCKET and PROJECT values and whether you want to run the pipeline locally using --DirectRunner or on the cloud using --DataFlowRunner.
+
+Execute the pipeline locally by typing the following into the training-vm SSH terminal:
+python3 JavaProjectsThatNeedHelp.py --bucket $BUCKET --project $PROJECT --DirectRunner
+
+Note: Please ignore the warning if any and move forward.
+Once the pipeline has finished executing, On the Navigation menu (Navigation menu icon), click Cloud Storage > Browser and click on your bucket. You will find the results in the javahelp folder. Click on the Result object to examine the output.
+
+
+
+
+Execute the pipeline on the cloud by typing the following into the training-vm SSH terminal:
+python3 JavaProjectsThatNeedHelp.py --bucket $BUCKET --project $PROJECT --DataFlowRunner
+
+Note: Please ignore the warning if any and move forward.
+Return to the browser tab for Console. On the Navigation menu (Navigation menu icon), click Dataflow and click on your job to monitor progress.
+Once the pipeline has finished executing, On the Navigation menu (Navigation menu icon) click Cloud Storage > Browser and click on your bucket. You will find the results in the javahelp folder. Click on the Result object to examine the output. The file name will be the same but you will notice that the file creation time is more recent.
+
+
+
+
+student-01-0b629d77c055@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ python3 JavaProjectsThatNeedHelp.py --bucket $BUCKET --project $PROJECT --DirectRunner
+JavaProjectsThatNeedHelp.py:163: BeamDeprecationWarning: BigQuerySource is deprecated since 2.25.0. Use ReadFromBigQuery instead.
+  bigqcollection = p | 'ReadFromBQ' >> beam.io.Read(beam.io.BigQuerySource(project=project,query=get_java_query))
+/usr/local/lib/python3.7/site-packages/apache_beam/io/gcp/bigquery.py:1881: BeamDeprecationWarning: options is deprecated since First stable release. References to <pipeline>.options will not be supported
+  temp_location = pcoll.pipeline.options.view_as(
+WARNING:apache_beam.io.gcp.bigquery_tools:Dataset qwiklabs-gcp-00-7f9c9f22d898:temp_dataset_03026d1f289444559b53643815e778bc does not exist so we will create it as temporary with location=US
+
+# results.csv
+('org', 42.84515547327333)
+('com', 40.236581303319525)
+('org.apache', 18.46461344204527)
+('org.elasticsearch', 17.06109838869794)
+('net', 10.654596801679137)
+('com.google', 14.066449806720366)
+('org.openhab', 13.518935494583966)
+('com.facebook', 10.856491360903036)
+('io', 15.505132496088244)
+('com.facebook.presto', 7.95257782815198)
+('com.google.common', 6.244050576023712)
+('edu', 19.30038465694993)
+('org.keycloak', 6.166651515546291)
+('org.openhab.binding', 12.078513130365952)
+('org.apache.camel', 3.696358996270924)
+('org.sakaiproject', 9.52879185746142)
+('org.jetbrains', 3.5639295975776397)
+('com.google.common.collect', 5.589295853669137)
+('org.wso2', 3.3298936425075)
+('edu.toronto', 3.270614189113479)
+('edu.toronto.cs', 3.270614189113479)
+('edu.toronto.cs.se', 3.270614189113479)
+('org.wso2.carbon', 3.1989577741928765)
+('com.badlogic', 5.070228113486126)
+('com.badlogic.gdx', 5.059296557734522)
+('org.pentaho', 5.014449012906627)
+('com.rtiming', 7.294937466160437)
+('com.facebook.presto.sql', 3.103453389372816)
+('org.openhab.binding.zwave', 4.906301539216605)
+('org.openhab.binding.zwave.internal', 4.88075126464708)
+('org.elasticsearch.index', 4.827795843250328)
+('org.openhab.binding.zwave.internal.protocol', 4.800329105414752)
+('org.pentaho.di', 4.800329105414752)
+('hudson', 6.616196250234998)
+('org.chromium', 4.5162565443453575)
+('ru', 2.8494406285892984)
+('com.fsck', 12.655792860505281)
+('com.fsck.k9', 12.655792860505281)
+('org.apache.logging', 4.402505482083911)
+('org.apache.logging.log4j', 4.402505482083911)
+('org.keycloak.testsuite', 2.711607716498163)
+('org.apache.camel.component', 2.6687189548649624)
+('ru.agentlab', 2.590755157777684)
+('ru.agentlab.maia', 2.590755157777684)
+('org.wso2.carbon.apimgt', 2.57405200784226)
+('org.collectionspace.services', 6.861980734078608)
+('org.collectionspace', 6.861980734078608)
+('edu.mit.ll', 8.723899038694206)
+('edu.mit', 8.723899038694206)
+('org.apache.beam', 2.3097081612770762)
+('com.insadelyon.les24heures', 2.2845000312564268)
+('com.insadelyon', 2.2845000312564268)
+('org.apache.beam.sdk', 2.258340429321709)
+('com.facebook.presto.sql.planner', 2.258340429321709)
+('org.chromium.chrome', 3.5362965368969035)
+('org.apache.logging.log4j.core', 3.3447497632087426)
+('com.google.javascript', 2.1103021438594824)
+('org.chromium.chrome.browser', 3.29114828928607)
+('org.checkerframework', 5.275726422485657)
+('org.elasticsearch.index.query', 3.234796845745636)
+('alexclin', 7.182304001555611)
+('alexclin.httplite', 7.182304001555611)
+('com.google.devtools', 3.175397932043973)
+('com.google.devtools.build', 3.175397932043973)
+('org.fortiss', 3.9276676827147607)
+('org.wso2.carbon.apimgt.impl', 1.9638338413573804)
+('org.fortiss.smg', 3.9276676827147607)
+('context', 7.040270678913389)
+('context.arch', 7.040270678913389)
+('edu.mit.ll.em.api', 7.1115496616140295)
+('se', 5.395208533762693)
+('edu.mit.ll.em', 7.1115496616140295)
+('org.opencb', 1.9218120556728056)
+('io.protostuff', 2.975097229261034)
+('com.sina', 7.146699732184862)
+('com.sina.sinavideo.sdk', 6.964623588996019)
+('com.sina.sinavideo', 6.964623588996019)
+
+
+
+
+
+
+
+student-01-0b629d77c055@training-vm:~/training-data-analyst/courses/data_analysis/lab2/python$ python3 JavaProjectsThatNeedHelp.py --bucket $BUCKET --project $PROJECT --DataFlowRunner
+JavaProjectsThatNeedHelp.py:163: BeamDeprecationWarning: BigQuerySource is deprecated since 2.25.0. Use ReadFromBigQuery instead.
+  bigqcollection = p | 'ReadFromBQ' >> beam.io.Read(beam.io.BigQuerySource(project=project,query=get_java_query))
+/usr/local/lib/python3.7/site-packages/apache_beam/io/gcp/bigquery.py:1881: BeamDeprecationWarning: options is deprecated since First stable release. References to <pipeline>.options will not be supported
+  temp_location = pcoll.pipeline.options.view_as(
+WARNING: You are using pip version 22.0.3; however, version 22.2.2 is available.
+You should consider upgrading via the '/usr/local/bin/python3 -m pip install --upgrade pip' command.
+WARNING: You are using pip version 22.0.3; however, version 22.2.2 is available.
+You should consider upgrading via the '/usr/local/bin/python3 -m pip install --upgrade pip' command.
+WARNING:root:Make sure that locally built Python SDK docker image has Python 3.7 interpreter.
+
+
+
+
+
