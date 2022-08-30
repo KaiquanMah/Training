@@ -1,0 +1,432 @@
+Overview
+Workflows are a common theme in data analytics - they involve ingesting, transforming, and analyzing data to figure out the meaningful information within. In Google Cloud Platform (GCP), the tool for hosting workflows is Cloud Composer which is a hosted version of the popular open source workflow tool Apache Airflow.
+In this lab, you use the GCP Console to set up a Cloud Composer environment. 
+You then use Cloud Composer to go through a simple workflow that 
+-verifies the existence of a data file, 
+-creates a Cloud Dataproc cluster, 
+-runs an Apache Hadoop wordcount job on the Cloud Dataproc cluster, and 
+-deletes the Cloud Dataproc cluster afterwards.
+
+What you'll do
+Use GCP Console to create the Cloud Composer environment
+View and run the DAG (Directed Acyclic Graph) in the Airflow web interface
+View the results of the wordcount job in storage
+
+
+
+
+
+
+
+Task 1. Ensure that the Kubernetes Engine API is successfully enabled
+To ensure access to the necessary APIs, restart the connection to the Kubernetes Engine API.
+In the Google Cloud Console, enter Kubernetes Engine API in the top search bar. Click on the result for Kubernetes Engine API.
+Click Manage.
+Click Disable API.
+If asked to confirm, click Disable.
+If prompted Do you want to disable Kubernetes Engine API and its dependent APIs?, Click Disable.
+Click Enable.
+When the API has been enabled again, the page will show the option to disable.
+https://cdn.qwiklabs.com/T%2BwJiQHDaKfA3MdhHUcvfyPCFLlynLz9Dnr3YFH3Css%3D
+
+
+
+
+
+
+
+
+
+
+Task 2. Ensure that the Cloud Composer API is successfully enabled
+Restart the connection to the Cloud Composer API. In the prior step, restarting the Kubernetes Engine API forced the Cloud Composer API to be disabled.
+In the Google Cloud Console, enter Cloud Composer API in the top search bar. Click on the result for Cloud Composer API.
+Click Enable.
+https://cdn.qwiklabs.com/TPM0X%2FVkG2cCqAbbk5W8wO6OH0NKUIvo7SK0Zj0sRW8%3D
+When the API has been enabled, the page will show the option to disable.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Create Cloud Composer environment
+In this section, you create a Cloud Composer environment.
+Before proceeding further, make sure that you have performed earlier tasks to ensure that the required APIs are successfully enabled. If not, then please perform those tasks otherwise Cloud Composer environment creation will fail.
+
+Go to Navigation menu > Composer:
+https://cdn.qwiklabs.com/iOc8p24o0BgBX3dhW84X37YNt7e9t0BhcAq2y4IXgfI%3D
+Click Create Environment and select Composer 1. Set the following for your environment:
+Property	        Value
+Name	            highcpu
+Location	        us-central1
+Zone	            us-central1-a
+Machine type	    n1-highcpu-4
+Leave all other settings as default.
+Click Create.
+The environment creation process is completed when the green checkmark displays to the left of the environment name on the Environments page in the GCP Console.
+It can take 10-20 minutes for the environment to complete the setup process. Continue with the lab while the environment spins up.
+
+
+
+
+
+Create a Cloud Storage bucket
+Create a Cloud Storage bucket in your project. This buckets will be used as output for the Hadoop job from Dataproc.
+Go to Navigation menu > Cloud Storage > Browser and then click Create bucket.
+Give your bucket a universally unique name, then click Create.
+Remember the Cloud Storage bucket name as you'll use it as an Airflow variable later in the lab.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Airflow and core concepts
+While waiting for your Composer environment to get created, review some terms that are used with Airflow.
+Airflow is a platform to programmatically author, schedule and monitor workflows.
+https://airflow.apache.org/
+Use Airflow to author workflows as directed acyclic graphs (DAGs) of tasks. The airflow scheduler executes your tasks on an array of workers while following the specified dependencies.
+
+Core concepts
+DAG
+https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html
+A Directed Acyclic Graph is a collection of all the tasks you want to run, organized in a way that reflects their relationships and dependencies.
+
+Operator
+https://airflow.apache.org/docs/apache-airflow/stable/concepts/operators.html
+The description of a single task, it is usually atomic. For example, the BashOperator is used to execute bash command.
+
+Task
+https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html
+A parameterised instance of an Operator; a node in the DAG.
+
+Task Instance
+https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html#task-instances
+A specific run of a task; characterized as: a DAG, a Task, and a point in time. It has an indicative state: running, success, failed, skipped, ...
+
+You can read more about the concepts here.
+https://airflow.apache.org/concepts.html#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 5. Defining the workflow
+Now let's discuss the workflow you'll be using. Cloud Composer workflows are comprised of DAGs (Directed Acyclic Graphs). DAGs are defined in standard Python files that are placed in Airflow's DAG_FOLDER. Airflow will execute the code in each file to dynamically build the DAG objects. You can have as many DAGs as you want, each describing an arbitrary number of tasks. In general, each one should correspond to a single logical workflow.
+https://airflow.apache.org/docs/apache-airflow/stable/concepts/dags.html
+
+
+Below is the hadoop_tutorial.py workflow code, also referred to as the DAG:
+
+"""Example Airflow DAG that creates a Cloud Dataproc cluster, runs the Hadoop
+wordcount example, and deletes the cluster.
+This DAG relies on three Airflow variables
+https://airflow.apache.org/concepts.html#variables
+* gcp_project - Google Cloud Project to use for the Cloud Dataproc cluster.
+* gce_zone - Google Compute Engine zone where Cloud Dataproc cluster should be
+  created.
+* gcs_bucket - Google Cloud Storage bucket to used as output for the Hadoop jobs from Dataproc.
+  See https://cloud.google.com/storage/docs/creating-buckets for creating a
+  bucket.
+"""
+import datetime
+import os
+from airflow import models
+from airflow.contrib.operators import dataproc_operator
+from airflow.utils import trigger_rule
+# Output file for Cloud Dataproc job.
+output_file = os.path.join(
+    models.Variable.get('gcs_bucket'), 'wordcount',
+    datetime.datetime.now().strftime('%Y%m%d-%H%M%S')) + os.sep
+# Path to Hadoop wordcount example available on every Dataproc cluster.
+WORDCOUNT_JAR = (
+    'file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar'
+)
+# Arguments to pass to Cloud Dataproc job.
+wordcount_args = ['wordcount', 'gs://pub/shakespeare/rose.txt', output_file]
+yesterday = datetime.datetime.combine(
+    datetime.datetime.today() - datetime.timedelta(1),
+    datetime.datetime.min.time())
+default_dag_args = {
+    # Setting start date as yesterday starts the DAG immediately when it is
+    # detected in the Cloud Storage bucket.
+    'start_date': yesterday,
+    # To email on failure or retry set 'email' arg to your email and enable
+    # emailing here.
+    'email_on_failure': False,
+    'email_on_retry': False,
+    # If a task fails, retry it once after waiting at least 5 minutes
+    'retries': 1,
+    'retry_delay': datetime.timedelta(minutes=5),
+    'project_id': models.Variable.get('gcp_project')
+}
+with models.DAG(
+        'composer_sample_quickstart',
+        # Continue to run DAG once per day
+        schedule_interval=datetime.timedelta(days=1),
+        default_args=default_dag_args) as dag:
+    # Create a Cloud Dataproc cluster.
+    create_dataproc_cluster = dataproc_operator.DataprocClusterCreateOperator(
+        task_id='create_dataproc_cluster',
+        # Give the cluster a unique name by appending the date scheduled.
+        # See https://airflow.apache.org/code.html#default-variables
+        cluster_name='composer-hadoop-tutorial-cluster-{{ ds_nodash }}',
+        num_workers=2,
+        region='us-central1',
+        zone=models.Variable.get('gce_zone'),
+        image_version='2.0',
+        master_machine_type='n1-standard-2',
+        worker_machine_type='n1-standard-2')
+    # Run the Hadoop wordcount example installed on the Cloud Dataproc cluster
+    # master node.
+    run_dataproc_hadoop = dataproc_operator.DataProcHadoopOperator(
+        task_id='run_dataproc_hadoop',
+        region='us-central1',
+        main_jar=WORDCOUNT_JAR,
+        cluster_name='composer-hadoop-tutorial-cluster-{{ ds_nodash }}',
+        arguments=wordcount_args)
+    # Delete Cloud Dataproc cluster.
+    delete_dataproc_cluster = dataproc_operator.DataprocClusterDeleteOperator(
+        task_id='delete_dataproc_cluster',
+        region='us-central1',
+        cluster_name='composer-hadoop-tutorial-cluster-{{ ds_nodash }}',
+        # Setting trigger_rule to ALL_DONE causes the cluster to be deleted
+        # even if the Dataproc job fails.
+        trigger_rule=trigger_rule.TriggerRule.ALL_DONE)
+    # Define DAG dependencies.
+    create_dataproc_cluster >> run_dataproc_hadoop >> delete_dataproc_cluster
+    
+    
+    
+    
+    
+To orchestrate the three workflow tasks, the DAG imports the following operators:
+-DataprocClusterCreateOperator: Creates a Cloud Dataproc cluster.
+-DataProcHadoopOperator: Submits a Hadoop wordcount job and writes results to a Cloud Storage bucket.
+-DataprocClusterDeleteOperator: Deletes the cluster to avoid incurring ongoing Compute Engine charges.
+
+
+
+The tasks run sequentially, which you can see in this section of the file:
+# Define DAG dependencies.
+create_dataproc_cluster >> run_dataproc_hadoop >> delete_dataproc_cluster
+
+
+The name of the DAG is quickstart, and the DAG runs once each day.
+with models.DAG(
+        'composer_sample_quickstart',
+        # Continue to run DAG once per day
+        schedule_interval=datetime.timedelta(days=1),
+        default_args=default_dag_args) as dag:
+Because the start_date that is passed in to default_dag_args is set to yesterday, Cloud Composer schedules the workflow to start immediately after the DAG uploads.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 6. Viewing environment information
+Go back to Composer to check the status of your environment.
+Once your environment has been created, click the name of the environment (highcpu) to see its details.
+On the Environment details you'll see information such as the Airflow web interface URL, Kubernetes Engine cluster ID, and a link to the DAGs folder, which is stored in your bucket.
+Note: Cloud Composer only schedules the workflows in the /dags folder.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 7. Using the Airflow UI
+To access the Airflow web interface using the GCP Console:
+Go back to the Environments page.
+In the Airflow webserver column for the environment, click Airflow.
+Click on your lab credentials.
+The Airflow web interface opens in a new browser window.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 8. Setting Airflow variables
+Airflow variables are an Airflow-specific concept that is distinct from environment variables.
+https://cloud.google.com/composer/docs/how-to/managing/environment-variables
+
+Select Admin > Variables. Under List Variable, to add a new record click + icon.
+https://cdn.qwiklabs.com/q3zGBtJ5twTXCJJDegQZe%2FZyrFLcC%2FxbUbpE4169Pz0%3D
+
+Create the following Airflow variables: gcp_project, gcs_bucket, and gce_zone and click Save after each variable.
+Key	            Val	                Details
+gcp_project	    <your project-id>	  The Google Cloud Platform project you're using for this quickstart.
+gcs_bucket	    gs://<my-bucket>	  Replace <my-bucket> with the name of the Cloud Storage bucket you made earlier. This bucket stores the output from the Hadoop jobs from Dataproc.
+gce_zone	      us-central1-a	      This is the Compute Engine zone where your Cloud Dataproc cluster will be created. To chose a different zone, see Available regions & zones.
+
+Your Variables table should look like this when you're finished:
+https://cdn.qwiklabs.com/%2Bs2WtKrVxUhScpyvdDVi4fvvuMfhLj%2Br7kEZYn7PW%2Bk%3D
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 9. Uploading the DAG to Cloud Storage
+To upload the DAG:
+In Cloud Shell, upload a copy of the hadoop_tutorial.py file to the Cloud Storage bucket that was automatically created when you created the environment.
+
+Replace <DAGs_folder_path> in the following command:
+gsutil cp gs://cloud-training/datawarehousing/lab_assets/hadoop_tutorial.py <DAGs_folder_path>
+
+
+
+You can get the path by going to Composer. Click on the environment you created earlier and then click on the Environment Configuration tab to see the details of the environment. Find DAGs folder and copy the path.
+https://cdn.qwiklabs.com/Ctq9yHTnXbEK66MrXcV50SJUGLf0Pbt5oSB2SuOvlFE%3D
+
+The revised command to upload the file will look similar to the one below:
+gsutil cp gs://cloud-training/datawarehousing/lab_assets/hadoop_tutorial.py gs://us-central1-highcpu-0682d8c0-bucket/dags
+
+
+
+Once the file has been successfully uploaded to the DAGs directory, open dags folder in the bucket and you will see the file in the Objects tab of the Bucket details.
+https://cdn.qwiklabs.com/ZIBnvwv%2BPowmMYjbfApnBVfmsVJbab9K1%2B5Q4frA%2Fqs%3D
+
+When a DAG file is added to the DAGs folder, Cloud Composer adds the DAG to Airflow and schedules it automatically. DAG changes occur within 3-5 minutes.
+
+You can see the task status of the composer_hadoop_tutorial DAG in the Airflow web interface.
+
+
+
+
+
+
+Exploring DAG runs
+When you upload your DAG file to the dags folder in Cloud Storage, Cloud Composer parses the file. If no errors are found, the name of the workflow appears in the DAG listing, and the workflow is queued to run immediately.
+Make sure that you're on the DAGs tab in the Airflow web interface. It takes several minutes for this process to complete. Refresh your browser to make sure you're looking at the latest information.
+https://cdn.qwiklabs.com/8fKqjFwKJMogyW22AhDnr93K4RpSvFKmMQ%2FDObYGuqU%3D
+
+
+In Airflow, click composer_hadoop_tutorial to open the DAG details page. This page includes several representations of the workflow tasks and dependencies.
+https://cdn.qwiklabs.com/UF4UbIyjHMRiXk6QHLklrFC%2F1UzV1JePDKNtImbOLcE%3D
+
+In the toolbar, click Graph. Mouseover the graphic for each task to see its status. Note that the border around each task also indicates the status (green border = running; red = failed, etc.).
+https://cdn.qwiklabs.com/6fTsZUZet%2FQk%2BSsEaOLW7xOJPATWHIPjRrKf6222qHs%3D
+
+Click the "Refresh" link to make sure you're looking at the most recent information. The borders of the processes change colors as the state of the process changes
+Note: If your Dataproc cluster already exists, you can run the workflow again to reach the success state by clicking create_dataproc_cluster graphic and then click Clear to reset the three tasks and click OK to confirm.
+
+Once the status for create_dataproc_cluster has changed to "running", go to Navigation menu > Dataproc, then click on:
+-Clusters to monitor cluster creation and deletion. The cluster created by the workflow is ephemeral: it only exists for the duration of the workflow and is deleted as part of the last workflow task.
+-Jobs to monitor the Apache Hadoop wordcount job. Click the Job ID to see job log output.
+
+Once Dataproc gets to a state of "Running", return to Airflow and click Refresh to see that the cluster is complete.
+When the run_dataproc_hadoop process is complete, go to Navigation menu > Cloud Storage > Browser and click on the name of your bucket to see the results of the wordcount in the wordcount folder.
+
+Once all the steps are complete in the DAG, each step has a dark green border. Additionally the Dataproc cluster that was created is now deleted.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Next steps
+Check out when Cloud Composer was presented at NEXT 18 in San Francisco: https://www.youtube.com/watch?v=GeNFEtt-D4k
+To see the value of a variable, run the Airflow CLI sub-command variables with the get argument or use the Airflow web interface.
+-https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html#variables
+-https://cloud.google.com/composer/docs/quickstart#variables-ui
+For information about the Airflow web interface, see Accessing the web interface.
+-https://cloud.google.com/composer/docs/how-to/accessing/airflow-web-interface#accessing_the_web_interface
+
+
+
+
+
