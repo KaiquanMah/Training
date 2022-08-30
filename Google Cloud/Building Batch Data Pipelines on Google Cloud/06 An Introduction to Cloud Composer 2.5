@@ -59,6 +59,9 @@ When the API has been enabled, the page will show the option to disable.
 
 
 Task 3. Create Cloud Composer environment
+https://cloud.google.com/composer/docs/
+https://cloud.google.com/composer/docs/concepts/versioning/composer-versioning-overview
+
 In this section, you create a Cloud Composer environment.
 Before proceeding further, make sure that you have performed earlier tasks to ensure that the required APIs are successfully enabled. If not, then please perform those tasks otherwise Cloud Composer environment creation will fail.
 
@@ -83,6 +86,7 @@ Create a Cloud Storage bucket
 Create a Cloud Storage bucket in your project. This buckets will be used as output for the Hadoop job from Dataproc.
 Go to Navigation menu > Cloud Storage > Browser and then click Create bucket.
 Give your bucket a universally unique name, then click Create.
+qwiklabs-gcp-00-e13c9336bc86
 Remember the Cloud Storage bucket name as you'll use it as an Airflow variable later in the lab.
 
 
@@ -161,67 +165,79 @@ import os
 from airflow import models
 from airflow.contrib.operators import dataproc_operator
 from airflow.utils import trigger_rule
+
 # Output file for Cloud Dataproc job.
 output_file = os.path.join(
     models.Variable.get('gcs_bucket'), 'wordcount',
     datetime.datetime.now().strftime('%Y%m%d-%H%M%S')) + os.sep
+    
 # Path to Hadoop wordcount example available on every Dataproc cluster.
 WORDCOUNT_JAR = (
     'file:///usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar'
 )
+
 # Arguments to pass to Cloud Dataproc job.
 wordcount_args = ['wordcount', 'gs://pub/shakespeare/rose.txt', output_file]
+
 yesterday = datetime.datetime.combine(
     datetime.datetime.today() - datetime.timedelta(1),
     datetime.datetime.min.time())
+    
 default_dag_args = {
     # Setting start date as yesterday starts the DAG immediately when it is
     # detected in the Cloud Storage bucket.
     'start_date': yesterday,
+    
     # To email on failure or retry set 'email' arg to your email and enable
     # emailing here.
     'email_on_failure': False,
     'email_on_retry': False,
+    
     # If a task fails, retry it once after waiting at least 5 minutes
     'retries': 1,
     'retry_delay': datetime.timedelta(minutes=5),
     'project_id': models.Variable.get('gcp_project')
 }
-with models.DAG(
-        'composer_sample_quickstart',
-        # Continue to run DAG once per day
-        schedule_interval=datetime.timedelta(days=1),
-        default_args=default_dag_args) as dag:
-    # Create a Cloud Dataproc cluster.
-    create_dataproc_cluster = dataproc_operator.DataprocClusterCreateOperator(
-        task_id='create_dataproc_cluster',
-        # Give the cluster a unique name by appending the date scheduled.
-        # See https://airflow.apache.org/code.html#default-variables
-        cluster_name='composer-hadoop-tutorial-cluster-{{ ds_nodash }}',
-        num_workers=2,
-        region='us-central1',
-        zone=models.Variable.get('gce_zone'),
-        image_version='2.0',
-        master_machine_type='n1-standard-2',
-        worker_machine_type='n1-standard-2')
-    # Run the Hadoop wordcount example installed on the Cloud Dataproc cluster
-    # master node.
-    run_dataproc_hadoop = dataproc_operator.DataProcHadoopOperator(
-        task_id='run_dataproc_hadoop',
-        region='us-central1',
-        main_jar=WORDCOUNT_JAR,
-        cluster_name='composer-hadoop-tutorial-cluster-{{ ds_nodash }}',
-        arguments=wordcount_args)
-    # Delete Cloud Dataproc cluster.
-    delete_dataproc_cluster = dataproc_operator.DataprocClusterDeleteOperator(
-        task_id='delete_dataproc_cluster',
-        region='us-central1',
-        cluster_name='composer-hadoop-tutorial-cluster-{{ ds_nodash }}',
-        # Setting trigger_rule to ALL_DONE causes the cluster to be deleted
-        # even if the Dataproc job fails.
-        trigger_rule=trigger_rule.TriggerRule.ALL_DONE)
-    # Define DAG dependencies.
-    create_dataproc_cluster >> run_dataproc_hadoop >> delete_dataproc_cluster
+
+
+with models.DAG('composer_sample_quickstart',
+                # Continue to run DAG once per day
+                schedule_interval=datetime.timedelta(days=1),
+                default_args=default_dag_args) as dag:
+                
+                  # Create a Cloud Dataproc cluster.
+                  create_dataproc_cluster = dataproc_operator.DataprocClusterCreateOperator(
+                      task_id='create_dataproc_cluster',
+                      # Give the cluster a unique name by appending the date scheduled.
+                      # See https://airflow.apache.org/code.html#default-variables
+                      cluster_name='composer-hadoop-tutorial-cluster-{{ ds_nodash }}',
+                      num_workers=2,
+                      region='us-central1',
+                      zone=models.Variable.get('gce_zone'),
+                      image_version='2.0',
+                      master_machine_type='n1-standard-2',
+                      worker_machine_type='n1-standard-2')
+                      
+                  # Run the Hadoop wordcount example installed on the Cloud Dataproc cluster
+                  # master node.
+                  run_dataproc_hadoop = dataproc_operator.DataProcHadoopOperator(
+                      task_id='run_dataproc_hadoop',
+                      region='us-central1',
+                      main_jar=WORDCOUNT_JAR,
+                      cluster_name='composer-hadoop-tutorial-cluster-{{ ds_nodash }}',
+                      arguments=wordcount_args)
+                      
+                  # Delete Cloud Dataproc cluster.
+                  delete_dataproc_cluster = dataproc_operator.DataprocClusterDeleteOperator(
+                      task_id='delete_dataproc_cluster',
+                      region='us-central1',
+                      cluster_name='composer-hadoop-tutorial-cluster-{{ ds_nodash }}',
+                      # Setting trigger_rule to ALL_DONE causes the cluster to be deleted
+                      # even if the Dataproc job fails.
+                      trigger_rule=trigger_rule.TriggerRule.ALL_DONE)
+                      
+                  # Define DAG dependencies.
+                  create_dataproc_cluster >> run_dataproc_hadoop >> delete_dataproc_cluster
     
     
     
@@ -246,6 +262,50 @@ with models.DAG(
         schedule_interval=datetime.timedelta(days=1),
         default_args=default_dag_args) as dag:
 Because the start_date that is passed in to default_dag_args is set to yesterday, Cloud Composer schedules the workflow to start immediately after the DAG uploads.
+
+
+
+
+
+
+
+
+
+
+
+airflow_monitoring.py
+"""A liveness prober dag for monitoring composer.googleapis.com/environment/healthy."""
+import airflow
+from airflow import DAG
+from airflow.operators.bash_operator import BashOperator
+from datetime import timedelta
+
+default_args = {
+    'start_date': airflow.utils.dates.days_ago(0),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5)
+}
+
+dag = DAG(
+    'airflow_monitoring',
+    default_args=default_args,
+    description='liveness monitoring dag',
+    schedule_interval=None,
+    dagrun_timeout=timedelta(minutes=20))
+
+# priority_weight has type int in Airflow DB, uses the maximum.
+t1 = BashOperator(
+    task_id='echo',
+    bash_command='echo test',
+    dag=dag,
+    depends_on_past=False,
+    priority_weight=2**31-1)
+
+
+
+
+
+
 
 
 
@@ -286,13 +346,15 @@ Note: Cloud Composer only schedules the workflows in the /dags folder.
 
 
 
+
+
 Task 7. Using the Airflow UI
 To access the Airflow web interface using the GCP Console:
 Go back to the Environments page.
 In the Airflow webserver column for the environment, click Airflow.
 Click on your lab credentials.
 The Airflow web interface opens in a new browser window.
-
+https://e366dd29027ca4ceap-tp.appspot.com/home
 
 
 
@@ -319,7 +381,11 @@ https://cdn.qwiklabs.com/q3zGBtJ5twTXCJJDegQZe%2FZyrFLcC%2FxbUbpE4169Pz0%3D
 Create the following Airflow variables: gcp_project, gcs_bucket, and gce_zone and click Save after each variable.
 Key	            Val	                Details
 gcp_project	    <your project-id>	  The Google Cloud Platform project you're using for this quickstart.
+	qwiklabs-gcp-00-e13c9336bc86
+  
 gcs_bucket	    gs://<my-bucket>	  Replace <my-bucket> with the name of the Cloud Storage bucket you made earlier. This bucket stores the output from the Hadoop jobs from Dataproc.
+gs://	qwiklabs-gcp-00-e13c9336bc86
+
 gce_zone	      us-central1-a	      This is the Compute Engine zone where your Cloud Dataproc cluster will be created. To chose a different zone, see Available regions & zones.
 
 Your Variables table should look like this when you're finished:
@@ -356,7 +422,6 @@ Replace <DAGs_folder_path> in the following command:
 gsutil cp gs://cloud-training/datawarehousing/lab_assets/hadoop_tutorial.py <DAGs_folder_path>
 
 
-
 You can get the path by going to Composer. Click on the environment you created earlier and then click on the Environment Configuration tab to see the details of the environment. Find DAGs folder and copy the path.
 https://cdn.qwiklabs.com/Ctq9yHTnXbEK66MrXcV50SJUGLf0Pbt5oSB2SuOvlFE%3D
 
@@ -364,12 +429,17 @@ The revised command to upload the file will look similar to the one below:
 gsutil cp gs://cloud-training/datawarehousing/lab_assets/hadoop_tutorial.py gs://us-central1-highcpu-0682d8c0-bucket/dags
 
 
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ gsutil cp gs://cloud-training/datawarehousing/lab_assets/hadoop_tutorial.py gs://us-central1-highcpu-be611f55-bucket/dags/
+Copying gs://cloud-training/datawarehousing/lab_assets/hadoop_tutorial.py [Content-Type=text/x-python-script]...
+- [1 files][  4.2 KiB/  4.2 KiB]
+Operation completed over 1 objects/4.2 KiB.
+
+
+
 
 Once the file has been successfully uploaded to the DAGs directory, open dags folder in the bucket and you will see the file in the Objects tab of the Bucket details.
 https://cdn.qwiklabs.com/ZIBnvwv%2BPowmMYjbfApnBVfmsVJbab9K1%2B5Q4frA%2Fqs%3D
-
 When a DAG file is added to the DAGs folder, Cloud Composer adds the DAG to Airflow and schedules it automatically. DAG changes occur within 3-5 minutes.
-
 You can see the task status of the composer_hadoop_tutorial DAG in the Airflow web interface.
 
 
@@ -396,10 +466,172 @@ Once the status for create_dataproc_cluster has changed to "running", go to Navi
 -Clusters to monitor cluster creation and deletion. The cluster created by the workflow is ephemeral: it only exists for the duration of the workflow and is deleted as part of the last workflow task.
 -Jobs to monitor the Apache Hadoop wordcount job. Click the Job ID to see job log output.
 
+
+/usr/lib/hadoop/libexec//hadoop-functions.sh: line 2400: HADOOP_COM.GOOGLE.CLOUD.HADOOP.SERVICES.AGENT.JOB.SHIM.HADOOPRUNJARSHIM_USER: invalid variable name
+/usr/lib/hadoop/libexec//hadoop-functions.sh: line 2365: HADOOP_COM.GOOGLE.CLOUD.HADOOP.SERVICES.AGENT.JOB.SHIM.HADOOPRUNJARSHIM_USER: invalid variable name
+/usr/lib/hadoop/libexec//hadoop-functions.sh: line 2460: HADOOP_COM.GOOGLE.CLOUD.HADOOP.SERVICES.AGENT.JOB.SHIM.HADOOPRUNJARSHIM_OPTS: invalid variable name
+2022-08-30 13:24:26,096 INFO client.RMProxy: Connecting to ResourceManager at composer-hadoop-tutorial-cluster-20220830-m/10.128.0.9:8032
+2022-08-30 13:24:26,452 INFO client.AHSProxy: Connecting to Application History server at composer-hadoop-tutorial-cluster-20220830-m/10.128.0.9:10200
+2022-08-30 13:24:28,225 INFO mapreduce.JobResourceUploader: Disabling Erasure Coding for path: /tmp/hadoop-yarn/staging/root/.staging/job_1661865796877_0001
+2022-08-30 13:24:29,024 INFO input.FileInputFormat: Total input files to process : 1
+2022-08-30 13:24:29,230 INFO mapreduce.JobSubmitter: number of splits:1
+2022-08-30 13:24:29,579 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1661865796877_0001
+2022-08-30 13:24:29,581 INFO mapreduce.JobSubmitter: Executing with tokens: []
+2022-08-30 13:24:29,910 INFO conf.Configuration: resource-types.xml not found
+2022-08-30 13:24:29,911 INFO resource.ResourceUtils: Unable to find 'resource-types.xml'.
+2022-08-30 13:24:30,650 INFO impl.YarnClientImpl: Submitted application application_1661865796877_0001
+2022-08-30 13:24:30,927 INFO mapreduce.Job: The url to track the job: http://composer-hadoop-tutorial-cluster-20220830-m:8088/proxy/application_1661865796877_0001/
+2022-08-30 13:24:30,930 INFO mapreduce.Job: Running job: job_1661865796877_0001
+2022-08-30 13:24:47,171 INFO mapreduce.Job: Job job_1661865796877_0001 running in uber mode : false
+2022-08-30 13:24:47,172 INFO mapreduce.Job:  map 0% reduce 0%
+2022-08-30 13:24:55,257 INFO mapreduce.Job:  map 100% reduce 0%
+2022-08-30 13:25:04,313 INFO mapreduce.Job:  map 100% reduce 33%
+2022-08-30 13:25:12,359 INFO mapreduce.Job:  map 100% reduce 100%
+2022-08-30 13:25:15,389 INFO mapreduce.Job: Job job_1661865796877_0001 completed successfully
+2022-08-30 13:25:15,507 INFO mapreduce.Job: Counters: 60
+	File System Counters
+		FILE: Number of bytes read=202
+		FILE: Number of bytes written=989739
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+		GS: Number of bytes read=84
+		GS: Number of bytes written=116
+		GS: Number of read operations=1
+		GS: Number of large read operations=0
+		GS: Number of write operations=68
+		HDFS: Number of bytes read=94
+		HDFS: Number of bytes written=0
+		HDFS: Number of read operations=1
+		HDFS: Number of large read operations=0
+		HDFS: Number of write operations=0
+		HDFS: Number of bytes read erasure-coded=0
+	Job Counters 
+		Killed reduce tasks=1
+		Launched map tasks=1
+		Launched reduce tasks=3
+		Rack-local map tasks=1
+		Total time spent by all maps in occupied slots (ms)=17584128
+		Total time spent by all reduces in occupied slots (ms)=111522816
+		Total time spent by all map tasks (ms)=5724
+		Total time spent by all reduce tasks (ms)=36303
+		Total vcore-milliseconds taken by all map tasks=5724
+		Total vcore-milliseconds taken by all reduce tasks=36303
+		Total megabyte-milliseconds taken by all map tasks=17584128
+		Total megabyte-milliseconds taken by all reduce tasks=111522816
+	Map-Reduce Framework
+		Map input records=2
+		Map output records=18
+		Map output bytes=156
+		Map output materialized bytes=202
+		Input split bytes=94
+		Combine input records=18
+		Combine output records=17
+		Reduce input groups=17
+		Reduce shuffle bytes=202
+		Reduce input records=17
+		Reduce output records=17
+		Spilled Records=34
+		Shuffled Maps =3
+		Failed Shuffles=0
+		Merged Map outputs=3
+		GC time elapsed (ms)=1532
+		CPU time spent (ms)=7890
+		Physical memory (bytes) snapshot=1612980224
+		Virtual memory (bytes) snapshot=17536835584
+		Total committed heap usage (bytes)=1366818816
+		Peak Map Physical memory (bytes)=603848704
+		Peak Map Virtual memory (bytes)=4385841152
+		Peak Reduce Physical memory (bytes)=362938368
+		Peak Reduce Virtual memory (bytes)=4392226816
+	Shuffle Errors
+		BAD_ID=0
+		CONNECTION=0
+		IO_ERROR=0
+		WRONG_LENGTH=0
+		WRONG_MAP=0
+		WRONG_REDUCE=0
+	File Input Format Counters 
+		Bytes Read=84
+	File Output Format Counters 
+		Bytes Written=116
+
+
+
+
+
+
+
 Once Dataproc gets to a state of "Running", return to Airflow and click Refresh to see that the cluster is complete.
 When the run_dataproc_hadoop process is complete, go to Navigation menu > Cloud Storage > Browser and click on the name of your bucket to see the results of the wordcount in the wordcount folder.
 
 Once all the steps are complete in the DAG, each step has a dark green border. Additionally the Dataproc cluster that was created is now deleted.
+
+
+
+
+
+
+
+
+
+
+
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ gsutil cp gs://pub/shakespeare/rose.txt ./
+Copying gs://pub/shakespeare/rose.txt...
+- [1 files][   84.0 B/   84.0 B]
+Operation completed over 1 objects/84.0 B.
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ cat rose.txt
+What's in a name? That which we call a rose
+By any other name would smell as sweet.
+
+
+
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ gsutil cp gs://qwiklabs-gcp-00-e13c9336bc86/wordcount/20220830-132418/part-r-00000 ./
+Copying gs://qwiklabs-gcp-00-e13c9336bc86/wordcount/20220830-132418/part-r-00000...
+/ [1 files][   26.0 B/   26.0 B]
+Operation completed over 1 objects/26.0 B.
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ ls
+part-r-00000  README-cloudshell.txt  _SUCCESS
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ cat part-r-00000
+That    1
+as      1
+in      1
+sweet.  1
+
+
+
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ gsutil cp gs://qwiklabs-gcp-00-e13c9336bc86/wordcount/20220830-132418/part-r-00001 ./
+Copying gs://qwiklabs-gcp-00-e13c9336bc86/wordcount/20220830-132418/part-r-00001...
+- [1 files][   46.0 B/   46.0 B]
+Operation completed over 1 objects/46.0 B.
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ cat part-r-00001
+name    1
+name?   1
+other   1
+rose    1
+which   1
+would   1
+
+
+
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ gsutil cp gs://qwiklabs-gcp-00-e13c9336bc86/wordcount/20220830-132418/part-r-00002 ./
+Copying gs://qwiklabs-gcp-00-e13c9336bc86/wordcount/20220830-132418/part-r-00002...
+- [1 files][   44.0 B/   44.0 B]
+Operation completed over 1 objects/44.0 B.
+student_00_f3adff700b22@cloudshell:~ (qwiklabs-gcp-00-e13c9336bc86)$ cat part-r-00002
+By      1
+What's  1
+a       2
+any     1
+call    1
+smell   1
+we      1
 
 
 
