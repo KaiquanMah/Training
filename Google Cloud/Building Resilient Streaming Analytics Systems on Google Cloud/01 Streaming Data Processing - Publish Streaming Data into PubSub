@@ -1,0 +1,173 @@
+01 Streaming Data Processing - Publish Streaming Data into PubSub
+
+
+Overview
+Google Cloud Pub/Sub is a fully-managed real-time messaging service that allows you to send and receive messages between independent applications. Use Cloud Pub/Sub to publish and subscribe to data from multiple sources, then use Google Cloud Dataflow to understand your data, all in real time.
+In this lab, you will simulate your traffic sensor data into a Pub/Sub topic for later to be processed by Dataflow pipeline before finally ending up in a BigQuery table for further analysis.
+Note: At the time of this writing, streaming pipelines are not available in the DataFlow Python SDK. So the streaming labs are written in Java.
+
+
+Objectives
+In this lab, you will perform the following tasks:
+Create a Pub/Sub topic and subscription
+Simulate your traffic sensor data into Pub/Sub
+
+
+
+
+
+
+
+Task 1. Preparation
+You will be running a sensor simulator from the training VM. There are several files and some setup of the environment required.
+
+Open the SSH terminal and connect to the training VM
+In the Console, on the Navigation menu ( Navigation menu icon), click Compute Engine > VM instances.
+Locate the line with the instance called training-vm.
+On the far right, under Connect, click on SSH to open a terminal window.
+In this lab, you will enter CLI commands on the training-vm.
+
+
+Verify initialization is complete
+The training-vm is installing some software in the background. Verify that setup is complete by checking the contents of the new directory:
+ls /training
+The setup is complete when the result of your list (ls) command output appears as in the image below. If the full listing does not appear, wait a few minutes and try again. Note: It may take 2 to 3 minutes for all background actions to complete.
+https://cdn.qwiklabs.com/reTB5OuLQ4t3XAdt8OASrxYL%2BvI90R%2BgFRTCIWVKi1I%3D
+
+Download the code repository
+Next you will download a code repository for use in this lab:
+git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+
+
+Identify a project
+One environment variable that you will set is $DEVSHELL_PROJECT_ID that contains the Google Cloud project ID required to access billable resources.
+In the Console, on the Navigation menu ( Navigation menu icon), click Home. In the panel with Project Info, the Project ID is listed. You can also find this information in the Qwiklabs tab under Connection Details, where it is labeled GCP Project ID.
+On the training-vm SSH terminal, set the DEVSHELL_PROJECT_ID environment variable and export it so it will be available to other shells. The following command obtains the active Project ID from the Google Cloud environment:
+export DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Create Pub/Sub topic and subscription
+On the training-vm SSH terminal, navigate to the directory for this lab:
+cd ~/training-data-analyst/courses/streaming/publish
+
+
+
+
+
+
+
+
+
+
+Verify that the Pub/Sub service is accessible and working using the gcloud command.
+Create your topic and publish a simple message:
+gcloud pubsub topics create sandiego
+
+Publish a simple message:
+gcloud pubsub topics publish sandiego --message "hello"
+
+Create a subscription for the topic:
+gcloud pubsub subscriptions create --topic sandiego mySub1
+
+Pull the first message that was published to your topic:
+gcloud pubsub subscriptions pull --auto-ack mySub1
+Do you see any result? If not, why?
+
+Try to publish another message and then pull it using the subscription:
+gcloud pubsub topics publish sandiego --message "hello again"
+gcloud pubsub subscriptions pull --auto-ack mySub1
+Did you get any response this time?
+https://cdn.qwiklabs.com/UEqulIxNg44LC1%2FYn5DkYxDpZiYoXZ56lXWzXpWgi3w%3D
+
+In the training-vm SSH terminal, cancel your subscription:
+gcloud pubsub subscriptions delete mySub1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Simulate traffic sensor data into Pub/Sub
+Explore the python script to simulate San Diego traffic sensor data. Do not make any changes to the code.
+cd ~/training-data-analyst/courses/streaming/publish
+nano send_sensor_data.py
+
+Look at the simulate function. This one lets the script behave as if traffic sensors were sending in data in real time to Pub/Sub. The speedFactor parameter determines how fast the simulation will go. Exit the file by pressing Ctrl+X.
+Download the traffic simulation dataset:
+./download_data.sh
+
+
+Simulate streaming sensor data
+Run the send_sensor_data.py:
+./send_sensor_data.py --speedFactor=60 --project $DEVSHELL_PROJECT_ID
+
+This command simulates sensor data by sending recorded sensor data via Pub/Sub messages. The script extracts the original time of the sensor data and pauses between sending each message to simulate realistic timing of the sensor data. The value speedFactor changes the time between messages proportionally. So a speedFactor of 60 means "60 times faster" than the recorded timing. It will send about an hour of data every 60 seconds.
+Leave this terminal open and the simulator running.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Verify that messages are received
+Open a second SSH terminal and connect to the training VM
+In the Console, on the Navigation menu ( Navigation menu icon), click Compute Engine > VM instances.
+Locate the line with the instance called training-vm.
+On the far right, under Connect, click on SSH to open a second terminal window.
+
+Change into the directory you were working in:
+cd ~/training-data-analyst/courses/streaming/publish
+
+Create a subscription for the topic and do a pull to confirm that messages are coming in (note: you may need to issue the 'pull' command more than once to start seeing messages):
+gcloud pubsub subscriptions create --topic sandiego mySub2
+gcloud pubsub subscriptions pull --auto-ack mySub2
+
+Confirm that you see a message with traffic sensor information.
+https://cdn.qwiklabs.com/JZn0tWH2%2FwRZQDRDMNcksb2cCIoYHPFVPuNFAluzDJc%3D
+
+Cancel this subscription:
+gcloud pubsub subscriptions delete mySub2
+
+Close the second terminal:
+exit
+Copied!
+Stop the sensor simulator
+Return to the first terminal.
+
+Interrupt the publisher by typing Ctrl+C to stop it.
+
+Close the first terminal:
+
+exit
+
+
