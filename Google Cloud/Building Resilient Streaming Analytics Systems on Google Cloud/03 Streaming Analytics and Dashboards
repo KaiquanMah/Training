@@ -1,0 +1,789 @@
+Streaming Data Processing - Streaming Analytics and Dashboards
+Data visualization tools can help you make sense of your BigQuery data and help you analyze the data interactively. You can use visualization tools to help you identify trends, respond to them, and make predictions using your data. In this lab, you use Google Data Studio to visualize data in the BigQuery table populated by your Dataflow pipeline in the previous exercise. You will not be accessing live streaming data in this lab.
+
+Objectives
+In this lab, you will perform the following tasks:
+Connect to a BigQuery data source
+Create reports and charts to visualize BigQuery data
+This lab uses Google Data Studio to visualize data in BigQuery using the BigQuery connector. In subsequent tasks, you will create a data source, a report, and charts that visualize data in the sample table.
+
+
+
+
+
+
+
+
+
+
+
+
+Task 1. Creating a data source in Data Studio
+The Google Data Studio User Interface is accessed from outside of the Google Cloud environment. Open a new browser tab preferably in an incognito window. Navigate to: datastudio.google.com or click on the following link: Google Data Studio https://datastudio.google.com/
+Note: The first step in creating a report in Data Studio is to create a data source for the report. A report may contain one or more data sources. When you create a BigQuery data source, Data Studio uses the BigQuery connector.
+Note: You must have the appropriate permissions in order to add a BigQuery data source to a Data Studio report. Lab initialization steps created a BigQuery Dataset and tables for use in your exercises. The permissions applied to BigQuery datasets will apply to the reports, charts, and dashboards you create in Data Studio. When a Data Studio report is shared, the report components are visible only to users who have appropriate permissions at the data level.
+
+On the Reports page, in the Start with a Template section, click the Blank Report template. This starts the account setup process.
+https://cdn.qwiklabs.com/RZhR0hqh4RUrzwdQ0EmmUZVZEYjZ4gox%2BN1k%2BRDuFfQ%3D
+
+Acknowledge the terms of services and click Continue.
+On the Preferences page, select No for each option to receive email notifications, and click Continue.
+Now that the account is initialized, you need to start the process again.
+On the Reports page, in the Start with a Template section, click the Blank Report template. This time it will take you to a new page and begin an Untitled Report.
+The Add data to report panel will load from the bottom of the page.
+In the Google Connectors section, select BigQuery.
+https://cdn.qwiklabs.com/z%2FcJDjUCpT5JjVy%2FRIQFWTdbKKdz3zqvpuiw3F3SrRk%3D
+
+Authorize that "Data Studio requires authorization to connect to your BigQuery projects."
+If prompted, in the Sign in dialog, select your student account.
+If prompted, click Allow to give Google Data Studio permission to view the BigQuery resources in your lab account.
+Select My Projects.
+In the Project column, click your project name.
+In the Dataset column, click demos.
+In the Table column, click current_conditions.
+Lastly click Add.
+You will be prompted with a You are about to add data to this report notice.
+Check Don't show me this again and click Add to report.
+
+Once complete, a simple default tabular report appears. This confirms that you can see your BigQuery data in Data Studio.
+https://cdn.qwiklabs.com/3fr5eocWzu7UWdmD7nfuPHZ0LKl3j0BiMY7GbTJOxh4%3D
+
+Note: Giving Data Studio permission to Google Cloud account resources is typically a first-time activity and not something you would need to do every time you create a report.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Creating a bar chart using a calculated field
+Once you have added the current_conditions data source to the report, the next step is to create a visualization. Begin by creating a bar chart. The bar chart will display the total number of vehicles captured for each highway.
+
+(Optional) At the top of the page, click Untitled Report to change the report name. For example, type <PROJECTID>-report1-yourname.
+Delete the pre-populated tabular report. You can do this by simply selecting it and pressing delete.
+Next, from the Add a chart menu select the first Bar chart.
+https://cdn.qwiklabs.com/t43JAApiP1hAWGAhbVXbYszUOTPbKVY2Pn4FEWPORX4%3D
+
+In the Bar chart properties window, on the Data tab, notice the value for Data Source (current_conditions) and the default values for Dimension and Metric.
+If Dimension is not set to highway, then change Dimension to highway. In the Dimension section, click the existing dimension and in the Dimension picker, select highway.
+In the Metric section, click Add metric and add latitude.
+In the Metric section, mouse over Record Count and click the (x) to remove it.
+Example:
+https://cdn.qwiklabs.com/MTDeAyzjGGjDnfV2YhsowyxbEoZW6S7b8ipSobH5gTg%3D
+
+
+To gain insight on vehicle volume you need to add a metric for each vehicle detected.
+In the Metric section, click Add metric and add sensorId.
+A count distinct for this column is automatically created. This metric set as a count distinct does not give you a true sense of traffic volume. Click the CTD text and on the popup window choose Count . Type the name vehicles in the name box. Click in the report space off the popup to close it. The change is saved automatically.
+In the Metric section, mouse over latitude and click the (x) to remove it.
+The Dimension should be set to highway and the Metric should be set to sensorId. Notice the chart below is sorted in descending order by default. The highway with the most vehicles is displayed first.
+https://cdn.qwiklabs.com/qaBcAMoiR1YYixNQoZ6redznfQ%2BOWmicO%2B5J2jGJl9I%3D
+
+To enhance the chart, change the bar labels. In the Bar chart properties window, click the STYLE tab.
+In the Bar chart section, check Show data labels.
+The total number of vehicles is displayed above each bar in the chart.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Creating a chart using a custom query
+You may find that it is easier to work with an existing query to produce the desired reports and visualizations in Data Studio. The Custom Query option lets you leverage BigQuery's full query capabilities such as joins, unions, and analytical functions.
+Alternatively, you can leverage BigQuery's full query capabilities by creating a view. A view is a virtual table defined by a SQL query. You can query data in a view by adding the dataset containing the view as a data source.
+When you specify a SQL query as your BigQuery data source, the results of the query are in table format, which becomes the field definition (schema) for your data source. When you use a custom query as a data source, Data Studio uses your SQL as an inner select statement for each generated query to BigQuery. For more information on custom queries in Data Studio, consult the online help https://support.google.com/datastudio/?hl=en#topic=6267740.
+
+To add a bar chart to your report that uses a custom query data source:
+From the Add a chart menu select the first Bar chart.
+In the Bar chart properties window, on the Data tab, notice the value for Data Source (current_conditions) and the default values for Dimension and Metric are the same as the previous chart. In the Data Source section, click the current_conditions data source. At the bottom of the pane choose Add data.
+Under Google Connectors, select BigQuery.
+Select CUSTOM QUERY in the first grouping.
+For Billing Project, select your project.
+
+Type the following in the Enter custom query window and replace the <PROJECTID> with your Project ID:
+SELECT max(speed) as maxspeed, min(speed) as minspeed,
+avg(speed) as avgspeed, highway
+FROM `<PROJECTID>.demos.current_conditions`
+group by highway
+
+
+SELECT max(speed) as maxspeed, min(speed) as minspeed,
+       avg(speed) as avgspeed, highway
+FROM `qwiklabs-gcp-01-dafa8006690a.demos.current_conditions`
+group by highway
+
+This query uses max/min/avg functions to give you the corresponding speed for each highway.
+Click ADD.
+When prompted, click ADD TO REPORT.
+
+Note: Data Studio may be unable to determine the appropriate Dimension and Metrics for the chart. This requires you to adjust the graph options.
+In the Bar chart properties, on the Data tab, in the Metric section, click Record count.
+In the Metric picker, select maxspeed.
+In the Metric section, click Add metric.
+In the Metric picker, select minspeed.
+In the Metric section, click Add metric.
+In the Metric picker, select avgspeed.
+Remove the metric other than maxspeed, minspeed and avgspeed, if exist.
+Your chart now displays the maximum speed, minimum speed, and average speed for each highway.
+
+Notice each bar has a default color based on the order the metrics were added to the chart.
+Bar chart. maxspeed is blue, minspeed is teal, and avgspeed is pink.
+https://cdn.qwiklabs.com/pvhJKwNWMkziGgstC9F9UiTkpc%2ByuB0HfFWO0A1MOWs%3D
+
+For readability, change the chart styles. In the Bar chart properties, click the Style tab.
+In the Color By section, click on the boxes to select different colors.
+https://cdn.qwiklabs.com/C443EY0ohpxoR%2BwQwUDFQuimw1N6rpNg8JERWn5rVVA%3D
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 4. Viewing your query history
+You can view queries submitted via the BigQuery Connector by examining your query history in the BigQuery web interface. Using the query history, you can estimate query costs, and you can save queries for use in other scenarios.
+
+Open BigQuery Console
+In the Google Cloud Console, select Navigation menu > BigQuery.
+The Welcome to BigQuery in the Cloud Console message box opens. This message box provides a link to the quickstart guide and lists UI updates.
+
+Click Done.
+In the bottom panel the first item in the list will be Personal history. On your initial visit to the page the query history should appear on the bottom right underneath the Query editor pane. If it is not loaded click the Personal history link.
+The list of queries is displayed with the most recent queries first. Click on any Query to view details on the query such as Job ID and Bytes Processed.
+
+
+
+# https://stackoverflow.com/questions/31140104/is-it-possible-to-retrieve-an-extended-or-full-query-history-in-google-bigquery
+student_00_ac6e06aa1328@cloudshell:~ (qwiklabs-gcp-01-dafa8006690a)$ bq ls -j -a
+                    jobId                      Job Type    State      Start Time         Duration
+ -------------------------------------------- ---------- --------- ----------------- ----------------
+  job_u81-eNLdnLhB6WWg4c-q2OhC9SeW             query      SUCCESS   26 Dec 09:02:10   0:00:00.099000
+  job_xY6nVmq4P_hSTuE-plmSgWJvMV10             query      SUCCESS   26 Dec 09:02:10   0:00:00.102000
+  job_D7oLCx9u1guziYz3hh5Bqg6W05-L             query      SUCCESS   26 Dec 09:02:04   0:00:00.154000
+  job_iCWGgT6LCURbMt1ZCaKa6Lh7qtrt             query      SUCCESS   26 Dec 09:02:03   0:00:00.128000
+  job_J8H2VXdjBBnUPxBciwKYs6i-SzhB             query      SUCCESS   26 Dec 08:58:46   0:00:00.223000
+  job_LpXAEBzJnLfNiSl9UzbUF-6Ln9Z1             query      SUCCESS   26 Dec 08:58:45   0:00:00.280000
+  job_oeu7-2UzBMc74VPysHNtPrUMTQ0N             query      SUCCESS   26 Dec 08:47:07   0:00:00.385000
+  job_rrxneV_rZX95Z47jUxvK5XmzsyjQ             query      SUCCESS   26 Dec 08:47:07   0:00:00.384000
+  bqjob_r7747980e715e6853_000001854d6d7640_1   load       SUCCESS   26 Dec 07:54:57   0:00:01.724000
+  bqjob_r29b066743615c398_000001854d6d668c_1   load       SUCCESS   26 Dec 07:54:53   0:00:01.643000
+
+
+
+
+
+student_00_ac6e06aa1328@cloudshell:~ (qwiklabs-gcp-01-dafa8006690a)$ bq show --format=prettyjson -j job_u81-eNLdnLhB6WWg4c-q2OhC9SeW
+{
+  "configuration": {
+    "jobType": "QUERY",
+    "labels": {
+      "requestor": "looker_studio"
+    },
+    "query": {
+      "destinationTable": {
+        "datasetId": "_7888a31489b240aceca3c5bf6383f8f7964fad1d",
+        "projectId": "qwiklabs-gcp-01-dafa8006690a",
+        "tableId": "anon71d51a7013748b170696ab8d87a55a45da5fdee40a200670689e6aa0d3e0d3b8"
+      },
+      "priority": "INTERACTIVE",
+      "query": "SELECT t0.avgspeed, t0.highway, t0.maxspeed, t0.minspeed FROM (\nSELECT max(speed) as maxspeed, min(speed) as minspeed,\n       avg(speed) as avgspeed, highway\nFROM `qwiklabs-gcp-01-dafa8006690a.demos.current_conditions`\ngroup by highway\n) AS t0 LIMIT 100; ",
+      "useLegacySql": false,
+      "writeDisposition": "WRITE_TRUNCATE"
+    }
+  },
+  "etag": "Rh7P9/r6gj1bYeOkdN+Isg==",
+  "id": "qwiklabs-gcp-01-dafa8006690a:US.job_u81-eNLdnLhB6WWg4c-q2OhC9SeW",
+  "jobReference": {
+    "jobId": "job_u81-eNLdnLhB6WWg4c-q2OhC9SeW",
+    "location": "US",
+    "projectId": "qwiklabs-gcp-01-dafa8006690a"
+  },
+  "kind": "bigquery#job",
+  "principal_subject": "user:student-00-ac6e06aa1328@qwiklabs.net",
+  "selfLink": "https://bigquery.googleapis.com/bigquery/v2/projects/qwiklabs-gcp-01-dafa8006690a/jobs/job_u81-eNLdnLhB6WWg4c-q2OhC9SeW?location=US",
+  "statistics": {
+    "creationTime": "1672045330467",
+    "endTime": "1672045330611",
+    "query": {
+      "cacheHit": true,
+      "statementType": "SELECT",
+      "totalBytesBilled": "0",
+      "totalBytesProcessed": "0"
+    },
+    "startTime": "1672045330512",
+    "totalBytesProcessed": "0"
+  },
+  "status": {
+    "state": "DONE"
+  },
+  "user_email": "student-00-ac6e06aa1328@qwiklabs.net"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+student_00_ac6e06aa1328@cloudshell:~ (qwiklabs-gcp-01-dafa8006690a)$ bq show --format=prettyjson -j job_J8H2VXdjBBnUPxBciwKYs6i-SzhB
+{
+  "configuration": {
+    "jobType": "QUERY",
+    "labels": {
+      "requestor": "looker_studio"
+    },
+    "query": {
+      "destinationTable": {
+        "datasetId": "_7888a31489b240aceca3c5bf6383f8f7964fad1d",
+        "projectId": "qwiklabs-gcp-01-dafa8006690a",
+        "tableId": "anon71d51a7013748b170696ab8d87a55a45da5fdee40a200670689e6aa0d3e0d3b8"
+      },
+      "priority": "INTERACTIVE",
+      "query": "SELECT t0.avgspeed, t0.highway, t0.maxspeed, t0.minspeed FROM (\nSELECT max(speed) as maxspeed, min(speed) as minspeed,\n       avg(speed) as avgspeed, highway\nFROM `qwiklabs-gcp-01-dafa8006690a.demos.current_conditions`\ngroup by highway\n) AS t0 LIMIT 100; ",
+      "useLegacySql": false,
+      "writeDisposition": "WRITE_TRUNCATE"
+    }
+  },
+  "etag": "m49GotWVY4KRQPELl1I/og==",
+  "id": "qwiklabs-gcp-01-dafa8006690a:US.job_J8H2VXdjBBnUPxBciwKYs6i-SzhB",
+  "jobReference": {
+    "jobId": "job_J8H2VXdjBBnUPxBciwKYs6i-SzhB",
+    "location": "US",
+    "projectId": "qwiklabs-gcp-01-dafa8006690a"
+  },
+  "kind": "bigquery#job",
+  "principal_subject": "user:student-00-ac6e06aa1328@qwiklabs.net",
+  "selfLink": "https://bigquery.googleapis.com/bigquery/v2/projects/qwiklabs-gcp-01-dafa8006690a/jobs/job_J8H2VXdjBBnUPxBciwKYs6i-SzhB?location=US",
+  "statistics": {
+    "creationTime": "1672045126127",
+    "endTime": "1672045126398",
+    "finalExecutionDurationMs": "105",
+    "query": {
+      "billingTier": 1,
+      "cacheHit": false,
+      "estimatedBytesProcessed": "235941",
+      "queryPlan": [
+        {
+          "completedParallelInputs": "1",
+          "computeMsAvg": "9",
+          "computeMsMax": "9",
+          "computeRatioAvg": 0.36,
+          "computeRatioMax": 0.36,
+          "endMs": "1672045126256",
+          "id": "0",
+          "name": "S00: Input",
+          "parallelInputs": "1",
+          "readMsAvg": "4",
+          "readMsMax": "4",
+          "readRatioAvg": 0.16,
+          "readRatioMax": 0.16,
+          "recordsRead": "20511",
+          "recordsWritten": "5",
+          "shuffleOutputBytes": "210",
+          "shuffleOutputBytesSpilled": "0",
+          "slotMs": "17",
+          "startMs": "1672045126241",
+          "status": "COMPLETE",
+          "steps": [
+            {
+              "kind": "READ",
+              "substeps": [
+                "$1:highway, $2:speed",
+                "FROM qwiklabs-gcp-01-dafa8006690a.demos.current_conditions"
+              ]
+            },
+            {
+              "kind": "AGGREGATE",
+              "substeps": [
+                "GROUP BY $30 := $1",
+                "$20 := MAX($2)",
+                "$21 := MIN($2)",
+                "$22 := SHARD_AVG($2)"
+              ]
+            },
+            {
+              "kind": "WRITE",
+              "substeps": [
+                "$30, $20, $21, $22",
+                "TO __stage00_output",
+                "BY HASH($30)"
+              ]
+            }
+          ],
+          "waitMsAvg": "1",
+          "waitMsMax": "1",
+          "waitRatioAvg": 0.04,
+          "waitRatioMax": 0.04,
+          "writeMsAvg": "4",
+          "writeMsMax": "4",
+          "writeRatioAvg": 0.16,
+          "writeRatioMax": 0.16
+        },
+        {
+          "completedParallelInputs": "1",
+          "computeMsAvg": "4",
+          "computeMsMax": "4",
+          "computeRatioAvg": 0.16,
+          "computeRatioMax": 0.16,
+          "endMs": "1672045126293",
+          "id": "1",
+          "inputStages": [
+            "0"
+          ],
+          "name": "S01: Aggregate+",
+          "parallelInputs": "1",
+          "readMsAvg": "0",
+          "readMsMax": "0",
+          "readRatioAvg": 0,
+          "readRatioMax": 0,
+          "recordsRead": "5",
+          "recordsWritten": "5",
+          "shuffleOutputBytes": "170",
+          "shuffleOutputBytesSpilled": "0",
+          "slotMs": "9",
+          "startMs": "1672045126285",
+          "status": "COMPLETE",
+          "steps": [
+            {
+              "kind": "READ",
+              "substeps": [
+                "$30, $20, $21, $22",
+                "FROM __stage00_output"
+              ]
+            },
+            {
+              "kind": "LIMIT",
+              "substeps": [
+                "100"
+              ]
+            },
+            {
+              "kind": "AGGREGATE",
+              "substeps": [
+                "GROUP BY $40 := $30",
+                "$10 := MAX($20)",
+                "$11 := MIN($21)",
+                "$12 := ROOT_AVG($22)"
+              ]
+            },
+            {
+              "kind": "WRITE",
+              "substeps": [
+                "$40, $10, $11, $12",
+                "TO __stage01_output"
+              ]
+            }
+          ],
+          "waitMsAvg": "25",
+          "waitMsMax": "25",
+          "waitRatioAvg": 1,
+          "waitRatioMax": 1,
+          "writeMsAvg": "1",
+          "writeMsMax": "1",
+          "writeRatioAvg": 0.04,
+          "writeRatioMax": 0.04
+        },
+        {
+          "completedParallelInputs": "1",
+          "computeMsAvg": "8",
+          "computeMsMax": "8",
+          "computeRatioAvg": 0.32,
+          "computeRatioMax": 0.32,
+          "endMs": "1672045126327",
+          "id": "2",
+          "inputStages": [
+            "1"
+          ],
+          "name": "S02: Output",
+          "parallelInputs": "1",
+          "readMsAvg": "0",
+          "readMsMax": "0",
+          "readRatioAvg": 0,
+          "readRatioMax": 0,
+          "recordsRead": "5",
+          "recordsWritten": "5",
+          "shuffleOutputBytes": "155",
+          "shuffleOutputBytesSpilled": "0",
+          "slotMs": "75",
+          "startMs": "1672045126285",
+          "status": "COMPLETE",
+          "steps": [
+            {
+              "kind": "READ",
+              "substeps": [
+                "$40, $10, $11, $12",
+                "FROM __stage01_output"
+              ]
+            },
+            {
+              "kind": "LIMIT",
+              "substeps": [
+                "100"
+              ]
+            },
+            {
+              "kind": "WRITE",
+              "substeps": [
+                "$40, $10, $11, $12",
+                "TO __stage02_output"
+              ]
+            }
+          ],
+          "waitMsAvg": "10",
+          "waitMsMax": "10",
+          "waitRatioAvg": 0.4,
+          "waitRatioMax": 0.4,
+          "writeMsAvg": "24",
+          "writeMsMax": "24",
+          "writeRatioAvg": 0.96,
+          "writeRatioMax": 0.96
+        }
+      ],
+      "referencedTables": [
+        {
+          "datasetId": "demos",
+          "projectId": "qwiklabs-gcp-01-dafa8006690a",
+          "tableId": "current_conditions"
+        }
+      ],
+      "statementType": "SELECT",
+      "timeline": [
+        {
+          "completedUnits": "3",
+          "elapsedMs": "171",
+          "estimatedRunnableUnits": "0",
+          "pendingUnits": "0",
+          "totalSlotMs": "101"
+        }
+      ],
+      "totalBytesBilled": "10485760",
+      "totalBytesProcessed": "235941",
+      "totalPartitionsProcessed": "0",
+      "totalSlotMs": "101",
+      "transferredBytes": "0"
+    },
+    "startTime": "1672045126175",
+    "totalBytesProcessed": "235941",
+    "totalSlotMs": "101"
+  },
+  "status": {
+    "state": "DONE"
+  },
+  "user_email": "student-00-ac6e06aa1328@qwiklabs.net"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+student_00_ac6e06aa1328@cloudshell:~ (qwiklabs-gcp-01-dafa8006690a)$ bq show --format=prettyjson -j job_rrxneV_rZX95Z47jUxvK5XmzsyjQ
+{
+  "configuration": {
+    "jobType": "QUERY",
+    "labels": {
+      "requestor": "looker_studio"
+    },
+    "query": {
+      "destinationTable": {
+        "datasetId": "_7888a31489b240aceca3c5bf6383f8f7964fad1d",
+        "projectId": "qwiklabs-gcp-01-dafa8006690a",
+        "tableId": "anon95c50518f0e2876ecaafb7a4b1aaf0a6104b5b9c2e6c0c8c33c4ffdf6ad27548"
+      },
+      "priority": "INTERACTIVE",
+      "query": "SELECT t0.direction, t0.lane, t0.sensorId, t0.speed FROM `qwiklabs-gcp-01-dafa8006690a.demos.current_conditions` AS t0 LIMIT 100; ",
+      "useLegacySql": false,
+      "writeDisposition": "WRITE_TRUNCATE"
+    }
+  },
+  "etag": "hX1WmzkuaAr03v+xvc5O7w==",
+  "id": "qwiklabs-gcp-01-dafa8006690a:US.job_rrxneV_rZX95Z47jUxvK5XmzsyjQ",
+  "jobReference": {
+    "jobId": "job_rrxneV_rZX95Z47jUxvK5XmzsyjQ",
+    "location": "US",
+    "projectId": "qwiklabs-gcp-01-dafa8006690a"
+  },
+  "kind": "bigquery#job",
+  "principal_subject": "user:student-00-ac6e06aa1328@qwiklabs.net",
+  "selfLink": "https://bigquery.googleapis.com/bigquery/v2/projects/qwiklabs-gcp-01-dafa8006690a/jobs/job_rrxneV_rZX95Z47jUxvK5XmzsyjQ?location=US",
+  "statistics": {
+    "creationTime": "1672044427421",
+    "endTime": "1672044427864",
+    "finalExecutionDurationMs": "43",
+    "query": {
+      "billingTier": 1,
+      "cacheHit": false,
+      "estimatedBytesProcessed": "989645",
+      "queryPlan": [
+        {
+          "completedParallelInputs": "1",
+          "computeMsAvg": "9",
+          "computeMsMax": "9",
+          "computeRatioAvg": 1,
+          "computeRatioMax": 1,
+          "endMs": "1672044427586",
+          "id": "0",
+          "name": "S00: Output",
+          "parallelInputs": "1",
+          "readMsAvg": "7",
+          "readMsMax": "7",
+          "readRatioAvg": 0.7777777777777778,
+          "readRatioMax": 0.7777777777777778,
+          "recordsRead": "20511",
+          "recordsWritten": "100",
+          "shuffleOutputBytes": "5100",
+          "shuffleOutputBytesSpilled": "0",
+          "slotMs": "30",
+          "startMs": "1672044427562",
+          "status": "COMPLETE",
+          "steps": [
+            {
+              "kind": "READ",
+              "substeps": [
+                "$1:direction, $2:lane, $3:speed, $4:sensorId",
+                "FROM qwiklabs-gcp-01-dafa8006690a.demos.current_conditions"
+              ]
+            },
+            {
+              "kind": "LIMIT",
+              "substeps": [
+                "100"
+              ]
+            },
+            {
+              "kind": "WRITE",
+              "substeps": [
+                "$1, $2, $3, $4",
+                "TO __stage00_output"
+              ]
+            }
+          ],
+          "waitMsAvg": "1",
+          "waitMsMax": "1",
+          "waitRatioAvg": 0.1111111111111111,
+          "waitRatioMax": 0.1111111111111111,
+          "writeMsAvg": "8",
+          "writeMsMax": "8",
+          "writeRatioAvg": 0.8888888888888888,
+          "writeRatioMax": 0.8888888888888888
+        }
+      ],
+      "referencedTables": [
+        {
+          "datasetId": "demos",
+          "projectId": "qwiklabs-gcp-01-dafa8006690a",
+          "tableId": "current_conditions"
+        }
+      ],
+      "statementType": "SELECT",
+      "timeline": [
+        {
+          "completedUnits": "1",
+          "elapsedMs": "349",
+          "estimatedRunnableUnits": "0",
+          "pendingUnits": "0",
+          "totalSlotMs": "30"
+        }
+      ],
+      "totalBytesBilled": "10485760",
+      "totalBytesProcessed": "989645",
+      "totalPartitionsProcessed": "0",
+      "totalSlotMs": "30",
+      "transferredBytes": "0"
+    },
+    "startTime": "1672044427480",
+    "totalBytesProcessed": "989645",
+    "totalSlotMs": "30"
+  },
+  "status": {
+    "state": "DONE"
+  },
+  "user_email": "student-00-ac6e06aa1328@qwiklabs.net"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+student_00_ac6e06aa1328@cloudshell:~ (qwiklabs-gcp-01-dafa8006690a)$ bq show --format=prettyjson -j bqjob_r7747980e715e6853_000001854d6d7640_1
+{
+  "configuration": {
+    "jobType": "LOAD",
+    "load": {
+      "destinationTable": {
+        "datasetId": "demos",
+        "projectId": "qwiklabs-gcp-01-dafa8006690a",
+        "tableId": "current_conditions"
+      },
+      "maxBadRecords": 0,
+      "schema": {
+        "fields": [
+          {
+            "name": "timestamp",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "latitude",
+            "type": "FLOAT"
+          },
+          {
+            "name": "longitude",
+            "type": "FLOAT"
+          },
+          {
+            "name": "highway",
+            "type": "STRING"
+          },
+          {
+            "name": "direction",
+            "type": "STRING"
+          },
+          {
+            "name": "lane",
+            "type": "INTEGER"
+          },
+          {
+            "name": "speed",
+            "type": "FLOAT"
+          },
+          {
+            "name": "sensorId",
+            "type": "STRING"
+          }
+        ]
+      },
+      "skipLeadingRows": 1,
+      "sourceFormat": "CSV",
+      "sourceUris": [
+        "gs://cloud-training/gcpdei/results-20180608-102960.csv"
+      ]
+    }
+  },
+  "etag": "eG6ZkjQpgfNm0p41ALWeQA==",
+  "id": "qwiklabs-gcp-01-dafa8006690a:US.bqjob_r7747980e715e6853_000001854d6d7640_1",
+  "jobReference": {
+    "jobId": "bqjob_r7747980e715e6853_000001854d6d7640_1",
+    "location": "US",
+    "projectId": "qwiklabs-gcp-01-dafa8006690a"
+  },
+  "kind": "bigquery#job",
+  "principal_subject": "serviceAccount:630873586354-compute@developer.gserviceaccount.com",
+  "selfLink": "https://bigquery.googleapis.com/bigquery/v2/projects/qwiklabs-gcp-01-dafa8006690a/jobs/bqjob_r7747980e715e6853_000001854d6d7640_1?location=US",
+  "statistics": {
+    "completionRatio": 1,
+    "creationTime": "1672041297711",
+    "endTime": "1672041299568",
+    "finalExecutionDurationMs": "988",
+    "load": {
+      "badRecords": "0",
+      "inputFileBytes": "2103158",
+      "inputFiles": "1",
+      "outputBytes": "1553762",
+      "outputRows": "20511",
+      "timeline": [
+        {
+          "activeUnits": "0",
+          "completedUnits": "1",
+          "elapsedMs": "911",
+          "pendingUnits": "0",
+          "totalSlotMs": "748"
+        },
+        {
+          "activeUnits": "0",
+          "completedUnits": "1",
+          "elapsedMs": "1697",
+          "estimatedRunnableUnits": "0",
+          "pendingUnits": "0",
+          "totalSlotMs": "748"
+        }
+      ]
+    },
+    "reservation_id": "default-pipeline",
+    "startTime": "1672041297844",
+    "totalSlotMs": "748"
+  },
+  "status": {
+    "state": "DONE"
+  },
+  "user_email": "630873586354-compute@developer.gserviceaccount.com"
+}
+
+
+
+
+
+
+
