@@ -34,9 +34,37 @@ ls /training
 The setup is complete when the result of your list (ls) command output appears as in the image below. If the full listing does not appear, wait a few minutes and try again. Note: It may take 2 to 3 minutes for all background actions to complete.
 https://cdn.qwiklabs.com/reTB5OuLQ4t3XAdt8OASrxYL%2BvI90R%2BgFRTCIWVKi1I%3D
 
+student-00-7438b3f49d31@training-vm:~$ pwd
+/home/student-00-7438b3f49d31
+student-00-7438b3f49d31@training-vm:~$ ls
+student-00-7438b3f49d31@training-vm:~$ cd /training
+student-00-7438b3f49d31@training-vm:/training$ ls
+bq_magic.sh  project_env.sh  sensor_magic.sh
+
+
+
+
+
+
 Download the code repository
 Next you will download a code repository for use in this lab:
 git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+
+student-00-7438b3f49d31@training-vm:~$ pwd
+/home/student-00-7438b3f49d31
+student-00-7438b3f49d31@training-vm:~$ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+Cloning into 'training-data-analyst'...
+remote: Enumerating objects: 61415, done.
+remote: Counting objects: 100% (126/126), done.
+remote: Compressing objects: 100% (63/63), done.
+remote: Total 61415 (delta 66), reused 106 (delta 58), pack-reused 61289
+Receiving objects: 100% (61415/61415), 690.73 MiB | 39.07 MiB/s, done.
+Resolving deltas: 100% (39049/39049), done.
+student-00-7438b3f49d31@training-vm:~$ ls
+training-data-analyst
+
+
+
 
 
 Identify a project
@@ -45,7 +73,8 @@ In the Console, on the Navigation menu ( Navigation menu icon), click Home. In t
 On the training-vm SSH terminal, set the DEVSHELL_PROJECT_ID environment variable and export it so it will be available to other shells. The following command obtains the active Project ID from the Google Cloud environment:
 export DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
 
-
+student-00-7438b3f49d31@training-vm:~$ echo $DEVSHELL_PROJECT_ID 
+qwiklabs-gcp-00-49f9a679f755
 
 
 
@@ -63,12 +92,9 @@ Task 2. Create Pub/Sub topic and subscription
 On the training-vm SSH terminal, navigate to the directory for this lab:
 cd ~/training-data-analyst/courses/streaming/publish
 
-
-
-
-
-
-
+student-00-7438b3f49d31@training-vm:~$ cd ~/training-data-analyst/courses/streaming/publish
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ ls
+download_data.sh  pubsub_pull.py  README.txt  send_sensor_data.py
 
 
 
@@ -86,14 +112,47 @@ Pull the first message that was published to your topic:
 gcloud pubsub subscriptions pull --auto-ack mySub1
 Do you see any result? If not, why?
 
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub topics create sandiego
+Created topic [projects/qwiklabs-gcp-00-49f9a679f755/topics/sandiego].
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub topics publish sandiego --message "hello"
+messageIds:
+- '6508639726728764'
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub subscriptions create --topic sandiego mySub1
+Created subscription [projects/qwiklabs-gcp-00-49f9a679f755/subscriptions/mySub1].
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub subscriptions pull --auto-ack mySub1
+Listed 0 items.
+-> BECAUSE THE VM'S SUBSCRIPTION TO THE TOPIC ONLY EXISTED AFTER THE MESSAGE WAS PUBLISHED TO THE TOPIC
+THERE IS NO MESSAGE TO PULL BY THIS VM/SUBSCRIBER
+
+
+
+
+
 Try to publish another message and then pull it using the subscription:
 gcloud pubsub topics publish sandiego --message "hello again"
 gcloud pubsub subscriptions pull --auto-ack mySub1
 Did you get any response this time?
 https://cdn.qwiklabs.com/UEqulIxNg44LC1%2FYn5DkYxDpZiYoXZ56lXWzXpWgi3w%3D
 
+
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub topics publish sandiego --message "hello again"
+messageIds:
+- '6508622069161588'
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub subscriptions pull --auto-ack mySub1
+┌─────────────┬──────────────────┬────────────┐
+│     DATA    │    MESSAGE_ID    │ ATTRIBUTES │
+├─────────────┼──────────────────┼────────────┤
+│ hello again │ 6508622069161588 │            │
+└─────────────┴──────────────────┴────────────┘
+
+
+
+
 In the training-vm SSH terminal, cancel your subscription:
 gcloud pubsub subscriptions delete mySub1
+
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub subscriptions delete mySub1
+Deleted subscription [projects/qwiklabs-gcp-00-49f9a679f755/subscriptions/mySub1].
 
 
 
@@ -114,9 +173,140 @@ Explore the python script to simulate San Diego traffic sensor data. Do not make
 cd ~/training-data-analyst/courses/streaming/publish
 nano send_sensor_data.py
 
-Look at the simulate function. This one lets the script behave as if traffic sensors were sending in data in real time to Pub/Sub. The speedFactor parameter determines how fast the simulation will go. Exit the file by pressing Ctrl+X.
+
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ cat send_sensor_data.py
+#!/usr/bin/env python3
+
+# Copyright 2018 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import time
+import gzip
+import logging
+import argparse
+import datetime
+from google.cloud import pubsub
+
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+TOPIC = 'sandiego'
+INPUT = 'sensor_obs2008.csv.gz'
+
+def publish(publisher, topic, events):
+   numobs = len(events)
+   if numobs > 0:
+       logging.info('Publishing {0} events from {1}'.format(numobs, get_timestamp(events[0])))
+       for event_data in events:
+         publisher.publish(topic,event_data)
+
+def get_timestamp(line):
+   ## convert from bytes to str
+   line = line.decode('utf-8')
+
+   # look at first field of row
+   timestamp = line.split(',')[0]
+   return datetime.datetime.strptime(timestamp, TIME_FORMAT)
+
+def simulate(topic, ifp, firstObsTime, programStart, speedFactor):
+   # sleep computation
+   def compute_sleep_secs(obs_time):
+        time_elapsed = (datetime.datetime.utcnow() - programStart).seconds
+        sim_time_elapsed = ((obs_time - firstObsTime).days * 86400.0 + (obs_time - firstObsTime).seconds) / speedFactor
+        to_sleep_secs = sim_time_elapsed - time_elapsed
+        return to_sleep_secs
+
+   topublish = list() 
+
+   for line in ifp:
+       event_data = line   # entire line of input CSV is the message
+       obs_time = get_timestamp(line) # from first column
+
+       # how much time should we sleep?
+       if compute_sleep_secs(obs_time) > 1:
+          # notify the accumulated topublish
+          publish(publisher, topic, topublish) # notify accumulated messages
+          topublish = list() # empty out list
+
+          # recompute sleep, since notification takes a while
+          to_sleep_secs = compute_sleep_secs(obs_time)
+          if to_sleep_secs > 0:
+             logging.info('Sleeping {} seconds'.format(to_sleep_secs))
+             time.sleep(to_sleep_secs)
+       topublish.append(event_data)
+
+   # left-over records; notify again
+   publish(publisher, topic, topublish)
+
+def peek_timestamp(ifp):
+   # peek ahead to next line, get timestamp and go back
+   pos = ifp.tell()
+   line = ifp.readline()
+   ifp.seek(pos)
+   return get_timestamp(line)
+
+
+if __name__ == '__main__':
+   parser = argparse.ArgumentParser(description='Send sensor data to Cloud Pub/Sub in small groups, simulating real-time behavior')
+   parser.add_argument('--speedFactor', help='Example: 60 implies 1 hour of data sent to Cloud Pub/Sub in 1 minute', required=True, type=float)
+   parser.add_argument('--project', help='Example: --project $DEVSHELL_PROJECT_ID', required=True)
+   args = parser.parse_args()
+
+   # create Pub/Sub notification topic
+   logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+   publisher = pubsub.PublisherClient()
+   event_type = publisher.topic_path(args.project,TOPIC)
+   try:
+      publisher.get_topic(event_type)
+      logging.info('Reusing pub/sub topic {}'.format(TOPIC))
+   except:
+      publisher.create_topic(event_type)
+      logging.info('Creating pub/sub topic {}'.format(TOPIC))
+
+   # notify about each line in the input file
+   programStartTime = datetime.datetime.utcnow() 
+   with gzip.open(INPUT, 'rb') as ifp:
+      header = ifp.readline()  # skip header
+      firstObsTime = peek_timestamp(ifp)
+      logging.info('Sending sensor data from {}'.format(firstObsTime))
+      simulate(event_type, ifp, firstObsTime, programStartTime, args.speedFactor)
+      
+      
+      
+      
+
+
+
+Look at the simulate function. This one lets the script behave as if traffic sensors were sending in data in real time to Pub/Sub. 
+The speedFactor parameter determines how fast the simulation will go. Exit the file by pressing Ctrl+X.
 Download the traffic simulation dataset:
 ./download_data.sh
+
+
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ pwd
+/home/student-00-7438b3f49d31/training-data-analyst/courses/streaming/publish
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ ls
+download_data.sh  pubsub_pull.py  README.txt  send_sensor_data.py
+
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ cat download_data.sh 
+gsutil cp gs://cloud-training-demos/sandiego/sensor_obs2008.csv.gz .
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ ./download_data.sh 
+Copying gs://cloud-training-demos/sandiego/sensor_obs2008.csv.gz...
+- [1 files][ 34.6 MiB/ 34.6 MiB]                                                
+Operation completed over 1 objects/34.6 MiB.  
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ ls
+download_data.sh  pubsub_pull.py  README.txt  send_sensor_data.py  sensor_obs2008.csv.gz
+
+
 
 
 Simulate streaming sensor data
@@ -126,8 +316,21 @@ Run the send_sensor_data.py:
 This command simulates sensor data by sending recorded sensor data via Pub/Sub messages. The script extracts the original time of the sensor data and pauses between sending each message to simulate realistic timing of the sensor data. The value speedFactor changes the time between messages proportionally. So a speedFactor of 60 means "60 times faster" than the recorded timing. It will send about an hour of data every 60 seconds.
 Leave this terminal open and the simulator running.
 
+# EARLIER IN 'send_sensor_data.py', THE CSV FILE WAS ALREADY SPECIFIED
+# AND READ USING gzip.open
+# INPUT = 'sensor_obs2008.csv.gz'
 
-
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ ./send_sensor_data.py --speedFactor=60 --project $DEVSHELL_PROJECT_ID
+INFO: Reusing pub/sub topic sandiego
+INFO: Sending sensor data from 2008-11-01 00:00:00
+INFO: Publishing 477 events from 2008-11-01 00:00:00
+INFO: Sleeping 5.0 seconds
+INFO: Publishing 477 events from 2008-11-01 00:05:00
+INFO: Sleeping 5.0 seconds
+INFO: Publishing 477 events from 2008-11-01 00:10:00
+INFO: Sleeping 5.0 seconds
+INFO: Publishing 477 events from 2008-11-01 00:15:00
+INFO: Sleeping 5.0 seconds
 
 
 
@@ -154,6 +357,26 @@ gcloud pubsub subscriptions pull --auto-ack mySub2
 
 Confirm that you see a message with traffic sensor information.
 https://cdn.qwiklabs.com/JZn0tWH2%2FwRZQDRDMNcksb2cCIoYHPFVPuNFAluzDJc%3D
+
+
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub subscriptions create --topic sandiego mySub2
+Created subscription [projects/qwiklabs-gcp-00-49f9a679f755/subscriptions/mySub2].
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub subscriptions pull --auto-ack mySub2
+┌──────────────────────────────────────────────────────┬──────────────────┬────────────┐
+│                         DATA                         │    MESSAGE_ID    │ ATTRIBUTES │
+├──────────────────────────────────────────────────────┼──────────────────┼────────────┤
+│ 2008-11-01 00:10:00,33.136599,-117.330302,5,N,1,74.5 │ 6508670882673912 │            │
+└──────────────────────────────────────────────────────┴──────────────────┴────────────┘
+
+student-00-7438b3f49d31@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud pubsub subscriptions pull --auto-ack mySub2
+┌──────────────────────────────────────────────────────┬──────────────────┬────────────┐
+│                         DATA                         │    MESSAGE_ID    │ ATTRIBUTES │
+├──────────────────────────────────────────────────────┼──────────────────┼────────────┤
+│ 2008-11-01 00:55:00,32.979329,-117.252709,5,N,1,75.5 │ 6508674296564789 │            │
+└──────────────────────────────────────────────────────┴──────────────────┴────────────┘
+
+
+
 
 Cancel this subscription:
 gcloud pubsub subscriptions delete mySub2
