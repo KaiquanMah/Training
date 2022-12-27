@@ -18,7 +18,7 @@ Click CREATE DATASET.
 
 
 
-Task 2. Creating tables with
+Task 2. Creating tables with date partitions
 A partitioned table is a table that is divided into segments, called partitions, that make it easier to manage and query your data. By dividing a large table into smaller partitions, you can improve query performance, and control costs by reducing the number of bytes read by a query.
 Now you will create a new table and bind a date or timestamp column as a partition. Before we do that, let's explore the data in the non-partitioned table first.
 
@@ -37,6 +37,35 @@ LIMIT 5
 
 Click Run.
 The query returns 5 results.
+[{
+  "fullVisitorId": "2013733114991091192",
+  "date": "20170708",
+  "city": "Sunnyvale",
+  "pageTitle": "Nest-USA"
+}, {
+  "fullVisitorId": "3422881036274193424",
+  "date": "20170708",
+  "city": "not available in demo dataset",
+  "pageTitle": "Nest-USA"
+}, {
+  "fullVisitorId": "3193515338910163002",
+  "date": "20170708",
+  "city": "not available in demo dataset",
+  "pageTitle": "Nest-USA"
+}, {
+  "fullVisitorId": "0615794439100789552",
+  "date": "20170708",
+  "city": "San Francisco",
+  "pageTitle": "Nest-USA"
+}, {
+  "fullVisitorId": "8890384353656042946",
+  "date": "20170708",
+  "city": "Mountain View",
+  "pageTitle": "Nest-USA"
+}]
+
+
+
 
 
 
@@ -62,18 +91,18 @@ Additionally, the LIMIT 5 does not reduce the total amount of data processed, wh
 
 
 Why did the previous query return 0 records but still scan through 1.74GB of data?
-Before the query runs, the query engine does not know whether 2018 data exists to satisfy the WHERE clause condition and it needs to scan through all records in a non-partitioned table.
-The query was written incorrectly
-The query engine has the metadata for each partition stored but still needs to scan all records even if the table is partitioned.
+YES   Before the query runs, the query engine does not know whether 2018 data exists to satisfy the WHERE clause condition and it needs to scan through all records in a non-partitioned table.
+NO    The query was written incorrectly
+NO    The query engine has the metadata for each partition stored but still needs to scan all records even if the table is partitioned.
+
 
 
 
 Common use-cases for date-partitioned tables
 Scanning through the entire dataset everytime to compare rows against a WHERE condition is wasteful. This is especially true if you only really care about records for a specific period of time like:
-
-All transactions for the last year
-All visitor interactions within the last 7 days
-All products sold in the last month
+-All transactions for the last year
+-All visitor interactions within the last 7 days
+-All products sold in the last month
 Instead of scanning the entire dataset and filtering on a date field like we did in the earlier queries, we will now set up a date-partitioned table. This will allow us to completely ignore scanning records in certain partitions if they are irrelevant to our query.
 
 
@@ -95,6 +124,18 @@ Click COMPOSE NEW QUERY and add the below query, then RUN:
  FROM `data-to-insights.ecommerce.all_sessions_raw`
 
 In this query, note the new option - PARTITION BY a field. The two options available to partition are DATE and TIMESTAMP. The PARSE_DATE function is used on the date field (stored as a string) to get it into the proper DATE type for partitioning.
+Row	                date_formatted          fullvisitorId
+1	                  2017-03-01              814658797187419661
+2	                  2017-03-01              8363178793377014434
+3	                  2017-03-01              8583528663966710025
+
+
+
+
+
+
+
+
 Click on the ecommerce dataset, then select the new partiton_by_day table:
 Click on the Details tab.
 Confirm that you see in the Table info section:
@@ -126,6 +167,19 @@ FROM `data-to-insights.ecommerce.partition_by_day`
 WHERE date_formatted = '2016-08-01'
 
 This time ~25 KB or 0.025MB is processed, which is a fraction of what you queried.
+[{
+  "date_formatted": "2016-08-01",
+  "fullvisitorId": "8346614539128137085"
+}, {
+  "date_formatted": "2016-08-01",
+  "fullvisitorId": "1856237131266550302"
+}, 
+...
+]
+
+Elapsed time          196 ms
+Slot time consumed    14 ms
+Bytes shuffled        24.18 KB
 
 
 
@@ -138,12 +192,16 @@ FROM `data-to-insights.ecommerce.partition_by_day`
 WHERE date_formatted = '2018-07-08'
 
 You should see This query will process 0 B when run.
+Elapsed time            141 ms
+Slot time consumed      4 ms
+Bytes shuffled          0 B
+
 
 
 Why are there 0 bytes processed?
-The query engine has cached the results from a query we ran earlier and will return the same 10 records
-The query engine processes many fewer rows of data when you use partitions and caches each row for all users so 0 bytes are processed
-The query engine knows which partitions already exist and knows that no partition exists for 2018-07-08 (the ecommerce dataset ranges from 2016-08-01 to 2017-08-01).
+NO    The query engine has cached the results from a query we ran earlier and will return the same 10 records
+NO    The query engine processes many fewer rows of data when you use partitions and caches each row for all users so 0 bytes are processed
+YES   The query engine knows which partitions already exist and knows that no partition exists for 2018-07-08 (the ecommerce dataset ranges from 2016-08-01 to 2017-08-01).
 
 
 
@@ -166,7 +224,27 @@ Explore the available NOAA weather data tables
 In the left panel, click on + ADD DATA and select Explore public datasets.
 Search for GSOD NOAA, and then select the dataset.
 Click on View dataset.
+-Global Surface Summary of the Day Weather Data
+- National Oceanic and Atmospheric Administration (NOAA) 
+This public dataset was created by the National Oceanic and Atmospheric Administration (NOAA) and includes global data obtained from the USAF Climatology Center. This dataset covers GSOD data between 1929 and present (updated daily), collected from over 9000 stations.
+Global summary of the day is comprised of a dozen daily averages computed from global hourly station data. Daily weather elements include mean values of: temperature, dew point temperature, sea level pressure, station pressure, visibility, and wind speed plus maximum and minimum temperature, maximum sustained wind speed and maximum gust, precipitation amount, snow depth, and weather indicators. With the exception of U.S. stations, 24-hour periods are based upon UTC times.
+This public dataset is hosted in Google BigQuery and is included in BigQuery's 1TB/mo of free tier processing. This means that each user receives 1TB of free BigQuery processing every month, which can be used to run queries on this public dataset. Watch this short video to learn how to get started quickly using BigQuery to access public datasets. What is BigQuery 
+Update Frequency: daily
+Terms of use: This dataset is publicly available for anyone to use under the following terms provided by the Dataset Source — http://www.data.gov/privacy-policy#data_policy — and is provided "AS IS" without any warranty, express or implied, from Google. Google disclaims all liability for any damages, direct or indirect, resulting from the use of the dataset.
+Dataset ID        bigquery-public-data.noaa_gsod
+Created           Mar 14, 2016, 10:54:51 AM UTC+8
+Default table expiration      Never
+Last modified                 Sep 20, 2022, 3:57:49 PM UTC+8
+Data location                 US
+https://data.noaa.gov/dataset/dataset/global-surface-summary-of-the-day-gsod
+
+
+
+
 Scroll through the tables in the noaa_gsod dataset (which are manually sharded and not partitioned).
+=>THIS DOESNT SHOW THE UNDERLYING TABLES IN THE DATASET
+
+
 Next, copy and paste this below query to Query editor:
 #standardSQL
  SELECT
@@ -185,6 +263,58 @@ Note that the table wildcard * used in the FROM clause to limit the amount of ta
 Note that although a LIMIT 10 was added, this still does not reduce the total amount of data scanned (about 141.6 MB) since there are no partitions yet.
 Click Run.
 Confirm the date is properly formatted and the precipitation field is showing non-zero values.
+[{
+  "date": "2022-12-25",
+  "station_name": "POCATELLO REGIONAL AIRPORT",
+  "prcp": "0.03"
+}, {
+  "date": "2022-12-25",
+  "station_name": "MUSKEGON COUNTY AIRPORT",
+  "prcp": "0.05"
+}, {
+  "date": "2022-12-25",
+  "station_name": "GLACIER PARK INTERNATIONAL AI",
+  "prcp": "0.07"
+}, {
+  "date": "2022-12-25",
+  "station_name": "LEWISTON-NEZ PERCE COUNTY AIR",
+  "prcp": "0.03"
+}, {
+  "date": "2022-12-25",
+  "station_name": "WALLA WALLA REGIONAL ARPT",
+  "prcp": "0.07"
+}, {
+  "date": "2022-12-25",
+  "station_name": "RENTON MUNI",
+  "prcp": "0.8"
+}, {
+  "date": "2022-12-25",
+  "station_name": "HAINES",
+  "prcp": "0.04"
+}, {
+  "date": "2022-12-25",
+  "station_name": "PETERSBURG",
+  "prcp": "0.04"
+}, {
+  "date": "2022-12-25",
+  "station_name": "DETROIT METRO WAYNE COUNTY AI",
+  "prcp": "0.02"
+}, {
+  "date": "2022-12-25",
+  "station_name": "SANDERSON FLD",
+  "prcp": "1.78"
+}]
+
+
+Elapsed time            2 sec
+Slot time consumed      24 sec
+Bytes shuffled          208.63 MB
+
+
+
+
+
+
 
 
 
@@ -225,12 +355,109 @@ Your query should look like this:
    AND prcp > 0      -- Filter
    AND _TABLE_SUFFIX >= '2021'
 
+Elapsed time          11 sec
+Slot time consumed      9 min 49 sec
+Bytes shuffled          293.01 MB
+
+
+
+
+
+
+SELECT *
+FROM `bigquery-public-data.noaa_gsod.gsod*`
+LIMIT 1
+[{
+  "stn": "917720",
+  "wban": "99999",
+  "date": null,
+  "year": "2007",
+  "mo": "02",
+  "da": "01",
+  "temp": "79.4",
+  "count_temp": "4",
+  "dewp": "9999.9",
+  "count_dewp": "0",
+  "slp": "9999.9",
+  "count_slp": "0",
+  "stp": "9999.9",
+  "count_stp": "0",
+  "visib": "12.4",
+  "count_visib": "4",
+  "wdsp": "6.5",
+  "count_wdsp": "4",
+  "mxpsd": "8.0",
+  "gust": "999.9",
+  "max": "80.8",
+  "flag_max": "*",
+  "min": "75.9",
+  "flag_min": "*",
+  "prcp": "0.24",
+  "flag_prcp": "C",
+  "sndp": "999.9",
+  "fog": "0",
+  "rain_drizzle": "0",
+  "snow_ice_pellets": "0",
+  "hail": "0",
+  "thunder": "0",
+  "tornado_funnel_cloud": "0"
+}]
+
+
+
+SELECT *
+FROM `bigquery-public-data.noaa_gsod.stations`
+LIMIT 1
+[{
+  "usaf": "007018",
+  "wban": "99999",
+  "name": "WXPOD 7018                   ",
+  "country": null,
+  "state": null,
+  "call": null,
+  "lat": "0.0",
+  "lon": "0.0",
+  "elev": "+7018.0",
+  "begin": "20110309",
+  "end": "20130730"
+}]
+
+
+
+
+
+
+SELECT *
+FROM ecommerce.days_with_rain
+LIMIT 3
+[{
+  "date": "2022-11-19",
+  "station_name": "LIMONCOCHA",
+  "prcp": "4.25"
+}, {
+  "date": "2022-11-19",
+  "station_name": "DRUMMOND ISLAND AIRPORT",
+  "prcp": "0.25"
+}, {
+  "date": "2022-11-19",
+  "station_name": "WAEDENSWIL",
+  "prcp": "0.25"
+}]
+
+
+
+
+
+
+
 
 
 
 Confirm data partition expiration is working
 To confirm you are only storing data from 60 days in the past up until today, run the DATE_DIFF query to get the age of your partitions, which are set to expire after 60 days.
 Below is a query which tracks the average rainfall for the NOAA weather station in Wakayama, Japan which has significant precipitation.
+https://en.wikipedia.org/wiki/Wakayama,_Wakayama#Climate
+
 Add this query and run it:
 #standardSQL
 # avg monthly precipitation
@@ -245,6 +472,109 @@ FROM ecommerce.days_with_rain
 WHERE station_name = 'WAKAYAMA' #Japan
 GROUP BY station_name, date, today, month, partition_age
 ORDER BY date DESC; # most recent days first
+
+[{
+  "average": "0.08",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-23",
+  "today": "2022-12-27",
+  "partition_age": "4",
+  "month": "12"
+}, {
+  "average": "0.43",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-22",
+  "today": "2022-12-27",
+  "partition_age": "5",
+  "month": "12"
+}, {
+  "average": "0.02",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-19",
+  "today": "2022-12-27",
+  "partition_age": "8",
+  "month": "12"
+}, {
+  "average": "0.04",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-18",
+  "today": "2022-12-27",
+  "partition_age": "9",
+  "month": "12"
+}, {
+  "average": "0.43",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-17",
+  "today": "2022-12-27",
+  "partition_age": "10",
+  "month": "12"
+}, {
+  "average": "0.02",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-14",
+  "today": "2022-12-27",
+  "partition_age": "13",
+  "month": "12"
+}, {
+  "average": "0.28",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-13",
+  "today": "2022-12-27",
+  "partition_age": "14",
+  "month": "12"
+}, {
+  "average": "0.08",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-05",
+  "today": "2022-12-27",
+  "partition_age": "22",
+  "month": "12"
+}, {
+  "average": "0.16",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-30",
+  "today": "2022-12-27",
+  "partition_age": "27",
+  "month": "11"
+}, {
+  "average": "0.43",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-29",
+  "today": "2022-12-27",
+  "partition_age": "28",
+  "month": "11"
+}, {
+  "average": "0.35",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-23",
+  "today": "2022-12-27",
+  "partition_age": "34",
+  "month": "11"
+}, {
+  "average": "0.08",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-21",
+  "today": "2022-12-27",
+  "partition_age": "36",
+  "month": "11"
+}, {
+  "average": "0.83",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-13",
+  "today": "2022-12-27",
+  "partition_age": "44",
+  "month": "11"
+}, {
+  "average": "0.43",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-01",
+  "today": "2022-12-27",
+  "partition_age": "56",
+  "month": "11"
+}]
+
+
+
 
 
 
@@ -276,5 +606,107 @@ GROUP BY station_name, date, today, month, partition_age
 ORDER BY partition_age DESC
 
 Note: Your results will vary if you re-run the query in the future, as the weather data, and your partitions, are continuously updated.
+[{
+  "average": "0.43",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-01",
+  "today": "2022-12-27",
+  "partition_age": "56",
+  "month": "11"
+}, {
+  "average": "0.83",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-13",
+  "today": "2022-12-27",
+  "partition_age": "44",
+  "month": "11"
+}, {
+  "average": "0.08",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-21",
+  "today": "2022-12-27",
+  "partition_age": "36",
+  "month": "11"
+}, {
+  "average": "0.35",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-23",
+  "today": "2022-12-27",
+  "partition_age": "34",
+  "month": "11"
+}, {
+  "average": "0.43",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-29",
+  "today": "2022-12-27",
+  "partition_age": "28",
+  "month": "11"
+}, {
+  "average": "0.16",
+  "station_name": "WAKAYAMA",
+  "date": "2022-11-30",
+  "today": "2022-12-27",
+  "partition_age": "27",
+  "month": "11"
+}, {
+  "average": "0.08",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-05",
+  "today": "2022-12-27",
+  "partition_age": "22",
+  "month": "12"
+}, {
+  "average": "0.28",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-13",
+  "today": "2022-12-27",
+  "partition_age": "14",
+  "month": "12"
+}, {
+  "average": "0.02",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-14",
+  "today": "2022-12-27",
+  "partition_age": "13",
+  "month": "12"
+}, {
+  "average": "0.43",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-17",
+  "today": "2022-12-27",
+  "partition_age": "10",
+  "month": "12"
+}, {
+  "average": "0.04",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-18",
+  "today": "2022-12-27",
+  "partition_age": "9",
+  "month": "12"
+}, {
+  "average": "0.02",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-19",
+  "today": "2022-12-27",
+  "partition_age": "8",
+  "month": "12"
+}, {
+  "average": "0.43",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-22",
+  "today": "2022-12-27",
+  "partition_age": "5",
+  "month": "12"
+}, {
+  "average": "0.08",
+  "station_name": "WAKAYAMA",
+  "date": "2022-12-23",
+  "today": "2022-12-27",
+  "partition_age": "4",
+  "month": "12"
+}]
+
+
+
 
 
