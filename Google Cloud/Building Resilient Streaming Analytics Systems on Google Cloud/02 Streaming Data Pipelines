@@ -62,13 +62,35 @@ The training-vm is installing some software in the background.
 Verify that setup is complete by checking the contents of the new directory:
 ls /training
 
+
+student-04-bc58f0392d74@training-vm:~$ ls /training
+bq_magic.sh  project_env.sh  sensor_magic.sh  training-data-analyst
+
+
 The setup is complete when the result of your list (ls) command output appears as in the image below. If the full listing does not appear, wait a few minutes and try again.
 Note: It may take 2 to 3 minutes for all background actions to complete.
+
+
 
 
 Download code repository
 Next you will download a code repository for use in this lab:
 git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+
+student-04-bc58f0392d74@training-vm:~$ git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+Cloning into 'training-data-analyst'...
+remote: Enumerating objects: 61500, done.
+remote: Counting objects: 100% (210/210), done.
+remote: Compressing objects: 100% (109/109), done.
+remote: Total 61500 (delta 129), reused 154 (delta 96), pack-reused 61290
+Receiving objects: 100% (61500/61500), 690.71 MiB | 40.66 MiB/s, done.
+Resolving deltas: 100% (39112/39112), done.
+student-04-bc58f0392d74@training-vm:~$ pwd
+/home/student-04-bc58f0392d74
+student-04-bc58f0392d74@training-vm:~$ ls
+training-data-analyst
+
+
 
 
 Set environment variables
@@ -76,6 +98,34 @@ On the training-vm SSH terminal enter the following:
 source /training/project_env.sh
 
 This script sets the DEVSHELL_PROJECT_ID and BUCKET environment variables.
+
+student-04-bc58f0392d74@training-vm:~$ cat /training/project_env.sh
+#! /bin/bash
+# Create the DEVSHELL_PROJECT_ID on a VM
+curl "http://metadata.google.internal/computeMetadata/v1/project/project-id" -H "Metadata-Flavor: Google" > Project_ID
+awk '{print "export DEVSHELL_PROJECT_ID=" $0, "\n" "export BUCKET=" $0, "\n" "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre" }' Project_ID > env.txt
+source env.txt
+echo $DEVSHELL_PROJECT_ID
+
+
+
+
+student-04-bc58f0392d74@training-vm:~$ cat Project_ID 
+qwiklabs-gcp-01-99ac5d9f28efstudent-04-bc58f0392d74@training-vm:~$ source /training/project_env.sh
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100    28  100    28    0     0   2736      0 --:--:-- --:--:-- --:--:--  2800
+qwiklabs-gcp-01-99ac5d9f28ef
+
+
+
+
+student-04-bc58f0392d74@training-vm:~$ echo $DEVSHELL_PROJECT_ID
+qwiklabs-gcp-01-99ac5d9f28ef
+student-04-bc58f0392d74@training-vm:~$ echo $JAVA_HOME
+/usr/lib/jvm/java-8-openjdk-amd64/jre
+student-04-bc58f0392d74@training-vm:~$ echo $BUCKET
+qwiklabs-gcp-01-99ac5d9f28ef
 
 
 
@@ -133,6 +183,53 @@ In the training-vm SSH terminal, start the sensor simulator. The script reads sa
 /training/sensor_magic.sh
 
 This command will send 1 hour of data in 1 minute. Let the script continue to run in the current terminal.
+student-04-bc58f0392d74@training-vm:~$ cat /training/sensor_magic.sh
+#! /bin/bash
+
+# User tasks:
+#  1. copy repo to ~/training-data-analyst
+#  2. create $DEVSHELL_PROJECT_ID
+#
+# Install PIP
+# sudo apt-get install -y python-pip
+# Use PIP to install pubsub API
+# sudo pip install -U google-cloud-pubsub
+# Download the data file
+gsutil cp gs://cloud-training-demos/sandiego/sensor_obs2008.csv.gz ~/training-data-analyst/courses/streaming/publish/
+# cd to directory
+cd ~/training-data-analyst/courses/streaming/publish/
+# Run sensor simulator
+python3 ./send_sensor_data.py --speedFactor=60 --project $DEVSHELL_PROJECT_ID
+
+
+
+
+
+
+
+
+python3 ./send_sensor_data.py --speedFactor=60 --project $DEVSHELL_PROJECT_IDstudent-04-bc58f0392d74@training-vm:~$ /training/sensor_magic.sh
+Copying gs://cloud-training-demos/sandiego/sensor_obs2008.csv.gz...
+/ [1 files][ 34.6 MiB/ 34.6 MiB]                                                
+Operation completed over 1 objects/34.6 MiB.                                     
+INFO: Creating pub/sub topic sandiego
+INFO: Sending sensor data from 2008-11-01 00:00:00
+INFO: Publishing 477 events from 2008-11-01 00:00:00
+INFO: Sleeping 5.0 seconds
+INFO: Publishing 477 events from 2008-11-01 00:05:00
+INFO: Sleeping 5.0 seconds
+...
+
+
+
+
+student-04-bc58f0392d74@training-vm:~$ cd ~/training-data-analyst/courses/streaming/publish/
+student-04-bc58f0392d74@training-vm:~/training-data-analyst/courses/streaming/publish$ ls
+download_data.sh  pubsub_pull.py  README.txt  send_sensor_data.py  sensor_obs2008.csv.gz
+
+
+
+
 
 
 Open a second SSH terminal and connect to the training VM
@@ -140,6 +237,19 @@ In the upper right corner of the training-vm SSH terminal, click on the gear-sha
 The new terminal session will not have the required environment variables. Run the following command to set them.
 In the new training-vm SSH terminal enter the following:
 source /training/project_env.sh
+
+
+student-04-bc58f0392d74@training-vm:~$ source /training/project_env.sh
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100    28  100    28    0     0   2766      0 --:--:-- --:--:-- --:--:--  2800
+qwiklabs-gcp-01-99ac5d9f28ef
+
+
+
+
+
+
 
 
 
@@ -164,7 +274,13 @@ To ensure that the proper APIs and permissions are set, execute the following bl
 gcloud services disable dataflow.googleapis.com --force
 gcloud services enable dataflow.googleapis.com
 
+student-04-bc58f0392d74@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud services disable dataflow.googleapis.com --force
+Operation "operations/acat.p17-322482283217-a2554577-dc47-4d0e-86aa-93abfec7b4ff" finished successfully.
+student-04-bc58f0392d74@training-vm:~/training-data-analyst/courses/streaming/publish$ gcloud services enable dataflow.googleapis.com
+Operation "operations/acf.p2-322482283217-35b4820d-a466-4d33-b781-6470bf1bc20a" finished successfully.
 
+
+  
 Return to the second training-vm SSH terminal. Change into the directory for this lab.
 cd ~/training-data-analyst/courses/streaming/process/sandiego
 
@@ -184,6 +300,49 @@ options             <options>
 There are 4 java files that you can choose from for classname. Each reads the traffic data from Pub/Sub and runs different aggregations/computations.
 
 
+student-04-bc58f0392d74@training-vm:~/training-data-analyst/courses/streaming/publish$ cd ~/training-data-analyst/courses/streaming/process/sandiego
+student-04-bc58f0392d74@training-vm:~/training-data-analyst/courses/streaming/process/sandiego$ ls
+create_cbt.sh  delete_cbt.sh  install_quickstart.sh  pom.xml  run_oncloud.sh  src
+student-04-bc58f0392d74@training-vm:~/training-data-analyst/courses/streaming/process/sandiego$ cat run_oncloud.sh
+#!/bin/bash
+
+if [ "$#" -lt 3 ]; then
+   echo "Usage:   ./run_oncloud.sh project-name bucket-name classname [options] "
+   echo "Example: ./run_oncloud.sh cloud-training-demos cloud-training-demos CurrentConditions --bigtable"
+   exit
+fi
+
+PROJECT=$1
+shift
+BUCKET=$1
+shift
+MAIN=com.google.cloud.training.dataanalyst.sandiego.$1
+shift
+
+echo "Launching $MAIN project=$PROJECT bucket=$BUCKET $*"
+
+export PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin/:$PATH
+mvn compile -e exec:java \
+ -Dexec.mainClass=$MAIN \
+      -Dexec.args="--project=$PROJECT \
+      --stagingLocation=gs://$BUCKET/staging/ $* \
+      --tempLocation=gs://$BUCKET/staging/ \
+      --runner=DataflowRunner"
+
+
+# If you run into quota problems, add this option the command line above
+#     --maxNumWorkers=2 
+# In this case, you will not be able to view autoscaling, however.
+
+
+
+
+
+
+
+
+
+
 Go into the java directory. Identify the source file AverageSpeeds.java.
 cd ~/training-data-analyst/courses/streaming/process/sandiego/src/main/java/com/google/cloud/training/dataanalyst/sandiego
 cat AverageSpeeds.java
@@ -197,6 +356,160 @@ Copy-and-paste the following URL into a browser tab to view the source code on G
 https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/courses/streaming/process/sandiego/src/main/java/com/google/cloud/training/dataanalyst/sandiego/AverageSpeeds.java
 
 Leave this browser tab open. You will be referring back to the source code in a later step in this lab.
+student-04-bc58f0392d74@training-vm:~/training-data-analyst/courses/streaming/process/sandiego/src/main/java/com/google/cloud/training/dataanalyst/sandiego$ cat AverageSpeeds.java
+/*
+ * Copyright (C) 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package com.google.cloud.training.dataanalyst.sandiego;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.Mean;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.windowing.SlidingWindows;
+import org.apache.beam.sdk.transforms.windowing.Window;
+import org.apache.beam.sdk.values.KV;
+import org.apache.beam.sdk.values.PCollection;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
+
+import com.google.api.services.bigquery.model.TableFieldSchema;
+import com.google.api.services.bigquery.model.TableRow;
+import com.google.api.services.bigquery.model.TableSchema;
+
+/**
+ * A dataflow pipeline that computes average speeds in each lane
+ * 
+ * @author vlakshmanan
+ *
+ */
+public class AverageSpeeds {
+
+  public static interface MyOptions extends DataflowPipelineOptions {
+    @Description("Over how long a time period should we average? (in minutes)")
+    @Default.Double(60.0)
+    Double getAveragingInterval();
+
+    void setAveragingInterval(Double d);
+
+    @Description("Simulation speedup factor. Use 1.0 if no speedup")
+    @Default.Double(60.0)
+    Double getSpeedupFactor();
+
+    void setSpeedupFactor(Double d);
+  }
+
+  @SuppressWarnings("serial")
+  public static void main(String[] args) {
+    MyOptions options = PipelineOptionsFactory.fromArgs(args).withValidation().as(MyOptions.class);
+    options.setStreaming(true);
+    Pipeline p = Pipeline.create(options);
+
+    String topic = "projects/" + options.getProject() + "/topics/sandiego";
+    String avgSpeedTable = options.getProject() + ":demos.average_speeds";
+
+    // if we need to average over 60 minutes and speedup is 30x
+    // then we need to average over 2 minutes of sped-up stream
+    Duration averagingInterval = Duration
+        .millis(Math.round(1000 * 60 * (options.getAveragingInterval() / options.getSpeedupFactor())));
+    Duration averagingFrequency = averagingInterval.dividedBy(2); // 2 times
+    // in
+    // window
+    System.out.println("Averaging interval = " + averagingInterval);
+    System.out.println("Averaging freq = " + averagingFrequency);
+
+    // Build the table schema for the output table.
+    List<TableFieldSchema> fields = new ArrayList<>();
+    fields.add(new TableFieldSchema().setName("timestamp").setType("TIMESTAMP"));
+    fields.add(new TableFieldSchema().setName("latitude").setType("FLOAT"));
+    fields.add(new TableFieldSchema().setName("longitude").setType("FLOAT"));
+    fields.add(new TableFieldSchema().setName("highway").setType("STRING"));
+    fields.add(new TableFieldSchema().setName("direction").setType("STRING"));
+    fields.add(new TableFieldSchema().setName("lane").setType("INTEGER"));
+    fields.add(new TableFieldSchema().setName("speed").setType("FLOAT"));
+    fields.add(new TableFieldSchema().setName("sensorId").setType("STRING"));
+    TableSchema schema = new TableSchema().setFields(fields);
+
+    PCollection<LaneInfo> currentConditions = p //
+        .apply("GetMessages", PubsubIO.readStrings().fromTopic(topic)) //
+        .apply("ExtractData", ParDo.of(new DoFn<String, LaneInfo>() {
+          @ProcessElement
+          public void processElement(ProcessContext c) throws Exception {
+            String line = c.element();
+            c.output(LaneInfo.newLaneInfo(line));
+          }
+        }));
+
+    PCollection<KV<String, Double>> avgSpeed = currentConditions //
+        .apply("TimeWindow",
+            Window.into(SlidingWindows//
+                .of(averagingInterval)//
+                .every(averagingFrequency))) //
+        .apply("BySensor", ParDo.of(new DoFn<LaneInfo, KV<String, Double>>() {
+          @ProcessElement
+          public void processElement(ProcessContext c) throws Exception {
+            LaneInfo info = c.element();
+            String key = info.getSensorKey();
+            Double speed = info.getSpeed();
+            c.output(KV.of(key, speed));
+          }
+        })) //
+        .apply("AvgBySensor", Mean.perKey());
+
+    avgSpeed.apply("ToBQRow", ParDo.of(new DoFn<KV<String, Double>, TableRow>() {
+      @ProcessElement
+      public void processElement(ProcessContext c) throws Exception {
+        TableRow row = new TableRow();
+        String stationKey = c.element().getKey();
+        Double speed = c.element().getValue();
+        String line = Instant.now().toString() + "," + stationKey + "," + speed; // CSV
+        LaneInfo info = LaneInfo.newLaneInfo(line);
+        row.set("timestamp", info.getTimestamp());
+        row.set("latitude", info.getLatitude());
+        row.set("longitude", info.getLongitude());
+        row.set("highway", info.getHighway());
+        row.set("direction", info.getDirection());
+        row.set("lane", info.getLane());
+        row.set("speed", info.getSpeed());
+        row.set("sensorId", info.getSensorKey());
+        c.output(row);
+      }
+    })) //
+        .apply(BigQueryIO.writeTableRows().to(avgSpeedTable)//
+            .withSchema(schema)//
+            .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
+            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
+
+    p.run();
+  }
+}
+
+
+
+
+
 
 
 
@@ -213,6 +526,83 @@ Example successful completion:
 [INFO] Finished at: 2018-06-08T16:51:30+00:00
 [INFO] Final Memory: 56M/216M
 [INFO] ------------------------------------------------------------------------
+
+
+
+INFO: Uploading /home/student-04-bc58f0392d74/.m2/repository/com/google/api/api-common/1.8.1/api-common-1.8.1.jar to gs://qwiklabs-gcp-01-99ac5d9f28ef/staging/api-common-1.8.1-g5ubgp_2pxctZAsz-8Lhsw.jar
+Dec 26, 2022 11:36:10 PM org.apache.beam.runners.dataflow.util.PackageUtil tryStagePackage
+INFO: Uploading /home/student-04-bc58f0392d74/.m2/repository/com/google/apis/google-api-services-bigquery/v2-rev20190917-1.30.3/google-api-services-bigquery-v2-rev20190917-1.30.3.jar to gs://qwiklabs-gcp-01-99ac5d9f28ef/staging/google-api-services-bigquery-v2-rev20190917-1.30.3-W2XVD6JEhkUFEB6OFZtb0w.jar
+Dec 26, 2022 11:36:10 PM org.apache.beam.runners.dataflow.util.PackageUtil tryStagePackage
+INFO: Uploading /home/student-04-bc58f0392d74/.m2/repository/io/github/classgraph/classgraph/4.8.65/classgraph-4.8.65.jar to gs://qwiklabs-gcp-01-99ac5d9f28ef/staging/classgraph-4.8.65-W08dT45fGDTJjSfbojuwKA.jar
+Dec 26, 2022 11:36:10 PM org.apache.beam.runners.dataflow.util.PackageUtil tryStagePackage
+INFO: Uploading /usr/share/java/jsoup.jar to gs://qwiklabs-gcp-01-99ac5d9f28ef/staging/jsoup-F8ys810BDAvcHEH8ewXnHg.jar
+Dec 26, 2022 11:36:17 PM org.apache.beam.runners.dataflow.util.PackageUtil stageClasspathElements
+INFO: Staging files complete: 0 files cached, 200 files newly uploaded in 13 seconds
+Dec 26, 2022 11:36:17 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding GetMessages/PubsubUnboundedSource as step s1
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding GetMessages/MapElements/Map as step s2
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding ExtractData as step s3
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding TimeWindow/Window.Assign as step s4
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BySensor as step s5
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding AvgBySensor/GroupByKey as step s6
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding AvgBySensor/Combine.GroupedValues as step s7
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding ToBQRow as step s8
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BigQueryIO.Write/PrepareWrite/ParDo(Anonymous) as step s9
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BigQueryIO.Write/StreamingInserts/CreateTables/ParDo(CreateTables) as step s10
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BigQueryIO.Write/StreamingInserts/StreamingWriteTables/ShardTableWrites as step s11
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BigQueryIO.Write/StreamingInserts/StreamingWriteTables/TagWithUniqueIds as step s12
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BigQueryIO.Write/StreamingInserts/StreamingWriteTables/Reshuffle/Window.Into()/Window.Assign as step s13
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BigQueryIO.Write/StreamingInserts/StreamingWriteTables/Reshuffle/GroupByKey as step s14
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BigQueryIO.Write/StreamingInserts/StreamingWriteTables/Reshuffle/ExpandIterable as step s15
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BigQueryIO.Write/StreamingInserts/StreamingWriteTables/GlobalWindow/Window.Assign as step s16
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowPipelineTranslator$Translator addStep
+INFO: Adding BigQueryIO.Write/StreamingInserts/StreamingWriteTables/StreamingWrite as step s17
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.DataflowRunner run
+INFO: Staging pipeline description to gs://qwiklabs-gcp-01-99ac5d9f28ef/staging/
+Dec 26, 2022 11:36:18 PM org.apache.beam.runners.dataflow.util.PackageUtil tryStagePackage
+INFO: Uploading <37307 bytes, hash V29g26L_mWWlGC_kgOrppg> to gs://qwiklabs-gcp-01-99ac5d9f28ef/staging/pipeline-V29g26L_mWWlGC_kgOrppg.pb
+Dec 26, 2022 11:36:19 PM org.apache.beam.runners.dataflow.DataflowRunner run
+INFO: Dataflow SDK version: 2.20.0
+Dec 26, 2022 11:36:19 PM org.apache.beam.runners.dataflow.options.DataflowPipelineOptions$DefaultGcpRegionFactory create
+WARNING: Region will default to us-central1. Future releases of Beam will require the user to set the region explicitly. https://cloud.google.com/compute/docs/regions-zones/regions-zones
+Dec 26, 2022 11:36:21 PM org.apache.beam.runners.dataflow.DataflowRunner run
+INFO: To access the Dataflow monitoring console, please navigate to https://console.cloud.google.com/dataflow/jobs/us-central1/2022-12-26_15_36_19-16327379380581171019?project=qwiklabs-gcp-01-99ac5d9f28ef
+Dec 26, 2022 11:36:21 PM org.apache.beam.runners.dataflow.DataflowRunner run
+INFO: Submitted job: 2022-12-26_15_36_19-16327379380581171019
+Dec 26, 2022 11:36:21 PM org.apache.beam.runners.dataflow.DataflowRunner run
+INFO: To cancel the job using the 'gcloud' tool, run:
+> gcloud dataflow jobs --project=qwiklabs-gcp-01-99ac5d9f28ef cancel --region=us-central1 2022-12-26_15_36_19-16327379380581171019
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 01:02 min
+[INFO] Finished at: 2022-12-26T23:36:21+00:00
+[INFO] Final Memory: 59M/239M
+[INFO] ------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
 
 
 
@@ -244,11 +634,106 @@ Compare the code in the Github browser tab, AverageSpeeds.java and the pipeline 
 Find the GetMessages pipeline step in the graph, and then find the corresponding code in the AverageSpeeds.java file. This is the pipeline step that reads from the Pub/Sub topic. It creates a collection of Strings - which corresponds to Pub/Sub messages that have been read.
 Do you see a subscription created?
 How does the code pull messages from Pub/Sub?
+
+    PCollection<LaneInfo> currentConditions = p //
+        .apply("GetMessages", PubsubIO.readStrings().fromTopic(topic)) //
+        .apply("ExtractData", ParDo.of(new DoFn<String, LaneInfo>() {
+          @ProcessElement
+          public void processElement(ProcessContext c) throws Exception {
+            String line = c.element();
+            c.output(LaneInfo.newLaneInfo(line));   => DOES THIS STEP CREATE A SUBSCRIPTION?
+          }
+        }));
+        
+        
+        
+
 Find the Time Window pipeline step in the graph and in code. In this pipeline step we create a window of a duration specified in the pipeline parameters (sliding window in this case). This window will accumulate the traffic data from the previous step until end of window, and pass it to the next steps for further transforms.
 What is the window interval?
 How often is a new window created?
+
+  public static interface MyOptions extends DataflowPipelineOptions {
+    @Description("Over how long a time period should we average? (in minutes)")
+    @Default.Double(60.0)
+    Double getAveragingInterval();
+
+    void setAveragingInterval(Double d);
+
+    @Description("Simulation speedup factor. Use 1.0 if no speedup")
+    @Default.Double(60.0)
+    Double getSpeedupFactor();
+
+    void setSpeedupFactor(Double d);
+  }
+
+    Duration averagingInterval = Duration
+        .millis(Math.round(1000 * 60 * (options.getAveragingInterval() / options.getSpeedupFactor())));
+    Duration averagingFrequency = averagingInterval.dividedBy(2); // 2 times
+    
+    => averagingInterval
+    MILLI OF A UNIT = 10^-3
+    SO 1K X MILLISECOND = 1 SECOND
+       1 SECOND X 60 = 60 SECONDS
+       60 SECONDS X AVERAGE OVER 60 SECONDS / SPEED UP OVER 60 SECONDS
+       60 SECONDS
+       
+    => averagingFrequency
+       60 SECONDS/2 = 30 SECONDS
+    
+
+
+
+
 Find the BySensor and AvgBySensor pipeline steps in the graph, and then find the corresponding code snippet in the AverageSpeeds.java file. This BySensor does a grouping of all events in the window by sensor id, while AvgBySensor will then compute the mean speed for each grouping.
+    PCollection<KV<String, Double>> avgSpeed = currentConditions //
+        .apply("TimeWindow",
+            Window.into(SlidingWindows//
+                .of(averagingInterval)//
+                .every(averagingFrequency))) //
+        .apply("BySensor", ParDo.of(new DoFn<LaneInfo, KV<String, Double>>() {
+          @ProcessElement
+          public void processElement(ProcessContext c) throws Exception {
+            LaneInfo info = c.element();
+            String key = info.getSensorKey();
+            Double speed = info.getSpeed();
+            c.output(KV.of(key, speed));
+          }
+        })) //
+        .apply("AvgBySensor", Mean.perKey());
+
+    => SO EVERY 30 SECONDS, TAKE A 60 SECOND WINDOW
+
+
+
 Find the ToBQRow pipeline step in the graph and in code. This step simply creates a "row" with the average computed from the previous step together with the lane information.
+    avgSpeed.apply("ToBQRow", ParDo.of(new DoFn<KV<String, Double>, TableRow>() {
+      @ProcessElement
+      public void processElement(ProcessContext c) throws Exception {
+        TableRow row = new TableRow();
+        String stationKey = c.element().getKey();
+        Double speed = c.element().getValue();
+        String line = Instant.now().toString() + "," + stationKey + "," + speed; // CSV
+        LaneInfo info = LaneInfo.newLaneInfo(line);
+        row.set("timestamp", info.getTimestamp());
+        row.set("latitude", info.getLatitude());
+        row.set("longitude", info.getLongitude());
+        row.set("highway", info.getHighway());
+        row.set("direction", info.getDirection());
+        row.set("lane", info.getLane());
+        row.set("speed", info.getSpeed());
+        row.set("sensorId", info.getSensorKey());
+        c.output(row);
+      }
+    })) //
+        .apply(BigQueryIO.writeTableRows().to(avgSpeedTable)//
+            .withSchema(schema)//
+            .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
+            .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
+
+       => WHERE DO YOU GET THE 'info' METHODS FROM?
+          OUT OF THE BOX?
+
+
 Note: In practice, other actions could be taken in the ToBQRow step. For example, it could compare the calculated mean against a predefined threshold and log the results of the comparison in Cloud Logging.
 Find the BigQueryIO.Write in both the pipeline graph and in the source code. This step writes the row out of the pipeline into a BigQuery table. Because we chose the WriteDisposition.WRITE_APPEND write disposition, new records will be appended to the table.
 Return to the BigQuery web UI tab. Refresh your browser.
@@ -284,7 +769,22 @@ Return to the browser tab for Console. On the Navigation menu (Navigation menu i
 Select the GetMessages pipeline node in the graph and look at the step metrics on the right.
 System Lag is an important metric for streaming pipelines. It represents the amount of time data elements are waiting to be processed since they "arrived" in the input of the transformation step.
 Elements Added metric under output collections tells you how many data elements exited this step (for the Read PubSub Msg step of the pipeline it also represents the number of Pub/Sub messages read from the topic by the Pub/Sub IO connector).
+
+Step name         GetMessages
+System lag        9 sec
+Data watermark    December 27, 2022 at 8:03:24 AM UTC+8
+Wall time         1 sec
+
+GetMessages/MapElements/Map.out0
+Elements added (Approximate)    156,456
+Estimated size                  10 MB
+
+
+
 Select the Time Window node in the graph. Observe how the Elements Added metric under the Input Collections of the Time Window step matches the Elements Added metric under the Output Collections of the previous step GetMessages.
+
+
+
 
 
 
@@ -308,11 +808,929 @@ FROM `demos.average_speeds`
 ORDER BY timestamp DESC
 LIMIT 100
 
+
+[{
+  "timestamp": "2022-12-27 00:05:54.891000 UTC",
+  "latitude": "32.766593",
+  "longitude": "-117.149413",
+  "highway": "8",
+  "direction": "W",
+  "lane": "5",
+  "speed": "63.225",
+  "sensorId": "32.766593,-117.149413,8,W,5"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.731172",
+  "longitude": "-117.171313",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "77.091666666666669",
+  "sensorId": "32.731172,-117.171313,5,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.769912",
+  "longitude": "-117.161861",
+  "highway": "163",
+  "direction": "S",
+  "lane": "3",
+  "speed": "69.274999999999991",
+  "sensorId": "32.769912,-117.161861,163,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.815542",
+  "longitude": "-117.222956",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "69.183333333333337",
+  "sensorId": "32.815542,-117.222956,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.717944",
+  "longitude": "-117.147838",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "61.475",
+  "sensorId": "32.717944,-117.147838,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.784015",
+  "longitude": "-117.16195",
+  "highway": "163",
+  "direction": "S",
+  "lane": "1",
+  "speed": "78.283333333333331",
+  "sensorId": "32.784015,-117.16195,163,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.891663",
+  "longitude": "-117.208278",
+  "highway": "805",
+  "direction": "S",
+  "lane": "2",
+  "speed": "70.574999999999989",
+  "sensorId": "32.891663,-117.208278,805,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "33.155391",
+  "longitude": "-117.338093",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "72.133333333333326",
+  "sensorId": "33.155391,-117.338093,5,N,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.743125",
+  "longitude": "-117.184141",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "70.274999999999991",
+  "sensorId": "32.743125,-117.184141,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.80859",
+  "longitude": "-117.217482",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "72.391666666666666",
+  "sensorId": "32.80859,-117.217482,5,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "33.155391",
+  "longitude": "-117.338093",
+  "highway": "5",
+  "direction": "N",
+  "lane": "5",
+  "speed": "66.791666666666671",
+  "sensorId": "33.155391,-117.338093,5,N,5"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "33.200816",
+  "longitude": "-117.373244",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "69.033333333333317",
+  "sensorId": "33.200816,-117.373244,5,N,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.790685",
+  "longitude": "-117.159536",
+  "highway": "163",
+  "direction": "S",
+  "lane": "4",
+  "speed": "63.241666666666667",
+  "sensorId": "32.790685,-117.159536,163,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.890000 UTC",
+  "latitude": "32.833981",
+  "longitude": "-117.233282",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "69.408333333333331",
+  "sensorId": "32.833981,-117.233282,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.786195",
+  "longitude": "-117.207405",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "76.966666666666669",
+  "sensorId": "32.786195,-117.207405,5,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.763297",
+  "longitude": "-117.162027",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "68.4",
+  "sensorId": "32.763297,-117.162027,8,W,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.749679",
+  "longitude": "-117.155519",
+  "highway": "163",
+  "direction": "S",
+  "lane": "2",
+  "speed": "66.283333333333346",
+  "sensorId": "32.749679,-117.155519,163,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.694358",
+  "longitude": "-117.129467",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "66.716666666666669",
+  "sensorId": "32.694358,-117.129467,5,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.74683",
+  "longitude": "-117.191991",
+  "highway": "5",
+  "direction": "S",
+  "lane": "5",
+  "speed": "65.108333333333334",
+  "sensorId": "32.74683,-117.191991,5,S,5"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.778313",
+  "longitude": "-117.059444",
+  "highway": "8",
+  "direction": "W",
+  "lane": "5",
+  "speed": "64.066666666666649",
+  "sensorId": "32.778313,-117.059444,8,W,5"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.743125",
+  "longitude": "-117.184141",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "76.391666666666666",
+  "sensorId": "32.743125,-117.184141,5,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.777199",
+  "longitude": "-117.121031",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "68.308333333333323",
+  "sensorId": "32.777199,-117.121031,8,W,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.735387",
+  "longitude": "-117.175064",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "75.341666666666654",
+  "sensorId": "32.735387,-117.175064,5,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.782844",
+  "longitude": "-117.141449",
+  "highway": "805",
+  "direction": "S",
+  "lane": "2",
+  "speed": "73.325000000000017",
+  "sensorId": "32.782844,-117.141449,805,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.80484",
+  "longitude": "-117.154415",
+  "highway": "163",
+  "direction": "S",
+  "lane": "5",
+  "speed": "64.341666666666654",
+  "sensorId": "32.80484,-117.154415,163,S,5"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "33.066891",
+  "longitude": "-117.292681",
+  "highway": "5",
+  "direction": "N",
+  "lane": "1",
+  "speed": "72.024999999999991",
+  "sensorId": "33.066891,-117.292681,5,N,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.997569",
+  "longitude": "-117.25673",
+  "highway": "5",
+  "direction": "N",
+  "lane": "4",
+  "speed": "61.866666666666667",
+  "sensorId": "32.997569,-117.25673,5,N,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.766593",
+  "longitude": "-117.149413",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "71.066666666666677",
+  "sensorId": "32.766593,-117.149413,8,W,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.889000 UTC",
+  "latitude": "32.729729",
+  "longitude": "-117.107696",
+  "highway": "805",
+  "direction": "S",
+  "lane": "1",
+  "speed": "74.575",
+  "sensorId": "32.729729,-117.107696,805,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.76999",
+  "longitude": "-117.139776",
+  "highway": "8",
+  "direction": "W",
+  "lane": "2",
+  "speed": "70.808333333333337",
+  "sensorId": "32.76999,-117.139776,8,W,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.671747",
+  "longitude": "-117.111237",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "67.791666666666671",
+  "sensorId": "32.671747,-117.111237,5,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.735387",
+  "longitude": "-117.175064",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "67.875",
+  "sensorId": "32.735387,-117.175064,5,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.74683",
+  "longitude": "-117.191991",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "71.358333333333334",
+  "sensorId": "32.74683,-117.191991,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.821375",
+  "longitude": "-117.162372",
+  "highway": "805",
+  "direction": "S",
+  "lane": "4",
+  "speed": "69.88333333333334",
+  "sensorId": "32.821375,-117.162372,805,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.831347",
+  "longitude": "-117.168404",
+  "highway": "805",
+  "direction": "S",
+  "lane": "2",
+  "speed": "73.55",
+  "sensorId": "32.831347,-117.168404,805,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.773993",
+  "longitude": "-117.04547",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "74.175000000000011",
+  "sensorId": "32.773993,-117.04547,8,W,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.935788",
+  "longitude": "-117.241314",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "71.191666666666663",
+  "sensorId": "32.935788,-117.241314,5,N,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.786195",
+  "longitude": "-117.207405",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "73.983333333333334",
+  "sensorId": "32.786195,-117.207405,5,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "33.086077",
+  "longitude": "-117.299048",
+  "highway": "5",
+  "direction": "N",
+  "lane": "1",
+  "speed": "73.333333333333329",
+  "sensorId": "33.086077,-117.299048,5,N,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.786575",
+  "longitude": "-117.146795",
+  "highway": "805",
+  "direction": "S",
+  "lane": "1",
+  "speed": "76.608333333333334",
+  "sensorId": "32.786575,-117.146795,805,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.749679",
+  "longitude": "-117.155519",
+  "highway": "163",
+  "direction": "S",
+  "lane": "1",
+  "speed": "72.375",
+  "sensorId": "32.749679,-117.155519,163,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.765048",
+  "longitude": "-117.205506",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "78.61666666666666",
+  "sensorId": "32.765048,-117.205506,5,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.806773",
+  "longitude": "-117.216007",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "67.016666666666666",
+  "sensorId": "32.806773,-117.216007,5,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.831347",
+  "longitude": "-117.168404",
+  "highway": "805",
+  "direction": "S",
+  "lane": "5",
+  "speed": "62.324999999999996",
+  "sensorId": "32.831347,-117.168404,805,S,5"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.935788",
+  "longitude": "-117.241314",
+  "highway": "5",
+  "direction": "N",
+  "lane": "1",
+  "speed": "74.49166666666666",
+  "sensorId": "32.935788,-117.241314,5,N,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.694108",
+  "longitude": "-117.124841",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "68.983333333333334",
+  "sensorId": "32.694108,-117.124841,5,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.888000 UTC",
+  "latitude": "32.761823",
+  "longitude": "-117.165326",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "61.883333333333333",
+  "sensorId": "32.761823,-117.165326,8,W,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.887000 UTC",
+  "latitude": "33.012329",
+  "longitude": "-117.266766",
+  "highway": "5",
+  "direction": "N",
+  "lane": "1",
+  "speed": "73.983333333333334",
+  "sensorId": "33.012329,-117.266766,5,N,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.887000 UTC",
+  "latitude": "32.723248",
+  "longitude": "-117.115543",
+  "highway": "15",
+  "direction": "S",
+  "lane": "2",
+  "speed": "66.85",
+  "sensorId": "32.723248,-117.115543,15,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.887000 UTC",
+  "latitude": "32.729729",
+  "longitude": "-117.107696",
+  "highway": "805",
+  "direction": "S",
+  "lane": "2",
+  "speed": "73.1",
+  "sensorId": "32.729729,-117.107696,805,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.887000 UTC",
+  "latitude": "32.881653",
+  "longitude": "-117.201619",
+  "highway": "805",
+  "direction": "S",
+  "lane": "1",
+  "speed": "75.000000000000014",
+  "sensorId": "32.881653,-117.201619,805,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.887000 UTC",
+  "latitude": "32.765048",
+  "longitude": "-117.205506",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "70.166666666666671",
+  "sensorId": "32.765048,-117.205506,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.887000 UTC",
+  "latitude": "32.806773",
+  "longitude": "-117.216007",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "64.183333333333323",
+  "sensorId": "32.806773,-117.216007,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.887000 UTC",
+  "latitude": "32.67696",
+  "longitude": "-117.109463",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "63.258333333333326",
+  "sensorId": "32.67696,-117.109463,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.887000 UTC",
+  "latitude": "32.778313",
+  "longitude": "-117.059444",
+  "highway": "8",
+  "direction": "W",
+  "lane": "2",
+  "speed": "73.408333333333331",
+  "sensorId": "32.778313,-117.059444,8,W,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.887000 UTC",
+  "latitude": "32.69574",
+  "longitude": "-117.135196",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "75.583333333333329",
+  "sensorId": "32.69574,-117.135196,5,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.885000 UTC",
+  "latitude": "32.712581",
+  "longitude": "-117.147751",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "69.416666666666671",
+  "sensorId": "32.712581,-117.147751,5,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.885000 UTC",
+  "latitude": "32.759802",
+  "longitude": "-117.187519",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "73.716666666666654",
+  "sensorId": "32.759802,-117.187519,8,W,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.885000 UTC",
+  "latitude": "32.722887",
+  "longitude": "-117.149778",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "66.391666666666666",
+  "sensorId": "32.722887,-117.149778,5,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.885000 UTC",
+  "latitude": "32.779415",
+  "longitude": "-117.06815",
+  "highway": "8",
+  "direction": "W",
+  "lane": "2",
+  "speed": "73.541666666666671",
+  "sensorId": "32.779415,-117.06815,8,W,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.885000 UTC",
+  "latitude": "32.762484",
+  "longitude": "-117.163806",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "63.57500000000001",
+  "sensorId": "32.762484,-117.163806,8,W,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.885000 UTC",
+  "latitude": "32.69574",
+  "longitude": "-117.135196",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "70.916666666666657",
+  "sensorId": "32.69574,-117.135196,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.885000 UTC",
+  "latitude": "32.833981",
+  "longitude": "-117.233282",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "72.491666666666674",
+  "sensorId": "32.833981,-117.233282,5,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.694358",
+  "longitude": "-117.129467",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "70.86666666666666",
+  "sensorId": "32.694358,-117.129467,5,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.685989",
+  "longitude": "-117.113063",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "73.508333333333326",
+  "sensorId": "32.685989,-117.113063,5,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.779415",
+  "longitude": "-117.06815",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "71.175",
+  "sensorId": "32.779415,-117.06815,8,W,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.997569",
+  "longitude": "-117.25673",
+  "highway": "5",
+  "direction": "N",
+  "lane": "1",
+  "speed": "72.175",
+  "sensorId": "32.997569,-117.25673,5,N,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.731172",
+  "longitude": "-117.171313",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "72.725",
+  "sensorId": "32.731172,-117.171313,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.881653",
+  "longitude": "-117.201619",
+  "highway": "805",
+  "direction": "S",
+  "lane": "3",
+  "speed": "69.891666666666666",
+  "sensorId": "32.881653,-117.201619,805,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.779052",
+  "longitude": "-117.102755",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "75.1",
+  "sensorId": "32.779052,-117.102755,8,W,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.7062",
+  "longitude": "-117.147722",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "57.258333333333326",
+  "sensorId": "32.7062,-117.147722,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.761823",
+  "longitude": "-117.165326",
+  "highway": "8",
+  "direction": "W",
+  "lane": "2",
+  "speed": "69.774999999999991",
+  "sensorId": "32.761823,-117.165326,8,W,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.740771",
+  "longitude": "-117.179757",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "73.166666666666671",
+  "sensorId": "32.740771,-117.179757,5,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.755311",
+  "longitude": "-117.125108",
+  "highway": "805",
+  "direction": "S",
+  "lane": "2",
+  "speed": "72.908333333333346",
+  "sensorId": "32.755311,-117.125108,805,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.997569",
+  "longitude": "-117.25673",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "64.8",
+  "sensorId": "32.997569,-117.25673,5,N,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.884000 UTC",
+  "latitude": "32.779052",
+  "longitude": "-117.102755",
+  "highway": "8",
+  "direction": "W",
+  "lane": "2",
+  "speed": "73.783333333333331",
+  "sensorId": "32.779052,-117.102755,8,W,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.883000 UTC",
+  "latitude": "32.755396",
+  "longitude": "-117.202354",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "77.966666666666669",
+  "sensorId": "32.755396,-117.202354,5,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.883000 UTC",
+  "latitude": "32.952314",
+  "longitude": "-117.243976",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "70.7",
+  "sensorId": "32.952314,-117.243976,5,N,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.883000 UTC",
+  "latitude": "32.717944",
+  "longitude": "-117.147838",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "66.891666666666666",
+  "sensorId": "32.717944,-117.147838,5,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.883000 UTC",
+  "latitude": "32.80859",
+  "longitude": "-117.217482",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "76.799999999999983",
+  "sensorId": "32.80859,-117.217482,5,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.883000 UTC",
+  "latitude": "32.717944",
+  "longitude": "-117.147838",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "75.058333333333351",
+  "sensorId": "32.717944,-117.147838,5,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.883000 UTC",
+  "latitude": "32.761829",
+  "longitude": "-117.16531",
+  "highway": "8",
+  "direction": "W",
+  "lane": "5",
+  "speed": "65.25833333333334",
+  "sensorId": "32.761829,-117.16531,8,W,5"
+}, {
+  "timestamp": "2022-12-27 00:05:54.883000 UTC",
+  "latitude": "33.086077",
+  "longitude": "-117.299048",
+  "highway": "5",
+  "direction": "N",
+  "lane": "4",
+  "speed": "60.791666666666664",
+  "sensorId": "33.086077,-117.299048,5,N,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.883000 UTC",
+  "latitude": "32.918784",
+  "longitude": "-117.235428",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "72.274999999999991",
+  "sensorId": "32.918784,-117.235428,5,N,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "33.136599",
+  "longitude": "-117.330302",
+  "highway": "5",
+  "direction": "N",
+  "lane": "4",
+  "speed": "60.533333333333324",
+  "sensorId": "33.136599,-117.330302,5,N,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "32.769912",
+  "longitude": "-117.161861",
+  "highway": "163",
+  "direction": "S",
+  "lane": "1",
+  "speed": "74.566666666666663",
+  "sensorId": "32.769912,-117.161861,163,S,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "32.930695",
+  "longitude": "-117.240733",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "64.783333333333331",
+  "sensorId": "32.930695,-117.240733,5,N,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "32.80484",
+  "longitude": "-117.154415",
+  "highway": "163",
+  "direction": "S",
+  "lane": "4",
+  "speed": "69.166666666666671",
+  "sensorId": "32.80484,-117.154415,163,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "32.872888",
+  "longitude": "-117.197982",
+  "highway": "805",
+  "direction": "S",
+  "lane": "4",
+  "speed": "71.524999999999991",
+  "sensorId": "32.872888,-117.197982,805,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "32.780256",
+  "longitude": "-117.094969",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "76.641666666666666",
+  "sensorId": "32.780256,-117.094969,8,W,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "32.864267",
+  "longitude": "-117.189842",
+  "highway": "805",
+  "direction": "S",
+  "lane": "4",
+  "speed": "64.499999999999986",
+  "sensorId": "32.864267,-117.189842,805,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "32.779286",
+  "longitude": "-117.2086",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "84.0",
+  "sensorId": "32.779286,-117.2086,5,S,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "32.952314",
+  "longitude": "-117.243976",
+  "highway": "5",
+  "direction": "N",
+  "lane": "1",
+  "speed": "74.966666666666669",
+  "sensorId": "32.952314,-117.243976,5,N,1"
+}, {
+  "timestamp": "2022-12-27 00:05:54.882000 UTC",
+  "latitude": "32.780922",
+  "longitude": "-117.089026",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "68.733333333333334",
+  "sensorId": "32.780922,-117.089026,8,W,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.881000 UTC",
+  "latitude": "32.765519",
+  "longitude": "-117.153716",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "69.916666666666671",
+  "sensorId": "32.765519,-117.153716,8,W,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.881000 UTC",
+  "latitude": "32.779286",
+  "longitude": "-117.2086",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "74.241666666666674",
+  "sensorId": "32.779286,-117.2086,5,S,4"
+}, {
+  "timestamp": "2022-12-27 00:05:54.881000 UTC",
+  "latitude": "32.731172",
+  "longitude": "-117.171313",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "76.891666666666666",
+  "sensorId": "32.731172,-117.171313,5,S,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.881000 UTC",
+  "latitude": "32.763297",
+  "longitude": "-117.162027",
+  "highway": "8",
+  "direction": "W",
+  "lane": "2",
+  "speed": "64.533333333333331",
+  "sensorId": "32.763297,-117.162027,8,W,2"
+}, {
+  "timestamp": "2022-12-27 00:05:54.881000 UTC",
+  "latitude": "33.12394",
+  "longitude": "-117.32296",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "65.24166666666666",
+  "sensorId": "33.12394,-117.32296,5,N,3"
+}, {
+  "timestamp": "2022-12-27 00:05:54.881000 UTC",
+  "latitude": "32.780922",
+  "longitude": "-117.089026",
+  "highway": "8",
+  "direction": "W",
+  "lane": "5",
+  "speed": "63.841666666666661",
+  "sensorId": "32.780922,-117.089026,8,W,5"
+}]
+
+
+
+
+
+
+
+
 Find the last update to the table by running the following SQL:
 SELECT
 MAX(timestamp)
 FROM
 `demos.average_speeds`
+
+[{
+  "f0_": "2022-12-27 00:05:54.891000 UTC"
+}]
+
+
+
+
 
 
 Next use the time travel capability of BigQuery to reference the state of the table at a previous point in time.
@@ -326,6 +1744,913 @@ FROM `demos.average_speeds`
 FOR SYSTEM_TIME AS OF TIMESTAMP_SUB(CURRENT_TIMESTAMP, INTERVAL 10 MINUTE)
 ORDER BY timestamp DESC
 LIMIT 100
+
+[{
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.722887",
+  "longitude": "-117.149778",
+  "highway": "5",
+  "direction": "S",
+  "lane": "5",
+  "speed": "61.35",
+  "sensorId": "32.722887,-117.149778,5,S,5"
+}, {
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.815542",
+  "longitude": "-117.222956",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "69.100000000000009",
+  "sensorId": "32.815542,-117.222956,5,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.848811",
+  "longitude": "-117.235604",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "65.416666666666671",
+  "sensorId": "32.848811,-117.235604,5,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.979329",
+  "longitude": "-117.252709",
+  "highway": "5",
+  "direction": "N",
+  "lane": "4",
+  "speed": "71.95",
+  "sensorId": "32.979329,-117.252709,5,N,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.782844",
+  "longitude": "-117.141449",
+  "highway": "805",
+  "direction": "S",
+  "lane": "1",
+  "speed": "77.308333333333323",
+  "sensorId": "32.782844,-117.141449,805,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.907593",
+  "longitude": "-117.225274",
+  "highway": "5",
+  "direction": "N",
+  "lane": "1",
+  "speed": "77.191666666666663",
+  "sensorId": "32.907593,-117.225274,5,N,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.935788",
+  "longitude": "-117.241314",
+  "highway": "5",
+  "direction": "N",
+  "lane": "1",
+  "speed": "76.225000000000009",
+  "sensorId": "32.935788,-117.241314,5,N,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.979329",
+  "longitude": "-117.252709",
+  "highway": "5",
+  "direction": "N",
+  "lane": "1",
+  "speed": "75.38333333333334",
+  "sensorId": "32.979329,-117.252709,5,N,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.761823",
+  "longitude": "-117.165326",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "69.275",
+  "sensorId": "32.761823,-117.165326,8,W,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.118000 UTC",
+  "latitude": "32.759539",
+  "longitude": "-117.206475",
+  "highway": "8",
+  "direction": "W",
+  "lane": "2",
+  "speed": "75.433333333333337",
+  "sensorId": "32.759539,-117.206475,8,W,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.117000 UTC",
+  "latitude": "32.759539",
+  "longitude": "-117.206475",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "71.916666666666671",
+  "sensorId": "32.759539,-117.206475,8,W,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.117000 UTC",
+  "latitude": "32.822411",
+  "longitude": "-117.162995",
+  "highway": "805",
+  "direction": "S",
+  "lane": "1",
+  "speed": "75.250000000000014",
+  "sensorId": "32.822411,-117.162995,805,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.117000 UTC",
+  "latitude": "32.80484",
+  "longitude": "-117.154415",
+  "highway": "163",
+  "direction": "S",
+  "lane": "1",
+  "speed": "78.691666666666663",
+  "sensorId": "32.80484,-117.154415,163,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.117000 UTC",
+  "latitude": "32.74683",
+  "longitude": "-117.191991",
+  "highway": "5",
+  "direction": "S",
+  "lane": "5",
+  "speed": "65.708333333333314",
+  "sensorId": "32.74683,-117.191991,5,S,5"
+}, {
+  "timestamp": "2022-12-26 23:56:39.115000 UTC",
+  "latitude": "33.167728",
+  "longitude": "-117.34438",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "75.49166666666666",
+  "sensorId": "33.167728,-117.34438,5,N,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.115000 UTC",
+  "latitude": "32.762058",
+  "longitude": "-117.164683",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "76.7",
+  "sensorId": "32.762058,-117.164683,8,W,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.115000 UTC",
+  "latitude": "32.761823",
+  "longitude": "-117.165326",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "64.075",
+  "sensorId": "32.761823,-117.165326,8,W,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.115000 UTC",
+  "latitude": "32.768812",
+  "longitude": "-117.143278",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "73.541666666666671",
+  "sensorId": "32.768812,-117.143278,8,W,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.115000 UTC",
+  "latitude": "33.12394",
+  "longitude": "-117.32296",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "73.641666666666666",
+  "sensorId": "33.12394,-117.32296,5,N,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.115000 UTC",
+  "latitude": "32.755396",
+  "longitude": "-117.202354",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "79.49166666666666",
+  "sensorId": "32.755396,-117.202354,5,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.114000 UTC",
+  "latitude": "32.765519",
+  "longitude": "-117.153716",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "77.825",
+  "sensorId": "32.765519,-117.153716,8,W,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.114000 UTC",
+  "latitude": "32.780869",
+  "longitude": "-117.138874",
+  "highway": "805",
+  "direction": "S",
+  "lane": "1",
+  "speed": "77.483333333333334",
+  "sensorId": "32.780869,-117.138874,805,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.114000 UTC",
+  "latitude": "32.760685",
+  "longitude": "-117.194292",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "74.116666666666674",
+  "sensorId": "32.760685,-117.194292,8,W,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.114000 UTC",
+  "latitude": "32.817541",
+  "longitude": "-117.16012",
+  "highway": "805",
+  "direction": "S",
+  "lane": "5",
+  "speed": "68.583333333333329",
+  "sensorId": "32.817541,-117.16012,805,S,5"
+}, {
+  "timestamp": "2022-12-26 23:56:39.114000 UTC",
+  "latitude": "32.821375",
+  "longitude": "-117.162372",
+  "highway": "805",
+  "direction": "S",
+  "lane": "4",
+  "speed": "77.641666666666666",
+  "sensorId": "32.821375,-117.162372,805,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.114000 UTC",
+  "latitude": "32.722887",
+  "longitude": "-117.149778",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "66.55",
+  "sensorId": "32.722887,-117.149778,5,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.114000 UTC",
+  "latitude": "32.952314",
+  "longitude": "-117.243976",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "74.441666666666677",
+  "sensorId": "32.952314,-117.243976,5,N,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.114000 UTC",
+  "latitude": "33.086077",
+  "longitude": "-117.299048",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "72.191666666666649",
+  "sensorId": "33.086077,-117.299048,5,N,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.114000 UTC",
+  "latitude": "32.779286",
+  "longitude": "-117.2086",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "84.0",
+  "sensorId": "32.779286,-117.2086,5,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.67696",
+  "longitude": "-117.109463",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "67.466666666666654",
+  "sensorId": "32.67696,-117.109463,5,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.803539",
+  "longitude": "-117.150852",
+  "highway": "805",
+  "direction": "S",
+  "lane": "3",
+  "speed": "74.075",
+  "sensorId": "32.803539,-117.150852,805,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "33.044755",
+  "longitude": "-117.285974",
+  "highway": "5",
+  "direction": "N",
+  "lane": "4",
+  "speed": "63.525",
+  "sensorId": "33.044755,-117.285974,5,N,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.779052",
+  "longitude": "-117.102755",
+  "highway": "8",
+  "direction": "W",
+  "lane": "6",
+  "speed": "68.183333333333323",
+  "sensorId": "32.779052,-117.102755,8,W,6"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.694108",
+  "longitude": "-117.124841",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "83.316666666666663",
+  "sensorId": "32.694108,-117.124841,5,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.755396",
+  "longitude": "-117.202354",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "71.591666666666669",
+  "sensorId": "32.755396,-117.202354,5,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.918784",
+  "longitude": "-117.235428",
+  "highway": "5",
+  "direction": "N",
+  "lane": "4",
+  "speed": "73.841666666666654",
+  "sensorId": "32.918784,-117.235428,5,N,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.779052",
+  "longitude": "-117.102755",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "73.050000000000011",
+  "sensorId": "32.779052,-117.102755,8,W,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.798331",
+  "longitude": "-117.149654",
+  "highway": "805",
+  "direction": "S",
+  "lane": "3",
+  "speed": "78.066666666666663",
+  "sensorId": "32.798331,-117.149654,805,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.759802",
+  "longitude": "-117.187519",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "74.500000000000014",
+  "sensorId": "32.759802,-117.187519,8,W,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.833981",
+  "longitude": "-117.233282",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "77.533333333333346",
+  "sensorId": "32.833981,-117.233282,5,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "33.012329",
+  "longitude": "-117.266766",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "71.808333333333351",
+  "sensorId": "33.012329,-117.266766,5,N,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.113000 UTC",
+  "latitude": "32.768263",
+  "longitude": "-117.206354",
+  "highway": "5",
+  "direction": "S",
+  "lane": "5",
+  "speed": "68.116666666666674",
+  "sensorId": "32.768263,-117.206354,5,S,5"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.891663",
+  "longitude": "-117.208278",
+  "highway": "805",
+  "direction": "S",
+  "lane": "3",
+  "speed": "72.175",
+  "sensorId": "32.891663,-117.208278,805,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.833981",
+  "longitude": "-117.233282",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "74.616666666666674",
+  "sensorId": "32.833981,-117.233282,5,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.765519",
+  "longitude": "-117.153716",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "71.166666666666657",
+  "sensorId": "32.765519,-117.153716,8,W,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.782844",
+  "longitude": "-117.141449",
+  "highway": "805",
+  "direction": "S",
+  "lane": "3",
+  "speed": "78.38333333333334",
+  "sensorId": "32.782844,-117.141449,805,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.771677",
+  "longitude": "-117.132551",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "69.125",
+  "sensorId": "32.771677,-117.132551,8,W,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.779199",
+  "longitude": "-117.101551",
+  "highway": "8",
+  "direction": "W",
+  "lane": "5",
+  "speed": "64.691666666666663",
+  "sensorId": "32.779199,-117.101551,8,W,5"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.779415",
+  "longitude": "-117.06815",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "77.88333333333334",
+  "sensorId": "32.779415,-117.06815,8,W,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.7062",
+  "longitude": "-117.147722",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "67.225",
+  "sensorId": "32.7062,-117.147722,5,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.798331",
+  "longitude": "-117.149654",
+  "highway": "805",
+  "direction": "S",
+  "lane": "1",
+  "speed": "78.016666666666666",
+  "sensorId": "32.798331,-117.149654,805,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.112000 UTC",
+  "latitude": "32.833981",
+  "longitude": "-117.233282",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "76.541666666666671",
+  "sensorId": "32.833981,-117.233282,5,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "32.779052",
+  "longitude": "-117.102755",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "73.691666666666663",
+  "sensorId": "32.779052,-117.102755,8,W,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "32.817541",
+  "longitude": "-117.16012",
+  "highway": "805",
+  "direction": "S",
+  "lane": "2",
+  "speed": "76.041666666666671",
+  "sensorId": "32.817541,-117.16012,805,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "32.817425",
+  "longitude": "-117.16005",
+  "highway": "805",
+  "direction": "S",
+  "lane": "3",
+  "speed": "75.891666666666666",
+  "sensorId": "32.817425,-117.16005,805,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "32.735387",
+  "longitude": "-117.175064",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "70.591666666666669",
+  "sensorId": "32.735387,-117.175064,5,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "32.768263",
+  "longitude": "-117.206354",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "75.141666666666652",
+  "sensorId": "32.768263,-117.206354,5,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "32.779052",
+  "longitude": "-117.102755",
+  "highway": "8",
+  "direction": "W",
+  "lane": "1",
+  "speed": "75.591666666666654",
+  "sensorId": "32.779052,-117.102755,8,W,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "33.044755",
+  "longitude": "-117.285974",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "67.516666666666666",
+  "sensorId": "33.044755,-117.285974,5,N,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "32.807319",
+  "longitude": "-117.21645",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "76.7",
+  "sensorId": "32.807319,-117.21645,5,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "32.798331",
+  "longitude": "-117.149654",
+  "highway": "805",
+  "direction": "S",
+  "lane": "2",
+  "speed": "75.016666666666666",
+  "sensorId": "32.798331,-117.149654,805,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.111000 UTC",
+  "latitude": "32.7062",
+  "longitude": "-117.147722",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "53.491666666666667",
+  "sensorId": "32.7062,-117.147722,5,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.110000 UTC",
+  "latitude": "32.765048",
+  "longitude": "-117.205506",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "76.225000000000009",
+  "sensorId": "32.765048,-117.205506,5,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.110000 UTC",
+  "latitude": "32.694108",
+  "longitude": "-117.124841",
+  "highway": "5",
+  "direction": "S",
+  "lane": "4",
+  "speed": "65.975000000000009",
+  "sensorId": "32.694108,-117.124841,5,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.110000 UTC",
+  "latitude": "32.761829",
+  "longitude": "-117.16531",
+  "highway": "8",
+  "direction": "W",
+  "lane": "5",
+  "speed": "65.708333333333329",
+  "sensorId": "32.761829,-117.16531,8,W,5"
+}, {
+  "timestamp": "2022-12-26 23:56:39.110000 UTC",
+  "latitude": "33.086077",
+  "longitude": "-117.299048",
+  "highway": "5",
+  "direction": "N",
+  "lane": "4",
+  "speed": "72.241666666666646",
+  "sensorId": "33.086077,-117.299048,5,N,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.110000 UTC",
+  "latitude": "32.779199",
+  "longitude": "-117.101551",
+  "highway": "8",
+  "direction": "W",
+  "lane": "6",
+  "speed": "69.774999999999991",
+  "sensorId": "32.779199,-117.101551,8,W,6"
+}, {
+  "timestamp": "2022-12-26 23:56:39.110000 UTC",
+  "latitude": "32.797079",
+  "longitude": "-117.209814",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "71.691666666666677",
+  "sensorId": "32.797079,-117.209814,5,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.110000 UTC",
+  "latitude": "32.755311",
+  "longitude": "-117.125108",
+  "highway": "805",
+  "direction": "S",
+  "lane": "4",
+  "speed": "73.541666666666671",
+  "sensorId": "32.755311,-117.125108,805,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.110000 UTC",
+  "latitude": "32.735387",
+  "longitude": "-117.175064",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "67.25833333333334",
+  "sensorId": "32.735387,-117.175064,5,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.109000 UTC",
+  "latitude": "32.930695",
+  "longitude": "-117.240733",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "65.916666666666671",
+  "sensorId": "32.930695,-117.240733,5,N,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.109000 UTC",
+  "latitude": "32.817541",
+  "longitude": "-117.16012",
+  "highway": "805",
+  "direction": "S",
+  "lane": "4",
+  "speed": "78.133333333333354",
+  "sensorId": "32.817541,-117.16012,805,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.109000 UTC",
+  "latitude": "32.672443",
+  "longitude": "-117.110958",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "82.716666666666654",
+  "sensorId": "32.672443,-117.110958,5,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.109000 UTC",
+  "latitude": "32.779415",
+  "longitude": "-117.06815",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "73.558333333333323",
+  "sensorId": "32.779415,-117.06815,8,W,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.109000 UTC",
+  "latitude": "32.979329",
+  "longitude": "-117.252709",
+  "highway": "5",
+  "direction": "N",
+  "lane": "2",
+  "speed": "75.908333333333331",
+  "sensorId": "32.979329,-117.252709,5,N,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.109000 UTC",
+  "latitude": "32.864267",
+  "longitude": "-117.189842",
+  "highway": "805",
+  "direction": "S",
+  "lane": "2",
+  "speed": "72.716666666666654",
+  "sensorId": "32.864267,-117.189842,805,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.109000 UTC",
+  "latitude": "32.740771",
+  "longitude": "-117.179757",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "76.575",
+  "sensorId": "32.740771,-117.179757,5,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.109000 UTC",
+  "latitude": "32.817425",
+  "longitude": "-117.16005",
+  "highway": "805",
+  "direction": "S",
+  "lane": "4",
+  "speed": "71.533333333333346",
+  "sensorId": "32.817425,-117.16005,805,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.108000 UTC",
+  "latitude": "32.672443",
+  "longitude": "-117.110958",
+  "highway": "5",
+  "direction": "S",
+  "lane": "2",
+  "speed": "76.675",
+  "sensorId": "32.672443,-117.110958,5,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.108000 UTC",
+  "latitude": "33.028326",
+  "longitude": "-117.275912",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "73.941666666666677",
+  "sensorId": "33.028326,-117.275912,5,N,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.108000 UTC",
+  "latitude": "32.80859",
+  "longitude": "-117.217482",
+  "highway": "5",
+  "direction": "S",
+  "lane": "5",
+  "speed": "67.15",
+  "sensorId": "32.80859,-117.217482,5,S,5"
+}, {
+  "timestamp": "2022-12-26 23:56:39.107000 UTC",
+  "latitude": "32.761829",
+  "longitude": "-117.16531",
+  "highway": "8",
+  "direction": "W",
+  "lane": "2",
+  "speed": "75.483333333333334",
+  "sensorId": "32.761829,-117.16531,8,W,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.107000 UTC",
+  "latitude": "32.817541",
+  "longitude": "-117.16012",
+  "highway": "805",
+  "direction": "S",
+  "lane": "3",
+  "speed": "81.250000000000014",
+  "sensorId": "32.817541,-117.16012,805,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.107000 UTC",
+  "latitude": "32.671747",
+  "longitude": "-117.111237",
+  "highway": "5",
+  "direction": "S",
+  "lane": "1",
+  "speed": "80.300000000000026",
+  "sensorId": "32.671747,-117.111237,5,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.107000 UTC",
+  "latitude": "32.723849",
+  "longitude": "-117.156302",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "73.708333333333329",
+  "sensorId": "32.723849,-117.156302,5,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.107000 UTC",
+  "latitude": "32.780256",
+  "longitude": "-117.094969",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "73.99166666666666",
+  "sensorId": "32.780256,-117.094969,8,W,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.107000 UTC",
+  "latitude": "32.761829",
+  "longitude": "-117.16531",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "72.458333333333329",
+  "sensorId": "32.761829,-117.16531,8,W,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.107000 UTC",
+  "latitude": "32.762484",
+  "longitude": "-117.163806",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "65.275",
+  "sensorId": "32.762484,-117.163806,8,W,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.107000 UTC",
+  "latitude": "33.179859",
+  "longitude": "-117.353416",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "80.058333333333337",
+  "sensorId": "33.179859,-117.353416,5,N,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.106000 UTC",
+  "latitude": "32.779199",
+  "longitude": "-117.101551",
+  "highway": "8",
+  "direction": "W",
+  "lane": "3",
+  "speed": "74.625000000000014",
+  "sensorId": "32.779199,-117.101551,8,W,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.106000 UTC",
+  "latitude": "32.784015",
+  "longitude": "-117.16195",
+  "highway": "163",
+  "direction": "S",
+  "lane": "2",
+  "speed": "73.24166666666666",
+  "sensorId": "32.784015,-117.16195,163,S,2"
+}, {
+  "timestamp": "2022-12-26 23:56:39.105000 UTC",
+  "latitude": "33.12394",
+  "longitude": "-117.32296",
+  "highway": "5",
+  "direction": "N",
+  "lane": "4",
+  "speed": "72.291666666666657",
+  "sensorId": "33.12394,-117.32296,5,N,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.104000 UTC",
+  "latitude": "32.766593",
+  "longitude": "-117.149413",
+  "highway": "8",
+  "direction": "W",
+  "lane": "4",
+  "speed": "71.824999999999989",
+  "sensorId": "32.766593,-117.149413,8,W,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.103000 UTC",
+  "latitude": "32.907593",
+  "longitude": "-117.225274",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "72.3",
+  "sensorId": "32.907593,-117.225274,5,N,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.103000 UTC",
+  "latitude": "32.935788",
+  "longitude": "-117.241314",
+  "highway": "5",
+  "direction": "N",
+  "lane": "3",
+  "speed": "74.941666666666677",
+  "sensorId": "32.935788,-117.241314,5,N,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.103000 UTC",
+  "latitude": "32.748401",
+  "longitude": "-117.122511",
+  "highway": "805",
+  "direction": "S",
+  "lane": "1",
+  "speed": "76.441666666666663",
+  "sensorId": "32.748401,-117.122511,805,S,1"
+}, {
+  "timestamp": "2022-12-26 23:56:39.103000 UTC",
+  "latitude": "32.69574",
+  "longitude": "-117.135196",
+  "highway": "5",
+  "direction": "S",
+  "lane": "5",
+  "speed": "66.774999999999991",
+  "sensorId": "32.69574,-117.135196,5,S,5"
+}, {
+  "timestamp": "2022-12-26 23:56:39.103000 UTC",
+  "latitude": "32.872445",
+  "longitude": "-117.229306",
+  "highway": "5",
+  "direction": "S",
+  "lane": "3",
+  "speed": "71.066666666666663",
+  "sensorId": "32.872445,-117.229306,5,S,3"
+}, {
+  "timestamp": "2022-12-26 23:56:39.102000 UTC",
+  "latitude": "32.872888",
+  "longitude": "-117.197982",
+  "highway": "805",
+  "direction": "S",
+  "lane": "4",
+  "speed": "72.799999999999983",
+  "sensorId": "32.872888,-117.197982,805,S,4"
+}, {
+  "timestamp": "2022-12-26 23:56:39.102000 UTC",
+  "latitude": "32.793785",
+  "longitude": "-117.149874",
+  "highway": "805",
+  "direction": "S",
+  "lane": "1",
+  "speed": "78.008333333333326",
+  "sensorId": "32.793785,-117.149874,805,S,1"
+}]
+
+
+
+
+
 
 
 
@@ -346,11 +2671,41 @@ LIMIT 100
 Task 8. Observe and understand autoscaling
 Observe how Dataflow scales the number of workers to process the backlog of incoming Pub/Sub messages.
 Return to the browser tab for Console. On the Navigation menu (Navigation menu icon), click Dataflow and click on your pipeline job.
+
+Job name                          averagespeeds-student0040bc58f0392d74-1226233601-553e138b
+Job ID                            2022-12-26_15_36_19-16327379380581171019
+Job type                          Streaming
+Job status                        Running
+SDK version                       Apache Beam SDK for Java 2.20.0
+ This version of the SDK is deprecated and will eventually be unsupported. Learn more
+Job region                        us-central1
+Worker location                   us-central1
+Current workers                   1
+Latest worker status              Worker pool started.
+Start time                        December 27, 2022 at 7:36:21 AM GMT+8
+Elapsed time                      33 min 12 sec
+Encryption type                   Google-managed key
+Dataflow Prime                    Disabled
+Runner v2                         Disabled
+Streaming Engine                  Disabled
+Vertical Autoscaling              Disabled
+
+
+
 Examine the Job metrics panel on the right, and review the Autoscaling section. How many workers are currently being used to process messages in the Pub/Sub topic?
 Click on More history and review how many workers were used at different points in time during pipeline execution.
+
+Time                          Number of target workers        Status
+Dec 27, 2022, 7:36:39 AM	    1	                              Starting a pool of 1 workers.	
+
+
 The data from a traffic sensor simulator started at the beginning of the lab creates hundreds of messages per second in the Pub/Sub topic. This will cause Dataflow to increase the number of workers to keep the system lag of the pipeline at optimal levels.
 Click on More history. In the Worker pool, you can see how Dataflow changed the number of workers. Notice the Status column that explains the reason for the change.
 https://cdn.qwiklabs.com/Qeuf5VZOsDS08iB8pAvnW4EGzqp%2FJ%2FY10nQbSEPeVNo%3D
+
+
+
+
 
 
 
@@ -533,6 +2888,60 @@ Example:
 https://cdn.qwiklabs.com/UaChWbZd5SY5J5TsPHSLrHI2e%2Fb5Mx4rXYmO%2Bw7rO58%3D
 
 You can add more charts to the dashboard, if you would like, for example, Pub/Sub publish rates on the topic, or subscription backlog (which is a signal to the Dataflow auto-scaler).
+
+{
+  "category": "CUSTOM",
+  "dashboardFilters": [],
+  "displayName": "My Dashboard",
+  "mosaicLayout": {
+    "columns": 12,
+    "tiles": [
+      {
+        "height": 5,
+        "widget": {
+          "title": "System lag for qwiklabs-gcp-01-99ac5d9f28ef [MEAN]",
+          "xyChart": {
+            "chartOptions": {
+              "mode": "COLOR"
+            },
+            "dataSets": [
+              {
+                "minAlignmentPeriod": "60s",
+                "plotType": "LINE",
+                "targetAxis": "Y1",
+                "timeSeriesQuery": {
+                  "apiSource": "DEFAULT_CLOUD",
+                  "timeSeriesFilter": {
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "crossSeriesReducer": "REDUCE_NONE",
+                      "perSeriesAligner": "ALIGN_MEAN"
+                    },
+                    "filter": "metric.type=\"dataflow.googleapis.com/job/system_lag\" resource.type=\"dataflow_job\" resource.label.\"project_id\"=\"qwiklabs-gcp-01-99ac5d9f28ef\"",
+                    "secondaryAggregation": {
+                      "alignmentPeriod": "60s",
+                      "crossSeriesReducer": "REDUCE_NONE",
+                      "perSeriesAligner": "ALIGN_NONE"
+                    }
+                  }
+                }
+              }
+            ],
+            "thresholds": [],
+            "timeshiftDuration": "0s",
+            "yAxis": {
+              "label": "y1Axis",
+              "scale": "LINEAR"
+            }
+          }
+        },
+        "width": 9,
+        "xPos": 0,
+        "yPos": 0
+      }
+    ]
+  }
+}
 
 
 
