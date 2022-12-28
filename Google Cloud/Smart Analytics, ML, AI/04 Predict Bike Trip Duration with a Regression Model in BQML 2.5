@@ -1284,6 +1284,69 @@ A linear regression model predicts the output as a weighted sum of its inputs. O
 Examine (or export) the weights of your model using the query below:
 SELECT * FROM ML.WEIGHTS(MODEL bike_model.model_bucketized)
 
+[{
+  "processed_input": "start_station_name",
+  "weight": null,
+  "category_weights": [{
+    "category": "Vincent Street, Pimlico",
+    "weight": "-179.21274215509285"
+  }, {
+    "category": "Flood Street, Chelsea",
+    "weight": "-166.95891147022391"
+  }, 
+  ...,
+  {
+    "category": "Ontario Street, Elephant \u0026 Castle",
+    "weight": "33.225995582676518"
+  }, {
+    "category": "Sloane Avenue, Knightsbridge",
+    "weight": "15.478776379542749"
+  }, {
+    "category": "Plough Terrace, Clapham Junction",
+    "weight": "309.89581658036133"
+  }, {
+    "category": "Strand, Strand",
+    "weight": "100.63295120092951"
+  }, {
+    "category": "Vereker Road North, West Kensington",
+    "weight": "57.424261131648393"
+  }, {
+    "category": "Churchill Place, Canary Wharf",
+    "weight": "242.90858814129368"
+  }]
+}, {
+  "processed_input": "dayofweek",
+  "weight": null,
+  "category_weights": [{
+    "category": "weekend",
+    "weight": "4.4518208920319953e-06"
+  }, {
+    "category": "weekday",
+    "weight": "-374.95035411402796"
+  }]
+}, {
+  "processed_input": "hourofday",
+  "weight": null,
+  "category_weights": [{
+    "category": "bin_4",
+    "weight": "-2608.5155570871516"
+  }, {
+    "category": "bin_1",
+    "weight": "-1874.9771238232431"
+  }, {
+    "category": "bin_2",
+    "weight": "-2838.09693944014"
+  }, {
+    "category": "bin_3",
+    "weight": "-2472.7711740712016"
+  }]
+}, {
+  "processed_input": "__INTERCEPT__",
+  "weight": "4061.8025603459969",
+  "category_weights": []
+}]
+
+
 Note, numeric features get a single weight, while categorical features get a weight for each possible value. For example, the dayofweek feature has the following weights:
 weekend weight: 2084.4003..., weekday weight: 1709.4363...
 https://cdn.qwiklabs.com/QqVJjiPJR444vOASHe8UMcUt2DertyqlBg50QGtdSBs%3D
@@ -1306,14 +1369,672 @@ FROM
     (
     SELECT
       start_station_name,
-      start_date
+      CAST(EXTRACT(dayofweek
+    FROM
+      start_date) AS STRING) AS dayofweek,
+  CAST(EXTRACT(hour
+    FROM
+      start_date) AS STRING) AS hourofday
     FROM
       `bigquery-public-data`.london_bicycles.cycle_hire
     LIMIT
       100) )
 
+[{
+  "predicted_duration": "1342.9230263203251",
+  "start_station_name": "Winsland Street, Paddington",
+  "dayofweek": "2",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "841.13555163269916",
+  "start_station_name": "Finsbury Square , Moorgate",
+  "dayofweek": "2",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1875.7385218466304",
+  "start_station_name": "Panton Street, West End",
+  "dayofweek": "1",
+  "hourofday": "22"
+}, {
+  "predicted_duration": "1058.6126687682688",
+  "start_station_name": "Queen Street 1, Bank",
+  "dayofweek": "3",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "1795.9270413699576",
+  "start_station_name": "Bethnal Green Garden, Bethnal Green",
+  "dayofweek": "1",
+  "hourofday": "14"
+}, {
+  "predicted_duration": "1096.8340749362476",
+  "start_station_name": "Pritchard\u0027s Road, Bethnal Green",
+  "dayofweek": "6",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "2310.3237491694808",
+  "start_station_name": "The Vale, Chelsea",
+  "dayofweek": "1",
+  "hourofday": "2"
+}, {
+  "predicted_duration": "1472.1525018605578",
+  "start_station_name": "Winsland Street, Paddington",
+  "dayofweek": "4",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "1621.1990943397698",
+  "start_station_name": "Tower Gardens , Tower",
+  "dayofweek": "5",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "1479.2699259390208",
+  "start_station_name": "Ram Street, Wandsworth",
+  "dayofweek": "4",
+  "hourofday": "23"
+}, {
+  "predicted_duration": "2204.2028995361634",
+  "start_station_name": "Chepstow Villas, Notting Hill",
+  "dayofweek": "1",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "760.83470508575078",
+  "start_station_name": "Abingdon Villas, Kensington",
+  "dayofweek": "3",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "2127.2020338868251",
+  "start_station_name": "London Zoo,  The Regent\u0027s Park",
+  "dayofweek": "7",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "1595.4421493985508",
+  "start_station_name": "Park Street, Bankside",
+  "dayofweek": "7",
+  "hourofday": "12"
+}, {
+  "predicted_duration": "2645.3956905548766",
+  "start_station_name": "Timber Lodge, Queen Elizabeth Olympic Park",
+  "dayofweek": "7",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "1718.2248117845081",
+  "start_station_name": "Stephendale Road, Sands End",
+  "dayofweek": "7",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "3010.7383707476038",
+  "start_station_name": "Aquatic Centre, Queen Elizabeth Olympic Park",
+  "dayofweek": "1",
+  "hourofday": "12"
+}, {
+  "predicted_duration": "3150.9386086784689",
+  "start_station_name": "Hyde Park Corner, Hyde Park",
+  "dayofweek": "1",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "976.62004654127873",
+  "start_station_name": "Rossmore Road, Marylebone",
+  "dayofweek": "6",
+  "hourofday": "20"
+}, {
+  "predicted_duration": "1251.0747384825033",
+  "start_station_name": "Warwick Avenue Station, Maida Vale",
+  "dayofweek": "3",
+  "hourofday": "7"
+}, {
+  "predicted_duration": "1683.6227862357689",
+  "start_station_name": "Royal Avenue 2, Chelsea",
+  "dayofweek": "1",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "3848.6925517730515",
+  "start_station_name": "Black Lion Gate, Kensington Gardens",
+  "dayofweek": "7",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "1741.1368711118569",
+  "start_station_name": "Green Park Station, Mayfair",
+  "dayofweek": "6",
+  "hourofday": "21"
+}, {
+  "predicted_duration": "1095.7784546260025",
+  "start_station_name": "Claverton Street, Pimlico",
+  "dayofweek": "3",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "955.05892423232422",
+  "start_station_name": "Riverlight South, Nine Elms",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "969.39719047790527",
+  "start_station_name": "Bell Lane, Liverpool Street",
+  "dayofweek": "3",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "1044.7471724816298",
+  "start_station_name": "Great Tower Street, Monument",
+  "dayofweek": "5",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1210.3798318472207",
+  "start_station_name": "Vereker Road North, West Kensington",
+  "dayofweek": "2",
+  "hourofday": "23"
+}, {
+  "predicted_duration": "1026.6466336433775",
+  "start_station_name": "Limerston Street, West Chelsea",
+  "dayofweek": "4",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "1764.2939611926952",
+  "start_station_name": "Green Street, Mayfair",
+  "dayofweek": "6",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1617.8419708650551",
+  "start_station_name": "Fanshaw Street, Hoxton",
+  "dayofweek": "1",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "1048.0902996751317",
+  "start_station_name": "Albany Street, The Regent\u0027s Park",
+  "dayofweek": "5",
+  "hourofday": "22"
+}, {
+  "predicted_duration": "1695.968999899859",
+  "start_station_name": "Soho Square , Soho",
+  "dayofweek": "1",
+  "hourofday": "12"
+}, {
+  "predicted_duration": "1240.8782634808242",
+  "start_station_name": "Hop Exchange, The Borough",
+  "dayofweek": "3",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "942.55183461817683",
+  "start_station_name": "Margery Street, Clerkenwell",
+  "dayofweek": "5",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "2359.8279565763669",
+  "start_station_name": "Cadogan Close, Victoria Park",
+  "dayofweek": "7",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "1017.2117076538118",
+  "start_station_name": "Tavistock Street, Covent Garden",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1246.7866294981711",
+  "start_station_name": "Putney Pier, Wandsworth",
+  "dayofweek": "3",
+  "hourofday": "21"
+}, {
+  "predicted_duration": "1080.0946522791189",
+  "start_station_name": "Borough Road, Elephant \u0026 Castle",
+  "dayofweek": "6",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1054.7780267590886",
+  "start_station_name": "Flood Street, Chelsea",
+  "dayofweek": "5",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "798.528545054475",
+  "start_station_name": "Endsleigh Gardens, Euston",
+  "dayofweek": "3",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "1012.518260318607",
+  "start_station_name": "Crosswall, Tower",
+  "dayofweek": "3",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1097.8421445757738",
+  "start_station_name": "Kensington Town Hall, Kensington",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1246.3810844715115",
+  "start_station_name": "Islington Green, Angel",
+  "dayofweek": "5",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "2852.9234944781656",
+  "start_station_name": "Hyde Park Corner, Hyde Park",
+  "dayofweek": "7",
+  "hourofday": "20"
+}, {
+  "predicted_duration": "1233.6429533970511",
+  "start_station_name": "New Globe Walk, Bankside",
+  "dayofweek": "5",
+  "hourofday": "14"
+}, {
+  "predicted_duration": "2718.4031685661193",
+  "start_station_name": "Pembridge Villas, Notting Hill",
+  "dayofweek": "1",
+  "hourofday": "3"
+}, {
+  "predicted_duration": "1060.0891952348404",
+  "start_station_name": "Cephas Street, Bethnal Green",
+  "dayofweek": "2",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "1368.8555703648706",
+  "start_station_name": "Moorfields, Moorgate",
+  "dayofweek": "7",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "2259.9404351079393",
+  "start_station_name": "Waterloo Place, St. James\u0027s",
+  "dayofweek": "7",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "1189.3348317416583",
+  "start_station_name": "North Audley Street, Mayfair",
+  "dayofweek": "5",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1731.4768529550254",
+  "start_station_name": "Hammersmith Road, Hammersmith",
+  "dayofweek": "1",
+  "hourofday": "12"
+}, {
+  "predicted_duration": "1031.6516614565733",
+  "start_station_name": "Bell Street , Marylebone",
+  "dayofweek": "2",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "1430.7861583562415",
+  "start_station_name": "Flamborough Street, Limehouse",
+  "dayofweek": "2",
+  "hourofday": "5"
+}, {
+  "predicted_duration": "1402.4701966891469",
+  "start_station_name": "Walnut Tree Walk, Vauxhall",
+  "dayofweek": "1",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "1010.6152346649767",
+  "start_station_name": "Southwark Street, Bankside",
+  "dayofweek": "3",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "967.02153802299176",
+  "start_station_name": "Eccleston Place, Victoria",
+  "dayofweek": "3",
+  "hourofday": "9"
+}, {
+  "predicted_duration": "1806.2005265155028",
+  "start_station_name": "Chrisp Street Market, Poplar",
+  "dayofweek": "4",
+  "hourofday": "23"
+}, {
+  "predicted_duration": "2782.5636275510687",
+  "start_station_name": "Park Lane , Hyde Park",
+  "dayofweek": "1",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "1310.6032954499794",
+  "start_station_name": "Paddington Green Police Station, Paddington",
+  "dayofweek": "3",
+  "hourofday": "9"
+}, {
+  "predicted_duration": "903.22940799499133",
+  "start_station_name": "Vicarage Gate, Kensington",
+  "dayofweek": "2",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "1122.4490364885075",
+  "start_station_name": "Usk Road, Clapham Junction",
+  "dayofweek": "6",
+  "hourofday": "20"
+}, {
+  "predicted_duration": "1506.351761516454",
+  "start_station_name": "Notting Hill Gate Station, Notting Hill",
+  "dayofweek": "1",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "948.74448633304",
+  "start_station_name": "Twig Folly Bridge, Mile End",
+  "dayofweek": "6",
+  "hourofday": "7"
+}, {
+  "predicted_duration": "985.64819777857861",
+  "start_station_name": "Bayley Street , Bloomsbury",
+  "dayofweek": "3",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "688.36666513585737",
+  "start_station_name": "Gloucester Road Station, South Kensington",
+  "dayofweek": "3",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "1116.6636253552749",
+  "start_station_name": "Baker Street, Marylebone",
+  "dayofweek": "4",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "894.77230601148608",
+  "start_station_name": "Flood Street, Chelsea",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1326.5112562389957",
+  "start_station_name": "Porchester Place, Paddington",
+  "dayofweek": "5",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "1168.8370258177622",
+  "start_station_name": "Wright\u0027s Lane, Kensington",
+  "dayofweek": "2",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "842.29064462550673",
+  "start_station_name": "Empire Square, The Borough",
+  "dayofweek": "6",
+  "hourofday": "7"
+}, {
+  "predicted_duration": "1079.7850440273312",
+  "start_station_name": "Maclise Road, Olympia",
+  "dayofweek": "3",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "1268.0082887622082",
+  "start_station_name": "Bramham Gardens, Earl\u0027s Court",
+  "dayofweek": "2",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "969.16456224528679",
+  "start_station_name": "Lots Road, West Chelsea",
+  "dayofweek": "4",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "1085.3476994726786",
+  "start_station_name": "Hampstead Road, Euston",
+  "dayofweek": "2",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "1876.3897712708956",
+  "start_station_name": "Green Park Station, Mayfair",
+  "dayofweek": "6",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "861.0172360952954",
+  "start_station_name": "Waterloo Station 3, Waterloo",
+  "dayofweek": "6",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "1022.2855376811042",
+  "start_station_name": "Hollybush Gardens, Bethnal Green",
+  "dayofweek": "5",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "629.984520516475",
+  "start_station_name": "Queen Street 2, Bank",
+  "dayofweek": "2",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "1608.2616299801427",
+  "start_station_name": "Prince of Wales Drive, Battersea Park",
+  "dayofweek": "6",
+  "hourofday": "23"
+}, {
+  "predicted_duration": "2698.6709736902558",
+  "start_station_name": "Hyde Park Corner, Hyde Park",
+  "dayofweek": "5",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "1331.5560316216286",
+  "start_station_name": "Commercial Street, Shoreditch",
+  "dayofweek": "7",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "1827.2894113169775",
+  "start_station_name": "Flamborough Street, Limehouse",
+  "dayofweek": "7",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "1340.497159179198",
+  "start_station_name": "William Morris Way, Sands End",
+  "dayofweek": "5",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "1075.1641919065848",
+  "start_station_name": "Rampayne Street, Pimlico",
+  "dayofweek": "4",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "1145.2067348071371",
+  "start_station_name": "Wardour Street, Soho",
+  "dayofweek": "2",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "1102.5473874000197",
+  "start_station_name": "Old Street Station, St. Luke\u0027s",
+  "dayofweek": "4",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "1177.6396698424594",
+  "start_station_name": "Gloucester Road Station, South Kensington",
+  "dayofweek": "2",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "2185.0420321361771",
+  "start_station_name": "Ravenscourt Park Station, Hammersmith",
+  "dayofweek": "2",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1577.2088357059608",
+  "start_station_name": "Clapham Common North Side, Clapham Common",
+  "dayofweek": "4",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "2230.259568361178",
+  "start_station_name": "Albert Embankment, Vauxhall",
+  "dayofweek": "3",
+  "hourofday": "1"
+}, {
+  "predicted_duration": "1497.4992413362477",
+  "start_station_name": "Coomer Place, West Kensington",
+  "dayofweek": "7",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "769.42499764493937",
+  "start_station_name": "Waterloo Station 3, Waterloo",
+  "dayofweek": "2",
+  "hourofday": "7"
+}, {
+  "predicted_duration": "1328.7047771977225",
+  "start_station_name": "Fisherman\u0027s Walk West, Canary Wharf",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "1399.8407489313415",
+  "start_station_name": "Lancaster Drive, Blackwall",
+  "dayofweek": "5",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "1482.8640788816281",
+  "start_station_name": "Brushfield Street, Liverpool Street",
+  "dayofweek": "7",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "1391.495915843281",
+  "start_station_name": "St. Mark\u0027s Road, North Kensington",
+  "dayofweek": "4",
+  "hourofday": "9"
+}, {
+  "predicted_duration": "1167.6872346895768",
+  "start_station_name": "South Audley Street, Mayfair",
+  "dayofweek": "5",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "1185.2147045268819",
+  "start_station_name": "Ethelburga Estate, Battersea Park",
+  "dayofweek": "5",
+  "hourofday": "9"
+}, {
+  "predicted_duration": "1571.1845373813028",
+  "start_station_name": "Limerston Street, West Chelsea",
+  "dayofweek": "7",
+  "hourofday": "15"
+}]
+
+
+
+
 
 SELECT * FROM ML.WEIGHTS(MODEL bike_model.model)
+
+[{
+  "processed_input": "start_station_name",
+  "weight": null,
+  "category_weights": [{
+    "category": "Albert Square, Stockwell",
+    "weight": "2520.4685280332033"
+  }, {
+    "category": "Royal Avenue 2, Chelsea",
+    "weight": "2448.0885020214992"
+  }, 
+  ...,
+  {
+    "category": "Eastbourne Mews, Paddington",
+    "weight": "2560.1988725658362"
+  }, {
+    "category": "Langdon Park, Poplar",
+    "weight": "3177.5000357961144"
+  }]
+}, {
+  "processed_input": "dayofweek",
+  "weight": null,
+  "category_weights": [{
+    "category": "2",
+    "weight": "-549.01376914139632"
+  }, {
+    "category": "3",
+    "weight": "-600.4950369922683"
+  }, {
+    "category": "5",
+    "weight": "-527.50779646614171"
+  }, {
+    "category": "7",
+    "weight": "-211.64266579137842"
+  }, {
+    "category": "1",
+    "weight": "-140.54983873933793"
+  }, {
+    "category": "6",
+    "weight": "-491.36312726557389"
+  }, {
+    "category": "4",
+    "weight": "-557.0699301372274"
+  }]
+}, {
+  "processed_input": "hourofday",
+  "weight": null,
+  "category_weights": [{
+    "category": "14",
+    "weight": "741.868137649262"
+  }, {
+    "category": "12",
+    "weight": "626.6272442788669"
+  }, {
+    "category": "19",
+    "weight": "524.810652298427"
+  }, {
+    "category": "23",
+    "weight": "604.84921750935678"
+  }, {
+    "category": "0",
+    "weight": "1017.9411527887821"
+  }, {
+    "category": "11",
+    "weight": "660.18971067391544"
+  }, {
+    "category": "22",
+    "weight": "555.79797263416572"
+  }, {
+    "category": "21",
+    "weight": "523.35871427005532"
+  }, {
+    "category": "16",
+    "weight": "662.09628883449091"
+  }, {
+    "category": "4",
+    "weight": "1276.8363758303403"
+  }, {
+    "category": "3",
+    "weight": "1492.1727756062237"
+  }, {
+    "category": "9",
+    "weight": "344.99101033627096"
+  }, {
+    "category": "7",
+    "weight": "252.18795826023978"
+  }, {
+    "category": "2",
+    "weight": "1498.6419481870137"
+  }, {
+    "category": "8",
+    "weight": "286.12955483477322"
+  }, {
+    "category": "20",
+    "weight": "496.9990045422411"
+  }, {
+    "category": "15",
+    "weight": "723.92129169050338"
+  }, {
+    "category": "18",
+    "weight": "540.51189629312967"
+  }, {
+    "category": "17",
+    "weight": "528.168027352577"
+  }, {
+    "category": "5",
+    "weight": "602.96413922377292"
+  }, {
+    "category": "13",
+    "weight": "658.61161442909429"
+  }, {
+    "category": "1",
+    "weight": "1346.1351342737507"
+  }, {
+    "category": "6",
+    "weight": "282.10276885166843"
+  }, {
+    "category": "10",
+    "weight": "555.20593444777933"
+  }]
+}, {
+  "processed_input": "__INTERCEPT__",
+  "weight": "-1282.5274914754866",
+  "category_weights": []
+}]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1325,12 +2046,640 @@ FROM
     (
     SELECT
       start_station_name,
-      start_date
+      CAST(EXTRACT(dayofweek
+    FROM
+      start_date) AS STRING) AS dayofweek,
+  CAST(EXTRACT(hour
+    FROM
+      start_date) AS STRING) AS hourofday
     FROM
       `bigquery-public-data`.london_bicycles.cycle_hire
     LIMIT
       100) )
 
+[{
+  "predicted_duration": "-205.61190114882609",
+  "start_station_name": "Winsland Street, Paddington",
+  "dayofweek": "2",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "-706.75032495826213",
+  "start_station_name": "Finsbury Square , Moorgate",
+  "dayofweek": "2",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-77.971309665970551",
+  "start_station_name": "Panton Street, West End",
+  "dayofweek": "1",
+  "hourofday": "22"
+}, {
+  "predicted_duration": "-434.41398581911352",
+  "start_station_name": "Queen Street 1, Bank",
+  "dayofweek": "3",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-157.50198174061083",
+  "start_station_name": "Bethnal Green Garden, Bethnal Green",
+  "dayofweek": "1",
+  "hourofday": "14"
+}, {
+  "predicted_duration": "-507.88738495674636",
+  "start_station_name": "Pritchard\u0027s Road, Bethnal Green",
+  "dayofweek": "6",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "361.65929511744821",
+  "start_station_name": "The Vale, Chelsea",
+  "dayofweek": "1",
+  "hourofday": "2"
+}, {
+  "predicted_duration": "-65.739194810134535",
+  "start_station_name": "Winsland Street, Paddington",
+  "dayofweek": "4",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "57.362348330090583",
+  "start_station_name": "Tower Gardens , Tower",
+  "dayofweek": "5",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "-57.868099201401662",
+  "start_station_name": "Ram Street, Wandsworth",
+  "dayofweek": "4",
+  "hourofday": "23"
+}, {
+  "predicted_duration": "250.58516712100948",
+  "start_station_name": "Chepstow Villas, Notting Hill",
+  "dayofweek": "1",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "-736.38629679739677",
+  "start_station_name": "Abingdon Villas, Kensington",
+  "dayofweek": "3",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "246.71431205073543",
+  "start_station_name": "London Zoo,  The Regent\u0027s Park",
+  "dayofweek": "7",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "-287.48303596661697",
+  "start_station_name": "Park Street, Bankside",
+  "dayofweek": "7",
+  "hourofday": "12"
+}, {
+  "predicted_duration": "766.29549710907918",
+  "start_station_name": "Timber Lodge, Queen Elizabeth Olympic Park",
+  "dayofweek": "7",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "-161.93706810939244",
+  "start_station_name": "Stephendale Road, Sands End",
+  "dayofweek": "7",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "1059.7025731802253",
+  "start_station_name": "Aquatic Centre, Queen Elizabeth Olympic Park",
+  "dayofweek": "1",
+  "hourofday": "12"
+}, {
+  "predicted_duration": "1200.6862985556709",
+  "start_station_name": "Hyde Park Corner, Hyde Park",
+  "dayofweek": "1",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "-629.97798904277784",
+  "start_station_name": "Rossmore Road, Marylebone",
+  "dayofweek": "6",
+  "hourofday": "20"
+}, {
+  "predicted_duration": "-243.84043843441773",
+  "start_station_name": "Warwick Avenue Station, Maida Vale",
+  "dayofweek": "3",
+  "hourofday": "7"
+}, {
+  "predicted_duration": "-270.51319293690852",
+  "start_station_name": "Royal Avenue 2, Chelsea",
+  "dayofweek": "1",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "1967.5709004788334",
+  "start_station_name": "Black Lion Gate, Kensington Gardens",
+  "dayofweek": "7",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "136.59865197879827",
+  "start_station_name": "Green Park Station, Mayfair",
+  "dayofweek": "6",
+  "hourofday": "21"
+}, {
+  "predicted_duration": "-400.06559646045218",
+  "start_station_name": "Claverton Street, Pimlico",
+  "dayofweek": "3",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "-584.00958556408932",
+  "start_station_name": "Riverlight South, Nine Elms",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-526.53289759857489",
+  "start_station_name": "Bell Lane, Liverpool Street",
+  "dayofweek": "3",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "-523.5623291184645",
+  "start_station_name": "Great Tower Street, Monument",
+  "dayofweek": "5",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-333.65276156366156",
+  "start_station_name": "Vereker Road North, West Kensington",
+  "dayofweek": "2",
+  "hourofday": "23"
+}, {
+  "predicted_duration": "-513.43514842730019",
+  "start_station_name": "Limerston Street, West Chelsea",
+  "dayofweek": "4",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "159.46076097964965",
+  "start_station_name": "Green Street, Mayfair",
+  "dayofweek": "6",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-334.64995807600747",
+  "start_station_name": "Fanshaw Street, Hoxton",
+  "dayofweek": "1",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-518.862624008452",
+  "start_station_name": "Albany Street, The Regent\u0027s Park",
+  "dayofweek": "5",
+  "hourofday": "22"
+}, {
+  "predicted_duration": "-256.35106058715638",
+  "start_station_name": "Soho Square , Soho",
+  "dayofweek": "1",
+  "hourofday": "12"
+}, {
+  "predicted_duration": "-253.07937927097177",
+  "start_station_name": "Hop Exchange, The Borough",
+  "dayofweek": "3",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "-626.63378162235222",
+  "start_station_name": "Margery Street, Clerkenwell",
+  "dayofweek": "5",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "479.45044123712478",
+  "start_station_name": "Cadogan Close, Victoria Park",
+  "dayofweek": "7",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-522.35451355087389",
+  "start_station_name": "Tavistock Street, Covent Garden",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-246.79460086552393",
+  "start_station_name": "Putney Pier, Wandsworth",
+  "dayofweek": "3",
+  "hourofday": "21"
+}, {
+  "predicted_duration": "-523.88257899163864",
+  "start_station_name": "Borough Road, Elephant \u0026 Castle",
+  "dayofweek": "6",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-510.47635766892563",
+  "start_station_name": "Flood Street, Chelsea",
+  "dayofweek": "5",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-698.19743611504521",
+  "start_station_name": "Endsleigh Gardens, Euston",
+  "dayofweek": "3",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "-483.532336514282",
+  "start_station_name": "Crosswall, Tower",
+  "dayofweek": "3",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-443.23278636625867",
+  "start_station_name": "Kensington Town Hall, Kensington",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-321.90460562287149",
+  "start_station_name": "Islington Green, Angel",
+  "dayofweek": "5",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "970.23140308614734",
+  "start_station_name": "Hyde Park Corner, Hyde Park",
+  "dayofweek": "7",
+  "hourofday": "20"
+}, {
+  "predicted_duration": "-332.42097838782831",
+  "start_station_name": "New Globe Walk, Bankside",
+  "dayofweek": "5",
+  "hourofday": "14"
+}, {
+  "predicted_duration": "771.00269656029377",
+  "start_station_name": "Pembridge Villas, Notting Hill",
+  "dayofweek": "1",
+  "hourofday": "3"
+}, {
+  "predicted_duration": "-484.27642167710258",
+  "start_station_name": "Cephas Street, Bethnal Green",
+  "dayofweek": "2",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "-513.78847324391609",
+  "start_station_name": "Moorfields, Moorgate",
+  "dayofweek": "7",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "378.62809969142666",
+  "start_station_name": "Waterloo Place, St. James\u0027s",
+  "dayofweek": "7",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "-380.09842441288049",
+  "start_station_name": "North Audley Street, Mayfair",
+  "dayofweek": "5",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-221.846921924277",
+  "start_station_name": "Hammersmith Road, Hammersmith",
+  "dayofweek": "1",
+  "hourofday": "12"
+}, {
+  "predicted_duration": "-516.07587040245517",
+  "start_station_name": "Bell Street , Marylebone",
+  "dayofweek": "2",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "-113.85659938712607",
+  "start_station_name": "Flamborough Street, Limehouse",
+  "dayofweek": "2",
+  "hourofday": "5"
+}, {
+  "predicted_duration": "-549.54111769613928",
+  "start_station_name": "Walnut Tree Walk, Vauxhall",
+  "dayofweek": "1",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-497.54668481392787",
+  "start_station_name": "Southwark Street, Bankside",
+  "dayofweek": "3",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "-528.54746502910689",
+  "start_station_name": "Eccleston Place, Victoria",
+  "dayofweek": "3",
+  "hourofday": "9"
+}, {
+  "predicted_duration": "269.43054544496522",
+  "start_station_name": "Chrisp Street Market, Poplar",
+  "dayofweek": "4",
+  "hourofday": "23"
+}, {
+  "predicted_duration": "827.44268277482774",
+  "start_station_name": "Park Lane , Hyde Park",
+  "dayofweek": "1",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "-184.9852142221041",
+  "start_station_name": "Paddington Green Police Station, Paddington",
+  "dayofweek": "3",
+  "hourofday": "9"
+}, {
+  "predicted_duration": "-644.80304534554284",
+  "start_station_name": "Vicarage Gate, Kensington",
+  "dayofweek": "2",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "-481.37907267457155",
+  "start_station_name": "Usk Road, Clapham Junction",
+  "dayofweek": "6",
+  "hourofday": "20"
+}, {
+  "predicted_duration": "-449.93709137401618",
+  "start_station_name": "Notting Hill Gate Station, Notting Hill",
+  "dayofweek": "1",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "-656.053484485938",
+  "start_station_name": "Twig Folly Bridge, Mile End",
+  "dayofweek": "6",
+  "hourofday": "7"
+}, {
+  "predicted_duration": "-510.39085399514437",
+  "start_station_name": "Bayley Street , Bloomsbury",
+  "dayofweek": "3",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "-807.19522274010319",
+  "start_station_name": "Gloucester Road Station, South Kensington",
+  "dayofweek": "3",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "-420.06697643767825",
+  "start_station_name": "Baker Street, Marylebone",
+  "dayofweek": "4",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-643.8795839797765",
+  "start_station_name": "Flood Street, Chelsea",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-238.97827365023417",
+  "start_station_name": "Porchester Place, Paddington",
+  "dayofweek": "5",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "-375.5584380337549",
+  "start_station_name": "Wright\u0027s Lane, Kensington",
+  "dayofweek": "2",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "-764.07451446537618",
+  "start_station_name": "Empire Square, The Borough",
+  "dayofweek": "6",
+  "hourofday": "7"
+}, {
+  "predicted_duration": "-413.25592758724383",
+  "start_station_name": "Maclise Road, Olympia",
+  "dayofweek": "3",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-275.9825349201476",
+  "start_station_name": "Bramham Gardens, Earl\u0027s Court",
+  "dayofweek": "2",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-570.3321244617257",
+  "start_station_name": "Lots Road, West Chelsea",
+  "dayofweek": "4",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "-463.28276676239295",
+  "start_station_name": "Hampstead Road, Euston",
+  "dayofweek": "2",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "274.53818485365406",
+  "start_station_name": "Green Park Station, Mayfair",
+  "dayofweek": "6",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-743.46496926049349",
+  "start_station_name": "Waterloo Station 3, Waterloo",
+  "dayofweek": "6",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "-547.96241026307439",
+  "start_station_name": "Hollybush Gardens, Bethnal Green",
+  "dayofweek": "5",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "-917.32939401715407",
+  "start_station_name": "Queen Street 2, Bank",
+  "dayofweek": "2",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "7.8414674134734526",
+  "start_station_name": "Prince of Wales Drive, Battersea Park",
+  "dayofweek": "6",
+  "hourofday": "23"
+}, {
+  "predicted_duration": "1135.0249014242013",
+  "start_station_name": "Hyde Park Corner, Hyde Park",
+  "dayofweek": "5",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-550.54925769183853",
+  "start_station_name": "Commercial Street, Shoreditch",
+  "dayofweek": "7",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "-54.259127219342872",
+  "start_station_name": "Flamborough Street, Limehouse",
+  "dayofweek": "7",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "-226.19400717188",
+  "start_station_name": "William Morris Way, Sands End",
+  "dayofweek": "5",
+  "hourofday": "16"
+}, {
+  "predicted_duration": "-461.43265993872888",
+  "start_station_name": "Rampayne Street, Pimlico",
+  "dayofweek": "4",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-401.0915217047405",
+  "start_station_name": "Wardour Street, Soho",
+  "dayofweek": "2",
+  "hourofday": "19"
+}, {
+  "predicted_duration": "-433.820473005955",
+  "start_station_name": "Old Street Station, St. Luke\u0027s",
+  "dayofweek": "4",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "-365.82621886648474",
+  "start_station_name": "Gloucester Road Station, South Kensington",
+  "dayofweek": "2",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "637.9097652555904",
+  "start_station_name": "Ravenscourt Park Station, Hammersmith",
+  "dayofweek": "2",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "39.670965259156333",
+  "start_station_name": "Clapham Common North Side, Clapham Common",
+  "dayofweek": "4",
+  "hourofday": "8"
+}, {
+  "predicted_duration": "741.23761285758269",
+  "start_station_name": "Albert Embankment, Vauxhall",
+  "dayofweek": "3",
+  "hourofday": "1"
+}, {
+  "predicted_duration": "-385.34071128937353",
+  "start_station_name": "Coomer Place, West Kensington",
+  "dayofweek": "7",
+  "hourofday": "11"
+}, {
+  "predicted_duration": "-778.077748901349",
+  "start_station_name": "Waterloo Station 3, Waterloo",
+  "dayofweek": "2",
+  "hourofday": "7"
+}, {
+  "predicted_duration": "-209.29295546016576",
+  "start_station_name": "Fisherman\u0027s Walk West, Canary Wharf",
+  "dayofweek": "4",
+  "hourofday": "17"
+}, {
+  "predicted_duration": "-166.34196907521223",
+  "start_station_name": "Lancaster Drive, Blackwall",
+  "dayofweek": "5",
+  "hourofday": "15"
+}, {
+  "predicted_duration": "-398.0842472651504",
+  "start_station_name": "Brushfield Street, Liverpool Street",
+  "dayofweek": "7",
+  "hourofday": "13"
+}, {
+  "predicted_duration": "-146.16535435801947",
+  "start_station_name": "St. Mark\u0027s Road, North Kensington",
+  "dayofweek": "4",
+  "hourofday": "9"
+}, {
+  "predicted_duration": "-402.10805800398077",
+  "start_station_name": "South Audley Street, Mayfair",
+  "dayofweek": "5",
+  "hourofday": "18"
+}, {
+  "predicted_duration": "-381.52628330279344",
+  "start_station_name": "Ethelburga Estate, Battersea Park",
+  "dayofweek": "5",
+  "hourofday": "9"
+}, {
+  "predicted_duration": "-310.57745514311262",
+  "start_station_name": "Limerston Street, West Chelsea",
+  "dayofweek": "7",
+  "hourofday": "15"
+}]
+
+
+
+
 
 SELECT * FROM ML.WEIGHTS(MODEL bike_model.model_weekday)
+[{
+  "processed_input": "start_station_name",
+  "weight": null,
+  "category_weights": [{
+    "category": "London Zoo,  The Regent\u0027s Park",
+    "weight": "322.71776753824719"
+  }, {
+    "category": "Vauxhall Walk, Vauxhall",
+    "weight": "-52.57587061274679"
+  },  
+  ..., 
+  {
+    "category": "Bromley High Street, Bromley",
+    "weight": "243.92292916222013"
+  }, {
+    "category": "Penfold Street, Marylebone",
+    "weight": "-341.85990992853004"
+  }]
+}, {
+  "processed_input": "dayofweek",
+  "weight": null,
+  "category_weights": [{
+    "category": "weekday",
+    "weight": "1549.6822114345355"
+  }, {
+    "category": "weekend",
+    "weight": "1917.2944701186304"
+  }]
+}, {
+  "processed_input": "hourofday",
+  "weight": null,
+  "category_weights": [{
+    "category": "18",
+    "weight": "7.4842941757264825"
+  }, {
+    "category": "11",
+    "weight": "130.02229778437177"
+  }, {
+    "category": "2",
+    "weight": "972.20945517466225"
+  }, {
+    "category": "4",
+    "weight": "748.53293358194082"
+  }, {
+    "category": "17",
+    "weight": "-4.536013730767948"
+  }, {
+    "category": "9",
+    "weight": "-186.665486007305"
+  }, {
+    "category": "23",
+    "weight": "74.835563555308852"
+  }, {
+    "category": "14",
+    "weight": "211.97329449509621"
+  }, {
+    "category": "15",
+    "weight": "194.52860971155249"
+  }, {
+    "category": "19",
+    "weight": "-8.3290835726349854"
+  }, {
+    "category": "21",
+    "weight": "-9.0723202947728563"
+  }, {
+    "category": "10",
+    "weight": "24.389336259132932"
+  }, {
+    "category": "12",
+    "weight": "96.836482741389858"
+  }, {
+    "category": "7",
+    "weight": "-281.4531738029213"
+  }, {
+    "category": "3",
+    "weight": "967.46024700966746"
+  }, {
+    "category": "8",
+    "weight": "-246.84039416206588"
+  }, {
+    "category": "16",
+    "weight": "131.54362276605656"
+  }, {
+    "category": "22",
+    "weight": "24.287461444941897"
+  }, {
+    "category": "20",
+    "weight": "-35.92628575797103"
+  }, {
+    "category": "0",
+    "weight": "490.43617460758333"
+  }, {
+    "category": "1",
+    "weight": "819.92392719838585"
+  }, {
+    "category": "6",
+    "weight": "-251.31832189261337"
+  }, {
+    "category": "5",
+    "weight": "71.946150598273363"
+  }, {
+    "category": "13",
+    "weight": "128.86721258008293"
+  }]
+}, {
+  "processed_input": "__INTERCEPT__",
+  "weight": "-207.54707825356832",
+  "category_weights": []
+}]
+
+
+
+
+
+
+
+
+
 
