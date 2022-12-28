@@ -358,6 +358,576 @@ A graph element exists for each step. Click on the concat object to see the deta
 Click on the View Job button. A new tab will open with the Vertex AI Custom Job that was submitted to the backend to satisfy the pipeline request.
 https://cdn.qwiklabs.com/zjdFA8ES6xNLbcU5j3eup4ijGl8pJ4ZfNG5kU8zuGEA%3D
 
+
+
+
+basic-pipeline-20221228025703 - pipeline proto
+{
+  "name": "projects/802000798119/locations/us-central1/pipelineJobs/basic-pipeline-20221228025703",
+  "createTime": "2022-12-28T06:57:21.745491Z",
+  "startTime": "2022-12-28T06:58:37.576575Z",
+  "endTime": "2022-12-28T07:02:14.398591Z",
+  "updateTime": "2022-12-28T07:02:14.398591Z",
+  "pipelineSpec": {
+    "deploymentConfig": {
+      "@type": "type.googleapis.com/ml_pipelines.PipelineDeploymentConfig",
+      "executors": {
+        "exec-concat": {
+          "container": {
+            "image": "python:3.7",
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.8' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef concat(a: str, b: str) -> str:\n  return a + b\n\n"
+            ],
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "concat"
+            ]
+          }
+        },
+        "exec-reverse": {
+          "container": {
+            "image": "python:3.7",
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.8' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef reverse(a: str)->NamedTuple(\"outputs\", [(\"before\", str), (\"after\", str)]):\n  return a, a[::-1]\n\n"
+            ],
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "reverse"
+            ]
+          }
+        }
+      }
+    },
+    "components": {
+      "comp-concat": {
+        "inputDefinitions": {
+          "parameters": {
+            "a": {
+              "type": "STRING"
+            },
+            "b": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        },
+        "executorLabel": "exec-concat"
+      },
+      "comp-reverse": {
+        "inputDefinitions": {
+          "parameters": {
+            "a": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "after": {
+              "type": "STRING"
+            },
+            "before": {
+              "type": "STRING"
+            }
+          }
+        },
+        "executorLabel": "exec-reverse"
+      }
+    },
+    "schemaVersion": "2.0.0",
+    "root": {
+      "inputDefinitions": {
+        "parameters": {
+          "a": {
+            "type": "STRING"
+          },
+          "b": {
+            "type": "STRING"
+          }
+        }
+      },
+      "dag": {
+        "tasks": {
+          "concat": {
+            "taskInfo": {
+              "name": "concat"
+            },
+            "inputs": {
+              "parameters": {
+                "a": {
+                  "componentInputParameter": "a"
+                },
+                "b": {
+                  "componentInputParameter": "b"
+                }
+              }
+            },
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-concat"
+            }
+          },
+          "reverse": {
+            "taskInfo": {
+              "name": "reverse"
+            },
+            "inputs": {
+              "parameters": {
+                "a": {
+                  "taskOutputParameter": {
+                    "producerTask": "concat",
+                    "outputParameterKey": "Output"
+                  }
+                }
+              }
+            },
+            "dependentTasks": [
+              "concat"
+            ],
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-reverse"
+            }
+          }
+        }
+      }
+    },
+    "sdkVersion": "kfp-1.8.8",
+    "pipelineInfo": {
+      "name": "basic-pipeline"
+    },
+    "deploymentSpec": {
+      "executors": {
+        "exec-concat": {
+          "container": {
+            "image": "python:3.7",
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.8' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef concat(a: str, b: str) -> str:\n  return a + b\n\n"
+            ],
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "concat"
+            ]
+          }
+        },
+        "exec-reverse": {
+          "container": {
+            "image": "python:3.7",
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.8' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef reverse(a: str)->NamedTuple(\"outputs\", [(\"before\", str), (\"after\", str)]):\n  return a, a[::-1]\n\n"
+            ],
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "reverse"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "state": "PIPELINE_STATE_SUCCEEDED",
+  "jobDetail": {
+    "pipelineContext": {
+      "name": "projects/802000798119/locations/us-central1/metadataStores/default/contexts/basic-pipeline",
+      "displayName": "basic-pipeline",
+      "instanceSchemaTitle": "system.Pipeline",
+      "etag": "1672210717695",
+      "createTime": "2022-12-28T06:58:37.695Z",
+      "updateTime": "2022-12-28T06:58:37.695Z",
+      "schemaTitle": "system.Pipeline",
+      "schemaVersion": "0.0.1",
+      "metadata": {}
+    },
+    "pipelineRunContext": {
+      "name": "projects/802000798119/locations/us-central1/metadataStores/default/contexts/basic-pipeline-20221228025703",
+      "displayName": "basic-pipeline-20221228025703",
+      "instanceSchemaTitle": "system.PipelineRun",
+      "etag": "1672210717806",
+      "createTime": "2022-12-28T06:58:37.806Z",
+      "updateTime": "2022-12-28T06:58:37.806Z",
+      "parentContexts": [
+        "projects/802000798119/locations/us-central1/metadataStores/default/contexts/basic-pipeline"
+      ],
+      "schemaTitle": "system.PipelineRun",
+      "schemaVersion": "0.0.1",
+      "metadata": {}
+    },
+    "taskDetails": [
+      {
+        "taskId": "-6088741077001437184",
+        "taskName": "basic-pipeline-20221228025703",
+        "createTime": "2022-12-28T06:58:37.576575Z",
+        "startTime": "2022-12-28T06:58:38.156015Z",
+        "endTime": "2022-12-28T07:02:14.370448Z",
+        "executorDetail": {},
+        "state": "SUCCEEDED",
+        "execution": {
+          "name": "projects/802000798119/locations/us-central1/metadataStores/default/executions/14522322242525938600",
+          "displayName": "basic-pipeline-20221228025703",
+          "instanceSchemaTitle": "system.Run",
+          "state": "COMPLETE",
+          "customProperties": {
+            "input:a": {
+              "stringValue": "stres"
+            },
+            "input:b": {
+              "stringValue": "sed"
+            }
+          },
+          "etag": "1672210934341",
+          "createTime": "2022-12-28T06:58:38.062Z",
+          "updateTime": "2022-12-28T07:02:14.341Z",
+          "schemaTitle": "system.Run",
+          "schemaVersion": "0.0.1",
+          "metadata": {
+            "input:a": "stres",
+            "input:b": "sed"
+          }
+        },
+        "pipelineTaskStatus": [
+          {
+            "updateTime": "2022-12-28T07:02:14.162375784Z",
+            "state": "SUCCEEDED"
+          }
+        ]
+      },
+      {
+        "taskId": "-6250870663586775040",
+        "taskName": "concat",
+        "createTime": "2022-12-28T06:58:38.156015Z",
+        "startTime": "2022-12-28T06:58:38.686636Z",
+        "endTime": "2022-12-28T07:00:21.120117Z",
+        "executorDetail": {
+          "containerDetail": {
+            "mainJob": "projects/802000798119/locations/us-central1/customJobs/8281827382080307200"
+          }
+        },
+        "state": "SUCCEEDED",
+        "execution": {
+          "name": "projects/802000798119/locations/us-central1/metadataStores/default/executions/14883733976094418127",
+          "displayName": "concat",
+          "instanceSchemaTitle": "system.ContainerExecution",
+          "state": "COMPLETE",
+          "customProperties": {
+            "output:Output": {
+              "stringValue": "stressed"
+            },
+            "input:b": {
+              "stringValue": "sed"
+            },
+            "input:a": {
+              "stringValue": "stres"
+            }
+          },
+          "etag": "1672210821046",
+          "createTime": "2022-12-28T06:58:38.389Z",
+          "updateTime": "2022-12-28T07:00:21.046Z",
+          "schemaTitle": "system.ContainerExecution",
+          "schemaVersion": "0.0.1",
+          "metadata": {
+            "input:a": "stres",
+            "input:b": "sed",
+            "output:Output": "stressed"
+          }
+        },
+        "parentTaskId": "-6088741077001437184",
+        "pipelineTaskStatus": [
+          {
+            "updateTime": "2022-12-28T07:00:20.966070289Z",
+            "state": "SUCCEEDED"
+          }
+        ]
+      },
+      {
+        "taskId": "7584187391695388672",
+        "taskName": "reverse",
+        "createTime": "2022-12-28T06:58:38.156015Z",
+        "startTime": "2022-12-28T07:00:21.647128Z",
+        "endTime": "2022-12-28T07:02:14.142254Z",
+        "executorDetail": {
+          "containerDetail": {
+            "mainJob": "projects/802000798119/locations/us-central1/customJobs/7743647226609532928"
+          }
+        },
+        "state": "SUCCEEDED",
+        "execution": {
+          "name": "projects/802000798119/locations/us-central1/metadataStores/default/executions/2040210334639060716",
+          "displayName": "reverse",
+          "instanceSchemaTitle": "system.ContainerExecution",
+          "state": "COMPLETE",
+          "customProperties": {
+            "output:after": {
+              "stringValue": "desserts"
+            },
+            "input:a": {
+              "stringValue": "stressed"
+            },
+            "output:before": {
+              "stringValue": "stressed"
+            }
+          },
+          "etag": "1672210934084",
+          "createTime": "2022-12-28T07:00:21.337Z",
+          "updateTime": "2022-12-28T07:02:14.084Z",
+          "schemaTitle": "system.ContainerExecution",
+          "schemaVersion": "0.0.1",
+          "metadata": {
+            "output:before": "stressed",
+            "input:a": "stressed",
+            "output:after": "desserts"
+          }
+        },
+        "parentTaskId": "-6088741077001437184",
+        "pipelineTaskStatus": [
+          {
+            "updateTime": "2022-12-28T07:02:13.990426771Z",
+            "state": "SUCCEEDED"
+          }
+        ]
+      }
+    ]
+  },
+  "labels": {
+    "vertex-ai-pipelines-run-billing-id": "3578654162201608192"
+  },
+  "runtimeConfig": {
+    "parameters": {
+      "a": {
+        "stringValue": "stres"
+      },
+      "b": {
+        "stringValue": "sed"
+      }
+    },
+    "gcsOutputDirectory": "gs://qwiklabs-gcp-00-568fed827b86/pipeline-output",
+    "failurePolicy": "PIPELINE_FAILURE_POLICY_FAIL_SLOW"
+  },
+  "uiPipelineSpec": {
+    "pipelineInfo": {
+      "name": "basic-pipeline"
+    },
+    "sdkVersion": "kfp-1.8.8",
+    "schemaVersion": "2.0.0",
+    "components": {
+      "comp-concat": {
+        "inputDefinitions": {
+          "parameters": {
+            "a": {
+              "type": "STRING"
+            },
+            "b": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        },
+        "executorLabel": "exec-concat"
+      },
+      "comp-reverse": {
+        "inputDefinitions": {
+          "parameters": {
+            "a": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "after": {
+              "type": "STRING"
+            },
+            "before": {
+              "type": "STRING"
+            }
+          }
+        },
+        "executorLabel": "exec-reverse"
+      }
+    },
+    "root": {
+      "inputDefinitions": {
+        "parameters": {
+          "a": {
+            "type": "STRING"
+          },
+          "b": {
+            "type": "STRING"
+          }
+        }
+      },
+      "dag": {
+        "tasks": {
+          "concat": {
+            "taskInfo": {
+              "name": "concat"
+            },
+            "inputs": {
+              "parameters": {
+                "a": {
+                  "componentInputParameter": "a"
+                },
+                "b": {
+                  "componentInputParameter": "b"
+                }
+              }
+            },
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-concat"
+            }
+          },
+          "reverse": {
+            "taskInfo": {
+              "name": "reverse"
+            },
+            "inputs": {
+              "parameters": {
+                "a": {
+                  "taskOutputParameter": {
+                    "producerTask": "concat",
+                    "outputParameterKey": "Output"
+                  }
+                }
+              }
+            },
+            "dependentTasks": [
+              "concat"
+            ],
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-reverse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "uiPipelineDeploymentConfig": {
+    "executors": {
+      "exec-concat": {
+        "container": {
+          "image": "python:3.7",
+          "command": [
+            "sh",
+            "-c",
+            "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.8' && \"$0\" \"$@\"\n",
+            "sh",
+            "-ec",
+            "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+            "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef concat(a: str, b: str) -> str:\n  return a + b\n\n"
+          ],
+          "args": [
+            "--executor_input",
+            "{{$}}",
+            "--function_to_execute",
+            "concat"
+          ]
+        }
+      },
+      "exec-reverse": {
+        "container": {
+          "image": "python:3.7",
+          "command": [
+            "sh",
+            "-c",
+            "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.8' && \"$0\" \"$@\"\n",
+            "sh",
+            "-ec",
+            "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+            "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef reverse(a: str)->NamedTuple(\"outputs\", [(\"before\", str), (\"after\", str)]):\n  return a, a[::-1]\n\n"
+          ],
+          "args": [
+            "--executor_input",
+            "{{$}}",
+            "--function_to_execute",
+            "reverse"
+          ]
+        }
+      }
+    }
+  },
+  "serviceAccount": "802000798119-compute@developer.gserviceaccount.com"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 concat
 Input Parameters
 Parameter	Type	Value
@@ -425,6 +995,21 @@ Container (Training)				Custom
   ],
   "serviceAccount": "802000798119-compute@developer.gserviceaccount.com"
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -506,4 +1091,17 @@ Container (Training)		Custom
 
 
 
+
+
+
+
+
+
+
+qwiklabs-gcp-00-568fed827b86/pipeline-output/802000798119/basic-pipeline-20221228025703/concat_-6250870663586775040/executor_output.json 
+{"parameters": {"Output": {"stringValue": "stressed"}}}
+
+qwiklabs-gcp-00-568fed827b86/pipeline-output/802000798119/basic-pipeline-20221228025703/reverse_7584187391695388672/executor_output.json
+{"parameters": {"before": {"stringValue": "stressed"}, 
+		"after": {"stringValue": "desserts"}}}
 
