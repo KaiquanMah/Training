@@ -44,7 +44,25 @@ Run the following commands separately in the Cloud Shell:
  
  
  
+ 
+ 
+student_00_fd17b615b5b5@cloudshell:~ (qwiklabs-gcp-00-8fa6544f25a1)$ gcloud config get projectYour active configuration is: [cloudshell-19909]
+qwiklabs-gcp-00-8fa6544f25a1
 
+student_00_fd17b615b5b5@cloudshell:~ (qwiklabs-gcp-00-8fa6544f25a1)$ bq --location=EU mk --dataset movies
+Dataset 'qwiklabs-gcp-00-8fa6544f25a1:movies' successfully created.
+
+student_00_fd17b615b5b5@cloudshell:~ (qwiklabs-gcp-00-8fa6544f25a1)$  bq load --source_format=CSV \
+ --location=EU \
+ --autodetect movies.movielens_ratings \
+ gs://dataeng-movielens/ratings.csv
+Waiting on bqjob_r20219bbe42044ffa_0000018558120482_1 ... (37s) Current status: DONE   
+
+student_00_fd17b615b5b5@cloudshell:~ (qwiklabs-gcp-00-8fa6544f25a1)$  bq load --source_format=CSV \
+ --location=EU   \
+ --autodetect movies.movielens_movies_raw \
+ gs://dataeng-movielens/movies.csv
+Waiting on bqjob_r45c44cb60867efb_000001855812ff8a_1 ... (1s) Current status: DONE   
 
 
 
@@ -70,6 +88,12 @@ FROM
   movies.movielens_ratings
 
 You should confirm that the dataset consists of over 138 thousand users, nearly 27 thousand movies, and a little more than 20 million ratings.
+[{
+  "numUsers": "138493",
+  "numMovies": "26744",
+  "totalRatings": "20000263"
+}]
+
 
 
 
@@ -84,6 +108,24 @@ WHERE
 
 Output result table displaying four rows of data below the column headings: Row, movieID, title, and genres
 https://cdn.qwiklabs.com/%2BzWgCxeE4yA2VoPmcuDT6KfNkUn1jOVOYKaBqd6CO0w%3D
+[{
+  "movieId": "3",
+  "title": "Grumpier Old Men (1995)",
+  "genres": "Comedy|Romance"
+}, {
+  "movieId": "4",
+  "title": "Waiting to Exhale (1995)",
+  "genres": "Comedy|Drama|Romance"
+}, {
+  "movieId": "2",
+  "title": "Jumanji (1995)",
+  "genres": "Adventure|Children|Fantasy"
+}, {
+  "movieId": "1",
+  "title": "Toy Story (1995)",
+  "genres": "Adventure|Animation|Children|Comedy|Fantasy"
+}]
+
 
 
 You can see that the genres column is a formatted string. Parse the genres into an array and rewrite the results into a table named movielens_movies:
@@ -95,6 +137,29 @@ FROM
   movies.movielens_movies_raw
 
 Feel free to perform additional queries until you are comfortable with the dataset.
+[{
+  "movieId": "101319",
+  "title": "Operation Daybreak (1975)",
+  "genres": ["War"]
+}, 
+...,
+{
+  "movieId": "100042",
+  "title": "Guns of Fort Petticoat, The (1957)",
+  "genres": ["War", "Western"]
+}, {
+  "movieId": "8716",
+  "title": "Plainsman, The (1937)",
+  "genres": ["War", "Western"]
+}, {
+  "movieId": "59852",
+  "title": "Villa Rides! (1968)",
+  "genres": ["War", "Western"]
+}]
+
+
+
+
 
 
 
@@ -124,15 +189,30 @@ Matrix factorization is a collaborative filtering technique that relies on two v
 To perform a matrix factorization of our data, you use the typical BigQuery ML syntax except that the model_type is matrix_factorization and you have to identify which columns play what roles in the collaborative filtering setup.
 In order to apply matrix factorization to the movie ratings data, the BigQuery ML query needs to be executed to create the model. However, creation of this model type can take up to 40 minutes and requires a Google Cloud project with reservation-oriented resources -- which is unlike those offered by the Qwiklabs environment.
 A model has been created in the Cloud Training project's cloud-training-prod-bucket BigQuery dataset for use in the rest of the lab.
-Note: The query below is for reference only. Please DO NOT EXECUTE this query in your project:
 
-CREATE OR REPLACE MODEL movies.movie_recommender OPTIONS (model_type='matrix_factorization', user_col='userId', item_col='movieId', rating_col='rating', l2_reg=0.2, num_factors=16) AS SELECT userId, movieId, rating FROM movies.movielens_ratings
+Note: The query below is for reference only. Please DO NOT EXECUTE this query in your project:
+CREATE OR REPLACE MODEL movies.movie_recommender OPTIONS (model_type='matrix_factorization',
+                                                          user_col='userId',
+                                                          item_col='movieId',
+                                                          rating_col='rating', 
+                                                          l2_reg=0.2,
+                                                          num_factors=16) AS 
+SELECT userId, movieId, rating 
+FROM movies.movielens_ratings
 
 Note: The num_factors and l2_reg options have been selected after much experimentation to speed up training of the model.
 
 
 To view metrics for the trained model, run the following query:
 SELECT * FROM ML.EVALUATE(MODEL `cloud-training-prod-bucket.movies.movie_recommender`)
+[{
+  "mean_absolute_error": "0.65335546992357552",
+  "mean_squared_error": "0.73636156177660383",
+  "mean_squared_log_error": "0.05216607535798224",
+  "median_absolute_error": "0.5212922266313722",
+  "r2_score": "0.32841175494436314",
+  "explained_variance": "0.32841472627669144"
+}]
 
 
 
@@ -175,6 +255,36 @@ LIMIT
 Output result table displaying five rows of data below the column headings: Row, predicted_rating, movieID, title, and userId
 https://cdn.qwiklabs.com/pyIP8A80%2B3kkY%2BDVH61MEi0LU8P%2BMLUbvASXoi1MFZk%3D
 This result includes movies the user has already seen and rated in the past.
+[{
+  "predicted_rating": "6.3054848778976549",
+  "movieId": "82978",
+  "title": "Neighbors (1920)",
+  "userId": "903"
+}, {
+  "predicted_rating": "5.6599558870299154",
+  "movieId": "26136",
+  "title": "Hallelujah Trail, The (1965)",
+  "userId": "903"
+}, {
+  "predicted_rating": "5.6081278585930177",
+  "movieId": "69075",
+  "title": "Trojan War (1997)",
+  "userId": "903"
+}, {
+  "predicted_rating": "5.4234414572574172",
+  "movieId": "3337",
+  "title": "I\u0027ll Never Forget What\u0027s\u0027isname (1967)",
+  "userId": "903"
+}, {
+  "predicted_rating": "5.3014082121659847",
+  "movieId": "6167",
+  "title": "Stand-In (1937)",
+  "userId": "903"
+}]
+
+
+
+
 
 
 
@@ -209,6 +319,36 @@ LIMIT
   5
 
 For this user, this happens to yield the same set of movies -- the top predicted ratings didn’t include any of the movies the user has already seen.
+[{
+  "predicted_rating": "6.3054848778976549",
+  "movieId": "82978",
+  "title": "Neighbors (1920)",
+  "userId": "903"
+}, {
+  "predicted_rating": "5.6599558870299154",
+  "movieId": "26136",
+  "title": "Hallelujah Trail, The (1965)",
+  "userId": "903"
+}, {
+  "predicted_rating": "5.6081278585930177",
+  "movieId": "69075",
+  "title": "Trojan War (1997)",
+  "userId": "903"
+}, {
+  "predicted_rating": "5.4234414572574172",
+  "movieId": "3337",
+  "title": "I\u0027ll Never Forget What\u0027s\u0027isname (1967)",
+  "userId": "903"
+}, {
+  "predicted_rating": "5.3014082121659847",
+  "movieId": "6167",
+  "title": "Stand-In (1937)",
+  "userId": "903"
+}]
+
+
+
+
 
 
 
@@ -265,7 +405,507 @@ The result gives us 100 users to target, the top 5 of whom are:
 Output result table displaying five rows of data below the column headings: Row, predicted_rating, movieID, title, and userId
 https://cdn.qwiklabs.com/wJOfw5hwkYxB6xbFk24ZriueE5hlZ14bFKvQOScF0ZM%3D
 
-
+[{
+  "predicted_rating": "6.0001939886154316",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "104104"
+}, {
+  "predicted_rating": "5.92811262777923",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "57703"
+}, {
+  "predicted_rating": "5.9025591699496989",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "22625"
+}, {
+  "predicted_rating": "5.8821015856339063",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "118093"
+}, {
+  "predicted_rating": "5.7406211112062726",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "37594"
+}, {
+  "predicted_rating": "5.7233118007194861",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "131894"
+}, {
+  "predicted_rating": "5.6651646455574491",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "109768"
+}, {
+  "predicted_rating": "5.6459666484675983",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "13514"
+}, {
+  "predicted_rating": "5.6173975375441891",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "66133"
+}, {
+  "predicted_rating": "5.5897508386945951",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "26606"
+}, {
+  "predicted_rating": "5.5795721828336911",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "39962"
+}, {
+  "predicted_rating": "5.5258472885470082",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "73930"
+}, {
+  "predicted_rating": "5.5243197464765377",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "119100"
+}, {
+  "predicted_rating": "5.4808308152461613",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "136769"
+}, {
+  "predicted_rating": "5.4648872882750235",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "5340"
+}, {
+  "predicted_rating": "5.4619240980776338",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "25184"
+}, {
+  "predicted_rating": "5.4615137077227711",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "68779"
+}, {
+  "predicted_rating": "5.4537310991787082",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "96227"
+}, {
+  "predicted_rating": "5.431779137243451",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "84242"
+}, {
+  "predicted_rating": "5.4134478966333637",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "31788"
+}, {
+  "predicted_rating": "5.3989242244234337",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "20483"
+}, {
+  "predicted_rating": "5.3871887270519307",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "127509"
+}, {
+  "predicted_rating": "5.3837755347724672",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "54192"
+}, {
+  "predicted_rating": "5.3778898121030991",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "15590"
+}, {
+  "predicted_rating": "5.3777311824572669",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "25855"
+}, {
+  "predicted_rating": "5.3709658632442085",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "122674"
+}, {
+  "predicted_rating": "5.370054950720248",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "119345"
+}, {
+  "predicted_rating": "5.3587368307696375",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "88087"
+}, {
+  "predicted_rating": "5.3488879703737249",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "102844"
+}, {
+  "predicted_rating": "5.3471921933422477",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "95066"
+}, {
+  "predicted_rating": "5.33037920701863",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "65338"
+}, {
+  "predicted_rating": "5.3249426285173778",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "62285"
+}, {
+  "predicted_rating": "5.3248067787423894",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "30542"
+}, {
+  "predicted_rating": "5.3205157839230344",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "37385"
+}, {
+  "predicted_rating": "5.3125819352742507",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "36816"
+}, {
+  "predicted_rating": "5.3055339629970621",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "137553"
+}, {
+  "predicted_rating": "5.2805961311961083",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "69332"
+}, {
+  "predicted_rating": "5.2802294640292287",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "12113"
+}, {
+  "predicted_rating": "5.2792385171530487",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "26218"
+}, {
+  "predicted_rating": "5.2743574357140917",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "95139"
+}, {
+  "predicted_rating": "5.2719904912747158",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "86481"
+}, {
+  "predicted_rating": "5.2653288592254919",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "87651"
+}, {
+  "predicted_rating": "5.2598987139521105",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "21838"
+}, {
+  "predicted_rating": "5.2573004297600656",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "10852"
+}, {
+  "predicted_rating": "5.2531555606078353",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "75934"
+}, {
+  "predicted_rating": "5.2288774473418576",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "60589"
+}, {
+  "predicted_rating": "5.226315328466014",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "61661"
+}, {
+  "predicted_rating": "5.2199747404904571",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "24815"
+}, {
+  "predicted_rating": "5.2179685152604529",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "97169"
+}, {
+  "predicted_rating": "5.2124848987190529",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "45606"
+}, {
+  "predicted_rating": "5.2119687847870457",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "130117"
+}, {
+  "predicted_rating": "5.1984577582038725",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "21211"
+}, {
+  "predicted_rating": "5.1980723807245663",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "40461"
+}, {
+  "predicted_rating": "5.1953871880713329",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "19991"
+}, {
+  "predicted_rating": "5.1918319974352514",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "24466"
+}, {
+  "predicted_rating": "5.1898345852796748",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "67001"
+}, {
+  "predicted_rating": "5.1890784250216386",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "1376"
+}, {
+  "predicted_rating": "5.1884004880279244",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "59648"
+}, {
+  "predicted_rating": "5.1882150474837756",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "29248"
+}, {
+  "predicted_rating": "5.1875995240999764",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "26630"
+}, {
+  "predicted_rating": "5.1866743697728568",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "124272"
+}, {
+  "predicted_rating": "5.1834235104153077",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "103051"
+}, {
+  "predicted_rating": "5.180901296407658",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "13331"
+}, {
+  "predicted_rating": "5.18079176476959",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "99259"
+}, {
+  "predicted_rating": "5.180129044700859",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "129211"
+}, {
+  "predicted_rating": "5.17953500732258",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "36713"
+}, {
+  "predicted_rating": "5.1750316637485483",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "434"
+}, {
+  "predicted_rating": "5.1730842297843962",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "28872"
+}, {
+  "predicted_rating": "5.1616167557423678",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "108993"
+}, {
+  "predicted_rating": "5.1599946747087113",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "32019"
+}, {
+  "predicted_rating": "5.1584407457726984",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "76752"
+}, {
+  "predicted_rating": "5.1575742620103373",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "120236"
+}, {
+  "predicted_rating": "5.151097937917207",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "89797"
+}, {
+  "predicted_rating": "5.1466453655537556",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "120881"
+}, {
+  "predicted_rating": "5.1463107655690568",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "112712"
+}, {
+  "predicted_rating": "5.1462644189504072",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "45840"
+}, {
+  "predicted_rating": "5.1367521271353169",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "99550"
+}, {
+  "predicted_rating": "5.1339845560470856",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "134396"
+}, {
+  "predicted_rating": "5.1319994497292392",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "100037"
+}, {
+  "predicted_rating": "5.1311945041933171",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "72610"
+}, {
+  "predicted_rating": "5.1311896455187993",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "97286"
+}, {
+  "predicted_rating": "5.1311285402214262",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "65715"
+}, {
+  "predicted_rating": "5.1264227559967281",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "97496"
+}, {
+  "predicted_rating": "5.1193091830211195",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "49754"
+}, {
+  "predicted_rating": "5.1191116262765046",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "8293"
+}, {
+  "predicted_rating": "5.115990133574118",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "89414"
+}, {
+  "predicted_rating": "5.1131505255505756",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "49868"
+}, {
+  "predicted_rating": "5.1111685357926575",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "75665"
+}, {
+  "predicted_rating": "5.1106294651137247",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "20844"
+}, {
+  "predicted_rating": "5.1099657559151783",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "67121"
+}, {
+  "predicted_rating": "5.1066448172070222",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "19154"
+}, {
+  "predicted_rating": "5.1016466706998083",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "117622"
+}, {
+  "predicted_rating": "5.0998706430141585",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "22786"
+}, {
+  "predicted_rating": "5.0951509168482527",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "95920"
+}, {
+  "predicted_rating": "5.0879684083896812",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "108356"
+}, {
+  "predicted_rating": "5.0829524589870356",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "112039"
+}, {
+  "predicted_rating": "5.08151338804717",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "90701"
+}, {
+  "predicted_rating": "5.0805426115020573",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "136866"
+}, {
+  "predicted_rating": "5.0799396004172328",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "120799"
+}, {
+  "predicted_rating": "5.0755834254592767",
+  "movieId": "96481",
+  "title": "American Mullet (2001)",
+  "userId": "35925"
+}]
 
 
 
@@ -304,5 +944,15 @@ Without the LIMIT command the results would be too large to return given the def
 As seen in a section above, it is possible to filter out movies the user has already seen and rated in the past. The reason already seen movies aren’t filtered out by default is that there are situations (think of restaurant recommendations, for example) where it is perfectly expected that you would need to recommend restaurants the user has liked in the past.
 
 
-
+[{
+  "predicted_rating": "4.1565162098884336",
+  "userId": "67072",
+  "movieId": "91904"
+}, 
+...,
+{
+  "predicted_rating": "4.0596094299272441",
+  "userId": "67072",
+  "movieId": "97536"
+]
 
