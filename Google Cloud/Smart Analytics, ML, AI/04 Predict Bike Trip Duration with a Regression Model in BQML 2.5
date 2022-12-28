@@ -35,9 +35,15 @@ GROUP BY
   start_station_name
 
 Click on RUN.
-
-
-
+[{
+  "start_station_name": "St. John\u0027s Wood Church, The Regent\u0027s Park",
+  "duration": "1734.0452771272439"
+}, {
+  "start_station_name": "Bethnal Green Road, Shoreditch",
+  "duration": "1261.6499175041254"
+},
+...
+]
 
 
 
@@ -73,6 +79,10 @@ Because we are creating a machine learning model to predict events in the future
 
 
 
+
+
+
+
 Impact of day of week and hour of day
 For the next candidate features, the process is similar. We can check whether dayofweek (or, similarly, hourofday) matter.
 In the query editor window paste the following query:
@@ -85,7 +95,30 @@ FROM
   `bigquery-public-data`.london_bicycles.cycle_hire
 GROUP BY
   dayofweek
-  
+
+[{
+  "dayofweek": "6",
+  "duration": "1253.6514526977978"
+}, {
+  "dayofweek": "2",
+  "duration": "1188.6228888351179"
+}, {
+  "dayofweek": "7",
+  "duration": "1754.1729886642852"
+}, {
+  "dayofweek": "5",
+  "duration": "1190.617767140865"
+}, {
+  "dayofweek": "3",
+  "duration": "1111.307993942783"
+}, {
+  "dayofweek": "4",
+  "duration": "1154.2970515390193"
+}, {
+  "dayofweek": "1",
+  "duration": "1866.4453021589493"
+}]
+
 Visualize your data in Looker Studio. For day of week your visualization should resemble:
 Duration bar graph for Day of week
 https://cdn.qwiklabs.com/IRDUGYKrXjTTi3JxANjIsgIB7Mawf%2F8yW%2BWmF0Hwzu0%3D
@@ -93,6 +126,91 @@ https://cdn.qwiklabs.com/IRDUGYKrXjTTi3JxANjIsgIB7Mawf%2F8yW%2BWmF0Hwzu0%3D
 For hour of day your visualization should look like the following:
 Duration bar graph for Hour of day
 https://cdn.qwiklabs.com/ndfSXf0H65gTGnpEcli0FbroWvwRr7%2FA%2BIOFDyuayEg%3D
+
+SELECT
+  EXTRACT(hour
+  FROM
+    start_date) AS hourofday,
+  AVG(duration) AS duration
+FROM
+  `bigquery-public-data`.london_bicycles.cycle_hire
+GROUP BY
+  hourofday
+ORDER BY hourofday
+[{
+  "hourofday": "0",
+  "duration": "1875.9792869472055"
+}, {
+  "hourofday": "1",
+  "duration": "2226.320468545829"
+}, {
+  "hourofday": "2",
+  "duration": "2389.3796910061646"
+}, {
+  "hourofday": "3",
+  "duration": "2388.9411851632926"
+}, {
+  "hourofday": "4",
+  "duration": "2137.7168993282189"
+}, {
+  "hourofday": "5",
+  "duration": "1366.8564963990282"
+}, {
+  "hourofday": "6",
+  "duration": "939.91327712933071"
+}, {
+  "hourofday": "7",
+  "duration": "903.70409828531081"
+}, {
+  "hourofday": "8",
+  "duration": "938.29278232936042"
+}, {
+  "hourofday": "9",
+  "duration": "1045.2941140704122"
+}, {
+  "hourofday": "10",
+  "duration": "1390.3623824979074"
+}, {
+  "hourofday": "11",
+  "duration": "1560.7439939361384"
+}, {
+  "hourofday": "12",
+  "duration": "1517.5482576066513"
+}, {
+  "hourofday": "13",
+  "duration": "1566.4149667934341"
+}, {
+  "hourofday": "14",
+  "duration": "1683.7838052045956"
+}, {
+  "hourofday": "15",
+  "duration": "1662.2030524506229"
+}, {
+  "hourofday": "16",
+  "duration": "1520.063507598421"
+}, {
+  "hourofday": "17",
+  "duration": "1253.3818302691436"
+}, {
+  "hourofday": "18",
+  "duration": "1266.7016321250287"
+}, {
+  "hourofday": "19",
+  "duration": "1296.3109587283459"
+}, {
+  "hourofday": "20",
+  "duration": "1286.1341087960088"
+}, {
+  "hourofday": "21",
+  "duration": "1298.5575250016552"
+}, {
+  "hourofday": "22",
+  "duration": "1330.5304545182812"
+}, {
+  "hourofday": "23",
+  "duration": "1387.8158342434667"
+}]
+
 It is clear that the duration varies depending both on the day of the week, and on the hour of the day. It appears that durations are longer on weekends (days 1 and 7) than on weekdays. Similarly, durations are longer early in the morning and in the mid-afternoon. Hence, both dayofweek and hourofday are good features.
 
 
@@ -109,12 +227,158 @@ SELECT *
 FROM `bigquery-public-data`.london_bicycles.cycle_hire
 LIMIT 5
 
+[{
+  "rental_id": "58031552",
+  "duration": "1440",
+  "bike_id": "12192",
+  "end_date": "2016-09-05 19:35:00.000000 UTC",
+  "end_station_id": null,
+  "end_station_name": "Northdown Street, King\u0027s Cross",
+  "start_date": "2016-09-05 19:11:00.000000 UTC",
+  "start_station_id": null,
+  "start_station_name": "Winsland Street, Paddington",
+  "end_station_logical_terminal": "200058",
+  "start_station_logical_terminal": "3496",
+  "end_station_priority_id": "0"
+}, {
+  "rental_id": "58025746",
+  "duration": "360",
+  "bike_id": "9955",
+  "end_date": "2016-09-05 17:49:00.000000 UTC",
+  "end_station_id": null,
+  "end_station_name": "Snow Hill, Farringdon",
+  "start_date": "2016-09-05 17:43:00.000000 UTC",
+  "start_station_id": null,
+  "start_station_name": "Finsbury Square , Moorgate",
+  "end_station_logical_terminal": "2699",
+  "start_station_logical_terminal": "1056",
+  "end_station_priority_id": "0"
+}, {
+  "rental_id": "58005969",
+  "duration": "1200",
+  "bike_id": "6632",
+  "end_date": "2016-09-04 22:31:00.000000 UTC",
+  "end_station_id": null,
+  "end_station_name": "Belvedere Road, South Bank",
+  "start_date": "2016-09-04 22:11:00.000000 UTC",
+  "start_station_id": null,
+  "start_station_name": "Panton Street, West End",
+  "end_station_logical_terminal": "1186",
+  "start_station_logical_terminal": "3452",
+  "end_station_priority_id": "0"
+}, {
+  "rental_id": "58052539",
+  "duration": "2340",
+  "bike_id": "180",
+  "end_date": "2016-09-06 13:53:00.000000 UTC",
+  "end_station_id": null,
+  "end_station_name": "Parson\u0027s Green , Parson\u0027s Green",
+  "start_date": "2016-09-06 13:14:00.000000 UTC",
+  "start_station_id": null,
+  "start_station_name": "Queen Street 1, Bank",
+  "end_station_logical_terminal": "200237",
+  "start_station_logical_terminal": "999",
+  "end_station_priority_id": "0"
+}, {
+  "rental_id": "57991939",
+  "duration": "420",
+  "bike_id": "2116",
+  "end_date": "2016-09-04 15:03:00.000000 UTC",
+  "end_station_id": null,
+  "end_station_name": "Philpot Street, Whitechapel",
+  "start_date": "2016-09-04 14:56:00.000000 UTC",
+  "start_station_id": null,
+  "start_station_name": "Bethnal Green Garden, Bethnal Green",
+  "end_station_logical_terminal": "200033",
+  "start_station_logical_terminal": "200047",
+  "end_station_priority_id": "0"
+}]
+
+
 
 
 
 SELECT *
 FROM `bigquery-public-data`.london_bicycles.cycle_stations
 LIMIT 5
+
+[{
+  "id": "495",
+  "installed": "true",
+  "latitude": "51.528169",
+  "locked": "false",
+  "longitude": "-0.018703",
+  "name": "Bow Church Station, Bow",
+  "bikes_count": "0",
+  "docks_count": "39",
+  "nbEmptyDocks": "39",
+  "temporary": "false",
+  "terminal_name": "200252",
+  "install_date": "2012-01-23",
+  "removal_date": null
+}, {
+  "id": "768",
+  "installed": "true",
+  "latitude": "51.46134382",
+  "locked": "false",
+  "longitude": "-0.159322467",
+  "name": "Clapham Common North Side, Clapham Common",
+  "bikes_count": "0",
+  "docks_count": "37",
+  "nbEmptyDocks": "37",
+  "temporary": "false",
+  "terminal_name": "300065",
+  "install_date": "2014-02-27",
+  "removal_date": null
+}, {
+  "id": "447",
+  "installed": "true",
+  "latitude": "51.493381",
+  "locked": "false",
+  "longitude": "-0.007542",
+  "name": "Jubilee Crescent, Cubitt Town",
+  "bikes_count": "2",
+  "docks_count": "54",
+  "nbEmptyDocks": "52",
+  "temporary": "false",
+  "terminal_name": "200054",
+  "install_date": "2012-01-07",
+  "removal_date": null
+}, {
+  "id": "98",
+  "installed": "true",
+  "latitude": "51.52554222",
+  "locked": "false",
+  "longitude": "-0.138231303",
+  "name": "Hampstead Road, Euston",
+  "bikes_count": "3",
+  "docks_count": "54",
+  "nbEmptyDocks": "51",
+  "temporary": "false",
+  "terminal_name": "972",
+  "install_date": "2010-07-14",
+  "removal_date": null
+}, {
+  "id": "469",
+  "installed": "true",
+  "latitude": "51.513757",
+  "locked": "false",
+  "longitude": "-0.020467",
+  "name": "Lindfield Street, Poplar",
+  "bikes_count": "4",
+  "docks_count": "44",
+  "nbEmptyDocks": "40",
+  "temporary": "false",
+  "terminal_name": "22178",
+  "install_date": "2012-01-12",
+  "removal_date": null
+}]
+
+
+
+
+
+
 
 
 
@@ -131,12 +395,139 @@ ON
   cycle_hire.start_station_name = cycle_stations.name
 GROUP BY
   bikes_count
+ORDER BY duration DESC
+
+[{
+  "bikes_count": "36",
+  "duration": "2098.3706738732458"
+}, {
+  "bikes_count": "20",
+  "duration": "1805.9539112344908"
+}, {
+  "bikes_count": "22",
+  "duration": "1804.8766397455272"
+}, {
+  "bikes_count": "29",
+  "duration": "1515.6712774613502"
+}, {
+  "bikes_count": "13",
+  "duration": "1484.6165683725435"
+}, {
+  "bikes_count": "32",
+  "duration": "1480.2806051085627"
+}, {
+  "bikes_count": "28",
+  "duration": "1469.8071241755567"
+}, {
+  "bikes_count": "41",
+  "duration": "1446.3914373088683"
+}, {
+  "bikes_count": "31",
+  "duration": "1444.5712965865403"
+}, {
+  "bikes_count": "19",
+  "duration": "1443.2478411541858"
+}, {
+  "bikes_count": "37",
+  "duration": "1440.3037474845914"
+}, {
+  "bikes_count": "27",
+  "duration": "1431.1371053977412"
+}, {
+  "bikes_count": "21",
+  "duration": "1347.6961809460181"
+}, {
+  "bikes_count": "30",
+  "duration": "1328.5534257868867"
+}, {
+  "bikes_count": "16",
+  "duration": "1325.9364322558583"
+}, {
+  "bikes_count": "26",
+  "duration": "1310.6149229748555"
+}, {
+  "bikes_count": "8",
+  "duration": "1302.4464643905562"
+}, {
+  "bikes_count": "23",
+  "duration": "1289.6182640926359"
+}, {
+  "bikes_count": "18",
+  "duration": "1287.0548541008732"
+}, {
+  "bikes_count": "15",
+  "duration": "1269.6610977830446"
+}, {
+  "bikes_count": "12",
+  "duration": "1267.9494088465267"
+}, {
+  "bikes_count": "0",
+  "duration": "1263.9720597836888"
+}, {
+  "bikes_count": "1",
+  "duration": "1252.7879843454139"
+}, {
+  "bikes_count": "2",
+  "duration": "1244.5458966098606"
+}, {
+  "bikes_count": "4",
+  "duration": "1243.1961012054246"
+}, {
+  "bikes_count": "17",
+  "duration": "1241.4299604112757"
+}, {
+  "bikes_count": "34",
+  "duration": "1238.5471211687195"
+}, {
+  "bikes_count": "5",
+  "duration": "1231.2843266578759"
+}, {
+  "bikes_count": "25",
+  "duration": "1225.7527950796637"
+}, {
+  "bikes_count": "11",
+  "duration": "1219.5189969424166"
+}, {
+  "bikes_count": "10",
+  "duration": "1201.8317462627504"
+}, {
+  "bikes_count": "7",
+  "duration": "1201.7873601234251"
+}, {
+  "bikes_count": "6",
+  "duration": "1200.8367160913954"
+}, {
+  "bikes_count": "3",
+  "duration": "1183.5885224029332"
+}, {
+  "bikes_count": "9",
+  "duration": "1158.3276649227269"
+}, {
+  "bikes_count": "14",
+  "duration": "1146.4849056357095"
+}, {
+  "bikes_count": "24",
+  "duration": "1139.7107919254647"
+}, {
+  "bikes_count": "38",
+  "duration": "943.45097357440886"
+}, {
+  "bikes_count": "43",
+  "duration": "885.08279213797243"
+}]
+
+
 
 
 Visualize your data in Looker Studio.
 Duration bar graph
 https://cdn.qwiklabs.com/M2L7FpdCQ8N%2F67j8L2iToOw42MR3mGsaJcxt0U3o2jw%3D
 We notice that the relationship is noisy with no visible trend (compare against hour-of-day, for example). This indicates that the number of bicycles is not a good feature.
+
+
+
+
+
 
 
 
@@ -172,6 +563,33 @@ SELECT
 FROM
   `bigquery-public-data`.london_bicycles.cycle_hire
 
+[{
+  "duration": "1440",
+  "start_station_name": "Winsland Street, Paddington",
+  "dayofweek": "2",
+  "hourofday": "19"
+}, {
+  "duration": "360",
+  "start_station_name": "Finsbury Square , Moorgate",
+  "dayofweek": "2",
+  "hourofday": "17"
+}, {
+  "duration": "1200",
+  "start_station_name": "Panton Street, West End",
+  "dayofweek": "1",
+  "hourofday": "22"
+}, {
+  "duration": "2340",
+  "start_station_name": "Queen Street 1, Bank",
+  "dayofweek": "3",
+  "hourofday": "13"
+}, {
+  "duration": "420",
+  "start_station_name": "Bethnal Green Garden, Bethnal Green",
+  "dayofweek": "1",
+  "hourofday": "14"
+}]
+
 Feature columns have to be either numeric (INT64, FLOAT64, etc.) or categorical (STRING). If the feature is numeric but needs to be treated as categorical, we need to cast it as a string -- this explains why we casted the dayofweek and hourofday columns which are integers (in the ranges 1-7 and 0-23, respectively) into strings.
 If preparing the data involves computationally expensive transformations or joins, it might be a good idea to save the prepared training data as a table so as to not repeat that work during experimentation. If the transformations are trivial but the query itself is long-winded, it might be convenient to avoid repetitiveness by saving it as a view.
 In this case, the query is simple and short, and so, for clarity, we won't be saving it.
@@ -197,13 +615,31 @@ SELECT
 FROM
   `bigquery-public-data`.london_bicycles.cycle_hire
 
+Elapsed time            1 min 4 sec
+Slot time consumed      32 min 18 sec
+Stages 
+Preprocess      0
+Train           0
+Evaluate        0
+Training iterations
+Completed: 1
+Planned: 20
+
 
 Note, the model takes 2-3 minutes to train.
 To see some metrics related to model training, enter the following query into the BigQuery editor window:
 SELECT * FROM ML.EVALUATE(MODEL `bike_model.model`)
 
-The mean absolute error is 1025 seconds or about 17 minutes. This means that we should expect to be able to predict the duration of bicycle rentals with an average error of about 17 minutes.
+[{
+  "mean_absolute_error": "1025.3640406595698",
+  "mean_squared_error": "186262840.25307769",
+  "mean_squared_log_error": "0.86245228369780236",
+  "median_absolute_error": "542.09987235610834",
+  "r2_score": "0.0036253551808600459",
+  "explained_variance": "0.0036455296071103982"
+}]
 
+The mean absolute error is 1025 seconds or about 17 minutes. This means that we should expect to be able to predict the duration of bicycle rentals with an average error of about 17 minutes.
 
 
 
@@ -249,10 +685,27 @@ FROM
   `bigquery-public-data`.london_bicycles.cycle_hire
 
 
-
+Elapsed time          56 sec
+Slot time consumed    30 min 59 sec
+Stages 
+Preprocess      0
+Train           0
+Evaluate        0
+Training iterations
+Completed: 1
+Planned: 20
 
 To see the metrics for this model, enter the following query into the BigQuery editor window:
 SELECT * FROM ML.EVALUATE(MODEL `bike_model.model_weekday`)
+
+[{
+  "mean_absolute_error": "966.11368433453879",
+  "mean_squared_error": "198348752.04353434",
+  "mean_squared_log_error": "0.88752490675570206",
+  "median_absolute_error": "542.00844712604567",
+  "r2_score": "-1.9168176613515442e-05",
+  "explained_variance": "-1.8620968175619979e-05"
+}]
 
 This model results in a mean absolute error of 966 seconds which is less than the 1025 seconds for the original model. Improvement!
 
@@ -287,10 +740,33 @@ FROM
   `bigquery-public-data`.london_bicycles.cycle_hire
 
 
+Elapsed time          55 sec
+Slot time consumed    30 min 17 sec
+Stages 
+Preprocess      0
+Train           0
+Evaluate        0
+Training iterations
+Completed: 1
+Planned: 20
+
+
+
 To see the metrics for this model, enter the following query into the BigQuery editor window:
 SELECT * FROM ML.EVALUATE(MODEL `bike_model.model_bucketized`)
 
+[{
+  "mean_absolute_error": "904.20244283900786",
+  "mean_squared_error": "18622641.200558189",
+  "mean_squared_log_error": "0.85905018386213006",
+  "median_absolute_error": "543.00128745122174",
+  "r2_score": "0.013913793506915795",
+  "explained_variance": "0.014243186760085513"
+}]
+
 This model results in a mean absolute error of 904 seconds which is less than the 966 seconds for the weekday-weekend model. Further improvement!
+
+
 
 
 
@@ -351,6 +827,11 @@ FROM
       CURRENT_TIMESTAMP() AS start_date) )
 
 https://cdn.qwiklabs.com/wx29DfCTSXAVQKmS3pBjLxf2tYTUdpMeENtHCmOTdW0%3D
+[{
+  "predicted_duration": "2160.7300340590818",
+  "start_station_name": "Park Lane , Hyde Park",
+  "start_date": "2022-12-28 08:32:25.816097 UTC"
+}]
 
 
 
@@ -372,6 +853,421 @@ FROM
       100) )
       
       
+[{
+  "predicted_duration": "1341.667677266491",
+  "start_station_name": "Winsland Street, Paddington",
+  "start_date": "2016-09-05 19:11:00.000000 UTC"
+}, {
+  "predicted_duration": "845.83046830924241",
+  "start_station_name": "Finsbury Square , Moorgate",
+  "start_date": "2016-09-05 17:43:00.000000 UTC"
+}, {
+  "predicted_duration": "1829.829069963997",
+  "start_station_name": "Panton Street, West End",
+  "start_date": "2016-09-04 22:11:00.000000 UTC"
+}, {
+  "predicted_duration": "1118.9160942167982",
+  "start_station_name": "Queen Street 1, Bank",
+  "start_date": "2016-09-06 13:14:00.000000 UTC"
+}, {
+  "predicted_duration": "1689.2847658842461",
+  "start_station_name": "Bethnal Green Garden, Bethnal Green",
+  "start_date": "2016-09-04 14:56:00.000000 UTC"
+}, {
+  "predicted_duration": "1041.9036069616659",
+  "start_station_name": "Pritchard\u0027s Road, Bethnal Green",
+  "start_date": "2016-09-02 17:12:00.000000 UTC"
+}, {
+  "predicted_duration": "2048.1324455364693",
+  "start_station_name": "The Vale, Chelsea",
+  "start_date": "2016-09-04 02:22:00.000000 UTC"
+}, {
+  "predicted_duration": "1477.412060282441",
+  "start_station_name": "Winsland Street, Paddington",
+  "start_date": "2016-08-31 16:50:00.000000 UTC"
+}, {
+  "predicted_duration": "1547.8287372007067",
+  "start_station_name": "Tower Gardens , Tower",
+  "start_date": "2016-09-01 15:17:00.000000 UTC"
+}, {
+  "predicted_duration": "1414.7011656172685",
+  "start_station_name": "Ram Street, Wandsworth",
+  "start_date": "2016-08-31 23:27:00.000000 UTC"
+}, {
+  "predicted_duration": "2112.77021503625",
+  "start_station_name": "Chepstow Villas, Notting Hill",
+  "start_date": "2016-09-04 15:42:00.000000 UTC"
+}, {
+  "predicted_duration": "814.40248682101719",
+  "start_station_name": "Abingdon Villas, Kensington",
+  "start_date": "2016-09-06 17:16:00.000000 UTC"
+}, {
+  "predicted_duration": "2178.4226494735249",
+  "start_station_name": "London Zoo,  The Regent\u0027s Park",
+  "start_date": "2016-09-03 16:50:00.000000 UTC"
+}, {
+  "predicted_duration": "1675.7565371551232",
+  "start_station_name": "Park Street, Bankside",
+  "start_date": "2016-09-03 12:59:00.000000 UTC"
+}, {
+  "predicted_duration": "2695.7740183899505",
+  "start_station_name": "Timber Lodge, Queen Elizabeth Olympic Park",
+  "start_date": "2016-09-03 11:20:00.000000 UTC"
+}, {
+  "predicted_duration": "1699.8066562719455",
+  "start_station_name": "Stephendale Road, Sands End",
+  "start_date": "2016-09-03 15:59:00.000000 UTC"
+}, {
+  "predicted_duration": "3025.3850716493525",
+  "start_station_name": "Aquatic Centre, Queen Elizabeth Olympic Park",
+  "start_date": "2016-09-04 12:18:00.000000 UTC"
+}, {
+  "predicted_duration": "3066.6552462896962",
+  "start_station_name": "Hyde Park Corner, Hyde Park",
+  "start_date": "2016-09-04 15:38:00.000000 UTC"
+}, {
+  "predicted_duration": "951.59943481806749",
+  "start_station_name": "Rossmore Road, Marylebone",
+  "start_date": "2016-09-02 20:55:00.000000 UTC"
+}, {
+  "predicted_duration": "1350.474923578859",
+  "start_station_name": "Warwick Avenue Station, Maida Vale",
+  "start_date": "2016-09-06 07:24:00.000000 UTC"
+}, {
+  "predicted_duration": "1663.8727730070405",
+  "start_station_name": "Royal Avenue 2, Chelsea",
+  "start_date": "2016-09-04 13:02:00.000000 UTC"
+}, {
+  "predicted_duration": "3895.8064753647641",
+  "start_station_name": "Black Lion Gate, Kensington Gardens",
+  "start_date": "2016-09-03 16:33:00.000000 UTC"
+}, {
+  "predicted_duration": "1697.3875828005725",
+  "start_station_name": "Green Park Station, Mayfair",
+  "start_date": "2016-09-02 21:22:00.000000 UTC"
+}, {
+  "predicted_duration": "1161.5648835758552",
+  "start_station_name": "Claverton Street, Pimlico",
+  "start_date": "2016-09-06 08:35:00.000000 UTC"
+}, {
+  "predicted_duration": "968.09202868610419",
+  "start_station_name": "Riverlight South, Nine Elms",
+  "start_date": "2016-08-31 17:07:00.000000 UTC"
+}, {
+  "predicted_duration": "1014.8881743739785",
+  "start_station_name": "Bell Lane, Liverpool Street",
+  "start_date": "2016-09-06 18:08:00.000000 UTC"
+}, {
+  "predicted_duration": "1027.2106359256259",
+  "start_station_name": "Great Tower Street, Monument",
+  "start_date": "2016-09-01 17:23:00.000000 UTC"
+}, {
+  "predicted_duration": "1135.7609102764659",
+  "start_station_name": "Vereker Road North, West Kensington",
+  "start_date": "2016-09-05 23:34:00.000000 UTC"
+}, {
+  "predicted_duration": "1042.2727606686935",
+  "start_station_name": "Limerston Street, West Chelsea",
+  "start_date": "2016-08-31 19:34:00.000000 UTC"
+}, {
+  "predicted_duration": "1716.5808134385575",
+  "start_station_name": "Green Street, Mayfair",
+  "start_date": "2016-09-02 17:10:00.000000 UTC"
+}, {
+  "predicted_duration": "1593.1204025455695",
+  "start_station_name": "Fanshaw Street, Hoxton",
+  "start_date": "2016-09-04 13:55:00.000000 UTC"
+}, {
+  "predicted_duration": "1005.6624546473358",
+  "start_station_name": "Albany Street, The Regent\u0027s Park",
+  "start_date": "2016-09-01 22:06:00.000000 UTC"
+}, {
+  "predicted_duration": "1710.8709356976697",
+  "start_station_name": "Soho Square , Soho",
+  "start_date": "2016-09-04 12:51:00.000000 UTC"
+}, {
+  "predicted_duration": "1236.5378916430363",
+  "start_station_name": "Hop Exchange, The Borough",
+  "start_date": "2016-09-06 15:16:00.000000 UTC"
+}, {
+  "predicted_duration": "925.390679763646",
+  "start_station_name": "Margery Street, Clerkenwell",
+  "start_date": "2016-09-01 19:50:00.000000 UTC"
+}, {
+  "predicted_duration": "2408.9480497125833",
+  "start_station_name": "Cadogan Close, Victoria Park",
+  "start_date": "2016-09-03 13:35:00.000000 UTC"
+}, {
+  "predicted_duration": "1033.1018727264418",
+  "start_station_name": "Tavistock Street, Covent Garden",
+  "start_date": "2016-08-31 17:52:00.000000 UTC"
+}, {
+  "predicted_duration": "1307.3522884866306",
+  "start_station_name": "Putney Pier, Wandsworth",
+  "start_date": "2016-09-06 21:51:00.000000 UTC"
+}, {
+  "predicted_duration": "1027.4385982963872",
+  "start_station_name": "Borough Road, Elephant \u0026 Castle",
+  "start_date": "2016-09-02 17:38:00.000000 UTC"
+}, {
+  "predicted_duration": "1047.1221206905434",
+  "start_station_name": "Flood Street, Chelsea",
+  "start_date": "2016-09-01 13:00:00.000000 UTC"
+}, {
+  "predicted_duration": "859.94602832803457",
+  "start_station_name": "Endsleigh Gardens, Euston",
+  "start_date": "2016-09-06 08:36:00.000000 UTC"
+}, {
+  "predicted_duration": "1063.7529298282075",
+  "start_station_name": "Crosswall, Tower",
+  "start_date": "2016-09-06 17:23:00.000000 UTC"
+}, {
+  "predicted_duration": "1108.0082550608126",
+  "start_station_name": "Kensington Town Hall, Kensington",
+  "start_date": "2016-08-31 17:12:00.000000 UTC"
+}, {
+  "predicted_duration": "1234.262427890927",
+  "start_station_name": "Islington Green, Angel",
+  "start_date": "2016-09-01 19:52:00.000000 UTC"
+}, {
+  "predicted_duration": "2930.9108632737461",
+  "start_station_name": "Hyde Park Corner, Hyde Park",
+  "start_date": "2016-09-03 20:37:00.000000 UTC"
+}, {
+  "predicted_duration": "1140.6178978352991",
+  "start_station_name": "New Globe Walk, Bankside",
+  "start_date": "2016-09-01 14:15:00.000000 UTC"
+}, {
+  "predicted_duration": "2459.1053672297367",
+  "start_station_name": "Pembridge Villas, Notting Hill",
+  "start_date": "2016-09-04 03:57:00.000000 UTC"
+}, {
+  "predicted_duration": "1067.3620287759245",
+  "start_station_name": "Cephas Street, Bethnal Green",
+  "start_date": "2016-09-05 16:38:00.000000 UTC"
+}, {
+  "predicted_duration": "1412.8835322640607",
+  "start_station_name": "Moorfields, Moorgate",
+  "start_date": "2016-09-03 13:18:00.000000 UTC"
+}, {
+  "predicted_duration": "2313.1541934445581",
+  "start_station_name": "Waterloo Place, St. James\u0027s",
+  "start_date": "2016-09-03 11:05:00.000000 UTC"
+}, {
+  "predicted_duration": "1174.4655560340902",
+  "start_station_name": "North Audley Street, Mayfair",
+  "start_date": "2016-09-01 17:38:00.000000 UTC"
+}, {
+  "predicted_duration": "1738.0762583889341",
+  "start_station_name": "Hammersmith Road, Hammersmith",
+  "start_date": "2016-09-04 12:51:00.000000 UTC"
+}, {
+  "predicted_duration": "1019.0862574881676",
+  "start_station_name": "Bell Street , Marylebone",
+  "start_date": "2016-09-05 18:39:00.000000 UTC"
+}, {
+  "predicted_duration": "1127.714618896634",
+  "start_station_name": "Flamborough Street, Limehouse",
+  "start_date": "2016-09-05 05:43:00.000000 UTC"
+}, {
+  "predicted_duration": "1370.7020857842294",
+  "start_station_name": "Walnut Tree Walk, Vauxhall",
+  "start_date": "2016-09-04 13:49:00.000000 UTC"
+}, {
+  "predicted_duration": "1067.2955786721823",
+  "start_station_name": "Southwark Street, Bankside",
+  "start_date": "2016-09-06 16:37:00.000000 UTC"
+}, {
+  "predicted_duration": "970.83717064528673",
+  "start_station_name": "Eccleston Place, Victoria",
+  "start_date": "2016-09-06 09:00:00.000000 UTC"
+}, {
+  "predicted_duration": "1745.4482009543285",
+  "start_station_name": "Chrisp Street Market, Poplar",
+  "start_date": "2016-08-31 23:04:00.000000 UTC"
+}, {
+  "predicted_duration": "2765.2617749779192",
+  "start_station_name": "Park Lane , Hyde Park",
+  "start_date": "2016-09-04 19:00:00.000000 UTC"
+}, {
+  "predicted_duration": "1320.7194591260391",
+  "start_station_name": "Paddington Green Police Station, Paddington",
+  "start_date": "2016-09-06 09:31:00.000000 UTC"
+}, {
+  "predicted_duration": "915.99908115355311",
+  "start_station_name": "Vicarage Gate, Kensington",
+  "start_date": "2016-09-05 08:42:00.000000 UTC"
+}, {
+  "predicted_duration": "1094.9693191270317",
+  "start_station_name": "Usk Road, Clapham Junction",
+  "start_date": "2016-09-02 20:42:00.000000 UTC"
+}, {
+  "predicted_duration": "1464.7501181840144",
+  "start_station_name": "Notting Hill Gate Station, Notting Hill",
+  "start_date": "2016-09-04 18:49:00.000000 UTC"
+}, {
+  "predicted_duration": "939.19035655798916",
+  "start_station_name": "Twig Folly Bridge, Mile End",
+  "start_date": "2016-09-02 07:21:00.000000 UTC"
+}, {
+  "predicted_duration": "1033.4465891278583",
+  "start_station_name": "Bayley Street , Bloomsbury",
+  "start_date": "2016-09-06 18:54:00.000000 UTC"
+}, {
+  "predicted_duration": "756.93182581354131",
+  "start_station_name": "Gloucester Road Station, South Kensington",
+  "start_date": "2016-09-06 08:15:00.000000 UTC"
+}, {
+  "predicted_duration": "1131.1341333746341",
+  "start_station_name": "Baker Street, Marylebone",
+  "start_date": "2016-08-31 13:35:00.000000 UTC"
+}, {
+  "predicted_duration": "911.37773767459339",
+  "start_station_name": "Flood Street, Chelsea",
+  "start_date": "2016-08-31 17:29:00.000000 UTC"
+}, {
+  "predicted_duration": "1311.0217793548431",
+  "start_station_name": "Porchester Place, Paddington",
+  "start_date": "2016-09-01 11:39:00.000000 UTC"
+}, {
+  "predicted_duration": "1180.3240899794132",
+  "start_station_name": "Wright\u0027s Lane, Kensington",
+  "start_date": "2016-09-05 11:26:00.000000 UTC"
+}, {
+  "predicted_duration": "833.2488983474509",
+  "start_station_name": "Empire Square, The Borough",
+  "start_date": "2016-09-02 07:55:00.000000 UTC"
+}, {
+  "predicted_duration": "1134.6444037248812",
+  "start_station_name": "Maclise Road, Olympia",
+  "start_date": "2016-09-06 13:28:00.000000 UTC"
+}, {
+  "predicted_duration": "1273.5131207183672",
+  "start_station_name": "Bramham Gardens, Earl\u0027s Court",
+  "start_date": "2016-09-05 13:03:00.000000 UTC"
+}, {
+  "predicted_duration": "991.82949264415493",
+  "start_station_name": "Lots Road, West Chelsea",
+  "start_date": "2016-08-31 08:08:00.000000 UTC"
+}, {
+  "predicted_duration": "1077.6931874653969",
+  "start_station_name": "Hampstead Road, Euston",
+  "start_date": "2016-09-05 18:38:00.000000 UTC"
+}, {
+  "predicted_duration": "1833.1319658165226",
+  "start_station_name": "Green Park Station, Mayfair",
+  "start_date": "2016-09-02 13:05:00.000000 UTC"
+}, {
+  "predicted_duration": "796.84877314723872",
+  "start_station_name": "Waterloo Station 3, Waterloo",
+  "start_date": "2016-09-02 08:37:00.000000 UTC"
+}, {
+  "predicted_duration": "1008.6531540220308",
+  "start_station_name": "Hollybush Gardens, Bethnal Green",
+  "start_date": "2016-09-01 19:23:00.000000 UTC"
+}, {
+  "predicted_duration": "649.40324820661817",
+  "start_station_name": "Queen Street 2, Bank",
+  "start_date": "2016-09-05 08:21:00.000000 UTC"
+}, {
+  "predicted_duration": "1475.4482895954311",
+  "start_station_name": "Prince of Wales Drive, Battersea Park",
+  "start_date": "2016-09-02 23:37:00.000000 UTC"
+}, {
+  "predicted_duration": "2691.7048877238472",
+  "start_station_name": "Hyde Park Corner, Hyde Park",
+  "start_date": "2016-09-01 13:17:00.000000 UTC"
+}, {
+  "predicted_duration": "1379.0967460670304",
+  "start_station_name": "Commercial Street, Shoreditch",
+  "start_date": "2016-09-03 16:46:00.000000 UTC"
+}, {
+  "predicted_duration": "1867.9907428314214",
+  "start_station_name": "Flamborough Street, Limehouse",
+  "start_date": "2016-09-03 16:06:00.000000 UTC"
+}, {
+  "predicted_duration": "1325.8383497974964",
+  "start_station_name": "William Morris Way, Sands End",
+  "start_date": "2016-09-01 16:23:00.000000 UTC"
+}, {
+  "predicted_duration": "1092.5703907047573",
+  "start_station_name": "Rampayne Street, Pimlico",
+  "start_date": "2016-08-31 13:43:00.000000 UTC"
+}, {
+  "predicted_duration": "1160.9349906427342",
+  "start_station_name": "Wardour Street, Soho",
+  "start_date": "2016-09-05 19:03:00.000000 UTC"
+}, {
+  "predicted_duration": "1057.2543456197295",
+  "start_station_name": "Old Street Station, St. Luke\u0027s",
+  "start_date": "2016-08-31 15:01:00.000000 UTC"
+}, {
+  "predicted_duration": "1122.2575911824797",
+  "start_station_name": "Gloucester Road Station, South Kensington",
+  "start_date": "2016-09-05 15:42:00.000000 UTC"
+}, {
+  "predicted_duration": "2188.4107541309204",
+  "start_station_name": "Ravenscourt Park Station, Hammersmith",
+  "start_date": "2016-09-05 17:33:00.000000 UTC"
+}, {
+  "predicted_duration": "1599.2517154851466",
+  "start_station_name": "Clapham Common North Side, Clapham Common",
+  "start_date": "2016-08-31 08:23:00.000000 UTC"
+}, {
+  "predicted_duration": "2203.0682532615428",
+  "start_station_name": "Albert Embankment, Vauxhall",
+  "start_date": "2016-09-06 01:42:00.000000 UTC"
+}, {
+  "predicted_duration": "1539.537158013879",
+  "start_station_name": "Coomer Place, West Kensington",
+  "start_date": "2016-09-03 11:33:00.000000 UTC"
+}, {
+  "predicted_duration": "796.84877314723872",
+  "start_station_name": "Waterloo Station 3, Waterloo",
+  "start_date": "2016-09-05 07:17:00.000000 UTC"
+}, {
+  "predicted_duration": "1344.0012295811557",
+  "start_station_name": "Fisherman\u0027s Walk West, Canary Wharf",
+  "start_date": "2016-08-31 17:39:00.000000 UTC"
+}, {
+  "predicted_duration": "1327.7111029827979",
+  "start_station_name": "Lancaster Drive, Blackwall",
+  "start_date": "2016-09-01 15:26:00.000000 UTC"
+}, {
+  "predicted_duration": "1533.1435439247812",
+  "start_station_name": "Brushfield Street, Liverpool Street",
+  "start_date": "2016-09-03 13:40:00.000000 UTC"
+}, {
+  "predicted_duration": "1354.9208108651437",
+  "start_station_name": "St. Mark\u0027s Road, North Kensington",
+  "start_date": "2016-08-31 09:13:00.000000 UTC"
+}, {
+  "predicted_duration": "1139.6712526645183",
+  "start_station_name": "South Audley Street, Mayfair",
+  "start_date": "2016-09-01 18:28:00.000000 UTC"
+}, {
+  "predicted_duration": "1118.8712141101632",
+  "start_station_name": "Ethelburga Estate, Battersea Park",
+  "start_date": "2016-09-01 09:28:00.000000 UTC"
+}, {
+  "predicted_duration": "1552.9675022504925",
+  "start_station_name": "Limerston Street, West Chelsea",
+  "start_date": "2016-09-03 15:55:00.000000 UTC"
+}]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
