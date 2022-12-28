@@ -1,0 +1,359 @@
+Overview
+In this lab, you learn how to utilize Vertex AI Pipelines to execute a simple Kubeflow Pipeline SDK derived ML Pipeline.
+
+Objectives
+In this lab, you perform the following tasks:
+Set up the Project Environment
+Inspect and Configure Pipeline Code
+Execute the AI Pipeline
+
+
+Task 1. Set up the project environment
+Vertex AI Pipelines run in a serverless framework whereby pre-compiled pipelines are deployed on-demand or on a schedule. In order to facilitate smooth execution some environment configuration is required.
+For the seamless execution of Pipeline code in a Qwiklabs environment the Compute Service Account needs elevated privileges on Cloud Storage.
+In the Google Cloud console, on the Navigation menu (Navigation menu icon), click IAM & Admin > IAM.
+Click the pencil icon for default compute Service Account {project-number}-compute@developer.gserviceaccount.com to assign the Storage Admin role.
+On the slide-out window, click Add Another Role. Type Storage Admin in the search box. Select Storage Admin with Full control of GCS resources from the results list.
+Click Save to assign the role to the Compute Service Account.
+https://cdn.qwiklabs.com/jFFc5%2BygNlFZODMZolL4MDCTA3tW4DjpmYSowrdPOGA%3D
+Artifacts will be accessed on ingest and export as the Pipeline executes.
+
+802000798119-compute@developer.gserviceaccount.com
+
+
+
+
+Run this code block in the Cloud Shell to create a bucket in your project and two folders each with an empty file:
+gsutil mb gs://Project ID
+touch emptyfile1
+touch emptyfile2
+gsutil cp emptyfile1 gs://Project ID/pipeline-output/emptyfile1
+gsutil cp emptyfile2 gs://Project ID/pipeline-input/emptyfile2
+
+
+student_00_99f7a31bcf94@cloudshell:~ (qwiklabs-gcp-00-568fed827b86)$ gsutil mb gs://qwiklabs-gcp-00-568fed827b86
+touch emptyfile1
+touch emptyfile2
+gsutil cp emptyfile1 gs://qwiklabs-gcp-00-568fed827b86/pipeline-output/emptyfile1
+gsutil cp emptyfile2 gs://qwiklabs-gcp-00-568fed827b86/pipeline-input/emptyfile2
+Creating gs://qwiklabs-gcp-00-568fed827b86/...
+Copying file://emptyfile1 [Content-Type=application/octet-stream]...
+/ [1 files][    0.0 B/    0.0 B]
+Operation completed over 1 objects.
+Copying file://emptyfile2 [Content-Type=application/octet-stream]...
+/ [1 files][    0.0 B/    0.0 B]
+Operation completed over 1 objects.
+
+student_00_99f7a31bcf94@cloudshell:~ (qwiklabs-gcp-00-568fed827b86)$ pwd
+/home/student_00_99f7a31bcf94
+student_00_99f7a31bcf94@cloudshell:~ (qwiklabs-gcp-00-568fed827b86)$ ls
+emptyfile1  emptyfile2  README-cloudshell.txt
+
+
+
+
+
+The Pipeline has already been created for you and simply requires a few minor adjustments to allow it to run in your Qwiklabs project.
+Download the AI Pipeline from the lab assets folder:
+wget https://storage.googleapis.com/cloud-training/dataengineering/lab_assets/ai_pipelines/basic_pipeline.json
+
+student_00_99f7a31bcf94@cloudshell:~ (qwiklabs-gcp-00-568fed827b86)$ wget https://storage.googleapis.com/cloud-training/dataengineering/lab_assets/ai_pipelines/basic_pipeline.json
+--2022-12-28 06:40:23--  https://storage.googleapis.com/cloud-training/dataengineering/lab_assets/ai_pipelines/basic_pipeline.json
+Resolving storage.googleapis.com (storage.googleapis.com)... 172.217.194.128, 74.125.200.128, 74.125.68.128, ...
+Connecting to storage.googleapis.com (storage.googleapis.com)|172.217.194.128|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 5028 (4.9K) [application/json]
+Saving to: ‘basic_pipeline.json’
+
+basic_pipeline.json     100%[=============================>]   4.91K  --.-KB/s    in 0s
+
+2022-12-28 06:40:23 (44.3 MB/s) - ‘basic_pipeline.json’ saved [5028/5028]
+
+
+student_00_99f7a31bcf94@cloudshell:~ (qwiklabs-gcp-00-568fed827b86)$ cat basic_pipeline.json
+{
+  "pipelineSpec": {
+    "components": {
+      "comp-concat": {
+        "executorLabel": "exec-concat",
+        "inputDefinitions": {
+          "parameters": {
+            "a": {
+              "type": "STRING"
+            },
+            "b": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "Output": {
+              "type": "STRING"
+            }
+          }
+        }
+      },
+      "comp-reverse": {
+        "executorLabel": "exec-reverse",
+        "inputDefinitions": {
+          "parameters": {
+            "a": {
+              "type": "STRING"
+            }
+          }
+        },
+        "outputDefinitions": {
+          "parameters": {
+            "after": {
+              "type": "STRING"
+            },
+            "before": {
+              "type": "STRING"
+            }
+          }
+        }
+      }
+    },
+    "deploymentSpec": {
+      "executors": {
+        "exec-concat": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "concat"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.8' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef concat(a: str, b: str) -> str:\n  return a + b\n\n"
+            ],
+            "image": "python:3.7"
+          }
+        },
+        "exec-reverse": {
+          "container": {
+            "args": [
+              "--executor_input",
+              "{{$}}",
+              "--function_to_execute",
+              "reverse"
+            ],
+            "command": [
+              "sh",
+              "-c",
+              "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet     --no-warn-script-location 'kfp==1.8.8' && \"$0\" \"$@\"\n",
+              "sh",
+              "-ec",
+              "program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef reverse(a: str)->NamedTuple(\"outputs\", [(\"before\", str), (\"after\", str)]):\n  return a, a[::-1]\n\n"
+            ],
+            "image": "python:3.7"
+          }
+        }
+      }
+    },
+    "pipelineInfo": {
+      "name": "basic-pipeline"
+    },
+    "root": {
+      "dag": {
+        "tasks": {
+          "concat": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-concat"
+            },
+            "inputs": {
+              "parameters": {
+                "a": {
+                  "componentInputParameter": "a"
+                },
+                "b": {
+                  "componentInputParameter": "b"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "concat"
+            }
+          },
+          "reverse": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-reverse"
+            },
+            "dependentTasks": [
+              "concat"
+            ],
+            "inputs": {
+              "parameters": {
+                "a": {
+                  "taskOutputParameter": {
+                    "outputParameterKey": "Output",
+                    "producerTask": "concat"
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "reverse"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "parameters": {
+          "a": {
+            "type": "STRING"
+          },
+          "b": {
+            "type": "STRING"
+          }
+        }
+      }
+    },
+    "schemaVersion": "2.0.0",
+    "sdkVersion": "kfp-1.8.8"
+  },
+  "runtimeConfig": {
+    "gcsOutputDirectory": "gs://PROJECT_ID/pipeline-output",
+    "parameters": {
+      "a": {
+        "stringValue": "stres"
+      },
+      "b": {
+        "stringValue": "sed"
+      }
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Configure and inspect the Pipeline code
+The Pipeline code is a compilation of two AI operations written in Python. The example is very simple but demonstrates how easy it is orchestrate ML procedures written in a variety of languages (TensorFlow, Python, Java, etc.) into an easy to deploy AI Pipeline. The lab example performs two operations, concatenation and reverse, on two string values.
+First you must make an adjustment to update the output folder for the AI Pipeline execution. In the Cloud Shell use the Linux Stream EDitor (sed) command to adjust this setting:
+sed -i 's/PROJECT_ID/Project ID/g' basic_pipeline.json
+
+https://www.gnu.org/software/sed/manual/sed.html
+sed -i                        => REPLACE IN-LINE
+'s/PROJECT_ID/Project ID/g'   => REPLACE 'PROJECT_ID' with our <Project ID>
+                              => g stands for global, which means that all matching occurrences in the line would be replaced
+
+student_00_99f7a31bcf94@cloudshell:~ (qwiklabs-gcp-00-568fed827b86)$ sed -i 's/PROJECT_ID/qwiklabs-gcp-00-568fed827b86/g' basic_pipeline.json
+
+
+
+
+Inspect basic_pipeline.json to confirm that the output folder is set to your project:
+tail -20 basic_pipeline.json
+
+student_00_99f7a31bcf94@cloudshell:~ (qwiklabs-gcp-00-568fed827b86)$ tail -20 basic_pipeline.json
+            "type": "STRING"
+          }
+        }
+      }
+    },
+    "schemaVersion": "2.0.0",
+    "sdkVersion": "kfp-1.8.8"
+  },
+  "runtimeConfig": {
+    "gcsOutputDirectory": "gs://qwiklabs-gcp-00-568fed827b86/pipeline-output",
+    "parameters": {
+      "a": {
+        "stringValue": "stres"
+      },
+      "b": {
+        "stringValue": "sed"
+      }
+    }
+  }
+  
+  
+  
+  
+  
+
+The key sections of code in basic_pipeline.json are the deploymentSpec and command blocks. Below is the first command block, the job that concatenates the input strings. This is Kubeflow Pipeline SDK (kfp) code that is designated to be executed by the Python 3.7 engine. You will not change any code, the section is shown here for your reference:
+	"program_path=$(mktemp -d)\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\npython3 -m kfp.v2.components.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
+              "\nimport kfp\nfrom kfp.v2 import dsl\nfrom kfp.v2.dsl import *\nfrom typing import *\n\ndef concat(a: str, b: str) -> str:\n  return a + b\n\n"
+            ],
+            "image": "python:3.7"
+
+You can explore the entire file by issuing the command below:
+more basic_pipeline.json
+
+Note: Press the spacebar to advance through the file until its end. 
+If you wish to close the file early, type 'q' to close the more command.
+
+
+
+Next, move the updated basic_pipeline.json file to the Cloud Storage bucket created earlier so that it can be accessed to run an AI Pipeline job:
+gsutil cp basic_pipeline.json gs://Project ID/pipeline-input/basic_pipeline.json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Execute the AI Pipeline
+From the Console, open the navigation menu (Navigation menu icon), under Artificial Intelligence click Vertex AI.
+Activate the Vertex AI API. Click the blue Enable Vertex AI API button.
+Once the API is enabled, click Pipelines in the left menu.
+Click Create Run on the top menu.
+Under Run detail, for Pipeline select Import from Cloud Storage from the dropdown and for Cloud Storage URL browse to the pipeline-input folder you created inside your project's cloud storage bucket. Select the basic_pipeline.json file.
+Leave the remaining default values, click Continue.
+You may leave the default values for Runtime configuration. Notice that the GCS Output Directory is set to the bucket folder created in an earlier step. The Pipeline Parameters are pre-filled from the values in the basic_pipeline.json file but you have the option of changing those at runtime via this wizard.
+Click Submit to start the Pipeline execution.
+You will be returned to the Pipeline dashboard and your run will progress from Pending to Running to Succeeded. The entire run will take between 3 and 6 minutes.
+Once the status reaches Succeeded, click on the run name to see the execution graph and details.
+https://cdn.qwiklabs.com/9Yq7O9lrOSx1mSVzyO9YTxb7B7CgPUWlv%2F3szbYKgac%3D
+
+A graph element exists for each step. Click on the concat object to see the details for the job.
+Click on the View Job button. A new tab will open with the Vertex AI Custom Job that was submitted to the backend to satisfy the pipeline request.
+https://cdn.qwiklabs.com/zjdFA8ES6xNLbcU5j3eup4ijGl8pJ4ZfNG5kU8zuGEA%3D
+
+
+
