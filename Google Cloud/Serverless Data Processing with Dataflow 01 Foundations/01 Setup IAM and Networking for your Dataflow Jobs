@@ -1,0 +1,379 @@
+Overview
+In this lab, you will learn to set up IAM permissions and use private IP adresses for your Datafow jobs.
+
+Objectives
+Use IAM permissions that affect whether a job can be launched.
+Use Private IP addresses for your Dataflow jobs.
+
+
+
+
+Task 1. Create a Cloud Storage bucket
+In Cloud Shell, to set up your variables, run the following command:
+PROJECT=`gcloud config list --format 'value(core.project)'`
+USER_EMAIL=`gcloud config list account --format "value(core.account)"`
+REGION=us-central1
+
+
+Create a Cloud Storage bucket:
+gsutil mb -p $PROJECT -b on gs://$PROJECT
+
+
+
+student_02_592eb031bb69@cloudshell:~ (qwiklabs-gcp-04-7c031e2cd164)$ PROJECT=`gcloud config list --format 'value(core.project)'`
+USER_EMAIL=`gcloud config list account --format "value(core.account)"`
+REGION=us-central1
+student_02_592eb031bb69@cloudshell:~ (qwiklabs-gcp-04-7c031e2cd164)$ gsutil mb -p $PROJECT -b on gs://$PROJECT
+Creating gs://qwiklabs-gcp-04-7c031e2cd164/...
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Launch a Dataflow job
+In this task, you try to run a Dataflow job. It will initially fail because of the lack of IAM permissions. After you assign the required role, the job runs successfully.
+
+Firstly, verify the IAM roles associated with the account:
+gcloud projects get-iam-policy $PROJECT  \
+--format='table(bindings.role)' \
+--flatten="bindings[].members" \
+--filter="bindings.members:$USER_EMAIL"
+
+
+tudent_02_592eb031bb69@cloudshell:~ (qwiklabs-gcp-04-7c031e2cd164)$ gcloud projects get-iam-policy $PROJECT  \
+--format='table(bindings.role)' \
+--flatten="bindings[].members" \
+--filter="bindings.members:$USER_EMAIL"
+ROLE: roles/container.admin
+ROLE: roles/dataflow.viewer
+ROLE: roles/resourcemanager.projectIamAdmin
+ROLE: roles/storage.admin
+ROLE: roles/viewer
+
+
+
+
+
+
+
+Attempt to launch a Dataflow job:
+gcloud dataflow jobs run job1 \
+--gcs-location gs://dataflow-templates-us-central1/latest/Word_Count \
+--region $REGION \
+--staging-location gs://$PROJECT/tmp \
+--parameters inputFile=gs://dataflow-samples/shakespeare/kinglear.txt,output=gs://$PROJECT/results/outputs 
+
+This will fail as expected because of missing IAM permissions.
+student_02_592eb031bb69@cloudshell:~ (qwiklabs-gcp-04-7c031e2cd164)$ gcloud dataflow jobs run job1 \
+--gcs-location gs://dataflow-templates-us-central1/latest/Word_Count \
+--region $REGION \
+--staging-location gs://$PROJECT/tmp \
+--parameters inputFile=gs://dataflow-samples/shakespeare/kinglear.txt,output=gs://$PROJECT/results/outputs 
+ERROR: (gcloud.dataflow.jobs.run) PERMISSION_DENIED: (cf9d97960468dff6): Could not create workflow; user does not have write access to project: qwiklabs-gcp-04-7c031e2cd164 Causes: (cf9d97960468dc2b): Permission 'dataflow.jobs.create' denied on project: 'qwiklabs-gcp-04-7c031e2cd164'
+
+
+
+
+
+
+
+Add the Dataflow Admin role to the user account:
+gcloud projects add-iam-policy-binding $PROJECT --member=user:$USER_EMAIL --role=roles/dataflow.admin
+
+student_02_592eb031bb69@cloudshell:~ (qwiklabs-gcp-04-7c031e2cd164)$ gcloud projects add-iam-policy-binding $PROJECT --member=user:$USER_EMAIL --role=roles/dataflow.admin
+Updated IAM policy for project [qwiklabs-gcp-04-7c031e2cd164].
+bindings:
+- members:
+  - serviceAccount:qwiklabs-gcp-04-7c031e2cd164@qwiklabs-gcp-04-7c031e2cd164.iam.gserviceaccount.com
+  role: roles/bigquery.admin
+- members:
+  - serviceAccount:938299576273@cloudbuild.gserviceaccount.com
+  role: roles/cloudbuild.builds.builder
+- members:
+  - serviceAccount:service-938299576273@gcp-sa-cloudbuild.iam.gserviceaccount.com
+  role: roles/cloudbuild.serviceAgent
+- members:
+  - serviceAccount:service-938299576273@compute-system.iam.gserviceaccount.com
+  role: roles/compute.serviceAgent
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/container.admin
+- members:
+  - serviceAccount:service-938299576273@container-engine-robot.iam.gserviceaccount.com
+  role: roles/container.serviceAgent
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/dataflow.admin
+- members:
+  - serviceAccount:service-938299576273@dataflow-service-producer-prod.iam.gserviceaccount.com
+  role: roles/dataflow.serviceAgent
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/dataflow.viewer
+- members:
+  - serviceAccount:938299576273-compute@developer.gserviceaccount.com
+  - serviceAccount:938299576273@cloudservices.gserviceaccount.com
+  role: roles/editor
+- members:
+  - serviceAccount:admiral@qwiklabs-services-prod.iam.gserviceaccount.com
+  - serviceAccount:qwiklabs-gcp-04-7c031e2cd164@qwiklabs-gcp-04-7c031e2cd164.iam.gserviceaccount.com
+  role: roles/owner
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/resourcemanager.projectIamAdmin
+- members:
+  - serviceAccount:qwiklabs-gcp-04-7c031e2cd164@qwiklabs-gcp-04-7c031e2cd164.iam.gserviceaccount.com
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/storage.admin
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/viewer
+etag: BwXxAZpk0kY=
+version: 1
+
+
+
+
+
+
+
+
+
+
+
+
+Launch the Dataflow job again:
+gcloud dataflow jobs run job1 \
+--gcs-location gs://dataflow-templates-us-central1/latest/Word_Count \
+--region $REGION \
+--staging-location gs://$PROJECT/tmp \
+--parameters inputFile=gs://dataflow-samples/shakespeare/kinglear.txt,output=gs://$PROJECT/results/outputs 
+
+student_02_592eb031bb69@cloudshell:~ (qwiklabs-gcp-04-7c031e2cd164)$ gcloud dataflow jobs run job1 \
+--gcs-location gs://dataflow-templates-us-central1/latest/Word_Count \
+--region $REGION \
+--staging-location gs://$PROJECT/tmp \
+--parameters inputFile=gs://dataflow-samples/shakespeare/kinglear.txt,output=gs://$PROJECT/results/outputs 
+createTime: '2022-12-30T01:36:10.086539Z'
+currentStateTime: '1970-01-01T00:00:00Z'
+id: 2022-12-29_17_36_08-8798875514047457839
+location: us-central1
+name: job1
+projectId: qwiklabs-gcp-04-7c031e2cd164
+startTime: '2022-12-30T01:36:10.086539Z'
+type: JOB_TYPE_BATCH
+
+
+
+
+In the Google Cloud Console, on the Navigation menu, click Dataflow > Jobs, and you will see your dataflow job job1.
+Please wait for about 5 minutes for your job to complete before you proceed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Launch in private IPs
+In this task, you first try to launch a Dataflow job with the --disable-public-ips directive. It will fail in the first attempt because the network does not have Private Google Access (PGA) turned on. You configure PGA and re-run the command to launch the job.
+
+In Cloud Shell, to launch a Dataflow job using the --disable-public-ips directive, run the following command:
+gcloud dataflow jobs run job2 \
+--gcs-location gs://dataflow-templates-us-central1/latest/Word_Count \
+--region $REGION \
+--staging-location gs://$PROJECT/tmp \
+--parameters inputFile=gs://dataflow-samples/shakespeare/kinglear.txt,output=gs://$PROJECT/results/outputs --disable-public-ips
+
+
+
+student_02_592eb031bb69@cloudshell:~ (qwiklabs-gcp-04-7c031e2cd164)$ gcloud dataflow jobs run job2 \
+--gcs-location gs://dataflow-templates-us-central1/latest/Word_Count \
+--region $REGION \
+--staging-location gs://$PROJECT/tmp \
+--parameters inputFile=gs://dataflow-samples/shakespeare/kinglear.txt,output=gs://$PROJECT/results/outputs --disable-public-ips
+createTime: '2022-12-30T01:43:47.676672Z'
+currentStateTime: '1970-01-01T00:00:00Z'
+id: 2022-12-29_17_43_47-4263417786831603465
+location: us-central1
+name: job2
+projectId: qwiklabs-gcp-04-7c031e2cd164
+startTime: '2022-12-30T01:43:47.676672Z'
+type: JOB_TYPE_BATCH
+
+
+This job will fail as expected because PGA is not turned on.
+To verify, go to the Google Cloud Console, on the Navigation menu, click Dataflow > Jobs, and notice that job2 failed.
+Click on job2, then scroll to the bottom to click on "SHOW" next to Logs to see the cause of error.
+
+2022-12-30 09:43:50.099 HKT
+Workflow failed. Causes: Subnetwork '' on project qwiklabs-gcp-04-7c031e2cd164 network 'default' in region us-central1 does not have Private Google Access, which is required for usage of private IP addresses by the Dataflow workers. Please refer to https://cloud.google.com/vpc/docs/configure-private-google-access#configuring_access_to_google_services_from_internal_ips for instructions on how to configure it.
+Open in Logs Explorer
+{
+insertId: "q3c706d3cvj"
+labels: {4}
+logName: "projects/qwiklabs-gcp-04-7c031e2cd164/logs/dataflow.googleapis.com%2Fjob-message"
+receiveTimestamp: "2022-12-30T01:43:51.258851724Z"
+resource: {2}
+severity: "ERROR"
+textPayload: "Workflow failed. Causes: Subnetwork '' on project qwiklabs-gcp-04-7c031e2cd164 network 'default' in region us-central1 does not have Private Google Access, which is required for usage of private IP addresses by the Dataflow workers. Please refer to https://cloud.google.com/vpc/docs/configure-private-google-access#configuring_access_to_google_services_from_internal_ips for instructions on how to configure it."
+timestamp: "2022-12-30T01:43:50.099386179Z"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+In Cloud Shell, run the following commands to give the user the required role to enable PGA, and then enable PGA:
+gcloud projects add-iam-policy-binding $PROJECT --member=user:$USER_EMAIL --role=roles/compute.networkAdmin
+gcloud compute networks subnets update default \
+--region=$REGION \
+--enable-private-ip-google-access
+
+
+Repeat step 1:
+gcloud dataflow jobs run job2 \
+--gcs-location gs://dataflow-templates-us-central1/latest/Word_Count \
+--region $REGION \
+--staging-location gs://$PROJECT/tmp \
+--parameters inputFile=gs://dataflow-samples/shakespeare/kinglear.txt,output=gs://$PROJECT/results/outputs --disable-public-ips
+
+
+
+student_02_592eb031bb69@cloudshell:~ (qwiklabs-gcp-04-7c031e2cd164)$ gcloud projects add-iam-policy-binding $PROJECT --member=user:$USER_EMAIL --role=roles/compute.networkAdmin
+gcloud compute networks subnets update default \
+--region=$REGION \
+--enable-private-ip-google-access
+Updated IAM policy for project [qwiklabs-gcp-04-7c031e2cd164].
+bindings:
+- members:
+  - serviceAccount:qwiklabs-gcp-04-7c031e2cd164@qwiklabs-gcp-04-7c031e2cd164.iam.gserviceaccount.com
+  role: roles/bigquery.admin
+- members:
+  - serviceAccount:938299576273@cloudbuild.gserviceaccount.com
+  role: roles/cloudbuild.builds.builder
+- members:
+  - serviceAccount:service-938299576273@gcp-sa-cloudbuild.iam.gserviceaccount.com
+  role: roles/cloudbuild.serviceAgent
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/compute.networkAdmin
+- members:
+  - serviceAccount:service-938299576273@compute-system.iam.gserviceaccount.com
+  role: roles/compute.serviceAgent
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/container.admin
+- members:
+  - serviceAccount:service-938299576273@container-engine-robot.iam.gserviceaccount.com
+  role: roles/container.serviceAgent
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/dataflow.admin
+- members:
+  - serviceAccount:service-938299576273@dataflow-service-producer-prod.iam.gserviceaccount.com
+  role: roles/dataflow.serviceAgent
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/dataflow.viewer
+- members:
+  - serviceAccount:938299576273-compute@developer.gserviceaccount.com
+  - serviceAccount:938299576273@cloudservices.gserviceaccount.com
+  role: roles/editor
+- members:
+  - serviceAccount:admiral@qwiklabs-services-prod.iam.gserviceaccount.com
+  - serviceAccount:qwiklabs-gcp-04-7c031e2cd164@qwiklabs-gcp-04-7c031e2cd164.iam.gserviceaccount.com
+  role: roles/owner
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/resourcemanager.projectIamAdmin
+- members:
+  - serviceAccount:qwiklabs-gcp-04-7c031e2cd164@qwiklabs-gcp-04-7c031e2cd164.iam.gserviceaccount.com
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/storage.admin
+- members:
+  - user:student-02-592eb031bb69@qwiklabs.net
+  role: roles/viewer
+etag: BwXxAcxLVIo=
+version: 1
+Updated [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-04-7c031e2cd164/regions/us-central1/subnetworks/default].
+
+
+
+
+student_02_592eb031bb69@cloudshell:~ (qwiklabs-gcp-04-7c031e2cd164)$ gcloud dataflow jobs run job2 \
+--gcs-location gs://dataflow-templates-us-central1/latest/Word_Count \
+--region $REGION \
+--staging-location gs://$PROJECT/tmp \
+--parameters inputFile=gs://dataflow-samples/shakespeare/kinglear.txt,output=gs://$PROJECT/results/outputs --disable-public-ips
+createTime: '2022-12-30T01:48:37.775756Z'
+currentStateTime: '1970-01-01T00:00:00Z'
+id: 2022-12-29_17_48_37-7355349513660211001
+location: us-central1
+name: job2
+projectId: qwiklabs-gcp-04-7c031e2cd164
+startTime: '2022-12-30T01:48:37.775756Z'
+type: JOB_TYPE_BATCH
+
+
+
+
+
+
+
+
+In the Google Cloud Console, on the Navigation menu, click Compute Engine > VM Instances, and notice that the VM launched has no external IP address.
+Note: The VM instance will be deleted once the job status will change to succeeded.
+
+
+
+
+
+
+
+
+
+
+
+This concludes the lab. 
+In the lab, you used the correct IAM roles to launch a Dataflow job. 
+Next, you changed the subnet to Private Google Access and 
+aunched the VMs that do not use an external IP address as part of your Dataflow job.
+
+
+
+
+
