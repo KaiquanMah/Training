@@ -24,7 +24,7 @@ def fixsender(sender,allsenders=None) :
     sender = sender.replace('<','').replace('>','')
 
     # Check if we have a hacked gmane.org from address
-    if allsenders is not None and sender.endswith('gmane.org') :
+    if allsenders is not None and sender.endswith('.gmane.org') :
         pieces = sender.split('-')
 
         realsender = None
