@@ -1,0 +1,1163 @@
+Overview
+In a challenge lab you’re given a scenario and a set of tasks. Instead of following step-by-step instructions, you will use the skills learned from the labs in the quest to figure out how to complete the tasks on your own! An automated scoring system (shown on this page) will provide feedback on whether you have completed your tasks correctly.
+When you take a challenge lab, you will not be taught new Google Cloud concepts. You are expected to extend your learned skills, like changing default values and reading and researching error messages to fix your own mistakes.
+To score 100% you must successfully complete all tasks within the time period!
+
+This lab is recommended for students who have enrolled in the Create and Manage Cloud Resources quest. Are you ready for the challenge?
+
+Topics tested:
+Create an instance
+Create a 3-node Kubernetes cluster and run a simple service
+Create an HTTP(s) load balancer in front of two web servers
+
+
+
+
+You have started a new role as a Junior Cloud Engineer for Jooli, Inc. You are expected to help manage the infrastructure at Jooli. Common tasks include provisioning resources for projects.
+You are expected to have the skills and knowledge for these tasks, so step-by-step guides are not provided.
+Some Jooli, Inc. standards you should follow:
+Create all resources in the default region or zone, unless otherwise directed. The default region is us-central1, and the default zone is us-central1-c.
+Naming normally uses the format team-resource; for example, an instance could be named nucleus-webserver1.
+Allocate cost-effective resource sizes. Projects are monitored, and excessive resource use will result in the containing project's termination (and possibly yours), so plan carefully. This is the guidance the monitoring team is willing to share: unless directed, use e2-micro for small Linux VMs, and use e2-medium for Windows or other applications, such as Kubernetes nodes.
+Your challenge
+As soon as you sit down at your desk and open your new laptop, you receive several requests from the Nucleus team. Read through each description, and then create the resources.
+
+gcloud config set compute/region us-central1
+gcloud config set compute/zone us-central1-c
+
+
+
+
+Task 1. Create a project jumphost instance
+You will use this instance to perform maintenance for the project.
+Requirements:
+Name the instance nucleus-jumphost-950
+Create the instance in the us-central1-c zone.
+Use an e2-micro machine type.
+Use the default image type (Debian Linux).
+
+
+gcloud compute instances create nucleus-jumphost-950 \
+          --zone us-central1-c  \
+          --machine-type e2-micro  \
+          --image-family debian-12  \
+          --image-project debian-cloud \
+          --scopes cloud-platform \
+          --no-address
+
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/zones/us-central1-c/instances/nucleus-jumphost-950].
+NAME: nucleus-jumphost-950
+ZONE: us-central1-c
+MACHINE_TYPE: e2-micro
+PREEMPTIBLE: 
+INTERNAL_IP: 10.128.0.5
+EXTERNAL_IP: 
+STATUS: RUNNING
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 2. Create a Kubernetes service cluster
+Note: There is a limit to the resources you are allowed to create in your project. If you don't get the result you expected, delete the cluster before you create another cluster. If you don't, the lab might end and you might be blocked. To get your account unblocked, you will have to reach out to Google Cloud Skills Boost Support.
+
+The team is building an application that will use a service running on Kubernetes. You need to:
+Create a zonal cluster using us-central1-c.
+Use the Docker container hello-app (gcr.io/google-samples/hello-app:2.0) as a placeholder; the team will replace the container with their own work later.
+Expose the app on port 8083.
+
+gcloud container clusters create --machine-type=e2-medium --num-nodes 1 --zone=us-central1-c nucleus-cluster1
+gcloud container clusters get-credentials nucleus-cluster1 --zone=us-central1-c
+kubectl create deployment nucleus-server1 --image=gcr.io/google-samples/hello-app:2.0
+kubectl expose deployment nucleus-server1 --type=LoadBalancer --port 8083
+
+
+
+
+
+student_01_1a292bce9737@cloudshell:~ (qwiklabs-gcp-01-bc70df359ab4)$ gcloud container clusters create --machine-type=e2-medium --num-nodes 1 --zone=us-central1-c nucleus-cluster1
+Default change: VPC-native is the default mode during cluster creation for versions greater than 1.21.0-gke.1500. To create advanced routes based clusters, please pass the `--no-enable-ip-alias` flag
+Note: Your Pod address range (`--cluster-ipv4-cidr`) can accommodate at most 1008 node(s).
+Creating cluster nucleus-cluster1 in us-central1-c... Cluster is being health-checked (master is healthy)...done.                                                                              
+Created [https://container.googleapis.com/v1/projects/qwiklabs-gcp-01-bc70df359ab4/zones/us-central1-c/clusters/nucleus-cluster1].
+To inspect the contents of your cluster, go to: https://console.cloud.google.com/kubernetes/workload_/gcloud/us-central1-c/nucleus-cluster1?project=qwiklabs-gcp-01-bc70df359ab4
+kubeconfig entry generated for nucleus-cluster1.
+NAME: nucleus-cluster1
+LOCATION: us-central1-c
+MASTER_VERSION: 1.27.3-gke.100
+MASTER_IP: 35.202.125.52
+MACHINE_TYPE: e2-medium
+NODE_VERSION: 1.27.3-gke.100
+NUM_NODES: 1
+STATUS: RUNNING
+
+student_01_1a292bce9737@cloudshell:~ (qwiklabs-gcp-01-bc70df359ab4)$ gcloud container clusters get-credentials nucleus-cluster1 --zone=us-central1-c
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for nucleus-cluster1.
+
+student_01_1a292bce9737@cloudshell:~ (qwiklabs-gcp-01-bc70df359ab4)$ kubectl create deployment nucleus-server1 --image=gcr.io/google-samples/hello-app:2.0
+deployment.apps/nucleus-server1 created
+
+student_01_1a292bce9737@cloudshell:~ (qwiklabs-gcp-01-bc70df359ab4)$ kubectl expose deployment nucleus-server1 --type=LoadBalancer --port 8083
+service/nucleus-server1 exposed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task 3. Set up an HTTP load balancer
+You will serve the site via nginx web servers, but you want to ensure that the environment is fault-tolerant. Create an HTTP load balancer with a managed instance group of 2 nginx web servers. Use the following code to configure the web servers; the team will replace this with their own configuration later.
+
+cat << EOF > startup.sh
+#! /bin/bash
+apt-get update
+apt-get install -y nginx
+service nginx start
+sed -i -- 's/nginx/Google Cloud Platform - '"\$HOSTNAME"'/' /var/www/html/index.nginx-debian.html
+EOF
+
+Note: There is a limit to the resources you are allowed to create in your project, so do not create more than 2 instances in your managed instance group. If you do, the lab might end and you might be banned.
+
+You need to:
+-Create an instance template. Don't use the default machine type. Make sure you specify e2-medium as the machine type.
+-Create a target pool.
+-Create a managed instance group.
+-Create a firewall rule named as grant-tcp-rule-555 to allow traffic (80/tcp).
+-Create a health check.
+-Create a backend service, and attach the managed instance group with named port (http:80).
+-Create a URL map, and target the HTTP proxy to route requests to your URL map.
+-Create a forwarding rule.
+
+Note: You may need to wait for 5 to 7 minutes to get the score for this task.
+
+
+
+
+
+
+Enter these in Google Cloud Shell Terminal
+
+1. Creating a startup script:
+cat << EOF > startup.sh
+#! /bin/bash
+apt-get update
+apt-get install -y nginx
+service nginx start
+sed -i -- 's/nginx/Google Cloud Platform - '"\$HOSTNAME"'/' /var/www/html/index.nginx-debian.html
+EOF
+
+Explanation
+cat << EOF > startup.sh: This line creates a new file named startup.sh and redirects any subsequent input into it until the EOF marker is encountered.
+#! /bin/bash: This line indicates that the script should be executed using the Bash shell.
+apt-get update: This command updates the package lists for the available software.
+apt-get install -y nginx: This command installs the Nginx web server without prompting for confirmation (-y flag).
+service nginx start: This command starts the Nginx service.
+sed -i -- 's/nginx/Google Cloud Platform - '"\$HOSTNAME"'/' /var/www/html/index.nginx-debian.html: This command modifies the default Nginx HTML page to include the hostname of the instance.
+
+
+
+
+
+
+
+2. Creating an instance template:
+gcloud compute instance-templates create web-server-template \
+          --metadata-from-file startup-script=startup.sh \
+          --machine-type e2-medium \
+          --region us-central1
+
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/global/instanceTemplates/web-server-template].
+NAME: web-server-template
+MACHINE_TYPE: e2-medium
+PREEMPTIBLE: 
+CREATION_TIMESTAMP: 2024-01-27T00:55:44.870-08:00
+
+explanation
+gcloud compute instance-templates create web-server-template: This command creates an instance template named web-server-template.
+--metadata-from-file startup-script=startup.sh: This flag specifies that the startup.sh script should be executed when instances are created from this template.
+--machine-type e2-medium: This flag sets the machine type for the instances to e2-medium.
+--region us-central1: This flag sets the region where the instances will be created to us-central1.
+
+
+
+
+
+
+
+
+3. Creating a managed instance group:
+gcloud compute instance-groups managed create web-server-group \
+          --base-instance-name web-server \
+          --size 2 \
+          --template web-server-template \
+          --region us-central1
+
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/regions/us-central1/instanceGroupManagers/web-server-group].
+NAME: web-server-group
+LOCATION: us-central1
+SCOPE: region
+BASE_INSTANCE_NAME: web-server
+SIZE: 0
+TARGET_SIZE: 2
+INSTANCE_TEMPLATE: web-server-template
+AUTOSCALED: no
+
+explain
+gcloud compute instance-groups managed create web-server-group: This command creates a managed instance group named web-server-group.
+--base-instance-name web-server: This flag sets the base name for the instances in the group.
+--size 2: This flag specifies that the group should initially contain 2 instances.
+--template web-server-template: This flag indicates that instances should be created using the web-server-template.
+--region us-central1: This flag sets the region for the instance group.
+
+
+
+
+
+
+
+4. Creating a firewall rule:
+gcloud compute firewall-rules create grant-tcp-rule-555 \
+          --allow tcp:80
+
+Creating firewall...working..Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/global/firewalls/grant-tcp-rule-555].                                        
+Creating firewall...done.                                                                                                                                                                      
+NAME: grant-tcp-rule-555
+NETWORK: default
+DIRECTION: INGRESS
+PRIORITY: 1000
+ALLOW: tcp:80
+DENY: 
+DISABLED: False
+
+
+
+
+
+
+
+5. Creating an HTTP health check:
+gcloud compute http-health-checks create http-basic-check
+
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/global/httpHealthChecks/http-basic-check].
+NAME: http-basic-check
+HOST: 
+PORT: 80
+REQUEST_PATH: /
+
+explain
+to monitor the health of the web servers
+
+
+
+
+
+
+
+
+
+6. Setting named ports for the instance group:
+gcloud compute instance-groups managed \
+          set-named-ports web-server-group \
+          --named-ports http:80 \
+          --region us-central1
+
+Updated [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/regions/us-central1/instanceGroups/web-server-group].
+
+explain
+gcloud compute instance-groups managed set-named-ports web-server-group: This command sets a named port for the instance group.
+--named-ports http:80: This flag names port 80 as http
+
+
+
+
+
+
+7. Creating a backend service:
+gcloud compute backend-services create web-server-backend \
+          --protocol HTTP \
+          --http-health-checks http-basic-check \
+          --global
+
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/global/backendServices/web-server-backend].
+NAME: web-server-backend
+BACKENDS: 
+PROTOCOL: HTTP
+
+
+explain
+gcloud compute backend-services create web-server-backend: This command creates a backend service named web-server-backend.
+--protocol HTTP: This flag sets the protocol to HTTP.
+--http-health-checks http-basic-check: This flag associates the http-basic-check health check with the backend service.
+
+
+
+
+
+
+
+8. Adding the instance group to the backend service:
+gcloud compute backend-services add-backend web-server-backend \
+          --instance-group web-server-group \
+          --instance-group-region us-central1 \
+          --global
+
+Updated [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/global/backendServices/web-server-backend].
+
+explain
+gcloud compute backend-services add-backend web-server-backend: This command adds the web-server-group instance group to the web-server-backend backend service.
+
+
+
+
+
+9. Creating a URL map
+gcloud compute url-maps create web-server-map \
+          --default-service web-server-backend
+
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/global/urlMaps/web-server-map].
+NAME: web-server-map
+DEFAULT_SERVICE: backendServices/web-server-backend
+
+explain
+gcloud compute url-maps create web-server-map: This command creates a URL map named web-server-map.
+--default-service web-server-backend: This flag sets the default backend service for the URL map.
+
+
+
+
+
+
+
+
+
+10. Creating a target HTTP proxy:
+gcloud compute target-http-proxies create http-lb-proxy \
+          --url-map web-server-map
+
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/global/targetHttpProxies/http-lb-proxy].
+NAME: http-lb-proxy
+URL_MAP: web-server-map
+
+explain
+gcloud compute target-http-proxies create http-lb-proxy: This command creates a target HTTP proxy named http-lb-proxy.
+--url-map web-server-map: This flag specifies the web-server-map URL map as the backend for the proxy.
+This proxy serves as the entry point for incoming HTTP traffic. It routes requests based on the URL map configuration and distributes them across the healthy instances in the backend service.
+
+
+
+
+
+
+
+
+11. Creating a forwarding rule:
+gcloud compute forwarding-rules create http-content-rule \
+        --global \
+        --target-http-proxy http-lb-proxy \
+        --ports 80
+
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-01-bc70df359ab4/global/forwardingRules/http-content-rule].
+
+explain
+gcloud compute forwarding-rules create http-content-rule: This command creates a forwarding rule named http-content-rule.
+--global: This flag sets the rule to be global, meaning it's accessible from anywhere on the internet.
+--target-http-proxy http-lb-proxy: This flag specifies the http-lb-proxy as the target for the rule.
+--ports 80: This flag defines the port for incoming traffic (80 being the standard HTTP port).
+This rule essentially associates an external IP address with the target HTTP proxy. Traffic sent to this IP address on port 80 will be routed through the proxy and onto the web servers in the backend service.
+
+
+
+
+
+
+12. Listing forwarding rules:
+gcloud compute forwarding-rules list
+
+NAME: http-content-rule
+REGION: 
+IP_ADDRESS: 34.111.181.39
+IP_PROTOCOL: TCP
+TARGET: http-lb-proxy
+
+NAME: ae317b94744fb42269e57635b1c977aa
+REGION: us-central1
+IP_ADDRESS: 34.123.7.32
+IP_PROTOCOL: TCP
+TARGET: us-central1/targetPools/ae317b94744fb42269e57635b1c977aa
+
+explain
+gcloud compute forwarding-rules list: This command displays a list of all forwarding rules in the project.
+The output shows two rules:
+http-content-rule: The newly created global rule with the assigned IP address for accessing the load balancer.
+ae317b94744fb42269e57635b1c977aa: This is likely a previously existing rule for another resource in your project.
+
+
+
+
+
+
+
+
+
+
+====================
+
+student_01_1a292bce9737@cloudshell:~ (qwiklabs-gcp-01-bc70df359ab4)$ gcloud compute images list
+NAME: centos-7-v20240110
+PROJECT: centos-cloud
+FAMILY: centos-7
+DEPRECATED: 
+STATUS: READY
+
+NAME: centos-stream-8-v20240110
+PROJECT: centos-cloud
+FAMILY: centos-stream-8
+DEPRECATED: 
+STATUS: READY
+
+NAME: centos-stream-9-v20240110
+PROJECT: centos-cloud
+FAMILY: centos-stream-9
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-101-17162-336-47
+PROJECT: cos-cloud
+FAMILY: cos-101-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-105-17412-226-68
+PROJECT: cos-cloud
+FAMILY: cos-105-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-109-17800-66-65
+PROJECT: cos-cloud
+FAMILY: cos-109-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-97-16919-404-34
+PROJECT: cos-cloud
+FAMILY: cos-97-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: debian-10-buster-v20240110
+PROJECT: debian-cloud
+FAMILY: debian-10
+DEPRECATED: 
+STATUS: READY
+
+NAME: debian-11-bullseye-arm64-v20240110
+PROJECT: debian-cloud
+FAMILY: debian-11-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: debian-11-bullseye-v20240110
+PROJECT: debian-cloud
+FAMILY: debian-11
+DEPRECATED: 
+STATUS: READY
+
+NAME: debian-12-bookworm-arm64-v20240110
+PROJECT: debian-cloud
+FAMILY: debian-12-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: debian-12-bookworm-v20240110
+PROJECT: debian-cloud
+FAMILY: debian-12
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-cloud-base-gcp-34-1-2-x86-64
+PROJECT: fedora-cloud
+FAMILY: fedora-cloud-34
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-cloud-base-gcp-37-1-7-x86-64
+PROJECT: fedora-cloud
+FAMILY: fedora-cloud-37
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-cloud-base-gcp-38-1-6-x86-64
+PROJECT: fedora-cloud
+FAMILY: fedora-cloud-38
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-cloud-base-gcp-39-beta-1-1-x86-64
+PROJECT: fedora-cloud
+FAMILY: fedora-cloud-39
+DEPRECATED: 
+STATUS: READY
+
+NAME: opensuse-leap-15-5-v20231114-arm64
+PROJECT: opensuse-cloud
+FAMILY: opensuse-leap-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: opensuse-leap-15-5-v20231114-x86-64
+PROJECT: opensuse-cloud
+FAMILY: opensuse-leap
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-7-v20240110
+PROJECT: rhel-cloud
+FAMILY: rhel-7
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-8-v20240110
+PROJECT: rhel-cloud
+FAMILY: rhel-8
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-9-arm64-v20240110
+PROJECT: rhel-cloud
+FAMILY: rhel-9-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-9-v20240110
+PROJECT: rhel-cloud
+FAMILY: rhel-9
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-7-9-sap-v20240110
+PROJECT: rhel-sap-cloud
+FAMILY: rhel-7-9-sap-ha
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-8-2-sap-v20240110
+PROJECT: rhel-sap-cloud
+FAMILY: rhel-8-2-sap-ha
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-8-4-sap-v20240110
+PROJECT: rhel-sap-cloud
+FAMILY: rhel-8-4-sap-ha
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-8-6-sap-v20240110
+PROJECT: rhel-sap-cloud
+FAMILY: rhel-8-6-sap-ha
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-8-8-sap-v20240110
+PROJECT: rhel-sap-cloud
+FAMILY: rhel-8-8-sap-ha
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-9-0-sap-v20240110
+PROJECT: rhel-sap-cloud
+FAMILY: rhel-9-0-sap-ha
+DEPRECATED: 
+STATUS: READY
+
+NAME: rhel-9-2-sap-v20240110
+PROJECT: rhel-sap-cloud
+FAMILY: rhel-9-2-sap-ha
+DEPRECATED: 
+STATUS: READY
+
+NAME: rocky-linux-8-optimized-gcp-arm64-v20240111
+PROJECT: rocky-linux-cloud
+FAMILY: rocky-linux-8-optimized-gcp-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: rocky-linux-8-optimized-gcp-v20240111
+PROJECT: rocky-linux-cloud
+FAMILY: rocky-linux-8-optimized-gcp
+DEPRECATED: 
+STATUS: READY
+
+NAME: rocky-linux-8-v20240111
+PROJECT: rocky-linux-cloud
+FAMILY: rocky-linux-8
+DEPRECATED: 
+STATUS: READY
+
+NAME: rocky-linux-9-arm64-v20240111
+PROJECT: rocky-linux-cloud
+FAMILY: rocky-linux-9-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: rocky-linux-9-optimized-gcp-arm64-v20240111
+PROJECT: rocky-linux-cloud
+FAMILY: rocky-linux-9-optimized-gcp-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: rocky-linux-9-optimized-gcp-v20240111
+PROJECT: rocky-linux-cloud
+FAMILY: rocky-linux-9-optimized-gcp
+DEPRECATED: 
+STATUS: READY
+
+NAME: rocky-linux-9-v20240111
+PROJECT: rocky-linux-cloud
+FAMILY: rocky-linux-9
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-12-sp5-v20231108-x86-64
+PROJECT: suse-cloud
+FAMILY: sles-12
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-15-sp5-v20240126-arm64
+PROJECT: suse-cloud
+FAMILY: sles-15-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-15-sp5-v20240126-x86-64
+PROJECT: suse-cloud
+FAMILY: sles-15
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-12-sp5-sap-v20240125-x86-64
+PROJECT: suse-sap-cloud
+FAMILY: sles-12-sp5-sap
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-15-sp2-sap-v20231214-x86-64
+PROJECT: suse-sap-cloud
+FAMILY: sles-15-sp2-sap
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-15-sp3-sap-v20231214-x86-64
+PROJECT: suse-sap-cloud
+FAMILY: sles-15-sp3-sap
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-15-sp4-sap-v20231214-x86-64
+PROJECT: suse-sap-cloud
+FAMILY: sles-15-sp4-sap
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-15-sp5-sap-v20240126-x86-64
+PROJECT: suse-sap-cloud
+FAMILY: sles-15-sp5-sap
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-sap-15-sp4-hardened-v20231214-x86-64
+PROJECT: suse-sap-cloud
+FAMILY: sles-sap-15-sp4-hardened
+DEPRECATED: 
+STATUS: READY
+
+NAME: sles-sap-15-sp5-hardened-v20240126-x86-64
+PROJECT: suse-sap-cloud
+FAMILY: sles-sap-15-sp5-hardened
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-pro-1604-xenial-v20240126
+PROJECT: ubuntu-os-pro-cloud
+FAMILY: ubuntu-pro-1604-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-pro-1804-bionic-arm64-v20240125
+PROJECT: ubuntu-os-pro-cloud
+FAMILY: ubuntu-pro-1804-lts-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-pro-1804-bionic-v20240125
+PROJECT: ubuntu-os-pro-cloud
+FAMILY: ubuntu-pro-1804-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-pro-2004-focal-arm64-v20240125
+PROJECT: ubuntu-os-pro-cloud
+FAMILY: ubuntu-pro-2004-lts-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-pro-2004-focal-v20240125
+PROJECT: ubuntu-os-pro-cloud
+FAMILY: ubuntu-pro-2004-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-pro-2204-jammy-arm64-v20240126
+PROJECT: ubuntu-os-pro-cloud
+FAMILY: ubuntu-pro-2204-lts-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-pro-2204-jammy-v20240126
+PROJECT: ubuntu-os-pro-cloud
+FAMILY: ubuntu-pro-2204-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-pro-fips-1804-bionic-v20240118
+PROJECT: ubuntu-os-pro-cloud
+FAMILY: ubuntu-pro-fips-1804-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-pro-fips-2004-focal-v20240126
+PROJECT: ubuntu-os-pro-cloud
+FAMILY: ubuntu-pro-fips-2004-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2014-enterprise-windows-2016-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2014-win-2016
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-arm64-101-17162-336-47
+PROJECT: cos-cloud
+FAMILY: cos-arm64-101-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-arm64-105-17412-226-68
+PROJECT: cos-cloud
+FAMILY: cos-arm64-105-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-arm64-109-17800-66-65
+PROJECT: cos-cloud
+FAMILY: cos-arm64-109-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-arm64-beta-109-17800-66-65
+PROJECT: cos-cloud
+FAMILY: cos-arm64-beta
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-arm64-dev-113-18146-0-0
+PROJECT: cos-cloud
+FAMILY: cos-arm64-dev
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-arm64-stable-109-17800-66-65
+PROJECT: cos-cloud
+FAMILY: cos-arm64-stable
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-beta-109-17800-66-65
+PROJECT: cos-cloud
+FAMILY: cos-beta
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-2004-focal-arm64-v20240125
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-2004-lts-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-2004-focal-v20240125
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-2004-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-2204-jammy-arm64-v20240126
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-2204-lts-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-2204-jammy-v20240126
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-2204-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-2304-lunar-amd64-v20240109
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-2304-amd64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-2304-lunar-arm64-v20240109
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-2304-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-2310-mantic-amd64-v20240125
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-2310-amd64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-2310-mantic-arm64-v20240125
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-2310-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: windows-server-2016-dc-core-v20240111
+PROJECT: windows-cloud
+FAMILY: windows-2016-core
+DEPRECATED: 
+STATUS: READY
+
+NAME: windows-server-2016-dc-v20240111
+PROJECT: windows-cloud
+FAMILY: windows-2016
+DEPRECATED: 
+STATUS: READY
+
+NAME: windows-server-2019-dc-core-v20240111
+PROJECT: windows-cloud
+FAMILY: windows-2019-core
+DEPRECATED: 
+STATUS: READY
+
+NAME: windows-server-2019-dc-v20240111
+PROJECT: windows-cloud
+FAMILY: windows-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: windows-server-2022-dc-core-v20240111
+PROJECT: windows-cloud
+FAMILY: windows-2022-core
+DEPRECATED: 
+STATUS: READY
+
+NAME: windows-server-2022-dc-v20240111
+PROJECT: windows-cloud
+FAMILY: windows-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2016-enterprise-windows-2016-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2016-win-2016
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2016-enterprise-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2016-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2016-standard-windows-2016-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-std-2016-win-2016
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-dev-113-18146-0-0
+PROJECT: cos-cloud
+FAMILY: cos-dev
+DEPRECATED: 
+STATUS: READY
+
+NAME: cos-stable-109-17800-66-65
+PROJECT: cos-cloud
+FAMILY: cos-stable
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-minimal-2004-focal-arm64-v20240126
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-minimal-2004-lts-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-minimal-2004-focal-v20240126
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-minimal-2004-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2016-standard-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-std-2016-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2016-web-windows-2016-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-web-2016-win-2016
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2016-web-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-web-2016-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-enterprise-windows-2016-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2017-win-2016
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-enterprise-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2017-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-enterprise-windows-2022-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2017-win-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-minimal-2204-jammy-arm64-v20240125
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-minimal-2204-lts-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-minimal-2204-jammy-v20240125
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-minimal-2204-lts
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-minimal-2304-lunar-amd64-v20240123
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-minimal-2304-amd64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-minimal-2304-lunar-arm64-v20240123
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-minimal-2304-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-minimal-2310-mantic-amd64-v20240125
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-minimal-2310-amd64
+DEPRECATED: 
+STATUS: READY
+
+NAME: ubuntu-minimal-2310-mantic-arm64-v20240125
+PROJECT: ubuntu-os-cloud
+FAMILY: ubuntu-minimal-2310-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-express-windows-2016-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-exp-2017-win-2016
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-express-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-exp-2017-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-standard-windows-2016-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-std-2017-win-2016
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-standard-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-std-2017-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-standard-windows-2022-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-std-2017-win-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-web-windows-2016-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-web-2017-win-2016
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-web-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-web-2017-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2017-web-windows-2022-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-web-2017-win-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2019-enterprise-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2019-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2019-enterprise-windows-2022-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2019-win-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2019-standard-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-std-2019-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2019-standard-windows-2022-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-std-2019-win-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2019-web-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-web-2019-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2019-web-windows-2022-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-web-2019-win-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2022-enterprise-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2022-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2022-enterprise-windows-2022-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-ent-2022-win-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2022-standard-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-std-2022-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2022-standard-windows-2022-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-std-2022-win-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2022-web-windows-2019-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-web-2022-win-2019
+DEPRECATED: 
+STATUS: READY
+
+NAME: sql-2022-web-windows-2022-dc-v20240111
+PROJECT: windows-sql-cloud
+FAMILY: sql-web-2022-win-2022
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-coreos-39-20240104-3-0-gcp-aarch64
+PROJECT: fedora-coreos-cloud
+FAMILY: fedora-coreos-stable-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-coreos-39-20240104-3-0-gcp-x86-64
+PROJECT: fedora-coreos-cloud
+FAMILY: fedora-coreos-stable
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-coreos-39-20240112-1-0-gcp-aarch64
+PROJECT: fedora-coreos-cloud
+FAMILY: fedora-coreos-next-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-coreos-39-20240112-1-0-gcp-x86-64
+PROJECT: fedora-coreos-cloud
+FAMILY: fedora-coreos-next
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-coreos-39-20240112-2-0-gcp-aarch64
+PROJECT: fedora-coreos-cloud
+FAMILY: fedora-coreos-testing-arm64
+DEPRECATED: 
+STATUS: READY
+
+NAME: fedora-coreos-39-20240112-2-0-gcp-x86-64
+PROJECT: fedora-coreos-cloud
+FAMILY: fedora-coreos-testing
+DEPRECATED: 
+STATUS: READY
+
+
+
+==============================
