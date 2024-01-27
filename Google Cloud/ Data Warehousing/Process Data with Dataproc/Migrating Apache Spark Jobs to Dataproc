@@ -1,0 +1,166 @@
+Migrating Apache Spark Jobs to Dataproc [PWDW]
+
+Dataproc components
+https://cloud.google.com/dataproc/docs/concepts/components/overview#available_optional_components
+https://storage.googleapis.com/cloud-training/datawarehousing/v1.6/mini-courses/student_pdfs/MC5_Process_Data_with_Dataproc.pdf
+
+
+Overview
+In this lab, you will learn how to migrate Apache Spark code to Dataproc. You will follow a sequence of steps, progressively moving more of the job components over to Google Cloud services:
+Run original Spark code on Dataproc (Lift and Shift)
+Replace HDFS with Google Cloud Storage (cloud-native)
+Automate everything so it runs on job-specific clusters (cloud-optimized)
+Load data into BigQuery (modernize)
+
+
+
+Objectives
+In this lab, you will learn how to:
+Migrate existing Spark jobs to Dataproc
+Modify Spark jobs to use Cloud Storage instead of HDFS
+Optimize Spark jobs to run on job-specific clusters
+Replace Spark SQL with BigQuery
+
+
+What will you use?
+Dataproc
+Apache Spark
+AI Platform Notebooks
+BigQuery
+
+
+Scenario
+You are migrating an existing Spark workload to Dataproc and then progressively modifying the Spark code to make use of Google Cloud-native features and services.
+
+
+
+Task 1. Lift and Shift
+Migrate existing Spark jobs to Dataproc
+You will create a new Dataproc cluster and then run an imported Jupyter notebook that uses the cluster's default local Hadoop Distributed File system (HDFS) to store source data and then process that data just as you would on any Hadoop cluster using Spark.
+This demonstrates how many existing analytics workloads such as Jupyter notebooks containing Spark code require no changes when they are migrated to a Dataproc environment.
+
+
+Configure and start a Dataproc cluster
+In the Cloud Console, on the Navigation menu, in the Analytics section, click Dataproc.
+Click Create Cluster and click Create for Cluster on Compute Engine.
+Enter sparktobq for Name.
+Under Location, for Region, select Default Region . Leave Zone set to Any.
+In the Versioning section, click Change.
+Select 2.0 (Debian 10, Hadoop 3.2, Spark 3.1).
+In the Components section, select Enable component gateway under Component gateway.
+Select Jupyter Notebook under Optional components.
+Click Configure nodes (optional). Under Manager node, select Series: E2, Machine Type e2-standard-2.
+Under Worker nodes, select Series: E2, Machine Type e2-standard-2.
+Click Create on the Dataproc creation wizard list.
+The cluster should start in a few minutes. You can proceed to the next step without waiting for the Dataproc Cluster to fully deploy.
+
+
+
+
+
+
+
+Clone the source repository for the lab
+In the Cloud Shell, you clone the Git repository for the lab and copy the required notebook files to the Google Cloud Storage bucket used by Dataproc as the home directory for Jupyter notebooks.
+To clone the Git repository for the lab enter the following command in Cloud Shell:
+git -C ~ clone https://github.com/GoogleCloudPlatform/training-data-analyst
+
+
+To set the Dataproc region enter the following command in Cloud Shell:
+
+
+To locate the default Cloud Storage bucket used by Dataproc enter the following command in Cloud Shell:
+
+
+To copy the sample notebooks into the Jupyter working folder enter the following command in Cloud Shell:
+
+
+
+
+Log in to the Jupyter Notebook
+As soon as the cluster has fully started up you can connect to the Web interfaces. Click the Refresh button to check, as it may be deployed fully by the time you reach this stage.
+On the Dataproc Clusters page, wait for the cluster to finish starting and then click the name of your cluster to open the Cluster details page.
+Click Web Interfaces.
+Click the Jupyter link to open a new Jupyter tab in your browser. This opens the Jupyter home page.
+Click the GCS folder link. Here you can see the contents of the /notebooks/jupyter directory in Google Cloud Storage that now includes the sample Jupyter notebooks used in this lab.
+Click the 01_spark.ipynb notebook to open it.
+Click Cell and then Run All to run all of the cells in the notebook.
+Page back up to the top of the notebook and follow as the notebook completion runs each cell and outputs the results below them.
+You can now step down through the cells and examine the code as it is processed so that you can see what the notebook is doing. In particular pay attention to where the data is saved and processed from.
+The first code cell fetches the source data file, which is an extract from the KDD Cup competition from the Knowledge, Discovery, and Data (KDD) conference in 1999. The data relates to computer intrusion detection events.
+
+
+
+
+In the second code cell, the source data is copied to the default (local) Hadoop file system.
+
+In the third code cell, the command lists contents of the default directory in the cluster's HDFS file system.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Reading in data
+The data are gzipped CSV files. In Spark, these can be read drectly using the textFile method and then parsed by splitting each row on commas.
+The Python Spark code starts in cell In[4]. In this cell Spark SQL is initialized and Spark is used to read in the source data as text and then returns the first five rows.
+
+
+In cell In [5], each row is split using , as a delimiter and parsed using a prepared inline schema in the code:
+
+
+
+Spark analysis
+In cell In [6] , a Spark SQL context is created. And a Spark dataframe using that context is created using the parsed input data from the previous stage. Row data can be selected and displayed using the dataframe's .show() method to output a view summarizing a count of selected fields.
+
+
+
+The .show() method produces an output table similar to this.
+
+
+
+
+SparkSQL can also be used to query the parsed data stored in the Dataframe. In cell In [7] a temporary table (connections) is registered that is then referenced inside the subsequent SparkSQL SQL query statement.
+
+
+
+
+You will see output similar to this truncated example when the query has finished.
+
+
+
+
+And you can now also display this data visually using bar charts.
+The last cell, In [8], uses the %matplotlib inline Jupyter magic function to redirect matplotlib to render a graphic figure inline in the notebook instead of just dumping the data into a variable. This cell displays a bar chart using the attack_stats query from the previous step.
+
+
+
+
+The first part of the output should look like the following chart once all cells in the notebook have run successfully. You can scroll down in your notebook to see the complete output chart.
+
+
+
+
+
+
+
+
+=================
+
+Task 2. Separate compute and storage
+
+Modify Spark jobs to use Cloud Storage instead of HDFS
+Taking this original 'Lift & Shift' sample notebook you will now create a copy that decouples the storage requirements for the job from the compute requirements. In this case all you have to do is replace the Hadoop file system calls with Google Storage calls by replacing hdfs:// storage references with gs:// references in the code and adjusting folder names as necessary.
+You start by using the Cloud Shell to place a copy of the source data in a new Cloud Storage bucket.
+In the Cloud Shell, create a new storage bucket for your source data:
+
+
+
+
