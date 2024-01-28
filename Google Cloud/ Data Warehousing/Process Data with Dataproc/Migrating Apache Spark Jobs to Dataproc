@@ -67,12 +67,17 @@ git -C ~ clone https://github.com/GoogleCloudPlatform/training-data-analyst
 
 
 To set the Dataproc region enter the following command in Cloud Shell:
-
+gcloud config set dataproc/region  us-east1 
 
 To locate the default Cloud Storage bucket used by Dataproc enter the following command in Cloud Shell:
-
+export DP_STORAGE="gs://$(gcloud dataproc clusters describe sparktobq --format=json | jq -r '.config.configBucket')"
+student_00_a9656513663d@cloudshell:~ (qwiklabs-gcp-03-1aa4ca09e378)$ echo $DP_STORAGE
+gs://dataproc-staging-us-east1-564561129789-swsezldc
 
 To copy the sample notebooks into the Jupyter working folder enter the following command in Cloud Shell:
+gcloud storage cp ~/training-data-analyst/quests/sparktobq/*.ipynb $DP_STORAGE/notebooks/jupyter
+
+
 
 
 
@@ -87,21 +92,10 @@ Click the 01_spark.ipynb notebook to open it.
 Click Cell and then Run All to run all of the cells in the notebook.
 Page back up to the top of the notebook and follow as the notebook completion runs each cell and outputs the results below them.
 You can now step down through the cells and examine the code as it is processed so that you can see what the notebook is doing. In particular pay attention to where the data is saved and processed from.
+
 The first code cell fetches the source data file, which is an extract from the KDD Cup competition from the Knowledge, Discovery, and Data (KDD) conference in 1999. The data relates to computer intrusion detection events.
-
-
-
-
 In the second code cell, the source data is copied to the default (local) Hadoop file system.
-
 In the third code cell, the command lists contents of the default directory in the cluster's HDFS file system.
-
-
-
-
-
-
-
 
 
 
@@ -111,38 +105,19 @@ In the third code cell, the command lists contents of the default directory in t
 Reading in data
 The data are gzipped CSV files. In Spark, these can be read drectly using the textFile method and then parsed by splitting each row on commas.
 The Python Spark code starts in cell In[4]. In this cell Spark SQL is initialized and Spark is used to read in the source data as text and then returns the first five rows.
-
-
 In cell In [5], each row is split using , as a delimiter and parsed using a prepared inline schema in the code:
 
 
 
 Spark analysis
 In cell In [6] , a Spark SQL context is created. And a Spark dataframe using that context is created using the parsed input data from the previous stage. Row data can be selected and displayed using the dataframe's .show() method to output a view summarizing a count of selected fields.
-
-
-
 The .show() method produces an output table similar to this.
-
-
-
 
 SparkSQL can also be used to query the parsed data stored in the Dataframe. In cell In [7] a temporary table (connections) is registered that is then referenced inside the subsequent SparkSQL SQL query statement.
 
 
-
-
-You will see output similar to this truncated example when the query has finished.
-
-
-
-
 And you can now also display this data visually using bar charts.
 The last cell, In [8], uses the %matplotlib inline Jupyter magic function to redirect matplotlib to render a graphic figure inline in the notebook instead of just dumping the data into a variable. This cell displays a bar chart using the attack_stats query from the previous step.
-
-
-
-
 The first part of the output should look like the following chart once all cells in the notebook have run successfully. You can scroll down in your notebook to see the complete output chart.
 
 
@@ -159,8 +134,565 @@ Task 2. Separate compute and storage
 Modify Spark jobs to use Cloud Storage instead of HDFS
 Taking this original 'Lift & Shift' sample notebook you will now create a copy that decouples the storage requirements for the job from the compute requirements. In this case all you have to do is replace the Hadoop file system calls with Google Storage calls by replacing hdfs:// storage references with gs:// references in the code and adjusting folder names as necessary.
 You start by using the Cloud Shell to place a copy of the source data in a new Cloud Storage bucket.
+
 In the Cloud Shell, create a new storage bucket for your source data:
+export PROJECT_ID=qwiklabs-gcp-03-1aa4ca09e378
+gcloud storage buckets create gs://qwiklabs-gcp-03-1aa4ca09e378
+
+
+
+In the Cloud Shell, copy the source data into the bucket:
+Make sure that the command completes and the file has been copied to your new storage bucket.
+wget https://storage.googleapis.com/cloud-training/dataengineering/lab_assets/sparklab/kddcup.data_10_percent.gz
+gcloud storage cp kddcup.data_10_percent.gz gs://$PROJECT_ID/
+
+
+Switch back to the 01_spark Jupyter Notebook tab in your browser.
+Click File and then select Make a Copy.
+When the copy opens, click the 01_spark-Copy1 title and rename it to De-couple-storage.
+Open the Jupyter tab for 01_spark.
+Click File and then Save and checkpoint to save the notebook.
+Click File and then Close and Halt to shutdown the notebook.
+If you are prompted to confirm that you want to close the notebook, click Leave or OK.
+Switch back to the De-couple-storage Jupyter Notebook tab in your browser, if necessary.
 
 
 
 
+You no longer need the cells that download and copy the data onto the cluster's internal HDFS file system so you will remove those first.
+To delete a cell, you click in the cell to select it and then click the cut selected cells icon (the scissors) on the notebook toolbar.
+Delete the initial comment cells and the first three code cells ( In [1], In [2], and In [3]) so that the notebook now starts with the section Reading in Data.
+
+You will now change the code in the first cell (still called In[4] unless you have re-run the notebook) that defines the data file source location and reads in the source data. The cell currently contains the following code:
+from pyspark.sql import SparkSession, SQLContext, Row
+spark = SparkSession.builder.appName("kdd").getOrCreate()
+sc = spark.sparkContext
+data_file = "hdfs:///kddcup.data_10_percent.gz"
+raw_rdd = sc.textFile(data_file).cache()
+raw_rdd.take(5)
+
+
+Replace the contents of cell In [4] with the following code. The only change here is create a variable to store a Cloud Storage bucket name and then to point the data_file to the bucket we used to store the source data on Cloud Storage.
+from pyspark.sql import SparkSession, SQLContext, Row
+gcs_bucket='qwiklabs-gcp-03-1aa4ca09e378'
+spark = SparkSession.builder.appName("kdd").getOrCreate()
+sc = spark.sparkContext
+data_file = "gs://"+gcs_bucket+"//kddcup.data_10_percent.gz"
+raw_rdd = sc.textFile(data_file).cache()
+raw_rdd.take(5)
+
+
+When you have replaced the code the first cell will look similar to the following, with your lab project ID as the bucket name:
+https://cdn.qwiklabs.com/6KAnevNQ3eR1UV9ngPIOWi%2FVQ5XsaJ8p2VgILdClKAQ%3D
+
+Click Cell and then Run All to run all of the cells in the notebook.
+You will see exactly the same output as you did when the file was loaded and run from internal cluster storage. Moving the source data files to Cloud Storage only requires that you repoint your storage source reference from hdfs:// to gs://.
+
+
+
+
+
+
+
+
+
+=======================================
+
+
+Task 3. Deploy Spark jobs and workflow templates
+
+
+Optimize Spark jobs to run on job-specific clusters
+You now create a standalone Python file, that can be deployed as a Dataproc Job, that will perform the same functions as this notebook. To do this you add magic commands to the Python cells in a copy of this notebook to write the cell contents out to a file. You will also add an input parameter handler to set the storage bucket location when the Python script is called to make the code more portable.
+In the Jupyter Notebook menu click File and select Make a Copy.
+When the copy opens, click the De-couple-storage-Copy1 and rename it to PySpark-analysis-file.
+Open the Jupyter tab for Decouple-storage.
+Click File and then Save and checkpoint to save the notebook.
+Click File and then Close and Halt to shutdown the notebook.
+If you are prompted to confirm that you want to close the notebook, click Leave or OK.
+Switch back to the PySpark-analysis-file Jupyter Notebook tab in your browser, if necessary.
+
+
+
+Click the first cell at the top of the notebook.
+Click Insert and select Insert Cell Above.
+Paste the following library import and parameter handling code into this new first code cell:
+%%writefile spark_analysis.py
+
+import matplotlib
+matplotlib.use('agg')
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--bucket", help="bucket for input and output")
+args = parser.parse_args()
+
+BUCKET = args.bucket
+
+
+
+The %%writefile spark_analysis.py Jupyter magic command creates a new output file to contain your standalone python script. You will add a variation of this to the remaining cells to append the contents of each cell to the standalone script file.
+This code also imports the matplotlib module and explicitly sets the default plotting backend via matplotlib.use('agg') so that the plotting code runs outside of a Jupyter notebook.
+
+
+
+For the remaining cells, insert %%writefile -a spark_analysis.py at the start of each Python code cell. These are the five cells labelled In [x].
+%%writefile -a spark_analysis.py
+
+For example, the next cell should now look as follows.
+%%writefile -a spark_analysis.py
+
+from pyspark.sql import SparkSession, SQLContext, Row
+
+spark = SparkSession.builder.appName("kdd").getOrCreate()
+sc = spark.sparkContext
+data_file = "gs://{}/kddcup.data_10_percent.gz".format(BUCKET)
+raw_rdd = sc.textFile(data_file).cache()
+#raw_rdd.take(5)
+
+
+
+Repeat this step, inserting %%writefile -a spark_analysis.py at the start of each code cell until you reach the end.
+In the last cell, where the Pandas bar chart is plotted, remove the %matplotlib inline magic command.
+Note: You must remove this inline matplotlib Jupyter magic directive or your script will fail when you run it.
+
+Make sure you have selected the last code cell in the notebook; then, in the menu bar, click Insert and select Insert Cell Below.
+Paste the following code into the new cell.
+%%writefile -a spark_analysis.py
+
+ax[0].get_figure().savefig('report.png');
+
+
+
+
+Add another new cell at the end of the notebook and paste in the following:
+%%writefile -a spark_analysis.py
+
+import google.cloud.storage as gcs
+bucket = gcs.Client().get_bucket(BUCKET)
+for blob in bucket.list_blobs(prefix='sparktobq/'):
+    blob.delete()
+bucket.blob('sparktobq/report.png').upload_from_filename('report.png')
+
+
+
+
+Add a new cell at the end of the notebook and paste in the following:
+%%writefile -a spark_analysis.py
+
+connections_by_protocol.write.format("csv").mode("overwrite").save(
+    "gs://{}/sparktobq/connections_by_protocol".format(BUCKET))
+
+
+
+
+
+
+
+
+
+Test automation
+You now test that the PySpark code runs successfully as a file by calling the local copy from inside the notebook, passing in a parameter to identify the storage bucket you created earlier that stores the input data for this job. The same bucket will be used to store the report data files produced by the script.
+
+In the PySpark-analysis-file notebook, add a new cell at the end of the notebook and paste in the following:
+BUCKET = 'qwiklabs-gcp-03-1aa4ca09e378' 
+print('Writing to {}'.format(BUCKET))
+!/opt/conda/miniconda3/bin/python spark_analysis.py --bucket={BUCKET}
+
+This code assumes that you have followed the earlier instructions and created a Cloud Storage bucket using your lab Project ID as the Storage Bucket name. If you used a different name modify this code to set the BUCKET variable to the name you used.
+
+
+
+
+Add a new cell at the end of the notebook and paste in the following:
+!gsutil ls gs://{BUCKET}/sparktobq/**
+
+This lists the script output files that have been saved to your Cloud Storage bucket.
+
+
+
+To save a copy of the Python file to persistent storage, add a new cell and paste in the following:
+!gsutil cp spark_analysis.py gs://{BUCKET}/sparktobq/spark_analysis.py
+
+
+
+
+Click Cell and then Run All to run all of the cells in the notebook.
+If the notebook successfuly creates and runs the Python file you should see output smilar to the following for the last two cells. This indicates that the script has run to completion saving the output to the Cloud Storage bucket you created earlier in the lab.
+The gsutil ls command's output
+https://cdn.qwiklabs.com/t2N85qObliy0M1cWt9WZDcalnLPiPPVStPxNMDI2xG8%3D
+Note: The most likely source of an error at this stage is that you did not remove the matplotlib directive in In [7]. Recheck that you have modified all of the cells, as per the instructions above, and have not skipped any steps.
+
+
+
+
+
+
+
+
+
+
+
+
+NOW
+Run the Analysis Job from Cloud Shell
+Switch to your Cloud Shell and copy the Python script from Cloud Storage so you can run it as a Dataproc job:
+export PROJECT_ID=qwiklabs-gcp-03-1aa4ca09e378
+gcloud config set dataproc/region  us-east1 
+gcloud storage cp gs://$PROJECT_ID/sparktobq/spark_analysis.py spark_analysis.py
+
+Create a launch script:
+nano submit_onejob.sh
+
+
+
+
+Paste the following into the script:
+#!/bin/bash
+gcloud dataproc jobs submit pyspark \
+       --cluster sparktobq \
+       spark_analysis.py \
+       -- --bucket=$1
+
+Press CTRL+X then Y to exit and save.
+
+
+
+Make the script executable:
+chmod +x submit_onejob.sh
+
+
+Launch the PySpark Analysis job:
+./submit_onejob.sh $PROJECT_ID
+
+
+
+In the Cloud Console tab, navigate to the Dataproc > Clusters page if it is not already open.
+Click Jobs.
+Click the name of the job that is listed. You can monitor progress here as well as from the Cloud shell. Wait for the job to complete successfully.
+Navigate to your storage bucket and note that the output report, /sparktobq/report.png has an updated time-stamp indicating that the stand-alone job has completed successfully.
+The storage bucket used by this job for input and output data storage is the bucket that is used just the Project ID as the name.
+Navigate back to the Dataproc > Clusters page.
+Select the sparktobq cluster and click Delete. You don't need it any more.
+Click Confirm.
+Close both Jupyter tabs in your browser.
+
+
+
+
+
+
+
+Run the analysis job using a Dataproc workflow template
+You will now configure a Workflow Template to deploy the job to an ephemeral cluster.
+
+Switch to your Cloud Shell and enter the following commands to set up environment variables for our workflow template and the managed Dataproc cluster you will use to run the job:
+TEMPLATE=sparktobq
+MACHINE_TYPE=e2-standard-2
+CLUSTER=sparktobq-e
+BUCKET=$PROJECT_ID
+
+
+
+To create a new Dataproc Workflow Template called sparktobq, enter the following in the Cloud Shell:
+gcloud dataproc workflow-templates create $TEMPLATE
+
+
+
+To create a start up script to initialize the Python environment for the job, enter the following in the Cloud Shell:
+# Configure the things we need pip-installed on the cluster
+STARTUP_SCRIPT=gs://${BUCKET}/sparktobq/startup_script.sh
+echo "pip install --upgrade --quiet google-compute-engine google-cloud-storage" > /tmp/startup_script.sh
+echo "pip install --upgrade --quiet matplotlib" >> /tmp/startup_script.sh
+gcloud storage cp /tmp/startup_script.sh $STARTUP_SCRIPT
+gcloud storage cp spark_analysis.py gs://$BUCKET
+
+
+
+To create a managed Dataproc cluster definition for the sparktobq Workflow Template, enter the following in the Cloud Shell:
+# Create new cluster for job
+gcloud dataproc workflow-templates set-managed-cluster $TEMPLATE \
+    --master-machine-type $MACHINE_TYPE \
+    --worker-machine-type $MACHINE_TYPE \
+    --initialization-actions $STARTUP_SCRIPT \
+    --num-workers 2 \
+    --image-version 2.0 \
+    --cluster-name $CLUSTER
+
+This includes the startup script you defined in the previous step and sets the cluster version and configuration details that are required for the job.
+
+
+
+
+
+To register a new job using the sparktobq Dataproc Workflow template, enter the following in the Cloud Shell:
+# Define the code for the steps in the job
+gcloud dataproc workflow-templates add-job \
+  pyspark gs://$BUCKET/spark_analysis.py \
+  --step-id create-report \
+  --workflow-template $TEMPLATE \
+  -- --bucket=$BUCKET
+
+
+
+To instantiate the reporting job, enter the following in the Cloud Shell:
+# submit workflow template
+gcloud dataproc workflow-templates instantiate $TEMPLATE
+
+
+
+Switch back to the Dataproc console page and monitor progress as the template sets up the managed cluster, deploys, and runs the job and then tears down the cluster.
+
+Waiting on operation [projects/qwiklabs-gcp-03-1aa4ca09e378/regions/us-east1/operations/c26a5142-4763-3e4f-9df7-4ae2f7e73324].
+WorkflowTemplate [sparktobq] RUNNING
+Creating cluster: Operation ID [projects/qwiklabs-gcp-03-1aa4ca09e378/regions/us-east1/operations/8ba9f211-aabb-4551-9d57-d3a59d74f0f1].
+Created cluster: sparktobq-e-74tyd2whyqtvc.
+Job ID create-report-74tyd2whyqtvc RUNNING
+Job ID create-report-74tyd2whyqtvc COMPLETED
+Deleting cluster: Operation ID [projects/qwiklabs-gcp-03-1aa4ca09e378/regions/us-east1/operations/90f6aaab-d317-498e-836f-08b86381a20e].
+WorkflowTemplate [sparktobq] DONE
+Deleted cluster: sparktobq-e-74tyd2whyqtvc.
+
+
+
+
+
+
+
+
+
+
+
+=======================================
+
+
+Task 4. Migrate from Spark SQL to BigQuery
+
+
+
+You can now convert the code to run as an AI Platform notebook using BigQuery, rather than SparkSQL. You will import data into BigQuery, as well as convert and run your queries against BigQuery rather than using SparkSQL.
+In the Navigation menu on the Google Cloud Console page, navigate to Vertex AI > Workbench in the Artificial Intelligence section.
+Click Enable Notebooks API.
+Click + Create New.
+Click Environment and then select Python 3 (with Intel MKL).
+Enter sparktobq for the Notebook name.
+Click Create.
+When the instance has started and the Open JupyterLab link has become active, click Open JupyterLab to open the JupyterLab notebook console.
+In the Launcher pane, under Notebook, click Python 3.
+
+Paste in the following code into the first cell to install the Google Cloud BigQuery Python module required to use inline BigQuery using the %%bigquery cell magic keyword:
+%pip install google-cloud-bigquery==1.25.0
+%pip install google-resumable-media==0.6.0
+%pip install google-cloud-storage==1.30.0
+%pip install -U google-cloud-bigquery google-api-core==1.33.2
+# https://stackoverflow.com/questions/74673148/bigquery-client-using-python-timeout-and-polling-issues
+
+Press the Run icon to install the BigQuery module.
+Click Kernel > Restart Kernel to import the new module into the kernel for this notebook.
+
+
+Replace the contents of the first cell with the following code to import the source data from your storage bucket:
+BUCKET_list = !gcloud info --format='value(config.project)'
+BUCKET=BUCKET_list[0]
+!bq --location=US mk sparktobq
+!bq --location=US load --autodetect --source_format=CSV sparktobq.kdd_cup_raw gs://$BUCKET/kddcup.data_10_percent.gz
+
+Press the Run icon to run and advance to the next cell.
+
+
+
+This loads and parses the rows of data in the CSV file and saves the data into the kdd_cup_raw table.
+
+
+
+To examine the data, add the following to the new cell and then click the Run icon:
+%%bigquery
+SELECT * FROM sparktobq.kdd_cup_raw LIMIT 5
+
+This shows that the data has been successfully loaded but we have no column headers. You can add column headers by creating a second table, kdd_cup, and using Create of Replace Table.
+
+
+
+
+
+To create the working table, add the following code to the new cell and then click the Run icon:
+%%bigquery
+
+CREATE OR REPLACE TABLE sparktobq.kdd_cup AS
+
+SELECT
+    int64_field_0 AS duration,
+    string_field_1 AS protocol_type,
+    string_field_2 AS service,
+    string_field_3 AS flag,
+    int64_field_4 AS src_bytes,
+    int64_field_5 AS dst_bytes,
+    int64_field_6 AS wrong_fragment,
+    int64_field_7 AS urgent,
+    int64_field_8 AS hot,
+    int64_field_9 AS num_failed_logins,
+    int64_field_11 AS num_compromised,
+    int64_field_13 AS su_attempted,
+    int64_field_14 AS num_root,
+    int64_field_15 AS num_file_creations,
+    string_field_41 AS label
+FROM
+    sparktobq.kdd_cup_raw
+
+
+
+
+
+
+To examine the data, add the following to the new cell and then click the Run icon:
+%%bigquery
+SELECT * FROM sparktobq.kdd_cup LIMIT 5
+
+This now returns the data with appropriate headers provided by the schema for the newly creaded kdd_cup table.
+
+
+
+
+
+
+You now convert the original Spark SQL data frame query that showed connection counts by protocol to a BigQuery SQL query.
+To create the new query, add the following to the new cell and then click the Run icon:
+%%bigquery connections_by_protocol
+SELECT COUNT(*) AS count
+FROM sparktobq.kdd_cup
+GROUP BY protocol_type
+ORDER by count ASC
+
+
+
+You now recreate the main report query that is used to produce the attack stats chart. Take the time to note that the BigQuery version of the query is identical in syntax to the earlier SparkSQL version, the only difference is the reference to the source table.
+For reference, this is what the original SparkSQL query definition looked like.
+SparkSQL query definition in Jupyter
+https://cdn.qwiklabs.com/dLVD4PlNM4qB4hQA1VMDt36UllPrI%2FhS4Mzzb6Q2LgM%3D
+
+
+
+
+
+
+To create the new query, add the following to the new cell and click the Run icon:
+%%bigquery attack_stats
+    SELECT
+        protocol_type,
+        CASE label
+            WHEN 'normal.' THEN 'no attack'
+            ELSE 'attack'
+        END AS state,
+        COUNT(*) as total_freq,
+        ROUND(AVG(src_bytes), 2) as mean_src_bytes,
+        ROUND(AVG(dst_bytes), 2) as mean_dst_bytes,
+        ROUND(AVG(duration), 2) as mean_duration,
+        SUM(num_failed_logins) as total_failed_logins,
+        SUM(num_compromised) as total_compromised,
+        SUM(num_file_creations) as total_file_creations,
+        SUM(su_attempted) as total_root_attempts,
+        SUM(num_root) as total_root_acceses
+    FROM sparktobq.kdd_cup
+    GROUP BY protocol_type, state
+    ORDER BY 3 DESC
+
+To create the output chart, add the following to the new cell and click the Run icon. Once again, this code is identical to the original code used to produce the chart from the Spark table data.
+%matplotlib inline
+ax = attack_stats.plot.bar(x='protocol_type', subplots=True, figsize=(10,25))
+
+To create the out report data files, paste the following code into the new cell, and click the Run icon:
+import google.cloud.storage as gcs
+
+# save locally
+ax[0].get_figure().savefig('report.png');
+connections_by_protocol.to_csv("connections_by_protocol.csv")
+
+# upload to GCS
+bucket = gcs.Client().get_bucket(BUCKET)
+for blob in bucket.list_blobs(prefix='sparktobq/'):
+    blob.delete()
+for fname in ['report.png', 'connections_by_protocol.csv']:
+    bucket.blob('sparktobq/{}'.format(fname)).upload_from_filename(fname)
+
+In the JupyterLab menu, click Run and select Run All Cells.
+Wait for the report to finish and confirm that the report has been updated in Google Storage using the BigQuery table data.
+
+In the Navigation menu, navigate to Cloud Storage > Buckets and open this in a new tab.
+
+Browse to the qwiklabs-gcp-03-1aa4ca09e378 bucket and open the sparktobq folder. You should see that the timestamp on the report.png file has been updated and now contains the output report generated using BigQuery.
+
+
+
+
+
+
+
+
+
+
+=======================================
+
+Task 5. Use a Cloud Function to automate analysis
+
+
+Note: If you have not already completed Task 4, you must complete the following steps to create the JupyterLab instance. If you have completed Task 4, switch back to your JupyterLab instance and skip these seven steps.
+In the Navigation menu, on the Google Cloud Console page, navigate to Vertex AI > Workbench in the Artificial Intelligence section.
+Click Enable Notebooks API.
+Click + Create New.
+Click Environment and then select Python 3 (with Intel MKL).
+Enter sparktobq for the Notebook name.
+Click Create.
+When the instance has started and the Open JupyterLab link has become active, click Open JupyterLab to open the JupyterLab notebook console.
+
+
+
+
+
+Clone the Git Repository for the lab into your JupyterLab instance
+You will clone the source code repository for the lab into the JupyterLab instance.
+In the JupyterLab File menu, click New and then select Terminal.
+In the JupyterLab terminal, enter the following command:
+!git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+
+
+When the repository has been cloned, navigate to training-data-analyst > quests > sparktobq in the directory pane to the left of the terminal.
+Click 05_functions_dw to open the notebook for the final part of the lab.
+
+
+
+
+
+Use a Cloud Function to automate analysis
+You will now use a pre-configured Jupyter notebook to create, deploy, and test a Cloud Function that automatically loads and processes a data file from Cloud Storage using BigQuery (and the techniques covered in the earlier steps in this lab) to produce a report automatically when a datafile is uploaded to Cloud Storage.
+
+Change the contents of the catch up cell to the following:
+%%bash
+bq mk sparktobq
+wget https://storage.googleapis.com/cloud-training/dataengineering/lab_assets/sparklab/kddcup.data_10_percent.gz
+gunzip kddcup.data_10_percent.gz
+export BUCKET=$(gcloud info --format='value(config.project)')
+gcloud storage buckets create gs://$BUCKET
+gcloud storage cp kdd* gs://$BUCKET/
+
+
+Note: If you have completed Task 4 of the lab, the Cloud Storage bucket and BigQuery dataset will already exist. If that is the case, the commands that create the bucket and dataset will report errors that can be ignored when the cell is run in a later step.
+This configures the notebook for your Qwiklabs project.
+
+
+Page down to the cell below the title Test that the function endpoint works.
+Replace the bucket name in the line BUCKET='cloud-training-demos-ml' with the Project ID for your lab.
+On the menu bar, click Run and then click Run All Cells.
+
+The initial deployment of the Cloud Function will take a couple of minutes to complete.
+Note: The Cloud Function test deployment might fail with a permissions error when it is run for the first time. If that happens, then re-run the cell that deploys the Cloud Function.
+
+In the Cloud Console, navigate to Cloud Functions in the Serverless section.
+Click the name of the function to open it. You can monitor the progress of the initial setup of the function from here.
+Switch back to the Vertex AI Jupyter notebook and monitor progress until it completes.
+The final cell will initially report an exception if it is run before the Cloud Function has completed processing. Re-run this cell when the Cloud Function has completed to see the output files.
+
+
+
+
+
+=======================================
