@@ -1,0 +1,399 @@
+Serverless Data Processing with Dataflow - Writing an ETL pipeline using Apache Beam and Cloud Dataflow (Java)
+
+Build a batch Extract-Transform-Load pipeline in Apache Beam, which takes raw data from Google Cloud Storage and writes it to Google BigQuery.
+Run the Apache Beam pipeline on Cloud Dataflow.
+Parameterize the execution of the pipeline.
+
+
+gcloud auth list
+gcloud config list project
+
+
+
+
+Apache Beam and Cloud Dataflow
+Cloud Dataflow is a fully-managed Google Cloud Platform service for running batch and streaming Apache Beam data processing pipelines.
+Apache Beam is an open source, advanced, unified and portable data processing programming model that allows end users to define both batch and streaming data-parallel processing pipelines using Java, Python, or Go. Apache Beam pipelines can be executed on your local development machine on small datasets, and at scale on Cloud Dataflow. However, because Apache Beam is open source, other runners exist — you can run Beam pipelines on Apache Flink and Apache Spark, among others.
+https://cdn.qwiklabs.com/jm%2FNqn%2FwCrYjVEN0qIz1VU%2BX1x3KYukp5IeCk30oasQ%3D
+
+
+
+
+Lab part 1. Writing an ETL pipeline from scratch
+Introduction
+In this section, you write an Apache Beam Extract-Transform-Load (ETL) pipeline from scratch.
+
+Dataset and use case review
+For each lab in this quest, the input data is intended to resemble web server logs in Common Log format along with other data that a web server might contain. For this first lab, the data is treated as a batch source; in later labs, the data will be treated as a streaming source. Your task is to read the data, parse it, and then write it to BigQuery, a serverless data warehouse, for later data analysis..
+https://en.wikipedia.org/wiki/Common_Log_Format
+
+Create a new terminal in your IDE environment, if you haven't already, and copy and paste the following command:
+# Change directory into the lab
+cd 1_Basic_ETL/labs
+export BASE_DIR=$(pwd)
+
+theia@f8ca3c8b3735:/home/project/training-data-analyst/quests/dataflow/1_Basic_ETL/labs$ echo $BASE_DIR
+/home/project/training-data-analyst/quests/dataflow/1_Basic_ETL/labs
+
+
+
+Modifying the pom.xml file
+Before you can begin editing the actual pipeline code, you need to add in necessary dependencies.
+
+Add the following dependencies to your pom.xml file, which is located in 1_Basic_ETL/labs , inside the dependencies tag:
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-sdks-java-core</artifactId>
+      <version>${beam.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-runners-direct-java</artifactId>
+      <version>${beam.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
+      <version>${beam.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-runners-google-cloud-dataflow-java</artifactId>
+      <version>${beam.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.beam</groupId>
+      <artifactId>beam-sdks-java-extensions-google-cloud-platform-core</artifactId>
+      <version>${beam.version}</version>
+    </dependency>
+
+A <beam.version> tag has already been added in the pom.xml to indicate which version of Beam to install. Save the file.
+
+Lastly, download these dependencies for use in your pipeline:
+# Download dependencies listed in pom.xml
+mvn clean dependency:resolve
+
+
+
+
+
+==============================================
+
+Task 1. Generate synthetic data
+Run the following command in the shell to clone a repository containing scripts for generating synthetic web server logs:
+# Change to the directory containing the relevant code
+cd $BASE_DIR/../..
+
+# Create GCS buckets and BQ dataset
+source create_batch_sinks.sh
+
+# Run a script to generate a batch of web server log events
+bash generate_batch_events.sh
+
+# Examine some sample events
+head events.json
+
+
+
+
+theia@f8ca3c8b3735:/home/project/training-data-analyst/quests/dataflow$ ls
+1_Basic_ETL            6_SQL_Streaming_Analytics       containers                 generate_batch_events.sh      taxonomy.json
+2_Branching_Pipelines  7_Advanced_Streaming_Analytics  create_batch_sinks.sh      generate_streaming_events.sh  user_generator.py
+3_Batch_Analytics      8a_Batch_Testing_Pipeline       create_streaming_sinks.sh  install_packages.sh           users_bq.txt
+4_SQL_Batch_Analytics  8b_Stream_Testing_Pipeline      dm                         schema.yaml
+5_Streaming_Analytics  batch_event_generator.py        gce_image                  streaming_event_generator.py
+
+
+theia@f8ca3c8b3735:/home/project/training-data-analyst/quests/dataflow$ head events.json
+{"num_bytes": 151, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET archea.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:26:51.820278Z", "lat": 39.9122}
+{"num_bytes": 498, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET home.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:26:57.174293Z", "lat": 39.9122}
+{"num_bytes": 385, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET home.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:27:02.652800Z", "lat": 39.9122}
+{"num_bytes": 469, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET home.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:27:09.901579Z", "lat": 39.9122}
+{"num_bytes": 334, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET bacteria.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:27:10.413449Z", "lat": 39.9122}
+{"num_bytes": 153, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET bacteria.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:27:18.715603Z", "lat": 39.9122}
+{"num_bytes": 237, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET bacteria.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:27:26.526839Z", "lat": 39.9122}
+{"num_bytes": 211, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET bacteria.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:27:28.074118Z", "lat": 39.9122}
+{"num_bytes": 358, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET bacteria.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:27:34.830729Z", "lat": 39.9122}
+{"num_bytes": 422, "lng": 116.3561, "user_id": "9046767596275610321", "http_response": 200, "http_request": "\"GET home.html HTTP/1.0\"", "ip": "111.131.84.174", "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows 98; Win 9x 4.90; Trident/3.1)", "timestamp": "2024-02-03T08:27:40.262807Z", "lat": 39.9122}
+
+
+
+
+
+The script creates a file called events.json containing lines resembling the following:
+{"user_id": "-6434255326544341291", "ip": "192.175.49.116", "timestamp": "2019-06-19T16:06:45.118306Z", "http_request": "\"GET eucharya.html HTTP/1.0\"", "lat": 37.751, "lng": -97.822, "http_response": 200, "user_agent": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 5.01; Trident/5.1)", "num_bytes": 182}
+
+
+It then automatically copies this file to your Google Cloud Storage bucket at gs://<YOUR-PROJECT-ID>/events.json.
+Navigate to Google Cloud Storage and confirm that your storage bucket contains a file called events.json.
+
+
+
+
+======================================
+
+Task 2. Read data from your source
+If you get stuck in this or later sections, refer to the solution.
+https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/quests/dataflow/1_Basic_ETL/solution/src/main/java/com/mypackage/pipeline/MyPipeline.java
+
+Open up MyPipeline.java in your IDE, which can be found in 1_Basic_ETL/labs/src/main/java/com/mypackage/pipeline. Make sure the following packages are imported:
+import com.google.gson.Gson;
+import org.apache.beam.runners.dataflow.options.DataflowPipelineOptions;
+import org.apache.beam.sdk.Pipeline;
+import org.apache.beam.sdk.PipelineResult;
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.schemas.JavaFieldSchema;
+import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+Scroll down to the run() method. This method currently contains a pipeline that doesn’t do anything; note how a Pipeline object is created using a PipelineOptions object and the final line of the method runs the pipeline.
+Pipeline pipeline = Pipeline.create(options);
+// Do stuff
+pipeline.run();
+
+
+All data in Apache Beam pipelines reside in PCollections. To create your pipeline’s initial PCollection, apply a root transform to your pipeline object. A root transform creates a PCollection from either an external data source or some local data you specify.
+There are two kinds of root transforms in the Beam SDKs: Read and Create. Read transforms read data from an external source, such as a text file or a database table. Create transforms create a PCollection from an in-memory java.util.Collection and are especially useful for testing.
+
+The following example code shows how to apply a TextIO.Read root transform to read data from a text file. The transform is applied to a Pipeline object p, and returns a pipeline data set in the form of a PCollection<String>. "ReadLines" is your name for the transform, which will be helpful later when working with larger pipelines:
+PCollection<String> lines = pipeline.apply("ReadLines", TextIO.read().from("gs://path/to/input.txt"));
+
+
+
+Inside the run() method, create a string constant called “input” and set its value to gs://<YOUR-PROJECT-ID>/events.json. In a future lab, you will use command-line parameters to pass this information.
+Create a PCollection of strings of all the events in events.json by calling the TextIO.read() transform.
+Add any appropriate import statements to the top of MyPipeline.java, in this case import org.apache.beam.sdk.values.PCollection;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+======================================
+
+
+Task 3. Run your pipeline to verify that it works
+
+Return to the terminal and return to $BASE_DIR folder and execute the mvn compile exec:java command:
+cd $BASE_DIR
+
+# Set up environment variables
+export MAIN_CLASS_NAME=com.mypackage.pipeline.MyPipeline
+mvn compile exec:java \
+-Dexec.mainClass=${MAIN_CLASS_NAME}
+
+
+
+
+Note: In Case build fails, run the command: mvn clean install
+At the moment, your pipeline doesn’t actually do anything; it simply reads in data. However, running it demonstrates a useful workflow, in which you verify the pipeline locally and cheaply using DirectRunner running on your local machine before doing more expensive computations. To run the pipeline using Google Cloud Dataflow, you may change runner to DataflowRunner.
+
+
+
+
+
+
+
+
+
+
+======================================
+
+
+
+Task 4. Adding in a transformation
+If you get stuck, refer to the solution.
+
+Transforms are what change your data. In Apache Beam, transforms are done by the PTransform class. At runtime, these operations will be performed on a number of independent workers. The input and output to every PTransform is a PCollection. In fact, though you may not have realized it, you have already used a PTransform when you read in data from Google Cloud Storage. Whether or not you assigned it to a variable, this created a PCollection of strings.
+
+
+
+Because Beam uses a generic apply method for PCollections, you can chain transforms sequentially. For example, you can chain transforms to create a sequential pipeline, like this one:
+[Final Output PCollection] = [Initial Input PCollection].apply([First Transform])
+    .apply([Second Transform])
+    .apply([Third Transform]);
+
+
+
+
+For this task, use a new sort of transform: a ParDo. ParDo is a Beam transform for generic parallel processing. The ParDo processing paradigm is similar to the “Map” phase of a Map/Shuffle/Reduce-style algorithm: a ParDo transform considers each element in the input PCollection, performs some processing function (your user code) on that element, and emits zero, one, or multiple elements to an output PCollection.
+
+
+
+ParDo is useful for a variety of common data processing operations, including:
+Filtering a data set. You can use ParDo to consider each element in a PCollection and either output that element to a new collection, or discard it.
+Formatting or type-converting each element in a data set. If your input PCollection contains elements that are of a different type or format than you want, you can use ParDo to perform a conversion on each element and output the result to a new PCollection.
+Extracting parts of each element in a data set. If you have a PCollection of records with multiple fields, for example, you can use a ParDo to parse out just the fields you want to consider into a new PCollection.
+Performing computations on each element in a data set. You can use ParDo to perform simple or complex computations on every element, or certain elements, of a PCollection and output the results as a new PCollection.
+
+
+
+
+To complete this task, write a ParDo transform that reads in a JSON string representing a single event, parses it using Gson, and outputs the custom object returned by Gson.
+
+
+
+ParDo functions can be implemented in two ways, either inline or as a static class. Write inline ParDo functions like this:
+pCollection.apply(ParDo.of(new DoFn<T1, T2>() {
+  @ProcessElement
+  public void processElement(@Element T1 i, OutputReceiver<T2> r) {
+    // Do something
+    r.output(0);
+  }
+}));
+
+
+Alternatively, they can be implemented as static classes that extend DoFn. This allows them to be more easily integrated with testing frameworks:
+static class  MyDoFn extends DoFn<T1, T2> {
+  @ProcessElement
+  public void processElement(@Element T1 json, OutputReceiver<T2> r) throws Exception {
+    // Do something
+    r.output(0);
+  }
+}
+
+
+And then, within the pipeline itself:
+[Initial Input PCollection].apply(ParDo.of(new MyDoFn());
+
+
+
+
+
+In order to use Gson, you will need to create an inner class inside of MyPipeline. To take advantage of Beam Schemas, add the @DefaultSchema annotation. More on that later. Here’s an example of how to use Gson:
+// Elsewhere
+@DefaultSchema(JavaFieldSchema.class)
+class MyClass {
+  int field1;
+  String field2;
+}
+
+// Within the DoFn
+Gson gson = new Gson();
+MyClass myClass = gson.fromJson(jsonString, MyClass.class);
+
+
+Name your inner class CommmonLog. To construct this inner class with the right state variables, refer to the sample JSON above: the class should have one state variable for every key in the incoming JSON, and this variable should agree in type and name with the value and key.
+Use String for the "timestamp" for now, Long for "INTEGER" (BigQuery Integer is INT64), Double for "FLOAT" (BigQuery FLOAT is FLOAT64), and match the following BigQuery schema:
+https://cdn.qwiklabs.com/yIkGZKFP8ZVIrrtCWLXobrbjqYF5mV173mSE%2Bd5s7QM%3D
+CommonLog Schema tabbed page, which includes the log information such as user_id, timestamp, and num_bytes.
+
+
+
+
+
+
+
+
+
+
+
+
+======================================
+
+
+Task 5. Writing to a sink
+At this point, your pipeline reads a file from Google Cloud Storage, parses each line, and emits a CommonLog for each element. The next step is to write these CommonLog objects into a BigQuery table.
+While you can instruct your pipeline to create a BigQuery table if needed, you will need to create the dataset ahead of time. This has already been done by the generate_batch_events.sh script.
+
+You can examine the dataset:
+# Examine dataset
+bq ls
+
+# No tables yet
+bq ls logs
+
+
+
+heia@f8ca3c8b3735:/home/project/training-data-analyst/quests/dataflow/1_Basic_ETL/labs$ bq ls
+  datasetId  
+ ----------- 
+  logs      
+
+
+To output your pipeline’s final PCollections, you apply a Write transform to that PCollection. Write transforms can output the elements of a PCollection to an external data sink, such as a database table. You can use Write to output a PCollection at any time in your pipeline, although you’ll typically write out data at the end of your pipeline.
+
+
+
+The following example code shows how to apply a TextIO.Write transform to write a PCollection of String to a text file:
+PCollection<String> pCollection = ...;
+pCollection.apply("WriteMyFile", TextIO.write().to("gs://path/to/output"));
+
+
+
+In this case, instead of using TextIO.write(), use BigQueryIO.write().
+This function requires a number of things to be specified, including the specific table to write to, the schema of this table. You can optionally specify whether to append to an existing table, recreate existing tables (helpful in early pipeline iteration), or create the table if it doesn't exist. By default, this transform will create tables that don't exist and won't write to a non-empty table.
+Since the addition of Beam Schemas to the SDK, you can instruct the transform to infer the table schema from the object passed to it using .useBeamSchema() and by marking the input type. Alternatively, you can explicitly provide the schema with .withSchema() but would need to build a BigQuery TableSchema object to pass. Because you annotated the CommonLog class with @DefaultSchema(JavaFieldSchema.class), each transform is aware of the names and types of the fields in the object, including BigQueryIO.write().
+
+
+Examine the various alternatives in the 'Writing' section of BigQueryIO. In this case, since you annotated your CommonLog object, utilize .useBeamSchema(), and target <YOUR-PROJECT-ID>:logs.logs table like this:
+pCollection.apply(BigQueryIO.<MyObject>write()
+      .to("my-project:output_dataset.output_table")
+      .useBeamSchema()
+.withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
+);
+
+
+
+
+Note: WRITE_TRUNCATE will delete and recreate your table each and every time. This is helpful in early pipeline iteration, especially as you are iterating on your schema, but can easily cause unintended issues in production. WRITE_APPEND or WRITE_EMPTY are safer.
+The set of all available types in Beam Schemas can be found in the Schema. FieldType documentation. All the possible BigQuery datatypes in Standard SQL that can be used can be found in the setType documentation and if you're curious, inspect the Beam Schema to BigQuery conversion.
+
+
+
+
+
+
+
+
+======================================
+
+Task 6. Run your pipeline
+Return to the terminal, change the value of the RUNNER environment variable to DataflowRunner and run your pipeline using the same command as earlier. Once it has started, navigate to the Dataflow product page and note the arrangement of your pipeline. If you gave your transforms names, they will be displayed. Clicking on each one will reveal in real time the number of elements being processed each second.
+
+The overall shape should be a single path, starting with the Read transform and ending with the Write transform. As your pipeline runs, workers will be added automatically, as the service determines the needs of your pipeline, and then disappear when they are no longer needed. You can observe this by navigating to Compute Engine, where you should see virtual machines created by the Dataflow service.
+
+Note: If your pipeline is building successfully, but you're seeing a lot of errors due to code or misconfiguration in the Dataflow service, you can set RUNNER back to 'DirectRunner' to run it locally and receive faster feedback. This approach works in this case because the dataset is small and you are not using any features that aren't supported by DirectRunner.
+# Set up environment variables
+export PROJECT_ID=$(gcloud config get-value project)
+export REGION='us-central1'
+export PIPELINE_FOLDER=gs://${PROJECT_ID}
+export MAIN_CLASS_NAME=com.mypackage.pipeline.MyPipeline
+export RUNNER=DataflowRunner
+
+cd $BASE_DIR
+mvn compile exec:java \
+-Dexec.mainClass=${MAIN_CLASS_NAME} \
+-Dexec.cleanupDaemonThreads=false \
+-Dexec.args=" \
+--project=${PROJECT_ID} \
+--region=${REGION} \
+--stagingLocation=${PIPELINE_FOLDER}/staging \
+--tempLocation=${PIPELINE_FOLDER}/temp \
+--runner=${RUNNER}"
+
+
+
+
+Once your pipeline has finished, return to the BigQuery browser window and query your table.
+
+
+
+
+
