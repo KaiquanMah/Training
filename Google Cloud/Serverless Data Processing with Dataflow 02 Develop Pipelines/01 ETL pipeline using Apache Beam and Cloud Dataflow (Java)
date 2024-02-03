@@ -397,3 +397,225 @@ Once your pipeline has finished, return to the BigQuery browser window and query
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=================================================================
+
+
+
+
+Lab part 2. Parameterizing basic ETL
+
+Much of the work of data engineers is either predictable, like recurring jobs, or it’s similar to other work. 
+However, the process for running pipelines requires engineering expertise. Think back to the steps that you just completed:
+
+You created a development environment and developed a pipeline. The environment included the Apache Beam SDK and other dependencies.
+You executed the pipeline from the development environment. The Apache Beam SDK staged files in Cloud Storage, created a job request file, and submitted the file to the Cloud Dataflow service.
+It would be much better if were a way to initiate a job through an API call or without having to set up a development environment (which non-technical users would be unable to do). This would allow you also to pipelines to run.
+
+
+
+
+Dataflow Templates seek to solve this problem by changing the representation that is created when a pipeline is compiled so that it is parameterizable. Unfortunately, it is not as simple as exposing command-line parameters, although that is something you do in a later lab. With Dataflow Templates, the workflow above becomes:
+Developers create a development environment and develop their pipeline. The environment includes the Apache Beam SDK and other dependencies.
+Developers execute the pipeline and create a template. The Apache Beam SDK stages files in Cloud Storage, creates a template file (similar to job request), and saves the template file in Cloud Storage.
+Non-developer users or other workflow tools like Airflow can easily execute jobs with the Google Cloud Console, gcloud command-line tool, or the REST API to submit template file execution requests to the Cloud Dataflow service.
+In this lab, you will practice using one of the many Google-created Dataflow Templates to accomplish the same task as the pipeline that you built in Part 1.
+https://cloud.google.com/dataflow/docs/guides/templates/provided-templates
+
+
+
+
+
+
+
+Task 1. Creating a JSON schema file
+While you didn't have to pass a TableSchema object to the BigQueryIO.writeTableRows() transform since you utilized .usedBeamSchema() , you must pass the Dataflow Template a JSON file representing the schema in this example.
+
+Open up the terminal and navigate back to the main directory. Run the following command to grab the schema from your existing logs.logs table:
+cd $BASE_DIR/../..
+bq show --schema --format=prettyjson logs.logs
+
+theia@60503077a61d:/home/project/training-data-analyst/quests/dataflow$ bq show --schema --format=prettyjson logs.logs
+[
+  {
+    "mode": "REQUIRED",
+    "name": "user_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "ip",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "lat",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "lng",
+    "type": "FLOAT"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "timestamp",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "http_request",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "user_agent",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "http_response",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "num_bytes",
+    "type": "INTEGER"
+  }
+]
+
+
+
+
+
+
+
+
+
+
+Now, capture this output in a file and upload to GCS. The extra sed commands are to build a full JSON object that DataFlow will expect.
+bq show --schema --format=prettyjson logs.logs | sed '1s/^/{"BigQuery Schema":/' | sed '$s/$/}/' > schema.json
+
+cat schema.json
+
+export PROJECT_ID=$(gcloud config get-value project)
+gsutil cp schema.json gs://${PROJECT_ID}/
+
+
+
+
+
+
+
+
+=================================================================
+
+
+
+Task 2. Writing a JavaScript user-defined function
+The Cloud Storage to BigQuery Dataflow Template requires a JavaScript function to convert the raw text into valid JSON. In this case, each line of text is valid JSON, so the function is somewhat trivial.
+To complete this task, use the IDE to create a .js file with the contents below and then copy it to Google Cloud Storage.
+
+
+Copy the function below to its own transform.js file in the 1_Basic_ETL/ folder:
+function transform(line) {
+  return line;
+}
+
+
+
+Then run the following to copy the file to Google Cloud Storage:
+cd 1_Basic_ETL/
+export PROJECT_ID=$(gcloud config get-value project)
+gsutil cp *.js gs://${PROJECT_ID}/
+
+
+
+
+
+
+
+
+
+
+=================================================================
+
+Task 3. Running a Dataflow Template
+Go to the Cloud Dataflow Web UI. https://console.cloud.google.com/dataflow
+Click CREATE JOB FROM TEMPLATE.
+Enter a job name for your Cloud Dataflow job.
+Under Cloud Dataflow template, select the Text Files on Cloud Storage to BigQuery template under the Process Data in Bulk (batch) section - NOT the Streaming section.
+For JavaScript UDF path in Cloud Storage, enter in the path to your .js , in the form gs://<YOUR-PROJECT-ID>/transform.js
+For JSON path, write the path to your schema.json file, in the form gs://<YOUR-PROJECT-ID>/schema.json
+For Javascript UDF name, enter transform
+For BigQuery output table, enter <myprojectid>:logs.logs
+For Cloud Storage input path, enter the path to events.json in the form gs://<YOUR-PROJECT-ID>/events.json
+For Temporary BigQuery directory, enter a new folder within this same bucket. The job will create it for you.
+For Temporary location, enter a second new folder within this same bucket.
+Leave Encryption at Google-managed key.
+Click the Run job button.
+While your job is running, you may inspect it from within the Dataflow Web UI.
+
+
+
+https://cloud.google.com/dataflow/docs/guides/templates/provided/cloud-storage-to-bigquery
+
+
+
+
+
+
+
+
+
+
+
+
+
+=================================================================
+
+Task 4. Inspect the Dataflow Template code
+
+
+Recall the code for the Dataflow Template you just used.
+https://github.com/GoogleCloudPlatform/DataflowTemplates/blob/main/v1/src/main/java/com/google/cloud/teleport/templates/TextIOToBigQuery.java
+
+
+
+Scroll down to the main method. The code should look familiar to the pipeline you authored!
+It begins with a Pipeline object, created using a PipelineOptions object.
+It consists of a chain of PTransforms, beginning with a TextIO.read() transform.
+The PTransform after the read transform is a bit different; it allows one to use Javascript to transform the input strings if, for example, the source format doesn’t align well with the BigQuery table format; for documentation on how to use this feature, see this page.
+The PTransform after the Javascript UDF uses a library function to convert the JSON into a tablerow; you can inspect that code here.
+https://github.com/GoogleCloudPlatform/DataflowTemplates/blob/main/v1/src/main/java/com/google/cloud/teleport/templates/common/BigQueryConverters.java#L344
+The write PTransform looks a bit different because instead of making use of a schema that is known at graph compile-time, the code is intended to accept parameters that will only be known at run-time. The NestedValueProvider class is what makes this possible. It also is using an explicitally set schema, vs one inferred from Beam schema using .useBeamSchema() as you did.
+
+
+Make sure to check out the next lab, which will cover making pipelines that are not simply chains of PTransforms, and how you can adapt a pipeline you’ve built to be a custom Dataflow Template.
+
+
+
+
+
+
+
+
+
+
+
+
+
+=================================================================
