@@ -36,7 +36,7 @@ cd 3_Batch_Analytics/labs
 # Download dependencies
 mvn clean dependency:resolve
 export BASE_DIR=$(pwd)
-Copied!
+
 
 
 
@@ -52,14 +52,14 @@ source generate_batch_events.sh
 
 # Change to the directory containing the practice version of the code
 cd $BASE_DIR
-Copied!
+
 
 
 
 
 The script creates a file called events.json containing lines resembling the following:
 {"user_id": "-6434255326544341291", "ip": "192.175.49.116", "timestamp": "2019-06-19T16:06:45.118306Z", "http_request": "\"GET eucharya.html HTTP/1.0\"", "lat": 37.751, "lng": -97.822, "http_response": 200, "user_agent": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 5.01; Trident/5.1)", "num_bytes": 182}
-Copied!
+
 
 
 It then automatically copies this file to your Google Cloud Storage bucket at gs://my-project-id/events.json.
@@ -84,7 +84,7 @@ This pipeline already contains the necessary code to accept command-line options
 
 The next step in the pipeline is to aggregate the events by each unique user_id and count pagviews for each. Any easy way to do this on Rows or objects with a Beam schema is to use the Group.byFieldNames() transform and then perform some aggregations on the resulting group. For example:
 purchases.apply(Group.<MyObject>byFieldNames("userId", "address"));
-Copied!
+
 
 will return a PCollection of rows with two fields, "key" and "values". The "key" field is itself a Row with schema <userID:STRING, address:STRING> representing every unique combination of userID and address. The "values" field is of type ITERABLE[ROW[MyObject]] containing all of the objects in that unique group.
 FieldName	  FieldType
@@ -98,7 +98,7 @@ purchases.apply(Group.byFieldNames("userId")
     .aggregateField("itemId", Count.combineFn(), "numPurchases")
     .aggregateField("costCents", Sum.ofLongs(), "totalSpendCents")
     .aggregateField("costCents", Max.ofLongs(), "largestPurchases"));
-Copied!
+
 
 This returns a "key" "value" Row, as opposed to "values" plural.
 FieldName	FieldType
@@ -142,7 +142,7 @@ purchases.apply(Group.byFieldNames("userId")
         .aggregateField("costCents", Sum.ofLongs(), "totalSpendCents")
         .aggregateField("costCents", Max.ofLongs(), "largestPurchases"))
     .apply(Select.fieldNames("key.userId", "value.numPurchases", "value.totalSpendCents", "value.largestPurchases")
-Copied!
+
 
 
 This will retain the relevant field names in the new flattened Schema, and remove "key" and "value".
@@ -281,7 +281,7 @@ You can parse the timestamp field from each record and use the WithTimestamps tr
 PCollection<MyClass> unstamped = ...;
 PCollection<MyClass> stamped =
           unstampedLogs.apply(WithTimestamps.of((MyClass m) -> org.joda.time.Instant.parse(m.getTimestamp())));
-Copied!
+
 
 
 
@@ -325,7 +325,7 @@ PCollection<String> pColl= ...;
 PCollection<String> windowedPCollection = pColl.apply(
 
         Window.<String>into(FixedWindows.of(Duration.standardSeconds(60))));
-Copied!
+
 
 
 To complete this task, add a transform to your pipeline that windows elements into windows one minute long.
@@ -401,7 +401,7 @@ Schema appSchema =
         .addStringField("description")
         .addDateTimeField("rowtime")
         .build();
-Copied!
+
 
 
 
@@ -412,14 +412,14 @@ Row row =
           .withSchema(appSchema)
           .addValues(1, "Some cool app", new Date())
           .build();
-Copied!
+
 
 
 
 
 Usually Beam will require an indication of the new schema on the PTransform if the transform is creating a new row as opposed to mutating a previous one:
 .apply().setRowSchema(appSchema)
-Copied!
+
 
 
 
