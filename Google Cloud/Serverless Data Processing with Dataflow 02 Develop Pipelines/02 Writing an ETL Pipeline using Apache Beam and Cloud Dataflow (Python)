@@ -71,21 +71,21 @@ Open the appropriate lab
 Return to the terminal in your IDE, and copy and paste the following command:
 cd 1_Basic_ETL/lab
 export BASE_DIR=$(pwd)
-Copied!
+
 Set up the virtual environment and dependencies
 Before you can begin editing the actual pipeline code, you need to ensure that you have installed the necessary dependencies.
 
 In the terminal, create a virtual environment for your work in this lab:
 sudo apt-get update && sudo apt-get install -y python3-venv
-Copied!
+
 python3 -m venv df-env
-Copied!
+
 source df-env/bin/activate
-Copied!
+
 Next, install the packages you will need to execute your pipeline:
 python3 -m pip install -q --upgrade pip setuptools wheel
 python3 -m pip install apache-beam[gcp]
-Copied!
+
 Finally, ensure that the Dataflow API is enabled:
 gcloud services enable dataflow.googleapis.com
 
@@ -107,11 +107,11 @@ source create_batch_sinks.sh
 bash generate_batch_events.sh
 
 head events.json
-Copied!
+
 The script creates a file called events.json containing lines resembling the following:
 
 {"user_id": "-6434255326544341291", "ip": "192.175.49.116", "timestamp": "2019-06-19T16:06:45.118306Z", "http_request": "\"GET eucharya.html HTTP/1.0\"", "lat": 37.751, "lng": -97.822, "http_response": 200, "user_agent": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 5.01; Trident/5.1)", "num_bytes": 182}
-Copied!
+
 It then automatically copies this file to your Google Cloud Storage bucket at gs://qwiklabs-gcp-01-b2eea1d16ec3/events.json.
 
 In another browser tab, navigate to Google Cloud Storage and confirm that your storage bucket contains a file called events.json.
@@ -139,7 +139,7 @@ from apache_beam.options.pipeline_options import GoogleCloudOptions
 from apache_beam.options.pipeline_options import PipelineOptions
 from apache_beam.options.pipeline_options import StandardOptions
 from apache_beam.runners import DataflowRunner, DirectRunner
-Copied!
+
 Scroll down to the run() method. This method currently contains a pipeline that doesn’t do anything; note how a Pipeline object is created using a PipelineOptions object and the final line of the method runs the pipeline:
 options = PipelineOptions()
 # Set options
@@ -191,7 +191,7 @@ python3 my_pipeline.py \
   --stagingLocation=gs://$PROJECT_ID/staging/ \
   --tempLocation=gs://$PROJECT_ID/temp/ \
   --runner=DirectRunner
-Copied!
+
 
 
 
@@ -277,7 +277,7 @@ Because Beam uses a generic apply method for PCollections, represented by the pi
 [Output_PCollection] = ([Input_PCollection] | [First Transform]
                                             | [Second Transform]
                                             | [Third Transform])
-Copied!
+
 
 
 
@@ -301,7 +301,7 @@ To complete this task, you need to write a Map transform that reads in a JSON st
 
 Map functions can be implemented in two ways, either inline or via a predefined callable. You write inline Map functions like this:
 p | beam.Map(lambda x : something(x))
-Copied!
+
 
 
 
@@ -311,7 +311,7 @@ def something(x):
   return y
 
 p | beam.Map(something)
-Copied!
+
 
 
 
@@ -324,7 +324,7 @@ class MyDoFn(beam.DoFn):
     yield output
 
 p | beam.ParDo(MyDoFn())
-Copied!
+
 
 
 Remember, if you get stuck, refer to the solution.
@@ -347,7 +347,7 @@ bq ls
 
 # No tables yet
 bq ls logs
-Copied!
+
 
 
 
@@ -375,7 +375,7 @@ To output your pipeline’s final PCollections, you apply a Write transform to t
 The following example code shows how to apply a WriteToText transform to write a PCollection of string to a text file:
 
 p | "WriteMyFile" >> beam.io.WriteToText("gs://path/to/output")
-Copied!
+
 
 
 
@@ -386,7 +386,7 @@ This function requires a number of things to be specified, including the specifi
 
 However, we do need to specify our schema. There are two ways to do this. We can specify the schema as a single string or in JSON format. For example, suppose our dictionary has three fields: name (of type str), ID (of type int) and balance (of type float). Then we can specify the schema in a single line:
 table_schema = 'name:STRING,id:INTEGER,balance:FLOAT'
-Copied!
+
 
 
 
@@ -409,7 +409,7 @@ table_schema = {
             }
         ]
     }
-Copied!
+
 
 
 
@@ -423,7 +423,7 @@ p | 'WriteToBQ' >> beam.io.WriteToBigQuery(
             create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
             write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE
             )
-Copied!
+
 
 
 
@@ -453,7 +453,7 @@ python3 my_pipeline.py \
   --stagingLocation=gs://$PROJECT_ID/staging/ \
   --tempLocation=gs://$PROJECT_ID/temp/ \
   --runner=DataflowRunner
-Copied!
+
 
 
 
@@ -557,7 +557,7 @@ Just like before, you must pass the Dataflow Template a JSON file representing t
 Return to the terminal in your IDE. Run the following commands to navigate back to the main directory, then grab the schema from your existing logs.logs table:
 cd $BASE_DIR/../..
 bq show --schema --format=prettyjson logs.logs
-Copied!
+
 
 
 
@@ -653,7 +653,7 @@ Copy the function below to the transform.js file and save it:
 function transform(line) {
   return line;
 }
-Copied!
+
 
 
 
