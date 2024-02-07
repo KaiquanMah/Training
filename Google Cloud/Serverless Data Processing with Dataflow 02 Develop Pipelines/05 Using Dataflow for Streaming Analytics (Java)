@@ -1,0 +1,651 @@
+Overview
+In this lab, you take many of the concepts introduced in a batch context and apply them in a streaming context to create a pipeline similar to BatchMinuteTrafficPipeline, but which operates in real time. The finished pipeline will first read JSON messages from Pub/Sub and parse those messages before branching. One branch writes some raw data to BigQuery and takes note of event and processing time. The other branch windows and aggregates the data and then writes the results to BigQuery.
+
+Objectives
+Read data from a streaming source.
+Write data to a streaming sink.
+Window data in a streaming context.
+Experimentally verify the effects of lag.
+
+You will build the following pipeline:
+https://cdn.qwiklabs.com/FAbWaMRRLeEg3NbMhByJiMJJui0xfBHj4G9dIC4tFTQ%3D
+
+
+
+
+
+
+==================================
+
+Task 1. Reading from a streaming source
+In previous labs, you used TextIO.read() to read from Google Cloud Storage. In this lab, instead of Google Cloud Storage, you use Pub/Sub. Pub/Sub is a fully managed real-time messaging service that allows publishers to send messages to a "topic," to which subscribers can subscribe via a "subscription."
+https://cdn.qwiklabs.com/6EOQuFRbzhJhpLd8L%2BzW%2FD9ZGISTBs2NprZLGjjIwqU%3D
+
+
+
+The pipeline you create subscribes to a topic called my_topic that you just created via create_streaming_sinks.sh script. In a production situation, this topic will often be created by the publishing team. You can view it in the Pub/Sub portion of the console.
+
+To read from Pub/Sub using Apache Beam’s IO connectors, open the file StreamingMinuteTrafficPipeline.java and add a transform to the pipeline that uses the PubsubIO.readStrings() function. This function returns an instance of PubsubIO.Read, which has a method for specifying the source topic as well as the timestamp attribute. Note that there is already a command-line option for the Pub/Sub topic name. Set the timestamp attribute to “timestamp”, which corresponds to an attribute that will be added to each Pub/Sub message. In the event that message publication time is sufficient, this step would be unnecessary.
+
+Note: Publication time is the time when the Pub/Sub service first receives the message. In systems where there may be a delay between the actual event time and publish time (i.e. late data) and you would like to take this into account, the client code publishing the message needs to set a 'timestamp' metadata attribute on the message and provide the actual event timestamp, since Pub/Sub will not natively know how to extract the event timestamp embedded in the payload.
+You can see the client code generating the messages you'll use in Github.
+To complete this task, add a transform that reads from the Pub/Sub topic specified by the inputTopic command-line parameter. Then, use the provided DoFn, JsonToCommonLog, to convert each JSON string into a CommonLog instance. Collect the results from this transform into a PCollection of CommonLog instances.
+
+https://github.com/GoogleCloudPlatform/training-data-analyst/blob/efc7ed26b88d54bc1d8c0c0376ed01558d1f3b59/quests/dataflow/streaming_event_generator.py#L112
+
+
+
+==================================
+
+Task 2. Window the data
+In the previous non-SQL lab, you implemented fixed-time windowing in order to group events by event time into mutually-exclusive windows of fixed size. Do the same thing here with the streaming inputs. Feel free to reference the previous lab's code or the solution if you get stuck.
+https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/quests/dataflow/3_Batch_Analytics/solution/src/main/java/com/mypackage/pipeline/BatchMinuteTrafficPipeline.java
+https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/quests/dataflow/5_Streaming_Analytics/solution/src/main/java/com/mypackage/pipeline/StreamingMinuteTrafficPipeline.java
+
+
+
+Window into one-minute windows
+Implement a fixed-time window with a one-minute duration as follows:
+PCollection<String> pColl= ...;
+PCollection<String> windowedPCollection = pColl.apply(
+        Window.<String>into(FixedWindows.of(Duration.standardSeconds(60))));
+Copied!
+
+
+To complete this task, add a transform to your pipeline that accepts the PCollection of CommonLog data and windows elements into windows of windowDuration seconds long, with windowDuration as another command-line parameter.
+
+
+
+
+
+
+==================================
+
+
+Task 3. Aggregate the data
+In the previous lab, you used the Count transform to count the number of events per window. Do the same here.
+
+
+
+Count events per window
+To count the number of events within a non-global window, you can write code like the following:
+PCollection<Long> counts = pColl.apply("CountPerWindow",
+Combine.globally(Count.<MyClass>combineFn()).withoutDefaults());
+Copied!
+
+
+
+
+As before, you would need to convert back from the <Long> value to a <Row> value and extract the timestamp as follows:
+@ProcessElement
+public void processElement(@Element T l, OutputReceiver<T> r, IntervalWindow window) {
+   Instant i = Instant.ofEpochMilli(window.end().getMillis());
+   Row row = Row.withSchema(appSchema)
+            .addValues(.......)
+            .build()
+   ...
+   r.output(...);
+}
+Copied!
+
+
+
+
+Remember to indicate the schema for serialization purposes as such:
+apply().setRowSchema(appSchema)
+Copied!
+
+
+
+
+To complete this task, pass the windowed PCollection as input to a transform that counts the number of events per window.
+
+Add an additional transform to convert the results back to a PCollection of Rows with the schema pageviewsSchema that has been provided for you.
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+Task 4. Write to BigQuery
+This pipeline writes to BigQuery in two separate branches. The first branch writes the aggregated data to BigQuery. The second branch, which has already been authored for you, writes out some metadata regarding each raw event, including the event timestamp and the actual processing timestamp. Both write directly to BigQuery via streaming inserts.
+
+
+
+
+
+Write aggregated data to BigQuery
+Writing to BigQuery has been covered extensively in previous labs, so the basic mechanics will not be covered in depth here.
+
+This task makes use of code that has been provided.
+
+
+To complete this task:
+Create a new command-line parameter called aggregateTableName for the table intended to house aggregated data.
+Add a transform, as before, that writes to BigQuery and uses .useBeamSchema().
+Note: When in a streaming context, BigQueryIO.write() does not support WriteDisposition of WRITE_TRUNCATE in which the table is dropped and recreated. In this example, use WRITE_APPEND.
+
+
+
+BigQuery insertion method
+BigQueryIO.Write will default to either streaming inserts for unbounded PCollections or batch file load jobs for bounded PCollections. Streaming inserts can be particularly useful when you want data to show up in aggregations immediately, but does incur extra charges.
+
+In streaming use cases where you are OK with periodic batch uploads on the order of every couple minutes, you can specify this behavior via .withMethod(), and also set the frequency with .withTriggeringFrequency(org.joda.time.Duration).
+
+Refer to the BigQueryIO.Write.Method documentation to learn more.
+
+
+
+
+rowsPCollection.apply("WriteToBQ",
+                BigQueryIO.<Row>write().to(myTableName).useBeamSchema()
+                        .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
+                        .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED));
+Copied!
+
+
+
+
+
+
+
+
+Write raw data to BigQuery
+To complete this task:
+Find the command-line parameter for the name of the table intended to house the raw data.
+Examine the pipeline branch that has been authored for you already. It is capturing processing time in addition to the event time.
+
+
+
+
+
+
+
+
+==================================
+
+
+
+Task 5. Run your pipeline
+To run your pipeline, construct a command resembling the example below:
+Note: It may need to be modified to reflect the names of any command-line options that you have included.
+export PROJECT_ID=$(gcloud config get-value project)
+export REGION=us-central1
+export BUCKET=gs://${PROJECT_ID}
+export PIPELINE_FOLDER=${BUCKET}
+export MAIN_CLASS_NAME=com.mypackage.pipeline.StreamingMinuteTrafficPipeline
+export RUNNER=DataflowRunner
+export PUBSUB_TOPIC=projects/${PROJECT_ID}/topics/my_topic
+export WINDOW_DURATION=60
+export AGGREGATE_TABLE_NAME=${PROJECT_ID}:logs.windowed_traffic
+export RAW_TABLE_NAME=${PROJECT_ID}:logs.raw
+
+cd $BASE_DIR
+mvn compile exec:java \
+-Dexec.mainClass=${MAIN_CLASS_NAME} \
+-Dexec.cleanupDaemonThreads=false \
+-Dexec.args=" \
+--project=${PROJECT_ID} \
+--region=${REGION} \
+--stagingLocation=${PIPELINE_FOLDER}/staging \
+--tempLocation=${PIPELINE_FOLDER}/temp \
+--runner=${RUNNER} \
+--inputTopic=${PUBSUB_TOPIC} \
+--windowDuration=${WINDOW_DURATION} \
+--aggregateTableName=${AGGREGATE_TABLE_NAME} \
+--rawTableName=${RAW_TABLE_NAME}"
+Copied!
+
+
+
+
+
+Ensure in the Dataflow UI that it executes successfully without errors.
+Note: There is no data yet being created and ingested by the pipeline, so it will be running but not processing anything. You will introduce data in the next step.
+
+
+
+
+
+
+
+
+==================================
+
+
+Task 6. Generate lag-less streaming input
+Because this is a streaming pipeline, it subscribes to the streaming source and will await input; there is none currently. In this section, you generate data with no lag. Actual data will almost invariably contain lag. However, it is instructive to understand lag-less streaming inputs.
+The code for this quest includes a script for publishing JSON events using Pub/Sub.
+
+
+
+To complete this task and start publishing messages, open a new terminal side-by-side with your current one and run the following script. It will keep publishing messages until you kill the script. Make sure you are in the training-data-analyst/quests/dataflow folder.
+bash generate_streaming_events.sh
+
+
+
+
+
+
+
+
+
+
+Examine the results
+Wait a couple minutes for the data to start to populate, then navigate to BigQuery and query the logs.minute_traffic table with something like the following query:
+SELECT minute, pageviews
+FROM `logs.windowed_traffic`
+ORDER BY minute ASC
+Copied!
+
+
+
+You should see that the number of pageviews hovered around 100 views a minute.
+Alternatively, you can use the BigQuery command-line tool as a quick way to confirm results are being written:
+bq head logs.raw
+bq head logs.windowed_traffic
+Copied!
+
+
+
+
+Now, enter the following query:
+SELECT
+  UNIX_MILLIS(event_timestamp) - min_millis.min_event_millis AS event_millis,
+  UNIX_MILLIS(processing_timestamp) - min_millis.min_event_millis AS processing_millis,
+  user_id,
+
+  -- added as unique label so we see all the points
+  CAST(UNIX_MILLIS(event_timestamp) - min_millis.min_event_millis AS STRING) AS label
+FROM
+  `logs.raw`
+CROSS JOIN (
+  SELECT
+    MIN(UNIX_MILLIS(event_timestamp)) AS min_event_millis
+  FROM
+    `logs.raw`) min_millis
+WHERE
+  event_timestamp IS NOT NULL
+ORDER BY
+  event_millis ASC
+Copied!
+
+This query illustrates the gap between event time and processing time. However, it can be hard to see the big picture by looking at just the raw tabular data. We will use Data Studio, a lightweight data visualization and BI engine.
+
+
+
+
+
+
+To enable Data Studio:
+Visit Data Studio.
+Click Create in the upper left.
+Click Report.
+Click through the Terms of Service and then click Done.
+Return to the BigQuery UI.
+
+
+
+In the BigQuery UI, click on the Explore data button and choose Explore With Data Studio.
+This will open a new window.
+
+
+
+In the panel on the right-hand side of the window, select the scatter chart type.
+
+
+
+
+In the Data column of the panel on the right-hand side, set the following values:
+Dimension: label
+Metric X: event_millis
+Metric Y: processing_millis
+
+
+
+The chart will transform to be a scatterplot, where all points are on the diagonal. This is because in the streaming data currently being generated, events are processed immediately after they were generated — there was no lag. If you started the data generation script quickly, i.e. before the Dataflow job was fully up and running, you may see a hockey stick, as there were messages queuing in Pub/Sub that were all processed more or less at once.
+
+But in the real world, lag is something that pipelines need to cope with.
+https://cdn.qwiklabs.com/7WOYLEASp4nAcs%2FvYbBkOIpKNKS1xAEDDR5VoM6Uk%2F0%3D
+
+
+
+
+
+
+
+==================================
+
+
+
+
+Task 7. Introduce lag to streaming input
+The streaming event script is capable of generating events with simulated lag.
+
+This represents scenarios where there is a time delay between when the events are generated and published to Pub/Sub, for example when a mobile client goes into offline mode if a user has no service, but events are collected on the device and all published at once when the device is back online.
+
+
+
+
+
+Generate streaming input with lag
+First, close the Data Studio window.
+Then, to turn on lag, return to the window containing IDE Terminal.
+Next, stop the running script using CTRL+C in the Terminal.
+Then, run the following:
+bash generate_streaming_events.sh true
+Copied!
+
+
+
+
+Examine the results
+Return to the BigQuery UI, rerun the query, and then recreate the Data Studio view as before.
+The new data that arrive, which should appear on the right side of the chart, should no longer be perfect; instead, some will appear above the diagonal, indicating that they were processed after the events transpired.
+Chart Type: Scatter
+Dimension: label
+Metric X: event_millis
+Metric Y: processing_millis
+
+
+
+
+
+https://cdn.qwiklabs.com/owc2rbPlOSO18Ts%2F6giCtVsUaRTi2AB0CH%2Fp0zJbBsA%3D
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
