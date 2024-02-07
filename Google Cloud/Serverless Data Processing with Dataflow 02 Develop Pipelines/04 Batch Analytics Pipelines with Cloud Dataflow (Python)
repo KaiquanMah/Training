@@ -39,7 +39,7 @@ Next you will download a code repository for use in this lab.
 In the terminal you just opened, enter the following:
 git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 cd /home/jupyter/training-data-analyst/quests/dataflow_python/
-Copied!
+
 On the left panel of your notebook environment, in the file browser, you will notice the training-data-analyst repo added.
 
 Navigate into the cloned repo /training-data-analyst/quests/dataflow_python/. You will see a folder for each lab, which is further divided into a lab sub-folder with code to be completed by you, and a solution sub-folder with a fully workable example to reference if you get stuck.
@@ -85,7 +85,7 @@ In the terminal in your IDE environment, run the following commands:
 # Change directory into the lab
 cd 3_Batch_Analytics/lab
 export BASE_DIR=$(pwd)
-Copied!
+
 
 
 
@@ -96,19 +96,19 @@ Before you can begin editing the actual pipeline code, you need to ensure that y
 
 Execute the following to create a virtual environment for your work in this lab:
 sudo apt-get update && sudo apt-get install -y python3-venv
-Copied!
+
 # Create and activate virtual environment
 python3 -m venv df-env
-Copied!
+
 source df-env/bin/activate
-Copied!
+
 Next, install the packages you will need to execute your pipeline:
 python3 -m pip install -q --upgrade pip setuptools wheel
 python3 -m pip install apache-beam[gcp]
-Copied!
+
 Ensure that the Dataflow API is enabled:
 gcloud services enable dataflow.googleapis.com
-Copied!
+
 
 
 
@@ -125,7 +125,7 @@ source generate_batch_events.sh
 
 # Change to the directory containing the practice version of the code
 cd $BASE_DIR
-Copied!
+
 
 
 
@@ -133,7 +133,7 @@ Copied!
 The script creates a file called events.json containing lines resembling the following:
 
 {"user_id": "-6434255326544341291", "ip": "192.175.49.116", "timestamp": "2019-06-19T16:06:45.118306Z", "http_request": "\"GET eucharya.html HTTP/1.0\"", "lat": 37.751, "lng": -97.822, "http_response": 200, "user_agent": "Mozilla/5.0 (compatible; MSIE 7.0; Windows NT 5.01; Trident/5.1)", "num_bytes": 182}
-Copied!
+
 It then automatically copies this file to your Google Cloud Storage bucket at Cloud Storage path.
 
 Navigate to Google Cloud Storage and confirm that your storage bucket contains a file called events.json.
@@ -157,7 +157,7 @@ In the file explorer, navigate to training-data-analyst/quest/dataflow_python/3_
 
 The next step in the pipeline is to aggregate the events by each unique user_id and count page views for each. An easy way to do this on objects of type beam.Row or objects with a Beam schema is to use the GroupBy transform and then perform some aggregations on the resulting group. For example:
 purchases | GroupBy('user_id', 'address')
-Copied!
+
 will return a PCollection of rows with two fields.
 
 
@@ -175,7 +175,7 @@ This is most useful when you can perform aggregate calculations on this grouping
              .aggregate_field("cost_cents", sum, "total_spend_cents")
              .aggregate_field("cost_cents", max, "largest_purchases"))
              .with_output_types(UserPurchases)
-Copied!
+
 
 
 
@@ -201,7 +201,7 @@ class UserPurchases(typing.NamedTuple):
   largest_purchases : int
 
 beam.coders.registry.register_coder(UserPurchases, beam.coders.RowCoder)
-Copied!
+
 
 
 
@@ -299,7 +299,7 @@ def add_timestamp(element):
 
 unstamped = ...
 stamped = unstamped | beam.Map(add_timestamp)
-Copied!
+
 
 
 
@@ -337,7 +337,7 @@ https://cdn.qwiklabs.com/qlgW3ZJ8Wq09vBlKOZ8WRg0eZ%2Fa6yHjc4nHwlFgQxOM%3D
 Implement a fixed-time window with a five-minute duration as follows:
 p = ...
 p_windowed = p | beam.WindowInto(beam.window.FixedWindows(5*60))
-Copied!
+
 
 
 To complete this task, add a transform to your pipeline that windows elements into fixed windows one minute long.
