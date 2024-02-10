@@ -1,0 +1,353 @@
+Overview
+Cloud Dataprep by Trifacta is an intelligent data service for visually exploring, cleaning, and preparing data for analysis. Cloud Dataprep is serverless and works at any scale. There is no infrastructure to deploy or manage. Easy data preparation with clicks and no code!
+In this lab, you use Dataprep to manipulate a dataset. You import datasets, correct mismatched data, transform data, and join data. If this is new to you, you'll know what it all is by the end of this lab.
+
+What you'll do
+In this lab, you learn how to use Dataprep to complete the following tasks:
+Import data
+Correct mismatched data
+Transform data
+Join data
+
+
+
+
+Task 1. Create a Cloud Storage bucket in your project
+In the Cloud Console, select Navigation menu(Navigation menu icon) > Cloud Storage > Buckets.
+Click Create bucket.
+In the Create a bucket dialog, Name the bucket a unique name. Leave other settings at their default value.
+Note: Learn more about naming buckets from Bucket naming guidelines.
+Uncheck Enforce public access prevention on this bucket for Choose how to control access to objects.
+Click Create.
+You created your bucket. Remember the bucket name for later steps.
+
+
+
+================================
+
+
+
+Task 2. Initialize Cloud Dataprep
+Open Cloud Shell and run the following command:
+gcloud beta services identity create --service=dataprep.googleapis.com
+
+You should see a message saying the service identity was created.
+
+Select Navigation menu > Dataprep.
+Check to accept the Google Dataprep Terms of Service, then click Accept.
+Check to authorize sharing your account information with Trifacta, then click Agree and Continue.
+Click Allow to allow Trifacta to access project data.
+Click your student username to sign in to Cloud Dataprep by Trifacta. Your username is the Username in the left panel in your lab.
+Click Allow to grant Cloud Dataprep access to your Google Cloud lab account.
+Check to agree to Trifacta Terms of Service, and then click Accept.
+Click Continue on the First time setup screen to create the default storage location.
+Dataprep opens.
+
+
+
+
+
+
+
+
+================================
+
+
+
+
+
+Task 3. Create a flow
+Cloud Dataprep uses a flow workspace to access and manipulate datasets.
+
+Click Flows icon, then the Create button, then select Blank Flow :
+https://cdn.qwiklabs.com/YG1phM5jiQwM1RCHHoMDFd1agP2BHKRlkYlebPFq0YY%3D
+
+Click on Untitled Flow, then name and describe the flow. Since this lab uses 2016 data from the United States Federal Elections Commission 2016, name the flow "FEC-2016", and then describe the flow as "United States Federal Elections Commission 2016".
+Click OK.
+The FEC-2016 flow page opens.
+https://www.fec.gov/data/browse-data/?tab=bulk-data
+
+
+
+
+
+
+
+================================
+
+
+
+Task 4. Import datasets
+In this section you import and add data to the FEC-2016 flow.
+
+Click Add Datasets, then select the Import Datasets link.
+In the left menu pane, select Cloud Storage to import datasets from Cloud Storage, then click on the pencil to edit the file path.
+https://cdn.qwiklabs.com/IMICgtrsZL8%2BLTjmyg754ftt0I%2Bby0KSPPPdj21VCz8%3D
+
+Type gs://spls/gsp105 in the Choose a file or folder text box, then click Go.
+You may have to widen the browser window to see the Go and Cancel buttons.
+
+Click us-fec/.
+Click the + icon next to cn-2016.txt to create a dataset shown in the right pane. Click on the title in the dataset in the right pane and rename it "Candidate Master 2016".
+In the same way add the itcont-2016-orig.txt dataset, and rename it "Campaign Contributions 2016".
+Both datasets are listed in the right pane; click Import & Add to Flow.
+https://cdn.qwiklabs.com/dQ3zTrEHhwVZnUJTvV3U%2Bazq5YT15qPiuq0lf38bRAw%3D
+
+You see both datasets listed as a flow.
+
+
+
+
+
+
+
+
+================================
+
+Task 5. Prep the candidate file
+By default, the Candidate Master 2016 dataset is selected. In the right pane, click Edit Recipe.
+https://cdn.qwiklabs.com/0gU%2F3uAcWjKJtaBy%2FtOmayvgBECbTPs%2FPej3wjki9xw%3D
+The Candidate Master 2016 Transformer page opens in the grid view.
+https://cdn.qwiklabs.com/9r2CStT1fxAbpxqs3CH7XWPY5OjUL5%2F63C3HL21TBNo%3D
+The Transformer page is where you build your transformation recipe and see the results applied to the sample. When you are satisfied with what you see, execute the job against your dataset.
+
+
+
+Each of the column heads have a Name and value that specify the data type. To see data types, click the column icon:
+https://cdn.qwiklabs.com/np%2B84KqotZFP2Vm9pfBSUhQ2QApRI3El5anSZ%2B02Rfs%3D
+
+Notice also that when you click the name of the column, a Details panel opens on the right.
+Click X in the top right of the Details panel to close the Details panel.
+
+
+
+
+
+In the following steps you explore data in the grid view and apply transformation steps to your recipe.
+Column5 provides data from 1990-2064. Widen column5 (like you would on a spreadsheet) to separate each year. Click to select the tallest bin, which represents the year 2016.
+https://cdn.qwiklabs.com/HBgC2djaKgiuQL6XDXuhBIYIZk7ao5FbDSTac%2FmiNV8%3D
+This creates a step where these values are selected.
+
+
+
+
+In the Suggestions panel on the right, in the Keep rows section, click Add to add this step to your recipe.
+https://cdn.qwiklabs.com/Ts1eNo7vDLqRv%2FjotrG8%2FK8kHycDUYORiuFK%2F5xTkp4%3D
+
+The Recipe panel on the right now has the following step:
+
+Keep rows where(DATE(2016, 1, 1) <= column5) && (column5 < DATE(2018, 1, 1))
+
+
+
+In Column6 (State), hover over and click on the mismatched (red) portion of the header to select the mismatched rows.
+https://cdn.qwiklabs.com/J4An%2BqPwdGNzAdgSvOWakFOE%2FnrgJ%2B7ijW4SGJBch38%3D
+
+Scroll down to the bottom (highlighted in red) find the mismatched values and notice how most of these records have the value "P" in column7, and "US" in column6. The mismatch occurs because column6 is marked as a "State" column (indicated by the flag icon), but there are non-state (such as "US") values.
+
+
+
+To correct the mismatch, click X in the top of the Suggestions panel to cancel the transformation, then click on the flag icon in Column6 and change it to a "String" column.
+https://cdn.qwiklabs.com/lZtnUvD5I6KCDVJ4Zot5dmDC1KkektpgBlQgF7OO4pc%3D
+
+There is no longer a mismatch and the column marker is now green.
+
+
+
+
+Filter on just the presidential candidates, which are those records that have the value "P" in column7. In the histogram for column7, hover over the two bins to see which is "H" and which is "P". Click the "P" bin.
+https://cdn.qwiklabs.com/CIUuZWVWsWWQD3xJhQfJhm0qSoFcBK0cYUTpAnxpTbc%3D
+
+In the right Suggestions panel, click Add to accept the step to the recipe.
+https://cdn.qwiklabs.com/3rctj2B3qPP53yr4UU4raLXyed9Zk8lHPlaXNNsZmhY%3D
+
+
+
+
+
+
+
+
+
+================================
+
+
+
+Task 6. Wrangle the Contributions file and join it to the Candidates file
+On the Join page, you can add your current dataset to another dataset or recipe based on information that is common to both datasets.
+
+
+
+
+Before you join the Contributions file to the Candidates file, clean up the Contributions file.
+
+Click on FEC-2016 (the dataset selector) at the top of the grid view page.
+https://cdn.qwiklabs.com/HjbiWzAPc2RlYFro3r4llT65MBJjJkcA%2FklDCnLHn%2BU%3D
+
+Click to select the grayed out Campaign Contributions 2016.
+In the right pane, click Add > Recipe, then click Edit Recipe.
+Click the recipe icon at the top right of the page, then click Add New Step.
+https://cdn.qwiklabs.com/RSjdCHmcco6eqx2PxMao6QLRwsGdN17OuuKWuKScdJA%3D
+
+
+Remove extra delimiters in the dataset.
+Insert the following Wrangle language command in the Search box:
+replacepatterns col: * with: '' on: `{start}"|"{end}` global: true
+
+
+
+The Transformation Builder parses the Wrangle command and populates the Find and Replace transformation fields.
+https://cdn.qwiklabs.com/1BATF7Nh4eCh%2FfdTP63tsOKDXKBpYZrJcvX9xhkmD%2B4%3D
+
+
+
+Click Add to add the transform to the recipe.
+Add another new step to the recipe. Click New Step, then type "Join" in the Search box.
+https://cdn.qwiklabs.com/R0Fk6rYEUC7dlUnXULpsr4UXwyI38nKt9koliI%2BmVeo%3D
+
+
+
+Click Join datasets to open the Joins page.
+Click on "Candidate Master 2016" to join with Campaign Contributions 2016, then Accept in the bottom right.
+https://cdn.qwiklabs.com/uihqUqtOIf5rTyiVKKK6ST1lALU2cg1LrT8dCZJcymA%3D
+
+
+On the right side, hover in the Join keys section, then click on the pencil (Edit icon).
+https://cdn.qwiklabs.com/H4yPICUZhn0v03sH8lME2m%2FOnPRm2EK28AYf1CqwWK0%3D
+
+
+Dataprep infers common keys. There are many common values that Dataprep suggests as Join Keys.
+
+In the Add Key panel, in the Suggested join keys section, click column2 = column11.
+https://cdn.qwiklabs.com/PVJawQJsD8zidQznUENkTaUpglQkmkZUoOe8n7dDMmE%3D
+
+
+
+
+Click Save and Continue.
+Columns 2 and 11 open for your review.
+
+Click Next, then check the checkbox to the left of the "Column" label to add all columns of both datasets to the joined dataset.
+https://cdn.qwiklabs.com/Y0yG7pQbqD9xQ%2FaaawSVMTCspoeJ3GlWrllws8dNzZ0%3D
+
+
+
+Click Review, and then Add to Recipe to return to the grid view.
+
+
+
+
+
+
+
+
+
+================================
+
+
+
+
+Task 7. Summary of data
+Generate a useful summary by aggregating, averaging, and counting the contributions in Column 16 and grouping the candidates by IDs, names, and party affiliation in Columns 2, 24, 8 respectively.
+
+At the top of the Recipe panel on the right, click on New Step and enter the following formula in the Transformation search box to preview the aggregated data.
+pivot value:sum(column16),average(column16),countif(column16 > 0) group: column2,column24,column8
+
+
+
+An initial sample of the joined and aggregated data is displayed, representing a summary table of US presidential candidates and their 2016 campaign contribution metrics.
+https://cdn.qwiklabs.com/KWn%2BlaBdq7hmCkvWKzDVVGl0JYFKCEXuKEJ2GkfF7uA%3D
+
+Click Add to open a summary table of major US presidential candidates and their 2016 campaign contribution metrics.
+
+
+
+
+
+
+
+
+================================
+
+
+
+Task 8. Rename columns
+You can make the data easier to interpret by renaming the columns.
+
+Add each of the renaming and rounding steps individually to the recipe by clicking New Step, then enter:
+rename type: manual mapping: [column24,'Candidate_Name'], [column2,'Candidate_ID'],[column8,'Party_Affiliation'], [sum_column16,'Total_Contribution_Sum'], [average_column16,'Average_Contribution_Sum'], [countif,'Number_of_Contributions']
+
+
+
+Then click Add.
+Add in this last New Step to round the Average Contribution amount:
+set col: Average_Contribution_Sum value: round(Average_Contribution_Sum)
+
+
+
+Then click Add.
+Your results look something like this:
+https://cdn.qwiklabs.com/5kpf3WN7jksYbhJVM%2FTmDRpycoWZ7VvssNsHzWEuEnA%3D
+
+
+
+
+
+
+
+
+================================
+
+
+
+
+
+
+
+
+
+
+
+
+================================
+
+
+
+
+
+
+
+
+
+
+
+
+================================
+
+
+
+
+
+
+
+
+
+
+
+
+================================
+
+
+
+
+
+
+
+
+
+
+
+
+================================
+
+
