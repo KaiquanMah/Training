@@ -22,6 +22,27 @@ Request an online prediction and explanation and see the response.
 gcloud auth list
 gcloud config list project
 
+student_00_bbbd4939f308@cloudshell:~ (qwiklabs-gcp-03-10918307af3a)$ gcloud auth list
+Credentialed Accounts
+
+ACTIVE: *
+ACCOUNT: student-00-bbbd4939f308@qwiklabs.net
+
+To set the active account, run:
+    $ gcloud config set account `ACCOUNT`
+
+student_00_bbbd4939f308@cloudshell:~ (qwiklabs-gcp-03-10918307af3a)$ gcloud config list project
+[core]
+project = qwiklabs-gcp-03-10918307af3a
+
+Your active configuration is: [cloudshell-6091]
+
+
+
+
+
+
+
 
 
 
@@ -41,7 +62,7 @@ gcloud services enable \
   container.googleapis.com
 
 
-
+Operation "operations/acat.p2-663179162516-a440e9fb-0541-48a6-b1e1-5b0fb1097ff0" finished successfully.
 
 
 
@@ -71,6 +92,74 @@ PROJECT_ID=$(gcloud config get-value core/project)
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member=serviceAccount:$SERVICE_ACCOUNT_ID@$PROJECT_ID.iam.gserviceaccount.com \
     --role="roles/storage.admin"
+
+
+
+
+
+student_00_bbbd4939f308@cloudshell:~ (qwiklabs-gcp-03-10918307af3a)$ SERVICE_ACCOUNT_ID=vertex-custom-training-sa
+gcloud iam service-accounts create $SERVICE_ACCOUNT_ID  \
+    --description="A custom service account for Vertex custom training with Tensorboard" \
+    --display-name="Vertex AI Custom Training"
+Created service account [vertex-custom-training-sa].
+student_00_bbbd4939f308@cloudshell:~ (qwiklabs-gcp-03-10918307af3a)$ PROJECT_ID=$(gcloud config get-value core/project)
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$SERVICE_ACCOUNT_ID@$PROJECT_ID.iam.gserviceaccount.com \
+    --role="roles/storage.admin"
+Your active configuration is: [cloudshell-6091]
+Updated IAM policy for project [qwiklabs-gcp-03-10918307af3a].
+bindings:
+- members:
+  - user:student-00-bbbd4939f308@qwiklabs.net
+  role: roles/aiplatform.admin
+- members:
+  - serviceAccount:qwiklabs-gcp-03-10918307af3a@qwiklabs-gcp-03-10918307af3a.iam.gserviceaccount.com
+  - user:student-00-bbbd4939f308@qwiklabs.net
+  role: roles/bigquery.admin
+- members:
+  - serviceAccount:663179162516@cloudbuild.gserviceaccount.com
+  role: roles/cloudbuild.builds.builder
+- members:
+  - serviceAccount:service-663179162516@gcp-sa-cloudbuild.iam.gserviceaccount.com
+  role: roles/cloudbuild.serviceAgent
+- members:
+  - serviceAccount:service-663179162516@compute-system.iam.gserviceaccount.com
+  role: roles/compute.serviceAgent
+- members:
+  - serviceAccount:service-663179162516@container-engine-robot.iam.gserviceaccount.com
+  role: roles/container.serviceAgent
+- members:
+  - serviceAccount:663179162516-compute@developer.gserviceaccount.com
+  - serviceAccount:663179162516@cloudservices.gserviceaccount.com
+  role: roles/editor
+- members:
+  - user:student-00-bbbd4939f308@qwiklabs.net
+  role: roles/iam.serviceAccountUser
+- members:
+  - serviceAccount:service-663179162516@gcp-sa-notebooks.iam.gserviceaccount.com
+  role: roles/notebooks.serviceAgent
+- members:
+  - serviceAccount:admiral@qwiklabs-services-prod.iam.gserviceaccount.com
+  - serviceAccount:qwiklabs-gcp-03-10918307af3a@qwiklabs-gcp-03-10918307af3a.iam.gserviceaccount.com
+  - user:student-00-bbbd4939f308@qwiklabs.net
+  role: roles/owner
+- members:
+  - serviceAccount:qwiklabs-gcp-03-10918307af3a@qwiklabs-gcp-03-10918307af3a.iam.gserviceaccount.com
+  - serviceAccount:vertex-custom-training-sa@qwiklabs-gcp-03-10918307af3a.iam.gserviceaccount.com
+  - user:student-00-bbbd4939f308@qwiklabs.net
+  role: roles/storage.admin
+- members:
+  - user:student-00-bbbd4939f308@qwiklabs.net
+  role: roles/viewer
+- members:
+  - serviceAccount:service-663179162516@gcp-sa-websecurityscanner.iam.gserviceaccount.com
+  role: roles/websecurityscanner.serviceAgent
+etag: BwYRBKJQfEY=
+version: 1
+
+
+
+
 
 
 
