@@ -1,0 +1,217 @@
+Overview
+In this lab, you use BigQuery for data processing and exploratory data analysis and the Vertex AI platform to train and deploy a custom TensorFlow Regressor model to predict customer lifetime value. The goal of the lab is to introduce to Vertex AI through a high value real world use case - predictive CLV. You start with a local BigQuery and TensorFlow workflow that you may already be familiar with and progress toward training and deploying your model in the cloud with Vertex AI.
+https://cdn.qwiklabs.com/9o%2FVIaICB83dXmHVwnBlArxUkhQU61Bkj7776Wsa45Y%3D
+Vertex AI is Google Cloud's next generation, unified platform for machine learning development and the successor to AI Platform announced at Google I/O in May 2021. By developing machine learning solutions on Vertex AI, you can leverage the latest ML pre-built components and AutoML to significantly enhance development productivity, the ability to scale your workflow and decision making with your data, and accelerate time to value.
+
+
+
+Objectives
+In this lab, you will:
+Train a TensorFlow model locally in a hosted Vertex Notebook.
+Create a managed Tabular dataset artifact for experiment tracking.
+Containerize your training code with Cloud Build and push it to Google Cloud Artifact Registry.
+Run a Vertex AI custom training job with your custom model container.
+Use Vertex TensorBoard to visualize model performance.
+Deploy your trained model to a Vertex Online Prediction Endpoint for serving predictions.
+Request an online prediction and explanation and see the response.
+
+
+
+
+
+gcloud auth list
+gcloud config list project
+
+
+
+
+Task 1. Enable Google Cloud services
+In Cloud Shell, use gcloud to enable the services used in the lab:
+gcloud services enable \
+  compute.googleapis.com \
+  iam.googleapis.com \
+  iamcredentials.googleapis.com \
+  monitoring.googleapis.com \
+  logging.googleapis.com \
+  notebooks.googleapis.com \
+  aiplatform.googleapis.com \
+  bigquery.googleapis.com \
+  artifactregistry.googleapis.com \
+  cloudbuild.googleapis.com \
+  container.googleapis.com
+Copied!
+
+
+
+
+
+
+
+
+============================
+
+
+
+
+
+
+
+
+Task 2. Create Vertex AI custom service account for Vertex Tensorboard integration
+Create custom service account:
+SERVICE_ACCOUNT_ID=vertex-custom-training-sa
+gcloud iam service-accounts create $SERVICE_ACCOUNT_ID  \
+    --description="A custom service account for Vertex custom training with Tensorboard" \
+    --display-name="Vertex AI Custom Training"
+Copied!
+
+
+Grant it access to Cloud Storage for writing and retrieving Tensorboard logs:
+PROJECT_ID=$(gcloud config get-value core/project)
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$SERVICE_ACCOUNT_ID@$PROJECT_ID.iam.gserviceaccount.com \
+    --role="roles/storage.admin"
+Copied!
+
+
+Grant it access to your BigQuery data source to read data into your TensorFlow model:
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$SERVICE_ACCOUNT_ID@$PROJECT_ID.iam.gserviceaccount.com \
+    --role="roles/bigquery.admin"
+Copied!
+
+
+Grant it access to Vertex AI for running model training, deployment, and explanation jobs:
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$SERVICE_ACCOUNT_ID@$PROJECT_ID.iam.gserviceaccount.com \
+    --role="roles/aiplatform.user"
+
+
+
+
+
+
+
+
+============================
+
+
+
+
+Task 3. Launch Vertex AI Workbench notebook
+Note: Please use TensorFlow Enterprise 2.13 to complete this lab.
+
+
+To create and launch a Vertex AI Workbench notebook:
+In the Navigation Menu Navigation menu icon, click Vertex AI > Workbench.
+On the Workbench page, click Enable Notebooks API (if it isn't enabled yet).
+Click on User-Managed Notebooks tab then, click Create New.
+Name the notebook.
+Set Region to REGION and Zone to ZONE.
+In the New instance menu, choose the latest version of TensorFlow Enterprise 2.x in Environment.
+Click Advanced Options to edit the instance properties.
+Click Machine type and then select e2-standard-2 for Machine type.
+Leave the remaining fields at their default and click Create.
+
+
+After a few minutes, the Workbench page lists your instance, followed by Open JupyterLab.
+Click Open JupyterLab to open JupyterLab in a new tab. If you get a message saying beatrix jupyterlab needs to be included in the build, just ignore it.
+
+
+
+
+
+
+============================
+
+
+
+
+Task 4. Clone the lab repository
+Next you'll clone the training-data-analyst repo to your JupyterLab instance.
+To clone the training-data-analyst repository in your JupyterLab instance:
+
+
+
+In JupyterLab, click the Terminal icon to open a new terminal.
+Open Terminal
+https://cdn.qwiklabs.com/rSJUVtqbDlE28I3g1GyCXTkPI2nFhq1oA%2FXXMISaSdQ%3D
+
+
+At the command-line prompt, type the following command and press ENTER:
+git clone --depth=1 https://github.com/GoogleCloudPlatform/training-data-analyst
+Copied!
+
+
+To confirm that you have cloned the repository, in the left panel, double click the training-data-analyst folder to see its contents.
+https://cdn.qwiklabs.com/viCi2TfN6FSS9PR2xkTx4S59n2yPDDWf4lHgn79Chy4%3D
+
+It will take several minutes for the repo to clone.
+
+
+
+
+
+
+
+
+============================
+
+
+
+Task 5. Install lab dependencies
+Run the following to go to the training-data-analyst/self-paced-labs/vertex-ai/vertex-ai-qwikstart folder, then pip3 install requirements.txt to install lab dependencies:
+cd training-data-analyst/self-paced-labs/vertex-ai/vertex-ai-qwikstart
+pip3 install --user -r requirements.txt
+Copied!
+
+
+
+Navigate to lab notebook
+In your notebook, navigate to training-data-analyst > self-paced-labs > vertex-ai > vertex-ai-qwikstart, and open lab_exercise.ipynb.
+https://cdn.qwiklabs.com/HrRGv1lnGHe%2B6BMXXhIyq56znZBrWo%2Fsm8ff3iYhIVg%3D
+
+Continue the lab in the notebook, and run each cell by clicking the Run icon at the top of the screen.
+Alternatively, you can execute the code in a cell with SHIFT + ENTER.
+
+Read the narrative and make sure you understand what's happening in each cell.
+
+
+
+
+
+
+
+
+
+============================
+
+
+
+
+
+
+
+
+
+
+
+============================
+
+
+
+
+
+
+
+
+
+
+
+============================
+
+
+
+
+
+
