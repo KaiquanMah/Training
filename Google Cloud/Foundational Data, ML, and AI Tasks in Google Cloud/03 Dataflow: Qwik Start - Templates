@@ -1,0 +1,347 @@
+Overview
+In this lab, you learn how to create a streaming pipeline using one of Google's Dataflow templates. More specifically, you use the Pub/Sub to BigQuery template, which reads messages written in JSON from a Pub/Sub topic and pushes them to a BigQuery table. You can find the documentation for this template in the Get started with Google-provided templates Guide.
+You are given the option to use the Cloud Shell command line or the Cloud console to create the BigQuery dataset and table. Pick one method to use, then continue with that method for the rest of the lab. If you want experience using both methods, run through this lab a second time.
+
+
+
+What you'll do
+Create a BigQuery dataset and table
+Create a Cloud Storage bucket
+Create a streaming pipeline using the Pub/Sub to BigQuery Dataflow template
+
+
+
+gcloud auth list
+gcloud config list project
+
+
+
+
+
+
+
+
+Task 1. Ensure that the Dataflow API is successfully re-enabled
+To ensure access to the necessary API, restart the connection to the Dataflow API.
+
+In the Cloud Console, enter "Dataflow API" in the top search bar. Click on the result for Dataflow API.
+Click Manage.
+Click Disable API.
+If asked to confirm, click Disable.
+
+Click Enable.
+When the API has been enabled again, the page will show the option to disable.
+
+
+
+
+=========================
+
+
+
+
+Task 2. Create a BigQuery dataset, BigQuery table, and Cloud Storage bucket using Cloud Shell
+Let's first create a BigQuery dataset and table.
+Note: This task uses the bq command-line tool. Skip down to Task 3 if you want to complete these steps using the Cloud console.
+
+
+Run the following command to create a dataset called taxirides:
+bq mk taxirides
+
+
+Your output should look similar to:
+Dataset '' successfully created
+
+
+
+
+
+
+Now that you have your dataset created, you'll use it in the following step to instantiate a BigQuery table.
+
+Run the following command to do so:
+bq mk \
+--time_partitioning_field timestamp \
+--schema ride_id:string,point_idx:integer,latitude:float,longitude:float,\
+timestamp:timestamp,meter_reading:float,meter_increment:float,ride_status:string,\
+passenger_count:integer -t taxirides.realtime
+
+
+
+Your output should look similar to:
+Table 'myprojectid:taxirides.realtime' successfully created
+
+
+
+
+
+On its face, the bq mk command looks a bit complicated. However, with some assistance from the BigQuery command-line documentation, we can break down what's going on here. For example, the documentation tells us a little bit more about schema:
+Either the path to a local JSON schema file or a comma-separated list of column definitions in the form [FIELD]:[DATA_TYPE], [FIELD]:[DATA_TYPE].
+In this case, we are using the latter—a comma-separated list.
+
+
+
+
+
+Create a Cloud Storage bucket using Cloud Shell
+Now that we have our table instantiated, let's create a bucket.
+
+Use the Project ID as the bucket name to ensure a globally unique name: <Bucket Name>
+Run the following commands to do so:
+export BUCKET_NAME="Bucket Name"
+
+gsutil mb gs://$BUCKET_NAME/
+
+
+
+
+
+
+
+
+
+
+
+
+=========================
+
+
+
+Task 3. Create a BigQuery dataset, BigQuery table, and Cloud Storage bucket using the Google Cloud console
+Note: Do not complete Task 3 if you completed Task 2, which includes the same tasks in the command line!
+From the left-hand menu, in the Big Data section, click on BigQuery.
+Then click Done.
+Click on the three dots next to your project name under the Explorer section, then click Create dataset.
+Input taxirides as your dataset ID:
+Select us (multiple regions in United States) in Data location.
+Leave all of the other default settings in place and click CREATE DATASET.
+
+
+
+
+You should now see the taxirides dataset underneath your project ID in the left-hand console.
+Click on the three dots next to taxirides dataset and select Open.
+Then select CREATE TABLE in the right-hand side of the console.
+In the Destination > Table Name input, enter realtime.
+
+Under Schema, toggle the Edit as text slider and enter the following:
+ride_id:string,point_idx:integer,latitude:float,longitude:float,timestamp:timestamp,
+meter_reading:float,meter_increment:float,ride_status:string,passenger_count:integer
+
+
+Your console should look like the following:
+https://cdn.qwiklabs.com/LqLoLzf7IkIzwUFthE2fZr5GHTn4W%2BlSQ6YCB58STCI%3D
+
+Now, click Create table.
+
+
+
+
+
+
+Create a Cloud Storage bucket using the Cloud console
+Go back to the Cloud Console and navigate to Cloud Storage > Buckets > Create bucket.
+Use the Project ID as the bucket name to ensure a globally unique name: <Bucket Name>
+Leave all other default settings, then click Create.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=========================
+
+
+
+
+Task 4. Run the pipeline
+Deploy the Dataflow Template:
+gcloud dataflow jobs run iotflow \
+    --gcs-location gs://dataflow-templates-"Region"/latest/PubSub_to_BigQuery \
+    --region "Region" \
+    --worker-machine-type e2-medium \
+    --staging-location gs://"Bucket Name"/temp \
+    --parameters inputTopic=projects/pubsub-public-data/topics/taxirides-realtime,outputTableSpec="Table Name":taxirides.realtime
+
+
+In the Google Cloud Console, on the Navigation menu, click Dataflow > Jobs, and you will see your dataflow job.
+
+Please refer the document for more information.
+https://cloud.google.com/sdk/gcloud/reference/dataflow/jobs/run
+Note: You may need to wait a minute for the activity tracking to complete.
+
+
+
+
+You'll watch your resources build and become ready for use.
+Now, let's go view the data written to BigQuery by clicking on BigQuery found in the Navigation menu.
+When the BigQuery UI opens, you'll see the taxirides dataset added under your project name and realtime table underneath that.
+Note: You may have to wait a few minutes for the data to populate in the BigQuery table.
+
+
+
+
+
+
+=========================
+
+
+
+
+Task 5. Submit a query
+You can submit queries using standard SQL.
+
+
+In the BigQuery Editor, add the following to query the data in your project:
+SELECT * FROM `"Bucket Name".taxirides.realtime` LIMIT 1000
+
+
+
+Now click RUN.
+If you run into any issues or errors, run the query again (the pipeline takes a minute to start up.)
+
+When the query runs successfully, you'll see the output in the Query Results panel as shown below:
+https://cdn.qwiklabs.com/JIACp2MGHfBDfVaUOojawE0nqwdx18el4zjgmqABSuc%3D
+
+
+Great work! You just pulled 1000 taxi rides from a Pub/Sub topic and pushed them to a BigQuery table. As you saw firsthand, templates are a practical, easy-to-use way to run Dataflow jobs. Be sure to check out, in the Dataflow Documentation, some other Google Templates in the Get started with Google-provided templates Guide.
+https://cloud.google.com/dataflow/docs/templates/provided-templates
+
+
+
+
+
+
+
+
+
+
+=========================
+
+
+
+
+Google Cloud Dataflow supports batch processing.
+YES  True
+False
+
+
+
+
+
+Which Dataflow Template used in the lab to run the pipeline?
+YES    Pub/Sub to BigQuery
+Bulk Compress Cloud Storage Files
+Cloud Storage Text to BigQuery
+
+
+
+
+
+
+
+=========================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=========================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=========================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=========================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=========================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=========================
+
+
+
+
+
+
+
+
+
+
+
