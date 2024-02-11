@@ -88,8 +88,7 @@ Now that we have our table instantiated, let's create a bucket.
 
 Use the Project ID as the bucket name to ensure a globally unique name: <Bucket Name>
 Run the following commands to do so:
-export BUCKET_NAME="Bucket Name"
-
+export BUCKET_NAME=qwiklabs-gcp-00-b8705da90de4
 gsutil mb gs://$BUCKET_NAME/
 
 
@@ -172,6 +171,19 @@ gcloud dataflow jobs run iotflow \
     --parameters inputTopic=projects/pubsub-public-data/topics/taxirides-realtime,outputTableSpec="Table Name":taxirides.realtime
 
 
+
+
+
+gcloud dataflow jobs run iotflow \
+    --gcs-location gs://dataflow-templates-us-east1/latest/PubSub_to_BigQuery \
+    --region us-east1 \
+    --worker-machine-type e2-medium \
+    --staging-location gs://qwiklabs-gcp-00-b8705da90de4/temp \
+    --parameters inputTopic=projects/pubsub-public-data/topics/taxirides-realtime,outputTableSpec=qwiklabs-gcp-00-b8705da90de4:taxirides.realtime
+
+
+
+
 In the Google Cloud Console, on the Navigation menu, click Dataflow > Jobs, and you will see your dataflow job.
 
 Please refer the document for more information.
@@ -201,7 +213,7 @@ You can submit queries using standard SQL.
 
 
 In the BigQuery Editor, add the following to query the data in your project:
-SELECT * FROM `"Bucket Name".taxirides.realtime` LIMIT 1000
+SELECT * FROM `qwiklabs-gcp-00-b8705da90de4.taxirides.realtime` LIMIT 1000
 
 
 
