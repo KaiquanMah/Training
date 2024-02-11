@@ -1,0 +1,508 @@
+The Apache Beam SDK is an open source programming model for data pipelines. In Google Cloud, you can define a pipeline with an Apache Beam program and then use Dataflow to run your pipeline.
+In this lab, you set up your Python development environment for Dataflow (using the Apache Beam SDK for Python) and run an example Dataflow pipeline.
+
+
+
+
+What you'll do
+In this lab, you learn how to:
+Create a Cloud Storage bucket to store results of a Dataflow pipeline
+Install the Apache Beam SDK for Python
+Run a Dataflow pipeline remotely
+
+
+
+gcloud auth list
+gcloud config list project
+gcloud config set compute/region us-east1
+
+
+
+
+Ensure that the Dataflow API is successfully enabled
+To ensure access to the necessary API, restart the connection to the Dataflow API.
+In the Cloud Console, enter "Dataflow API" in the top search bar. Click on the result for Dataflow API.
+Click Manage.
+Click Disable API.
+If asked to confirm, click Disable.
+Click Enable.
+When the API has been enabled again, the page will show the option to disable.
+
+
+===============================
+
+
+
+
+
+
+Task 1. Create a Cloud Storage bucket
+When you run a pipeline using Dataflow, your results are stored in a Cloud Storage bucket. In this task, you create a Cloud Storage bucket for the results of the pipeline that you run in a later task.
+
+On the Navigation menu (Navigation menu icon), click Cloud Storage > Buckets.
+Click Create bucket.
+
+In the Create bucket dialog, specify the following attributes:
+Name: To ensure a unique bucket name, use the following name: qwiklabs-gcp-03-ef6a06b1a196-bucket. Note that this name does not include sensitive information in the bucket name, as the bucket namespace is global and publicly visible.
+Location type: Multi-region
+Location: us
+A location where bucket data will be stored.
+Click Create.
+
+If Prompted Public access will be prevented, click Confirm.
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+Task 2. Install the Apache Beam SDK for Python
+To ensure that you use a supported Python version, begin by running the Python3.9 Docker Image:
+docker run -it -e DEVSHELL_PROJECT_ID=$DEVSHELL_PROJECT_ID python:3.9 /bin/bash
+Copied!
+
+This command pulls a Docker container with the latest stable version of Python 3.9 and then opens up a command shell for you to run the following commands inside your container.
+
+
+
+
+
+student_00_bbbd4939f308@cloudshell:~ (qwiklabs-gcp-03-ef6a06b1a196)$ docker run -it -e DEVSHELL_PROJECT_ID=$DEVSHELL_PROJECT_ID python:3.9 /bin/bash
+Unable to find image 'python:3.9' locally
+3.9: Pulling from library/python
+6a299ae9cfd9: Pull complete 
+e08e8703b2fb: Pull complete 
+68e92d11b04e: Pull complete 
+5b9fe7fef9be: Pull complete 
+09864a904dd0: Pull complete 
+0ef83db8e9e9: Pull complete 
+2598e745e6b4: Pull complete 
+598bf3cac8d0: Pull complete 
+Digest: sha256:5e11e0165c7e02fcb4a15772bd25e28266ed9c4e90fded5e8cc7a921affd7826
+Status: Downloaded newer image for python:3.9
+root@2a2ef4930fc3:/# pip install 'apache-beam[gcp]'==2.42.0
+
+
+
+
+
+After the container is running, install the latest version of the Apache Beam SDK for Python by running the following command from a virtual environment:
+pip install 'apache-beam[gcp]'==2.42.0
+Copied!
+You will see some warnings returned that are related to dependencies. It is safe to ignore them for this lab.
+
+
+
+
+Run the wordcount.py example locally by running the following command:
+python -m apache_beam.examples.wordcount --output OUTPUT_FILE
+Copied!
+You may see a message similar to the following:
+INFO:root:Missing pipeline option (runner). Executing pipeline using the default runner: DirectRunner.
+INFO:oauth2client.client:Attempting refresh to obtain initial access_token
+This message can be ignored.
+
+
+
+
+You can now list the files that are on your local cloud environment to get the name of the OUTPUT_FILE:
+ls
+Copied!
+
+
+
+
+
+root@2a2ef4930fc3:/# python -m apache_beam.examples.wordcount --output OUTPUT_FILE
+INFO:root:Missing pipeline option (runner). Executing pipeline using the default runner: DirectRunner.
+INFO:apache_beam.internal.gcp.auth:Setting socket default timeout to 60 seconds.
+INFO:apache_beam.internal.gcp.auth:socket default timeout is 60.0 seconds.
+WARNING:google.auth._default:No project ID could be determined. Consider running `gcloud config set project` or setting the GOOGLE_CLOUD_PROJECT environment variable
+INFO:root:Default Python SDK image for environment is apache/beam_python3.9_sdk:2.42.0
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function annotate_downstream_side_inputs at 0x7f2fd264e040> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function fix_side_input_pcoll_coders at 0x7f2fd264e160> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function pack_combiners at 0x7f2fd264e670> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function lift_combiners at 0x7f2fd264e700> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function expand_sdf at 0x7f2fd264e8b0> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function expand_gbk at 0x7f2fd264e940> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function sink_flattens at 0x7f2fd264ea60> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function greedily_fuse at 0x7f2fd264eaf0> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function read_to_impulse at 0x7f2fd264eb80> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function impulse_to_input at 0x7f2fd264ec10> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function sort_stages at 0x7f2fd264ee50> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function add_impulse_to_dangling_transforms at 0x7f2fd264ef70> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function setup_timer_mapping at 0x7f2fd264edc0> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function populate_data_channel_coders at 0x7f2fd264eee0> ====================
+INFO:apache_beam.runners.worker.statecache:Creating state cache with size 100
+INFO:apache_beam.runners.portability.fn_api_runner.worker_handlers:Created Worker handler <apache_beam.runners.portability.fn_api_runner.worker_handlers.EmbeddedWorkerHandler object at 0x7f2fd2562d00> for environment ref_Environment_default_environment_1 (beam:env:embedded_python:v1, b'')
+INFO:apache_beam.io.filebasedsink:Starting finalize_write threads with num_shards: 1 (skipped: 0), batches: 1, num_threads: 1
+INFO:apache_beam.io.filebasedsink:Renamed 1 shards in 0.01 seconds.
+
+
+
+root@2a2ef4930fc3:/# ls
+OUTPUT_FILE-00000-of-00001  bin  boot  dev  etc  home  lib  lib32  lib64  libx32  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+
+
+
+
+
+Copy the name of the OUTPUT_FILE and cat into it:
+cat <file name>
+Copied!
+Your results show each word in the file and how many times it appears.
+
+
+
+
+
+
+https://github.com/apache/beam/blob/master/sdks/python/apache_beam/examples/wordcount.py
+root@2a2ef4930fc3:/# cat OUTPUT_FILE-00000-of-00001
+
+tart: 1
+Knows: 1
+freer: 1
+show'dst: 1
+French: 2
+camp: 4
+Something: 2
+imperfect: 2
+imports: 1
+personal: 1
+required: 1
+necessary: 1
+Marshal: 1
+Monsieur: 1
+...
+bootless: 1
+applied: 1
+resign: 1
+During: 1
+absolute: 1
+merited: 1
+wages: 1
+cup: 1
+deservings: 1
+hang'd: 1
+Thou'lt: 1
+button: 1
+faints: 1
+Break: 1
+Vex: 1
+ghost: 1
+rack: 1
+Stretch: 1
+usurp'd: 1
+Friends: 1
+Rule: 1
+gored: 1
+journey: 1
+weight: 1
+ought: 1
+oldest: 1
+
+
+
+
+
+
+
+
+===============================
+
+
+Task 3. Run an example Dataflow pipeline remotely
+Set the BUCKET environment variable to the bucket you created earlier:
+BUCKET=gs://wiklabs-gcp-03-ef6a06b1a196-bucket
+Copied!
+
+
+
+Now you'll run the wordcount.py example remotely:
+python -m apache_beam.examples.wordcount --project $DEVSHELL_PROJECT_ID \
+  --runner DataflowRunner \
+  --staging_location $BUCKET/staging \
+  --temp_location $BUCKET/temp \
+  --output $BUCKET/results/output \
+  --region us-east1
+Copied!
+
+
+In your output, wait until you see the message:
+JOB_MESSAGE_DETAILED: Workers have started successfully.
+Then continue with the lab.
+
+
+
+
+
+
+root@2a2ef4930fc3:/# BUCKET=gs://wiklabs-gcp-03-ef6a06b1a196-bucket
+root@2a2ef4930fc3:/# python -m apache_beam.examples.wordcount --project $DEVSHELL_PROJECT_ID \
+  --runner DataflowRunner \
+  --staging_location $BUCKET/staging \
+  --temp_location $BUCKET/temp \
+  --output $BUCKET/results/output \
+  --region us-east1
+
+INFO:apache_beam.internal.gcp.auth:Setting socket default timeout to 60 seconds.
+INFO:apache_beam.internal.gcp.auth:socket default timeout is 60.0 seconds.
+WARNING:google.auth._default:No project ID could be determined. Consider running `gcloud config set project` or setting the GOOGLE_CLOUD_PROJECT environment variable
+INFO:apache_beam.runners.portability.stager:Downloading source distribution of the SDK from PyPi
+INFO:apache_beam.runners.portability.stager:Executing command: ['/usr/local/bin/python', '-m', 'pip', 'download', '--dest', '/tmp/tmp_6039b6r', 'apache-beam==2.42.0', '--no-deps', '--no-binary', ':all:']
+
+[notice] A new release of pip is available: 23.0.1 -> 24.0
+[notice] To update, run: pip install --upgrade pip
+INFO:apache_beam.runners.portability.stager:Staging SDK sources from PyPI: dataflow_python_sdk.tar
+INFO:apache_beam.runners.portability.stager:Downloading binary distribution of the SDK from PyPi
+INFO:apache_beam.runners.portability.stager:Executing command: ['/usr/local/bin/python', '-m', 'pip', 'download', '--dest', '/tmp/tmp_6039b6r', 'apache-beam==2.42.0', '--no-deps', '--only-binary', ':all:', '--python-version', '39', '--implementation', 'cp', '--abi', 'cp39', '--platform', 'manylinux1_x86_64']
+
+[notice] A new release of pip is available: 23.0.1 -> 24.0
+[notice] To update, run: pip install --upgrade pip
+INFO:apache_beam.runners.portability.stager:Staging binary distribution of the SDK from PyPI: apache_beam-2.42.0-cp39-cp39-manylinux1_x86_64.whl
+INFO:root:Default Python SDK image for environment is apache/beam_python3.9_sdk:2.42.0
+INFO:root:Using provided Python SDK container image: gcr.io/cloud-dataflow/v1beta3/python39:2.42.0
+INFO:root:Python SDK container image set to "gcr.io/cloud-dataflow/v1beta3/python39:2.42.0" for Docker environment
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function pack_combiners at 0x7fa0d3b82ca0> ====================
+INFO:apache_beam.runners.portability.fn_api_runner.translations:==================== <function sort_stages at 0x7fa0d3b834c0> ====================
+INFO:apache_beam.runners.dataflow.internal.apiclient:Starting GCS upload to gs://wiklabs-gcp-03-ef6a06b1a196-bucket/staging/beamapp-root-0211105327-046918-wy5spqad.1707648807.047091/pickled_main_session...
+INFO:apache_beam.runners.dataflow.internal.apiclient:Completed GCS upload to gs://wiklabs-gcp-03-ef6a06b1a196-bucket/staging/beamapp-root-0211105327-046918-wy5spqad.1707648807.047091/pickled_main_session in 0 seconds.
+INFO:apache_beam.runners.dataflow.internal.apiclient:Starting GCS upload to gs://wiklabs-gcp-03-ef6a06b1a196-bucket/staging/beamapp-root-0211105327-046918-wy5spqad.1707648807.047091/dataflow_python_sdk.tar...
+INFO:apache_beam.runners.dataflow.internal.apiclient:Completed GCS upload to gs://wiklabs-gcp-03-ef6a06b1a196-bucket/staging/beamapp-root-0211105327-046918-wy5spqad.1707648807.047091/dataflow_python_sdk.tar in 1 seconds.
+INFO:apache_beam.runners.dataflow.internal.apiclient:Starting GCS upload to gs://wiklabs-gcp-03-ef6a06b1a196-bucket/staging/beamapp-root-0211105327-046918-wy5spqad.1707648807.047091/apache_beam-2.42.0-cp39-cp39-manylinux1_x86_64.whl...
+INFO:apache_beam.runners.dataflow.internal.apiclient:Completed GCS upload to gs://wiklabs-gcp-03-ef6a06b1a196-bucket/staging/beamapp-root-0211105327-046918-wy5spqad.1707648807.047091/apache_beam-2.42.0-cp39-cp39-manylinux1_x86_64.whl in 17 seconds.
+INFO:apache_beam.runners.dataflow.internal.apiclient:Starting GCS upload to gs://wiklabs-gcp-03-ef6a06b1a196-bucket/staging/beamapp-root-0211105327-046918-wy5spqad.1707648807.047091/pipeline.pb...
+INFO:apache_beam.runners.dataflow.internal.apiclient:Completed GCS upload to gs://wiklabs-gcp-03-ef6a06b1a196-bucket/staging/beamapp-root-0211105327-046918-wy5spqad.1707648807.047091/pipeline.pb in 0 seconds.
+INFO:apache_beam.runners.dataflow.internal.apiclient:Create job: <Job
+ clientRequestId: '20240211105327047965-3701'
+ createTime: '2024-02-11T10:53:50.344775Z'
+ currentStateTime: '1970-01-01T00:00:00Z'
+ id: '2024-02-11_02_53_49-14777054581138948073'
+ location: 'us-east1'
+ name: 'beamapp-root-0211105327-046918-wy5spqad'
+ projectId: 'qwiklabs-gcp-03-ef6a06b1a196'
+ stageStates: []
+ startTime: '2024-02-11T10:53:50.344775Z'
+ steps: []
+ tempFiles: []
+ type: TypeValueValuesEnum(JOB_TYPE_BATCH, 1)>
+INFO:apache_beam.runners.dataflow.internal.apiclient:Created job with id: [2024-02-11_02_53_49-14777054581138948073]
+INFO:apache_beam.runners.dataflow.internal.apiclient:Submitted job: 2024-02-11_02_53_49-14777054581138948073
+INFO:apache_beam.runners.dataflow.internal.apiclient:To access the Dataflow monitoring console, please navigate to https://console.cloud.google.com/dataflow/jobs/us-east1/2024-02-11_02_53_49-14777054581138948073?project=qwiklabs-gcp-03-ef6a06b1a196
+INFO:apache_beam.runners.dataflow.dataflow_runner:Job 2024-02-11_02_53_49-14777054581138948073 is in state JOB_STATE_PENDING
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:51.334Z: JOB_MESSAGE_DETAILED: Autoscaling is enabled for job 2024-02-11_02_53_49-14777054581138948073. The number of workers will be between 1 and 4000.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:51.377Z: JOB_MESSAGE_DETAILED: Autoscaling was automatically enabled for job 2024-02-11_02_53_49-14777054581138948073.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:52.905Z: JOB_MESSAGE_BASIC: Worker configuration: n1-standard-1 in us-east1-d.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.491Z: JOB_MESSAGE_DETAILED: Expanding SplittableParDo operations into optimizable parts.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.513Z: JOB_MESSAGE_DETAILED: Expanding CollectionToSingleton operations into optimizable parts.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.555Z: JOB_MESSAGE_DETAILED: Expanding CoGroupByKey operations into optimizable parts.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.575Z: JOB_MESSAGE_DEBUG: Combiner lifting skipped for step Write/Write/WriteImpl/GroupByKey: GroupByKey not followed by a combiner.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.613Z: JOB_MESSAGE_DETAILED: Expanding GroupByKey operations into optimizable parts.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.632Z: JOB_MESSAGE_DEBUG: Annotating graph with Autotuner information.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.654Z: JOB_MESSAGE_DETAILED: Fusing adjacent ParDo, Read, Write, and Flatten operations
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.675Z: JOB_MESSAGE_DETAILED: Fusing consumer Write/Write/WriteImpl/InitializeWrite into Write/Write/WriteImpl/DoOnce/Map(decode)
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.693Z: JOB_MESSAGE_DETAILED: Fusing consumer Write/Write/WriteImpl/DoOnce/FlatMap(<lambda at core.py:3481>) into Write/Write/WriteImpl/DoOnce/Impulse
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.711Z: JOB_MESSAGE_DETAILED: Fusing consumer Write/Write/WriteImpl/DoOnce/Map(decode) into Write/Write/WriteImpl/DoOnce/FlatMap(<lambda at core.py:3481>)
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.730Z: JOB_MESSAGE_DETAILED: Fusing consumer Read/Read/Map(<lambda at iobase.py:908>) into Read/Read/Impulse
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.749Z: JOB_MESSAGE_DETAILED: Fusing consumer ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/PairWithRestriction into Read/Read/Map(<lambda at iobase.py:908>)
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.767Z: JOB_MESSAGE_DETAILED: Fusing consumer ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/SplitWithSizing into ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/PairWithRestriction
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.786Z: JOB_MESSAGE_DETAILED: Fusing consumer Split into ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/ProcessElementAndRestrictionWithSizing
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.805Z: JOB_MESSAGE_DETAILED: Fusing consumer PairWithOne into Split
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.822Z: JOB_MESSAGE_DETAILED: Fusing consumer GroupAndSum/GroupByKey+GroupAndSum/Combine/Partial into PairWithOne
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.839Z: JOB_MESSAGE_DETAILED: Fusing consumer GroupAndSum/GroupByKey/Write into GroupAndSum/GroupByKey+GroupAndSum/Combine/Partial
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.858Z: JOB_MESSAGE_DETAILED: Fusing consumer GroupAndSum/Combine into GroupAndSum/GroupByKey/Read
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.870Z: JOB_MESSAGE_DETAILED: Fusing consumer GroupAndSum/Combine/Extract into GroupAndSum/Combine
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.891Z: JOB_MESSAGE_DETAILED: Fusing consumer Format into GroupAndSum/Combine/Extract
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.909Z: JOB_MESSAGE_DETAILED: Fusing consumer Write/Write/WriteImpl/WindowInto(WindowIntoFn) into Format
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.929Z: JOB_MESSAGE_DETAILED: Fusing consumer Write/Write/WriteImpl/WriteBundles into Write/Write/WriteImpl/WindowInto(WindowIntoFn)
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.951Z: JOB_MESSAGE_DETAILED: Fusing consumer Write/Write/WriteImpl/Pair into Write/Write/WriteImpl/WriteBundles
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:53.977Z: JOB_MESSAGE_DETAILED: Fusing consumer Write/Write/WriteImpl/GroupByKey/Write into Write/Write/WriteImpl/Pair
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.001Z: JOB_MESSAGE_DETAILED: Fusing consumer Write/Write/WriteImpl/Extract into Write/Write/WriteImpl/GroupByKey/Read
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.036Z: JOB_MESSAGE_DEBUG: Workflow config is missing a default resource spec.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.058Z: JOB_MESSAGE_DEBUG: Adding StepResource setup and teardown to workflow graph.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.076Z: JOB_MESSAGE_DEBUG: Adding workflow start and stop steps.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.093Z: JOB_MESSAGE_DEBUG: Assigning stage ids.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.188Z: JOB_MESSAGE_DEBUG: Executing wait step start34
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.226Z: JOB_MESSAGE_BASIC: Executing operation Read/Read/Impulse+Read/Read/Map(<lambda at iobase.py:908>)+ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/PairWithRestriction+ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/SplitWithSizing
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.244Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/DoOnce/Impulse+Write/Write/WriteImpl/DoOnce/FlatMap(<lambda at core.py:3481>)+Write/Write/WriteImpl/DoOnce/Map(decode)+Write/Write/WriteImpl/InitializeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.257Z: JOB_MESSAGE_DEBUG: Starting worker pool setup.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:53:54.277Z: JOB_MESSAGE_BASIC: Starting 1 workers in us-east1-d...
+INFO:apache_beam.runners.dataflow.dataflow_runner:Job 2024-02-11_02_53_49-14777054581138948073 is in state JOB_STATE_RUNNING
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:54:44.413Z: JOB_MESSAGE_DETAILED: Autoscaling: Raised the number of workers to 1 based on the rate of progress in the currently running stage(s).
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:55:19.836Z: JOB_MESSAGE_DETAILED: Workers have started successfully.
+
+
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:27.402Z: JOB_MESSAGE_BASIC: All workers have finished the startup processes and began to receive work requests.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.229Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/DoOnce/Impulse+Write/Write/WriteImpl/DoOnce/FlatMap(<lambda at core.py:3481>)+Write/Write/WriteImpl/DoOnce/Map(decode)+Write/Write/WriteImpl/InitializeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.284Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/DoOnce/Map(decode).None" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.305Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/InitializeWrite.None" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.343Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/WriteBundles/View-python_side_input0-Write/Write/WriteImpl/WriteBundles
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.365Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/FinalizeWrite/View-python_side_input0-Write/Write/WriteImpl/FinalizeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.385Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/PreFinalize/View-python_side_input0-Write/Write/WriteImpl/PreFinalize
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.386Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/WriteBundles/View-python_side_input0-Write/Write/WriteImpl/WriteBundles
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.412Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/FinalizeWrite/View-python_side_input0-Write/Write/WriteImpl/FinalizeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.425Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/WriteBundles/View-python_side_input0-Write/Write/WriteImpl/WriteBundles.out" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.427Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/PreFinalize/View-python_side_input0-Write/Write/WriteImpl/PreFinalize
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.454Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/FinalizeWrite/View-python_side_input0-Write/Write/WriteImpl/FinalizeWrite.out" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:29.469Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/PreFinalize/View-python_side_input0-Write/Write/WriteImpl/PreFinalize.out" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:30.260Z: JOB_MESSAGE_BASIC: Finished operation Read/Read/Impulse+Read/Read/Map(<lambda at iobase.py:908>)+ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/PairWithRestriction+ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/SplitWithSizing
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:30.302Z: JOB_MESSAGE_DEBUG: Value "ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7-split-with-sizing-out3" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:30.336Z: JOB_MESSAGE_BASIC: Executing operation GroupAndSum/GroupByKey/Create
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:30.737Z: JOB_MESSAGE_BASIC: Finished operation GroupAndSum/GroupByKey/Create
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:30.775Z: JOB_MESSAGE_DEBUG: Value "GroupAndSum/GroupByKey/Session" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:30.813Z: JOB_MESSAGE_BASIC: Executing operation ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/ProcessElementAndRestrictionWithSizing+Split+PairWithOne+GroupAndSum/GroupByKey+GroupAndSum/Combine/Partial+GroupAndSum/GroupByKey/Write
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:32.914Z: JOB_MESSAGE_BASIC: Finished operation ref_AppliedPTransform_Read-Read-SDFBoundedSourceReader-ParDo-SDFBoundedSourceDoFn-_7/ProcessElementAndRestrictionWithSizing+Split+PairWithOne+GroupAndSum/GroupByKey+GroupAndSum/Combine/Partial+GroupAndSum/GroupByKey/Write
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:32.958Z: JOB_MESSAGE_BASIC: Executing operation GroupAndSum/GroupByKey/Close
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:33.046Z: JOB_MESSAGE_BASIC: Finished operation GroupAndSum/GroupByKey/Close
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:33.087Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/GroupByKey/Create
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:33.237Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/GroupByKey/Create
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:33.278Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/GroupByKey/Session" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:33.313Z: JOB_MESSAGE_BASIC: Executing operation GroupAndSum/GroupByKey/Read+GroupAndSum/Combine+GroupAndSum/Combine/Extract+Format+Write/Write/WriteImpl/WindowInto(WindowIntoFn)+Write/Write/WriteImpl/WriteBundles+Write/Write/WriteImpl/Pair+Write/Write/WriteImpl/GroupByKey/Write
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:34.564Z: JOB_MESSAGE_BASIC: Finished operation GroupAndSum/GroupByKey/Read+GroupAndSum/Combine+GroupAndSum/Combine/Extract+Format+Write/Write/WriteImpl/WindowInto(WindowIntoFn)+Write/Write/WriteImpl/WriteBundles+Write/Write/WriteImpl/Pair+Write/Write/WriteImpl/GroupByKey/Write
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:34.604Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/GroupByKey/Close
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:34.694Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/GroupByKey/Close
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:34.735Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/GroupByKey/Read+Write/Write/WriteImpl/Extract
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:36.464Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/GroupByKey/Read+Write/Write/WriteImpl/Extract
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:36.505Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/Extract.None" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:36.546Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/FinalizeWrite/View-python_side_input1-Write/Write/WriteImpl/FinalizeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:36.567Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/PreFinalize/View-python_side_input1-Write/Write/WriteImpl/PreFinalize
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:36.587Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/FinalizeWrite/View-python_side_input1-Write/Write/WriteImpl/FinalizeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:36.610Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/PreFinalize/View-python_side_input1-Write/Write/WriteImpl/PreFinalize
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:36.628Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/FinalizeWrite/View-python_side_input1-Write/Write/WriteImpl/FinalizeWrite.out" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:36.650Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/PreFinalize/View-python_side_input1-Write/Write/WriteImpl/PreFinalize.out" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:36.692Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/PreFinalize
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:38.780Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/PreFinalize
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:38.820Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/PreFinalize.None" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:38.861Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/FinalizeWrite/View-python_side_input2-Write/Write/WriteImpl/FinalizeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:38.908Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/FinalizeWrite/View-python_side_input2-Write/Write/WriteImpl/FinalizeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:38.951Z: JOB_MESSAGE_DEBUG: Value "Write/Write/WriteImpl/FinalizeWrite/View-python_side_input2-Write/Write/WriteImpl/FinalizeWrite.out" materialized.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:38.989Z: JOB_MESSAGE_BASIC: Executing operation Write/Write/WriteImpl/FinalizeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:40.517Z: JOB_MESSAGE_BASIC: Finished operation Write/Write/WriteImpl/FinalizeWrite
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:40.558Z: JOB_MESSAGE_DEBUG: Executing success step success32
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:40.607Z: JOB_MESSAGE_DETAILED: Cleaning up.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:40.802Z: JOB_MESSAGE_DEBUG: Starting worker pool teardown.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:57:40.825Z: JOB_MESSAGE_BASIC: Stopping worker pool...
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:58:23.463Z: JOB_MESSAGE_DETAILED: Autoscaling: Resized worker pool from 1 to 0.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:58:23.491Z: JOB_MESSAGE_BASIC: Worker pool stopped.
+INFO:apache_beam.runners.dataflow.dataflow_runner:2024-02-11T10:58:23.515Z: JOB_MESSAGE_DEBUG: Tearing down pending resources...
+INFO:apache_beam.runners.dataflow.dataflow_runner:Job 2024-02-11_02_53_49-14777054581138948073 is in state JOB_STATE_DONE
+
+
+
+
+
+
+===============================
+
+
+
+
+
+Task 4. Check that your Dataflow job succeeded
+Open the Navigation menu and click Dataflow from the list of services.
+You should see your wordcount job with a status of Running at first.
+
+Click on the name to watch the process. When all the boxes are checked off, you can continue watching the logs in Cloud Shell.
+The process is complete when the status is Succeeded.
+
+
+
+
+
+Click Navigation menu > Cloud Storage in the Cloud Console.
+Click on the name of your bucket. In your bucket, you should see the results and staging directories.
+Click on the results folder and you should see the output files that your job created:
+Click on a file to see the word counts it contains.
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+Dataflow temp_location must be a valid Cloud Storage URL.
+YES    True
+False
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
