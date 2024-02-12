@@ -1,0 +1,249 @@
+Overview
+Dataproc is a fast, easy-to-use, fully-managed cloud service for running Apache Spark and Apache Hadoop clusters in a simpler, more cost-efficient way. Operations that used to take hours or days take seconds or minutes instead. Create Dataproc clusters quickly and resize them at any time, so you don't have to worry about your data pipelines outgrowing your clusters.
+This lab shows you how to use the Google Cloud console to create a Dataproc cluster, run a simple Apache Spark job in the cluster, and then modify the number of workers in the cluster.
+
+
+What you'll do
+In this lab, you learn how to:
+Create a Dataproc cluster in the Google Cloud console
+Run a simple Apache Spark job
+Modify the number of workers in the cluster
+
+
+
+
+
+Confirm Cloud Dataproc API is enabled
+To create a Dataproc cluster in Google Cloud, the Cloud Dataproc API must be enabled. To confirm the API is enabled:
+Click Navigation menu > APIs & Services > Library:
+Type Cloud Dataproc in the Search for APIs & Services dialog. The console will display the Cloud Dataproc API in the search results.
+Click on Cloud Dataproc API to display the status of the API. If the API is not already enabled, click the Enable button.
+Once the API is enabled, proceed with the lab instructions.
+
+
+
+
+
+
+
+==========================
+
+Task 1. Create a cluster
+In the Cloud Platform Console, select Navigation menu > Dataproc > Clusters, then click Create cluster.
+Click Create for Cluster on Compute Engine.
+Set the following fields for your cluster and accept the default values for all other fields:
+Note: In the Configure nodes section ensure both the Master node and Worker nodes are set to the correct Machine Series and Machine Type
+
+
+
+Field	                Value
+Name	                example-cluster
+Region	              us-east4
+Zone	                us-east4-c
+Machine Series	      E2
+Machine Type	        e2-standard-2
+Number of Worker Nodes	2
+
+
+Note: A Zone is a special multi-region namespace that is capable of deploying instances into all Google Compute zones globally. You can also specify distinct regions, such as us-central1 or europe-west1, to isolate resources (including VM instances and Cloud Storage) and metadata storage locations utilized by Cloud Dataproc within the user-specified region.
+Click Create to create the cluster.
+Your new cluster will appear in the Clusters list. It may take a few minutes to create, the cluster Status shows as Provisioning until the cluster is ready to use, then changes to Running.
+
+
+
+
+
+==========================
+
+
+
+Task 2. Submit a job
+To run a sample Spark job:
+
+Click Jobs in the left pane to switch to Dataproc's jobs view, then click Submit job.
+Set the following fields to update Job. Accept the default values for all other fields:
+Field	              Value
+Region	            us-east4
+Cluster	            example-cluster
+Job type	          Spark
+Main class or jar	  org.apache.spark.examples.SparkPi
+Jar files	          file:///usr/lib/spark/examples/jars/spark-examples.jar
+Arguments	          1000 (This sets the number of tasks.)
+
+Click Submit.
+Note: How the job calculates Pi: The Spark job estimates a value of Pi using the Monte Carlo method. It generates x,y points on a coordinate plane that models a circle enclosed by a unit square. The input argument (1000) determines the number of x,y pairs to generate; the more pairs generated, the greater the accuracy of the estimation. This estimation leverages Cloud Dataproc worker nodes to parallelize the computation. For more information, see Estimating Pi using the Monte Carlo Method and see JavaSparkPi.java on GitHub.
+Your job should appear in the Jobs list, which shows your project's jobs with its cluster, type, and current status. Job status displays as Running, and then Succeeded after it completes.
+https://academo.org/demos/estimating-pi-monte-carlo/
+https://github.com/Apache/spark/blob/master/examples/src/main/java/org/apache/spark/examples/JavaSparkPi.java
+
+
+
+
+
+==========================
+
+
+
+
+Task 3. View the job output
+To see your completed job's output:
+
+Click the job ID in the Jobs list.
+Select LINE WRAP to ON or scroll all the way to the right to see the calculated value of Pi. Your output, with LINE WRAP ON, should look something like this:
+https://cdn.qwiklabs.com/DnVGNZW%2F3WiDYaqOqt3ET3nW%2Bp4NZbZYgvi2OL0QjXo%3D
+
+Your job has successfully calculated a rough value for pi!
+
+
+
+24/02/12 02:11:35 INFO SparkEnv: Registering MapOutputTracker
+24/02/12 02:11:35 INFO SparkEnv: Registering BlockManagerMaster
+24/02/12 02:11:35 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+24/02/12 02:11:35 INFO SparkEnv: Registering OutputCommitCoordinator
+24/02/12 02:11:36 INFO DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at example-cluster-m.us-east4-c.c.qwiklabs-gcp-03-37f2d54a9d80.internal./10.150.0.2:8032
+24/02/12 02:11:37 INFO AHSProxy: Connecting to Application History server at example-cluster-m.us-east4-c.c.qwiklabs-gcp-03-37f2d54a9d80.internal./10.150.0.2:10200
+24/02/12 02:11:38 INFO Configuration: resource-types.xml not found
+24/02/12 02:11:38 INFO ResourceUtils: Unable to find 'resource-types.xml'.
+24/02/12 02:11:39 INFO YarnClientImpl: Submitted application application_1707703730788_0001
+24/02/12 02:11:41 INFO DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at example-cluster-m.us-east4-c.c.qwiklabs-gcp-03-37f2d54a9d80.internal./10.150.0.2:8030
+24/02/12 02:11:43 INFO GhfsStorageStatistics: Detected potential high latency for operation op_get_file_status. latencyMs=488; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history
+24/02/12 02:11:43 INFO GoogleCloudStorageImpl: Ignoring exception of type GoogleJsonResponseException; verified object already exists with desired state.
+24/02/12 02:11:43 INFO GhfsStorageStatistics: Detected potential high latency for operation op_mkdirs. latencyMs=320; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history
+24/02/12 02:11:44 INFO GhfsStorageStatistics: Detected potential high latency for operation op_create. latencyMs=442; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history/application_1707703730788_0001.inprogress
+Pi is roughly 3.1415809514158095
+24/02/12 02:12:06 INFO GhfsStorageStatistics: Detected potential high latency for operation op_rename. latencyMs=443; previousMaxLatencyMs=0; operationCount=1; context=rename(gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history/application_1707703730788_0001.inprogress -> gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history/application_1707703730788_0001)
+
+
+
+
+
+==========================
+
+
+
+Task 4. Update a cluster to modify the number of workers
+
+
+To change the number of worker instances in your cluster:
+Select Clusters in the left navigation pane to return to the Dataproc Clusters view.
+Click example-cluster in the Clusters list. By default, the page displays an overview of your cluster's CPU usage.
+Click Configuration to display your cluster's current settings.
+Click Edit. The number of worker nodes is now editable.
+Enter 4 in the Worker nodes field.
+Click Save.
+Your cluster is now updated. Check out the number of VM instances in the cluster.
+
+
+
+To rerun the job with the updated cluster, you would click Jobs in the left pane, then click SUBMIT JOB.
+Set the same fields you set in the Submit a job section:
+Field	              Value
+Region	            us-east4
+Cluster	            example-cluster
+Job type	          Spark
+Main class or jar	  org.apache.spark.examples.SparkPi
+Jar files	          file:///usr/lib/spark/examples/jars/spark-examples.jar
+Arguments	          1000 (This sets the number of tasks.)
+
+Click Submit.
+
+
+
+
+24/02/12 02:21:11 INFO SparkEnv: Registering MapOutputTracker
+24/02/12 02:21:12 INFO SparkEnv: Registering BlockManagerMaster
+24/02/12 02:21:12 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+24/02/12 02:21:12 INFO SparkEnv: Registering OutputCommitCoordinator
+24/02/12 02:21:13 INFO DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at example-cluster-m.us-east4-c.c.qwiklabs-gcp-03-37f2d54a9d80.internal./10.150.0.2:8032
+24/02/12 02:21:13 INFO AHSProxy: Connecting to Application History server at example-cluster-m.us-east4-c.c.qwiklabs-gcp-03-37f2d54a9d80.internal./10.150.0.2:10200
+24/02/12 02:21:14 INFO Configuration: resource-types.xml not found
+24/02/12 02:21:14 INFO ResourceUtils: Unable to find 'resource-types.xml'.
+24/02/12 02:21:15 INFO YarnClientImpl: Submitted application application_1707703730788_0002
+24/02/12 02:21:16 INFO DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at example-cluster-m.us-east4-c.c.qwiklabs-gcp-03-37f2d54a9d80.internal./10.150.0.2:8030
+24/02/12 02:21:19 INFO GhfsStorageStatistics: Detected potential high latency for operation op_get_file_status. latencyMs=512; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history
+24/02/12 02:21:19 INFO GoogleCloudStorageImpl: Ignoring exception of type GoogleJsonResponseException; verified object already exists with desired state.
+24/02/12 02:21:19 INFO GhfsStorageStatistics: Detected potential high latency for operation op_mkdirs. latencyMs=385; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history
+24/02/12 02:21:19 INFO GhfsStorageStatistics: Detected potential high latency for operation op_create. latencyMs=490; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history/application_1707703730788_0002.inprogress
+Pi is roughly 3.141801791418018
+24/02/12 02:21:40 INFO GhfsStorageStatistics: Detected potential high latency for operation stream_write_close_operations. latencyMs=215; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history/application_1707703730788_0002.inprogress
+24/02/12 02:21:41 INFO GhfsStorageStatistics: Detected potential high latency for operation op_rename. latencyMs=497; previousMaxLatencyMs=0; operationCount=1; context=rename(gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history/application_1707703730788_0002.inprogress -> gs://dataproc-temp-us-east4-622618762481-aok0gpsm/ab564b31-5603-4bd3-a5ff-8130cb25ccdd/spark-job-history/application_1707703730788_0002)
+
+
+
+
+Job ID  Status    Region    Type    Cluster          Start time                  Elapsed time    Labels
+Job2	 Succeeded	us-east4	Spark	  example-cluster	Feb 12, 2024, 10:21:06 AM	    36 sec	        None
+Job1	 Succeeded	us-east4	Spark	  example-cluster	Feb 12, 2024, 10:11:29 AM	    41 sec	        None
+
+
+==========================
+
+
+Which type of Dataproc job is submitted in the lab?
+YES    Spark
+PySpark
+SparkSql
+Hadoop
+Pig
+
+
+
+
+Dataproc helps users process, transform and understand vast quantities of data.
+True
+
+
+
+==========================
+
+
+
+
+
+
+
+
+
+
+
+==========================
+
+
+
+
+
+
+
+
+
+
+
+==========================
+
+
+
+
+
+
+
+
+
+
+
+==========================
+
+
+
+
+
+
+
+
+
+
+
+==========================
+
+
+
+
