@@ -19,7 +19,7 @@ gcloud config list project
 Task 1. Create a cluster
 In Cloud Shell, run the following command to set the Region:
 gcloud config set dataproc/region us-central1
-Copied!
+
 
 
 Dataproc creates staging and temp buckets that are shared among clusters in the same region. Since we're not specifying an account for Dataproc to use, it will use the Compute Engine default service account, which doesn't have storage bucket permissions by default. Let's add those.
@@ -27,7 +27,7 @@ First, run the following commands to grab the PROJECT_ID and PROJECT_NUMBER:
 PROJECT_ID=$(gcloud config get-value project) && \
 gcloud config set project $PROJECT_ID
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
-Copied!
+
 
 
 
@@ -35,7 +35,7 @@ Now run the following command to give the Storage Admin role to the Compute Engi
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
   --role=roles/storage.admin
-Copied!
+
 
 
 student_00_b5eb890529a4@cloudshell:~ (qwiklabs-gcp-01-fd0e65d75c3b)$ gcloud projects add-iam-policy-binding $PROJECT_ID \
@@ -91,7 +91,7 @@ version: 1
 
 Run the following command to create a cluster called example-cluster with e2-standard-4 VMs and default Cloud Dataproc settings:
 gcloud dataproc clusters create example-cluster --worker-boot-disk-size 500 --worker-machine-type=e2-standard-4 --master-machine-type=e2-standard-4
-Copied!
+
 
 
 If asked to confirm a zone for your cluster. Enter Y.
@@ -125,7 +125,7 @@ Run this command to submit a sample Spark job that calculates a rough value for 
 gcloud dataproc jobs submit spark --cluster example-cluster \
   --class org.apache.spark.examples.SparkPi \
   --jars file:///usr/lib/spark/examples/jars/spark-examples.jar -- 1000
-Copied!
+
 
 
 
@@ -239,7 +239,7 @@ yarnApplications:
 Task 3. Update a cluster
 To change the number of workers in the cluster to four, run the following command:
 gcloud dataproc clusters update example-cluster --num-workers 4
-Copied!
+
 
 
 
@@ -251,7 +251,7 @@ Waiting for cluster update operation...done.
 
 You can use the same command to decrease the number of worker nodes:
 gcloud dataproc clusters update example-cluster --num-workers 2
-Copied!
+
 Now you can create a Dataproc cluster and adjust the number of workers from the gcloud command line on the Google Cloud.
 
 
