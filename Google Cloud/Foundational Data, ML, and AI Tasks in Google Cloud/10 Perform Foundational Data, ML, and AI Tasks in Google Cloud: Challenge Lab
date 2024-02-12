@@ -1,0 +1,485 @@
+Topics tested:
+Create a simple Dataproc job
+Create a simple DataFlow job
+Perform two Google machine learning backed API tasks
+
+
+
+
+Task 1: Run a simple Dataflow job
+You have used Dataflow in the quest to load data into BigQuery from Pub/Sub, now use the Dataflow batch template Text Files on Cloud Storage to BigQuery under "Process Data in Bulk (batch)" to transfer data from a Cloud Storage bucket (gs://cloud-training/gsp323/lab.csv). 
+The following table has the values you need to correctly configure the Dataflow job.
+
+You will need to make sure you have:
+Create a BigQuery dataset called lab_102.
+ALSO CREATE A TABLE - customers_533
+
+Create a Cloud Storage Bucket called qwiklabs-gcp-02-f452622bcbc9-marking.
+Uncheck the default machine type to access alternative CPU variant.
+
+Example Dataflow job is shown below:
+https://cdn.qwiklabs.com/kSrvyzgXo0Q9BdvWxWtD0i%2FqJoVtU1PtxgMq0m0esLk%3D
+
+Field	                                  Value
+JavaScript UDF path in Cloud Storage	  gs://cloud-training/gsp323/lab.js
+JSON path	                              gs://cloud-training/gsp323/lab.schema
+JavaScript UDF name	                    transform
+BigQuery output table	                  qwiklabs-gcp-02-f452622bcbc9:lab_102.customers_533
+Cloud Storage input path	              gs://cloud-training/gsp323/lab.csv
+Temporary BigQuery directory	          gs://qwiklabs-gcp-02-f452622bcbc9-marking/bigquery_temp
+Temporary location	                    gs://qwiklabs-gcp-02-f452622bcbc9-marking/temp
+Machine Type	                          e2-standard-2
+Wait for the job to finish before trying to check your progress.
+
+
+
+
+==========================
+
+
+
+Task 2: Run a simple Dataproc job
+You have used Dataproc in the quest, now you must run another example Spark job using Dataproc.
+
+Before you run the job, log into one of the cluster nodes and copy the /data.txt file into hdfs
+(use the command hdfs dfs -cp gs://cloud-training/gsp323/data.txt /data.txt).
+
+Example Dataproc job is shown below:
+https://cdn.qwiklabs.com/Dk%2B393DHZGLmQzlA086vkzmzAut2NZV3%2B1mFtjs1StU%3D
+
+
+
+
+
+Run a Dataproc job using the values below.
+
+Field	                    Value
+Region	                  us-east1
+Job type	                Spark
+Main class or jar	        org.apache.spark.examples.SparkPageRank
+Jar files	                file:///usr/lib/spark/examples/jars/spark-examples.jar
+Arguments	                /data.txt
+Max restarts per hour	    1
+Dataproc Cluster	      Compute Engine
+Region	                us-east1
+Machine Series	        E2
+Manager Node	          Set Machine Type to e2-standard-2
+Worker Node	            Set Machine Type to e2-standard-2
+Max Worker Nodes	2
+
+
+Wait for the job to finish before trying to check your progress.
+
+
+CREATE DATAPROC CLUSTER ON COMPUTE ENGINE USING INFO ABOVE
+GO TO COMPUTE ENGINE > SSH > 
+
+
+find . -type f -iname "data.txt"
+find /home/ -type f -iname "data"
+
+
+
+
+SSH into mater node
+
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ pwd
+/home/student-03-9796b4a24ff8
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ ls
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ hdfs dfs -cp gs://cloud-training/gsp323/data.txt /data.txt
+Feb 12, 2024 6:58:25 AM com.google.cloud.hadoop.fs.gcs.GhfsStorageStatistics updateMinMaxStats
+INFO: Detected potential high latency for operation op_get_file_status. latencyMs=495; previousMaxLatencyMs=0; operationCount=1; context=gs://cloud-training/gsp323/data.txt
+Feb 12, 2024 6:58:25 AM com.google.cloud.hadoop.fs.gcs.GhfsStorageStatistics updateMinMaxStats
+INFO: Detected potential high latency for operation op_glob_status. latencyMs=594; previousMaxLatencyMs=0; operationCount=1; context=path=gs://cloud-training/gsp323/data.txt; pattern=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystemBase$$Lambda$74/0x000000010021fc40@2954f6ab
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ ls
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ pwd
+/home/student-03-9796b4a24ff8
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ find . -type f -iname "data" -and -iname "txt"
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ find . -type f -iname "data"
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ find /home/ -type f -iname "data"
+
+
+
+
+
+
+SSH into worker node 1
+
+student-03-9796b4a24ff8@lab-dataproc-cluster-w-0:~$ pwd
+/home/student-03-9796b4a24ff8
+student-03-9796b4a24ff8@lab-dataproc-cluster-w-0:~$ ls
+student-03-9796b4a24ff8@lab-dataproc-cluster-w-0:~$ hdfs dfs -cp gs://cloud-training/gsp323/data.txt /data.txt
+Feb 12, 2024 7:04:28 AM com.google.cloud.hadoop.fs.gcs.GhfsStorageStatistics updateMinMaxStats
+INFO: Detected potential high latency for operation op_get_file_status. latencyMs=353; previousMaxLatencyMs=0; operationCount=1; context=gs://cloud-training/gsp323/data.txt
+Feb 12, 2024 7:04:28 AM com.google.cloud.hadoop.fs.gcs.GhfsStorageStatistics updateMinMaxStats
+INFO: Detected potential high latency for operation op_glob_status. latencyMs=411; previousMaxLatencyMs=0; operationCount=1; context=path=gs://cloud-training/gsp323/data.txt; pattern=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystemBase$$Lambda$74/0x000000010021fc40@30ec7d21
+cp: `/data.txt': File exists
+student-03-9796b4a24ff8@lab-dataproc-cluster-w-0:~$ ls
+
+
+
+
+
+
+
+CREATE DATAPROC JOB USING INFO IN TABLE ABOVE
+
+
+
+WARN: This is a naive implementation of PageRank and is given as an example!
+Please use the PageRank implementation found in org.apache.spark.graphx.lib.PageRank
+for more conventional use.
+      
+24/02/12 07:10:19 INFO SparkEnv: Registering MapOutputTracker
+24/02/12 07:10:19 INFO SparkEnv: Registering BlockManagerMaster
+24/02/12 07:10:20 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+24/02/12 07:10:20 INFO SparkEnv: Registering OutputCommitCoordinator
+24/02/12 07:10:21 INFO DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at lab-dataproc-cluster-m.us-east1-d.c.qwiklabs-gcp-02-f452622bcbc9.internal./10.142.0.3:8032
+24/02/12 07:10:22 INFO AHSProxy: Connecting to Application History server at lab-dataproc-cluster-m.us-east1-d.c.qwiklabs-gcp-02-f452622bcbc9.internal./10.142.0.3:10200
+24/02/12 07:10:23 INFO Configuration: resource-types.xml not found
+24/02/12 07:10:23 INFO ResourceUtils: Unable to find 'resource-types.xml'.
+24/02/12 07:10:25 INFO YarnClientImpl: Submitted application application_1707720874499_0001
+24/02/12 07:10:26 INFO DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at lab-dataproc-cluster-m.us-east1-d.c.qwiklabs-gcp-02-f452622bcbc9.internal./10.142.0.3:8030
+24/02/12 07:10:29 INFO GhfsStorageStatistics: Detected potential high latency for operation op_get_file_status. latencyMs=561; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east1-205717750001-xhf8dnpx/8b307c07-8b15-4aa6-b19d-429d92270c00/spark-job-history
+24/02/12 07:10:30 INFO GoogleCloudStorageImpl: Ignoring exception of type GoogleJsonResponseException; verified object already exists with desired state.
+24/02/12 07:10:30 INFO GhfsStorageStatistics: Detected potential high latency for operation op_mkdirs. latencyMs=408; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east1-205717750001-xhf8dnpx/8b307c07-8b15-4aa6-b19d-429d92270c00/spark-job-history
+24/02/12 07:10:31 INFO GhfsStorageStatistics: Detected potential high latency for operation op_create. latencyMs=612; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-east1-205717750001-xhf8dnpx/8b307c07-8b15-4aa6-b19d-429d92270c00/spark-job-history/application_1707720874499_0001.inprogress
+url_4 has rank:  1.253623453429063 .
+url_2 has rank:  0.5376950254457503 .
+url_3 has rank:  0.9104932478397175 .
+url_1 has rank:  1.2981882732854677 .
+24/02/12 07:10:55 INFO GhfsStorageStatistics: Detected potential high latency for operation op_rename. latencyMs=474; previousMaxLatencyMs=0; operationCount=1; context=rename(gs://dataproc-temp-us-east1-205717750001-xhf8dnpx/8b307c07-8b15-4aa6-b19d-429d92270c00/spark-job-history/application_1707720874499_0001.inprogress -> gs://dataproc-temp-us-east1-205717750001-xhf8dnpx/8b307c07-8b15-4aa6-b19d-429d92270c00/spark-job-history/application_1707720874499_0001)
+
+
+
+
+
+
+
+==========================
+
+
+
+
+Task 3: Use the Google Cloud Speech-to-Text API
+Use Google Cloud Speech-to-Text API to analyze the audio file gs://cloud-training/gsp323/task3.flac. Once you have analyzed the file, upload the resulting file to: gs://qwiklabs-gcp-02-f452622bcbc9-marking/task3-gcs-974.result
+Note: If you are facing issues in this task, you can refer to the respective lab for troubleshooting: Google Cloud Speech-to-Text API: Qwik Start
+https://www.cloudskillsboost.google/catalog_lab/743
+
+
+
+
+To create an API key, click Navigation menu > APIs & services > Credentials.
+Then click Create credentials.
+In the drop down menu, select API key.
+AIzaSyAAHEPggC46KMsA_ql-D7_7WqiXl2kLbtU
+
+
+GO BACK TO COMPUTE ENGINE
+SSH INTO 1 OF THE INSTANCES
+
+export API_KEY=AIzaSyAAHEPggC46KMsA_ql-D7_7WqiXl2kLbtU
+touch request.json
+nano request.json
+{
+  "config": {
+      "encoding":"FLAC",
+      "languageCode": "en-US"
+  },
+  "audio": {
+      "uri":"gs://cloud-training/gsp323/task3.flac"
+  }
+}
+
+
+
+curl -s -X POST -H "Content-Type: application/json" --data-binary @request.json \
+"https://speech.googleapis.com/v1/speech:recognize?key=${API_KEY}" > task3-gcs-974.result
+
+gsutil cp ./task3-gcs-974.result gs://qwiklabs-gcp-02-f452622bcbc9-marking/task3-gcs-974.result
+
+
+
+
+
+
+
+
+
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ export API_KEY=AIzaSyAAHEPggC46KMsA_ql-D7_7WqiXl2kLbtU
+touch request.json
+nano request.json
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ curl -s -X POST -H "Content-Type: application/json" --data-binary @request.json \
+"https://speech.googleapis.com/v1/speech:recognize?key=${API_KEY}" > task3-gcs-974.result
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ gsutil cp ./task3-gcs-974.result gs://qwiklabs-gcp-02-f452622bcbc9-marking/task3-gcs-974.result
+Copying file://./task3-gcs-974.result [Content-Type=application/octet-stream]...
+/ [1 files][  366.0 B/  366.0 B]                                                
+Operation completed over 1 objects/366.0 B.                                      
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ pwd
+/home/student-03-9796b4a24ff8
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ ls
+request.json  task3-gcs-974.result
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ cat task3-gcs-974.result 
+{
+  "results": [
+    {
+      "alternatives": [
+        {
+          "transcript": "welcome to the Baseline data machine learning and artificial intelligence challenge lab",
+          "confidence": 0.99121165
+        }
+      ],
+      "resultEndTime": "5.220s",
+      "languageCode": "en-us"
+    }
+  ],
+  "totalBilledTime": "6s",
+  "requestId": "8289258147994876507"
+}
+
+
+
+
+
+
+==========================
+
+
+
+
+Task 4: Use the Cloud Natural Language API
+Use the Cloud Natural Language API to analyze the sentence from text about Odin. The text you need to analyze is "Old Norse texts portray Odin as one-eyed and long-bearded, frequently wielding a spear named Gungnir and wearing a cloak and a broad hat." Once you have analyzed the text, upload the resulting file to: gs://qwiklabs-gcp-02-f452622bcbc9-marking/task4-cnl-555.result
+Note: If you are facing issues in this task, you can refer to the respective lab for troubleshooting: Cloud Natural Language API: Qwik Start
+https://www.cloudskillsboost.google/catalog_lab/709
+
+
+
+
+export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value core/project)
+
+gcloud iam service-accounts create my-natlang-sa \
+  --display-name "my natural language service account"
+
+gcloud iam service-accounts keys create ~/key.json \
+  --iam-account my-natlang-sa@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com
+
+export GOOGLE_APPLICATION_CREDENTIALS="/home/USER/key.json"
+
+gcloud ml language analyze-entities --content="Old Norse texts portray Odin as one-eyed and long-bearded, frequently wielding a spear named Gungnir and wearing a cloak and a broad hat." > task4-cnl-555.result
+
+gsutil cp task4-cnl-555.result gs://qwiklabs-gcp-02-f452622bcbc9-marking
+
+
+
+
+
+
+
+
+
+
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value core/project)
+
+gcloud iam service-accounts create my-natlang-sa \
+  --display-name "my natural language service account"
+
+gcloud iam service-accounts keys create ~/key.json \
+  --iam-account my-natlang-sa@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com
+
+export GOOGLE_APPLICATION_CREDENTIALS="/home/USER/key.json"
+Created service account [my-natlang-sa].
+created key [5c520c1f391b5c9ac65ba46db1a662bf9a6db64b] of type [json] as [/home/student-03-9796b4a24ff8/key.json] for [my-natlang-sa@qwiklabs-gcp-02-f452622bcbc9.iam.gserviceaccount.com]
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ gcloud ml language analyze-entities --content="Old Norse texts portray Odin as one-eyed and long-bearded, frequently wielding a spear named Gungnir and wearing a cloak and a broad hat." > task4-cnl-555.result
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ gsutil cp task4-cnl-555.result gs://qwiklabs-gcp-02-f452622bcbc9-marking
+Copying file://task4-cnl-555.result [Content-Type=application/octet-stream]...
+/ [1 files][  2.6 KiB/  2.6 KiB]                                                
+Operation completed over 1 objects/2.6 KiB.       
+
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ pwd
+/home/student-03-9796b4a24ff8
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ ls
+key.json  request.json  task3-gcs-974.result  task4-cnl-555.result
+student-03-9796b4a24ff8@lab-dataproc-cluster-m:~$ cat task4-cnl-555.result 
+{
+  "entities": [
+    {
+      "mentions": [
+        {
+          "text": {
+            "beginOffset": 10,
+            "content": "texts"
+          },
+          "type": "COMMON"
+        }
+      ],
+      "metadata": {},
+      "name": "texts",
+      "salience": 0.3645955,
+      "type": "WORK_OF_ART"
+    },
+    {
+      "mentions": [
+        {
+          "text": {
+            "beginOffset": 0,
+            "content": "Old Norse"
+          },
+          "type": "PROPER"
+        }
+      ],
+      "metadata": {
+        "mid": "/m/05p1x",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Old_Norse"
+      },
+      "name": "Old Norse",
+      "salience": 0.22666056,
+      "type": "OTHER"
+    },
+    {
+      "mentions": [
+        {
+          "text": {
+            "beginOffset": 115,
+            "content": "cloak"
+          },
+          "type": "COMMON"
+        }
+      ],
+      "metadata": {},
+      "name": "cloak",
+      "salience": 0.13469206,
+      "type": "OTHER"
+    },
+    {
+      "mentions": [
+        {
+          "text": {
+            "beginOffset": 81,
+            "content": "spear"
+          },
+          "type": "COMMON"
+        }
+      ],
+      "metadata": {},
+      "name": "spear",
+      "salience": 0.098837085,
+      "type": "OTHER"
+    },
+    {
+      "mentions": [
+        {
+          "text": {
+            "beginOffset": 24,
+            "content": "Odin"
+          },
+          "type": "PROPER"
+        }
+      ],
+      "metadata": {
+        "mid": "/m/01p56f",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Odin"
+      },
+      "name": "Odin",
+      "salience": 0.093548745,
+      "type": "PERSON"
+    },
+    {
+      "mentions": [
+        {
+          "text": {
+            "beginOffset": 133,
+            "content": "hat"
+          },
+          "type": "COMMON"
+        }
+      ],
+      "metadata": {},
+      "name": "hat",
+      "salience": 0.053587068,
+      "type": "OTHER"
+    },
+    {
+      "mentions": [
+        {
+          "text": {
+            "beginOffset": 93,
+            "content": "Gungnir"
+          },
+          "type": "PROPER"
+        }
+      ],
+      "metadata": {
+        "mid": "/m/0jv17",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Gungnir"
+      },
+      "name": "Gungnir",
+      "salience": 0.02807897,
+      "type": "OTHER"
+    },
+    {
+      "mentions": [
+        {
+          "text": {
+            "beginOffset": 32,
+            "content": "one"
+          },
+          "type": "TYPE_UNKNOWN"
+        }
+      ],
+      "metadata": {
+        "value": "1"
+      },
+      "name": "one",
+      "salience": 0.0,
+      "type": "NUMBER"
+    }
+  ],
+  "language": "en"
+}
+
+
+
+
+==========================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+==========================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+==========================
+
+
+
+
+
+
+
+
+
+
