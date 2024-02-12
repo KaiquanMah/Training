@@ -1,0 +1,424 @@
+Overview
+Dataproc is a fast, easy-to-use, fully-managed cloud service for running Apache Spark and Apache Hadoop clusters in a simpler, more cost-efficient way. Operations that used to take hours or days take seconds or minutes instead. Create Dataproc clusters quickly and resize them at any time, so you don't have to worry about your data pipelines outgrowing your clusters.
+This lab shows you how to use the command line to create a Dataproc cluster, run a simple Apache Spark job in the cluster, and then modify the number of workers in the cluster.
+
+
+What you'll do
+In this lab, you learn how to:
+Create a Dataproc cluster using the command line
+Run a simple Apache Spark job
+Modify the number of workers in the cluster
+
+
+gcloud auth list
+gcloud config list project
+
+
+
+
+Task 1. Create a cluster
+In Cloud Shell, run the following command to set the Region:
+gcloud config set dataproc/region us-central1
+Copied!
+
+
+Dataproc creates staging and temp buckets that are shared among clusters in the same region. Since we're not specifying an account for Dataproc to use, it will use the Compute Engine default service account, which doesn't have storage bucket permissions by default. Let's add those.
+First, run the following commands to grab the PROJECT_ID and PROJECT_NUMBER:
+PROJECT_ID=$(gcloud config get-value project) && \
+gcloud config set project $PROJECT_ID
+PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+Copied!
+
+
+
+Now run the following command to give the Storage Admin role to the Compute Engine default service account:
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
+  --role=roles/storage.admin
+Copied!
+
+
+student_00_b5eb890529a4@cloudshell:~ (qwiklabs-gcp-01-fd0e65d75c3b)$ gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
+  --role=roles/storage.admin
+Updated IAM policy for project [qwiklabs-gcp-01-fd0e65d75c3b].
+bindings:
+- members:
+  - serviceAccount:qwiklabs-gcp-01-fd0e65d75c3b@qwiklabs-gcp-01-fd0e65d75c3b.iam.gserviceaccount.com
+  role: roles/bigquery.admin
+- members:
+  - serviceAccount:399513760474@cloudbuild.gserviceaccount.com
+  role: roles/cloudbuild.builds.builder
+- members:
+  - serviceAccount:service-399513760474@gcp-sa-cloudbuild.iam.gserviceaccount.com
+  role: roles/cloudbuild.serviceAgent
+- members:
+  - serviceAccount:service-399513760474@compute-system.iam.gserviceaccount.com
+  role: roles/compute.serviceAgent
+- members:
+  - serviceAccount:service-399513760474@container-engine-robot.iam.gserviceaccount.com
+  role: roles/container.serviceAgent
+- members:
+  - serviceAccount:service-399513760474@dataproc-accounts.iam.gserviceaccount.com
+  role: roles/dataproc.serviceAgent
+- members:
+  - serviceAccount:399513760474-compute@developer.gserviceaccount.com
+  - serviceAccount:399513760474@cloudservices.gserviceaccount.com
+  role: roles/editor
+- members:
+  - serviceAccount:admiral@qwiklabs-services-prod.iam.gserviceaccount.com
+  - serviceAccount:qwiklabs-gcp-01-fd0e65d75c3b@qwiklabs-gcp-01-fd0e65d75c3b.iam.gserviceaccount.com
+  - user:student-00-b5eb890529a4@qwiklabs.net
+  role: roles/owner
+- members:
+  - serviceAccount:399513760474-compute@developer.gserviceaccount.com
+  - serviceAccount:qwiklabs-gcp-01-fd0e65d75c3b@qwiklabs-gcp-01-fd0e65d75c3b.iam.gserviceaccount.com
+  role: roles/storage.admin
+- members:
+  - user:student-00-b5eb890529a4@qwiklabs.net
+  role: roles/viewer
+etag: BwYRJgaKfsE=
+version: 1
+
+
+
+
+
+
+
+
+
+
+Run the following command to create a cluster called example-cluster with e2-standard-4 VMs and default Cloud Dataproc settings:
+gcloud dataproc clusters create example-cluster --worker-boot-disk-size 500 --worker-machine-type=e2-standard-4 --master-machine-type=e2-standard-4
+Copied!
+
+
+If asked to confirm a zone for your cluster. Enter Y.
+Your cluster will build for a couple of minutes.
+Waiting for cluster creation operation...done.
+Created [... example-cluster]
+When you see a "Created" message, you're ready to move on.
+
+
+student_00_b5eb890529a4@cloudshell:~ (qwiklabs-gcp-01-fd0e65d75c3b)$ gcloud dataproc clusters create example-cluster --worker-boot-disk-size 500 --worker-machine-type=e2-standard-4 --master-machine-type=e2-standard-4
+Waiting on operation [projects/qwiklabs-gcp-01-fd0e65d75c3b/regions/us-central1/operations/83ef8e05-5bc6-3fff-88c7-a02af12e9f7f].
+Waiting for cluster creation operation...working.                                                                                                       
+WARNING: No image specified. Using the default image version. It is recommended to select a specific image version in production, as the default image version may change at any time.
+WARNING: For PD-Standard without local SSDs, we strongly recommend provisioning 1TB or larger to ensure consistently high I/O performance. See https://cloud.google.com/compute/docs/disks/performance for information on disk I/O performance.
+WARNING: The firewall rules for specified network or subnetwork would allow ingress traffic from 0.0.0.0/0, which could be a security risk.
+WARNING: The specified custom staging bucket 'dataproc-staging-us-central1-399513760474-ii7p2av7' is not using uniform bucket level access IAM configuration. It is recommended to update bucket to enable the same. See https://cloud.google.com/storage/docs/uniform-bucket-level-access.
+Waiting for cluster creation operation...done.                                                                                                          
+Created [https://dataproc.googleapis.com/v1/projects/qwiklabs-gcp-01-fd0e65d75c3b/regions/us-central1/clusters/example-cluster] Cluster placed in zone [us-central1-f].
+
+
+
+
+
+===============================
+
+
+
+
+Task 2. Submit a job
+Run this command to submit a sample Spark job that calculates a rough value for pi:
+gcloud dataproc jobs submit spark --cluster example-cluster \
+  --class org.apache.spark.examples.SparkPi \
+  --jars file:///usr/lib/spark/examples/jars/spark-examples.jar -- 1000
+Copied!
+
+
+
+The command specifies:
+That you want to run a spark job on the example-cluster cluster
+The class containing the main method for the job's pi-calculating application
+The location of the jar file containing your job's code
+The parameters you want to pass to the job—in this case, the number of tasks, which is 1000
+Note: Parameters passed to the job must follow a double dash (--). See the gcloud documentation for more information.
+
+
+The job's running and final output is displayed in the terminal window:
+Waiting for job output...
+...
+Pi is roughly 3.14118528
+...
+state: FINISHED
+
+
+
+
+
+
+
+
+
+
+
+
+student_00_b5eb890529a4@cloudshell:~ (qwiklabs-gcp-01-fd0e65d75c3b)$ gcloud dataproc jobs submit spark --cluster example-cluster \
+  --class org.apache.spark.examples.SparkPi \
+  --jars file:///usr/lib/spark/examples/jars/spark-examples.jar -- 1000
+Job [558f854a455c4bf3ad92baa695204395] submitted.
+Waiting for job output...
+24/02/12 02:40:39 INFO org.apache.spark.SparkEnv: Registering MapOutputTracker
+24/02/12 02:40:39 INFO org.apache.spark.SparkEnv: Registering BlockManagerMaster
+24/02/12 02:40:39 INFO org.apache.spark.SparkEnv: Registering BlockManagerMasterHeartbeat
+24/02/12 02:40:39 INFO org.apache.spark.SparkEnv: Registering OutputCommitCoordinator
+24/02/12 02:40:40 INFO org.sparkproject.jetty.util.log: Logging initialized @4434ms to org.sparkproject.jetty.util.log.Slf4jLog
+24/02/12 02:40:40 INFO org.sparkproject.jetty.server.Server: jetty-9.4.40.v20210413; built: 2021-04-13T20:42:42.668Z; git: b881a572662e1943a14ae12e7e1207989f218b74; jvm 1.8.0_402-b06
+24/02/12 02:40:40 INFO org.sparkproject.jetty.server.Server: Started @4588ms
+24/02/12 02:40:40 INFO org.sparkproject.jetty.server.AbstractConnector: Started ServerConnector@1f387978{HTTP/1.1, (http/1.1)}{0.0.0.0:36153}
+24/02/12 02:40:41 INFO org.apache.hadoop.yarn.client.RMProxy: Connecting to ResourceManager at example-cluster-m/10.128.0.7:8032
+24/02/12 02:40:41 INFO org.apache.hadoop.yarn.client.AHSProxy: Connecting to Application History server at example-cluster-m/10.128.0.7:10200
+24/02/12 02:40:42 INFO org.apache.hadoop.conf.Configuration: resource-types.xml not found
+24/02/12 02:40:42 INFO org.apache.hadoop.yarn.util.resource.ResourceUtils: Unable to find 'resource-types.xml'.
+24/02/12 02:40:43 INFO org.apache.hadoop.yarn.client.api.impl.YarnClientImpl: Submitted application application_1707705447178_0001
+24/02/12 02:40:44 INFO org.apache.hadoop.yarn.client.RMProxy: Connecting to ResourceManager at example-cluster-m/10.128.0.7:8030
+24/02/12 02:40:46 INFO com.google.cloud.hadoop.fs.gcs.GhfsStorageStatistics: Detected potential high latency for operation op_get_file_status. latencyMs=304; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-central1-399513760474-akglf7kx/6b99b748-58cf-4a0a-a00b-2c7197a295de/spark-job-history
+24/02/12 02:40:47 INFO com.google.cloud.hadoop.repackaged.gcs.com.google.cloud.hadoop.gcsio.GoogleCloudStorageImpl: Ignoring exception of type GoogleJsonResponseException; verified object already exists with desired state.
+24/02/12 02:40:47 INFO com.google.cloud.hadoop.fs.gcs.GhfsStorageStatistics: Detected potential high latency for operation op_mkdirs. latencyMs=188; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-central1-399513760474-akglf7kx/6b99b748-58cf-4a0a-a00b-2c7197a295de/spark-job-history
+Pi is roughly 3.1416266714162666
+24/02/12 02:41:03 INFO org.sparkproject.jetty.server.AbstractConnector: Stopped Spark@1f387978{HTTP/1.1, (http/1.1)}{0.0.0.0:0}
+24/02/12 02:41:04 INFO com.google.cloud.hadoop.fs.gcs.GhfsStorageStatistics: Detected potential high latency for operation stream_write_close_operations. latencyMs=182; previousMaxLatencyMs=0; operationCount=1; context=gs://dataproc-temp-us-central1-399513760474-akglf7kx/6b99b748-58cf-4a0a-a00b-2c7197a295de/spark-job-history/application_1707705447178_0001.inprogress
+24/02/12 02:41:04 INFO com.google.cloud.hadoop.fs.gcs.GhfsStorageStatistics: Detected potential high latency for operation op_rename. latencyMs=222; previousMaxLatencyMs=0; operationCount=1; context=rename(gs://dataproc-temp-us-central1-399513760474-akglf7kx/6b99b748-58cf-4a0a-a00b-2c7197a295de/spark-job-history/application_1707705447178_0001.inprogress -> gs://dataproc-temp-us-central1-399513760474-akglf7kx/6b99b748-58cf-4a0a-a00b-2c7197a295de/spark-job-history/application_1707705447178_0001)
+Job [558f854a455c4bf3ad92baa695204395] finished successfully.
+done: true
+driverControlFilesUri: gs://dataproc-staging-us-central1-399513760474-ii7p2av7/google-cloud-dataproc-metainfo/6b99b748-58cf-4a0a-a00b-2c7197a295de/jobs/558f854a455c4bf3ad92baa695204395/
+driverOutputResourceUri: gs://dataproc-staging-us-central1-399513760474-ii7p2av7/google-cloud-dataproc-metainfo/6b99b748-58cf-4a0a-a00b-2c7197a295de/jobs/558f854a455c4bf3ad92baa695204395/driveroutput
+jobUuid: 7cf68ab7-8e01-3f55-ae3c-fc187d99ae65
+placement:
+  clusterName: example-cluster
+  clusterUuid: 6b99b748-58cf-4a0a-a00b-2c7197a295de
+reference:
+  jobId: 558f854a455c4bf3ad92baa695204395
+  projectId: qwiklabs-gcp-01-fd0e65d75c3b
+sparkJob:
+  args:
+  - '1000'
+  jarFileUris:
+  - file:///usr/lib/spark/examples/jars/spark-examples.jar
+  mainClass: org.apache.spark.examples.SparkPi
+status:
+  state: DONE
+  stateStartTime: '2024-02-12T02:41:06.196215Z'
+statusHistory:
+- state: PENDING
+  stateStartTime: '2024-02-12T02:40:34.438752Z'
+- state: SETUP_DONE
+  stateStartTime: '2024-02-12T02:40:34.475923Z'
+- details: Agent reported job success
+  state: RUNNING
+  stateStartTime: '2024-02-12T02:40:34.839085Z'
+yarnApplications:
+- name: Spark Pi
+  progress: 1.0
+  state: FINISHED
+  trackingUrl: http://example-cluster-m:8088/proxy/application_1707705447178_0001/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+Task 3. Update a cluster
+To change the number of workers in the cluster to four, run the following command:
+gcloud dataproc clusters update example-cluster --num-workers 4
+Copied!
+
+
+
+Your cluster's updated details are displayed in the command's output:
+Waiting on operation [projects/qwiklabs-gcp-7f7aa0829e65200f/regions/global/operations/b86892cc-e71d-4e7b-aa5e-6030c945ea67].
+Waiting for cluster update operation...done.
+
+
+
+You can use the same command to decrease the number of worker nodes:
+gcloud dataproc clusters update example-cluster --num-workers 2
+Copied!
+Now you can create a Dataproc cluster and adjust the number of workers from the gcloud command line on the Google Cloud.
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+Clusters can be created and scaled quickly with a variety of virtual machine types, disk sizes, and number of nodes.
+YES    True
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+
+
+
+
+
