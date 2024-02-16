@@ -189,7 +189,7 @@ SELECT DISTINCT
 productSKU,
 v2ProductName
 FROM `data-to-insights.ecommerce.all_sessions_raw`
-Copied!
+
 
 Click Run.
 Look at the pagination results in the console for the total number of records returned.
@@ -198,7 +198,7 @@ https://cdn.qwiklabs.com/BxuVfqbqOwbz1BABm52tAadnDEV9nsZTv4xADegkaCc%3D
 
 How many rows of product data are returned?
 1,925 products and SKUs
-2,273 products and SKUs
+YES    2,273 products and SKUs
 2,205 products and SKUs
 
 But...do the results mean that there are that many unique product SKUs? One of the first queries you will run as a data analyst is looking at the uniqueness of your data values.
@@ -217,16 +217,16 @@ SELECT
 DISTINCT
 productSKU
 FROM `data-to-insights.ecommerce.all_sessions_raw`
-Copied!
+
 
 How many DISTINCT SKUs are returned?
 2,273 distinct SKUs
-1,909 distinct SKUs
+YES    1,909 distinct SKUs
 119 distinct SKUs
 
 
 There are fewer DISTINCT SKUs than the SKU & Product Name query had before. Why do you think that is?
-The first query also returned Product Name. It appears multiple Product Names can have the same SKU.
+YES    The first query also returned Product Name. It appears multiple Product Names can have the same SKU.
 The first query was excluding some Product Names.
 The first query showed that only one Product Name can belong to a SKU.
 
@@ -256,7 +256,7 @@ FROM `data-to-insights.ecommerce.all_sessions_raw`
   GROUP BY v2ProductName
   HAVING SKU_count > 1
   ORDER BY SKU_count DESC
-Copied!
+
 
 Click Run.
 Results:
@@ -265,12 +265,12 @@ https://cdn.qwiklabs.com/FNCBqmZ5vUziQbxcLBNZPyf8QFyAtQAod0KaM%2BwBVPw%3D
 
 Do some product names have more than one SKU? Look at the query results to confirm
 No
-Yes
+YES    Yes
 
 
 Which product has the most SKUs associated?
 Android Womens Short Sleeve Badge Tee Dark Heather
-Waze Womens Typography Short Sleeve Tee
+YES    Waze Womens Typography Short Sleeve Tee
 Google Sunglasses
 
 
@@ -299,14 +299,14 @@ FROM `data-to-insights.ecommerce.all_sessions_raw`
   GROUP BY productSKU
   HAVING product_count > 1
   ORDER BY product_count DESC
-Copied!
+
 
 https://cdn.qwiklabs.com/ygNQFqb7mLl2rfSvN3O7ysFF0BV3keIMiU9DrfEhVtk%3D
 Note: Try replacing STRING_AGG() with ARRAY_AGG() instead. Pretty cool, right? BigQuery natively supports nested array values. You can learn more from the Work with arrays guide.
 
 
 When you look at the query results, are there single SKU values with more than one product name associated? What do you notice about those product names?
-Yes, most of the product names are similar but not exactly the same.
+YES    Yes, most of the product names are similar but not exactly the same.
 No, the Product SKUs match the Product Names one-for-one.
 
 
@@ -368,7 +368,7 @@ SELECT DISTINCT
   productSKU
 FROM `data-to-insights.ecommerce.all_sessions_raw`
 WHERE productSKU = 'GGOEGPJC019099'
-Copied!
+
 Click Run.
 
 v2ProductName                         productSKU
@@ -378,7 +378,7 @@ Google 7-inch Dog Flying Disc Blue    GGOEGPJC019099
 
 
 What do you notice about the product names?
-They are mostly the same except for a few characters.
+YES    They are mostly the same except for a few characters.
 They are exactly the same.
 
 
@@ -405,18 +405,18 @@ SELECT
   stockLevel
 FROM `data-to-insights.ecommerce.products`
 WHERE SKU = 'GGOEGPJC019099'
-Copied!
+
 
 
 
 Is the SKU unique in the product inventory dataset?
-Yes, just one record is returned.
+YES    Yes, just one record is returned.
 No, there are duplicate SKUs in the inventory dataset.
 
 
 How many dog frisbees do you have in inventory?
 0
-154
+YES    154
 10,540
 
 
@@ -440,12 +440,12 @@ FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 JOIN `data-to-insights.ecommerce.products` AS inventory
   ON website.productSKU = inventory.SKU
   WHERE productSKU = 'GGOEGPJC019099'
-Copied!
+
 
 What happens when you join the website table and the product inventory table on SKU? Do you now have inventory stock levels for the product?
 Yes, there is inventory data and everything looks fine.
 No, there is no inventory data, the join did not work.
-Yes, there are inventory levels but the stockLevel is showing three times (one for each record).
+YES      Yes, there are inventory levels but the stockLevel is showing three times (one for each record).
 
 
 
@@ -475,11 +475,11 @@ SELECT
   SUM(stockLevel) AS total_inventory
 FROM inventory_per_sku
 GROUP BY productSKU
-Copied!
+
 
 
 Is the dog Frisbee properly showing a stock level of 154?
-No, it is now at 462 showing three times (one for each record!)
+YES      No, it is now at 462 showing three times (one for each record!)
 Yes, it is at 154
 
 
@@ -539,7 +539,7 @@ SELECT
 FROM `data-to-insights.ecommerce.all_sessions_raw`
 WHERE productSKU = 'GGOEGAAX0098'
 GROUP BY productSKU
-Copied!
+
 
 Now instead of having a row for every Product Name, you only have a row for each unique SKU.
 
@@ -553,7 +553,7 @@ SELECT
 FROM `data-to-insights.ecommerce.all_sessions_raw`
 WHERE productSKU = 'GGOEGAAX0098'
 GROUP BY productSKU
-Copied!
+
 
 
 
@@ -569,10 +569,10 @@ website.productSKU
 FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 JOIN `data-to-insights.ecommerce.products` AS inventory
 ON website.productSKU = inventory.SKU
-Copied!
+
 
 How many records were returned? All 1,909 distinct SKUs?
-No, just 1,090 records
+YES      No, just 1,090 records
 Yes, all 1,909 records
 
 
@@ -591,7 +591,7 @@ FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 JOIN `data-to-insights.ecommerce.products` AS inventory
 ON website.productSKU = inventory.SKU
 # IDs are present in both tables, how can you dig deeper?
-Copied!
+
 
 It appears the SKUs are present in both of those datasets after the join for these 1,090 records. How can you find the missing records?
 
@@ -621,14 +621,14 @@ inventory.SKU AS inventory_SKU
 FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 LEFT JOIN `data-to-insights.ecommerce.products` AS inventory
 ON website.productSKU = inventory.SKU
-Copied!
+
 
 Click Run.
 You have successfully used a LEFT JOIN to return all of the original 1,909 website SKUs in your results.
 
 
 True or False: Many inventory SKU values are NULL.
-True
+YES    True
 False
 
 
@@ -660,7 +660,7 @@ FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 LEFT JOIN `data-to-insights.ecommerce.products` AS inventory
 ON website.productSKU = inventory.SKU
 WHERE inventory.SKU IS NULL
-Copied!
+
 
 Click Run.
 
@@ -683,11 +683,11 @@ Clear the previous query and run the below query to confirm using one of the spe
 SELECT * FROM `data-to-insights.ecommerce.products`
 WHERE SKU = 'GGOEGATJ060517'
 # query returns zero results
-Copied!
+
 
 
 Why might the product inventory dataset be missing SKUs?
-Some SKUs could be digital products that you do not store in warehouse inventory
+YES      Some SKUs could be digital products that you do not store in warehouse inventory
 Old products you sold in past website orders are no longer offered in current inventory
 There is legitimate missing data from inventory and should be tracked
 All of the above
@@ -707,7 +707,7 @@ FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 RIGHT JOIN `data-to-insights.ecommerce.products` AS inventory
 ON website.productSKU = inventory.SKU
 WHERE website.productSKU IS NULL
-Copied!
+
 Click Run.
 Answer: Yes. There are two product SKUs missing from the website dataset
 
@@ -728,7 +728,7 @@ FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 RIGHT JOIN `data-to-insights.ecommerce.products` AS inventory
 ON website.productSKU = inventory.SKU
 WHERE website.productSKU IS NULL
-Copied!
+
 
 Why would the below products be missing from the ecommerce website dataset?
 website_SKU  SKU               name                                  orderedQuantity  stockLevel  restockingLeadTime  sentimentScore  sentimentMagnitude
@@ -758,7 +758,7 @@ FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 FULL JOIN `data-to-insights.ecommerce.products` AS inventory
 ON website.productSKU = inventory.SKU
 WHERE website.productSKU IS NULL OR inventory.SKU IS NULL
-Copied!
+
 Click Run.
 
 
@@ -785,7 +785,7 @@ Clear the previous query and run the below query:
 #standardSQL
 CREATE OR REPLACE TABLE ecommerce.site_wide_promotion AS
 SELECT .05 AS discount;
-Copied!
+
 
 In the left pane, site_wide_promotion is now listed in the Resource section under your project and dataset.
 
@@ -800,10 +800,10 @@ discount
 FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 CROSS JOIN ecommerce.site_wide_promotion
 WHERE v2ProductCategory LIKE '%Clearance%'
-Copied!
+
 
 How many products are on clearance?
-82
+YES    82
 91
 0
 52
@@ -817,13 +817,13 @@ Clear the previous query and run the below query to insert two more records into
 INSERT INTO ecommerce.site_wide_promotion (discount)
 VALUES (.04),
        (.03);
-Copied!
+
 
 
 Next, view the data values in the promotion table.
 Clear the previous query and run the below query:
 SELECT discount FROM ecommerce.site_wide_promotion
-Copied!
+
 How many records were returned?
 Answer: 3
 
@@ -838,7 +838,7 @@ discount
 FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 CROSS JOIN ecommerce.site_wide_promotion
 WHERE v2ProductCategory LIKE '%Clearance%'
-Copied!
+
 
 How many products are returned?
 Answer: Instead of 82, you now have 246 returned which is more records than your original table started with.
@@ -858,7 +858,7 @@ FROM `data-to-insights.ecommerce.all_sessions_raw` AS website
 CROSS JOIN ecommerce.site_wide_promotion
 WHERE v2ProductCategory LIKE '%Clearance%'
 AND productSKU = 'GGOEGOLC013299'
-Copied!
+
 What was the impact of the CROSS JOIN?
 Answer: Since there are 3 discount codes to cross join on, you are multiplying the original dataset by 3.
 
