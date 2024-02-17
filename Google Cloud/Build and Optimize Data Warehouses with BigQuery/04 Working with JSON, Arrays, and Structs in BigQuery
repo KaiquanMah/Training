@@ -112,14 +112,14 @@ Enter the following in the BigQuery Query Editor:
 #standardSQL
 SELECT
 ['raspberry', 'blackberry', 'strawberry', 'cherry'] AS fruit_array
-Copied!
+
 Click Run.
 
 Now try executing this one:
 #standardSQL
 SELECT
 ['raspberry', 'blackberry', 'strawberry', 'cherry', 1234567] AS fruit_array
-Copied!
+
 You should get an error that looks like the following:
 Error: Array elements of types {INT64, STRING} do not have a common supertype at [3:1]
 
@@ -134,7 +134,7 @@ YES              Arrays can only share one data type (all strings, all numbers).
 Here's the final table to query against:
 #standardSQL
 SELECT person, fruit_array, total_cost FROM `data-to-insights.advanced.fruit_store`;
-Copied!
+
 Click Run.
 After viewing the results, click the JSON tab to view the nested structure of the results.
 https://cdn.qwiklabs.com/V0j%2FsiBB1RlvfpG6x%2Bl9P6xn5YaSKjcRwasQde5WRTs%3D
@@ -210,7 +210,7 @@ SELECT
   FROM `data-to-insights.ecommerce.all_sessions`
 WHERE visitId = 1501570398
 ORDER BY date
-Copied!
+
 Click Run and view the results.
 
 How many rows are returned?
@@ -233,7 +233,7 @@ SELECT
 WHERE visitId = 1501570398
 GROUP BY fullVisitorId, date
 ORDER BY date
-Copied!
+
 Click Run and view the results
 
 How many rows are returned?
@@ -261,7 +261,7 @@ SELECT
 WHERE visitId = 1501570398
 GROUP BY fullVisitorId, date
 ORDER BY date
-Copied!
+
 
 How many pages were visited by this user on 20170801?
 70
@@ -286,7 +286,7 @@ SELECT
 WHERE visitId = 1501570398
 GROUP BY fullVisitorId, date
 ORDER BY date
-Copied!
+
 
 How many DISTINCT pages were visited by this user on 20170801?
 101
@@ -334,7 +334,7 @@ SELECT
   *
 FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801`
 WHERE visitId = 1501570398
-Copied!
+
 
 Run the query.
 Scroll right in the results until you see the hits.product.v2ProductName field (multiple field aliases are discussed shortly).
@@ -356,7 +356,7 @@ SELECT
   hits.page.pageTitle
 FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801`
 WHERE visitId = 1501570398
-Copied!
+
 
 You will get an error: Error:Cannot access field page on a value with type ARRAY<STRUCT<hitNumber INT64, time INT64, hour INT64, ...>> at [3:8]
 
@@ -369,12 +369,12 @@ Before you can query REPEATED fields (arrays) normally, you must first break the
 
 For example, the array for hits.page.pageTitle is stored currently as a single row like:
 ['homepage','product page','checkout']
-Copied!
+
 and it needs to be:
 ['homepage',
 'product page',
 'checkout']
-Copied!
+
 
 How do you do that with SQL?
 Answer: Use the UNNEST() function on your array field:
@@ -385,7 +385,7 @@ FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801`,
 UNNEST(hits) AS h
 WHERE visitId = 1501570398
 LIMIT 10
-Copied!
+
 
 
 We'll cover UNNEST() more in detail later but for now just know that:
@@ -508,7 +508,7 @@ SELECT
 FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801`
 WHERE visitId = 1501570398
 LIMIT 10
-Copied!
+
 Note: The .* syntax tells BigQuery to return all fields for that STRUCT (much like it would if totals.* was a separate table we joined against).
 Storing your large reporting tables as STRUCTs (pre-joined "tables") and ARRAYs (deep granularity) allows you to:
 
@@ -537,7 +537,7 @@ The next dataset will be lap times of runners around the track. Each lap will be
 With this query, try out the STRUCT syntax and note the different field types within the struct container:
 #standardSQL
 SELECT STRUCT("Rudisha" as name, 23.4 as split) as runner
-Copied!
+
 Row    runner.name    runner.split
 1      Rudisha        23.4
 
@@ -560,7 +560,7 @@ With an array of course!
 Run the below query to confirm:
 #standardSQL
 SELECT STRUCT("Rudisha" as name, [23.4, 26.3, 26.4, 26.1] as splits) AS runner
-Copied!
+
 Row    runner.name    runner.splits
 1      Rudisha          23.4
                         26.3
@@ -614,7 +614,7 @@ In Schema, click on Edit as text slider and add the following:
         ]
     }
 ]
-Copied!
+
 
 Call the new table race_results.
 Click Create table.
@@ -641,7 +641,7 @@ Practice querying nested and repeated fields
 Let's see all of our racers for the 800 Meter race:
 #standardSQL
 SELECT * FROM racing.race_results
-Copied!
+
 How many rows were returned?
 Answer: 1
 https://cdn.qwiklabs.com/8ygOJAxnxJxkoRxOSBabLh0T7%2BIwx%2FaE%2BSK%2F46cYexg%3D
@@ -652,7 +652,7 @@ Run the below schema and see what happens:
 #standardSQL
 SELECT race, participants.name
 FROM racing.race_results
-Copied!
+
 Error: Cannot access field name on a value with type ARRAY<STRUCT<name STRING, splits ARRAY<FLOAT64>>>> at [2:27]
 
 
@@ -687,7 +687,7 @@ SELECT race, participants.name
 FROM racing.race_results
 CROSS JOIN
 participants  # this is the STRUCT (it is like a table within a table)
-Copied!
+
 Table name "participants" missing dataset while no default dataset is set in the request.
 Even though the participants STRUCT is like a table, it is still technically a field in the racing.race_results table.
 
@@ -700,7 +700,7 @@ SELECT race, participants.name
 FROM racing.race_results
 CROSS JOIN
 race_results.participants # full STRUCT name
-Copied!
+
 And click Run.
 Wow! You've successfully listed all of the racers for each race!
 
@@ -723,7 +723,7 @@ This will give you the same query result:
 #standardSQL
 SELECT race, participants.name
 FROM racing.race_results AS r, r.participants
-Copied!
+
 
 If you have more than one race type (800M, 100M, 200M), wouldn't a CROSS JOIN just associate every racer name with every possible race like a cartesian product?
 Answer: No. This is a correlated cross join which only unpacks the elements associated with a single row. For a greater discussion, see working with ARRAYs and STRUCTs
@@ -762,14 +762,14 @@ To start, use the below partially written query:
 #standardSQL
 SELECT COUNT(participants.name) AS racer_count
 FROM racing.race_results
-Copied!
+
 
 Note: Remember you will need to cross join in your struct name as an additional data source after the FROM.
 Possible solution:
 #standardSQL
 SELECT COUNT(p.name) AS racer_count
 FROM racing.race_results AS r, UNNEST(r.participants) AS p
-Copied!
+
 
 Row  racer_count
 1      8
@@ -818,7 +818,7 @@ WHERE
 GROUP BY
 ORDER BY
 ;
-Copied!
+
 
 Note:
 You will need to unpack both the struct and the array within the struct as data sources after your FROM clause.
@@ -837,7 +837,7 @@ FROM racing.race_results AS r
 WHERE p.name LIKE 'R%'
 GROUP BY p.name
 ORDER BY total_race_time ASC;
-Copied!
+
 Row    name    total_race_time
 1    Rudisha    102.19999999999999
 2    Rotich      103.6
@@ -877,7 +877,7 @@ FROM racing.race_results AS r
 , r.participants AS p
 , p.splits AS split_time
 WHERE split_time = ;
-Copied!
+
 
 
 
@@ -890,7 +890,7 @@ FROM racing.race_results AS r
 , UNNEST(r.participants) AS p
 , UNNEST(p.splits) AS split_time
 WHERE split_time = 23.2;
-Copied!
+
 
 Row    name        split_time
 1      Kipketer    23.2
