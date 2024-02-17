@@ -74,7 +74,7 @@ What are some potential issues if you stored all your data in one giant table?
 The table row size could be too large for traditional reporting databases
 Any changes to a value (like customer email) could impact many other rows (like all their orders)
 Data at differing levels of granularity could lead to reporting issues because less granular fields would be repeated.
-All of the above
+YES      All of the above
 
 
 
@@ -126,8 +126,8 @@ Error: Array elements of types {INT64, STRING} do not have a common supertype at
 Why did you get this error?
 Data in an array cannot exceed 4 elements
 Data in an array must only be strings
-Data in an array [ ] must all be the same type
-Arrays can only share one data type (all strings, all numbers).
+YES              Data in an array [ ] must all be the same type
+YES              Arrays can only share one data type (all strings, all numbers).
 
 
 
@@ -138,6 +138,19 @@ Copied!
 Click Run.
 After viewing the results, click the JSON tab to view the nested structure of the results.
 https://cdn.qwiklabs.com/V0j%2FsiBB1RlvfpG6x%2Bl9P6xn5YaSKjcRwasQde5WRTs%3D
+
+[{
+  "person": ["sally"],
+  "fruit_array": ["raspberry", "blackberry", "strawberry", "cherry"],
+  "total_cost": ["10.99"]
+}, {
+  "person": ["frederick"],
+  "fruit_array": ["orange", "apple"],
+  "total_cost": ["5.55"]
+}]
+
+
+
 
 
 
@@ -203,7 +216,7 @@ Click Run and view the results.
 How many rows are returned?
 70
 2
-111
+YES            111
 100
 
 
@@ -225,7 +238,7 @@ Click Run and view the results
 
 How many rows are returned?
 70 - one for each day
-2 - one for each day
+yes            2 - one for each day
 63 - one for each day
 100 - one for each day
 
@@ -253,7 +266,7 @@ Copied!
 How many pages were visited by this user on 20170801?
 70
 8
-109
+yes            109
 101
 
 
@@ -277,7 +290,7 @@ Copied!
 
 How many DISTINCT pages were visited by this user on 20170801?
 101
-8
+yes            8
 109
 70
 
@@ -329,7 +342,7 @@ Scroll right in the results until you see the hits.product.v2ProductName field (
 
 You'll note a lot of seemingly 'blank' values in the results as you scroll. Why do you think that is?
 The dataset is missing data values for those fields
-The fields that appear to be missing data are actually at a higher level of granularity than other fields
+YES            The fields that appear to be missing data are actually at a higher level of granularity than other fields
 BigQuery is still loading the data for those fields
 
 
@@ -429,11 +442,26 @@ Start scrolling through the schema and answer the following question by using th
 
 
 
+
+SELECT * 
+FROM `bigquery-public-data.google_analytics_sample.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS`
+WHERE table_name='ga_sessions_20170127'
+
+
+SELECT * 
+FROM `bigquery-public-data.google_analytics_sample.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS`
+WHERE table_name='ga_sessions_20170127'
+AND data_type like '%STRUCT%'
+
+
+
+
+
 In a BigQuery schema, a STRUCT field is noted as a RECORD Type. Search for RECORD in the Google Analytics schema. How many STRUCTs are present in this dataset?
 1
 5
 11
-32
+YES            32
 
 
 What are the names of some of the STRUCT (RECORD Type) fields?
@@ -441,20 +469,29 @@ Totals
 TrafficSource
 trafficSource.adwordsClickInfo
 device
-All of the above
+YES            All of the above
 
 
 How can both TrafficSource and trafficSource.adwordsClickInfo both be STRUCTs?
-A STRUCT can have another STRUCT as one of its fields (you can nest STRUCTs)
+YES            A STRUCT can have another STRUCT as one of its fields (you can nest STRUCTs)
 They are not STRUCTs
 Because they are all ARRAYs
 This is an invalid data type
 
 
+
+
+
+SELECT * 
+FROM `bigquery-public-data.google_analytics_sample.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS`
+WHERE table_name='ga_sessions_20170127'
+AND data_type like '%ARRAY%'
+
+
 In a BigQuery schema, an ARRAY field is noted as a REPEATED Mode. Search for REPEATED in the Google Analytics schema. How many ARRAYs are present in this dataset?
 1
 5
-11
+YES            11
 32
 
 
@@ -512,7 +549,7 @@ What if the runner has multiple split times for a single race (like time per lap
 How could you have multiple split times within a single record? Hint: the splits all have the same numeric datatype.
 Use a SQL UNION to join the race and split details
 Store each split time in a separate STRING field with STRING_AGG()
-Store each split time as an element in an ARRAY of splits
+YES            Store each split time as an element in an ARRAY of splits
 Store each split time in a separate table called race_splits
 
 With an array of course!
@@ -742,6 +779,19 @@ Answer: There were 8 racers who ran the race.
 
 
 
+
+
+
+
+
+Explore
+SELECT *
+FROM racing.race_results AS r, UNNEST(r.participants) AS p
+
+
+
+SELECT r.race, p.name
+FROM racing.race_results AS r, UNNEST(r.participants) AS p
 
 
 
