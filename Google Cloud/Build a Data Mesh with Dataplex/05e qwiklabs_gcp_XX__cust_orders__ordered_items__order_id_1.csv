@@ -1,0 +1,77 @@
+execution_ts,rule_binding_id,rule_id,table_id,column_id,dimension,metadata_json_string,configs_hashsum,dataplex_lake,dataplex_zone,dataplex_asset_id,dq_run_id,progress_watermark,rows_validated,complex_rule_validation_errors_count,complex_rule_validation_success_flag,last_modified,skip_null_count,success_count,success_percentage,failed_count,failed_percentage,null_count,null_percentage,failed_records_query
+2024-05-25 09:10:57.612512 UTC,VALID_ORDER,NOT_NULL,qwiklabs-gcp-02-fbb8015ae5b2.customer_orders.ordered_items,order_id,COMPLETENESS,{},a616846b89ed142216903fa743b33ff90fe3e1f2a901c1606980e655cebb8f68,sales-lake,curated-customer-zone,customer-orders,VALID_ORDER_NOT_NULL_2024-05-25 09:10:57.612512+00_true,true,1000,,,2024-05-24 21:29:01.895000 UTC,true,1000,1.0,0,0.0,,,"
+WITH
+zero_record AS (
+    SELECT
+        'VALID_ORDER' AS rule_binding_id,
+),
+data AS (
+    SELECT
+      *,
+      'VALID_ORDER' AS rule_binding_id,
+    FROM
+      `qwiklabs-gcp-02-fbb8015ae5b2.customer_orders.ordered_items` d
+    WHERE
+      True
+),
+last_mod AS (
+    SELECT
+        project_id || '.' || dataset_id || '.' || table_id AS _internal_table_id,
+        TIMESTAMP_MILLIS(last_modified_time) AS last_modified
+    FROM `qwiklabs-gcp-02-fbb8015ae5b2.customer_orders.__TABLES__`
+),
+validation_results AS (SELECT
+    'VALID_ORDER' AS rule_binding_id,
+    'NOT_NULL' AS _internal_rule_id,
+    'qwiklabs-gcp-02-fbb8015ae5b2.customer_orders.ordered_items' AS _internal_table_id,
+    'order_id' AS _internal_column_id,
+    data.order_id AS _internal_column_value,
+    
+    'COMPLETENESS' AS _internal_dimension,
+
+    CASE
+
+      WHEN order_id IS NOT NULL THEN TRUE
+
+    ELSE
+      FALSE
+    END AS _internal_simple_rule_row_is_valid,
+
+    TRUE AS _internal_skip_null_count,
+
+    CAST(NULL AS INT64) AS complex_rule_validation_errors_count,
+    CAST(NULL AS BOOLEAN) AS _internal_complex_rule_validation_success_flag,
+  FROM
+    zero_record
+  LEFT JOIN
+    data
+  ON
+    zero_record.rule_binding_id = data.rule_binding_id
+),
+all_validation_results AS (
+  SELECT
+    'f4ed7776-1bc6-4ad3-bcbc-3b53115124dc' as _dq_validation_invocation_id,
+    r.rule_binding_id AS _dq_validation_rule_binding_id,
+    r._internal_rule_id AS _dq_validation_rule_id,
+    r._internal_column_id AS _dq_validation_column_id,
+    r._internal_column_value AS _dq_validation_column_value,
+    CAST(r._internal_dimension AS STRING) AS _dq_validation_dimension,
+    r._internal_simple_rule_row_is_valid AS _dq_validation_simple_rule_row_is_valid,
+    r.complex_rule_validation_errors_count AS _dq_validation_complex_rule_validation_errors_count,
+    r._internal_complex_rule_validation_success_flag AS _dq_validation_complex_rule_validation_success_flag,
+    
+
+
+  FROM
+    validation_results r
+)
+SELECT
+  *
+FROM
+  all_validation_results
+
+WHERE
+_dq_validation_simple_rule_row_is_valid is False
+OR
+_dq_validation_complex_rule_validation_success_flag is False
+ORDER BY _dq_validation_rule_id"
