@@ -1,0 +1,148 @@
+Skip to main content
+Skip to editor
+Skip to results
+Site
+Worksheets
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+--For example, Mercedes AG of Germany and Mercedes USA both roll up into Mercedes
+--But they use different WMI Codes
+CREATE TABLE vin.decode.manuf_to_make
+(
+     manuf_id	number(6)
+    ,make_name	varchar(50)
+    ,make_id	number(5)
+);
+
+--We need a table that can decode the model year
+-- The year 2001 is represented by the digit 1
+-- The year 2020 is represented by the letter L
+CREATE TABLE vin.decode.model_year
+(
+     model_year_code	varchar(1)
+    ,model_year_name	varchar(4)
+);
+
+--We need a table that can decode which plant at which 
+--the vehicle was assembled
+--You might have code "A" for Honda and code "A" for Ford
+--so you need both the Make and the Plant Code to properly decode 
+--the plant code
+CREATE TABLE vin.decode.manuf_plants
+(
+     make_id	number(5)
+    ,plant_code	varchar(1)
+    ,plant_name	varchar(75)
+ );
+ 
+--We need to use a combination of both the Make and VDS 
+--to decode many attributes including the engine, transmission, etc
+CREATE TABLE vin.decode.make_model_vds
+(
+     make_id	  number(3)
+    ,model_id	  number(6)
+    ,model_name	  varchar(50)
+    ,vds	  varchar(5)
+    ,desc1	  varchar(25)
+    ,desc2	  varchar(25)
+    ,desc3	  varchar(50)
+    ,desc4	  varchar(25)
+    ,desc5	  varchar(25)
+    ,body_style	  varchar(25)
+    ,engine	  varchar(100)
+    ,drive_type	  varchar(50)
+    ,transmission varchar(50)
+    ,mpg  	varchar(25)
+);
+
+
+
+
+
+--Create a file format and then load each of the 5 Lookup Tables
+--You need a file format if you want to load the table
+CREATE FILE FORMAT vin.decode.comma_sep_oneheadrow 
+type = 'CSV' 
+field_delimiter = ',' 
+record_delimiter = '\n' 
+skip_header = 1 
+field_optionally_enclosed_by = '"'  
+trim_space = TRUE;
+
+
+
+CREATE STAGE aws_s3_bucket 
+	URL = 's3://uni-cmcw/  ' 
+	DIRECTORY = ( ENABLE = true );
+Databases
+Worksheets
+Search objects
+
+The table was removed before loading finished
