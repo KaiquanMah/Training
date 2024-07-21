@@ -1,0 +1,97 @@
+SELECT
+  *
+FROM
+  GARDEN_PLANTS.VEGGIES.VEGETABLE_DETAILS;
+
+
+create file format garden_plants.veggies.PIPECOLSEP_ONEHEADROW 
+    TYPE = 'CSV'--csv is used for any flat file (tsv, pipe-separated, etc)
+    FIELD_DELIMITER = '|' --pipes as column separators
+    SKIP_HEADER = 1 --one header row to skip
+    ;
+
+create file format garden_plants.veggies.COMMASEP_DBLQUOT_ONEHEADROW 
+    TYPE = 'CSV'--csv for comma separated files
+    SKIP_HEADER = 1 --one header row  
+    FIELD_OPTIONALLY_ENCLOSED_BY = '"' --this means that some values will be wrapped in double-quotes bc they have commas in them
+    ;
+
+
+DELETE FROM VEGETABLE_DETAILS
+WHERE PLANT_NAME='Spinach'
+    AND ROOT_DEPTH_CODE='D';
+
+
+
+--The data in the file, with no FILE FORMAT specified
+select $1
+from @util_db.public.like_a_window_into_an_s3_bucket/LU_SOIL_TYPE.tsv;
+
+--Same file but with one of the file formats we created earlier  
+select $1, $2, $3
+from @util_db.public.like_a_window_into_an_s3_bucket/LU_SOIL_TYPE.tsv
+(file_format => garden_plants.veggies.COMMASEP_DBLQUOT_ONEHEADROW);
+
+--Same file but with the other file format we created earlier
+select $1, $2, $3
+from @util_db.public.like_a_window_into_an_s3_bucket/LU_SOIL_TYPE.tsv
+(file_format => garden_plants.veggies.PIPECOLSEP_ONEHEADROW );
+
+
+
+
+
+
+
+
+
+
+create or replace file format garden_plants.veggies.L8_CHALLENGE_FF 
+    TYPE = 'CSV'
+    FIELD_DELIMITER = '\t'
+    SKIP_HEADER = 1 --one header row  
+    ;
+
+--Same file but with the other file format we created earlier
+select $1, $2, $3
+from @util_db.public.like_a_window_into_an_s3_bucket/LU_SOIL_TYPE.tsv
+(file_format => garden_plants.veggies.L8_CHALLENGE_FF );
+
+create or replace table LU_SOIL_TYPE(
+SOIL_TYPE_ID number,	
+SOIL_TYPE varchar(15),
+SOIL_DESCRIPTION varchar(75)
+ );
+
+
+copy into LU_SOIL_TYPE
+from @util_db.public.like_a_window_into_an_s3_bucket
+files = ( 'LU_SOIL_TYPE.tsv')
+file_format = ( format_name=GARDEN_PLANTS.VEGGIES.L8_CHALLENGE_FF );
+
+SELECT *
+FROM LU_SOIL_TYPE;
+
+
+
+
+
+
+
+create or replace table VEGETABLE_DETAILS_PLANT_HEIGHT(
+        plant_name TEXT,
+        UOM TEXT(1),
+        Low_End_of_Range number,
+        High_End_of_Range number
+ );
+
+
+copy into VEGETABLE_DETAILS_PLANT_HEIGHT
+from @util_db.public.like_a_window_into_an_s3_bucket
+files = ( 'veg_plant_height.csv')
+file_format = ( format_name=GARDEN_PLANTS.VEGGIES.COMMASEP_DBLQUOT_ONEHEADROW );
+
+SELECT *
+FROM VEGETABLE_DETAILS_PLANT_HEIGHT;
+
+ 
