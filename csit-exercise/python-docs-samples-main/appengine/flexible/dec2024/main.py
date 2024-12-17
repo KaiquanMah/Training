@@ -39,8 +39,8 @@ app = Flask(__name__)
 # Gatekeeper Service endpoint
 GATEKEEPER_URL = "https://dec-2024-mini-challenge.csit-events.sg/api/gatekeeper/access"
 
-# # Toy Production Service URL (replace with actual URL if known)
-# TOY_PRODUCTION_URL = "http://toy-production-service.local/api/toyProductionKey"
+# Toy Production Service URL (replace with actual URL if known)
+TOY_PRODUCTION_URL = "54.86.50.139/api/toyProductionKey"
 
 # Replace with your Compute Engine external IP and port
 ORDER_SERVICE_IP = "34.145.30.44:8080"  # Update with your public IP and port
