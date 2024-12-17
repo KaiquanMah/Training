@@ -39,8 +39,8 @@ app = Flask(__name__)
 # Gatekeeper Service endpoint
 GATEKEEPER_URL = "https://dec-2024-mini-challenge.csit-events.sg/api/gatekeeper/access"
 
-# Toy Production Service URL (replace with actual URL if known)
-TOY_PRODUCTION_URL = "http://toy-production-service.local/api/toyProductionKey"
+# # Toy Production Service URL (replace with actual URL if known)
+# TOY_PRODUCTION_URL = "http://toy-production-service.local/api/toyProductionKey"
 
 # Replace with your Compute Engine external IP and port
 ORDER_SERVICE_IP = "34.145.30.44:8080"  # Update with your public IP and port
@@ -51,45 +51,53 @@ def order_service():
     """
     Endpoint to retrieve the toy production key.
     """
-    try:
-        # Step 1: Send a request to Gatekeeper Service
-        gatekeeper_payload = {
-            "orderServiceHostOrIpAddress": ORDER_SERVICE_IP,
-            "secretInput": "Plush123!"  # Replace 'secret_value' with actual secret
-        }
-        gatekeeper_response = requests.post(GATEKEEPER_URL, json=gatekeeper_payload)
+    # try:
+    #     # Step 1: Send a request to Gatekeeper Service
+    #     gatekeeper_payload = {
+    #         "orderServiceHostOrIpAddress": ORDER_SERVICE_IP,
+    #         "secretInput": "Plush123!"  # Replace 'secret_value' with actual secret
+    #     }
+    #     gatekeeper_response = requests.post(GATEKEEPER_URL, json=gatekeeper_payload)
 
-        # Check if Gatekeeper response is successful
-        if gatekeeper_response.status_code != 200:
-            return (
-                jsonify({"error": "Failed to authenticate with Gatekeeper Service"}),
-                502,
-            )
+    #     # Check if Gatekeeper response is successful
+    #     if gatekeeper_response.status_code != 200:
+    #         return (
+    #             jsonify({"error": "Failed to authenticate with Gatekeeper Service"}),
+    #             502,
+    #         )
 
-        # Step 2: Extract the secret input
-        gatekeeper_data = gatekeeper_response.json()
-        secret_input = gatekeeper_data.get("secretInput")
-        if not secret_input:
-            return jsonify({"error": "Invalid Gatekeeper response"}), 502
+    #     # Step 2: Extract the secret input
+    #     gatekeeper_data = gatekeeper_response.json()
+    #     secret_input = gatekeeper_data.get("secretInput")
+    #     if not secret_input:
+    #         return jsonify({"error": "Invalid Gatekeeper response"}), 502
 
-        # Step 3: Forward the secretInput to Toy Production Service
-        toy_production_payload = {"toyProductionKey": secret_input}
-        toy_production_response = requests.post(
-            TOY_PRODUCTION_URL, json=toy_production_payload
-        )
+    #     # Step 3: Forward the secretInput to Toy Production Service
+    #     toy_production_payload = {"toyProductionKey": secret_input}
+    #     toy_production_response = requests.post(
+    #         TOY_PRODUCTION_URL, json=toy_production_payload
+    #     )
 
-        # Check if Toy Production Service response is successful
-        if toy_production_response.status_code != 200:
-            return (
-                jsonify({"error": "Toy Production Service request failed"}),
-                502,
-            )
+    #     # Check if Toy Production Service response is successful
+    #     if toy_production_response.status_code != 200:
+    #         return (
+    #             jsonify({"error": "Toy Production Service request failed"}),
+    #             502,
+    #         )
 
-        # Step 4: Return the response from Toy Production Service
-        return jsonify(
-            {"message": "Toy Production Key retrieved!", "data": toy_production_response.json()}
-        )
+    #     # Step 4: Return the response from Toy Production Service
+    #     return jsonify(
+    #         {"message": "Toy Production Key retrieved!", "data": toy_production_response.json()}
+    #     )
 
+
+    data = request.json
+    print(f"Received data: {data}")  # For debugging
+    return jsonify({"status": "success", "message": "Key received!"}), 200
+
+
+
+    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
