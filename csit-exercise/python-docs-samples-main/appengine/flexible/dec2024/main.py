@@ -32,7 +32,7 @@
 
 
 from flask import Flask, request, jsonify
-import requests  # Used to make HTTP requests to external services
+# import requests  # Used to make HTTP requests to external services
 
 app = Flask(__name__)
 
@@ -90,10 +90,10 @@ def order_service():
     #         {"message": "Toy Production Key retrieved!", "data": toy_production_response.json()}
     #     )
 
-
-    data = request.json
-    print(f"Received data: {data}")  # For debugging
-    return jsonify({"status": "success", "message": "Key received!"}), 200
+    try:
+        data = request.json
+        print(f"Received data: {data}")  # For debugging
+        return jsonify({"status": "success", "message": "Key received!"}), 200
 
 
 
