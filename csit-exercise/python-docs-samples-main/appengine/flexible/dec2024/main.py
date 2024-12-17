@@ -55,7 +55,7 @@ def order_service():
         # Step 1: Send a request to Gatekeeper Service
         gatekeeper_payload = {
             "orderServiceHostOrIpAddress": ORDER_SERVICE_IP,
-            "secretInput": "secret_value"  # Replace 'secret_value' with actual secret
+            "secretInput": "Plush123!"  # Replace 'secret_value' with actual secret
         }
         gatekeeper_response = requests.post(GATEKEEPER_URL, json=gatekeeper_payload)
 
