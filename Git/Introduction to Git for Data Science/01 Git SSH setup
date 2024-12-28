@@ -58,7 +58,7 @@ tuni-hello-git/
 
 cd tuni-hello-git/
 nano hello_world.py
-print(Hello World!)
+print("Hello World!")
 
 
 
@@ -89,7 +89,7 @@ kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-hello-git (main)
 
 
 
-
+Fetch and merge version history from the remote repository. Because repositories don’t share common ancestor you’ll have to do merge with --allow-unrelated-histories flag. The first time you pull content from a remote, git will ask you
 $ git commit -m "test add, commit"
 [main cf341a1] test add, commit
  1 file changed, 1 insertion(+)
@@ -97,4 +97,189 @@ $ git commit -m "test add, commit"
 
 
 
+
+
+
+$ git push
+Enumerating objects: 4, done.
+Counting objects: 100% (4/4), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 298 bytes | 298.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To github.com:KaiquanMah/tuni-hello-git.git
+   c39a664..cf341a1  main -> main
+
+
+
+
+
+
+$ git remote add tuni https://course-gitlab.tuni.fi/git-course/basics-materials.git
+$ git remote -v
+origin  git@github.com:KaiquanMah/tuni-hello-git.git (fetch)
+origin  git@github.com:KaiquanMah/tuni-hello-git.git (push)
+tuni    https://course-gitlab.tuni.fi/git-course/basics-materials.git (fetch)
+tuni    https://course-gitlab.tuni.fi/git-course/basics-materials.git (push)
+
+
+$ git fetch tuni
+remote: Enumerating objects: 30, done.
+remote: Total 30 (delta 0), reused 0 (delta 0), pack-reused 30 (from 1)
+Unpacking objects: 100% (30/30), 3.29 KiB | 27.00 KiB/s, done.
+From https://course-gitlab.tuni.fi/git-course/basics-materials
+ * [new branch]      master     -> tuni/master
+...~/Downloads/TUNI Git/tuni trg/tuni-hello-git (main)
+
+
+
+
+$ git merge origin/main --allow-unrelated-histories
+Already up to date.
+$ git merge tuni/main --allow-unrelated-histories
+merge: tuni/main - not something we can merge
+$ git merge tuni/master --allow-unrelated-histories
+Merge made by the 'ort' strategy.
+ basics/mergesort.py       | 52 +++++++++++++++++++++++++++++++++++++++++++++++
+ basics/readme.md          |  1 +
+ basics/test_inputs/1.in   |  1 +
+ basics/test_outputs/1.out |  1 +
+ ignore.txt                |  1 +
+ 5 files changed, 56 insertions(+)
+ create mode 100644 basics/mergesort.py
+ create mode 100644 basics/readme.md
+ create mode 100644 basics/test_inputs/1.in
+ create mode 100644 basics/test_outputs/1.out
+ create mode 100644 ignore.txt
+
+
+
+
+$ git config pull.rebase false
+$ git pull tuni master --allow-unrelated-histories
+From https://course-gitlab.tuni.fi/git-course/basics-materials
+ * branch            master     -> FETCH_HEAD
+Already up to date.
+
+$ ls
+basics/  hello_world.py  ignore.txt  README.md
+$ cd basics/
+$ ls
+mergesort.py  readme.md  test_inputs/  test_outputs/
+
+
+Find the relevant commit ID to checkout the right version of the file
+$ git log --oneline -- mergesort.py
+0729109 Removed debug-prints
+dd8c56c Merge-sort
+b6fd9ed Strings to integers
+be5d637 Basic input
+$ git checkout b6fd9ed -- mergesort.py
+
+
+
+
+
+
+
+
+
+$ cat mergesort.py
+def debug_print(debug_msg=None, **kwargs):
+
+    if debug_msg:
+        print(debug_msg)
+
+    for key, value in kwargs.items():
+        print("{}: {}".format(key, value))
+
+
+if __name__ == "__main__":
+    input_str = input("Enter numbers, separated by ',': ")
+
+    input_list = input_str.split(",")
+    debug_print(input_list=input_list)
+
+    value_list = []
+    for x in input_list:
+        try:
+            value_list.append(int(x))
+        except ValueError as err:
+            print("Invalid input.")
+            quit(1)
+
+    debug_print(value_list=value_list)
+
+$ cd ..
+$ ls
+basics/  hello_world.py  ignore.txt  README.md
+$ git status
+On branch main
+Your branch is ahead of 'origin/main' by 8 commits.
+  (use "git push" to publish your local commits)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        modified:   basics/mergesort.py
+
+$ git add basics/mergesort.py
+$ git status
+On branch main
+Your branch is ahead of 'origin/main' by 8 commits.
+  (use "git push" to publish your local commits)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        modified:   basics/mergesort.py
+
+
+$ git commit -m "mergesort rollback to b6fd9ed version"
+[main 19abd91] mergesort rollback to b6fd9ed version
+ 1 file changed, 4 insertions(+), 31 deletions(-)
+
+
+$ git push
+To github.com:KaiquanMah/tuni-hello-git.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'github.com:KaiquanMah/tuni-hello-git.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref. If you want to integrate the remote changes, use
+hint: 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+
+$ git fetch origin
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+Unpacking objects: 100% (3/3), 956 bytes | 63.00 KiB/s, done.
+From github.com:KaiquanMah/tuni-hello-git
+   cf341a1..32fb2f2  main       -> origin/main
+
+
+$ git merge origin/main --allow-unrelated-histories
+Merge made by the 'ort' strategy.
+ hello_world.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+
+$ git status
+On branch main
+Your branch is ahead of 'origin/main' by 10 commits.
+  (use "git push" to publish your local commits)
+nothing to commit, working tree clean
+
+
+$ git push
+Enumerating objects: 39, done.
+Counting objects: 100% (39/39), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (26/26), done.
+Writing objects: 100% (37/37), 3.60 KiB | 409.00 KiB/s, done.
+Total 37 (delta 8), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (8/8), done.
+To github.com:KaiquanMah/tuni-hello-git.git
+   32fb2f2..0f4dc6e  main -> main
 
