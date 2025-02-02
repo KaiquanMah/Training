@@ -308,6 +308,121 @@ branch 'release' set up to track 'origin/release'.
 
 3.10.2 Normal merge	intermediate
 
+Normal merge
+Initializing a repository
+Add a new remote repository for your repository https://course-gitlab.tuni.fi/git-course/intermediate-normal-merge.git
+Fetch the history from the remote repository and merge it to yours. You might have to use --allow-unrelated-histories flag
+Exercise
+Merge branch feature/add-logging to main. Merge message should be:
+
+Merge branch 'feature/add-logging'
+Push your updated main
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (release)
+$ git remote add origin https://course-gitlab.tuni.fi/git-course/intermediate-normal-merge.git
+error: remote origin already exists.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (release)
+$ git remote add upstream https://course-gitlab.tuni.fi/git-course/intermediate-normal-merge.git
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (release)
+$ git branch
+  feature/create-awesome
+  main
+* release
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (release)
+$ git branch main
+fatal: a branch named 'main' already exists
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (release)
+$ git checkout main
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git fetch upstream
+remote: Enumerating objects: 12, done.
+remote: Total 12 (delta 0), reused 0 (delta 0), pack-reused 12 (from 1)
+Unpacking objects: 100% (12/12), 994 bytes | 36.00 KiB/s, done.
+From https://course-gitlab.tuni.fi/git-course/intermediate-normal-merge
+ * [new branch]      feature/add-logging    -> upstream/feature/add-logging
+ * [new branch]      feature/create-awesome -> upstream/feature/create-awesome
+ * [new branch]      master                 -> upstream/master
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git merge upstream/main --allow-unrelated-histories
+merge: upstream/main - not something we can merge
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git branch -r
+  origin/feature/create-awesome
+  origin/main
+  origin/release
+  upstream/feature/add-logging
+  upstream/feature/create-awesome
+  upstream/master
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git checkout main
+Already on 'main'
+Your branch is up to date with 'origin/main'.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git merge upstream/feature/add-logging -m "Merge branch 'feature/add-logging'"
+fatal: refusing to merge unrelated histories
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git merge upstream/feature/add-logging -m "Merge branch 'feature/add-logging'" --allow-unrelated-histories
+Auto-merging hello_world.py
+CONFLICT (add/add): Merge conflict in hello_world.py
+Automatic merge failed; fix conflicts and then commit the result.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ cat hello_world.py
+print("Hello world!")
+<<<<<<< HEAD
+=======
+print("Hello once again")
+>>>>>>> upstream/feature/add-logging
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ nano hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ git add hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ git commit -m "Merge branch 'feature/add-logging'"
+[main bc1b722] Merge branch 'feature/add-logging'
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git push origin main
+Enumerating objects: 12, done.
+Counting objects: 100% (12/12), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (7/7), done.
+Writing objects: 100% (10/10), 1.03 KiB | 351.00 KiB/s, done.
+Total 10 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To https://github.com/KaiquanMah/tuni-git-intermediate3
+   7467db6..bc1b722  main -> main
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
 
 
 
