@@ -157,3 +157,668 @@ d65df32 main@{Sun Feb 2 17:23:38 2025 +0800}: commit: Add release message to hel
 ===========
 
 
+Exercise 4.9
+Advanced exercises - Rebase
+
+Initializing a repository
+Create a NEW repository for yourself
+Add a new remote repository for your repository https://course-gitlab.tuni.fi/git-course/advanced-rebase.git
+Fetch the history from the remote repository and merge it to yours. You might have to use --allow-unrelated-histories flag
+Attention
+
+Automated tests verify that your log history is only two commits long. You’ll have to create a new repository in order to pass the tests.
+
+Exercise
+Repository contains two branches main and devel. Developers have barely been able to keep main nice and clean but devel is starting to look pretty horrible. As you might have guessed your job is to clean up the history in devel. Because the changes are pretty small you’ll want to have them in a single commit with message Add prints. You must be able to add these changes to main by fast-forwarding. In the end your main must have all the changes made in devel and the history must be two commits long.
+
+
+
+
+
+Check branches
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git branch -r
+  origin/feature/create-awesome
+  origin/main
+  origin/release
+  upstream/feature/add-logging
+  upstream/feature/create-awesome
+  upstream/master
+  upstream2/feature/modify-print
+  upstream2/master
+
+
+
+
+
+Remove upstream, upstream2, origin remote repositories, so we can start the new exercise
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git remote remove upstream
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git remote remove upstream2
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git remote remove origin
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git branch -r
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ cd ..
+
+
+
+
+
+create new 'tuni-git-adv' folder for our new exercise
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg (release)
+$ mkdir tuni-git-adv
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg (release)
+$ cd tuni-git-adv
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ pwd
+/c/Users/kaiqu/Downloads/TUNI Git/tuni trg/tuni-git-adv
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ ls
+
+
+
+
+somehow Git recognises some other git remote repos (maybe from a prevous exercise)
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git remote add origin https://github.com/KaiquanMah/tuni-git-adv.git
+error: remote origin already exists.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git branch -r
+  origin/feature/create-awesome
+  origin/main
+  origin/release
+  tuni/master
+
+we try to remove these old remote repos from a previous exercise
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git remote remove origin
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git remote remove tuni
+
+
+sanity check remote repo branches
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git branch -r
+
+
+
+
+then add our new remote repos for the exercise
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git remote add origin https://github.com/KaiquanMah/tuni-git-adv.git
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git remote -v
+origin  https://github.com/KaiquanMah/tuni-git-adv.git (fetch)
+origin  https://github.com/KaiquanMah/tuni-git-adv.git (push)
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git remote add upstream https://course-gitlab.tuni.fi/git-course/advanced-rebase.git
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git remote -v
+origin  https://github.com/KaiquanMah/tuni-git-adv.git (fetch)
+origin  https://github.com/KaiquanMah/tuni-git-adv.git (push)
+upstream        https://course-gitlab.tuni.fi/git-course/advanced-rebase.git (fetch)
+upstream        https://course-gitlab.tuni.fi/git-course/advanced-rebase.git (push)
+
+
+
+
+
+
+fetch branches from TUNI Git repo as the base
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git fetch upstream
+remote: Enumerating objects: 21, done.
+remote: Total 21 (delta 0), reused 0 (delta 0), pack-reused 21 (from 1)
+Unpacking objects: 100% (21/21), 1.57 KiB | 27.00 KiB/s, done.
+From https://course-gitlab.tuni.fi/git-course/advanced-rebase
+ * [new branch]      devel      -> upstream/devel
+ * [new branch]      master     -> upstream/master
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git branch -r
+  upstream/devel
+  upstream/master
+
+
+
+'upstream/master' is the branch, instead of 'upstream/main' which we expected from exercise instructions
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git merge upstream/main --allow-unrelated-histories
+merge: upstream/main - not something we can merge
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release)
+$ git merge upstream/master --allow-unrelated-histories
+Auto-merging hello_world.py
+CONFLICT (add/add): Merge conflict in hello_world.py
+Automatic merge failed; fix conflicts and then commit the result.
+
+
+somehow folder is empty
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ ls
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ git status
+On branch release
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+        both added:      ../hello_world.py
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        ../tuni-git-intermediate2/
+        ../tuni-git-intermediate3/
+        ../tuni-hello-git/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ cd ../hello_world.py
+bash: cd: ../hello_world.py: Not a directory
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ cd ..
+
+
+we edit the hello_world.py file to get lines from 'upstream/master'
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg (release|MERGING)
+$ nano hello_world.py
+
+then move file to the correct sub-folder
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg (release|MERGING)
+$ mv hello_world.py tuni-git-adv/hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg (release|MERGING)
+$ ls
+tuni-git-adv/           tuni-git-intermediate2/  tuni-hello-git/
+tuni-git-intermediate/  tuni-git-intermediate3/
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg (release|MERGING)
+$ cd tuni-git-adv/
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ ls
+hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ pwd
+/c/Users/kaiqu/Downloads/TUNI Git/tuni trg/tuni-git-adv
+
+
+
+
+
+try adding then commiting the base hello_world.py file to our Git repo 'https://github.com/KaiquanMah/tuni-git-adv.git'
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ git add hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ git commit -m "Resolved merge conflict in hello_world.py"
+U       hello_world.py
+error: Committing is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ git status
+On branch release
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+        new file:   hello_world.py
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+        both added:      ../hello_world.py
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        ../tuni-git-intermediate2/
+        ../tuni-git-intermediate3/
+        ../tuni-hello-git/
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ git branch -r
+  upstream/devel
+  upstream/master
+
+
+
+we had to run 'git init', then add and commit
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (release|MERGING)
+$ git init
+Initialized empty Git repository in C:/Users/kaiqu/Downloads/TUNI Git/tuni trg/tuni-git-adv/.git/
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ ls
+hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git status
+On branch master
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        hello_world.py
+
+nothing added to commit but untracked files present (use "git add" to track)
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git add hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git commit -m "Resolved merge conflict in hello_world.py"
+[master (root-commit) 3de3dcf] Resolved merge conflict in hello_world.py
+ 1 file changed, 1 insertion(+)
+ create mode 100644 hello_world.py
+
+
+
+
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git checkout -b devel upstream/devel
+fatal: 'upstream/devel' is not a commit and a branch 'devel' cannot be created from it
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git status
+On branch master
+nothing to commit, working tree clean
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git checkout -b devel upstream/devel
+fatal: 'upstream/devel' is not a commit and a branch 'devel' cannot be created from it
+
+
+
+
+
+after git init, we need to add our remote repo config again
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git branch -r
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git remote -v
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git remote add origin https://github.com/KaiquanMah/tuni-git-adv.git
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git remote add upstream https://course-gitlab.tuni.fi/git-course/advanced-rebase.git
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git fetch upstream
+remote: Enumerating objects: 21, done.
+remote: Total 21 (delta 0), reused 0 (delta 0), pack-reused 21 (from 1)
+Unpacking objects: 100% (21/21), 1.57 KiB | 28.00 KiB/s, done.
+From https://course-gitlab.tuni.fi/git-course/advanced-rebase
+ * [new branch]      devel      -> upstream/devel
+ * [new branch]      master     -> upstream/master
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git merge upstream/main --allow-unrelated-histories
+merge: upstream/main - not something we can merge
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (master)
+$ git checkout -b devel upstream/devel
+branch 'devel' set up to track 'upstream/devel'.
+Switched to a new branch 'devel'
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git reset --soft $(git merge-base master devel)
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git commit -m "Add prints"
+On branch devel
+Your branch is up to date with 'upstream/devel'.
+
+nothing to commit, working tree clean
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ ls
+hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ cat hello_world.py
+print("Hello world!")
+print("Not another hello world")
+print("No")
+print("More")
+print("Hello")
+print("World")
+print("Please, I'm begging you")
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git checkout main
+error: pathspec 'main' did not match any file(s) known to git
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git branch -r
+  upstream/devel
+  upstream/master
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git checkout main
+error: pathspec 'main' did not match any file(s) known to git
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git merge devel --ff-only
+Already up to date.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git push origin main
+error: src refspec main does not match any
+error: failed to push some refs to 'https://github.com/KaiquanMah/tuni-git-adv.git'
+
+
+
+
+
+fix 'master' branch name to 'main'
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git branch
+* devel
+  master
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git branch -m master main
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git push origin main
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 258 bytes | 258.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To https://github.com/KaiquanMah/tuni-git-adv.git
+ * [new branch]      main -> main
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git push origin --delete master
+error: unable to delete 'master': remote ref does not exist
+error: failed to push some refs to 'https://github.com/KaiquanMah/tuni-git-adv.git'
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git branch --set-upstream-to=origin/main
+branch 'devel' set up to track 'origin/main'.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git branch
+* devel
+  main
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git branch -r
+  origin/main
+  upstream/devel
+  upstream/master
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git push origin devel
+Enumerating objects: 21, done.
+Counting objects: 100% (21/21), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (13/13), done.
+Writing objects: 100% (21/21), 1.59 KiB | 406.00 KiB/s, done.
+Total 21 (delta 5), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (5/5), done.
+remote:
+remote: Create a pull request for 'devel' on GitHub by visiting:
+remote:      https://github.com/KaiquanMah/tuni-git-adv/pull/new/devel
+remote:
+To https://github.com/KaiquanMah/tuni-git-adv.git
+ * [new branch]      devel -> devel
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git branch --set-upstream-to=origin/devel devel
+branch 'devel' set up to track 'origin/devel'.
+
+
+
+
+
+
+
+
+
+Check devel branch's git log, then 'rebase'
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git checkout devel
+Already on 'devel'
+Your branch is up to date with 'origin/devel'.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git log --oneline main..devel
+ca63dde (HEAD -> devel, upstream/devel, origin/devel) fix typo
+c3cf8d5 qwerty
+1662e16 commit
+51905dc test2
+94c4fbf Line change
+fbb9ca9 asd
+426381d (upstream/master) Initial commit
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git log
+commit ca63dde21c3bde514cd41c72848ca17eb23b00e5 (HEAD -> devel, upstream/devel, origin/devel)
+Author: Mikko <mikko.luhtasaari@tuni.fi>
+Date:   Fri Jan 17 13:48:06 2020 +0200
+
+    fix typo
+
+commit c3cf8d549972cb7bc5f1f9be3a4953af0b76dc52
+Author: Mikko <mikko.luhtasaari@tuni.fi>
+Date:   Fri Jan 17 13:47:36 2020 +0200
+
+    qwerty
+
+commit 1662e1682258067db4ca48676d330fd79d001e59
+Author: Mikko <mikko.luhtasaari@tuni.fi>
+Date:   Fri Jan 17 13:47:16 2020 +0200
+
+    commit
+
+commit 51905dc7b37379f4f8543a84ef39592abfd0207d
+Author: Mikko <mikko.luhtasaari@tuni.fi>
+Date:   Fri Jan 17 13:46:54 2020 +0200
+
+    test2
+
+commit 94c4fbff55aedd01eb225c7bffcdb45e2030f734
+Author: Mikko <mikko.luhtasaari@tuni.fi>
+Date:   Fri Jan 17 13:46:31 2020 +0200
+
+    Line change
+
+commit fbb9ca9b550e5395d34b5480319203ec55216b81
+Author: Mikko <mikko.luhtasaari@tuni.fi>
+Date:   Fri Jan 17 13:45:59 2020 +0200
+
+    asd
+
+commit 426381dde6077e7d6bc82b232f3f07542f435b7d (upstream/master)
+Author: Mikko <mikko.luhtasaari@tuni.fi>
+Date:   Fri Jan 17 13:45:18 2020 +0200
+
+    Initial commit
+
+
+
+
+
+
+
+
+round1 rebase had issues, so we 'abort'
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git rebase -i main
+warning: skipped previously applied commit 426381d
+hint: use --reapply-cherry-picks to include skipped commits
+hint: Disable this message with "git config advice.skippedCherryPicks false"
+error: could not parse 'pick'
+error: invalid line 2: s pick 94c4fbf Line change
+error: could not parse 'pick'
+error: invalid line 3: s pick 51905dc test2
+error: could not parse 'pick'
+error: invalid line 4: s pick 1662e16 commit
+error: could not parse 'pick'
+error: invalid line 5: s pick c3cf8d5 qwerty
+error: could not parse 'pick'
+error: invalid line 6: s pick ca63dde fix typo
+You can fix this with 'git rebase --edit-todo' and then run 'git rebase --continue'.
+Or you can abort the rebase with 'git rebase --abort'.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel|REBASE)
+$ git rebase -i main
+fatal: It seems that there is already a rebase-merge directory, and
+I wonder if you are in the middle of another rebase.  If that is the
+case, please try
+        git rebase (--continue | --abort | --skip)
+If that is not the case, please
+        rm -fr ".git/rebase-merge"
+and run me again.  I am stopping in case you still have something
+valuable there.
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel|REBASE)
+$ git rebase --abort
+
+
+
+
+
+
+round2 rebase
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git rebase -i main
+warning: skipped previously applied commit 426381d
+hint: use --reapply-cherry-picks to include skipped commits
+hint: Disable this message with "git config advice.skippedCherryPicks false"
+[detached HEAD 41a65ea] Add prints
+ Author: Mikko <mikko.luhtasaari@tuni.fi>
+ Date: Fri Jan 17 13:45:59 2020 +0200
+ 1 file changed, 6 insertions(+)
+Successfully rebased and updated refs/heads/devel.
+
+----
+pick fbb9ca9 asd
+s 94c4fbf Line change
+s 51905dc test2
+s 1662e16 commit
+s c3cf8d5 qwerty
+s ca63dde fix typo
+---
+Add prints
+# and comment out other lines in the log
+----
+
+
+
+
+git log should show
+- 1 commit/line for 'devel'
+- 2 commits/lines - 1 for main, 1 for devel (according to exercise instructions) - ie 2 commits long
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git log --oneline main..devel
+41a65ea (HEAD -> devel) Add prints
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git log
+commit 41a65eab5bfc85bdbc50e56c7ef210bc66241716 (HEAD -> devel)
+Author: Mikko <mikko.luhtasaari@tuni.fi>
+Date:   Fri Jan 17 13:45:59 2020 +0200
+
+    Add prints
+
+commit 3de3dcfc35028775c6b36c4734c5fabd6221c58c (origin/main, main)
+Author: kaiquanmah <kaiquanmah@git.com>
+Date:   Mon Feb 3 15:08:00 2025 +0800
+
+    Resolved merge conflict in hello_world.py
+
+
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git branch
+* devel
+  main
+
+
+
+Fast-forward main
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (devel)
+$ git checkout main
+Switched to branch 'main'
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (main)
+$ git merge --ff-only devel
+Updating 3de3dcf..41a65ea
+Fast-forward
+ hello_world.py | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+
+
+Push changes
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (main)
+$ git push origin main
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 357 bytes | 357.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To https://github.com/KaiquanMah/tuni-git-adv.git
+   3de3dcf..41a65ea  main -> main
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (main)
+$ git push origin devel --force
+Total 0 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To https://github.com/KaiquanMah/tuni-git-adv.git
+ + ca63dde...41a65ea devel -> devel (forced update)
+
+
+
+
+
