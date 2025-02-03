@@ -157,7 +157,7 @@ d65df32 main@{Sun Feb 2 17:23:38 2025 +0800}: commit: Add release message to hel
 ===========
 
 
-Exercise 4.9
+Exercise 4.9.1
 Advanced exercises - Rebase
 
 Initializing a repository
@@ -817,6 +817,698 @@ $ git push origin devel --force
 Total 0 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
 To https://github.com/KaiquanMah/tuni-git-adv.git
  + ca63dde...41a65ea devel -> devel (forced update)
+
+
+
+
+
+
+
+======
+
+
+Exercise 4.9.2
+
+Log & Blame
+Initializing the exercise
+Clone repository https://course-gitlab.tuni.fi/git-course/advanced-blame
+
+Exercise
+The different ways of ”cheating” through this exercise are countless. The goal of this exercise is to learn how to use git log and git blame from command line. It’s possible to get the anwers from GUI or just by looking at every log event. You should try to add different filters to git log because it will come in handy in the future.
+You’ve cloned a remote repository. With this clone you’ve also received every event made in the repository. You’ll have to find answers to questions by using git log and git blame.
+You can open up the documentation by typing git log --help or git blame --help.
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (main)
+$ git clone https://course-gitlab.tuni.fi/git-course/advanced-blame.git
+Cloning into 'advanced-blame'...
+remote: Enumerating objects: 67, done.
+remote: Total 67 (delta 0), reused 0 (delta 0), pack-reused 67 (from 1)
+Receiving objects: 100% (67/67), 11.18 KiB | 1.24 MiB/s, done.
+Resolving deltas: 100% (23/23), done.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (main)
+$ ls
+advanced-blame/  hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv (main)
+$ cd advanced-blame/
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ ls
+function1.py  lorem.ipsum  models.py  README.md  TODO  urls.py  views.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log
+commit 6a70cf9c0d8cbe10ea3d918bbd4a4b2c3d3073c4 (HEAD -> master, origin/master, origin/HEAD)
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Thu Jan 16 09:42:59 2020 +0200
+
+    Oops, bad idea
+
+commit 7282b73ba9bdfdcaf933196d11146dac17a80a35
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Thu Jan 16 09:42:03 2020 +0200
+
+    Remove a couple of line breaks
+
+commit c4dc2dc37609f724566b9cb5ec9d2ccf04ab2d46
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Thu Jan 16 09:37:40 2020 +0200
+
+    Modify lorem ipsum
+
+commit 9afe1d6f9aaa85b3655088c27bf261616ccc0fca
+Author: Teemu Teekkari <teemu.teekkari@tuni.fi>
+Date:   Thu Jan 16 09:33:54 2020 +0200
+
+    Add lorem ipsum
+
+commit 18856f47566228385a3bb5993775cb08fdf9d220
+Merge: 146e2bd 4736e44
+Author: Pertti Python <pertti.python@tuni.fi>
+Date:   Thu Jan 16 07:36:25 2020 +0200
+
+    Merge branch 'feature/add-cool-function'
+
+commit 4736e44ce379d3fda6d39eb6c465ef47d2f77138
+Author: Pertti Python <pertti.python@tuni.fi>
+Date:   Thu Jan 16 07:36:00 2020 +0200
+
+    Make a function
+
+commit 146e2bdaac16f55424738eca9c04d22a0f967f05
+Merge: 8f47de6 7b84034
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Thu Jan 16 07:29:31 2020 +0200
+
+    Merge branch 'feature/create-todo'
+
+commit 7b8403428c2c7dc8ca85523634a72ec79c050cea
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Thu Jan 16 07:29:10 2020 +0200
+
+    Create TODO
+
+commit 8f47de6312af754540c65d89fc98ff2134ee26f0
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Thu Jan 16 07:27:19 2020 +0200
+
+    Delete hello_world.py
+
+commit 019a9b3b7563fd52ee88c7d0250e3ff0932d351c
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Thu Jan 16 07:25:17 2020 +0200
+
+    Add urls for the views
+
+commit 088bfa0c4e312a795a8fd2317f54b5e094279177
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Thu Jan 16 07:23:28 2020 +0200
+
+    Remove extra line break
+
+commit 70e5c2c5a814fb441dce6a2ae9a4331d8c88092d
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Thu Jan 16 07:23:01 2020 +0200
+
+    Add three more views
+
+commit 75e2011974124ed9cef819f8215702a86a8adf88
+Author: Pertti Python <pertti.python@tuni.fi>
+Date:   Thu Jan 16 07:21:05 2020 +0200
+
+    Add first view
+
+commit 9174875f531d0e2be2102f5ba8e944b05ecbf163
+Author: Teemu Teekkari <teemu.teekkari@tuni.fi>
+Date:   Thu Jan 16 07:19:37 2020 +0200
+
+    Fix charfield length
+
+commit 378e9d71f3450e29df29242cdeec123ebaebfe60
+Author: Teemu Teekkari <teemu.teekkari@tuni.fi>
+Date:   Thu Jan 16 07:16:59 2020 +0200
+
+    Rename file
+
+commit 64aee9f720238cd5331f6bb048000a4b4011edf5
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Wed Jan 15 15:28:07 2020 +0200
+
+    Complete a TODO in README
+
+commit dc77d1290d1545add4d24da81d7847e96e894f7a
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Wed Jan 15 15:23:44 2020 +0200
+
+    Write README
+
+commit 3531be18283ab80a25feb1155976f3ea9e41364b
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Wed Jan 15 15:22:07 2020 +0200
+
+    Fix errors caused by Teemu Teekkari
+
+commit 5aaced20277d315d890c41319db5d928bcd7c860
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Wed Jan 15 15:20:21 2020 +0200
+
+    Fix model
+
+commit 472ab7e21fdce04a0533d7729d16f1ce74ad05bd
+Author: Teemu Teekkari <teemu.teekkari@tuni.fi>
+Date:   Wed Jan 15 15:18:30 2020 +0200
+
+    Add a TODO to README
+
+commit 39ea92a72416e11445550a76016a1962b9c13101
+Author: Teemu Teekkari <teemu.teekkari@tuni.fi>
+Date:   Wed Jan 15 15:16:38 2020 +0200
+
+    Modify model
+
+commit d28d71cc5192c52d198fa41704df5220f54a537f
+Author: Pertti Python <pertti.python@tuni.fi>
+Date:   Wed Jan 15 15:15:22 2020 +0200
+
+    Create a model
+
+commit f370e663e3d4982815f111dd744d66f99eb065a5
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Wed Jan 15 15:13:05 2020 +0200
+
+    Modify README
+
+commit ee96d817df2736515260a563ea98b0dac7de81ae
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Wed Jan 15 15:11:38 2020 +0200
+
+    Create hello world
+
+commit 1a54e416ee43519815d16927af40abf129c874a4
+Author: Teemu Teekkari <teemu.teekkari@tuni.fi>
+Date:   Wed Jan 15 15:10:14 2020 +0200
+
+    Initial commit
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git blame
+usage: git blame [<options>] [<rev-opts>] [<rev>] [--] <file>
+
+    <rev-opts> are documented in git-rev-list(1)
+
+    --[no-]incremental    show blame entries as we find them, incrementally
+    -b                    do not show object names of boundary commits (Default: off)
+    --[no-]root           do not treat root commits as boundaries (Default: off)
+    --[no-]show-stats     show work cost statistics
+    --[no-]progress       force progress reporting
+    --[no-]score-debug    show output score for blame entries
+    -f, --[no-]show-name  show original filename (Default: auto)
+    -n, --[no-]show-number
+                          show original linenumber (Default: off)
+    -p, --[no-]porcelain  show in a format designed for machine consumption
+    --[no-]line-porcelain show porcelain format with per-line commit information
+    -c                    use the same output mode as git-annotate (Default: off)
+    -t                    show raw timestamp (Default: off)
+    -l                    show long commit SHA1 (Default: off)
+    -s                    suppress author name and timestamp (Default: off)
+    -e, --[no-]show-email show author email instead of name (Default: off)
+    -w                    ignore whitespace differences
+    --[no-]ignore-rev <rev>
+                          ignore <rev> when blaming
+    --[no-]ignore-revs-file <file>
+                          ignore revisions from <file>
+    --[no-]color-lines    color redundant metadata from previous line differently
+    --[no-]color-by-age   color lines by age
+    --[no-]minimal        spend extra cycles to find better match
+    -S <file>             use revisions from <file> instead of calling git-rev-list
+    --[no-]contents <file>
+                          use <file>'s contents as the final image
+    -C[<score>]           find line copies within and across files
+    -M[<score>]           find line movements within and across files
+    -L <range>            process only line range <start>,<end> or function :<funcname>
+    --[no-]abbrev[=<n>]   use <n> digits to display object names
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git blame --incremental
+usage: git blame [<options>] [<rev-opts>] [<rev>] [--] <file>
+
+    <rev-opts> are documented in git-rev-list(1)
+
+    --[no-]incremental    show blame entries as we find them, incrementally
+    -b                    do not show object names of boundary commits (Default: off)
+    --[no-]root           do not treat root commits as boundaries (Default: off)
+    --[no-]show-stats     show work cost statistics
+    --[no-]progress       force progress reporting
+    --[no-]score-debug    show output score for blame entries
+    -f, --[no-]show-name  show original filename (Default: auto)
+    -n, --[no-]show-number
+                          show original linenumber (Default: off)
+    -p, --[no-]porcelain  show in a format designed for machine consumption
+    --[no-]line-porcelain show porcelain format with per-line commit information
+    -c                    use the same output mode as git-annotate (Default: off)
+    -t                    show raw timestamp (Default: off)
+    -l                    show long commit SHA1 (Default: off)
+    -s                    suppress author name and timestamp (Default: off)
+    -e, --[no-]show-email show author email instead of name (Default: off)
+    -w                    ignore whitespace differences
+    --[no-]ignore-rev <rev>
+                          ignore <rev> when blaming
+    --[no-]ignore-revs-file <file>
+                          ignore revisions from <file>
+    --[no-]color-lines    color redundant metadata from previous line differently
+    --[no-]color-by-age   color lines by age
+    --[no-]minimal        spend extra cycles to find better match
+    -S <file>             use revisions from <file> instead of calling git-rev-list
+    --[no-]contents <file>
+                          use <file>'s contents as the final image
+    -C[<score>]           find line copies within and across files
+    -M[<score>]           find line movements within and across files
+    -L <range>            process only line range <start>,<end> or function :<funcname>
+    --[no-]abbrev[=<n>]   use <n> digits to display object names
+
+
+
+
+
+
+
+
+
+
+
+
+
+Question 1 2 / 2
+Who made the first commit?
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log --reverse --oneline
+1a54e41 Initial commit
+ee96d81 Create hello world
+f370e66 Modify README
+d28d71c Create a model
+39ea92a Modify model
+472ab7e Add a TODO to README
+5aaced2 Fix model
+3531be1 Fix errors caused by Teemu Teekkari
+dc77d12 Write README
+64aee9f Complete a TODO in README
+378e9d7 Rename file
+9174875 Fix charfield length
+75e2011 Add first view
+70e5c2c Add three more views
+088bfa0 Remove extra line break
+019a9b3 Add urls for the views
+8f47de6 Delete hello_world.py
+7b84034 Create TODO
+146e2bd Merge branch 'feature/create-todo'
+4736e44 Make a function
+18856f4 Merge branch 'feature/add-cool-function'
+9afe1d6 Add lorem ipsum
+c4dc2dc Modify lorem ipsum
+7282b73 Remove a couple of line breaks
+6a70cf9 (HEAD -> master, origin/master, origin/HEAD) Oops, bad idea
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log 1a54e41
+commit 1a54e416ee43519815d16927af40abf129c874a4
+Author: Teemu Teekkari <teemu.teekkari@tuni.fi>
+Date:   Wed Jan 15 15:10:14 2020 +0200
+
+    Initial commit
+
+
+
+
+
+
+
+
+
+
+
+
+Question 2 2 / 2
+How many commits did Jalo Javascript do in 15.01.2020?
+- should be 5, not sure why autograder only accepts '3'
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log --author="Jalo Javascript" --since="2020-01-15" --until="2020-01-16" --oneline
+8f47de6 Delete hello_world.py
+019a9b3 Add urls for the views
+64aee9f Complete a TODO in README
+5aaced2 Fix model
+f370e66 Modify README
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log --author="Jalo Javascript" --since="2020-01-15" --until="2020-01-15" --oneline
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log --author="Jalo Javascript" --since="2020-01-15" --until="2020-01-16"
+commit 8f47de6312af754540c65d89fc98ff2134ee26f0
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Thu Jan 16 07:27:19 2020 +0200
+
+    Delete hello_world.py
+
+commit 019a9b3b7563fd52ee88c7d0250e3ff0932d351c
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Thu Jan 16 07:25:17 2020 +0200
+
+    Add urls for the views
+
+commit 64aee9f720238cd5331f6bb048000a4b4011edf5
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Wed Jan 15 15:28:07 2020 +0200
+
+    Complete a TODO in README
+
+commit 5aaced20277d315d890c41319db5d928bcd7c860
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Wed Jan 15 15:20:21 2020 +0200
+
+    Fix model
+
+commit f370e663e3d4982815f111dd744d66f99eb065a5
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Wed Jan 15 15:13:05 2020 +0200
+
+    Modify README
+
+
+
+
+
+
+
+
+
+
+
+
+Question 3 2 / 2
+Who created file TODO and when?
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log --diff-filter=A -- TODO
+commit 7b8403428c2c7dc8ca85523634a72ec79c050cea
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Thu Jan 16 07:29:10 2020 +0200
+
+    Create TODO
+
+
+
+
+
+
+
+
+
+
+
+
+
+Question 4 2 / 2
+How many files have been renamed?
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log --summary --stat --oneline | grep "rename"
+ rename cool_python.py => models.py (100%)
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log --summary --stat --oneline
+6a70cf9 (HEAD -> master, origin/master, origin/HEAD) Oops, bad idea
+ lorem.ipsum | 3 +++
+ 1 file changed, 3 insertions(+)
+7282b73 Remove a couple of line breaks
+ lorem.ipsum | 3 ---
+ 1 file changed, 3 deletions(-)
+c4dc2dc Modify lorem ipsum
+ lorem.ipsum | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+9afe1d6 Add lorem ipsum
+ lorem.ipsum | 39 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 39 insertions(+)
+ create mode 100644 lorem.ipsum
+18856f4 Merge branch 'feature/add-cool-function'
+4736e44 Make a function
+ function1.py | 6 ++++++
+ 1 file changed, 6 insertions(+)
+ create mode 100644 function1.py
+146e2bd Merge branch 'feature/create-todo'
+7b84034 Create TODO
+ TODO | 3 +++
+ 1 file changed, 3 insertions(+)
+ create mode 100644 TODO
+8f47de6 Delete hello_world.py
+ hello_world.py | 1 -
+ 1 file changed, 1 deletion(-)
+ delete mode 100644 hello_world.py
+019a9b3 Add urls for the views
+ urls.py | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+ create mode 100644 urls.py
+088bfa0 Remove extra line break
+ views.py | 1 -
+ 1 file changed, 1 deletion(-)
+70e5c2c Add three more views
+ views.py | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+75e2011 Add first view
+ views.py | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+ create mode 100644 views.py
+9174875 Fix charfield length
+ models.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+378e9d7 Rename file
+ cool_python.py => models.py | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ rename cool_python.py => models.py (100%)
+64aee9f Complete a TODO in README
+ README.md | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+dc77d12 Write README
+ README.md | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+3531be1 Fix errors caused by Teemu Teekkari
+ cool_python.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+5aaced2 Fix model
+ cool_python.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+472ab7e Add a TODO to README
+ README.md | 4 ++++
+ 1 file changed, 4 insertions(+)
+39ea92a Modify model
+ cool_python.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+d28d71c Create a model
+ cool_python.py | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+ create mode 100644 cool_python.py
+f370e66 Modify README
+ README.md | 2 ++
+ 1 file changed, 2 insertions(+)
+ee96d81 Create hello world
+ hello_world.py | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 hello_world.py
+1a54e41 Initial commit
+ README.md | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 README.md
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Question 5 2 / 2
+How many merge commits are there in main?
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log --merges --oneline
+18856f4 Merge branch 'feature/add-cool-function'
+146e2bd Merge branch 'feature/create-todo'
+
+
+
+
+
+
+
+
+
+Question 6 2 / 2
+Who made the latest changes to lorem.ipsum lines 29-34?
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git blame -L 29,34 lorem.ipsum
+c4dc2dc3 (Teppo Testaaja 2020-01-16 09:37:40 +0200 29) Ut vehicula rhoncus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Etiam in tortor pellentesque turpis vestibulum finibus quis eu dolor. Curabitur consequat mauris id urna tempor, in lacinia justo pulvinar. Donec pretium nisl interdum viverra cursus. Donec non tincidunt velit. Morbi a mauris vestibulum, scelerisque arcu ac, mollis ex.
+6a70cf9c (Teppo Testaaja 2020-01-16 09:42:59 +0200 30)
+c4dc2dc3 (Teppo Testaaja 2020-01-16 09:37:40 +0200 31) Aenean scelerisque erat sit amet luctus. Nullam ut diam lectus. Morbi eu eros diam. Praesent cursus augue magna, sit amet eleifend orci placerat quis. Praesent vitae facilisis est, sit amet feugiat est. Duis at lectus quis sem sodales scelerisque in sed sapien. Morbi quam elit, pellentesque in auctor vel, viverra ut enim. Donec eros diam, euismod cursus est vitae, auctor venenatis justo. Fusce tellus est, mollis sit amet est sed, sodales rhoncus sem. Phasellus ac mattis tortor. Cras sem magna, aliquam et tempus vel, lobortis ac ex. Aliquam sed elit non tortor dignissim aliquet in ac mi. Mauris placerat ut felis id iaculis. Nullam tempus finibus sapien, quis fermentum erat aliquam a. Sed rutrum, nisl in eleifend sagittis, lectus est tincidunt lacus, a pretium tellus enim vel leo.
+6a70cf9c (Teppo Testaaja 2020-01-16 09:42:59 +0200 32)
+c4dc2dc3 (Teppo Testaaja 2020-01-16 09:37:40 +0200 33) Nulla varius, non dictum pretium, sapien nibh maximus neque, non volutpat erat ipsum sed mauris. Duis laoreet magna enim, et placerat lectus viverra in. Nunc sed enim quis felis tincidunt fringilla vel non justo. Donec finibus metus arcu, at condimentum risus fermentum at. Curabitur sit amet malesuada nunc. Maecenas pretium arcu non mollis fermentum. Vivamus malesuada lectus nisi, quis pulvinar lacus feugiat sed.
+6a70cf9c (Teppo Testaaja 2020-01-16 09:42:59 +0200 34)
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ cat lorem.ipsum
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit amet volutpat erat. Nullam et gravida orci. Morbi metus nulla, tempus sit amet ligula nec, mollis tempus justo. Sed condimentum sagittis dui ac mattis. Integer venenatis, purus in porttitor vestibulum, lacus arcu tincidunt sem, in mollis eros ex ac quam. Mauris erat orci, tincidunt vel dignissim vel, egestas vulputate velit. Quisque convallis, dui id cursus viverra, turpis turpis facilisis justo, et mattis ante ipsum vitae quam. Nulla vel justo id urna mollis lacinia volutpat eget tortor. Pellentesque lorem erat, imperdiet id imperdiet vitae, blandit vel neque. Nunc libero ex, vulputate non lectus vel, viverra fermentum orci. Vestibulum vel odio tellus. Quisque mollis sollicitudin tincidunt. Sed ac libero ut lacus ultricies sagittis. Sed ultricies pharetra dui, sed bibendum dolor vehicula at. In cursus et urna a semper. Curabitur ullamcorper mauris quam, ut rhoncus enim tempor eu.
+
+Sed pulvinar enim nec velit elementum cursus. Nullam vulputate arcu a justo vestibulum vulputate. Integer sed nibh imperdiet, sagittis magna tincidunt, varius tellus. Donec condimentum lobortis tellus, quis mattis nulla malesuada ut. Suspendisse lacinia dui at mi tincidunt iaculis. Proin luctus ultricies tincidunt. Praesent dapibus auctor lacus, sed tempus odio commodo et. Sed mattis ac ante nec pharetra.
+
+Curabitur fringilla porttitor dolor sit amet scelerisque. Mauris id lectus eu arcu gravida pulvinar. Integer mauris lectus, efficitur eu neque eget, semper viverra eros. Sed euismod tincidunt quam, venenatis bibendum ante ultricies nec. Aliquam sit amet tortor ipsum. Sed nec dignissim ipsum. Morbi non felis ut urna congue pulvinar ac eget nisi. Praesent vehicula iaculis nunc quis interdum.
+
+Maecenas dictum libero libero, et porttitor elit ultricies pellentesque. In in bibendum lacus. Suspendisse et blandit lectus. Aenean facilisis purus hendrerit risus feugiat, sed iaculis odio convallis. Suspendisse interdum pharetra massa, eget pulvinar ipsum congue vel. Curabitur a nulla enim. Donec consectetur purus vel condimentum egestas. Aliquam neque purus, pellentesque eget nulla at, porttitor lacinia tellus. Maecenas magna sapien, lacinia vitae ultrices eget, cursus non augue. Curabitur euismod laoreet justo, vitae suscipit risus feugiat ut. Proin laoreet velit vestibulum fermentum consectetur.
+
+Maecenas aliquet rhoncus erat, quis aliquam nisl faucibus in. Nullam venenatis efficitur massa non facilisis. Nunc tristique lectus eget vestibulum aliquam. Donec id tristique metus. Nunc pellentesque consectetur sapien ac bibendum. Proin dapibus, augue ac condimentum pharetra, lacus ipsum euismod turpis, quis malesuada eros urna vitae ipsum. Duis rhoncus nisl eget quam varius, quis vehicula nisl luctus. Phasellus vestibulum urna eget lectus lacinia mattis. Vestibulum eu nisi at eros posuere luctus ac a augue. Aliquam erat volutpat. Cras pharetra libero a volutpat interdum. Nunc mattis leo a mauris accumsan, congue mattis libero iaculis. Nulla augue nisl, blandit eu turpis vitae, lacinia pulvinar ligula. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+
+Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Donec risus purus, vestibulum venenatis ullamcorper non, eleifend pellentesque magna. Donec facilisis rutrum eros, sit amet viverra nulla dapibus ac. Proin eu blandit diam. Sed malesuada feugiat imperdiet. Phasellus egestas ac neque et commodo. Donec vestibulum est tincidunt diam aliquam, vel bibendum turpis porta. Maecenas mattis id lorem ultrices rhoncus.
+
+Nulla facilisi. Duis tempor velit nec eros porta, nec pretium lorem tempus. Vivamus tincidunt ligula in eleifend ultrices. Aenean sit amet consectetur tellus. Vestibulum rhoncus neque eu ante auctor pretium. Sed mollis suscipit ipsum quis placerat. Nulla neque orci, dapibus id ornare sit amet, imperdiet a velit. Cras molestie tempor libero nec volutpat. Suspendisse quis placerat est, eu sagittis lacus. Morbi eros nisl, vestibulum ac diam ac, scelerisque lacinia neque. Maecenas efficitur elit et ipsum consequat, quis vulputate augue consectetur.
+
+Maecenas molestie ultricies ex sit amet sollicitudin. Integer facilisis, justo vitae laoreet malesuada, odio turpis consequat nunc, non ornare eros nunc congue justo. Maecenas pharetra mi at metus porta auctor. Mauris porttitor venenatis libero sit amet congue. Nullam molestie tristique consectetur. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse varius odio a quam feugiat, in maximus ipsum dictum. Sed non fringilla lacus. Sed congue ante quis arcu tempor tincidunt. Nam sed nisl ullamcorper risus varius hendrerit. Mauris sed pretium nunc, tincidunt commodo enim. In vehicula dignissim enim, pretium congue justo rutrum non. Donec dignissim elit semper, tempus mi ac, hendrerit enim.
+
+Etiam suscipit justo massa, mollis lobortis est varius ac. Proin purus sapien, varius eget neque feugiat, lobortis porta libero. Etiam felis nisl, vulputate ornare mi a, egestas suscipit lorem. Pellentesque placerat egestas velit id elementum. Praesent facilisis, lacus quis elementum pulvinar, nibh tellus elementum augue, vel tincidunt enim mauris eu nisi. Mauris fringilla dolor odio, et accumsan ligula condimentum at. Suspendisse luctus et mi id fermentum. Morbi pharetra erat lectus, eu dapibus nibh commodo vel. Etiam volutpat elementum sollicitudin. Nulla facilisi. Sed quis nisi erat.
+
+Integer vel tincidunt mauris, id viverra enim. Quisque eget velit tempor, imperdiet ex ut, fermentum quam. Nullam tristique ante sed interdum lacinia. Integer eu dui risus. Donec porta odio tristique ipsum interdum, sit amet vehicula sapien laoreet. Mauris luctus hendrerit nunc, ut auctor leo pulvinar vel. Phasellus in hendrerit ante. Nam nec feugiat lacus, id dictum dolor. Maecenas dignissim feugiat pharetra. Suspendisse ullamcorper interdum neque vel pharetra.
+
+Vivamus non varius erat. Pellentesque sodales diam a tristique posuere. Vestibulum dapibus lacus sed neque pretium sodales. Vestibulum lobortis eu nulla et aliquam. Aenean imperdiet ligula viverra orci vestibulum, nec lacinia risus lobortis. Curabitur consequat lorem a lectus venenatis, sit amet lobortis dui fringilla. Sed at aliquet elit. Curabitur blandit lectus turpis, volutpat rhoncus ex venenatis eu. Vestibulum vestibulum velit non nisi varius condimentum. Morbi at ligula dictum, sollicitudin sem non, volutpat erat. Mauris mattis magna ac lorem iaculis, vitae convallis erat facilisis.
+
+Sed volutpat semper mattis. Proin tempus ultrices sapien, eu viverra lectus tincidunt placerat. Praesent sed tortor non orci dignissim tincidunt. Curabitur nec rutrum diam, a tempor ligula. Duis rutrum molestie dignissim. Phasellus at neque non ex volutpat dapibus. Cras sed porttitor odio, sit amet tincidunt tortor. Vestibulum non mauris a elit gravida egestas. Sed feugiat pellentesque feugiat. Ut ut sapien nec justo tempor consectetur eu et lorem. Morbi ut dui urna. Proin vitae posuere sapien. Mauris convallis nisi eget sodales imperdiet. Integer ullamcorper aliquam nisi a placerat. Nulla imperdiet dolor justo, sit amet dapibus purus faucibus fermentum. Suspendisse nunc mauris, lobortis in laoreet ac, laoreet vel lacus.
+
+Vivamus ac lectus sed magna porttitor euismod ut vel ante. Proin volutpat laoreet luctus. Nulla ut nibh ut quam finibus semper. Aenean at tempor lorem, fermentum posuere risus. Nulla placerat dolor ac enim cursus interdum. Vestibulum enim ex, pretium ut efficitur quis, eleifend vel metus. Pellentesque in commodo odio. Maecenas condimentum euismod rhoncus. Sed rhoncus elit eu nisi vulputate, a sagittis magna luctus. Mauris laoreet luctus mauris. Donec id finibus ipsum, vitae euismod velit. Quisque imperdiet pretium quam eget facilisis. Morbi molestie diam eu mauris semper commodo. Nullam urna enim, luctus id pretium vel, ornare a nulla. Curabitur rutrum posuere purus id venenatis. Praesent et vestibulum urna.
+
+Suspendisse blandit condimentum dui, vel eleifend tortor tempus vitae. Nunc dapibus ligula nec dui consequat, non suscipit mauris aliquam. Donec ut mi eget neque convallis porttitor quis sit amet massa. Nunc scelerisque egestas nunc a gravida. Sed risus velit, sagittis at tempor quis, euismod et ex. Donec nec consequat urna. Cras vehicula justo massa, vitae porttitor orci viverra id. Vivamus quis lectus eros. Duis at ipsum vehicula, tincidunt lacus ac, commodo justo. Nam et erat eros.
+
+Ut vehicula rhoncus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Etiam in tortor pellentesque turpis vestibulum finibus quis eu dolor. Curabitur consequat mauris id urna tempor, in lacinia justo pulvinar. Donec pretium nisl interdum viverra cursus. Donec non tincidunt velit. Morbi a mauris vestibulum, scelerisque arcu ac, mollis ex.
+
+Aenean scelerisque erat sit amet luctus. Nullam ut diam lectus. Morbi eu eros diam. Praesent cursus augue magna, sit amet eleifend orci placerat quis. Praesent vitae facilisis est, sit amet feugiat est. Duis at lectus quis sem sodales scelerisque in sed sapien. Morbi quam elit, pellentesque in auctor vel, viverra ut enim. Donec eros diam, euismod cursus est vitae, auctor venenatis justo. Fusce tellus est, mollis sit amet est sed, sodales rhoncus sem. Phasellus ac mattis tortor. Cras sem magna, aliquam et tempus vel, lobortis ac ex. Aliquam sed elit non tortor dignissim aliquet in ac mi. Mauris placerat ut felis id iaculis. Nullam tempus finibus sapien, quis fermentum erat aliquam a. Sed rutrum, nisl in eleifend sagittis, lectus est tincidunt lacus, a pretium tellus enim vel leo.
+
+Nulla varius, non dictum pretium, sapien nibh maximus neque, non volutpat erat ipsum sed mauris. Duis laoreet magna enim, et placerat lectus viverra in. Nunc sed enim quis felis tincidunt fringilla vel non justo. Donec finibus metus arcu, at condimentum risus fermentum at. Curabitur sit amet malesuada nunc. Maecenas pretium arcu non mollis fermentum. Vivamus malesuada lectus nisi, quis pulvinar lacus feugiat sed.
+
+Ut ut tempor est, sed feugiat felis. Morbi ut ligula elit. Sed arcu augue, semper eleifend enim non, aliquet facilisis velit. Nulla convallis lobortis odio, sed malesuada eros mattis in. Maecenas diam ipsum, vehicula id arcu in, porta fermentum odio. Vestibulum consectetur libero at risus blandit, et venenatis mauris ullamcorper. Sed hendrerit, sem eu dictum pharetra, eros ligula rutrum risus, quis tincidunt lectus eros ac ipsum. Duis vehicula, elit nec condimentum molestie, justo enim dignissim ligula, sed congue elit tortor vel nulla. Nunc efficitur lacus ac tellus maximus bibendum. Aliquam erat volutpat. Etiam non quam sit amet enim egestas imperdiet vel quis enim. Vestibulum varius sem leo, non facilisis dui rhoncus eget. Phasellus malesuada sed dui in gravida.
+
+Pellentesque dignissim suscipit odio, pharetra vulputate erat congue non. Vivamus accumsan tortor ac posuere accumsan. Donec tortor velit, laoreet ac justo a, maximus bibendum tellus. Proin faucibus lectus eros, eu egestas nunc feugiat ac. Curabitur vel ipsum ac ligula commodo cursus id id nisl. Aliquam maximus massa eu sagittis consequat. Mauris ante enim, tristique sit amet velit in, ultrices viverra lectus. Cras molestie massa quis sem efficitur, nec venenatis mi egestas. Phasellus eu laoreet leo, nec vestibulum nibh. Suspendisse nec dolor gravida, finibus urna quis, pulvinar felis. Vestibulum ultricies suscipit mi, eu laoreet tellus porttitor nec. Vestibulum et posuere dui.
+
+Etiam sollicitudin interdum ex, eget dapibus urna aliquet sed. Donec a tristique eros, non ornare diam. Morbi convallis ullamcorper ligula, et euismod nunc consectetur sed. Nulla nisi tortor, tempus ac lacinia rutrum, convallis nec risus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Phasellus ac eros eu diam feugiat convallis. Vivamus malesuada tortor a massa hendrerit aliquam. Vivamus vitae erat enim.
+
+
+
+
+
+
+
+
+
+
+
+
+Question 7 2 / 2
+Who added a file with class Question?
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log -S "class Question" --oneline
+d28d71c Create a model
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git log d28d71c
+commit d28d71cc5192c52d198fa41704df5220f54a537f
+Author: Pertti Python <pertti.python@tuni.fi>
+Date:   Wed Jan 15 15:15:22 2020 +0200
+
+    Create a model
+
+commit f370e663e3d4982815f111dd744d66f99eb065a5
+Author: Jalo Javascript <jalo.javascript@tuni.fi>
+Date:   Wed Jan 15 15:13:05 2020 +0200
+
+    Modify README
+
+commit ee96d817df2736515260a563ea98b0dac7de81ae
+Author: Teppo Testaaja <teppo.testaaja@tuni.fi>
+Date:   Wed Jan 15 15:11:38 2020 +0200
+
+    Create hello world
+
+commit 1a54e416ee43519815d16927af40abf129c874a4
+Author: Teemu Teekkari <teemu.teekkari@tuni.fi>
+Date:   Wed Jan 15 15:10:14 2020 +0200
+
+    Initial commit
+
+
+
+
+
+
+
+
+
+
+Question 8 6 / 6
+Which of the following statements are correct regarding the latest commit (9afe1d6f9aaa85b3655088c27bf261616ccc0fca) Teemu Teekkari made?
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-adv/advanced-blame (master)
+$ git show 9afe1d6f9aaa85b3655088c27bf261616ccc0fca
+commit 9afe1d6f9aaa85b3655088c27bf261616ccc0fca
+Author: Teemu Teekkari <teemu.teekkari@tuni.fi>
+Date:   Thu Jan 16 09:33:54 2020 +0200
+
+    Add lorem ipsum
+
+diff --git a/lorem.ipsum b/lorem.ipsum
+new file mode 100644
+index 0000000..cdbd93e
+--- /dev/null
++++ b/lorem.ipsum
+@@ -0,0 +1,39 @@
++Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sit amet volutpat erat. Nullam et gravida orci. Morbi metus nulla, tempus sit amet ligula nec, mollis tempus justo. Sed condimentum sagittis dui ac mattis. Integer venenatis, purus in porttitor vestibulum, lacus arcu tincidunt sem, in mollis eros ex ac quam. Mauris erat orci, tincidunt vel dignissim vel, egestas vulputate velit. Quisque convallis, dui id cursus viverra, turpis turpis facilisis justo, et mattis ante ipsum vitae quam. Nulla vel justo id urna mollis lacinia volutpat eget tortor. Pellentesque lorem erat, imperdiet id imperdiet vitae, blandit vel neque. Nunc libero ex, vulputate non lectus vel, viverra fermentum orci. Vestibulum vel odio tellus. Quisque mollis sollicitudin tincidunt. Sed ac libero ut lacus ultricies sagittis. Sed ultricies pharetra dui, sed bibendum dolor vehicula at. In cursus et urna a semper. Curabitur ullamcorper mauris quam, ut rhoncus enim tempor eu.
++
++Sed pulvinar enim nec velit elementum cursus. Nullam vulputate arcu a justo vestibulum vulputate. Integer sed nibh imperdiet, sagittis magna tincidunt, varius tellus. Donec condimentum lobortis tellus, quis mattis nulla malesuada ut. Suspendisse lacinia dui at mi tincidunt iaculis. Proin luctus ultricies tincidunt. Praesent dapibus auctor lacus, sed tempus odio commodo et. Sed mattis ac ante nec pharetra.
++
++Curabitur fringilla porttitor dolor sit amet scelerisque. Mauris id lectus eu arcu gravida pulvinar. Integer mauris lectus, efficitur eu neque eget, semper viverra eros. Sed euismod tincidunt quam, venenatis bibendum ante ultricies nec. Aliquam sit amet tortor ipsum. Sed nec dignissim ipsum. Morbi non felis ut urna congue pulvinar ac eget nisi. Praesent vehicula iaculis nunc quis interdum.
++
++Maecenas dictum libero libero, et porttitor elit ultricies pellentesque. In in bibendum lacus. Suspendisse et blandit lectus. Aenean facilisis purus hendrerit risus feugiat, sed iaculis odio convallis. Suspendisse interdum pharetra massa, eget pulvinar ipsum congue vel. Curabitur a nulla enim. Donec consectetur purus vel condimentum egestas. Aliquam neque purus, pellentesque eget nulla at, porttitor lacinia tellus. Maecenas magna sapien, lacinia vitae ultrices eget, cursus non augue. Curabitur euismod laoreet justo, vitae suscipit risus feugiat ut. Proin laoreet velit vestibulum fermentum consectetur
+.
++
++Maecenas aliquet rhoncus erat, quis aliquam nisl faucibus in. Nullam venenatis efficitur massa non facilisis. Nunc tristique lectus eget vestibulum aliquam. Donec id tristique metus. Nunc pellentesque consectetur sapien ac bibendum. Proin dapibus, augue ac condimentum pharetra, lacus ipsum euismod turpis, quis malesuada eros urna vitae ipsum. Duis rhoncus nisl eget quam varius, quis vehicula nisl luctus. Phasellus vestibulum urna eget lectus lacinia mattis. Vestibulum eu nisi at eros posuere luctus ac a augue. Aliquam erat volutpat. Cras pharetra libero a volutpat interdum. Nunc mattis leo a mauris accumsan, congue mattis libero iaculis. Nulla augue nisl, blandit eu turpis vitae, lacinia pulvinar ligula. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
++
++Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Donec risus purus, vestibulum venenatis ullamcorper non, eleifend pellentesque magna. Donec facilisis rutrum eros, sit amet viverra nul
+la dapibus ac. Proin eu blandit diam. Sed malesuada feugiat imperdiet. Phasellus egestas ac neque et commodo. Donec vestibulum est tincidunt diam aliquam, vel bibendum turpis porta. Maecenas mattis id lorem ultrices rhoncus.
++
++Nulla facilisi. Duis tempor velit nec eros porta, nec pretium lorem tempus. Vivamus tincidunt ligula in eleifend ultrices. Aenean sit amet consectetur tellus. Vestibulum rhoncus neque eu ante auctor pretium. Sed mollis suscipit ipsum quis placerat. Nulla neque orci, dapibus id ornare sit amet, imperdiet a velit. Cras molestie tempor libero nec volutpat. Suspendisse quis placerat est, eu sagittis lacus. Morbi eros nisl, vestibulum ac diam ac, scelerisque lacinia neque. Maecenas efficitur elit et ipsum consequat, quis vulputate augue consectetur.
++
++Maecenas molestie ultricies ex sit amet sollicitudin. Integer facilisis, justo vitae laoreet malesuada, odio turpis consequat nunc, non ornare eros nunc congue justo. Maecenas pharetra mi at metus porta auctor. Mauris porttitor venenatis libero sit amet congue. Nullam molestie tristique consectetur. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse varius odio a quam feugiat, in maximus ipsum dictum. Sed non fringilla lacus. Sed congue ante quis arcu tempor tincidunt. Nam sed nisl ullamcorper risus varius hendrerit. Mauris sed pretium nunc, tincidunt commodo enim. In vehicula dignissim enim, pretium congue justo rutrum non. Donec dignissim elit semper, tempus mi ac, hendrerit enim.
++
++Etiam suscipit justo massa, mollis lobortis est varius ac. Proin purus sapien, varius eget neque feugiat, lobortis porta libero. Etiam felis nisl, vulputate ornare mi a, egestas suscipit lorem. Pellentesque placerat egestas vel
+it id elementum. Praesent facilisis, lacus quis elementum pulvinar, nibh tellus elementum augue, vel tincidunt enim mauris eu nisi. Mauris fringilla dolor odio, et accumsan ligula condimentum at. Suspendisse luctus et mi id fermentum. Morbi pharetra erat lectus, eu dapibus nibh commodo vel. Etiam volutpat elementum sollicitudin. Nulla facilisi. Sed quis nisi erat.
++
++Integer vel tincidunt mauris, id viverra enim. Quisque eget velit tempor, imperdiet ex ut, fermentum quam. Nullam tristique ante sed interdum lacinia. Integer eu dui risus. Donec porta odio tristique ipsum interdum, sit amet vehicula sapien laoreet. Mauris luctus hendrerit nunc, ut auctor leo pulvinar vel. Phasellus in hendrerit ante. Nam nec feugiat lacus, id dictum dolor. Maecenas dignissim feugiat pharetra. Suspendisse ullamcorper interdum neque vel pharetra.
++
++Vivamus non varius erat. Pellentesque sodales diam a tristique posuere. Vestibulum dapibus lacus sed neque pretium sodales. Vestibulum lobortis eu nulla et aliquam. Aenean imperdiet ligula viverra orci vestibulum, nec lacinia risus lobortis. Curabitur consequat lorem a lectus venenatis, sit amet lobortis dui fringilla. Sed at aliquet elit. Curabitur blandit lectus turpis, volutpat rhoncus ex venenatis eu. Vestibulum vestibulum velit non nisi varius condimentum. Morbi at ligula dictum, sollicitudin sem non, volutpat erat. Mauris mattis magna ac lorem iaculis, vitae convallis erat facilisis.
++
++Sed volutpat semper mattis. Proin tempus ultrices sapien, eu viverra lectus tincidunt placerat. Praesent sed tortor non orci dignissim tincidunt. Curabitur nec rutrum diam, a tempor ligula. Duis rutrum molestie dignissim. Phase
+llus at neque non ex volutpat dapibus. Cras sed porttitor odio, sit amet tincidunt tortor. Vestibulum non mauris a elit gravida egestas. Sed feugiat pellentesque feugiat. Ut ut sapien nec justo tempor consectetur eu et lorem. Morbi ut dui urna. Proin vitae posuere sapien. Mauris convallis nisi eget soda
 
 
 
