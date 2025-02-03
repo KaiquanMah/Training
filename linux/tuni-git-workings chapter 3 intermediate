@@ -440,5 +440,194 @@ kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate
 3.10.3 Merge conflict
 
 
+Solving merge conflicts
+Initializing a repository
+Add a new remote repository for your repository https://course-gitlab.tuni.fi/git-course/intermediate-merge-conflict.git
+Fetch the history from the remote repository and merge it to yours. You might have to use --allow-unrelated-histories flag
+Exercise
+The repository contains one file hello_world.py. File has been changed in both main and in feature/modify-print. Changes have affected the same lines so automatic merge is not possible. You have to get both changes to your main:
+
+Change in `main` to hello_world.py line 2
+
+Change in `feature/modify-print` to hello_world.py line 3
+
+Merge commit message should be "Fix merge conflicts"
+Finally push your main to your remote repository.
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ pwd
+/c/Users/kaiqu/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ ls
+hello_world.py  second.py
+
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git branch
+  feature/create-awesome
+* main
+  release
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git remote add upstream https://course-gitlab.tuni.fi/git-course/intermediate-merge-conflict.git
+error: remote upstream already exists.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git remote add upstream2 https://course-gitlab.tuni.fi/git-course/intermediate-merge-conflict.git
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git fetch upstream2
+remote: Enumerating objects: 9, done.
+remote: Total 9 (delta 0), reused 0 (delta 0), pack-reused 9 (from 1)
+Unpacking objects: 100% (9/9), 708 bytes | 30.00 KiB/s, done.
+From https://course-gitlab.tuni.fi/git-course/intermediate-merge-conflict
+ * [new branch]      feature/modify-print -> upstream2/feature/modify-print
+ * [new branch]      master               -> upstream2/master
+
+
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git branch
+  feature/create-awesome
+* main
+  release
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git checkout main
+Already on 'main'
+Your branch is up to date with 'origin/main'.
+
+
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git branch -r
+  origin/feature/create-awesome
+  origin/main
+  origin/release
+  upstream/feature/add-logging
+  upstream/feature/create-awesome
+  upstream/master
+  upstream2/feature/modify-print
+  upstream2/master
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git merge upstream2/master --allow-unrelated-histories
+Auto-merging hello_world.py
+CONFLICT (add/add): Merge conflict in hello_world.py
+Automatic merge failed; fix conflicts and then commit the result.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ nano hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ cat hello_world.py
+print("Hello world!")
+print("Hello once again")
+print("Hello darkness my old friend")
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ git add hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ git commit -m "Fix merge conflicts"
+[main 1532328] Fix merge conflicts
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git push origin main
+Enumerating objects: 11, done.
+Counting objects: 100% (11/11), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (9/9), 806 bytes | 403.00 KiB/s, done.
+Total 9 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1/1), done.
+To https://github.com/KaiquanMah/tuni-git-intermediate3
+   bc1b722..1532328  main -> main
+
+
+
+
+
+
+
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git branch -r
+  origin/feature/create-awesome
+  origin/main
+  origin/release
+  upstream/feature/add-logging
+  upstream/feature/create-awesome
+  upstream/master
+  upstream2/feature/modify-print
+  upstream2/master
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git merge upstream2/feature/modify-print --allow-unrelated-histories
+Auto-merging hello_world.py
+CONFLICT (content): Merge conflict in hello_world.py
+Automatic merge failed; fix conflicts and then commit the result.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ nano hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ git commit -m "Fix merge conflicts"
+U       hello_world.py
+error: Committing is not possible because you have unmerged files.
+hint: Fix them up in the work tree, and then use 'git add/rm <file>'
+hint: as appropriate to mark resolution and make a commit.
+fatal: Exiting because of an unresolved conflict.
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ cat hello_world.py
+print("Hello world!")
+print("Hello darkness my old friend")
+print("I've come to talk with you again")
+
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ git add hello_world.py
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main|MERGING)
+$ git commit -m "Fix merge conflicts"
+[main 1d7946d] Fix merge conflicts
+
+kaiqu@kai-aftershock MINGW64 ~/Downloads/TUNI Git/tuni trg/tuni-git-intermediate3 (main)
+$ git push origin main
+Enumerating objects: 10, done.
+Counting objects: 100% (10/10), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (5/5), done.
+Writing objects: 100% (6/6), 667 bytes | 333.00 KiB/s, done.
+Total 6 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To https://github.com/KaiquanMah/tuni-git-intermediate3
+   1532328..1d7946d  main -> main
+
+
+
+
 
 
