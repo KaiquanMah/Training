@@ -1,0 +1,26 @@
+Gradient accumulation with Trainer
+You're setting up Trainer for your language translation model to use gradient accumulation, so that you can effectively train on larger batches. Your model will simplify translations by training on paraphrases from the MRPC dataset. Configure the training arguments to accumulate gradients! The exercise will take some time to run with the call to trainer.train().
+The model, dataset, and compute_metrics() function have been pre-defined.
+
+
+Set the number of gradient accumulation steps to two.
+Pass in the training arguments to Trainer.
+
+
+training_args = TrainingArguments(
+    output_dir="./results",
+    evaluation_strategy="epoch",
+    # Set the number of gradient accumulation steps to two
+    gradient_accumulation_steps=2
+)
+trainer = Trainer(
+    model=model,
+    # Pass in the training arguments to Trainer
+    args=training_args,
+    train_dataset=dataset["train"],
+    eval_dataset=dataset["validation"],
+    compute_metrics=compute_metrics,
+)
+trainer.train()
+
+
