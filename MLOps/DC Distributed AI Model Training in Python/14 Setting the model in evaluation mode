@@ -1,0 +1,27 @@
+Setting the model in evaluation mode
+You're ready to set your language model in evaluation mode. If the model is not in evaluation mode during inference, layers like batch normalization and dropout will introduce changes in the behavior of the model, leading to inconsistent translation quality. Build the loop to evaluate the model!
+Some data have been preloaded: model, eval_dataloader, accelerator, and metric.
+
+
+Load the evaluation metric for the mrpc dataset.
+Set the model in evaluation mode before looping through batches in the dataset.
+Aggregate predictions and labels across devices to compute evaluation metrics.
+Compute the evaluation metric at the end.
+
+# Load the evaluation metric
+metric = evaluate.load("glue", "mrpc")
+# Set the model in evaluation mode
+model.eval()
+for step, batch in enumerate(eval_dataloader):
+    with torch.no_grad():
+        outputs = model(**batch)
+    predictions = outputs.logits.argmax(dim=-1)
+    # Aggregate values across devices
+    predictions, references = accelerator.gather_for_metrics((predictions, batch["labels"]))
+    metric.add_batch(predictions=predictions, references=references)
+# Compute the evaluation metric
+eval_metric = metric.compute()
+print(eval_metric)
+
+
+
