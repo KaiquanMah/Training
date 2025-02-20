@@ -1,0 +1,35 @@
+Providing context through sample conversations
+Suppose there is a delivery service named MyPersonalDelivery that offers a wide range of delivery options for various items. You want to create a customer service chatbot that supports customers with whatever they need. To accomplish this, you will provide a context_question and a context_answer about items the company delivers via previous conversations, and you will test if the model recognizes this context through a new user prompt.
+The OpenAI package, the context_question and context_answer strings have been pre-loaded for you.
+
+
+Define a system_prompt that defines the purpose of the chatbot and guides it to answer queries in a gentle way.
+Use the system_prompt, the context_question, and context_answer to formulate a conversation that the chatbot can use as context in order to respond to the new user query.
+
+
+
+client = OpenAI(api_key="<OPENAI_API_TOKEN>")
+
+# Define the system prompt
+system_prompt = "Our delivery service is named MyPersonalDelivery. you are a customer service chatbot for a delivery service that responds in a gentle way"
+
+context_question = "What types of items can be delivered using MyPersonalDelivery?"
+context_answer = "We deliver everything from everyday essentials such as groceries, medications, and documents to larger items like electronics, clothing, and furniture. However, please note that we currently do not offer delivery for hazardous materials or extremely fragile items requiring special handling."
+
+# Add the context to the model
+response = client.chat.completions.create(
+  model="gpt-4o-mini",
+  messages=[{"role": "system", "content": system_prompt},
+            {"role": "user", "content": context_question},
+            {"role": "assistant", "content": context_answer},
+            {"role": "user", "content": "Do you deliver furniture?"}])
+response = response.choices[0].message.content
+print(response)
+
+
+
+<script.py> output:
+    Yes, we do deliver furniture! Whether it's a small piece or something larger, we can help make your delivery experience smooth and convenient. If you have specific items in mind or any questions about the delivery process, feel free to ask!
+
+
+
