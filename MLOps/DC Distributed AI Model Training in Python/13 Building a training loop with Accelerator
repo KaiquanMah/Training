@@ -1,0 +1,28 @@
+Building a training loop with Accelerator
+You're ready to implement a training loop for your language translation service. Now that you've seen how Accelerator modifies a PyTorch loop for distributed training you can leverage the Accelerator class in your training loop!
+
+Some data has been pre-loaded:
+accelerator is an instance of Accelerator
+train_dataloader, optimizer, model, and lr_scheduler have been defined and prepared with Accelerator
+
+
+
+Call the optimizer to zero the gradients.
+Use accelerator to compute gradients of the loss.
+Update the model's parameters.
+Update the learning rate of the optimizer.
+
+
+
+for batch in train_dataloader:
+    # Call the optimizer to zero the gradients
+    optimizer.zero_grad()
+    inputs, targets = batch["input_ids"], batch["labels"]
+    outputs = model(inputs, labels=targets)
+    loss = outputs.loss
+    # Use accelerator to compute gradients of the loss
+    accelerator.backward(loss)
+    # Update the model's parameters
+    optimizer.step()
+    # Update the learning rate of the optimizer
+    lr_scheduler.step()
