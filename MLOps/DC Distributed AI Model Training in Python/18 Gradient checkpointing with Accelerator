@@ -1,0 +1,30 @@
+Gradient checkpointing with Accelerator
+You're continuing to optimize memory usage so you can train your language translation model on your device. Gradient accumulation has helped you to effectively train on larger batch sizes. Build on this work to add gradient checkpointing to reduce the memory footprint of your model.
+The model, train_dataloader, and accelerator have been pre-defined.
+
+
+
+Enable gradient checkpointing on the model.
+Set up an Accelerator context manager to enable gradient accumulation on the model.
+
+
+
+# Enable gradient checkpointing on the model
+model.gradient_checkpointing_enable()
+
+for batch in train_dataloader:
+    with accelerator.accumulate(model):
+        inputs, targets = batch["input_ids"], batch["labels"]
+        # Get the outputs from a forward pass of the model
+        outputs = model(inputs, labels=targets)
+        loss = outputs.loss
+        accelerator.backward(loss)
+        optimizer.step()
+        lr_scheduler.step()
+        optimizer.zero_grad()
+        print(f"Loss = {loss}")
+
+
+<script.py> output:
+    Loss = 0.6132010221481323
+        
