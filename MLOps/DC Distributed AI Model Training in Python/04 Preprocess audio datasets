@@ -1,0 +1,37 @@
+Preprocess audio datasets
+You're enhancing your precision agriculture application by enabling farmers to control their machinery with voice commands. The system should recognize keywords in commands like "Turn on the sprinkler irrigation system."
+You'll leverage a keyword spotting dataset with audio clips of keywords like "on." Preprocess the audio files so they can be used with a pre-trained Transformer model!
+
+Some data has been pre-loaded:
+dataset contains a sample training dataset of audio files. It already contains the train split, so you don't need to specify train when using dataset.
+AutoFeatureExtractor has been imported from transformers.
+model is equal to facebook/wav2vec2-base.
+max_duration is defined as 1 second.
+
+
+
+Load a pre-trained feature_extractor with the AutoFeatureExtractor class.
+Set the sampling_rate of the audio_arrays using the rates from the feature_extractor.
+Set the max_length of the audio_arrays.
+
+
+
+
+# Load a pre-trained feature extractor
+feature_extractor = AutoFeatureExtractor.from_pretrained(model)
+
+def preprocess_function(examples):
+    audio_arrays = [x["array"] for x in examples["audio"]]
+    inputs = feature_extractor(
+        audio_arrays,
+        # Set the sampling rate
+        sampling_rate=feature_extractor.sampling_rate, 
+        # Set the max length
+        max_length=int(feature_extractor.sampling_rate * max_duration), 
+        truncation=True)
+    return inputs
+
+encoded_dataset = dataset.map(preprocess_function, remove_columns=["audio", "file"], batched=True)
+
+
+
