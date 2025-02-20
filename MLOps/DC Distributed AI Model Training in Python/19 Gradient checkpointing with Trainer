@@ -1,0 +1,37 @@
+Gradient checkpointing with Trainer
+You want to use gradient checkpointing to reduce the memory footprint of your model. You've seen how to write the explicit training loop with Accelerator, and now you'd like to use a simplified interface without training loops with Trainer. The exercise will take some time to run with the call to trainer.train().
+Set up the arguments for Trainer to use gradient checkpointing.
+
+
+
+Use four gradient accumulation steps in TrainingArguments.
+Enable gradient checkpointing in TrainingArguments.
+Pass in the training arguments to Trainer.
+
+
+
+training_args = TrainingArguments(output_dir="./results",
+                                  evaluation_strategy="epoch",
+                                  # Use four gradient accumulation steps
+                                  gradient_accumulation_steps=4,
+                                  # Enable gradient checkpointing
+                                  gradient_checkpointing=True)
+
+
+
+trainer = Trainer(model=model,
+                  # Pass in the training arguments
+                  args=training_args,
+                  train_dataset=dataset["train"],
+                  eval_dataset=dataset["validation"],
+                  compute_metrics=compute_metrics)
+trainer.train()
+
+
+
+<script.py> output:
+    {'eval_loss': 0.6923160552978516, 'eval_accuracy': 0.3333333333333333, 'eval_f1': 0.5, 'eval_runtime': 1.3622, 'eval_samples_per_second': 2.202, 'eval_steps_per_second': 0.734, 'epoch': 1.0}
+    {'eval_loss': 0.7021612524986267, 'eval_accuracy': 0.3333333333333333, 'eval_f1': 0.5, 'eval_runtime': 1.6544, 'eval_samples_per_second': 1.813, 'eval_steps_per_second': 0.604, 'epoch': 2.0}
+    {'eval_loss': 0.7071353793144226, 'eval_accuracy': 0.3333333333333333, 'eval_f1': 0.5, 'eval_runtime': 1.1896, 'eval_samples_per_second': 2.522, 'eval_steps_per_second': 0.841, 'epoch': 3.0}
+    {'train_runtime': 26.5698, 'train_samples_per_second': 0.339, 'train_steps_per_second': 0.113, 'train_loss': 0.1671491265296936, 'epoch': 3.0}
+
