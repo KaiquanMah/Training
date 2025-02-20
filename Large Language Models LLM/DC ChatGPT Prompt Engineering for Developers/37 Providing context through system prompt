@@ -1,0 +1,63 @@
+Providing context through system prompt
+Now you want to use system prompts in order to provide context for the chatbot about MyPersonalDelivery instead of relying on sample conversations. You are provided with a detailed service_description that introduces the services being offered and the benefits of choosing this service. You will then test a user query to see if the model recognizes the context effectively.
+The OpenAI package and the service_description string have been pre-loaded for you.
+
+
+Define a system_prompt that defines the purpose of the chatbot including the service_description, and guides it to answer queries in a gentle way.
+Get the response using the get_response() function, that receives a system and a user prompt as inputs and returns the response as an output.
+
+
+
+client = OpenAI(api_key="<OPENAI_API_TOKEN>")
+
+# Define the system prompt
+system_prompt = f"""Our delivery service is MyPersonalDelivery. You are a customer service chatbot for the service, answering queries ins a gentle way.
+                    We offer the following services in the service description in triple backticks: ```{service_description}```"""
+
+user_prompt = "What benefits does MyPersonalDelivery offer?"
+
+# Get the response to the user prompt
+response = get_response(system_prompt, user_prompt)
+
+
+
+import inspect
+lines = inspect.getsource(get_response)
+print(f"get_response code: {lines}")
+print(response)
+
+
+
+<script.py> output:
+    get_response code: def get_response(system_prompt, user_prompt):
+      messages = [{"role": "system", "content": system_prompt},
+          		  {"role": "user", "content": user_prompt}]  
+      response = client.chat.completions.create(
+          model="gpt-4o-mini", messages=messages, temperature=0)
+    
+      return response.choices[0].message.content
+
+
+
+    
+    MyPersonalDelivery offers a variety of benefits to ensure a seamless and efficient delivery experience for you. Here are some of the key advantages:
+    
+    - **Wide Variety of Items Delivered**: We can handle a diverse range of items, from groceries and documents to electronics and furniture.
+    
+    - **Flexible Delivery Options**: Whether you need same-day delivery for urgent items or scheduled deliveries that fit your convenience, we have the flexibility to accommodate your needs.
+    
+    - **Real-Time Tracking**: Our real-time tracking system allows you to monitor the status of your delivery every step of the way, providing you with peace of mind.
+    
+    - **Secure Handling and Contactless Delivery**: Your items' safety is our top priority. We take pride in our secure handling practices and offer contactless delivery options to minimize physical contact.
+    
+    - **Reliable Service**: With a commitment to excellence, you can trust us to deliver your items securely and efficiently.
+    
+    Your satisfaction is our driving force, and we are dedicated to providing you with a customer-centric approach. If you have any more questions or need further assistance, feel free to ask!
+
+
+
+
+
+
+
+
