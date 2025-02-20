@@ -1,0 +1,29 @@
+Gradient accumulation with Accelerator
+You're training a language model to simplify translations by paraphrasing complex sentences, but your GPU is running out of memory. Gradient accumulation allows the model to effectively train on larger batches by using small batches that fit into memory. You prefer to write the training loop explicitly to see its structure, so you're using Accelerator. Note that this exercise actually runs on the CPU, but the code remains the same for the GPU.
+The model, train_dataloader, optimizer, and lr_scheduler have been pre-defined.
+
+
+Configure Accelerator() to use gradient accumulation with two steps.
+Set up an Accelerator context manager to enable gradient accumulation for the model.
+Compute gradients of the loss using Accelerator.
+
+
+# Configure Accelerator
+accelerator = Accelerator(gradient_accumulation_steps=2)
+model, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(model, optimizer, train_dataloader, lr_scheduler)
+for batch in train_dataloader:
+    # Set up an Accelerator context manager
+    with accelerator.accumulate(model):
+        inputs, targets = batch["input_ids"], batch["labels"]
+        outputs = model(inputs, labels=targets)
+        loss = outputs.loss
+        # Compute gradients using Accelerator
+        accelerator.backward(loss)
+        optimizer.step()
+        lr_scheduler.step()
+        optimizer.zero_grad()
+        print(f"Loss = {loss}")
+
+
+
+        
