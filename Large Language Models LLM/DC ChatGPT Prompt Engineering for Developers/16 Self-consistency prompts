@@ -1,0 +1,59 @@
+Self-consistency prompts
+Imagine you own a store that sells laptops and mobile phones. You start your day with 50 devices in the store, out of which 60% are mobile phones. Throughout the day, three clients visited the store, each of them bought one mobile phone, and one of them bought additionally a laptop. Also, you added to your collection 10 laptops and 5 mobile phones. How many laptops and mobile phones do you have by the end of the day? This problem is defined in the problem_to_solve string, and you will use a self-consistency prompt to solve it.
+The OpenAI package and the get_response() function have been pre-loaded for you.
+The get_response() function in this exercise employs the max_tokens parameter to help this exercise run faster.
+
+
+
+Create the self_consistency_instruction that allows the model to solve the problem with three experts and combine the results with a majority vote.
+Create the final prompt by combining the self_consistency_instruction and the problem_to_solve.
+
+client = OpenAI(api_key="<OPENAI_API_TOKEN>")
+
+# Create the self_consistency instruction
+self_consistency_instruction = 'Solve the problem with 3 experts. Then combine results through majority vote'
+
+# Create the problem to solve
+problem_to_solve = "If you own a store that sells laptops and mobile phones. You start your day with 50 devices in the store, out of which 60% are mobile phones. Throughout the day, three clients visited the store, each of them bought one mobile phone, and one of them bought additionally a laptop. Also, you added to your collection 10 laptops and 5 mobile phones. How many laptops and mobile phones do you have by the end of the day?"
+
+# Create the final prompt
+prompt = self_consistency_instruction + problem_to_solve
+
+response = get_response(prompt)
+print(response)
+
+
+Let's break down the problem step by step.
+    
+    1. **Initial Inventory:**
+       - Total devices: 50
+       - Percentage of mobile phones: 60%
+       - Number of mobile phones: \( 50 \times 0.60 = 30 \)
+       - Number of laptops: \( 50 - 30 = 20 \)
+    
+    2. **Sales:**
+       - Three clients bought mobile phones: 
+         - Mobile phones sold: 3
+       - One of the clients also bought a laptop:
+         - Laptops sold: 1
+    
+       After sales:
+       - Remaining mobile phones: \( 30 - 3 = 27 \)
+       - Remaining laptops: \( 20 - 1 = 19 \)
+    
+    3. **Additions to Inventory:**
+       - Laptops added: 10
+       - Mobile phones added: 5
+    
+       After additions:
+       - Total laptops: \( 19 + 10 = 29 \)
+       - Total mobile phones: \( 27 + 5 = 32 \)
+    
+    4. **Final Inventory:**
+       - Laptops: 29
+       - Mobile phones: 32
+    
+    Thus, by the end of the day, you have **29 laptops** and **32 mobile phones**.
+
+
+
