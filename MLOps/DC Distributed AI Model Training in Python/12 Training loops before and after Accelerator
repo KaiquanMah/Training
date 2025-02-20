@@ -1,0 +1,37 @@
+Training loops before and after Accelerator
+You want to modify a PyTorch training loop to use Accelerator for your language model to simplify translations using the MPRC dataset of sentence paraphrases. Update the training loop to prepare your model for distributed training.
+
+Some data has been pre-loaded:
+accelerator is an instance of Accelerator
+train_dataloader, optimizer, model, and lr_scheduler have been defined and prepared with Accelerator
+
+
+Update the .to(device) lines so that Accelerator handles device movement.
+Modify the gradient computation to use Accelerator.
+
+'''
+for batch in train_dataloader:
+    optimizer.zero_grad()
+    inputs, targets = batch["input_ids"], batch["labels"]
+    # Update the lines so Accelerator handles device placement
+    inputs = inputs.to(device)
+    targets = targets.to(device)
+    outputs = model(inputs, labels=targets)
+    loss = outputs.loss
+    # Modify the gradient computation to use Accelerator
+    loss.backward()
+    optimizer.step()
+    lr_scheduler.step()
+'''
+
+
+  for batch in train_dataloader:
+    optimizer.zero_grad()
+    inputs, targets = batch["input_ids"], batch["labels"]
+    # Update the lines so Accelerator handles device placement
+    outputs = model(inputs, labels=targets)
+    loss = outputs.loss
+    # Modify the gradient computation to use Accelerator
+    accelerator.backward(loss)
+    optimizer.step()
+    lr_scheduler.step()
