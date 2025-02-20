@@ -1,0 +1,65 @@
+Preprocess text with AutoTokenizer
+You're building a precision agriculture application to enable farmers to ask questions on issues they encounter in the field. You'll leverage a dataset of common questions and answers to issues faced by farmers; the fields in this dataset are
+question: common agricultural questions
+answers: answers to the agricultural questions
+
+
+As a first step in distributed training, you'll begin by preprocessing this text dataset.
+Some data has been preloaded:
+dataset contains a sample dataset of agricultural questions and answers
+AutoTokenizer has been imported from transformers
+
+
+
+
+Load a pre-trained tokenizer.
+Tokenize the question field of the training example.
+Apply the encode() function to tokenize and pad the dataset.
+Rename the answers column to labels.
+
+
+
+
+
+
+# Load a pre-trained tokenizer
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+
+def encode(example):
+    # Tokenize the "question" field of the training example
+    return tokenizer(example["question"], padding="max_length", truncation=True, return_tensors="pt")
+
+
+
+# Apply a function to tokenize and pad the dataset
+dataset = dataset.map(encode, batched=True)
+
+print(f"dataset b4 renaming: {dataset}")
+
+
+# Rename the "answers" column to "labels"
+dataset = dataset.map(lambda example: {"labels": example["answers"]}, batched=True)
+
+print(dataset)
+
+
+
+
+<script.py> output:
+    dataset b4 renaming: DatasetDict({
+        train: Dataset({
+            features: ['question', 'answers', 'input_ids', 'attention_mask', 'labels'],
+            num_rows: 3
+        })
+    })
+
+
+
+    DatasetDict({
+        train: Dataset({
+            features: ['question', 'answers', 'input_ids', 'attention_mask', 'labels'],
+            num_rows: 3
+        })
+    })
+
+
