@@ -1,0 +1,41 @@
+Preprocess image datasets
+You're developing a precision agriculture system to help farmers monitor crop health, using a pre-trained transformer model, which you can later fine-tune on agricultural imagery. Preprocess the dataset using AutoImageProcessor to prepare for training!
+
+Some data has been pre-loaded:
+The AutoImageProcessor class has been imported from transformers
+model is equal to microsoft/swin-tiny-patch4-window7-224
+A sample dataset has been defined, with a sample image
+
+
+
+
+Load a pre-trained image processor from the pre-defined model.
+Apply the image_processor to the entire dataset.
+Preprocess an image.
+
+
+# Load a pre-trained image processor
+print(f"model name: {model}")
+image_processor = AutoImageProcessor.from_pretrained(model)
+
+# Apply the image_processor to the entire dataset
+dataset = dataset.map(
+    lambda examples: {
+        "pixel_values": [
+            # Preprocess an image
+            image_processor(image, return_tensors="pt").pixel_values
+            for image in examples["img"]
+        ]
+    },
+    batched=True,
+)
+print(dataset[0]["img"])
+
+
+
+<script.py> output:
+    model name: microsoft/swin-tiny-patch4-window7-224
+    <PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=720x480 at 0x7F636B7D7FD0>
+
+
+
