@@ -1,0 +1,62 @@
+Modifying code with multi-step prompts
+You are a home improvement contractor specializing in flooring installations. You need to develop a Python function that calculates the area and perimeter of a rectangular floor in a room to help you determine the amount of flooring material required for the project.
+You are given a string named function, which contains a starter function that calculates the area of a rectangular floor given its width and length. Using a multi-step prompt, you need to prompt the language model to modify this function to return the perimeter of the rectangle as well, and to test if the inputs (floor dimensions) are positive, and if not, display appropriate error messages.
+The OpenAI package, the function string, and the get_response() function have been pre-loaded for you.
+
+
+
+Craft a multi-step prompt that asks the model to modify the function according to the specified requirements: test if the inputs to the functions are positive, and if not, display appropriate error messages, otherwise return the area and perimeter of the rectangle.
+
+
+client = OpenAI(api_key="<OPENAI_API_TOKEN>")
+
+function = """def calculate_area_rectangular_floor(width, length):
+					return width*length"""
+
+# Craft a multi-step prompt that asks the model to adjust the function
+prompt = f"""Modify the function according to the specified requirements:
+			 - test if the inputs to the functions are positive, and 
+			 - if not positive, display appropriate error messages, 
+			 - if the inputs are positive, continue to return the area and perimeter of the rectangle.
+			 Function in triple backticks: ```{function}```
+			 """
+
+response = get_response(prompt)
+print(response)
+
+
+
+<script.py> output:
+    You can modify the function to include input validation for positive values. If the inputs are not positive, the function will raise a ValueError with an appropriate error message. Here's the modified function:
+    
+    ```python
+    def calculate_area_rectangular_floor(width, length):
+        if width <= 0:
+            raise ValueError("Width must be a positive number.")
+        if length <= 0:
+            raise ValueError("Length must be a positive number.")
+        
+        area = width * length
+        perimeter = 2 * (width + length)
+        
+        return area, perimeter
+    ```
+    
+    ### Explanation:
+    1. **Input Validation**: The function checks if `width` and `length` are positive. If either is not, it raises a `ValueError` with a descriptive message.
+    2. **Calculating Area and Perimeter**: If both inputs are valid, it calculates the area and perimeter of the rectangle.
+    3. **Return Values**: The function returns both the area and the perimeter as a tuple. 
+    
+    You can call this function and handle exceptions as needed:
+    
+    ```python
+    try:
+        area, perimeter = calculate_area_rectangular_floor(5, 10)
+        print(f"Area: {area}, Perimeter: {perimeter}")
+    except ValueError as e:
+        print(e)
+    ```
+
+
+
+    
