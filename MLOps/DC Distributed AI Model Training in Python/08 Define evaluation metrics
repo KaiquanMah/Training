@@ -1,0 +1,28 @@
+Define evaluation metrics
+You're developing a real-time language translation service in a video conferencing application. To monitor training, you'll define evaluation metrics for accuracy and F1 score, which measure overall model performance.
+The evaluate and numpy (np) libraries have been pre-imported.
+
+
+Load accuracy and f1 score using the evaluate library.
+Extract logits and labels from the input eval_predictions.
+Convert logits to predictions.
+Compute accuracy and f1 score based on the predictions and labels.
+
+
+
+def compute_metrics(eval_predictions):
+    # Load accuracy and F1 score
+    load_accuracy = evaluate.load("accuracy")
+    load_f1 = evaluate.load("f1")
+
+    # Extract logits and labels from eval_predictions
+    logits, labels = eval_predictions
+    # Convert logits to predictions
+    predictions = np.argmax(logits, axis=-1)
+    # Compute accuracy and F1 score
+    accuracy = load_accuracy.compute(predictions=predictions, references=labels)["accuracy"]
+    f1 = load_f1.compute(predictions=predictions, references=labels)["f1"]
+    return {"accuracy": accuracy, "f1": f1}
+
+
+
