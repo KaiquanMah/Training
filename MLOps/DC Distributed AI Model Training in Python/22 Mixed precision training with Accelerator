@@ -1,0 +1,30 @@
+Mixed precision training with Accelerator
+You want to simplify your PyTorch loop for mixed precision training of your language translation model by using Accelerator. Build the new training loop to leverage Accelerator!
+Some objects have been preloaded: dataset, model, dataloader, and optimizer.
+
+
+
+Enable mixed precision training using FP16 in Accelerator.
+Prepare training objects for mixed precision training before the loop.
+Compute the gradients of the loss for mixed precision training.
+
+
+# Enable mixed precision training using FP16
+accelerator = Accelerator(mixed_precision="fp16")
+
+# Prepare training objects for mixed precision training
+model, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(model, optimizer, train_dataloader, lr_scheduler)
+
+for batch in train_dataloader:
+    inputs, targets = batch["input_ids"], batch["labels"]
+    outputs = model(inputs, labels=targets)
+    loss = outputs.loss
+    # Compute the gradients of the loss
+    accelerator.backward(loss)
+    optimizer.step()
+    optimizer.zero_grad()
+
+
+
+
+    
