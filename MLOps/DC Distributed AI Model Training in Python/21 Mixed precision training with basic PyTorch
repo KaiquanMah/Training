@@ -1,0 +1,25 @@
+Mixed precision training with basic PyTorch
+You will use low precision floating point data types to speed up training for your language translation model. For example, 16-bit floating point data types (float16) are only half the size of their 32-bit counterparts (float32). This accelerates computations of matrix multiplications and convolutions. Recall that this involves scaling gradients and casting operations to 16 bit floating point.
+Some objects have been preloaded: dataset, model, dataloader, and optimizer.
+
+
+Before the loop, define a scaler for the gradients using a class from the torch library.
+In the loop, cast operations to the 16-bit floating point data type using a context manager from the torch library.
+In the loop, scale the loss and call .backward() to create scaled gradients.
+
+
+# Define a scaler for the gradients
+scaler = torch.amp.GradScaler()
+for batch in train_dataloader:
+    inputs, targets = batch["input_ids"], batch["labels"]
+    # Casts operations to mixed precision
+    with torch.autocast(device_type="cpu", dtype=torch.float16):
+        outputs = model(inputs, labels=targets)
+        loss = outputs.loss
+    # Compute scaled gradients
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()
+    optimizer.zero_grad()
+
+    
