@@ -1,0 +1,20 @@
+Defining a function for chunking
+To be able to batch upserts in a reproducible way, you'll need to define a function to split your list of vectors into chunks.
+The built-in itertools module has already been imported for you.
+
+
+Convert the iterable input into an iterator.
+Slice it into chunks of size batch_size using the itertools module.
+Yield the current chunk.
+
+
+def chunks(iterable, batch_size=100):
+    """A helper function to break an iterable into chunks of size batch_size."""
+    # Convert the iterable into an iterator
+    it = iter(iterable)
+    # Slice the iterator into chunks of size batch_size
+    chunk = tuple(itertools.islice(it, batch_size))
+    while chunk:
+        # Yield the chunk
+        yield chunk
+        chunk = tuple(itertools.islice(it, batch_size))
