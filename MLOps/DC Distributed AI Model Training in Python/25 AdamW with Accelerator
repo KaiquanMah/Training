@@ -1,0 +1,29 @@
+AdamW with Accelerator
+You want to customize your training loop using Accelerator and use AdamW as a benchmark optimizer for your language translation model. Build the training loop to use AdamW.
+Some training objects have been pre-loaded and defined, including model, train_dataloader, and accelerator.
+
+
+Prepare training objects for distributed training before the loop.
+Update the model parameters in the training loop.
+
+optimizer = AdamW(params=model.parameters())
+
+# Prepare training objects for distributed training
+model, optimizer, train_dataloader = accelerator.prepare(model, optimizer, train_dataloader)
+
+for batch in train_dataloader:
+    inputs, targets = batch["input_ids"], batch["labels"]
+    outputs = model(inputs, labels=targets)
+    loss = outputs.loss
+    accelerator.backward(loss)
+    # Update the model parameters
+    optimizer.step()
+    optimizer.zero_grad()
+    print(f"Loss = {loss}")
+
+
+
+<script.py> output:
+    Loss = 0.7899804711341858
+
+    
