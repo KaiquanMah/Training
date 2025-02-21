@@ -1,0 +1,44 @@
+Batching upserts in chunks
+In this exercise, you'll practice ingesting vectors into the 'datacamp-index' Pinecone index in series, batch-by-batch.
+
+The chunks() helper function you created in the previous exercise is available to use:
+def chunks(iterable, batch_size=100):
+    """A helper function to break an iterable into chunks of size batch_size."""
+    it = iter(iterable)
+    chunk = tuple(itertools.islice(it, batch_size))
+    while chunk:
+        yield chunk
+        chunk = tuple(itertools.islice(it, batch_size))
+
+
+
+
+
+
+Initialize the Pinecone connection with your API key.
+Upsert the vectors in vectors in batches of 100 vectors into 'datacamp-index'.
+Print the descriptive statistics from this index.
+
+
+# Initialize the Pinecone client with your API key
+pc = Pinecone(api_key="pcsk_4253vh_A7C4i7vfT1rtFL9TwdtknNuNJGY3d3wi38Mnna6y75ZQhRbckdYJYa65sfV7hU7")
+
+index = pc.Index('datacamp-index')
+
+# Upsert vectors in batches of 100
+for chunk in chunks(vectors):
+    index.upsert(vectors=chunk)
+
+# Retrieve statistics of the connected Pinecone index
+print(index.describe_index_stats())
+
+
+<script.py> output:
+    {'dimension': 1536,
+     'index_fullness': 0.0,
+     'namespaces': {'': {'vector_count': 800}},
+     'total_vector_count': 800}
+
+
+
+     
