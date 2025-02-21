@@ -1,0 +1,43 @@
+Batching upserts in parallel
+In this exercise, you'll practice ingesting vectors into the 'datacamp-index' Pinecone index in parallel. You'll need to connect to the index, upsert vectors in batches asynchronously, and check the updated metrics of the 'datacamp-index' index.
+
+The chunks() helper function you created earlier is still available to use:
+def chunks(iterable, batch_size=100):
+    """A helper function to break an iterable into chunks of size batch_size."""
+    it = iter(iterable)
+    chunk = tuple(itertools.islice(it, batch_size))
+    while chunk:
+        yield chunk
+        chunk = tuple(itertools.islice(it, batch_size))
+
+
+
+Initialize the Pinecone client to allow 20 simultaneous requests.
+Upsert the vectors in vectors in batches of 200 vectors per request asynchronously, configuring 20 simultaneous requests.
+Print the updated metrics of the 'datacamp-index' Pinecone index.
+
+
+
+# Initialize the client
+pc = Pinecone(api_key="apikey", pool_threads=20)
+
+index = pc.Index('datacamp-index')
+
+# Upsert vectors in batches of 200 vectors
+with pc.Index('datacamp-index', pool_threads=20) as index:
+    async_results = [index.upsert(vectors=chunk, async_req=True) for chunk in chunks(vectors, batch_size=200)]
+    [async_result.get() for async_result in async_results]
+
+# Retrieve statistics of the connected Pinecone index
+print(index.describe_index_stats())
+
+
+
+<script.py> output:
+    {'dimension': 1536,
+     'index_fullness': 0.0,
+     'namespaces': {'': {'vector_count': 1000}},
+     'total_vector_count': 1000}
+     
+
+     
