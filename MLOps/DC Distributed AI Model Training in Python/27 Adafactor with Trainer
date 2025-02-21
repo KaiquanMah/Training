@@ -1,0 +1,35 @@
+Adafactor with Trainer
+You're training a Transformer model with billions of parameters for your language translation service. It is straining your computational resources, so you decide to try the Adafactor optimizer to reduce memory requirements compared to AdamW. Prepare the Trainer for Adafactor!
+Some training objects have been pre-loaded, including model, train_dataset, validation_dataset, and compute_metrics.
+
+
+Specify Adafactor as an optimizer in TrainingArguments.
+Pass in the optimizer state to print the size.
+
+
+# Specify Adafactor as an optimizer
+training_args = TrainingArguments(output_dir="./results",
+                                  evaluation_strategy="epoch",
+                                  optim="adafactor")
+
+trainer = Trainer(model=model,
+                  args=training_args,
+                  train_dataset=train_dataset,
+                  eval_dataset=validation_dataset,
+                  compute_metrics=compute_metrics)
+trainer.train()
+
+# Pass in the optimizer state
+total_size_megabytes, total_num_elements = compute_optimizer_size(trainer.optimizer.state.values())
+print(f"\nNumber of optimizer parameters: {total_num_elements:,}\nOptimizer size: {total_size_megabytes:.0f} MB")  
+
+
+<script.py> output:
+    {'eval_loss': 0.7031665444374084, 'eval_accuracy': 0.0, 'eval_f1': 0.0, 'eval_runtime': 0.6843, 'eval_samples_per_second': 1.461, 'eval_steps_per_second': 1.461, 'epoch': 1.0}
+    {'eval_loss': 0.6323512196540833, 'eval_accuracy': 1.0, 'eval_f1': 1.0, 'eval_runtime': 0.636, 'eval_samples_per_second': 1.572, 'eval_steps_per_second': 1.572, 'epoch': 2.0}
+    {'eval_loss': 0.5990343689918518, 'eval_accuracy': 1.0, 'eval_f1': 1.0, 'eval_runtime': 0.5453, 'eval_samples_per_second': 1.834, 'eval_steps_per_second': 1.834, 'epoch': 3.0}
+    {'train_runtime': 8.2923, 'train_samples_per_second': 0.362, 'train_steps_per_second': 0.362, 'train_loss': 0.6304861704508463, 'epoch': 3.0}
+    
+    Number of optimizer parameters: 178,712
+    Optimizer size: 1 MB
+
