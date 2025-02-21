@@ -1,0 +1,48 @@
+Changing distance metrics
+By default, Pinecone indexes using the cosine similarity distance metric to compute similarity scores between vectors, which are used when querying to find the most similar vectors. Pinecone also supports other distance metrics, including Euclidean distance and the dot product.
+The distance metric is set when the index is created, and can't be changed afterwards. In this exercise, you'll practice creating an index that uses the dot product distance metric.
+
+
+Initialize the Pinecone connection with your API key.
+Create a new index called "dotproduct-index" that uses the dot product distance metric.
+List your indexes to verify that it has been created and has the correct metric.
+
+
+
+# Initialize the Pinecone client with your API key
+pc = Pinecone(api_key="apikey")
+
+# Create an index that uses the dot product distance metric
+pc.delete_index('dotproduct-index')
+pc.create_index(
+    name="dotproduct-index",
+    dimension=1536,
+    metric="dotproduct",
+    spec=ServerlessSpec(
+        cloud='aws',
+        region='us-east-1'
+    )
+)
+
+# Print a list of your indexes
+print(pc.list_indexes())
+
+
+<script.py> output:
+    {'indexes': [{'deletion_protection': 'disabled',
+                  'dimension': 1536,
+                  'host': 'datacamp-index-6yhilyo.svc.aped-4627-b74a.pinecone.io',
+                  'metric': 'cosine',
+                  'name': 'datacamp-index',
+                  'spec': {'serverless': {'cloud': 'aws', 'region': 'us-east-1'}},
+                  'status': {'ready': True, 'state': 'Ready'}},
+                 {'deletion_protection': 'disabled',
+                  'dimension': 1536,
+                  'host': 'dotproduct-index-6yhilyo.svc.aped-4627-b74a.pinecone.io',
+                  'metric': 'dotproduct',
+                  'name': 'dotproduct-index',
+                  'spec': {'serverless': {'cloud': 'aws', 'region': 'us-east-1'}},
+                  'status': {'ready': True, 'state': 'Ready'}}]}
+
+
+
