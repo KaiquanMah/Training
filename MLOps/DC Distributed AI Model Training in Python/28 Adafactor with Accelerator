@@ -1,0 +1,30 @@
+Adafactor with Accelerator
+You've demonstrated a proof-of-concept of Adafactor with Trainer to train your language translation model with reduced memory requirements. Now you'd like to customize your training loop using Accelerator. Build the training loop to use Adafactor!
+The compute_optimizer_size() function has been pre-defined. Some training objects have been pre-loaded: model, train_dataloader, and accelerator.
+
+
+Pass the model parameters to Adafactor when defining the optimizer.
+Pass in the optimizer state to print the size.
+
+
+# Pass the model parameters to Adafactor
+optimizer = Adafactor(params=model.parameters())
+model, optimizer, train_dataloader = accelerator.prepare(model, optimizer, train_dataloader)
+
+for batch in train_dataloader:
+    inputs, targets = batch["input_ids"], batch["labels"]
+    outputs = model(inputs, labels=targets)
+    loss = outputs.loss
+    accelerator.backward(loss)
+    optimizer.step()
+    optimizer.zero_grad()
+
+# Pass in the optimizer state
+total_size_megabytes, total_num_elements = compute_optimizer_size(optimizer.state.values())
+print(f"Number of optimizer parameters: {total_num_elements:,}\nOptimizer size: {total_size_megabytes:.0f} MB")  
+
+
+<script.py> output:
+    Number of optimizer parameters: 178,608
+    Optimizer size: 1 MB
+
