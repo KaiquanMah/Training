@@ -1,0 +1,29 @@
+8-bit Adam with Accelerator
+You would like to customize your training loop with 8-bit Adam to reduce memory requirements of your model. Prepare the loop with 8-bit Adam for training.
+Assume that an 8-bit Adam optimizer has been defined as adam_bnb_optim. Other training objects have been defined: model, train_dataloader, lr_scheduler, and accelerator.
+
+
+Prepare the 8-bit Adam optimizer for distributed training.
+Update the model parameters with the optimizer.
+Zero the gradients with the optimizer.
+
+
+# Prepare the 8-bit Adam optimizer for distributed training
+model, adam_bnb_optim, train_dataloader, lr_scheduler = accelerator.prepare(model, adam_bnb_optim, train_dataloader, lr_scheduler)
+
+for batch in train_dataloader:
+    inputs, targets = batch["input_ids"], batch["labels"]
+    outputs = model(inputs, labels=targets)
+    loss = outputs.loss
+    accelerator.backward(loss)
+    # Update the model parameters
+    adam_bnb_optim.step()
+    lr_scheduler.step()
+    # Zero the gradients
+    adam_bnb_optim.zero_grad()
+    print(f"Loss = {loss}")
+
+<script.py> output:
+    Loss = 0.7899804711341858
+
+    
