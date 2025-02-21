@@ -1,0 +1,34 @@
+Compute the optimizer size
+You're exploring different optimizers for training a model, and you need to quantify an optimizer's memory usage for an objective comparison. As a test, you've loaded a DistilBERT model and AdamW optimizer so that you quantify memory usage. Write the compute_optimizer_size function to compute the size of an optimizer.
+The AdamW optimizer has been defined, and training has completed using optimizer.
+
+
+Compute number of elements and size of each tensor in the for loop.
+Compute the total size of the optimizer in megabytes.
+Pass in the optimizer state to compute_optimizer_size.
+
+
+def compute_optimizer_size(optimizer_state):
+    total_size_megabytes, total_num_elements = 0, 0
+    for params in optimizer_state:
+        for name, tensor in params.items():
+            tensor = torch.tensor(tensor)
+            # Compute number of elements and size of each tensor
+            num_elements, element_size = tensor.numel(), tensor.element_size()
+            total_num_elements += num_elements
+            # Compute the total size in megabytes
+            total_size_megabytes += num_elements * element_size / (1024 ** 2)
+    return total_size_megabytes, total_num_elements
+
+# Pass in the optimizer state
+total_size_megabytes, total_num_elements = compute_optimizer_size(optimizer.state.values())
+print(f"Number of optimizer parameters: {total_num_elements:,}\nOptimizer size: {total_size_megabytes:.0f} MB")
+
+
+
+<script.py> output:
+    Number of optimizer parameters: 131,566,188
+    Optimizer size: 502 MB
+
+
+    
