@@ -1,0 +1,39 @@
+Multiple metadata filters
+As well as equality operations, Pinecone provides operators for other core comparison operations, as well as enabling multiple filters in a single query. In this exercise, you'll create multiple filters using Pinecone's other comparison operators and use them to re-query your index.
+
+Initialize the Pinecone connection using your API key.
+Retrieve the MOST similar vector to the vector provided, only searching through vectors where the the "genre" metadata is "thriller" and "year" is less than 2018.
+
+
+
+
+# Initialize the Pinecone client using your API key
+pc = Pinecone(api_key="apikey")
+
+index = pc.Index('datacamp-index')
+
+# Retrieve the MOST similar vector with genre and year filters
+query_result = index.query(
+    vector=vector,
+    top_k=1,
+    filter={"genre": {"$eq": "thriller"},
+            "year": {"$lt": 2018}},
+    include_metadata=True
+)
+print(query_result)
+
+
+
+
+
+
+<script.py> output:
+    {'matches': [{'id': '14',
+                  'metadata': {'genre': 'thriller', 'year': 2010.0},
+                  'score': 0.0560867488,
+                  'values': []}],
+     'namespace': '',
+     'usage': {'read_units': 6}}
+
+
+     
