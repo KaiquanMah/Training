@@ -1,0 +1,52 @@
+Validating Cypher queries
+When the LLMs generate the Cypher query, they have the graph schema available for reference; however, this doesn't mean there's absolute certainty that the query will reflect the schema perfectly. To improve reliability, you can validate and fix the generated query against the schema, which is particularly well-suited to fixing incorrect relationship directions.
+
+Create a graph QA chain that queries the graph database, including an additional check to validate the generated Cypher query; an llm has been defined for you and you should set verbose=True.
+Invoke the graph_qa_chain with the input provided.
+
+
+# Create the graph QA chain, validating the generated Cypher query
+graph_qa_chain = GraphCypherQAChain.from_llm(graph=graph, llm=llm, verbose=True, validate_cypher=True)
+
+
+# Invoke the chain with the input provided
+result = graph_qa_chain.invoke({"query": "Who won the Nobel Prize In Physics?"})
+print(f"Final answer: {result['result']}")
+
+
+Node properties:
+Document {id: STRING, source: STRING, text: STRING}
+Person {id: STRING}
+Award {id: STRING}
+Concept {id: STRING}
+Element {id: STRING}
+Relationship properties:
+
+The relationships:
+(:Document)-[:MENTIONS]->(:Element)
+(:Document)-[:MENTIONS]->(:Award)
+(:Document)-[:MENTIONS]->(:Person)
+(:Document)-[:MENTIONS]->(:Concept)
+(:Person)-[:EXPLANATION_FOR]->(:Concept)
+(:Person)-[:KNOWN_FOR]->(:Concept)
+(:Person)-[:AWARDED]->(:Award)
+(:Person)-[:DISCOVERED]->(:Element)
+(:Person)-[:SPOUSE]->(:Person)
+(:Person)-[:COLLABORATOR]->(:Person)
+
+<script.py> output:
+    
+    
+    [1m> Entering new GraphCypherQAChain chain...[0m
+    Generated Cypher:
+    [32;1m[1;3mcypher
+    MATCH (p:Person)-[:AWARDED]->(a:Award {id: "Nobel Prize In Physics"})
+    RETURN p.id
+    [0m
+    Full Context:
+    [32;1m[1;3m[{'p.id': 'Albert Einstein'}, {'p.id': 'Marie Curie'}][0m
+    
+    [1m> Finished chain.[0m
+    Final answer: Albert Einstein and Marie Curie won the Nobel Prize in Physics.
+
+Validating the generated Cypher query against the graph schema greatly improves the reliability of query and robustness of the Graph RAG system. Into the final method for improving the reliability of Cypher query generation: providing examples in the form of a few-shot prompt.
