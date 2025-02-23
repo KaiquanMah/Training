@@ -1,0 +1,43 @@
+Querying vectors for semantic search
+In this exercise, you'll create a query vector from the question, 'What is in front of the Notre Dame Main Building?'. Using this embedded query, you'll query the 'squad_dataset' namespace from the 'pinecone-datacamp' index and return the top five most similar vectors.
+
+Initialize the Pinecone client with your API key (the OpenAI client is available as client).
+Create a query vector by embedding the query provided with the same OpenAI embedding model you used for embedding the other vectors.
+Query the "squad_dataset" namespace using query_emb, returning the top five most similar results.
+
+
+
+# Initialize the Pinecone client
+pc = Pinecone(api_key="pcsk_4253vh_A7C4i7vfT1rtFL9TwdtknNuNJGY3d3wi38Mnna6y75ZQhRbckdYJYa65sfV7hU7")
+index = pc.Index('pinecone-datacamp')
+
+query = "What is in front of the Notre Dame Main Building?"
+
+# Create the query vector
+query_response = client.embeddings.create(
+    input=query,
+    model="text-embedding-3-small"
+)
+query_emb = query_response.data[0].embedding
+
+# Query the index and retrieve the top five most similar vectors
+retrieved_docs = index.query(vector=query_emb,
+                            top_k=5,
+                            namespace='squad_dataset',
+                            include_metadata=True)
+
+for result in retrieved_docs['matches']:
+    print(f"{result['id']}: {round(result['score'], 2)}")
+    print('\n')
+
+
+    <script.py> output:
+    a25d8490-e29e-4043-98df-3b2bc204587e: 0.46
+    0ec1e588-33c1-458f-9a9f-9c9202d4b122: 0.29
+    201aa392-8700-4daf-9e97-1d4aa1cb0dd5: 0.29
+    009b2550-f9d1-484b-a17e-8c95945246b5: 0.22
+    891b02c1-e0b5-4ac5-bd34-e80d9a374f3b: 0.21
+
+
+
+    
