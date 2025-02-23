@@ -1,0 +1,72 @@
+Querying your graph database
+Now that you have your database set up, it's time to begin querying. You'll view the graph schema to refamiliarize yourself with the nodes and relationships, and then write a Cypher query to query the graph.
+If you need help with writing or fixing your Cypher query, you can use the ask_chatgpt(text: str) function that we've defined for you, which accepts a string argument.
+The graph you created previously is available for you to use.
+
+
+Print the schema of the graph database, graph.
+
+# Print the graph schema
+print(graph.get_schema)
+
+<script.py> output:
+    Node properties:
+    Document {id: STRING, source: STRING, text: STRING}
+    Person {id: STRING}
+    Award {id: STRING}
+    Concept {id: STRING}
+    Element {id: STRING}
+    Relationship properties:
+    
+    The relationships:
+    (:Document)-[:MENTIONS]->(:Element)
+    (:Document)-[:MENTIONS]->(:Award)
+    (:Document)-[:MENTIONS]->(:Person)
+    (:Document)-[:MENTIONS]->(:Concept)
+    (:Person)-[:EXPLANATION_FOR]->(:Concept)
+    (:Person)-[:KNOWN_FOR]->(:Concept)
+    (:Person)-[:AWARDED]->(:Award)
+    (:Person)-[:DISCOVERED]->(:Element)
+    (:Person)-[:SPOUSE]->(:Person)
+    (:Person)-[:COLLABORATOR]->(:Person)
+
+
+
+
+
+
+
+
+Query the graph using Cypher to return the person who is known for the Concept with id Theory Of Relativity; use the graph schema to identify the nodes and relationships.
+# Print the graph schema
+print(graph.get_schema)
+
+# Query the graph
+results = graph.query("""
+MATCH (relativity:Concept {id: "Theory Of Relativity"}) <-[:KNOWN_FOR]- (scientist)
+RETURN scientist
+""")
+
+print(results[0])
+
+    <script.py> output:
+    Node properties:
+    Document {id: STRING, source: STRING, text: STRING}
+    Person {id: STRING}
+    Award {id: STRING}
+    Concept {id: STRING}
+    Element {id: STRING}
+    Relationship properties:
+    
+    The relationships:
+    (:Document)-[:MENTIONS]->(:Element)
+    (:Document)-[:MENTIONS]->(:Award)
+    (:Document)-[:MENTIONS]->(:Person)
+    (:Document)-[:MENTIONS]->(:Concept)
+    (:Person)-[:EXPLANATION_FOR]->(:Concept)
+    (:Person)-[:KNOWN_FOR]->(:Concept)
+    (:Person)-[:AWARDED]->(:Award)
+    (:Person)-[:DISCOVERED]->(:Element)
+    (:Person)-[:SPOUSE]->(:Person)
+    (:Person)-[:COLLABORATOR]->(:Person)
+    {'scientist': {'id': 'Albert Einstein'}}
