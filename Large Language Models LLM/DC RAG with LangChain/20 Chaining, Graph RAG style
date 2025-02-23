@@ -1,0 +1,65 @@
+Chaining, Graph RAG style!
+Now to bring everything together to create a Graph RAG QA chain! You've been provided with the same graph you've worked with throughout this chapter (with some potential variation in the specific nodes and relationships), and you'll connect this with another LLM to generate the Cypher query and return the natural language response.
+
+Create a Graph Cypher QA chain using an OpenAI chat model and the graph you've created previously.
+Invoke the chain with the input provided.
+Extract and print the result text from the result.
+
+
+Node properties:
+Document {id: STRING, source: STRING, text: STRING}
+Person {id: STRING}
+Award {id: STRING}
+Concept {id: STRING}
+Element {id: STRING}
+Relationship properties:
+
+The relationships:
+(:Document)-[:MENTIONS]->(:Element)
+(:Document)-[:MENTIONS]->(:Award)
+(:Document)-[:MENTIONS]->(:Person)
+(:Document)-[:MENTIONS]->(:Concept)
+(:Person)-[:EXPLANATION_FOR]->(:Concept)
+(:Person)-[:KNOWN_FOR]->(:Concept)
+(:Person)-[:AWARDED]->(:Award)
+(:Person)-[:DISCOVERED]->(:Element)
+(:Person)-[:SPOUSE]->(:Person)
+(:Person)-[:COLLABORATOR]->(:Person)
+
+
+
+
+==========
+
+# Create the Graph Cypher QA chain
+graph_qa_chain = GraphCypherQAChain.from_llm(
+    llm=ChatOpenAI(api_key="<OPENAI_API_TOKEN>", temperature=0), graph=graph, verbose=True
+)
+
+# Invoke the chain with the input provided
+result = graph_qa_chain.invoke({"query": "Who discovered the element Radium?"})
+
+# Print the result text
+print(f"Final answer: {result['result']}")
+
+
+
+<script.py> output:
+    
+    
+    [1m> Entering new GraphCypherQAChain chain...[0m
+    Generated Cypher:
+    [32;1m[1;3mMATCH (p:Person)-[:DISCOVERED]->(e:Element {id: "Radium"})
+    RETURN p[0m
+    Full Context:
+    [32;1m[1;3m[{'p': {'id': 'Marie Curie'}}][0m
+    
+    [1m> Finished chain.[0m
+    Final answer: Marie Curie discovered the element Radium.
+
+
+
+    Graph RAG is optimized for these sorts of queries involving multiple relationships between different entities in the document. In the final video of the course, you'll learn a few techniques to optimize this system further, targeting improving the reliability of the generated Cypher query. See you there
+
+
+    
