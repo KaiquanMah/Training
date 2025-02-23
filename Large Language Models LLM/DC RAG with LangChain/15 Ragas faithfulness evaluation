@@ -1,0 +1,41 @@
+Ragas faithfulness evaluation
+In this exercise, you'll evaluate the faithfulness of the RAG architecture you created at the end of Chapter 1. This chain has been re-defined for you and is available as through the variable chain.
+You'll use the query provided, the chain's output, and the retrieved output to evaluate the faithfulness using the ragas framework.
+The classes required have already been imported for you.
+
+
+
+Query the retriever using the query provided and use a list comprehension to extract the document text from each retrieved document.
+Define a ragas faithfulness chain.
+Evaluate the faithfulness of the RAG chain available; you'll need to invoke the chain to generate the answer.
+
+
+from ragas.metrics import faithfulness
+
+# Query the retriever using the query and extract the document text
+query = "How does RAG improve question answering with LLMs?"
+retrieved_docs = [doc.page_content for doc in retriever.invoke(query)]
+
+# Define the faithfulness chain
+faithfulness_chain = EvaluatorChain(metric=faithfulness, llm=llm, embeddings=embeddings)
+
+# Evaluate the faithfulness of the RAG chain
+eval_result = faithfulness_chain({
+  "question": query,
+  "answer": chain.invoke(query),
+  "contexts": retrieved_docs
+})
+
+print(eval_result)
+
+
+
+
+<script.py> output:
+    {'question': 'How does RAG improve question answering with LLMs?', 'answer': 'RAG improves question answering with LLMs by combining retrieval and generation techniques. It can generate correct answers even when the correct answer is not present in any retrieved document, achieving a notable accuracy in such cases. Additionally, RAG models outperform other models like BART in terms of generating factually correct and diverse text. They also utilize non-parametric knowledge and can handle unanswerable questions more effectively by leveraging retrieved information, which enhances their overall performance in open-domain question answering tasks.', 'contexts': ['to more effective marginalization over documents. Furthermore, RAG can generate correct answers\neven when the correct answer is not in any retrieved document, achieving 11.8% accuracy in such\ncases for NQ, where an extractive model would score 0%.\n4.2 Abstractive Question Answering\nAs shown in Table 2, RAG-Sequence outperforms BART on Open MS-MARCO NLG by 2.6 Bleu\npoints and 2.6 Rouge-L points. RAG approaches state-of-the-art model performance, which is\nimpressive given that (i) those models access gold passages with speciﬁc information required to\ngenerate the reference answer , (ii) many questions are unanswerable without the gold passages, and\n(iii) not all questions are answerable from Wikipedia alone. Table 3 shows some generated answers\nfrom our models. Qualitatively, we ﬁnd that RAG models hallucinate less and generate factually\ncorrect text more often than BART. Later, we also show that RAG generations are more diverse than\nBART generations (see §4.5).', 'documents, relying primarily on non-parametric knowledge. We also compare to “Closed-Book\nQA” approaches [52], which, like RAG, generate answers, but which do not exploit retrieval, instead\nrelying purely on parametric knowledge. We consider four popular open-domain QA datasets: Natural\nQuestions (NQ) [29], TriviaQA (TQA) [24]. WebQuestions (WQ) [3] and CuratedTrec (CT) [2]. As\nCT and WQ are small, we follow DPR [26] by initializing CT and WQ models with our NQ RAG\nmodel. We use the same train/dev/test splits as prior work [ 31, 26] and report Exact Match (EM)\nscores. For TQA, to compare with T5 [52], we also evaluate on the TQA Wiki test set.\n3.2 Abstractive Question Answering\nRAG models can go beyond simple extractive QA and answer questions with free-form, abstractive\ntext generation. To test RAG’s natural language generation (NLG) in a knowledge-intensive setting,\nwe use the MSMARCO NLG task v2.1 [ 43]. The task consists of questions, ten gold passages'], 'faithfulness': 0.625}
+
+
+Your RAG architecture scored very well on faithfulness; however, this isn't the whole story. If you look at the model's response, it definitely stayed true to the retrieved documents and earned its high score, buuuuut... it didn't really answer the question. This highlights the complexity of evaluating systems with several components! Let's finish by comparing string outputs to evaluate the architecture as a whole.
+
+
+
