@@ -1,0 +1,91 @@
+RAG questions answering function
+You're almost there! The final piece in the RAG workflow is to integrate the retrieved documents with a question-answering model.
+
+
+
+
+A prompt_with_context_builder() function has already been defined and made available to you. This function takes the documents retrieved from the Pinecone index, and integrates them into a prompt that the question-answering model can ingest:
+def prompt_with_context_builder(query, docs):
+    delim = '\n\n---\n\n'
+    prompt_start = 'Answer the question based on the context below.\n\nContext:\n'
+    prompt_end = f'\n\nQuestion: {query}\nAnswer:'
+
+    prompt = prompt_start + delim.join(docs) + prompt_end
+    return prompt
+
+
+
+    
+You'll implement the question_answering() function, which will provide OpenAI's language model gpt-4o-mini with additional context and sources with which it can answer your questions.
+Initialize the Pinecone client with your API key (the OpenAI client is available as client).
+Retrieve the three most similar documents to the query text from the 'youtube_rag_dataset' namespace.
+Generate a response to the provided prompt and sys_prompt using OpenAI's 'gpt-4o-mini' model, specified using the chat_model function argument.
+
+
+
+# Initialize the Pinecone client
+pc = Pinecone(api_key="apikey")
+index = pc.Index('pinecone-datacamp')
+
+query = "How to build next-level Q&A with OpenAI"
+
+# Retrieve the top three most similar documents and their sources
+documents, sources = retrieve(query, top_k=3, namespace='youtube_rag_dataset', emb_model="text-embedding-3-small")
+
+prompt_with_context = prompt_with_context_builder(query, documents)
+print(f'prompt_with_context: {prompt_with_context}')
+
+
+
+def question_answering(prompt, sources, chat_model):
+    sys_prompt = "You are a helpful assistant that always answers questions."
+    
+    # Use OpenAI chat completions to generate a response
+    res = client.chat.completions.create(
+        model=chat_model,
+        messages=[
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0
+    )
+    answer = res.choices[0].message.content.strip()
+    answer += "\n\nSources:"
+    for source in sources:
+        answer += "\n" + source[0] + ": " + source[1]
+    
+    return answer
+
+answer = question_answering(
+  prompt=prompt_with_context,
+  sources=sources,
+  chat_model='gpt-4o-mini')
+print(f'answer: {answer}')
+
+
+
+
+<script.py> output:
+    prompt_with_context: Answer the question based on the context below.
+    
+    Context:
+    and our model into a pipeline, into a Q&A pipeline. So again, we get this pipeline from the Transformers library. So we come down here, do from Transformers, import pipeline. And now what we want to do is just initialize a pipeline object. So to do that, we just write pipeline. And then in here, what we need to add is a model type. So obviously, you can see up here, we have all of these different tasks. So summarization, text generation and so on. The Transformers library needs to understand, or this pipeline object needs to understand which one of those pipelines or functions we are intending to use. So to tell it that we want to do question answering, we just write question answering. And that basically sets the wrapper of the pipeline to handle question answering formats. So we'll see our input and for our input, we will be passing a context and a question. So we'll see that it will convert into the right structure that we need for question answering, which is the CLS context separator, question separator and padding. It will convert into that, feed it into our tokenizer.
+    
+    ---
+    
+    And on the Hugging Face website, we just want to go over to the Models page. So it's here. Okay and on this Models page, the thing that we want to be looking at is this question and answering task. So here we have all these tasks because when you're working with transformers, they can work with a lot of different things. Text summarization, text classification, generation, loads of different things. But what we want to do is question answering. So we click on here and this filters all of the models that are available to us just purely for question and answering. So this is the sort of power of using the Hugging Face Transformers library. It already has all these pre-trained models that we can just download and start using. Now, when you want to go and apply these to specific use cases, you probably want to fine tune it, which means you want to train it a little bit more than what it is already trained. But for actually getting used to how all of this works, all you need to do is download this model and start asking questions and understanding how everything is actually functioning. So obviously there's a lot of models here. We've got 262 models for question answering,
+    
+    ---
+    
+    pulled from a different Wikipedia page. In this case, the title is a titled page. So this one is from the University of Notre Dame Wikipedia page. We have answers. So further down, we're going to ask a question and these answers here. So we have the text, which is the text answer. And then we have the position, so the character position where the answer starts within the context, which is what you can see here. Now we have a question here, which we're asking. And then the model, the Q&A model is going to extract the answer from our context there. Okay. So we're not going to be training model in this video or anything like that. We're just experimenting with the data sets library. We don't need to worry so much about that. So the first thing I want to do is have a look at how we can modify some of the features in our data. So with SQUAD, when we are training a model, one of the first things we would do is we take our answer start and the text and we will use that to get the answer end position as well.
+    
+    Question: How to build next-level Q&A with OpenAI
+    Answer:
+    answer: The context provided does not specifically address building a next-level Q&A system with OpenAI. However, it discusses using the Hugging Face Transformers library to create a Q&A pipeline, which involves initializing a pipeline object for question answering, utilizing pre-trained models, and potentially fine-tuning them for specific use cases. To build a next-level Q&A system with OpenAI, you would likely need to explore OpenAI's API, understand how to structure prompts effectively, and possibly integrate it with existing models or datasets for enhanced performance.
+    
+    Sources:
+    How to Build Q&A Models in Python (Transformers): https://youtu.be/scJsty_DR3o
+    How to Build Q&A Models in Python (Transformers): https://youtu.be/scJsty_DR3o
+    Build NLP Pipelines with HuggingFace Datasets: https://youtu.be/r-zQQ16wTCA
+
+
