@@ -1,0 +1,53 @@
+String evaluation
+Time to really evaluate the final output by comparing it to an answer written by a subject matter expert. You'll use LangSmith's LangChainStringEvaluator class to perform this string comparison evaluation.
+
+
+A prompt_template for string evaluation has already been written for you as:
+You are an expert professor specialized in grading students' answers to questions.
+You are grading the following question:{query}
+Here is the real answer:{answer}
+You are grading the following predicted answer:{result}
+Respond with CORRECT or INCORRECT:
+Grade:
+
+
+
+The output from the RAG chain is stored as predicted_answer and the expert's response is stored as ref_answer.
+All of the necessary classes have been imported for you.
+
+
+
+
+Create the LangSmith QA string evaluator using the eval_llm and prompt_template provided.
+Evaluate the RAG output, predicted_answer, by comparing it with the expert's response to the query, which is stored as ref_answer.
+
+
+
+
+# Create the QA string evaluator
+qa_evaluator = LangChainStringEvaluator(
+    "qa",
+    config={
+        "llm": eval_llm,
+        "prompt": prompt_template
+    }
+)
+
+query = "How does RAG improve question answering with LLMs?"
+
+# Evaluate the RAG output by evaluating strings
+score = qa_evaluator.evaluator.evaluate_strings(
+    prediction=predicted_answer,
+    reference=ref_answer,
+    input=query
+)
+
+print(f"Score: {score}")
+
+
+<script.py> output:
+    Score: {'reasoning': 'INCORRECT', 'value': 'INCORRECT', 'score': 0}
+
+
+
+
