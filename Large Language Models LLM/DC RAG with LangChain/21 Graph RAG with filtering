@@ -1,0 +1,51 @@
+Graph RAG with filtering
+For large and complex graphs, LLMs can sometimes struggle to accurately infer the most relevant nodes and relationships to build the Cypher query. Quite often, you will only need the LLM to be aware of a subset of the graph, and excluding particular node types will not only make it easier for the LLM to accurately create the Cypher query, but it will improve the query latency.
+The graph database you've been working with is available as graph.
+
+
+Create a graph QA chain that queries the graph database while ignoring nodes with the "Concept" type; an llm has been defined for you, and you should set verbose=True.
+Invoke the graph_qa_chain with the input provided.
+
+
+
+# Create the graph QA chain excluding Concept
+graph_qa_chain = GraphCypherQAChain.from_llm(graph=graph, llm=llm, exclude_types=["Concept"], verbose=True)
+
+# Invoke the chain with the input provided
+result = graph_qa_chain.invoke({"query": "Who was Marie Curie married to?"})
+print(f"Final answer: {result['result']}")
+
+
+
+
+Node properties:
+Document {id: STRING, source: STRING, text: STRING}
+Person {id: STRING}
+Award {id: STRING}
+Concept {id: STRING}
+Element {id: STRING}
+Relationship properties:
+
+The relationships:
+(:Document)-[:MENTIONS]->(:Element)
+(:Document)-[:MENTIONS]->(:Award)
+(:Document)-[:MENTIONS]->(:Person)
+(:Document)-[:MENTIONS]->(:Concept)
+(:Person)-[:EXPLANATION_FOR]->(:Concept)
+(:Person)-[:KNOWN_FOR]->(:Concept)
+(:Person)-[:AWARDED]->(:Award)
+(:Person)-[:DISCOVERED]->(:Element)
+(:Person)-[:SPOUSE]->(:Person)
+(:Person)-[:COLLABORATOR]->(:Person)
+
+<script.py> output:
+    
+    
+    [1m> Entering new GraphCypherQAChain chain...[0m
+    Generated Cypher:
+    [32;1m[1;3mMATCH (p:Person {id: 'Marie Curie'})-[:SPOUSE]->(spouse:Person) RETURN spouse.id[0m
+    Full Context:
+    [32;1m[1;3m[{'spouse.id': 'Pierre Curie'}][0m
+    
+    [1m> Finished chain.[0m
+    Final answer: Marie Curie was married to Pierre Curie.
