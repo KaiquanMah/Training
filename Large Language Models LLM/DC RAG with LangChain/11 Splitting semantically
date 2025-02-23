@@ -1,0 +1,38 @@
+Splitting semantically
+All of the splitting strategies you've used up to this point have the same drawback: the split doesn't consider the context of the surrounding text, so context can easily be lost during splitting.
+In this exercise, you'll create and apply a semantic text splitter, which is a cutting-edge experimental method for splitting text based on semantic meaning. When the splitter detects that the meaning of the text has deviated past a certain threshold, a split will be performed.
+
+
+Instantiate the 'text-embedding-3-small' embedding model from OpenAI.
+Create a semantic text splitter that uses vector gradients to determine semantic similarity and uses 0.8 as the threshold at which to split.
+Split the document using the semantic splitter.
+
+# Instantiate an OpenAI embeddings model
+embedding_model = OpenAIEmbeddings(api_key="<OPENAI_API_TOKEN>", model='text-embedding-3-small')
+
+# Create the semantic text splitter with desired parameters
+semantic_splitter = SemanticChunker(
+    embeddings=embedding_model, breakpoint_threshold_type="gradient", breakpoint_threshold_amount=0.8
+)
+
+# Split the document
+chunks = semantic_splitter.split_documents(document)
+print(chunks[0])
+
+
+
+
+<script.py> output:
+    page_content='Retrieval-Augmented Generation for
+    Knowledge-Intensive NLP Tasks
+    Patrick Lewis†‡, Ethan Perez⋆,
+    Aleksandra Piktus†, Fabio Petroni†, Vladimir Karpukhin†, Naman Goyal†, Heinrich Küttler†,
+    Mike Lewis†, Wen-tau Yih†, Tim Rocktäschel†‡, Sebastian Riedel†‡, Douwe Kiela†
+    †Facebook AI Research; ‡University College London; ⋆New York University;
+    plewis@fb.com
+    Abstract
+    Large pre-trained language models have been shown to store factual knowledge
+    in their parameters, and achieve state-of-the-art results when ﬁne-tuned on down-
+    stream NLP tasks.' metadata={'source': 'rag_paper.pdf', 'page': 0}
+
+
