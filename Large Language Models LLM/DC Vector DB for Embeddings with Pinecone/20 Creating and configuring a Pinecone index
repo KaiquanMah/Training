@@ -1,0 +1,49 @@
+Creating and configuring a Pinecone index
+To kickstart your semantic search application, you'll create and configure a new Pinecone index named 'pinecone-datacamp'. You'll use this in subsequent exercises to host Wikipedia articles from the SQuAD dataset.
+
+If you accidentally create a valid index that doesn't meet the specifications detailed in the instructions, you'll need to add the following code before your .create_index() code:
+pc.delete_index('pinecone-datacamp')
+
+
+Configure the Pinecone client with your API key.
+Create a Pinecone index called 'pinecone-datacamp' with dimensionality of 1536.
+Connect to the newly created index and view its statistics.
+
+# Initialize the Pinecone client with your API key
+pc = Pinecone(api_key="apikey")
+
+# Create Pinecone index
+pc.create_index(
+    name='pinecone-datacamp', 
+    dimension=1536,
+    spec=ServerlessSpec(cloud='aws', region='us-east-1')
+)
+
+# Connect to index and print the index statistics
+index = pc.Index('pinecone-datacamp')
+print(pc.list_indexes())
+
+
+
+<script.py> output:
+    {'indexes': [{'deletion_protection': 'disabled',
+                  'dimension': 1536,
+                  'host': 'pinecone-datacamp-6yhilyo.svc.aped-4627-b74a.pinecone.io',
+                  'metric': 'cosine',
+                  'name': 'pinecone-datacamp',
+                  'spec': {'serverless': {'cloud': 'aws', 'region': 'us-east-1'}},
+                  'status': {'ready': True, 'state': 'Ready'}},
+                 {'deletion_protection': 'disabled',
+                  'dimension': 1536,
+                  'host': 'datacamp-index-6yhilyo.svc.aped-4627-b74a.pinecone.io',
+                  'metric': 'cosine',
+                  'name': 'datacamp-index',
+                  'spec': {'serverless': {'cloud': 'aws', 'region': 'us-east-1'}},
+                  'status': {'ready': True, 'state': 'Ready'}},
+                 {'deletion_protection': 'disabled',
+                  'dimension': 1536,
+                  'host': 'dotproduct-index-6yhilyo.svc.aped-4627-b74a.pinecone.io',
+                  'metric': 'dotproduct',
+                  'name': 'dotproduct-index',
+                  'spec': {'serverless': {'cloud': 'aws', 'region': 'us-east-1'}},
+                  'status': {'ready': True, 'state': 'Ready'}}]}
