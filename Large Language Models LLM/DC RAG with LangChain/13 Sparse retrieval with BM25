@@ -1,0 +1,31 @@
+Sparse retrieval with BM25
+Time to try out a sparse retrieval implementation! You'll create a BM25 retriever to ask questions about an academic paper on RAG, which has already been split into chunks called chunks. An OpenAI chat model and prompt have also been defined as llm and prompt, respectively. You can view the prompt provided by printing it in the console.
+
+
+Create a BM25 sparse retriever from the documents stored in chunks; configure it to return 5 documents in retrieval.
+Create an LCEL retrieval chain to integrate the BM25 retriever with the llm and prompt provided.
+
+
+# Create a BM25 retriever from chunks
+retriever = BM25Retriever.from_documents(documents=chunks,k=5
+)
+
+# Create the LCEL retrieval chain
+chain = ({"context": retriever, "question": RunnablePassthrough()}
+         | prompt
+         | llm
+         | StrOutputParser()
+)
+
+print(f'prompt: {prompt}')
+print(chain.invoke("What are knowledge-intensive tasks?"))
+
+
+
+<script.py> output:
+    prompt: input_variables=['context', 'question'] input_types={} partial_variables={} messages=[HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['context', 'question'], input_types={}, partial_variables={}, template="\nUse the only the context provided to answer the following question. If you don't know the answer, reply that you are unsure.\nContext: {context}\nQuestion: {question}\n"), additional_kwargs={})]
+    Knowledge-intensive tasks are tasks that require a significant amount of knowledge or expertise, often beyond what can be reasonably managed by humans. However, the specific nature or examples of these tasks are not provided in the context given.
+
+
+
+
