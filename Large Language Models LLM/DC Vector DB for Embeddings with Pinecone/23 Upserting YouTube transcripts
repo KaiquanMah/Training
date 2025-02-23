@@ -1,0 +1,75 @@
+Upserting YouTube transcripts
+In this following exercises, you'll create a chatbot that can answer questions about YouTube videos by ingesting video transcripts and additional metadata into your 'pinecone-datacamp' index.
+
+To start, you'll prepare data from the youtube_rag_data.csv file and upsert the vectors with all of their metadata into the 'pinecone-datacamp' index. The data is provided in the DataFrame youtube_df.
+https://assets.datacamp.com/production/repositories/6574/datasets/19867f01bd9ec4120f05018604da13a0aeb32cfa/youtube_rag_data_small.csv
+
+=====
+Here's an example transcript from the youtube_df DataFrame:
+id: 
+35Pdoyi6ZoQ-t0.0
+
+title:
+Training and Testing an Italian BERT - Transformers From Scratch #4
+
+text: 
+Hi, welcome to the video. So this is the fourth video in a Transformers from Scratch 
+mini series. So if you haven't been following along, we've essentially covered what 
+you can see on the screen. So we got some data. We built a tokenizer with it...
+
+url: 
+https://youtu.be/35Pdoyi6ZoQ
+
+published: 
+01-01-2024
+
+=====
+
+
+Initialize the Pinecone client with your API key (the OpenAI client is available as client).
+Extract the 'id', 'text', 'title', 'url', and 'published' metadata from each row.
+Encode texts using 'text-embedding-3-small' from OpenAI.
+Upsert the vectors and metadatas to a namespace called 'youtube_rag_dataset'.
+
+
+# Initialize the Pinecone client
+pc = Pinecone(api_key="apikey")
+index = pc.Index('pinecone-datacamp')
+
+batch_limit = 100
+
+for batch in np.array_split(youtube_df, len(youtube_df) / batch_limit):
+    # Extract the metadata from each row
+    metadatas = [{
+      "text_id": row['id'],
+      "text": row['text'],
+      "title": row['title'],
+      "url": row['url'],
+      "published": row['published']} for _, row in batch.iterrows()]
+    texts = batch['text'].tolist()
+    
+    ids = [str(uuid4()) for _ in range(len(texts))]
+    
+    # Encode texts using OpenAI
+    response = client.embeddings.create(input=texts, model="text-embedding-3-small")
+    embeds = [np.array(x.embedding) for x in response.data]
+    
+    # Upsert vectors to the correct namespace
+    index.upsert(vectors=zip(ids, embeds, metadatas), namespace='youtube_rag_dataset')
+    
+print(index.describe_index_stats())
+
+
+
+<script.py> output:
+    {'dimension': 1536,
+     'index_fullness': 0.0,
+     'namespaces': {'squad_dataset': {'vector_count': 201}},
+     'total_vector_count': 201}
+
+
+     
+
+
+
+
