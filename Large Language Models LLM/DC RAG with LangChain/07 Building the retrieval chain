@@ -1,0 +1,98 @@
+Building the retrieval chain
+Now for the finale of the chapter! You'll create a retrieval chain using LangChain's Expression Language (LCEL). This will combine the vector store containing your embedded document chunks from the RAG paper you loaded earlier, a prompt template, and an LLM so you can begin talking to your documents.
+
+Here's a reminder of the prompt_template you created in the previous exercise, and which is available for you to use:
+Use the only the context provided to answer the following question. If you don't know the answer, reply that you are unsure.
+Context: {context}
+Question: {question}
+
+The vector_store of embedded document chunks that you created previously has also been loaded for you, along with all of the libraries and classes required.
+
+
+
+
+Convert the Chroma vector_store into a retriever object for use in the LCEL retrieval chain.
+Create the LCEL retrieval chain to combine the retriever, the prompt_template, the llm, and a string output parser so it can answer input questions.
+Invoke the chain on the question provided.
+
+
+
+# Convert the vector store into a retriever
+retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k":2})
+
+# Create the LCEL retrieval chain
+# chain = (
+#     {"context": context, "question": question}
+#     | prompt_template
+#     | llm
+# )
+chain = (
+    {"context": retriever, "question": RunnablePassthrough()}
+    | prompt_template
+    | llm
+    | StrOutputParser()  # Add this to parse the output as a string
+)
+
+
+
+# Invoke the chain
+print(chain.invoke("Who are the authors?"))
+
+
+
+
+
+
+
+
+
+
+WITHOUT     | StrOutputParser()
+<script.py> output:
+    content='The authors mentioned in the provided context are:\n\n1. Angela Fan\n2. Yacine Jernite\n3. Ethan Perez\n4. David Grangier\n5. Jason Weston\n6. Michael Auli\n7. Claire Gardent\n8. Chloe Braud\n9. Antoine Bordes\n10. Thibault Févry\n11. Livio Baldini Soares\n12. Nicholas FitzGerald\n13. Eunsol Choi\n14. Tom Kwiatkowski\n15. Marjan Ghazvininejad\n16. Chris Brockett\n17. Ming-Wei Chang\n18. Bill Dolan\n19. Jianfeng Gao\n20. Wentau Yih\n21. Michel Galley\n22. Peter J. Liu\n23. Mohammad Saleh\n24. Etienne Pot\n25. Ben Goodrich\n26. Ryan Sepassi\n27. Lukasz Kaiser\n28. Noam Shazeer\n29. Yury A. Malkov\n30. D. A. Yashunin\n31. Gary Marcus\n32. Luca Massarelli\n33. Fabio Petroni\n34. Aleksandra Piktus\n35. Myle Ott\n36. Tim Rocktäschel\n37. Vassilis Plachouras\n38. Fabrizio Silvestri\n39. Sebastian Riedel' additional_kwargs={'refusal': None} response_metadata={'token_usage': {'completion_tokens': 284, 'prompt_tokens': 691, 'total_tokens': 975, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_name': 'gpt-4o-mini-2024-07-18', 'system_fingerprint': 'fp_7fcd609668', 'finish_reason': 'stop', 'logprobs': None} id='run-8677d102-4e4f-438d-ba2c-45c08feefc7f-0' usage_metadata={'input_tokens': 691, 'output_tokens': 284, 'total_tokens': 975, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 0}}
+
+
+
+WITH        | StrOutputParser()
+<script.py> output:
+    The authors mentioned in the provided context are:
+    
+    1. Angela Fan
+    2. Yacine Jernite
+    3. Ethan Perez
+    4. David Grangier
+    5. Jason Weston
+    6. Michael Auli
+    7. Claire Gardent
+    8. Chloe Braud
+    9. Antoine Bordes
+    10. Thibault Févry
+    11. Livio Baldini Soares
+    12. Nicholas FitzGerald
+    13. Eunsol Choi
+    14. Tom Kwiatkowski
+    15. Marjan Ghazvininejad
+    16. Chris Brockett
+    17. Ming-Wei Chang
+    18. Bill Dolan
+    19. Jianfeng Gao
+    20. Wentau Yih
+    21. Michel Galley
+    22. Peter J. Liu
+    23. Mohammad Saleh
+    24. Etienne Pot
+    25. Ben Goodrich
+    26. Ryan Sepassi
+    27. Lukasz Kaiser
+    28. Noam Shazeer
+    29. Yury A. Malkov
+    30. D. A. Yashunin
+    31. Gary Marcus
+    32. Luca Massarelli
+    33. Fabio Petroni
+    34. Aleksandra Piktus
+    35. Myle Ott
+    36. Tim Rocktäschel
+    37. Vassilis Plachouras
+    38. Fabrizio Silvestri
+    39. Sebastian Riedel
