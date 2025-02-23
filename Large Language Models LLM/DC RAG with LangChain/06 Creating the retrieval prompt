@@ -1,0 +1,43 @@
+Creating the retrieval prompt
+A key piece of any RAG implementation is the retrieval prompt. In this exercise, you'll create a chat prompt template for your retrieval chain and test that the LLM is able to respond using only the context provided.
+An llm has already been defined for you to use.
+
+
+Convert the string prompt into a reusable chat prompt template.
+Create an LCEL chain to integrate the prompt template with the llm provided.
+Invoke the chain on the inputs provided to see if you model can respond using only the context provided.
+
+
+prompt = """
+Use the only the context provided to answer the following question. If you don't know the answer, reply that you are unsure.
+Context: {context}
+Question: {question}
+"""
+
+# Convert the string into a chat prompt template
+prompt_template = ChatPromptTemplate.from_template(prompt)
+
+# Create an LCEL chain to test the prompt
+# chain = ({"context": retriever,
+#          "question": RunnablePassthrough()} 
+#          | prompt_template
+#          | llm
+#          | StrOutputParser()
+#         )
+chain = (prompt_template
+         | llm
+        )
+
+
+# Invoke the chain on the inputs provided
+print(chain.invoke({"context": "DataCamp's RAG course was created by Meri Nova and James Chapman!", "question": "Who created DataCamp's RAG course?"}))
+
+
+<script.py> output:
+    content="DataCamp's RAG course was created by Meri Nova and James Chapman." additional_kwargs={'refusal': None} response_metadata={'token_usage': {'completion_tokens': 17, 'prompt_tokens': 62, 'total_tokens': 79, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 
+'model_name': 'gpt-4o-mini-2024-07-18', 'system_fingerprint': 'fp_7fcd609668', 'finish_reason': 'stop', 'logprobs': None} id='run-cc9c9853-09e3-4bd1-86ae-d94ce8ca96bc-0' usage_metadata={'input_tokens': 62, 'output_tokens': 17, 'total_tokens': 79, 'input_token_details': {'audio': 0, 'cache_read': 0}, 'output_token_details': {'audio': 0, 'reasoning': 0}}
+
+
+
+
+
