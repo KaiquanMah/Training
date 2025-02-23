@@ -1,0 +1,49 @@
+Splitting Python files
+Although text and code files contain the same characters, code files contain structures beyond natural language. To retain this code-specific context during document splitting, you should program the splitter to first try to split on the most common code structure. Fortunately, LangChain provides functionality to do just that!
+All of the necessary classes have been imported for you, including Language from langchain_text_splitters.
+
+
+Create a recursive character splitter that will split on common Python code structures.
+Split the python_data document loader into chunks.
+
+
+
+
+# Create a Python-aware recursive character splitter
+python_splitter = RecursiveCharacterTextSplitter.from_language(
+    language=Language.PYTHON, chunk_size=300, chunk_overlap=100
+)
+
+# Split the Python content into chunks
+chunks = python_splitter.split_documents(python_data)
+
+for i, chunk in enumerate(chunks[:3]):
+    print(f"Chunk {i+1}:\n{chunk.page_content}\n")
+
+
+<script.py> output:
+    Chunk 1:
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from langchain_chroma import Chroma
+    from langchain_openai import ChatOpenAI
+    from langchain_huggingface import HuggingFaceEmbeddings
+    
+    Chunk 2:
+    from langchain_openai import ChatOpenAI
+    from langchain_huggingface import HuggingFaceEmbeddings
+    from langchain_community.document_loaders import PyPDFLoader
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain_core.runnables import RunnablePassthrough
+    
+    Chunk 3:
+    from langchain_core.runnables import RunnablePassthrough
+    from langchain_core.output_parsers import StrOutputParser
+    import shutil
+    import getpass
+    import os
+
+
+
