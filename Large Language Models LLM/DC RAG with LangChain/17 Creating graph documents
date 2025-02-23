@@ -1,0 +1,31 @@
+Creating graph documents
+You've been provided with a document called famous_scientists containing a paragraph of text about famous scientists from the 20th century. In this exercise, you'll transform this unstructured text data into structured graph documents using LLMs!
+
+
+Define an OpenAI chat LLM that will produce maximally deterministic responses.
+Instantiate an LLM graph transformer for converting LangChain documents into graph documents.
+Convert the text documents (docs) to graph documents using llm_transformer.
+
+
+# Define the LLM
+llm = ChatOpenAI(api_key="<OPENAI_API_TOKEN>", model="gpt-4o-mini", temperature=0)
+
+# Instantiate the LLM graph transformer
+llm_transformer = LLMGraphTransformer(llm=llm)
+
+# Convert the text documents to graph documents
+graph_documents = llm_transformer.convert_to_graph_documents(docs)
+print(f"Derived Nodes:\n{graph_documents[0].nodes}\n")
+print(f"Derived Edges:\n{graph_documents[0].relationships}")
+
+
+<script.py> output:
+    Derived Nodes:
+    [Node(id='Albert Einstein', type='Person', properties={}), Node(id='Marie Curie', type='Person', properties={}), Node(id='Nobel Prize In Physics', type='Award', properties={}), Node(id='Nobel Prize', type='Award', properties={}), Node(id='Theory Of Relativity', type='Concept', properties={}), Node(id='Photoelectric Effect', type='Concept', properties={}), Node(id='Radioactivity', type='Concept', properties={})]
+    
+    Derived Edges:
+    [Relationship(source=Node(id='Albert Einstein', type='Person', properties={}), target=Node(id='Theory Of Relativity', type='Concept', properties={}), type='KNOWN_FOR', properties={}), Relationship(source=Node(id='Albert Einstein', type='Person', properties={}), target=Node(id='Nobel Prize In Physics', type='Award', properties={}), type='AWARDED', properties={}), Relationship(source=Node(id='Albert Einstein', type='Person', properties={}), target=Node(id='Photoelectric Effect', type='Concept', properties={}), type='EXPLANATION_FOR', properties={}), Relationship(source=Node(id='Marie Curie', type='Person', properties={}), target=Node(id='Nobel Prize', type='Award', properties={}), type='AWARDED', properties={}), Relationship(source=Node(id='Marie Curie', type='Person', properties={}), target=Node(id='Radioactivity', type='Concept', properties={}), type='KNOWN_FOR', properties={})]
+
+
+
+
