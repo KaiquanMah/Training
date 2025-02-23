@@ -1,0 +1,117 @@
+Creating a Cypher few-shot prompt
+The final technique you'll utilize to improve the reliability of the generated Cypher is providing a few-shot prompt. Few-shot prompts are a great way of steering a model toward a desired output without needing to fine-tune it on a large dataset of examples.
+A set of examples tailored to this particular use case is available as examples; feel free to print it in the shell to view its contents. You'll use these to create a few-shot prompt for the Cypher generation process. The graph you created before is still available as graph.
+
+
+
+Create an example prompt template from the string provided.
+Use the example_prompt, examples, and prefix and suffix provided to create a few-shot prompt.
+
+# Create an example prompt template
+example_prompt = PromptTemplate.from_template(
+    "User input: {question}\nCypher query: {query}"
+)
+
+# Create the few-shot prompt template
+cypher_prompt = FewShotPromptTemplate(
+    examples=examples,
+    example_prompt=example_prompt,
+    prefix="You are a Neo4j expert. Given an input question, create a syntactically correct Cypher query to run.\n\nHere is the schema information\n{schema}.\n\nBelow are a number of examples of questions and their corresponding Cypher queries.",
+    suffix="User input: {question}\nCypher query: ",
+    input_variables=["question"]
+)
+
+
+
+
+======
+
+
+
+Create the graph Cypher QA chain, replacing the default Cypher prompt with the few-shot prompt template; set verbose=True and validate the Cypher.
+Invoke the graph_qa_chain with the input provided.
+
+# Create an example prompt template
+example_prompt = PromptTemplate.from_template(
+    "User input: {question}\nCypher query: {query}"
+)
+
+# Create the few-shot prompt template
+cypher_prompt = FewShotPromptTemplate(
+    examples=examples,
+    example_prompt=example_prompt,
+    prefix="You are a Neo4j expert. Given an input question, create a syntactically correct Cypher query to run.\n\nHere is the schema information\n{schema}.\n\nBelow are a number of examples of questions and their corresponding Cypher queries.",
+    suffix="User input: {question}\nCypher query: ",
+    input_variables=["question"]
+)
+
+# Create the graph Cypher QA chain
+graph_qa_chain = GraphCypherQAChain.from_llm(
+    graph=graph, llm=llm, cypher_prompt=cypher_prompt,verbose=True, validate_cypher=True
+)
+
+# Invoke the chain with the input provided
+result = graph_qa_chain.invoke({"query": "Which scientist proposed the Theory Of Relativity?"})
+print(f"Final answer: {result['result']}")
+
+
+
+
+
+
+Node properties:
+Document {id: STRING, source: STRING, text: STRING}
+Person {id: STRING}
+Award {id: STRING}
+Concept {id: STRING}
+Element {id: STRING}
+Relationship properties:
+
+The relationships:
+(:Document)-[:MENTIONS]->(:Element)
+(:Document)-[:MENTIONS]->(:Award)
+(:Document)-[:MENTIONS]->(:Person)
+(:Document)-[:MENTIONS]->(:Concept)
+(:Person)-[:EXPLANATION_FOR]->(:Concept)
+(:Person)-[:KNOWN_FOR]->(:Concept)
+(:Person)-[:AWARDED]->(:Award)
+(:Person)-[:DISCOVERED]->(:Element)
+(:Person)-[:SPOUSE]->(:Person)
+(:Person)-[:COLLABORATOR]->(:Person)
+Node properties:
+Document {id: STRING, source: STRING, text: STRING}
+Person {id: STRING}
+Award {id: STRING}
+Concept {id: STRING}
+Element {id: STRING}
+Relationship properties:
+
+The relationships:
+(:Document)-[:MENTIONS]->(:Element)
+(:Document)-[:MENTIONS]->(:Award)
+(:Document)-[:MENTIONS]->(:Person)
+(:Document)-[:MENTIONS]->(:Concept)
+(:Person)-[:EXPLANATION_FOR]->(:Concept)
+(:Person)-[:KNOWN_FOR]->(:Concept)
+(:Person)-[:AWARDED]->(:Award)
+(:Person)-[:DISCOVERED]->(:Element)
+(:Person)-[:SPOUSE]->(:Person)
+(:Person)-[:COLLABORATOR]->(:Person)
+
+<script.py> output:
+    
+    
+    [1m> Entering new GraphCypherQAChain chain...[0m
+    Generated Cypher:
+    [32;1m[1;3mcypher
+    MATCH (p:Person)-[:KNOWN_FOR]->(c:Concept {id: 'Theory Of Relativity'}) RETURN p
+    [0m
+    Full Context:
+    [32;1m[1;3m[{'p': {'id': 'Albert Einstein'}}][0m
+    
+    [1m> Finished chain.[0m
+    Final answer: Albert Einstein proposed the Theory of Relativity.
+
+
+Providing a few-shot prompt tailored to your specific use case can have a profound impact on the reliability of the generated Cypher query, particularly if the graph data is on a niche topic where the model may have a limited understanding.
+
