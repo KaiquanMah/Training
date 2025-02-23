@@ -1,0 +1,64 @@
+Splitting by tokens
+Splitting documents using RecursiveCharacterTextSplitter or CharacterTextSplitter is convenient, and can give you good performance in some cases, but it does have one drawback: they split using characters as base units, rather than tokens, which are processed by the model.
+In this exercise, you'll split documents using a token text splitter, so you can verify the number of tokens in each chunk to ensure that they don't exceed the model's context window. A PDF document has been loaded as document.
+tiktoken and all necessary classes have been imported for you.
+
+
+Get the encoding for gpt-4o-mini from tiktoken so you can check the number of tokens in each chunk.
+Create a text splitter to split based on the number of tokens using the GPT-4o-Mini encoding.
+Split the PDF, stored in document, into chunks using token_splitter.
+
+
+
+# Get the encoding for gpt-4o-mini
+encoding = tiktoken.encoding_for_model('gpt-4o-mini')
+
+# Create a token text splitter
+token_splitter = TokenTextSplitter(encoding_name=encoding.name, chunk_size=100, chunk_overlap=10)
+
+# Split the PDF into chunks
+# chunks = token_splitter.split_text(document)
+chunks = token_splitter.split_documents(document)
+
+
+for i, chunk in enumerate(chunks[:3]):
+    print(f"Chunk {i+1}:\nNo. tokens: {len(encoding.encode(chunk.page_content))}\n{chunk}\n")
+
+
+
+<script.py> output:
+    Chunk 1:
+    No. tokens: 100
+    page_content='Retrieval-Augmented Generation for
+    Knowledge-Intensive NLP Tasks
+    Patrick Lewis†‡, Ethan Perez⋆,
+    Aleksandra Piktus†, Fabio Petroni†, Vladimir Karpukhin†, Naman Goyal†, Heinrich Küttler†,
+    Mike Lewis†, Wen-tau Yih†, Tim Rocktäschel†‡, Sebastian Riedel†‡, Douwe Kiela†
+    †Facebook AI Research; ‡University College London;' metadata={'source': 'rag_paper.pdf', 'page': 0}
+    
+    Chunk 2:
+    No. tokens: 100
+    page_content='Facebook AI Research; ‡University College London; ⋆New York University;
+    plewis@fb.com
+    Abstract
+    Large pre-trained language models have been shown to store factual knowledge
+    in their parameters, and achieve state-of-the-art results when ﬁne-tuned on down-
+    stream NLP tasks. However, their ability to access and precisely manipulate knowl-
+    edge is still limited, and hence on knowledge-intensive tasks, their performance
+    lags behind task-speciﬁc architectures. Additionally, providing provenance' metadata={'source': 'rag_paper.pdf', 'page': 0}
+    
+    Chunk 3:
+    No. tokens: 100
+    page_content='-speciﬁc architectures. Additionally, providing provenance for their
+    decisions and updating their world knowledge remain open research problems. Pre-
+    trained models with a differentiable access mechanism to explicit non-parametric
+    memory have so far been only investigated for extractive downstream tasks. We
+    explore a general-purpose ﬁne-tuning recipe for retrieval-augmented generation
+    (RAG) — models which combine pre-trained parametric and non-parametric mem-
+    ory for language generation. We introduce RAG models' metadata={'source': 'rag_paper.pdf', 'page': 0}
+
+
+
+    
+
+    
