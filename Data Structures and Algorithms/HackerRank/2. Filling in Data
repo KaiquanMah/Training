@@ -1,0 +1,141 @@
+
+A time series of daily readings of mercury levels in a river is provided to you. In each test case, the day's highest level is missing for certain days. By analyzing the data, try to identify the missing mercury levels for those days. Each row of data contains two tab-separated values: a time-stamp and the day's highest reading. 
+There are exactly twenty rows marked missing in each input file. The missing values are marked as "Missing_1", "Missing_2", ..., "Missing_20". These missing records have been randomly dispersed in the rows of data. 
+Function Description 
+Complete the calcMissing function in the editor below. It should print 20 rows, one for each missing value, as floats. 
+Constraints 
+Mercury levels are all < 400.
+
+
+
+
+
+
+#!/bin/python3
+
+import math
+import os
+import random
+import re
+import sys
+#
+# Complete the 'calcMissing' function below.
+#
+# The function accepts STRING_ARRAY readings as parameter.
+#
+import pandas as pd
+
+
+def calcMissing(readings):
+    # Write your code here
+    timestamps = []
+    levels = []
+    missing_indices = []
+    
+    for i, reading in enumerate(readings):
+        parts = reading.strip().split('\t')  # Split by tab
+        timestamps.append(parts[0])  # First part is the timestamp
+        
+        # Check if the second part is a missing value
+        if parts[1].startswith('Missing'):
+            levels.append(None)  # Mark as missing
+            missing_indices.append(i)  # Store the index of the missing value
+        else:
+            levels.append(float(parts[1]))  # Convert to float
+    
+    # Create a DataFrame
+    df = pd.DataFrame({'timestamp': timestamps, 'level': levels})
+    
+    # Forward fill missing values
+    df['level'] = df['level'].fillna(method='ffill')
+    
+    # Extract and print the imputed values for the missing entries
+    for idx in missing_indices:
+        print(df.iloc[idx]['level'])
+    
+    
+
+if __name__ == '__main__':
+    readings_count = int(input().strip())
+
+    readings = []
+
+    for _ in range(readings_count):
+        readings_item = input()
+        readings.append(readings_item)
+
+    calcMissing(readings)
+
+
+
+
+
+
+
+
+
+Sample Case 0 
+
+Sample Input 0 
+250 
+1/3/2012 16:00:00 
+Missing_1 
+1/4/2012 16:00:00 27.47 
+1/5/2012 16:00:00 
+27.728 
+1/6/2012 16:00:00 
+28.19 
+1/9/2012 16:00:00 
+28.1 
+1/10/2012 16:00:00 28.15 
+12/13/2012 16:00:00 27.52 
+12/14/2012 16:00:00 Missing_19 
+12/17/2012 16:00:00 
+27.215 
+12/18/2012 16:00:00 
+27.63 
+12/19/2012 16:00:00 27.73 
+12/20/2012 16:00:00 
+Missing_20 
+12/21/2012 16:00:00 27.49 
+12/24/2012 13:00:00 27.25 
+12/26/2012 16:00:00 
+27.2 
+12/27/2012 16:00:00 
+27.09 
+12/28/2012 16:00:00 
+26.9 
+12/31/2012 16:00:00 
+26.77 
+
+
+
+Sample Output 0 
+26.96 
+31.98 
+32.69 
+32.41 
+32.32 
+30.5 
+29.18
+30.96 
+30.4 
+28.2 
+28.2 
+27.3 
+27.1666 
+27.58 
+26.82 
+27.13 
+27.68 
+
+Scoring 
+We will compute the mean of the magnitude of the percentage difference by comparing your expected answers with the actual mercury level high for each of the missing records (in all test cases - samples included). 
+For all missing values we calculate, d = Summation of abs((expected_value[i] -computed_value[i]) / expected_value[i]) x 100 Then we take the average of d. d = d/(number of missing values) 
+Your final score on a scale of 100 will be: 50 x 
+max(2 - d, 0) 
+That is, if the mean value of 'd' exceeds 2% (your predictions are off by 2% or more on average), you will score a zero. If your predictions are all right on target, you will score 100. 
+If your program throws an error (or an incorrect output format) for a single test case, the overall score assigned will be zero.
+
+
+
