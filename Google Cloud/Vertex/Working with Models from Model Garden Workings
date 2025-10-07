@@ -1,0 +1,96 @@
+Vertex AI notebook samples (code):
+https://github.com/GoogleCloudPlatform/vertex-ai-samples
+
+
+
+Task 2
+For the pricing calc, instead of P4 choose No accelerator
+
+Task 3
+For the DeepSeek API Service, enable both the v3.n and the R1 API services
+
+Then check whether endpoint is still being deployed or completed deploying.
+https://console.cloud.google.com/vertex-ai/online-prediction/endpoints?project=qwiklabs-asl-03-28f1b57bf3df&supportedpurview=project
+
+
+
+Then open Google Cloud Shell.
+Paste and run the following commands to configure the following environmental variables:
+```
+ENDPOINT=us-central1-aiplatform.googleapis.com
+REGION=us-central1
+PROJECT_ID="qwiklabs-asl-03-28f1b57bf3df"
+```
+
+
+
+
+Now send a prompt request by running the following curl command in the console.
+```
+curl \
+-X POST \
+-H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" https://${ENDPOINT}/v1/projects/${PROJECT_ID}/locations/${REGION}/endpoints/openapi/chat/completions \
+-d '{"model":"deepseek-ai/deepseek-r1-0528-maas", "max_tokens": 512, "stream":true, "messages":[{"role": "user", "content": "Provide a short list of the top 5 things to see in Panaji, Goa"}]}'
+```
+
+
+
+data: {"choices":[{"delta":{"content":"","reasoning_content":null,"role":"assistant","tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"<think>","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"\nOkay","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":", user","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":" wants a","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":" short","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":" list of top ","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"5 things to see","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":" in Panaji,","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":" Goa. H","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"mm, they specifically","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":" said \"short\"","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827795,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+...
+
+data: {"choices":[{"delta":{"content":":** \ud83c\udfd6","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827798,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"\ufe0f Pan","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827798,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":"aji's","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827798,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":" easily","reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":null,"index":0,"logprobs":null,"matched_stop":null}],"created":1759827798,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[{"delta":{"content":null,"reasoning_content":null,"role":null,"tool_calls":null},"finish_reason":"length","index":0,"logprobs":null,"matched_stop":null}],"created":1759827798,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":null}
+
+data: {"choices":[],"created":1759827798,"id":"U9fkaO_qEp-648APxPzrkQY","model":"deepseek-ai/deepseek-r1-0528-maas","object":"chat.completion.chunk","usage":{"completion_tokens":512,"prompt_tokens":22,"prompt_tokens_details":null,"total_tokens":534}}
+
+data: [DONE]
+
+
+
+
+
+
+
+
+Task 4 Virtual Try-on of clothes
+https://github.com/fmind/virtual-try-on
+
+
+
+
+Task 5 Check GCP has deployed the Flux model to the endpoint
+Endpoint ID          6885927963947171840 
+Region              us-central1
+Dedicated endpoint  6885927963947171840.us-central1-157385553049.prediction.vertexai.goog
+
+
