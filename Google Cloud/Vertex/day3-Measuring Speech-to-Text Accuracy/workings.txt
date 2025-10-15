@@ -1,0 +1,155 @@
+- Define what speech quality is and how to measure it.
+- Measure the quality of the transcription.
+
+
+
+
+ASR quality concepts
+The following are some key concepts and steps involved in evaluating the quality and accuracy of Automated Speech Recognition (ASR) systems.
+
+Define speech accuracy
+Although speech accuracy can be measured in many ways, the industry standard method is word error rate (WER). WER measures the percentage of incorrect transcriptions in an entire set. A lower WER indicates a more accurate system.
+
+The ground truth is the 100% accurate (typically human) transcription you compare a Speech-to-Text or hypothesis transcript against to measure the accuracy.
+
+
+
+Word Error Rate (WER)
+Word error rate is the combination of three types of transcription errors which can occur:
+Insertion Error - Word in the hypothesis transcript that is not in the ground truth.
+Substitution errors - Word in both the hypothesis and the ground truth, but not transcribed correctly.
+Deletion errors - Word is missing from the hypothesis but present in the ground truth.
+
+The formula below calculates WER:
+
+I: Number of insertion errors
+S: Number of substitution errors
+D: Number of deletion errors
+N: Total number of words in the ground truth transcript
+WER = (I+S+D)/N
+You add the total number of each error (S plus I plus D), and then divide that by the total number of words (N) in the ground truth transcript to find the WER. In situations with very low accuracy, it's possible that the WER can be greater than 100%.
+
+
+
+
+Other metrics
+Other metrics are useful for tracking things like readability or measuring how many of your most important terms were transcribed correctly. Examples are:
+- Jaccard Index - Measures the SIMILARITY of the hypothesis and ground truth (or a subset of the ground truth).
+- F1 Score - Measures precision vs recall on a dataset. This is useful when tuning speech systems towards SPECIFIC TERMS to ensure good recall without sacrificing too much precision.
+
+
+
+
+
+
+
+How to measure speech accuracy
+Now that you you're familiar with accuracy metrics, the following provides generic steps to follow when measuring accuracy on your own audio transcript.
+Note: In this lab a sample audio files of about 10 min is provided with associated ground truth. The steps below are not necessary to complete this lab, but are necessary to measure quality on your own data.
+
+
+1 Gather test AUDIO files
+You should gather a representative sample of the audio files for which you want to measure quality. This sample should be random and as CLOSE to the TARGET ENVIRONMENT as possible. For example, to transcribe conversations from a call center to aid in quality assurance, you would randomly select a few actual calls recorded on the SAME EQUIPMENT that your production audio would come through, not recorded on your cell phone or computer microphone.
+
+You need at least 30 min of audio to get A STATISTICALLY SIGNIFICANT accuracy metric. Using between 30 min and 3 hours of audio is recommended. This lab provides the audio.
+
+
+
+2 Get GROUND TRUTH transcriptions
+Next you need an accurate transcription of the audio. This usually involves a SINGLE or DOUBLE PASS of a HUMAN TRANSCRIPTION of the target audio. The goal is a 100% accurate transcription to measure against the automated results.
+
+It’s important when doing this to match the transcription conventions of your target ASR system as closely as possible. For example, ensure that punctuation, numbers, and capitalization are consistent. This lab provides the ground truth.
+
+3 Get the MACHINE transcription
+Send the audio to the Google Speech-to-Text API and get your hypothesis transcription. You can do this using one of Google Cloud’s many libraries or command line tools. This lab provides the code to do this.
+
+4 Compute the WER
+Now you would count the insertions, substitutions, deletions, and total words using the ground truth and the machine transcription.
+This lab uses code, created by Google, to normalize output and calculate the WER.
+https://cdn.qwiklabs.com/V971MvEnRQouGXnVr1t94cwWLbBTrF46QY98o6xfE2I%3D
+
+
+
+
+
+
+
+
+
+
+============================================
+
+
+Task 1. Create a Vertex AI Workbench instance
+
+This lab has curated and created a focused dataset based on public domain books and audio from the LibriSpeech project. This lab also provides all the code you need to measure the accuracy of Cloud Speech-to-Text API’s accuracy on this dataset.
+
+
+Vertex ai > dashboard > enable all APIs
+vertex ai > workbench > create instance
+Name: lab-workbench
+Region: Set the region to us-east1
+Zone: Set the zone to us-east1-b
+
+open jupyterlab
+>>terminal
+gsutil cp gs://spls/gsp758/notebook/measuring-accuracy.ipynb .
+gsutil cp gs://spls/gsp758/notebook/simple_wer_v2.py .
+
+
+
+
+
+Perform the following tasks to play audio files in an Incognito window
+Within Chrome click the 3 dots > Settings.
+In the Search Settings type Incognito.
+In the results, click Third-party cookies.
+Go to Allowed to use third-party cookies.
+Click Add.
+Copy the JUPYTERLAB domain, do not include https.
+
+It should be something like:
+[YOUR_NOTEBOOK_ID].notebooks.googleusercontent.com
+eg
+orig URL
+https://70d62192cf5ffecd-dot-us-east1.notebooks.googleusercontent.com/lab/tree/measuring-accuracy.ipynb
+relevant portion
+70d62192cf5ffecd-dot-us-east1.notebooks.googleusercontent.com
+
+
+Check Current incognito session only, and then click add.
+You can now continue to the notebook.
+Open the measuring-accuracy.ipynb notebook to follow the instructions inside to compute the WER on the provided dataset.
+
+
+
+============================================
+
+
+
+Task 2. Gather audio files and the ground truth
+In this task, you gather audio files and ground truth. Run the Gather Audio Files and Ground Truth section of the notebook.
+
+Example audio (without background noise)
+https://storage.googleapis.com/spls/gsp758/clean/1-130732-0000.wav
+Example audio with background noise
+https://storage.googleapis.com/spls/gsp758/noisy/1-130732-0000.wav
+
+
+
+============================================
+
+Task 3. Get the machine transcript
+In this task, you import the Speech client library and call the Recognize method for each audio file. Run the Get the Machine Transcript section of the notebook.
+
+
+============================================
+
+Task 4. Compute the WER
+In this task, you add transcripts to a WER analysis object and compute the results. Run the Compute the WER section of the notebook.
+
+
+
+============================================
+
+
