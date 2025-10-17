@@ -6,11 +6,21 @@ Python 3 was first launched in 2008
 | :--- | :--- | :--- |
 | **`print`** | A **statement** (`print "Hello"`) | A **function** (`print("Hello")`) |
 | **Not Equals** | Operator could be `<>` | Operator must be **`!=`** |
-| **Long Integers** | Explicit `long` type set by suffixing `L` (e.g., `123L`). eg big_num = 1234567890123456789L | **Removed**; standard `int` handles all integer sizes. eg big_num = 1234567890123456789 |
-| **String Literal** | Defaults to byte string; Unicode specified with `u` prefix. eg s = u"Hello" | **Unicode** is the **default string type**. `u` prefix is invalid. eg s = "Hello" |
-| **Object Repr** | Used **backticks** (`` `obj` ``) operator for representation. eg my_list = [1, 2] print ``my_list`` Output: [1, 2]| Must use the **`repr()` function** (`repr(obj)`). eg my_list = [1, 2] print(repr(my_list)) Output: [1, 2] |
+| **Long Integers** | Explicit `long` type set by suffixing `L` (e.g., `123L`). `eg big_num = 1234567890123456789L` | **Removed**; standard `int` handles all integer sizes. `eg big_num = 1234567890123456789` |
+| **String Literal** | Defaults to byte string; Unicode specified with `u` prefix. eg `s = u"Hello" (unicode string)` | **Unicode** is the **default string type**. `u` prefix is invalid. eg `s = "Hello" (unicode string), s=b"abeohba" (binary string)` |
+| **Strings** | `s = "hello"` $\implies$ Array of bytes (`str`).<br>**Unicode:** Requires prefix: `u = u"hello"`. | `s = "hello"` $\implies$ Unicode string (`str`).<br>**Binary:** Requires prefix: `b = b"hello"`. |
+| **Object Repr** | Used **backticks** (`` `obj` ``) operator for representation. eg `my_list = [1, 2] print ``my_list`` Output: [1, 2]` | Must use the **`repr()` function** (`repr(obj)`). `eg my_list = [1, 2] print(repr(my_list)) Output: [1, 2]` |
 | **Division (`/`)** | Integer division between two integers returns an **integer dividend** (floor division). | Returns a **float** (true division result). Floor division uses **`//`**. |
 | **Exception Handling**| Syntax was `except Exception, ex` | Syntax changed to **`except Exception as ex`** |
+| **Keyword-Only Arguments** | Not available.<br>Args are positional by default: `def func(a, b): ...` | Enforced by `*` in signature:<br>`def func(a, *, b):`<br>Valid call: `func(1, b=2)` (so anything before `*` are positional args (a) vs anything after `*` are keyword args (b)) <br>**Invalid call:** `func(1, 2)` |
+| **Dictionary Updates** | To merge: `d1.update(d2)` | **New Operators (from 3.9):**<br>**Merge:** `d3 = d1 \| d2`<br>**Update:** `d1 \|= d2` |
+| **Dictionary Performance** | Less memory efficient. | Re-implemented for up to **25% more memory efficient** (from 3.6). |
+| **`OrderedDict`** | Available in the `collections` module. **Standard `dict`** does **not** maintain insertion order. | Available in the `collections` module. **Standard `dict`** maintains insertion order by default (from 3.7). **OrderedDict** (added in 3.1) allows FIFO or LIFO order |
+| **`venv` Module** | Used external tools like `virtualenv`. | **Standard Library:**<br>`import venv`<br>`venv.create('myenv')` |
+| **`statistics` Module** | Had to use external libraries (e.g., NumPy). | **Standard Library:**<br>`import statistics`<br>`mean = statistics.mean([1, 2, 3])` |
+| **`asyncio` Module** | Used threading/multiprocessing or other libraries. | **Built-in Async:**<br>`import asyncio`<br>`async def main(): ...`<br>`await ...` |
+| **`concurrent.futures` Module** | Not available. | Simplifies asynchronous execution using `Future` objects and executors (from 3.2). |
+
 
 ---
 
