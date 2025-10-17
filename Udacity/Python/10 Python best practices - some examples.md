@@ -67,22 +67,27 @@ def func(arg1,
 Good return statement example
 ```python
 def func():
+    # assign the 'final_value' to return inside each 'if statement'
     if condition1:
        final_value = 1
-    if condition2:
+    elif condition2:
        final_value = 2
+
+    # then return the 'final_value' from the fn at the end
     return final_value
 ```
 
 Bad return statement example
 ```python
 def func():
+    # here we allow return of variables inside each 'if statement'
+
     final_value = 12345
     if condition1:
        var1 = 1
        return var1
 
-    if condition2:
+    elif condition2:
        var2 = 2
        return var2
 
