@@ -1,0 +1,147 @@
+In this lab, you explore how to build a custom Question-and-Answer (Q&A) pipeline using Retrieval Augmented Generation (RAG) with Vertex AI and LangChain. The intent behind the pipeline is to enhance customer experience and provide customers with detailed, relevant answers to their queries in real-time instead of having them rely on a static FAQs page or expansive user manuals. The pipeline could eventually be integrated into the Cymbal Superstore website and the mobile app, giving customers 24/7 answers to their queries.
+
+
+This lab uses the following Google Cloud services, as well as LangChain and Google Cloud integrations for LangChain:
+Vertex AI
+Vertex AI Workbench
+Vertex Vector Search
+Gemini 2.0 Flash
+Document AI
+Ranking API
+Check Grounding API
+
+
+
+Building a robust custom (DIY) RAG system for grounding can be challenging. Vertex AI simplifies the process with a suite of flexible standalone APIs to help you create your own solutions:
+
+Document AI LAYOUT Parser: Transforms documents INTO STRUCTURED REPRESENTATIONS, making content easily accessible. Creates CONTEXT-AWARE CHUNKS for improved information retrieval in generative AI and discovery applications.
+Within the context of the Cymbal Superstore use case, this can mean parsing documents from various information sources (such as shipping and delivery policies, warranty information policies, product specification datasheets, et cetera) to extract key information that customers may need.
+
+Ranking API: Re-ranks search results based on RELEVANCE to the original query. Enhances RAG accuracy by optimizing retrieval beyond initial nearest neighbor search.
+
+Check Grounding API: Acts as a "validator" to determine whether statements or claims are supported by provided facts (essentially how grounded a given piece of text is in a given set of reference text). Enables online FLAGGING of UNGROUNDED RESPONSES and offline evaluation of generative responses.
+In other words, before presenting the answer to the customer, this API lets you validate the accuracy of the response against the retrieved customer-facing documentation to ensure reliable and trustworthy information is shared with customers.
+
+
+
+
+
+
+
+
+Architecture
+The high-level architecture of the pipeline you build in this lab is as follows:
+https://cdn.qwiklabs.com/upOZOLx6rhGeyfiOWDD99Sk5IuEJTTMb8KWO2qGShv4%3D
+
+1. Convert documents to embedding
+GCS docs
+>> Document AI Layout parser
+>> text-embedding-004 model @ vertex AI
+>> vector store
+
+2. Serving
+user
+>> submits query
+>> vector search (from vector store in step 1)
+>> retrieve top-k relevant chunks
+>> rerank chunks
+>> generate ans
+>> verify grounding on facts
+>> ans AND citations
+>> send response to user
+
+
+
+Here is a breakdown of the main phases involved:
+
+Phase 1. Data Ingestion: Ingest documents from a Cloud Storage bucket to Vertex AI Vector Search (a vector database). You parse the documents using Cloud Document AI Layout Parser and convert the raw text chunks as embeddings using the Vertex AI Embeddings API, which lets you use the chunks of information extracted from the customer-facing documentation to generate vector representations embedded in a database. The generated embeddings power semantic search using Vector search.
+https://cloud.google.com/vertex-ai/docs/vector-search/overview
+https://cloud.google.com/document-ai/docs/layout-parse-chunk
+https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings
+
+
+Phase 2. Retrieval: Retrieve information that is most relevant to a customer's question from the vector database. Re-rank the chunks using the Vertex AI Ranking API.
+https://cloud.google.com/generative-ai-app-builder/docs/ranking
+
+Phase 3. Answer generation: Use the Vertex AI Gemini API to generate a clear, concise and helpful answer that's tailored to a customer's query for the given user based on the re-ranked chunks retrieved from the vector search. The generated answer is validated with the Vertex AI Check Grounding API to dertermine how grounded the answer is to the relevant chunks retrieved.
+https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/send-multimodal-prompts
+https://cloud.google.com/generative-ai-app-builder/docs/check-grounding
+
+The notebook uses LangChain and Google Cloud with LangChain integrations to orcherate the pipeline.
+https://www.langchain.com/
+https://python.langchain.com/v0.1/docs/integrations/platforms/google/
+
+
+
+
+
+Key Vertex AI Features
+1 Vertex AI Search technology: Build custom RAG and Grounded Generation solutions using the same technology that powers Vertex AI Search.
+
+2 Granular control: Tailor your RAG system to specific use cases and offer greater control to your users.
+
+3 Seamless integration: Combine these APIs with core services like Embeddings API and Vector Search for advanced grounded AI applications.
+
+These builder APIs give you full flexibility and control on the design of your RAG application while at the same time offering accelerated time-to-market and high quality by relying on these lower-level Vertex AI APIs. You can refer to the Vertex AI APIs for building search and RAG experiences documentation to learn more.
+https://cloud.google.com/generative-ai-app-builder/docs/builder-apis
+
+Note: The final step in Task 2 starts a process that takes more than 20 minutes to complete. You might prefer to review this and other explanations while that step is running.
+
+
+
+
+
+
+
+
+Tasks
+Parse documents using Document AI and chunk them into retrievable formats.
+Generate embeddings with the Vertex AI Embeddings API.
+Store and search vector data using Vertex AI Vector Search.
+Re-rank retrieved content with the Vertex AI Ranking API.
+Generate grounded answers using Gemini 2.0 Flash.
+Validate generated answers using the Check Grounding API.
+Use LangChain to orchestrate the end-to-end RAG pipeline.
+
+https://cdn.qwiklabs.com/2EKjxx1rBEnMz5xxCsJ6KWWugqvudUcmOfrqwttqHo0%3D
+
+
+===========================
+
+
+
+Task 1. Set up Vertex AI Workbench and install dependencies
+
+Navigate to the Vertex AI > Dashboard page and click on Enable all recommended APIs.
+
+
+
+
+In the top search bar, search for Workbench, and click on the first result to open Vertex AI Workbench.
+
+Under Instances, click Open JupyterLab next to your generative-ai-jupyterlab instance. This opens JupyterLab in a new browser tab.
+
+In the new tab, under Launcher in the Notebook section, select Python 3 (ipykernel) to create a new .ipynb notebook.
+
+In the Explorer panel on the left, right-click the new notebook file, select Rename, and rename the file to rag.ipynb.
+
+
+
+
+
+
+Note: for the remaining steps of task 1 and for the remaining tasks, please refer to:
+diy_rag.ipynb
+
+
+
+==================================================
+
+
+Reflections
+- This QwikLab had issues with langchain again after the release of langchain v1.0 in September 2025, which broke the code from task 3 onwards.
+
+
+
+
+
