@@ -1,0 +1,803 @@
+GENAI069
+Deploy a RAG application with vector search in Firestore: Challenge Lab
+https://partner.skills.google/paths/2310/course_templates/1289/labs/531796
+
+
+This lab tests your ability to develop a real-world Generative AI Q&A solution using a RAG framework. You will use Firestore as a vector database and deploy a Flask app as a user interface to query a food safety knowledge base.
+
+This lab uses the following technologies and Google Cloud services:
+Vertex AI
+Vertex AI Colab Enterprise
+Vertex AI Embeddings API
+Gemini 2.0 Flash
+Cloud Firestore
+
+In this challenge lab, you will demonstrate your ability to load a text document and split it into chunks, generate embeddings for each chunk, store the text chunks and their embeddings, conduct vector search to return similar documents to a query document, complete a RAG framework by having Gemini generate a response based on a context of similar documents to a query.
+
+
+
+
+
+
+
+Your Challenge
+You work for Cymbal Shops, a chain offering prepared meals to-go in busy downtown areas.
+
+The company's employees in the New York area needs to meet the New York City Department of Health and Mental Hygiene's food safety guidelines as provided in this Food Protection Training Manual.
+https://www.nyc.gov/assets/doh/downloads/pdf/rii/fpc-manual.pdf
+
+To make it easier for them, your manager has asked you to prepare an application where employees can ask questions and a bot will return the answers based only on what is found in this document.
+
+
+Additional reading
+[2025 Jul] https://www.youtube.com/watch?v=53AsmGBymz8&t=2s
+[2025 Jun] https://github.com/NicholasAT925/RAG-app-with-vector-search-in-Firestore/blob/main/Solution.pdf
+[2024] https://github.com/saikat-rakshit-prof/GCP-L400/blob/main/Deploy%20a%20RAG%20application%20with%20vector%20search%20in%20Firestore_%20Challenge%20Lab%20L400.pdf
+
+[2025 Sep lab with walkthrough instructions] Leverage Firestore as a Vector Store https://partner.skills.google/course_templates/1322/labs/550578
+AND
+https://github.com/KaiquanMah/Training/blob/master/Google%20Cloud/Vertex/day4-Leverage%20Firestore%20as%20a%20Vector%20Store/cymbal_ingest_to_vector_database.ipynb
+
+
+
+
+
+
+
+
+NYC Food Safety Manual PDF needed for the challenge lab
+[from google cloud storage bucket] https://console.cloud.google.com/storage/browser/_details/partner-genai-bucket/genai069/nyc_food_safety_manual.pdf;tab=live_object?project=qwiklabs-gcp-01-32c593469378
+[direct url] https://ffa4d9f1968d881b2f67bb8398734a6bb4b69c405c1765e93d51fd9-apidata.googleusercontent.com/download/storage/v1/b/partner-genai-bucket/o/genai069%2Fnyc_food_safety_manual.pdf?jk=AXoa1H9GzriZMM3aN3kpEoTA5Gkr3dkCmpEdJvXzOLAMPvHiOFzBgOXPlw1_NLQHRk1uFzbjJdNtgmd4vtY3Z8Cl51wHgxao77bWZVcE3YZq8mGBpqFsZOIg8_-SIyc4Q6_nZzOjKti_DXLpJ3-kccwHybtbZY4KbnBScv9IokBOAqnvbteGYZ_XqCB1Yy9sUSkoKCJ3Ht2aHqcziqb8DO4Mp-KU72SmMMLEhHeEjed0CCmF3BmmqAQf4AmQqBwyyyhZIu9ZaI8TDJ_MIKrYIspeWKWYpEyXcMhzT9XHJcl16Dm7RUeFPMbidqv73IU0lEjONB0OY5a7FlPDruyYiYFKOsXsRKyASygpYJKPNi1j0n8_SnvhEPUAntwKdcPPWerY7sg8zHJDveCxvaWHLoOMRwdluj2RJV5yOaLUFnGoz4XgNl14P5FRTZznTldBj_pIkZ8bSM2V2xPM-1MNXDpAWEI4nbNTACsSg1HZ3uC-wkOhPHSnvA9mwjHfsedTZh3qHXlp5cA8OFVtgsc8EJ99GOBp3Jx82nH7mAOvnScdoHlRDt8dBq98eMGcTS3vkAUxDvQFvvmtaVnAchGiOb_LYeZAkGx1qD7aj30M5VF63sM94TMQlEyzL9bnqhkbZa0TmA70TN4jkmFjAETDrybmowW8fRlk7l15kDb3qrup1_tNwoKUDwoHJYBD90GnXxkoP1d6NNosOKaBi8IYoYFQYnSWoQSSLyfK1g_XyAG5C9NHH-hh9BP90y53vdrgX8V_UtxQX2Q0oBaJUrVVEy2EnTXw-nOx7ifbNcnK2aVxtTchSj6FCwlGvwhhu7CMYpn1rQd6UCYjZBIT9JWHPzunUs2ist1bDgdC4nQfzOPPamaP_TqxImAVmmAnqYX6wDA76f3FJpf_2jZ8jxaHLiKXYUXQ7qVy2Ph7R-Om_3m4ckK1GwpzgTFJc-Fr--bipyiqQwO_0ViHlWx6_VidriXcgQtekCf4o_B3PIju8Rg1Snqgh9rqzxeXuGfKPgC0zc5gZIHS4SOYu_M1782y-SW6pjmnNuuYctJ5cn4FhvT-AE5AMjZMwo7HGs3Ry-OG4kzaQPkOQ8NWdbNvdUqOHi30QISjpgbakn_vnl96y8OE77LrFv0I0X8SHdsmYn3KEibanotKR6HoGO-ZNKvSZd1ixQsCstg-FGgK6x0DSuuuKwYQII1OMOGf_p3AzIA01e4&isca=1
+[direct url2] https://www.nyc.gov/assets/doh/downloads/pdf/rii/fpc-manual.pdf
+
+
+
+
+
+
+
+===============================
+
+
+Task 1. Create a Colab Enterprise Notebook
+In this section, you will set up a Colab Enterprise notebook environment in the Google Cloud Console.
+
+In the Google Cloud Console, navigate to Vertex AI > Colab Enterprise.
+
+When prompted to enable APIs, click ENABLE.
+
+Within the Colab Enterprise panel in the console, click on Create Notebook. Rename the notebook to cymbal_ingest_to_vector_database.ipynb.
+
+Paste the following code into the top cell of the notebook and run the cell.
+```
+!pip install --quiet --upgrade google-cloud-logging google_cloud_firestore google_cloud_aiplatform langchain langchain-google-vertexai langchain_community langchain_experimental pymupdf
+```
+
+
+
+After the cell completes running, indicated by a checkmark to the left of the cell, the packages should be installed. To use them, restart the runtime.
+
+Import the following packages by running the following command:
+```
+import vertexai
+import logging
+import google.cloud.logging
+from vertexai.language_models import TextEmbeddingModel
+from vertexai.generative_models import GenerativeModel
+
+import pickle
+from IPython.display import display, Markdown
+
+from langchain_google_vertexai import VertexAIEmbeddings
+from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_experimental.text_splitter import SemanticChunker
+
+from google.cloud import firestore
+from google.cloud.firestore_v1.vector import Vector
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+```
+
+
+
+Next, initialize Vertex AI with your project-id qwiklabs-gcp-01-32c593469378 and a location of us-central1.
+
+
+Populate a variable named embedding_model with an instance of the langchain_google_vertexai class VertexAIEmbeddings. Pass it a parameter model_name set to the text embedding model version of text-embedding-005. You will use this LangChain class for your embedding model so that you can use a LangChain semantic chunker to chunk your dataset.
+
+
+https://python.langchain.com/docs/integrations/text_embedding/google_vertex_ai_palm/
+https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models#models
+
+
+
+
+
+===============================
+
+
+Task 2. Download, process and chunk data semantically
+In this section, you will prepare the NYC Food Safety Manual for Retrieval-Augmented Generation (RAG). Clean the PDF content and split it into meaningful chunks based on semantic similarity using sentence embeddings and generate numerical representations (embeddings) for each identified text chunk.
+
+# Download the New York City Department of Health and Mental Hygiene's Food Protection Training Manual. This document will serve as your Retrieval-Augmented Generation source content.
+!gcloud storage cp gs://partner-genai-bucket/genai069/nyc_food_safety_manual.pdf .
+
+
+
+
+Use the LangChain class PyMuPDFLoader to load the contents of the PDF to a variable named 'data'.
+https://python.langchain.com/v0.1/docs/modules/data_connection/document_loaders/pdf/#using-pymupdf
+
+
+The following function is provided to do some basic cleaning on artifacts found in this particular document. Create a variable called cleaned_pages that is a list of strings, with each string being a page of content cleaned by this function.
+```
+def clean_page(page):
+  return page.page_content.replace("-\n","")\
+                          .replace("\n"," ")\
+                          .replace("\x02","")\
+                          .replace("\x03","")\
+                          .replace("fo d P R O T E C T I O N  T R A I N I N G  M A N U A L","")\
+                          .replace("N E W  Y O R K  C I T Y  D E P A R T M E N T  O F  H E A L T H  &  M E N T A L  H Y G I E N E","")
+```
+
+
+
+
+
+Use LangChain's SemanticChunker with the embedding_model you created earlier to split the first five pages of cleaned_pages into text chunks. The SemanticChunker determines when to start a new chunk when it encounters a larger distance between sentence embeddings. Save the strings of page content from the resulting documents into a list of strings called chunked_content. Take a look at a few of the chunks to get familiar with the content.
+https://python.langchain.com/v0.2/docs/how_to/semantic-chunker/#create-text-splitter
+
+
+
+
+
+
+Use the embedding_model to generate embeddings of the text chunks, saving them to a list called chunked_embeddings. To do so, pass your list of chunks to the VertexAIEmbeddings class's embed_documents() method.
+https://python.langchain.com/v0.2/docs/integrations/text_embedding/google_vertex_ai_palm/
+
+
+
+
+# You should have successfully chunked & embedded a short section of the document. To get the chunks & corresponding embeddings for the full document, run the following code:
+```
+!gcloud storage cp gs://partner-genai-bucket/genai069/chunked_content.pkl .
+!gcloud storage cp gs://partner-genai-bucket/genai069/chunked_embeddings.pkl .
+
+chunked_content = pickle.load(open("chunked_content.pkl", "rb"))
+chunked_embeddings = pickle.load(open("chunked_embeddings.pkl", "rb"))
+
+# Do not delete this logging statement.
+client = google.cloud.logging.Client()
+client.setup_logging()
+log_message = f"chunked contents are: {chunked_content[0][:20]}"
+logging.info(log_message)
+```
+
+
+
+
+
+
+
+===============================
+
+
+Task 3. Prepare your vector database
+
+In this section, you will set up a Firestore database to store the processed NYC Food Safety Manual chunks and their embeddings for efficient retrieval. You'll then build a search function to find relevant information based on a user query.
+(Refer back to https://partner.skills.google/course_templates/1322/labs/550578)
+
+
+Create a Firestore database with the default name of (default) in Native Mode and leave the other settings to default.
+https://firebase.google.com/docs/firestore/manage-databases#create_a_database
+
+
+
+Next, in your Colab Enterprise Notebook populate a db variable with a Firestore Client.
+
+Use a variable called collection to create a reference to a collection named food-safety.
+
+Using a combination of your lists chunked_content and chunked_embeddings, add a document to your collection for each of your chunked documents. Each document can be assigned a random ID, but it should have a field called content to store the chunk text and a field called embedding to store a Firestore Vector() of the associated embedding.
+https://firebase.google.com/docs/firestore/vector-search#write_operation_with_a_vector_embedding
+
+
+
+
+Complete the function below to receive a query, get its embedding, and compile a context consisting of the text from the 5 documents with the most similar embeddings. This time, use the embed_query() method of the LangChain VertexAIEmbeddings embedding_model to embed the user's query.
+https://python.langchain.com/v0.2/docs/integrations/text_embedding/google_vertex_ai_palm/#embed-single-texts
+```
+def search_vector_database(query: str):
+
+  context = ""
+
+  # 1. Generate the embedding of the query
+
+  # 2. Get the 5 nearest neighbors from your collection.
+  # Call the get() method on the result of your call to
+  # find_nearest to retrieve document snapshots.
+
+  # 3. Call to_dict() on each snapshot to load its data.
+  # Combine the snapshots into a single string named context
+
+
+  return context
+```
+
+
+
+When you first run this function using the code below, it will fail, but it will provide you a gcloud command to generate a Firestore index. Run that gcloud command to create a vector index for your collection using your embedding field.
+
+Expected output:
+
+task_3_function
+https://cdn.qwiklabs.com/gwZ5mXWBe6MYkajYTPObtQcSUHflGAmBnOsJGam8S4o%3D
+
+
+# Run the command again after the index has been created.
+```
+search_vector_database("How should I store food?")
+```
+
+Ensure your response is relevant, as in the example output below.
+https://cdn.qwiklabs.com/gwZ5mXWBe6MYkajYTPObtQcSUHflGAmBnOsJGam8S4o%3D
+
+
+
+
+
+
+
+
+===============================
+
+Task 4. Deploy a Generative AI application to search your vector store
+
+
+Now that your vector database is prepared, in this section you will work on the client application to query it and return answers generated by Gemini.
+
+Activate Cloud Shell by selecting the the icon that activates cloud shell icon in the upper right of the Cloud Console.
+(or enter 'G' >> 'S')
+
+
+To set up the base application and install packages, run the following command in Cloud Shell:
+gcloud storage cp -r gs://partner-genai-bucket/genai069/gen-ai-assessment .
+cd gen-ai-assessment
+python3 -m pip install -r requirements.txt
+
+```
+student_00_396d7599ae24@cloudshell:~ (qwiklabs-gcp-01-32c593469378)$ gcloud storage cp -r gs://partner-genai-bucket/genai069/gen-ai-assessment .
+cd gen-ai-assessment
+python3 -m pip install -r requirements.txt
+Copying gs://partner-genai-bucket/genai069/gen-ai-assessment/.gitignore to file://./gen-ai-assessment/.gitignore
+Copying gs://partner-genai-bucket/genai069/gen-ai-assessment/Cheat_Sheet.txt to file://./gen-ai-assessment/Cheat_Sheet.txt
+Copying gs://partner-genai-bucket/genai069/gen-ai-assessment/Dockerfile to file://./gen-ai-assessment/Dockerfile   
+Copying gs://partner-genai-bucket/genai069/gen-ai-assessment/main.py to file://./gen-ai-assessment/main.py
+Copying gs://partner-genai-bucket/genai069/gen-ai-assessment/requirements.txt to file://./gen-ai-assessment/requirements.txt
+Copying gs://partner-genai-bucket/genai069/gen-ai-assessment/static/favicon.ico to file://./gen-ai-assessment/static/favicon.ico
+Copying gs://partner-genai-bucket/genai069/gen-ai-assessment/templates/index.html to file://./gen-ai-assessment/templates/index.html
+Copying gs://partner-genai-bucket/genai069/gen-ai-assessment/templates/layout.html to file://./gen-ai-assessment/templates/layout.html
+  Completed files 8/8 | 17.8kiB/17.8kiB                                                                            
+
+Average throughput: 237.7kiB/s
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: flask in /usr/local/lib/python3.12/dist-packages (from -r requirements.txt (line 1)) (3.1.1)
+Requirement already satisfied: Jinja2 in /usr/local/lib/python3.12/dist-packages (from -r requirements.txt (line 2)) (3.1.6)
+Collecting pytest (from -r requirements.txt (line 3))
+  Downloading pytest-8.4.2-py3-none-any.whl.metadata (7.7 kB)
+Requirement already satisfied: pyyaml in /usr/local/lib/python3.12/dist-packages (from -r requirements.txt (line 4)) (6.0.2)
+Requirement already satisfied: google-cloud-aiplatform>=1.59.0 in /usr/local/lib/python3.12/dist-packages (from -r requirements.txt (line 5)) (1.102.0)
+Requirement already satisfied: google-cloud-logging in /usr/local/lib/python3.12/dist-packages (from -r requirements.txt (line 6)) (3.12.1)
+Collecting firebase-admin (from -r requirements.txt (line 7))
+  Downloading firebase_admin-7.1.0-py3-none-any.whl.metadata (1.7 kB)
+Collecting langchain-google-vertexai>=1.0.7 (from -r requirements.txt (line 8))
+  Downloading langchain_google_vertexai-3.0.0-py3-none-any.whl.metadata (5.2 kB)
+Requirement already satisfied: blinker>=1.9.0 in /usr/local/lib/python3.12/dist-packages (from flask->-r requirements.txt (line 1)) (1.9.0)
+Requirement already satisfied: click>=8.1.3 in /usr/local/lib/python3.12/dist-packages (from flask->-r requirements.txt (line 1)) (8.2.1)
+Requirement already satisfied: itsdangerous>=2.2.0 in /usr/local/lib/python3.12/dist-packages (from flask->-r requirements.txt (line 1)) (2.2.0)
+Requirement already satisfied: markupsafe>=2.1.1 in /usr/local/lib/python3.12/dist-packages (from flask->-r requirements.txt (line 1)) (3.0.2)
+Requirement already satisfied: werkzeug>=3.1.0 in /usr/local/lib/python3.12/dist-packages (from flask->-r requirements.txt (line 1)) (3.1.3)
+Collecting iniconfig>=1 (from pytest->-r requirements.txt (line 3))
+  Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Requirement already satisfied: packaging>=20 in /usr/local/lib/python3.12/dist-packages (from pytest->-r requirements.txt (line 3)) (25.0)
+Requirement already satisfied: pluggy<2,>=1.5 in /usr/local/lib/python3.12/dist-packages (from pytest->-r requirements.txt (line 3)) (1.6.0)
+Requirement already satisfied: pygments>=2.7.2 in /usr/local/lib/python3.12/dist-packages (from pytest->-r requirements.txt (line 3)) (2.19.2)
+Requirement already satisfied: google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,<3.0.0,>=1.34.1 in /usr/local/lib/python3.12/dist-packages (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,<3.0.0,>=1.34.1->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (2.25.1)
+Requirement already satisfied: google-auth<3.0.0,>=2.14.1 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (2.40.3)
+Requirement already satisfied: proto-plus<2.0.0,>=1.22.3 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (1.26.1)
+Requirement already satisfied: protobuf!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<7.0.0,>=3.20.2 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (5.29.5)
+Requirement already satisfied: google-cloud-storage<3.0.0,>=1.32.0 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (2.19.0)
+Requirement already satisfied: google-cloud-bigquery!=3.20.0,<4.0.0,>=1.15.0 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (3.34.0)
+Requirement already satisfied: google-cloud-resource-manager<3.0.0,>=1.3.3 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (1.14.2)
+Requirement already satisfied: shapely<3.0.0 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (2.1.1)
+Requirement already satisfied: google-genai<2.0.0,>=1.0.0 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (1.25.0)
+Requirement already satisfied: pydantic<3 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (2.11.7)
+Requirement already satisfied: typing_extensions in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (4.14.1)
+Requirement already satisfied: docstring_parser<1 in /usr/local/lib/python3.12/dist-packages (from google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (0.16)
+Requirement already satisfied: google-cloud-appengine-logging<2.0.0,>=0.1.3 in /usr/local/lib/python3.12/dist-packages (from google-cloud-logging->-r requirements.txt (line 6)) (1.6.2)
+Requirement already satisfied: google-cloud-audit-log<1.0.0,>=0.3.1 in /usr/local/lib/python3.12/dist-packages (from google-cloud-logging->-r requirements.txt (line 6)) (0.3.2)
+Requirement already satisfied: google-cloud-core<3.0.0,>=2.0.0 in /usr/local/lib/python3.12/dist-packages (from google-cloud-logging->-r requirements.txt (line 6)) (2.4.3)
+Requirement already satisfied: grpc-google-iam-v1<1.0.0,>=0.12.4 in /usr/local/lib/python3.12/dist-packages (from google-cloud-logging->-r requirements.txt (line 6)) (0.14.2)
+Requirement already satisfied: opentelemetry-api>=1.9.0 in /usr/local/lib/python3.12/dist-packages (from google-cloud-logging->-r requirements.txt (line 6)) (1.34.1)
+Collecting cachecontrol>=0.14.3 (from firebase-admin->-r requirements.txt (line 7))
+  Downloading cachecontrol-0.14.3-py3-none-any.whl.metadata (3.1 kB)
+Collecting google-cloud-firestore>=2.21.0 (from firebase-admin->-r requirements.txt (line 7))
+  Downloading google_cloud_firestore-2.21.0-py3-none-any.whl.metadata (9.9 kB)
+INFO: pip is looking at multiple versions of firebase-admin to determine which version is compatible with other requirements. This could take a while.
+Collecting firebase-admin (from -r requirements.txt (line 7))
+  Downloading firebase_admin-7.0.0-py3-none-any.whl.metadata (1.7 kB)
+  Downloading firebase_admin-6.9.0-py3-none-any.whl.metadata (1.5 kB)
+Requirement already satisfied: google-api-python-client>=1.7.8 in /usr/local/lib/python3.12/dist-packages (from firebase-admin->-r requirements.txt (line 7)) (2.176.0)
+Requirement already satisfied: pyjwt>=2.5.0 in /usr/lib/python3/dist-packages (from pyjwt[crypto]>=2.5.0->firebase-admin->-r requirements.txt (line 7)) (2.7.0)
+Requirement already satisfied: httpx==0.28.1 in /usr/local/lib/python3.12/dist-packages (from httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7)) (0.28.1)
+Requirement already satisfied: anyio in /usr/local/lib/python3.12/dist-packages (from httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7)) (4.9.0)
+Requirement already satisfied: certifi in /usr/local/lib/python3.12/dist-packages (from httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7)) (2025.7.9)
+Requirement already satisfied: httpcore==1.* in /usr/local/lib/python3.12/dist-packages (from httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7)) (1.0.9)
+Requirement already satisfied: idna in /usr/local/lib/python3.12/dist-packages (from httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7)) (3.10)
+Collecting h2<5,>=3 (from httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7))
+  Downloading h2-4.3.0-py3-none-any.whl.metadata (5.1 kB)
+Requirement already satisfied: h11>=0.16 in /usr/local/lib/python3.12/dist-packages (from httpcore==1.*->httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7)) (0.16.0)
+Collecting langchain-core<2.0.0,>=1.0.0 (from langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading langchain_core-1.0.0-py3-none-any.whl.metadata (3.4 kB)
+Collecting httpx-sse<1.0.0,>=0.4.0 (from langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading httpx_sse-0.4.3-py3-none-any.whl.metadata (9.7 kB)
+Collecting validators<1.0.0,>=0.22.0 (from langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading validators-0.35.0-py3-none-any.whl.metadata (3.9 kB)
+Collecting bottleneck<2.0.0,>=1.4.0 (from langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading bottleneck-1.6.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.2 kB)
+Collecting numexpr<3.0.0,>=2.8.6 (from langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading numexpr-2.14.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.0 kB)
+Collecting pyarrow<22.0.0,>=19.0.1 (from langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading pyarrow-21.0.0-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (3.3 kB)
+Requirement already satisfied: numpy in /usr/local/lib/python3.12/dist-packages (from bottleneck<2.0.0,>=1.4.0->langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8)) (2.1.3)
+Requirement already satisfied: requests>=2.16.0 in /usr/local/lib/python3.12/dist-packages (from cachecontrol>=0.14.3->firebase-admin->-r requirements.txt (line 7)) (2.32.4)
+Collecting msgpack<2.0.0,>=0.5.2 (from cachecontrol>=0.14.3->firebase-admin->-r requirements.txt (line 7))
+  Downloading msgpack-1.1.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.1 kB)
+Requirement already satisfied: googleapis-common-protos<2.0.0,>=1.56.2 in /usr/local/lib/python3.12/dist-packages (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,<3.0.0,>=1.34.1->google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,<3.0.0,>=1.34.1->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (1.70.0)
+Requirement already satisfied: grpcio<2.0.0,>=1.33.2 in /usr/local/lib/python3.12/dist-packages (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,<3.0.0,>=1.34.1->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (1.73.1)
+Requirement already satisfied: grpcio-status<2.0.0,>=1.33.2 in /usr/local/lib/python3.12/dist-packages (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,<3.0.0,>=1.34.1->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (1.71.2)
+Requirement already satisfied: httplib2<1.0.0,>=0.19.0 in /usr/local/lib/python3.12/dist-packages (from google-api-python-client>=1.7.8->firebase-admin->-r requirements.txt (line 7)) (0.22.0)
+Requirement already satisfied: google-auth-httplib2<1.0.0,>=0.2.0 in /usr/local/lib/python3.12/dist-packages (from google-api-python-client>=1.7.8->firebase-admin->-r requirements.txt (line 7)) (0.2.0)
+Requirement already satisfied: uritemplate<5,>=3.0.1 in /usr/local/lib/python3.12/dist-packages (from google-api-python-client>=1.7.8->firebase-admin->-r requirements.txt (line 7)) (4.2.0)
+Requirement already satisfied: cachetools<6.0,>=2.0.0 in /usr/local/lib/python3.12/dist-packages (from google-auth<3.0.0,>=2.14.1->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (5.5.2)
+Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python3.12/dist-packages (from google-auth<3.0.0,>=2.14.1->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (0.4.2)
+Requirement already satisfied: rsa<5,>=3.1.4 in /usr/local/lib/python3.12/dist-packages (from google-auth<3.0.0,>=2.14.1->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (4.9.1)
+Requirement already satisfied: google-resumable-media<3.0.0,>=2.0.0 in /usr/local/lib/python3.12/dist-packages (from google-cloud-bigquery!=3.20.0,<4.0.0,>=1.15.0->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (2.7.2)
+Requirement already satisfied: python-dateutil<3.0.0,>=2.8.2 in /usr/local/lib/python3.12/dist-packages (from google-cloud-bigquery!=3.20.0,<4.0.0,>=1.15.0->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (2.9.0.post0)
+Requirement already satisfied: google-crc32c<2.0dev,>=1.0 in /usr/local/lib/python3.12/dist-packages (from google-cloud-storage<3.0.0,>=1.32.0->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (1.7.1)
+Requirement already satisfied: tenacity<9.0.0,>=8.2.3 in /usr/local/lib/python3.12/dist-packages (from google-genai<2.0.0,>=1.0.0->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (8.5.0)
+Requirement already satisfied: websockets<15.1.0,>=13.0.0 in /usr/local/lib/python3.12/dist-packages (from google-genai<2.0.0,>=1.0.0->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (15.0.1)
+Collecting jsonpatch<2.0.0,>=1.33.0 (from langchain-core<2.0.0,>=1.0.0->langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading jsonpatch-1.33-py2.py3-none-any.whl.metadata (3.0 kB)
+Collecting langsmith<1.0.0,>=0.3.45 (from langchain-core<2.0.0,>=1.0.0->langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading langsmith-0.4.37-py3-none-any.whl.metadata (14 kB)
+Requirement already satisfied: importlib-metadata<8.8.0,>=6.0 in /usr/local/lib/python3.12/dist-packages (from opentelemetry-api>=1.9.0->google-cloud-logging->-r requirements.txt (line 6)) (8.7.0)
+Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.12/dist-packages (from pydantic<3->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (0.7.0)
+Requirement already satisfied: pydantic-core==2.33.2 in /usr/local/lib/python3.12/dist-packages (from pydantic<3->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (2.33.2)
+Requirement already satisfied: typing-inspection>=0.4.0 in /usr/local/lib/python3.12/dist-packages (from pydantic<3->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (0.4.1)
+Requirement already satisfied: cryptography>=3.4.0 in /usr/local/lib/python3.12/dist-packages (from pyjwt[crypto]>=2.5.0->firebase-admin->-r requirements.txt (line 7)) (45.0.5)
+Requirement already satisfied: sniffio>=1.1 in /usr/local/lib/python3.12/dist-packages (from anyio->httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7)) (1.3.1)
+Requirement already satisfied: cffi>=1.14 in /usr/local/lib/python3.12/dist-packages (from cryptography>=3.4.0->pyjwt[crypto]>=2.5.0->firebase-admin->-r requirements.txt (line 7)) (1.17.1)
+Collecting hyperframe<7,>=6.1 (from h2<5,>=3->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7))
+  Downloading hyperframe-6.1.0-py3-none-any.whl.metadata (4.3 kB)
+Collecting hpack<5,>=4.1 (from h2<5,>=3->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 7))
+  Downloading hpack-4.1.0-py3-none-any.whl.metadata (4.6 kB)
+Requirement already satisfied: pyparsing!=3.0.0,!=3.0.1,!=3.0.2,!=3.0.3,<4,>=2.4.2 in /usr/local/lib/python3.12/dist-packages (from httplib2<1.0.0,>=0.19.0->google-api-python-client>=1.7.8->firebase-admin->-r requirements.txt (line 7)) (3.2.3)
+Requirement already satisfied: zipp>=3.20 in /usr/local/lib/python3.12/dist-packages (from importlib-metadata<8.8.0,>=6.0->opentelemetry-api>=1.9.0->google-cloud-logging->-r requirements.txt (line 6)) (3.23.0)
+Collecting jsonpointer>=1.9 (from jsonpatch<2.0.0,>=1.33.0->langchain-core<2.0.0,>=1.0.0->langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading jsonpointer-3.0.0-py2.py3-none-any.whl.metadata (2.3 kB)
+Collecting orjson>=3.9.14 (from langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.0.0->langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading orjson-3.11.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (41 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 41.9/41.9 kB 1.9 MB/s eta 0:00:00
+Collecting requests-toolbelt>=1.0.0 (from langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.0.0->langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading requests_toolbelt-1.0.0-py2.py3-none-any.whl.metadata (14 kB)
+Collecting zstandard>=0.23.0 (from langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.0.0->langchain-google-vertexai>=1.0.7->-r requirements.txt (line 8))
+  Downloading zstandard-0.25.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (3.3 kB)
+Requirement already satisfied: pyasn1<0.7.0,>=0.6.1 in /usr/local/lib/python3.12/dist-packages (from pyasn1-modules>=0.2.1->google-auth<3.0.0,>=2.14.1->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (0.6.1)
+Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.12/dist-packages (from python-dateutil<3.0.0,>=2.8.2->google-cloud-bigquery!=3.20.0,<4.0.0,>=1.15.0->google-cloud-aiplatform>=1.59.0->-r requirements.txt (line 5)) (1.17.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/lib/python3.12/dist-packages (from requests>=2.16.0->cachecontrol>=0.14.3->firebase-admin->-r requirements.txt (line 7)) (3.4.2)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.12/dist-packages (from requests>=2.16.0->cachecontrol>=0.14.3->firebase-admin->-r requirements.txt (line 7)) (2.5.0)
+Requirement already satisfied: pycparser in /usr/local/lib/python3.12/dist-packages (from cffi>=1.14->cryptography>=3.4.0->pyjwt[crypto]>=2.5.0->firebase-admin->-r requirements.txt (line 7)) (2.22)
+Downloading pytest-8.4.2-py3-none-any.whl (365 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 365.8/365.8 kB 9.9 MB/s eta 0:00:00
+Downloading firebase_admin-6.9.0-py3-none-any.whl (139 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 139.7/139.7 kB 11.6 MB/s eta 0:00:00
+Downloading langchain_google_vertexai-3.0.0-py3-none-any.whl (101 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.5/101.5 kB 8.8 MB/s eta 0:00:00
+Downloading bottleneck-1.6.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (377 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 377.5/377.5 kB 26.7 MB/s eta 0:00:00
+Downloading cachecontrol-0.14.3-py3-none-any.whl (21 kB)
+Downloading google_cloud_firestore-2.21.0-py3-none-any.whl (368 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 368.8/368.8 kB 27.8 MB/s eta 0:00:00
+Downloading httpx_sse-0.4.3-py3-none-any.whl (9.0 kB)
+Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Downloading langchain_core-1.0.0-py3-none-any.whl (467 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 467.2/467.2 kB 29.5 MB/s eta 0:00:00
+Downloading numexpr-2.14.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (443 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 443.6/443.6 kB 26.9 MB/s eta 0:00:00
+Downloading pyarrow-21.0.0-cp312-cp312-manylinux_2_28_x86_64.whl (42.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 42.8/42.8 MB 35.0 MB/s eta 0:00:00
+Downloading validators-0.35.0-py3-none-any.whl (44 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.7/44.7 kB 3.7 MB/s eta 0:00:00
+Downloading h2-4.3.0-py3-none-any.whl (61 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 61.8/61.8 kB 5.7 MB/s eta 0:00:00
+Downloading jsonpatch-1.33-py2.py3-none-any.whl (12 kB)
+Downloading langsmith-0.4.37-py3-none-any.whl (396 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 396.1/396.1 kB 27.6 MB/s eta 0:00:00
+Downloading msgpack-1.1.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (427 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 427.6/427.6 kB 29.0 MB/s eta 0:00:00
+Downloading hpack-4.1.0-py3-none-any.whl (34 kB)
+Downloading hyperframe-6.1.0-py3-none-any.whl (13 kB)
+Downloading jsonpointer-3.0.0-py2.py3-none-any.whl (7.6 kB)
+Downloading orjson-3.11.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (132 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 132.9/132.9 kB 11.3 MB/s eta 0:00:00
+Downloading requests_toolbelt-1.0.0-py2.py3-none-any.whl (54 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 54.5/54.5 kB 4.8 MB/s eta 0:00:00
+Downloading zstandard-0.25.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.5/5.5 MB 77.2 MB/s eta 0:00:00
+Installing collected packages: zstandard, validators, pyarrow, orjson, numexpr, msgpack, jsonpointer, iniconfig, hyperframe, httpx-sse, hpack, bottleneck, requests-toolbelt, pytest, jsonpatch, h2, cachecontrol, langsmith, langchain-core, google-cloud-firestore, firebase-admin, langchain-google-vertexai
+  WARNING: The scripts py.test and pytest are installed in '/home/student_00_396d7599ae24/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script doesitcache is installed in '/home/student_00_396d7599ae24/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+Successfully installed bottleneck-1.6.0 cachecontrol-0.14.3 firebase-admin-6.9.0 google-cloud-firestore-2.21.0 h2-4.3.0 hpack-4.1.0 httpx-sse-0.4.3 hyperframe-6.1.0 iniconfig-2.3.0 jsonpatch-1.33 jsonpointer-3.0.0 langchain-core-1.0.0 langchain-google-vertexai-3.0.0 langsmith-0.4.37 msgpack-1.1.2 numexpr-2.14.1 orjson-3.11.3 pyarrow-21.0.0 pytest-8.4.2 requests-toolbelt-1.0.0 validators-0.35.0 zstandard-0.25.0
+```
+
+
+
+
+
+Run this base Flask application in Cloud Shell with:
+```
+python3 main.py
+```
+
+student_00_396d7599ae24@cloudshell:~/gen-ai-assessment (qwiklabs-gcp-01-32c593469378)$ python3 main.py
+ * Serving Flask app 'main'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.88.0.3:8080
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 573-936-224
+
+
+
+
+
+The app will run by default on Port 8080. Preview the app by clicking the Web Preview icon at the top of the Cloud Shell panel, then Preview on port 8080.
+
+
+
+
+
+
+You should be able to see the app and get a greeting, but if you try to ask FreshBot any questions, it will currently only reply Not implemented.
+
+Back in the Cloud Console, you can press CTRL+C to stop the app from running. Click Open Editor at the top of the Cloud Shell panel.
+
+Within the Explorer panel on the left of the Cloud Shell Editor, select the file generative-ai-assessment/main.py
+
+
+
+
+
+
+
+Just below the initialization of the Firestore database client, find the first comment labeled TODO. Assign a reference to your food-safety collection to the collection variable.
+Note: As you work through the next few steps, you can test your application by running the command python3 main.py. Alternatively, you can also use the Web Preview option to preview the application.
+
+
+
+
+Beneath the next two comments beginning TODO, assign the appropriate models to the variables embedding_model (using the same embedding model version of text-embedding-005 you used earlier in the lab) and gen_model (using the generative model version "gemini-2.0-flash" and a temperature of 0).
+https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models#models
+
+
+
+Complete the function search_vector_database as you did above.
+
+
+
+
+
+Complete the ask_gemini function to instruct your gen_model to answer a question based on the context retrieved from the vector database.
+
+Since some food safety content involves knives and potential burns, set Gemini's Dangerous Content safety setting to block only high-probability dangerous content.
+https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/configure-safety-attributes#how_to_configure_the_safety_filter
+
+
+
+
+
+When you have completed these steps, make sure the Flask app is running in your Cloud Shell Terminal and test it by making sure it can answer the following question:
+
+What temperature range do Mesophilic Bacteria grow best in?
+
+You should receive a response that includes a temperature range of 50 to 110 degrees Fahrenheit from the model.
+
+```
+student_00_396d7599ae24@cloudshell:~/gen-ai-assessment (qwiklabs-gcp-01-32c593469378)$ python3 main.py
+/usr/local/lib/python3.12/dist-packages/vertexai/generative_models/_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+  warning_logs.show_deprecation_warning()
+ * Serving Flask app 'main'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.88.0.3:8080
+Press CTRL+C to quit
+ * Restarting with stat
+/usr/local/lib/python3.12/dist-packages/vertexai/generative_models/_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+  warning_logs.show_deprecation_warning()
+ * Debugger is active!
+ * Debugger PIN: 573-936-224
+Answer: Hi, I'm FreshBot, what can I do for you?
+127.0.0.1 - - [23/Oct/2025 06:40:54] "GET /?authuser=0 HTTP/1.1" 200 -
+Answer: Mesophilic Bacteria grow best at temperatures between 50–110°F.
+
+127.0.0.1 - - [23/Oct/2025 06:41:07] "POST /?authuser=0 HTTP/1.1" 200 -
+Answer: Mesophilic Bacteria grow best at temperatures between 50–110°F.
+
+127.0.0.1 - - [23/Oct/2025 06:41:08] "POST /?authuser=0 HTTP/1.1" 200 -
+```
+
+
+
+
+
+
+
+
+
+
+
+Now, we will deploy the Flask application from this directory to Cloud Run.
+
+In the Google Cloud Console, navigate to Artifact Registry and find the cymbal-artifact-repo repo that has been created for you in the us-central1 location.
+
+Use the Copy Path button to copy the repo path and then in Cloud Run save it as an environment variable named ARTIFACT_REPO with:
+export ARTIFACT_REPO=YOUR_PATH_HERE
+```
+export ARTIFACT_REPO=us-central1-docker.pkg.dev/qwiklabs-gcp-01-32c593469378/cymbal-artifact-repo
+```
+
+
+Build a Docker image named cymbal-image using Dockerfile by running the following command:
+```
+docker build -t $ARTIFACT_REPO/cymbal-image -f Dockerfile .
+```
+docker build: This is the command to construct a Docker image.
+
+-t $ARTIFACT_REPO/cymbal-image: The tag option (-t) specifies the name and tag for the resulting image. It uses the environment variable $ARTIFACT_REPO and names the image 'cymbal-image'. The 'final image tag' will look something like us-central1-docker.pkg.dev/qwiklabs-gcp-01-32c593469378/cymbal-artifact-repo/cymbal-image.
+
+-f Dockerfile: This specifies that the 'build instructions are found in a file named Dockerfile' (which is the default, but explicitly stated here).
+
+.: This denotes the build context, meaning the 'current directory (~/gen-ai-assessment) contains the Dockerfile and any files it needs (like application code or requirements files).'
+
+```
+student_00_396d7599ae24@cloudshell:~/gen-ai-assessment (qwiklabs-gcp-01-32c593469378)$ docker build -t $ARTIFACT_REPO/cymbal-image -f Dockerfile .[+] Building 118.0s (10/10) FINISHED                                                                                               docker:default
+ => [internal] load build definition from Dockerfile                                                                                         0.1s
+ => => transferring dockerfile: 216B                                                                                                         0.1s
+ => [internal] load metadata for docker.io/library/python:3.9                                                                                1.4s
+ => [internal] load .dockerignore                                                                                                            0.0s
+ => => transferring context: 2B                                                                                                              0.0s
+ => [1/5] FROM docker.io/library/python:3.9@sha256:1234566asdbd0987                         40.9s
+ => => resolve docker.io/library/python:3.9@sha256:8109273asdbd8305                          0.0s
+ => => sha256:123sadfas123123 10.30kB / 10.30kB                                             0.0s
+...
+ => => extracting sha256:12345689asdfewr1231245                                                   10.4s
+ => [internal] load build context                                                                                                            0.1s
+ => => transferring context: 20.07kB                                                                                                         0.0s
+ => [2/5] WORKDIR /app                                                                                                                       1.4s
+ => [3/5] COPY . .                                                                                                                           0.0s
+ => [4/5] RUN pip install gunicorn                                                                                                           4.0s
+ => [5/5] RUN pip install -r requirements.txt                                                                                               61.6s 
+ => exporting to image                                                                                                                       8.3s 
+ => => exporting layers                                                                                                                      8.3s 
+ => => writing image sha256:3ed0c09e1234567628fd7                                                 0.0s 
+ => => naming to us-central1-docker.pkg.dev/qwiklabs-gcp-01-32c593469378/cymbal-artifact-repo/cymbal-image                                   0.0s 
+                                                                                                                                                  
+ 1 warning found (use docker --debug to expand):                                                                                                  
+ - JSONArgsRecommended: JSON arguments recommended for CMD to prevent unintended behavior related to OS signals (line 7)
+```
+
+
+
+
+
+
+
+
+
+
+
+Push the Docker image to the Artifact Registry repository with:
+```
+docker push $ARTIFACT_REPO/cymbal-image
+```
+docker push: This is the command used to transfer a tagged Docker image from your LOCAL MACHINE (where it was built) TO A centralized REPOSITORY.
+
+$ARTIFACT_REPO/cymbal-image: This is the full tag of the image you built in the previous step.
+
+The variable $ARTIFACT_REPO resolves to your specific Google Cloud Artifact Registry path (us-central1-docker.pkg.dev/qwiklabs-gcp-01-32c593469378/cymbal-artifact-repo).
+
+The image name is cymbal-image.
+
+Therefore, the image is being pushed to: us-central1-docker.pkg.dev/qwiklabs-gcp-01-32c593469378/cymbal-artifact-repo/cymbal-image
+
+
+
+
+
+student_00_396d7599ae24@cloudshell:~/gen-ai-assessment (qwiklabs-gcp-01-32c593469378)$ docker push $ARTIFACT_REPO/cymbal-image
+Using default tag: latest
+The push refers to repository [us-central1-docker.pkg.dev/qwiklabs-gcp-01-32c593469378/cymbal-artifact-repo/cymbal-image]
+a2f6ccbc4354: Pushing [====>                                              ]   70.2MB/710.8MB
+c78e1fa844ca: Pushed 
+7c96a9471721: Pushed 
+8b50ad47cadb: Pushed 
+52a0422df048: Pushed 
+712b6bd77d6a: Pushing [=====================>                             ]  22.52MB/53.45MB
+1b13f956067a: Pushing [==================================================>]  18.47MB
+713ad1f34d94: Pushing [=>                                                 ]  19.71MB/655.7MB
+c041ff8d6c73: Pushing [=========>                                         ]  34.19MB/184.9MB
+fbde375eafc7: Waiting 
+f2522c6ed78b: Waiting 
+
+
+
+
+
+student_00_396d7599ae24@cloudshell:~/gen-ai-assessment (qwiklabs-gcp-01-32c593469378)$ docker push $ARTIFACT_REPO/cymbal-image
+Using default tag: latest
+The push refers to repository [us-central1-docker.pkg.dev/qwiklabs-gcp-01-32c593469378/cymbal-artifact-repo/cymbal-image]
+a2f6ccbc4354: Pushed 
+c78e1fa844ca: Pushed 
+7c96a9471721: Pushed 
+8b50ad47cadb: Pushed 
+52a0422df048: Pushed 
+712b6bd77d6a: Pushed 
+1b13f956067a: Pushed 
+713ad1f34d94: Pushed 
+c041ff8d6c73: Pushed 
+fbde375eafc7: Pushed 
+f2522c6ed78b: Pushed 
+latest: digest: sha256:c61ecccd4e46dce5819abe94cd06076160d6290f73dc44732f628ac1430c0615 size: 2634
+
+
+
+student_00_396d7599ae24@cloudshell:~/gen-ai-assessment (qwiklabs-gcp-01-32c593469378)$ ls
+Cheat_Sheet.txt  Dockerfile  main.py  requirements.txt  static  templates
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Finally, deploy the app to Cloud Run using the docker image stored in the Artifact Registry repository named cymbal-artifact-repo. Use the following configuration while deploying the new service.
+Property          | Value
+Service Name      | cymbal-freshbot-service
+Authentication    |  Allow public access
+```
+gcloud run deploy cymbal-freshbot-service \
+    --image $ARTIFACT_REPO/cymbal-image \
+    --allow-unauthenticated \
+    --region us-central1
+```
+
+gcloud run deploy cymbal-freshbot-service	Specifies the Google Cloud CLI command for deploying a new Cloud Run service and names it cymbal-freshbot-service.
+
+--image $ARTIFACT_REPO/cymbal-image	Specifies the container image to deploy. The $ARTIFACT_REPO environment variable resolves to the full path in your Artifact Registry.
+The gcloud run deploy command deploys the container from the Artifact Registry, not your local machine.
+
+--allow-unauthenticated	Corresponds to the "Allow public access" configuration, making the service publicly accessible without needing Google Cloud credentials.
+
+--region us-central1	(Recommended) Cloud Run services are regional. Since your Artifact Registry is in us-central1 (based on $ARTIFACT_REPO), deploying the service to the same region is a common best practice.
+
+
+
+
+
+Summary of the Container Lifecycle
+Your overall process demonstrates the standard Continuous Delivery (CD) pipeline for containers:
+1 Build (docker build): The Docker image is created locally in your Cloud Shell environment.
+
+2 Push (docker push): The image is uploaded from your local environment to the Artifact Registry (the remote central repository).
+
+3 Deploy (gcloud run deploy): The Cloud Run service pulls the image from the Artifact Registry and runs it as a scalable service.
+Your local machine (Cloud Shell) is only responsible for the Build and Push steps; it's completely out of the loop once the image is safely stored in the registry.
+
+
+
+
+
+
+
+
+
+student_00_396d7599ae24@cloudshell:~/gen-ai-assessment (qwiklabs-gcp-01-32c593469378)$ gcloud run deploy cymbal-freshbot-service \
+    --image $ARTIFACT_REPO/cymbal-image \
+    --allow-unauthenticated \
+    --region us-central1
+The following APIs are not enabled on project [qwiklabs-gcp-01-32c593469378]:
+        run.googleapis.com
+
+Do you want enable these APIs to continue (this will take a few minutes)? (Y/n)?  y
+
+Enabling APIs on project [qwiklabs-gcp-01-32c593469378]...
+Operation "operations/acf.p2-399924514491-0276a19a-d95e-48c2-a247-87527ec718f0" finished successfully.
+Deploying container to Cloud Run service [cymbal-freshbot-service] in project [qwiklabs-gcp-01-32c593469378] region [us-central1]
+Deploying new service...                                                                                                                         
+  Setting IAM Policy...done                                                                                                                      
+  Creating Revision...done                                                                                                                       
+  Routing traffic...done                                                                                                                         
+Done.                                                                                                                                            
+Service [cymbal-freshbot-service] revision [cymbal-freshbot-service-00001-d2k] has been deployed and is serving 100 percent of traffic.
+Service URL: https://cymbal-freshbot-service-399924514491.us-central1.run.app
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Test your model through its Cloud Run service URL with the following question: 
+How should smoked fish be stored?
+https://cdn.qwiklabs.com/3MM1%2FoEpaECbHAUHOvRX3SAQxtDJBj8P5XF5qb3uQ8w%3D
+
+
+
+
+
+In this challenge lab, you have demonstrated your ability to load a text document and split it into chunks, generate embeddings for each chunk, store the text chunks and their embeddings, conduct vector search to return similar documents to a query document and complete a RAG framework by having Gemini generate a response based on a context of similar documents to a query.
+
+
+
+
+
+
+
+
+
+
+===============================
+
+
+Reflections
+- Support was unable to help because this was a 'challenge lab'
+- It seems that other learners were able to complete the lab without issues - not sure how this is possible with Task 1 blocking the rest of the lab
+- Even Gemini was unable to fix the library issues in Task 1
+- Please provide the requirements.txt from a working version of the lab, for learners to pip install the required libraries and their versions from
+- If the environment is the same, how did other learners clear task 1? What sort of workarounds or fixes did other learners use that are not in the current lab instructions?
+- Meanwhile, I used the workarounds that worked during
+[2025 Sep lab with walkthrough instructions] Leverage Firestore as a Vector Store https://partner.skills.google/course_templates/1322/labs/550578
+AND
+https://github.com/KaiquanMah/Training/blob/master/Google%20Cloud/Vertex/day4-Leverage%20Firestore%20as%20a%20Vector%20Store/cymbal_ingest_to_vector_database.ipynb
+
