@@ -99,7 +99,7 @@ What is a transaction?
 CAP
 - Consistency: **Every read** receives the **most recent write or an error**
 - Availability: Every request receives a **(non-error) response, without the guarantee** that it contains the **most recent write**
-  - operate even when **1/more nodes fail**
+  - operate even when **1/more nodes fail; continues to serve a user**
 - Partition tolerance: The system **continues to operate despite an arbitrary number of messages being dropped (or delayed) by the network between nodes**
   - operate even when **1/more network paths fail**
 <img width="797" height="783" alt="cap" src="https://github.com/user-attachments/assets/db6c16d3-ed63-478a-ac97-4247fb093ef4" />
@@ -107,12 +107,19 @@ CAP
 
 CAP theorem suggests that we can only ever have 2 of the 3 properties achieved at the same time.
 **Relational DB (RDBMS)**
-- CA: Single Node database server that is **typically not networked (NOT FAULT TOLERANT).** 
+- CA only: Single Node database server that is **typically not networked (NOT FAULT TOLERANT).** 
 vs
 **NoSQL**
 - CP: Consistency and Partition Tolerance
+  - **Nodes not available sometimes to users** - until node/partition is up again AND consistent
 - AP: Availability and Partition Tolerance
+  - **Might not be consistent**
 - CA: Consistency and Availability
-  <img width="1135" height="717" alt="cap-ca-cp-ap" src="https://github.com/user-attachments/assets/fad680c1-20b8-4831-8b6e-2fff9026bcc3" />
+  - 2 sides of a network cant guarantee the most recent write to each other
+  - to maintain C/A - system faces a dilemma it cannot solve
+    - **sacrifice A/availability by shutting down and restarting**
+    - **sacrifice C/consistency - 2 indpt sides accept conflicting writes**
+  - **possible BUT NOT PRACTICAL for a NoSQL/distributed system**
+<img width="1135" height="717" alt="cap-ca-cp-ap" src="https://github.com/user-attachments/assets/fad680c1-20b8-4831-8b6e-2fff9026bcc3" />
 
 
