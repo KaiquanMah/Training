@@ -58,16 +58,91 @@ NoSQL
 
 
 Relational DB
-- MySQL
-- PostgreSQL, Supabase
-- Redshift
-- Oracle
-- MariaDB
-- MS SQL Server
+- Easier to use - SQL
+- Flexibility for writing in SQL queries- 
+- Easier to change to business requirements
+- Modeling the actual data, not modeling queries (i.e. the dataset/results u want)
+- Ability to do JOINS
+- Ability to do aggregations and analytics
+- Smaller data volumes
+- Secondary Indexes available
+  - primary index = PK
+  - The Problem: **If you search the table using a column that is not the primary key** (e.g., searching for a user by their email_address), the database has to scan the entire table, row by row. This is called a **full table scan and is very slow on large tables.**
+  - The Secondary Index Solution: The **secondary index creates a separate, sorted list of values from the secondary-indexed column**. Next to each of those values, it stores a pointer (often the Primary Key value) to the full row in the main table.
+  - When you run a **search query**:
+    - The database **first searches the small, sorted secondary index (a very fast operation).**
+    - It **finds the relevant Primary Key(s)** for the matching rows.
+    - It then uses the Primary Key(s) to **fetch the complete row data from the main table**
+  - Gd
+    - Faster read/search
+      - Filter by secondary index, then retrieve primary index and the relevant rows
+      - Reads traverses through the **secondary index col (which is ald sorted)** - so no need to sort again **(i.e. no need to ORDER BY secondary idx col in ur query)**
+  - Bad
+    - Slower write - insert, update, delete
+    - inc storage
+    - inc maintenance overhead - update secondary idx col every time data in the col changes
+      - INSERT - insert row >> write new row into 'every secondary index' col
+        ```
+        Main Table
+        user_id PK|firstname|email 2IDX
+        1|alice|alice@a.com
+        2|bob|bob@b.com      <- INSERTED
+        ---------------
+        Secondary Index
+        email   Index Key | user_id   Pointer to main table row
+        alice@a.com       |  1
+        bob@b.com         |  2      <- INSERTED
+        ```
+      - UPDATE
+        - dont update secondary idx col >> no impact
+        ```
+        Main Table
+        user_id PK|firstname|email 2IDX
+        1|alice|alice@a.com
+        2|BOBBY|bob@b.com <- UPDATED
+        ---------------
+        Secondary Index   <- NO CHANGE
+        email   Index Key | user_id   Pointer to main table row
+        alice@a.com       |  1
+        bob@b.com         |  2
+        ```
+        - update secondary idx col >> delete old seondary idx, insert new secondary idx
+        ```
+        Main Table
+        user_id PK|firstname|email 2IDX
+        1|alice|alice@new.com   <- UPDATED
+        2|BOBBY|bob@b.com
+        ---------------
+        Secondary Index
+        email   Index Key | user_id   Pointer to main table row
+        alice@a.com       |  1   <- DELETED
+        alice@new.com     |  1   <- INSERTED
+        bob@b.com         |  2
+        ```
+      - DELETE - delete row >> delete tt row from 'every secondary index'
+        ```
+        Main Table
+        user_id PK|firstname|email 2IDX
+        1|alice|alice@a.com
+        2|BOBBY|bob@b.com      <- DELETE
+        ---------------
+        Secondary Index
+        email   Index Key | user_id   Pointer to main table row
+        alice@a.com       |  1
+        bob@b.com         |  2      <- DELETE
+        ```
+      - You do not need to "rerun an index query." The database system automatically and immediately updates the index structure as part of the transaction when the row is modified. This is done to ensure the index is always accurate for subsequent read queries. The overhead is the cost of these extra write/update operations for every index defined on the table.
 - scale vertically
 - Define known/static schema, PK-FK
-- ACID guarantee - data quality, consistency, integrity
+- ACID Transactions/guarantee - data quality, consistency, integrity
 - for legacy (acc, fin, bkg, inv mgt, txn mgt) systems, complex queries
+- Examples
+  - MySQL
+  - PostgreSQL, Supabase
+  - Redshift
+  - Oracle
+  - MariaDB
+  - MS SQL Server
 
 
 ## ACID
