@@ -1,4 +1,4 @@
-### SQL vs NoSQL
+## SQL vs NoSQL
 <img width="1038" height="834" alt="sqlnosql" src="https://github.com/user-attachments/assets/bc4ed9fb-6259-4c07-84ed-600d0bd02196" />
 
 NoSQL
@@ -69,7 +69,8 @@ Relational DB
 - ACID guarantee - data quality, consistency, integrity
 - for legacy (acc, fin, bkg, inv mgt, txn mgt) systems, complex queries
 
-ACID
+
+## ACID
 - Atomicity: **All or nothing for transaction completion**.
 - Consistency: The database must be **consistent no matter what happens 100% of the time**
   - **Eventual Consistency** = NoSQL databases offer the idea of eventual consistency. Eventual Consistency means - **when a transaction is executed, it might not update all the copies of the data right away. But the data would be eventually be updated.**
@@ -88,5 +89,30 @@ What is a transaction?
 - Single unit of work that accesses databases through **Read and Write operations.**
 - Every read, write, or **query** of a database is a transaction.
 
+
+
+## CAP Theorem
+- Note: Consistency in CAP theorem is not the same as Consistency in RDBMS ACID.
+- **CAP consistency talks about data consistency across a CLUSTER OF NODES** and not on a single server/node
+- Side Note: The CAP theorem is also called Brewer’s Theorem because it was first advanced by Professor Eric A. Brewer during a talk he gave on distributed computing in 2000. Two years later, MIT professors Seth Gilbert and Nancy Lynch published a proof of “Brewer’s Conjecture.”
+
+CAP
+- Consistency: **Every read** receives the **most recent write or an error**
+- Availability: Every request receives a **(non-error) response, without the guarantee** that it contains the **most recent write**
+  - operate even when **1/more nodes fail**
+- Partition tolerance: The system **continues to operate despite an arbitrary number of messages being dropped (or delayed) by the network between nodes**
+  - operate even when **1/more network paths fail**
+<img width="797" height="783" alt="cap" src="https://github.com/user-attachments/assets/db6c16d3-ed63-478a-ac97-4247fb093ef4" />
+
+
+CAP theorem suggests that we can only ever have 2 of the 3 properties achieved at the same time.
+**Relational DB (RDBMS)**
+- CA: Single Node database server that is **typically not networked (NOT FAULT TOLERANT).** 
+vs
+**NoSQL**
+- CP: Consistency and Partition Tolerance
+- AP: Availability and Partition Tolerance
+- CA: Consistency and Availability
+  <img width="1135" height="717" alt="cap-ca-cp-ap" src="https://github.com/user-attachments/assets/fad680c1-20b8-4831-8b6e-2fff9026bcc3" />
 
 
