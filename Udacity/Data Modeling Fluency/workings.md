@@ -3,12 +3,63 @@
 
 NoSQL
 - high availability
-- scalable
-- may not be 'consistent' at a point in time
+  - because you sacrifice consistency at a point in time
+  - BUT **EVENTUALLY CONSISTENT**
+- scale horizontally w distributed systems
+- supports schema evolution/changes - no need to predefine schema
+- Examples
+  - Document-oriented
+    - **Docs = JSON, BSON (OR JSONB = binary JSON = binary-encoded serialisation of JSON-like docs for efficient storage, scan speed), XML** - self-contained, usu nested, flex, schema-less
+    - **retrieve using 'document ID' OR fields (exact match) - content management system**
+    - MongoDB (can be document OR k-v), DynamoDB, CouchDB, Couchbase, Firebase Firestore
+  - Key-value:
+    - collection of k-v pairs
+    - **retrieve using 'exact key' (exact match) - session/cache management**
+    - DynamoDB (can be document OR k-v), Cassandra (wide column OR wide col), Redis, Memcached, Riak, Amazon ElastiCache
+  - Wide column:
+    - column families
+    - **retrieve using 'row key/partition key' then 'clustering columns/column family' then 'column'**
+    - **query across rows only for 1 col (eg aggregated match) - time series analysis**
+    - **NOT optimised for complex aggregations across many rows/cols**
+    - ```cql
+      SELECT
+        user_id,
+        COUNT(*) AS total_visits
+      FROM
+        user_events
+      WHERE
+        user_id = 'user_987'
+      -- In most wide-column stores, running this query across ALL user_ids
+      -- requires an inefficient ALLOW FILTERING or a separate data architecture.
+      GROUP BY
+        user_id;
+      ```
+    - Hbase, Google Bigtable, ScyllaDB
+  - Graph stores:
+    - stores nodes/entities, edges/relationships
+    - **retrieve using path (of start/end nodes AND 1/more edge(s))**
+    - traverse relationships (pattern match) - social network connections
+    - ```cypher
+      -- Find the friends of John's friends (2-hop path) who live in the same City as John.
+      MATCH
+          (john:Person {name: 'John'})-[:FRIENDS_WITH]->(friend1:Person),
+          (friend1)-[:FRIENDS_WITH]->(friend2:Person)
+      WHERE
+          friend2.name <> 'John'
+      -- Use a third pattern match to ensure p2 and john share a City node
+      MATCH
+          (john)-[:LIVES_IN]->(city:City)<-[:LIVES_IN]-(friend2)
+      
+      RETURN
+          friend2.name AS Recommended_Friend
+      ```
+    - Neptune Neo4J, Titan, ArangoDB (multi-model)
+
+
 
 Relational DB
 - MySQL
-- PostgreSQL
+- PostgreSQL, Supabase
 - Redshift
 - Oracle
 - MariaDB
@@ -21,6 +72,7 @@ Relational DB
 ACID
 - Atomicity: **All or nothing for transaction completion**.
 - Consistency: The database must be **consistent no matter what happens 100% of the time**
+  - **Eventual Consistency** = NoSQL databases offer the idea of eventual consistency. Eventual Consistency means - **when a transaction is executed, it might not update all the copies of the data right away. But the data would be eventually be updated.**
 - **Isolation**: **No transaction** should **affect** the existence of **any other transaction**.
 <img width="1375" height="666" alt="isol" src="https://github.com/user-attachments/assets/81ff5926-ef9e-4fce-b47f-4eb762d7ff01" />
   - Isolation ensures that multiple transactions can occur concurrently without leading to the inconsistency of the database state. Transactions occur independently without interference.
