@@ -177,6 +177,7 @@ CAP
   - operate even when **1/more nodes fail; continues to serve a user**
 - Partition tolerance: The system **continues to operate despite an arbitrary number of messages being dropped (or delayed) by the network between nodes**
   - operate even when **1/more network paths fail**
+  - **distributed system OR horizontal scaling**
 <img width="797" height="783" alt="cap" src="https://github.com/user-attachments/assets/db6c16d3-ed63-478a-ac97-4247fb093ef4" />
 
 
@@ -187,8 +188,9 @@ vs
 **NoSQL**
 - CP: Consistency and Partition Tolerance
   - **Nodes not available sometimes to users** - until node/partition is up again AND consistent
-- AP: Availability and Partition Tolerance
+- **AP**: Availability and Partition Tolerance
   - **Might not be consistent**
+  - **the usual choice**
 - CA: Consistency and Availability
   - 2 sides of a network cant guarantee the most recent write to each other
   - to maintain C/A - system faces a dilemma it cannot solve
@@ -198,3 +200,15 @@ vs
 <img width="1135" height="717" alt="cap-ca-cp-ap" src="https://github.com/user-attachments/assets/fad680c1-20b8-4831-8b6e-2fff9026bcc3" />
 
 
+
+
+## SQL vs NoSQL Recap
+| SQL | NoSQL |
+| :--- | :--- |
+| 1. **Complex queries with joins** | 1. Large number of **simple look-up queries** |
+| 2. Structured data with **relations** | 2. Structured/semi-structured, no relations |
+| 3. **Predefined table schema** | 3. No need of predefined table schema |
+| 4. **ACID** Guarantee on each transaction | 4. Follows **CAP Theorem** |
+| 5. Scales vertically | 5. **Scales Horizontally** |
+| 6. Upgrades/maintenance without downtime is hard | 6. **Seamless Upgrades/maintenance without downtime** |
+| 7. Can become very costly over time | 7. **Cheaper than SQL** over time |
