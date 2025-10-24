@@ -1,7 +1,7 @@
 ## SQL vs NoSQL
 <img width="1038" height="834" alt="sqlnosql" src="https://github.com/user-attachments/assets/bc4ed9fb-6259-4c07-84ed-600d0bd02196" />
 
-NoSQL
+**NoSQL = Not only SQL / Non-relational**
 - high availability
   - because you sacrifice consistency at a point in time
   - BUT **EVENTUALLY CONSISTENT**
@@ -15,7 +15,7 @@ NoSQL
   - Key-value:
     - collection of k-v pairs
     - **retrieve using 'exact key' (exact match) - session/cache management**
-    - DynamoDB (can be document OR k-v), Cassandra (wide column OR wide col), Redis, Memcached, Riak, Amazon ElastiCache
+    - DynamoDB (can be document OR k-v), Apache Cassandra (wide column OR wide col), Redis, Memcached, Riak, Amazon ElastiCache
   - Wide column:
     - column families
     - **retrieve using 'row key/partition key' then 'clustering columns/column family' then 'column'**
@@ -34,7 +34,7 @@ NoSQL
       GROUP BY
         user_id;
       ```
-    - Hbase, Google Bigtable, ScyllaDB
+    - Apache Hbase, Google Bigtable, ScyllaDB
   - Graph stores:
     - stores nodes/entities, edges/relationships
     - **retrieve using path (of start/end nodes AND 1/more edge(s))**
@@ -241,3 +241,11 @@ vs
 | 6. Upgrades/maintenance without downtime is hard | 6. **Seamless Upgrades/maintenance without downtime, high availability** |
 | 7. Can become very costly over time | 7. **Cheaper than SQL** over time |
 | 8. Smaller dataset | 8. **Large dataset** |
+
+
+Databases
+- Database: A set of related data and the way it is organized
+- Database Management System: Computer software that allows users to interact with the database and provides access to all of the data.
+- The term database is often used to refer to both the database and the DBMS used.
+
+  
