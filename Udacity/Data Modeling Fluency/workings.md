@@ -1,4 +1,4 @@
-## SQL vs NoSQL
+# SQL vs NoSQL
 <img width="1038" height="834" alt="sqlnosql" src="https://github.com/user-attachments/assets/bc4ed9fb-6259-4c07-84ed-600d0bd02196" />
 
 **NoSQL = Not only SQL / Non-relational**
@@ -243,9 +243,89 @@ vs
 | 8. Smaller dataset | 8. **Large dataset** |
 
 
-Databases
+
+# Databases
 - Database: A set of related data and the way it is organized
 - Database Management System: Computer software that allows users to interact with the database and provides access to all of the data.
 - The term database is often used to refer to both the database and the DBMS used.
+- conceptual level (tables) >> logical level (fields) >> physical level (DDL)
 
+Importance of Relational Databases / what makes a database system **a valid relational model**
+- Standardization of data model
+- Flexibility in adding and altering tables
+- Data Integrity
+- Structured Query Language (SQL)
+- Simplicity
+- Intuitive Organization
+
+**Codd's 12 rules**
+- https://en.wikipedia.org/wiki/Codd%27s_12_rules
+- Rule 1: The information rule
+  - All **information** in a relational database is **represented explicitly at the logical level** and in exactly one way – **by values in tables**.
+
+**OLAP vs OLTP**
+* OLAP - complex **analytical**/adhoc queries - incl **aggregations. Optimised for reads**
+* OLTP - **less complex queries, alot records/txns**. **Read, write/insert/update, delete**
+* https://stackoverflow.com/questions/21900185/what-are-oltp-and-olap-what-is-the-difference-between-them
+
+ **Normalise vs denormalise**
+ - Normalise - Reduce copies of data / dec data redundancy, inc data integrity, by structuring relational DB according to a series of 'Normal Forms'
+ - Denormalise - For read-heavy workloads to inc pf
+   - <img width="960" height="540" alt="use-this-version-data-modeling-lesson-2" src="https://github.com/user-attachments/assets/37fe3a71-631e-43ed-ba67-2d31b0cf0316" />
+- Normal Form
+  - 4 objectives
+    - To **free the database from unwanted insertions, updates, & deletion dependencies**
+    - To **reduce the need for refactoring** the database as new types of data are introduced
+    - To make the relational model **more informative to users**
+    - To make the **database neutral to the query statistics**
+    - https://en.wikipedia.org/wiki/Database_normalization
+  - How to reach **First Normal Form (1NF)**:
+    - Atomic values: **each cell contains unique and single values**
+      - **Single => cant divide into smaller units/parts**
+      - **NOT a list/array/nested structure**
+        - list - of phone numbers - 555-1234, 555-5678
+        - composite value - address - 123 Main St, Anytown, SG 90210
+        - nested/repeating groups of items - { "Math": 85, "Science": 92 }
+      - eg what we want
+        ```
+        Before
+        Table (Before 1NF)	Student_ID	Courses
+        Row 1	              101	        Math, History, Art
+        vs
+        After
+        Table (After 1NF)	Student_ID	Course
+        Row 1	            101	        Math
+        Row 2	            101	        History
+        Row 3	            101	        Art
+        ```
+    - Be able to add data records without altering tables (ie add/remove cols)
+    - **Separate different relations into different tables** - eg customer table, customer ID table, sales table
+      ```
+      customer table - customer_id|customer_name|customer_email
+      customer_id table - store_id|customer_id
+      sales table - customer_name|amount
+      music_awards table - music_award|year|winning_bandname
+      lead_singer table - bandname|lead_singer
+      ```
+    - Keep relationships between tables together with **foreign keys**
+  - **Second Normal Form (2NF):**
+    - Have reached 1NF
+    - All columns in the table must rely on the **Primary Key** - **NO COMPOSITE KEYS**
+  - **Third Normal Form (3NF):**
+    - Must be in 2nd Normal Form
+    - **No transitive dependencies**. Remember, "transitive dependencies you are trying to maintain" is that to get from A-> C, you want to avoid going through B.
+      - ```
+        music_awards table - music_award|year|winning_bandname
+        lead_singer table - bandname|lead_singer
+        ```
+      - eg we use music_award AND year to get to winning_bandname, not to get to lead_singer in the same table
+        - **dont want dupe 'lead_singer'/data in a col in the same table (like below)**
+        - ```
+          denormalised awards table - music_award|year|winning_bandname|lead_singer
+          ```
+  - When to use 3NF:
+    - When you want to update data, we want to be able to do in just 1 place. We want to **avoid updating 'multiple dupe/related records' in a 'denormalised Customers Detail' table**
+    - **Maximum normal form to attempt = 3NF**
   
+  
+
