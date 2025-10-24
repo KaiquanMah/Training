@@ -398,3 +398,40 @@ Importance of Relational Databases / what makes a database system **a valid rela
   - https://bluepi-in.medium.com/deep-diving-in-the-world-of-data-warehousing-78c0d52f49a
 
 
+
+
+# DynamoDB
+- Amazon DynamoDB is a fully managed proprietary NoSQL database service
+- Supports key-value and document data structures
+- **serverless database, no need to provision or manage the underlying infrastructure**
+- can handle millions of requests per second (2-4 milisecond queries on well-designed DynamoDB tables)
+  - **in-memory caching** (microsecond queries)
+- Use cases
+  - [CX] Customer facing application - fast request-responses, dec latency - mobile, web app
+  - [CX] AB test / personalisation - adtech
+  - [Big data collection] collect huge vol of data from mobile apps - IoT, gaming
+- Creating a table in DynamoDB
+  - **Requires only a table name and a Primary Key** (no need to know the whole schema)
+  - **PK data types: string/number/binary**
+  - Click 'Create table'
+  - <img width="462" height="235" alt="image" src="https://github.com/user-attachments/assets/569c78c3-05bc-4902-96b0-88ef464ef731" />
+- Data in DynamoDB
+  - **Item = Equivalent to a "row"** or a "record" in relational database
+  - **Attributes = Group of attributes** makes up an item. Similar to "fields" or "columns" in a relational database
+    - <img width="241" height="272" alt="image" src="https://github.com/user-attachments/assets/f08518f6-6a2b-4015-b467-9a4e95e96f18" />
+    - <img width="224" height="154" alt="image" src="https://github.com/user-attachments/assets/a0b3c274-e350-49f0-a9a0-9b7517750730" />
+    - Change from 'tree' to 'text' to check your 'item data' in JSON format
+      - <img width="257" height="158" alt="image" src="https://github.com/user-attachments/assets/e70fcf4c-f88e-4671-bf7e-b57fbb7fad85" />
+    - DynamoDB JSON
+      - AttributeName >> datatype (eg 'S') >> value
+      - <img width="187" height="181" alt="image" src="https://github.com/user-attachments/assets/4f04be0b-3232-49b2-993a-bc45bf1bce20" />
+  - **Maximum Record/Item size in DynamoDB is 400 KB**
+  - You should **not be storing large objects** such as **images** in DynamoDB (DynamoDB does not support **Blob data types**)
+  - DynamoDB **seamlessly handles schema evolution**
+    - **each record/item can have diff attributes**
+      - <img width="805" height="288" alt="image" src="https://github.com/user-attachments/assets/c98e6683-f405-45c5-97b3-8e3fd966095c" />
+- https://aws.amazon.com/dynamodb/
+- https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf
+
+  
+
