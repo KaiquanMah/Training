@@ -146,11 +146,39 @@ Relational DB
 
 
 ## ACID
-- Atomicity: **All or nothing for transaction completion**.
+- Atomicity: **Whole/All or nothing for transaction completion**.
+  - eg xfer amt from A to B = {withdraw from A, deposit into B}
+  - if any sub-item fails => the whole txn fails
+  - if ALL sub-item succceeds => the whole txn succeeds
 - Consistency: The database must be **consistent no matter what happens 100% of the time**
+  - Move DB from 1 'valid state' to another 'valid state'
+  - If txn violates any integrity constraint/rules -> DB rejects/rolls back txn to 'previous valid state'
   - **Eventual Consistency** = NoSQL databases offer the idea of eventual consistency. Eventual Consistency means - **when a transaction is executed, it might not update all the copies of the data right away. But the data would be eventually be updated.**
-- **Isolation**: **No transaction** should **affect** the existence of **any other transaction**.
-<img width="1375" height="666" alt="isol" src="https://github.com/user-attachments/assets/81ff5926-ef9e-4fce-b47f-4eb762d7ff01" />
+- **Isolation**: **No transaction** should **affect the integrity/existence** of **any other transaction**.
+  - **each txn can run independently**
+  - **order does not matter**
+  - **low isolation - simultaneous 'dirty reads of intermediate results', 'lost updates' by many users**
+    ```
+    txn A, B - simultaneous read, update, commit
+    the last txn overwrites the earlier txn
+    A read 100, B read 100
+    A +10, commit (total: 110)   -> lost
+    B +20, commit (total: 120)  -> B overwrites A
+    ---------------------------
+    vs Correct total: 130 (from A's +10 and B's +20)
+    ```
+  - **vs high isolation - use more resources/resource locks, txns block each other**
+    - **even if txns happened in parallel**
+    - **system behaves as if txns ran sequentially**
+    - **people cannot see intermediate results**
+      ```
+      txn A locks resource/table, blocks txn B (from starting/seeing incorrect intermediate data until txn A is completed)
+      txn A completed
+      txn B locks resource
+      txn B completed
+      Correct total: 130 (from A's +10 and B's +20)
+      ```
+  - <img width="1375" height="666" alt="isol" src="https://github.com/user-attachments/assets/81ff5926-ef9e-4fce-b47f-4eb762d7ff01" />
   - Isolation ensures that multiple transactions can occur concurrently without leading to the inconsistency of the database state. Transactions occur independently without interference.
   - **Changes occurring in a particular transaction will not be visible to any other transaction until that particular change in that transaction is written to memory or has been committed.**
   - This property ensures that the **execution of transactions concurrently will result in an 'equivalent state achieved if txns were executed serially in some order'.**
