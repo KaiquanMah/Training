@@ -416,7 +416,9 @@ Importance of Relational Databases / what makes a database system **a valid rela
   - Click 'Create table'
   - <img width="462" height="235" alt="image" src="https://github.com/user-attachments/assets/569c78c3-05bc-4902-96b0-88ef464ef731" />
 - Data in DynamoDB
+  - **Table = Collection of items**
   - **Item = Equivalent to a "row"** or a "record" in relational database
+    - **= Collection of attributes, w PK/unique identifier**
   - **Attributes = Group of attributes** makes up an item. Similar to "fields" or "columns" in a relational database
     - <img width="241" height="272" alt="image" src="https://github.com/user-attachments/assets/f08518f6-6a2b-4015-b467-9a4e95e96f18" />
     - <img width="224" height="154" alt="image" src="https://github.com/user-attachments/assets/a0b3c274-e350-49f0-a9a0-9b7517750730" />
@@ -426,10 +428,15 @@ Importance of Relational Databases / what makes a database system **a valid rela
       - AttributeName >> datatype (eg 'S') >> value
       - <img width="187" height="181" alt="image" src="https://github.com/user-attachments/assets/4f04be0b-3232-49b2-993a-bc45bf1bce20" />
   - **Maximum Record/Item size in DynamoDB is 400 KB**
+  - Unlimited num of items per table
   - You should **not be storing large objects** such as **images** in DynamoDB (DynamoDB does not support **Blob data types**)
   - DynamoDB **seamlessly handles schema evolution**
     - **each record/item can have diff attributes**
       - <img width="805" height="288" alt="image" src="https://github.com/user-attachments/assets/c98e6683-f405-45c5-97b3-8e3fd966095c" />
+  - <img width="1366" height="660" alt="tablenosql" src="https://github.com/user-attachments/assets/bb947d08-7aab-4a40-9384-933041433168" />
+  - <img width="1367" height="687" alt="itemnosql" src="https://github.com/user-attachments/assets/90ab1369-5dc5-47bf-927f-774a6e5aef22" />
+  - <img width="1360" height="691" alt="attriburesnosql" src="https://github.com/user-attachments/assets/d2f301e5-9ed9-40e3-a698-112fb2b5072a" />
+  - <img width="1386" height="631" alt="primakeynosql" src="https://github.com/user-attachments/assets/9b12d61a-2a9c-463a-8cd7-b99036e841b7" />
 - https://aws.amazon.com/dynamodb/
 - https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf
 
