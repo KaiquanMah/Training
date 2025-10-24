@@ -11,11 +11,31 @@
   - Document-oriented
     - **Docs = JSON, BSON (OR JSONB = binary JSON = binary-encoded serialisation of JSON-like docs for efficient storage, scan speed), XML** - self-contained, usu nested, flex, schema-less
     - **retrieve using 'document ID' OR fields (exact match) - content management system**
-    - MongoDB (can be document OR k-v), DynamoDB, CouchDB, Couchbase, Firebase Firestore
+    - MongoDB (can be document OR k-v), DynamoDB, Apache CouchDB, Couchbase, Firebase Firestore
+      - MongoDB
+        - MongoDB is a general-purpose, document-based, distributed database
+        - Uses **JSON format**
+        - Offers Query APIs
+        - https://www.mongodb.com/
+        - https://en.wikipedia.org/wiki/MongoDB
+      - Apache CouchDB
+        - Open-source document-oriented NoSQL database, implemented in Erlang
+        - CouchDB uses **multiple formats and protocols** to store, transfer, and process its data
+        - It uses **JSON to store data**, **JavaScript** as its **query** language using **MapReduce**, and **HTTP for an API**
+        - https://couchdb.apache.org/
   - Key-value:
     - collection of k-v pairs
     - **retrieve using 'exact key' (exact match) - session/cache management**
     - DynamoDB (can be document OR k-v), Apache Cassandra (wide column OR wide col), Redis, Memcached, Riak, Amazon ElastiCache
+      - Cassandra
+        - Open-source, distributed NoSQL database
+        - Originally developed internally at Facebook and was released as an open-source project in July 2008
+        - continuous availability (zero downtime)
+        - high performance
+        - linear scalability that modern applications require
+        - while also offering operational simplicity and effortless replication across data centers and geographies
+        - https://cassandra.apache.org/_/index.html
+        - https://www.ibm.com/think/topics/cassandra
   - Wide column:
     - column families
     - **retrieve using 'row key/partition key' then 'clustering columns/column family' then 'column'**
@@ -34,7 +54,12 @@
       GROUP BY
         user_id;
       ```
-    - Apache Hbase, Google Bigtable, ScyllaDB
+    - Apache HBase, Google Bigtable, ScyllaDB
+      - Apache HBase
+        - Open-source non-relational distributed database
+        - **Modeled after Google's Bigtable and written in Java**
+        - Developed as part of Apache Software Foundation's Apache Hadoop project and **runs on top of HDFS**
+        - https://hbase.apache.org/
   - Graph stores:
     - stores nodes/entities, edges/relationships
     - **retrieve using path (of start/end nodes AND 1/more edge(s))**
@@ -54,6 +79,40 @@
           friend2.name AS Recommended_Friend
       ```
     - Neptune Neo4J, Titan, ArangoDB (multi-model)
+- NoSQL data modeling principles
+  - denormalised, no JOINs
+  - Work backwards
+  - **1 Understand the business problem first, before creating schemas**
+    - You have to **know the application and future requirements**
+    - Qns to ask
+      - SQL vs NoSQL
+        - nature, type of dataset
+        - vol of data, vol growth pattern
+        - how apps query ur data / Understand ur application's access patterns
+        - filters
+        - keys
+        - expressions/aggregations
+        - can app handle eventual consistency? YES
+        - prioritise HA, scalability over strong consistency? YES
+        - little OR many schema changes over time? many schema changes (NoSQL)
+      - which NoSQL DB
+        - cloud-native vs self-managed data centre
+        - which type of NoSQL DB - 4 types above
+        - data encryption, compliance
+        - SLA
+        - existing contracts w NoSQL vendors
+      - tips
+        - application monitoring, alert - spike in traffic
+        - load test b4 deploy application, simulate forseeable failure scenarios
+        - **set your Read Capacity Unit (RCU) / Write Capacity Unit (WCU) for provisioned capacity mode tables**
+          - **= number of strongly consistent reads/writes per second for ur application**
+          - **capacity mode = {on-demand, provisioned}**
+            - https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/capacity-mode.html
+  - **2 create/design initial table schemas**
+    - **Create AS FEW SCHEMAS** as possible
+  - **3 evolve/update data model iteratively**
+    - **Data model can change as needs change**
+    - Be willing to iterate and be agile with the process
 
 
 
@@ -139,7 +198,11 @@ Relational DB
 - Examples
   - MySQL
   - PostgreSQL, Supabase
-  - Redshift
+  - Amazon Redshift (OLAP), Amazon Aurora DB (OLTP)
+    - https://aws.amazon.com/rds/aurora/global-database/
+  - Google Spanner
+    - **relational DB, BUT horizontally scalable (data centres, global)**
+    - https://cloud.google.com/spanner
   - Oracle
   - MariaDB
   - MS SQL Server
@@ -226,7 +289,12 @@ vs
     - **sacrifice C/consistency - 2 indpt sides accept conflicting writes**
   - **possible BUT NOT PRACTICAL for a NoSQL/distributed system**
 <img width="1135" height="717" alt="cap-ca-cp-ap" src="https://github.com/user-attachments/assets/fad680c1-20b8-4831-8b6e-2fff9026bcc3" />
-
+- RDBMS vs MongoDB vs Cassandra - CAP Theorem https://bikas-katwal.medium.com/mongodb-vs-cassandra-vs-rdbms-where-do-they-stand-in-the-cap-theorem-1bae779a7a15
+- CAP theorem
+  - https://www.ibm.com/think/topics/cap-theorem
+  - https://dzone.com/articles/understanding-the-cap-theorem
+  - https://en.wikipedia.org/wiki/CAP_theorem
+  - https://ravindraelicherla.medium.com/cap-theorem-simplified-28499a67eab4
 
 
 
