@@ -1,0 +1,153 @@
+In this lab, you’ll learn about using Vertex AI's Generative AI Evaluation Service to measure a generative AI-specific metric on a generative AI application.
+
+This API is designed for you to score your application’s responses on a variety of metrics, 
+- either in comparison to ground-truth data or 
+- by using another model to score your app’s output. 
+In this way, you can measure your application’s performance on multiple metrics, quantifying improvements made via prompt engineering, tuning a model, or other adjustments.
+
+
+
+
+In this lab you’ll learn to:
+Understand pointwise vs. pairwise evaluation paradigms
+Understand different evaluation metrics available to you
+Understand the input features required for different evaluation metrics
+Run an evaluation
+
+
+
+
+
+
+
+
+
+
+Understanding evaluation paradigms
+Evaluating generated text isn’t simple. If a group of people were given two articles about how mountain ranges form and were asked to score the articles, some people might prefer version A and others version B. Nevertheless, when working with machine learning models, engineers value measuring performance and incremental improvements.
+
+The Generative AI Evaluation Service evaluates Generative AI applications. You can say “applications” rather than “models” because the evaluations work ON responses, which are a result of multiple components including 
+- the foundation model itself, 
+- any additional tuned layers, 
+- the prompt’s instructions, 
+- any exemplars provided, and 
+- any retrieved information passed into the model as context.
+https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview
+
+The Generative AI Evaluation Service describes its offerings as belonging to one of two paradigms: pointwise and pairwise.
+1
+POINTWISE evaluations evaluate a generative AI application by SCORING it on selected metrics. Improvements to the model or prompt should result in better scores on these metrics.
+2
+PAIRWISE evaluations don’t offer objective scores, but instead CHOOSE A WINNER from the outputs of 2 generative AI applications. By choosing a preferred output for many different prompts, we can see which application performs better on that range of tasks.
+https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset#pointwise_model-based_metrics
+https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset#pairwise_model-based_metrics
+https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset#computation-based_metrics
+
+
+
+
+In addition to understanding the paradigms above, it’s important to understand two different categories of available metrics:
+1
+COMPUTATION-based metrics COMPARE GENERATED OUTPUT TO A GROUND-TRUTH reference that is considered the ideal response.
+2
+MODEL-based metrics don’t compare outputs to a ground truth, but instead use a generative AI MODEL to EVALUATE the output.
+https://cloud.google.com/vertex-ai/generative-ai/docs/models/metrics-templates
+
+
+The Gen AI Evaluation Service API allows you to use a mix of computation-based and model-based metrics. You can use these metrics to guide your prompt engineering improvements by iterating rapidly and evaluating on a small batch of prompts (and their ideal responses, if using computation-based metrics).
+
+In this lab, you'll focus on using the Gen AI Evaluation Service API to measure improvements to an application’s prompt.
+https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview
+
+
+
+
+
+
+
+========================
+
+
+
+
+
+
+Task 1. Initialize Vertex AI in a Colab Enterprise notebook
+Navigate to Colab Enterprise by searching for it using the search bar located at the top of the console.
+
+If prompted, enable required APIs.
+
+Click the + button to create a new notebook.
+
+Click File from the menu bar and rename the notebook to cymbal-eval-notebook.
+
+Paste the following code into the top cell and run it with Shift + Return. If you don’t already have an active notebook runtime, running a cell in a Colab Enterprise notebook will trigger it to create one for you and connect the notebook to it. When a runtime is allocated for the first time, you may be presented with a pop-up window to authorize the environment to act as your Qwiklabs student account.
+```
+%pip install --upgrade --quiet google-cloud-aiplatform google-cloud-aiplatform[evaluation]
+```
+
+
+
+After the cell completes running, indicated by a checkmark to the left of the cell, the packages should be installed. To use them, we’ll restart the runtime. Click Runtime from the upper left corner of the notebook.
+
+Select Restart Session > select Yes. The runtime will restart, indicated by clearing the green checkmark and the cell run order integer next to the cell you ran above.
+
+Click + Code to create a new code cell and paste in the import & configuration code below. Press Shift + Return to run the cell.
+```
+import datetime
+import nest_asyncio
+import pandas as pd
+from IPython.display import display, Markdown, HTML
+
+import vertexai
+from vertexai.generative_models import GenerativeModel
+
+pd.set_option('display.max_colwidth', None)
+```
+
+
+Paste the following into a new code block & run it to initialize Vertex AI.
+round1
+```
+PROJECT_ID = "qwiklabs-gcp-04-a60b4d3a4b6f"  
+LOCATION = "us-west1"
+import vertexai
+vertexai.init(project=PROJECT_ID, location=LOCATION)
+```
+
+
+round2
+```
+PROJECT_ID = "qwiklabs-gcp-00-99f245467a0e"  
+LOCATION = "us-west1"
+import vertexai
+vertexai.init(project=PROJECT_ID, location=LOCATION)
+```
+
+
+
+
+
+
+
+
+
+========================
+
+
+
+For the remaining steps, please refer to the Jupyter notebook
+
+
+
+Reflections
+- Unable to complete task1 - google not recognising my notebook
+- Unable to complete task2 step 4 and onwards - message: "Permission denied on resource project qwiklabs-gcp-04-a60b4d3a4b6f.". Also need to enable billing on project BUT WE DO NOT HAVE ACCESS
+- Unable to complete tasks 3 and 4 for the remaining parts of the lab due to the permission and billing issue
+- Not sure what was wrong with the provisioning of resources. I tried the lab twice and during both times, I encountered the same permission and billing issues.
+
+
+
+
+
+
