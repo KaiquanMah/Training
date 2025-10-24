@@ -270,6 +270,12 @@ Importance of Relational Databases / what makes a database system **a valid rela
 
  **Normalise vs denormalise**
  - Normalise - Reduce copies of data / dec data redundancy, inc data integrity, by structuring relational DB according to a series of 'Normal Forms'
+   - song table
+     - <img width="469" height="244" alt="table4" src="https://github.com/user-attachments/assets/241927b2-5a7e-48bd-a0ba-dcadc6582d97" />
+   - album table
+     - <img width="467" height="138" alt="table5" src="https://github.com/user-attachments/assets/c9476087-26a0-4edb-bf05-1e852658623b" />
+   - artist table
+     - <img width="590" height="206" alt="table6" src="https://github.com/user-attachments/assets/dc488046-a233-4206-bce3-b163baa5e7bc" />
  - Denormalise - For read-heavy workloads to inc pf
    - <img width="960" height="540" alt="use-this-version-data-modeling-lesson-2" src="https://github.com/user-attachments/assets/37fe3a71-631e-43ed-ba67-2d31b0cf0316" />
 - Normal Form
@@ -326,6 +332,69 @@ Importance of Relational Databases / what makes a database system **a valid rela
   - When to use 3NF:
     - When you want to update data, we want to be able to do in just 1 place. We want to **avoid updating 'multiple dupe/related records' in a 'denormalised Customers Detail' table**
     - **Maximum normal form to attempt = 3NF**
+- **Denormalisation**
+  - https://en.wikipedia.org/wiki/Denormalization
+  - **improve read performance by losing some write (insert, update, delete) performance**
+  - eg
+    ```
+    denormalised customer table - customer_name|country|city|amount
+    denormalised shipping table - customer_name|country|city|item -> we repeat customer_name, country, city information across tables
+    ```
+  - data modeler/designer is responsible to keep the data consistent
   
-  
+
+
+**Dimension vs Fact Tables**
+- **Dimension table**
+  - when (eg date table), where (eg store_location table), what (eg pdt table) <something> happened
+  - https://en.wikipedia.org/wiki/Dimension_(data_warehouse)
+- **Fact table**
+  - measurement/**metric**/facts of a biz process
+  - **how many** units, etc (eg sales table)
+  - can be aggregates
+  - values are usu int/numbers
+  - https://en.wikipedia.org/wiki/Fact_table
+- ```
+  Dim_Date    Id (PK)|Date|Day|Day_of_Week|Month|Month_Name|Quarter|Quarter_Name|Year
+  Dim_Store   Id (PK)|Store_Number|State_Province|Country
+  Dim_Product Id (PK)|EAN_Code|Product_Name|Brand|Product_Category
+  Fact_Sales  Date_Id (FK)|Store_Id (FK)|Product_Id (FK)|Units_Sold
+  ```
+- <img width="1002" height="648" alt="dimension-fact-tables" src="https://github.com/user-attachments/assets/cedfde76-5fd6-464b-ad8b-ceb25702cde8" />
+- https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model
+- dimension and fact tables fit in well with a star schema
+
+
+**Star vs snowflake schema**
+- star schema
+  - simplest 'data mart' style
+  - resembles a star shape
+  - **fact table @ the centre, dimension table surround the fact table**
+    - **star points = the set of dimension tables** = {Dim_Date, Dim_Store, Dim_Product}
+  - **1/more fact tables** tt reference **ANY NUMBER OF dimension tables**
+  - https://en.wikipedia.org/wiki/Star_schema
+  - Gd
+    - Getting a table into 3NF is a lot of hard work, JOINs can be complex even on simple data
+    - **Star schema allows for the relaxation of these rules and makes queries easier with simple JOINS**
+    - **Denormalise tables, simplify queries/JOINs**
+    - **Fast aggregations**
+      - **Aggregations** perform calculations and clustering of our data, **so we can reuse AND do not have to do aggregations again in our application**. Examples : COUNT, GROUP BY etc
+    - <img width="960" height="540" alt="use-this-version-data-modeling-lesson-2-1" src="https://github.com/user-attachments/assets/4add1bed-4df6-46f8-ac46-9b0b80a16c15" />
+  - Bad
+    - **Issues w denormalisation - dec data quality/integrity, dec query flexibility (cuz u design ur data model according to ur queries -> difficult to do other types of queries / adhoc queries)**
+    - supports 1-to-1 relationships
+      - abstract away/simplify many-to-many relationships to fit the data model
+- snowflake schema
+  - Star Schema is a special, simplified case of the snowflake schema
+  - **Snowflake schema (usu 3NF) is more normalised than Star schema (usu at least 1NF, usu not 2NF/3NF)**
+  - fact table connected to multiple dimension tables
+    - **immediate dimension tables connected to dimension tables @ a subsequent layer**
+    - **multiple levels of relationships, child tables have multiple parents**
+    - <img width="1459" height="881" alt="Snowflake-schema" src="https://github.com/user-attachments/assets/be513dbb-2143-4f58-9a00-b9d140d7af4c" />
+    - <img width="1185" height="645" alt="Snowflake-schema-example" src="https://github.com/user-attachments/assets/acee5c93-7088-4280-a245-6bf728b550cd" />
+  - Gd
+    - supports many-to-many relationships
+  - https://en.wikipedia.org/wiki/Snowflake_schema
+  - https://bluepi-in.medium.com/deep-diving-in-the-world-of-data-warehousing-78c0d52f49a
+
 
