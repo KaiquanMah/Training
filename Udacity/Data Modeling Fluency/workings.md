@@ -440,5 +440,32 @@ Importance of Relational Databases / what makes a database system **a valid rela
 - https://aws.amazon.com/dynamodb/
 - https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf
 
-  
+
+DynamoDB Keys
+- **simple PK = partition key = hash attribute**
+  - <img width="543" height="257" alt="pk" src="https://github.com/user-attachments/assets/46965606-e7a0-488a-adfe-bc05fc675c46" />
+  - DynamoDB uses hash fn to distribute data across ALL PARTITIONS
+    - **Input to hash fn: PK/partition key values**
+    - **Output from hash fn: partition_num**
+    - **items w same partition_num -> store tgt**
+  - 1 DynamoDB data partition = 10GB
+- **composite PK = {partition key AND sort/range key}**
+  - <img width="539" height="171" alt="composite-pk" src="https://github.com/user-attachments/assets/1061a93c-087a-47d9-ad4b-a2c9e1a41a41" />
+  - NoSQL 'sort key' -> equivalent to relationalDB's 'FK'
+  - if 2 items have the same 'partition key' => they must have diff 'sort key'
+  - **items w same 'partition key' are close tgt**
+    - **then sort on 'sort key'**
+  - partition key and sort key
+    - <img width="612" height="394" alt="partitionkey-and-sortkey" src="https://github.com/user-attachments/assets/4ac56e41-bcfc-492f-aafd-55f3fa72fb84" />
+  - 2 mandatory attributes (partition key and sort key) needed at the start
+    - <img width="186" height="119" alt="2-mandatory-attributes" src="https://github.com/user-attachments/assets/c068918f-3ee4-44d4-a98d-b35ca2f68c35" />
+  - same PK, diff sort key
+    - <img width="628" height="258" alt="same-pk-diff-sortkey" src="https://github.com/user-attachments/assets/75c4b537-c29e-4bfa-8c8e-9d8444959d3f" />
+  - AWS DynamoDB item query screen - change from 'scan' to 'query'
+    - <img width="801" height="368" alt="dynamodb-item-query-screen" src="https://github.com/user-attachments/assets/67f88c3e-2491-45f9-94d4-86e4fc62fdf8" />
+
+
+
+
+
 
