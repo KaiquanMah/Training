@@ -233,10 +233,11 @@ vs
 ## SQL vs NoSQL Recap
 | SQL | NoSQL |
 | :--- | :--- |
-| 1. **Complex queries with joins** | 1. Large number of **simple look-up queries** |
-| 2. Structured data with **relations** | 2. Structured/semi-structured, no relations |
+| 1. **Complex queries with joins, aggregations** | 1. Large number of **simple look-up queries, fast reads** |
+| 2. Structured data with **relations** | 2. Structured/semi-structured, no relations, **need to be able to store different data type formats** |
 | 3. **Predefined table schema** | 3. No need of predefined table schema |
 | 4. **ACID** Guarantee on each transaction | 4. Follows **CAP Theorem** |
 | 5. Scales vertically | 5. **Scales Horizontally** |
-| 6. Upgrades/maintenance without downtime is hard | 6. **Seamless Upgrades/maintenance without downtime** |
+| 6. Upgrades/maintenance without downtime is hard | 6. **Seamless Upgrades/maintenance without downtime, high availability** |
 | 7. Can become very costly over time | 7. **Cheaper than SQL** over time |
+| 8. Smaller dataset | 8. **Large dataset** |
