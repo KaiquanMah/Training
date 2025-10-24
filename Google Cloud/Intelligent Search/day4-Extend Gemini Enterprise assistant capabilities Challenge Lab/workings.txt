@@ -1,0 +1,734 @@
+Upon creation, a Gemini Enterprise assistant has the ability to search and respond to natural language queries about your content.
+
+
+In this lab, you will demonstrate your ability to extend its capabilities beyond the basics. Specifically, you will enhance the Gemini Enterprise assistant with the following:
+- a Gmail action to allow the assistant to write and send emails
+- Grounding with Google Search to allow the assistant to base its responses on up-to-date public information found using Google Search
+- the ability to refer queries to a custom Conversational Agent that has been provided a Tool to invoke a Cloud Run function
+
+
+
+In this challenge lab, you will demonstrate your ability to:
+Deploy a Gemini Enterprise app
+Create an OAuth Consent Screen & Client
+Enable the Gemini Enterprise Gmail action
+Allow your assistant to ground its responses with Google Search
+Deploy a Cloud Run function and an associated OpenAPI Tool to allow a conversational agent to be able to invoke your function
+Integrate your conversational agent into your Gemini Enterprise app
+
+
+
+
+
+
+
+
+======================================
+
+
+
+Task 1. Add content to Google Drive
+In this task, you will download files from a Cloud Storage bucket, upload them to a Google Drive folder, and create a Google Calendar event. This prepares demo data for use in subsequent lab activities.
+
+Navigate to Cloud Storage > Buckets and click on the existing bucket with the name: qwiklabs-gcp-02-f24785f0fe3c.
+
+Download the files listed below to your local system to use as demo data:
+
+Cymbal Shops Q4 Sales Data by City.xlsx
+Cymbal Shops Sales Analysis Report.docx
+In the Incognito window where you have logged into the Google Cloud console, create a new tab and navigate to drive.google.com.
+
+Upload the documents you downloaded from Cloud Storage to your Google Drive by dragging the files to your Google Drive browser tab or using New > File upload.
+Output:
+https://cdn.qwiklabs.com/ht9pu2Y1UrCnz0jiI0YOEYvEAKAzSYkDAKA%2BunbmsqY%3D
+
+
+
+
+
+======================================
+
+
+Task 2. Configure a Gemini Enterprise Identity Provider, create a Data Store, and create a Gemini Enterprise app
+
+In this section, you will configure an agent to use Google Identity and create data stores for Google Drive and Calendar. You will also create a Gemini Enterprise app, linking it to the created data stores.
+
+In the Cloud Console, navigate to AI Applications and click Continue and activate the API.
+
+Configure AI Applications to use Google Identity as your identity provider for the 'global' location.
+
+
+
+Create a Google Drive data store in the global region with access to all folders and drives. 
+Set the Data connector name to 'Cymbal Drive'.
+
+
+
+Create a Gemini Enterprise app named 'Cymbal Gemini Enterprise' and company named 'Cymbal Shops' in the global location.
+old
+https://vertexaisearch.cloud.google.com/home/cid/75f0efe1-f0dc-4dba-ad9d-cdf026da845d
+new
+https://vertexaisearch.cloud.google.com/home/cid/afc09b1f-00bf-4afa-a3f8-c7de7bf6e5f5
+
+
+Now connect the datastore named 'Cymbal Drive' to the Gemini Enterprise App named 'Cymbal Gemini Enterprise'.
+
+
+
+
+
+
+
+======================================
+
+
+
+Task 3. Create an OAuth Consent Screen and Configure the Gmail Action
+
+In this section, you will configure an OAuth consent screen for your Gemini Enterprise app, enabling user authorization. You will also create an OAuth client and add a Gmail action to your Gemini Enterprise app, allowing the AI assistant to generate email drafts. In order for the AI assistant to take actions on a user’s behalf, the user must grant access to your app.
+
+In the Google Auth Platform, create an OAuth consent screen for your app. 
+Name it 'Cymbal Shops Gemini Enterprise'. 
+It should be intended for an Internal Audience with 
+'student-00-90f04390e32d@qwiklabs.net' as User support email and Email addresses.
+
+Create an OAuth Client of type 'web application' named 'Gemini Enterprise Client for Cymbal' with the required Gemini Enterprise authorized redirect URI.
+```
+Under Authorized redirect URIs, add 
+https://vertexaisearch.cloud.google.com/oauth-redirect
+```
+client ID
+760323389195-ui3qjghu8p3ev6vftrq0qackd7sjn8uh.apps.googleusercontent.com
+client secret
+GOCSPX-abcdefg123GHJ098123
+
+
+Add a Google Gmail action to your Gemini Enterprise app to enable the AI assistant to generate email drafts from Gemini Enterprise. Provide the Action connector name 'Cymbal gmail action'.
+
+Output:
+https://cdn.qwiklabs.com/BdCVoqLW0aWbGBEdTzD%2FYa63esQqMevLprMhkyGsSsI%3D
+
+
+
+
+
+======================================
+
+
+
+Task 4. Create a BigQuery table to store feedback
+Over the next few tasks, you will enable the Gemini Enterprise assistant to record employees' feedback on their experiences in Cymbal Shops stores.
+
+In this task, you'll create a table to serve as the destination to store incoming feedback.
+
+Open a Cloud Shell terminal by selecting your Cloud Console window, then typing on your keyboard the G key and then the S key.
+
+Click the Authorize button when prompted to authorize Cloud Shell.
+
+In your Cloud Shell terminal, paste the following to create a employee_feedback_schema.json file to define the schema for a BigQuery table which will be used to record employee feedback:
+```
+cat > employee_feedback_schema.json << EOF
+[
+  {
+    "name": "feedback",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "store_number",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  }
+]
+EOF
+```
+
+Create the BigQuery dataset and table by running the following in Cloud Shell:
+```
+bq --location=US mk -d feedback
+bq mk -t feedback.employee_feedback employee_feedback_schema.json
+```
+
+
+
+```
+student_00_90f04390e32d@cloudshell:~ (qwiklabs-gcp-02-f24785f0fe3c)$ bq --location=US mk -d feedback
+bq mk -t feedback.employee_feedback employee_feedback_schema.json
+Dataset 'qwiklabs-gcp-02-f24785f0fe3c:feedback' successfully created.
+Table 'qwiklabs-gcp-02-f24785f0fe3c:feedback.employee_feedback' successfully created.
+```
+
+Once the dataset and table have been successfully created, you can close the Cloud Shell panel by clicking the X in the upper right of the terminal panel.
+
+
+
+
+
+
+
+======================================
+
+
+Task 5. Create a Cloud Run Function to record feedback
+
+In this task, you'll create the Cloud Run function that will take requests sent as JSON and write them to the table you created above.
+
+Using the search bar at the top of the Cloud Console, navigate to Cloud Run.
+
+From the options at the top of the Cloud Run console, select Write a Function.
+
+In the service creation menu, keep the Functions option selected ("Use an inline editor to create a function").
+https://cdn.qwiklabs.com/1ov8lHZnRaGXnbU7Wf0VAdvmVnHlUPttxCsjjwWiKlM%3D
+
+
+
+Under the Configure header, enter a Service name of 'record-feedback'.
+
+Set the Region to us-east1.
+
+Under the Endpoint URL header, copy the provided URL and paste it in a text document. You will need to access it later.
+
+Set the Runtime to Python 3.12.
+
+Under the Authentication header, select Require authentication.
+
+Keep the other settings as they are and click Create. The Source tab for the function will be loaded.
+
+Rename the Function entry point to record_feedback.
+
+Click the requirements.txt file on the left, delete its contents, and paste in the following:
+```
+functions-framework==3.*
+google-cloud-bigquery
+```
+
+
+Click the main.py file on the left, delete its contents, and paste in the following code. This function will take the feedback details sent in JSON as a POST request and write those values to a new row in the BigQuery table you created earlier:
+```
+import functions_framework
+from google.cloud import bigquery
+
+@functions_framework.http
+def record_feedback(request):
+    """Writes employee feedback to BigQuery.
+    Args:
+        request (flask.Request): A request object with JSON
+          containing fields for feedback and a store_number.
+    Returns:
+        JSON response containing a 'message' field indicating the
+          status of the request.
+    """
+    request_json = request.get_json(silent=True)
+    request_args = request.args
+    print("JSON:" + str(request_json))
+    print("args:" + str(request_args))
+
+    bq_client = bigquery.Client()
+    table_id = "qwiklabs-gcp-02-f24785f0fe3c.feedback.employee_feedback"
+
+    row_to_insert = [
+        {
+        "feedback": request_json["feedback"],
+        "store_number": request_json.get("store_number",0)
+        },
+    ]
+
+    errors = bq_client.insert_rows_json(table_id, row_to_insert)  # Make an API request.
+    if errors == []:
+        return {"message": "New row has been added."}
+    else:
+        return {"message": "Encountered errors while inserting rows: {}".format(errors)}
+```
+
+
+
+
+
+Wait till all the steps of creating the service are completed in the upper left, then click Save and redeploy.
+
+Pause until the Deploying revision activities all show a Completed status message.
+Completed status messages under the Deploying revision header
+https://cdn.qwiklabs.com/RxO3O%2BqVpdTbesXMoqTC46q1PJO6A3rPVkzsHdPoHNM%3D
+
+
+
+
+
+Click Test at the top of the Cloud Run console.
+
+Paste these values into the Configure payload test input field:
+```
+{"feedback": "Great friendly team, especially Anika who helped me find a new vacuum.",
+"store_number": 332}
+```
+
+
+
+At the bottom of the testing pane, click Test in Cloud shell.
+```
+curl -X POST "https://record-feedback-760323389195.us-east1.run.app" \
+-H "Authorization: bearer $(gcloud auth print-identity-token)" \
+-H "Content-Type: application/json" \
+-d '{"feedback": "Great friendly team, especially Anika who helped me find a new vacuum.",
+"store_number": 332}'
+```
+
+The Cloud Shell terminal window will open, and a curl command will be prepared for you to call your function. Select the Terminal window and press enter or return on your keyboard to send the command.
+```
+student_00_90f04390e32d@cloudshell:~ (qwiklabs-gcp-02-f24785f0fe3c)$ curl -X POST "https://record-feedback-760323389195.us-east1.run.app" \
+> -H "Authorization: bearer $(gcloud auth print-identity-token)" \
+> -H "Content-Type: application/json" \
+> -d '{"feedback": "Great friendly team, especially Anika who helped me find a new vacuum.", "store_number": 332}'
+{"message":"New row has been added."}
+```
+
+You should see a successful execution response:
+```
+{"message":"New row has been added."}
+```
+Close the Cloud Shell Terminal by pressing the X in the upper right of the Cloud Shell panel.
+
+
+Cloud Run Fn
+record-feedback
+Region: us-east1
+URL
+https://record-feedback-760323389195.us-east1.run.app
+
+
+
+
+
+
+
+
+Open a new browser tab (or if you are using Chrome, duplicate your current browser tab by right-clicking on it and selecting Duplicate). In the new tab, navigate to BigQuery.
+
+In the BigQuery Explorer pane, select your project ID.
+
+Select the feedback dataset.
+
+Select the employee_feedback table.
+
+Select the Preview tab to see employee feedback that has been recorded. Keep this tab open to return and check for new rows as you work through the other components in this lab.
+
+
+
+
+
+
+
+======================================
+
+
+Task 6. Create a Conversational Agent Tool to call the Cloud Run Function
+Now you can create a Tool in the Conversational Agent console that can call the Cloud Run function. Your conversational agent will be able to use this Tool to record the employee feedback.
+
+Navigate to AI Applications and create a Conversational agent app.
+
+Enable the Dialogflow API.
+
+On the Conversational Agents page, If a project selection pop-up appears, choose your Project ID qwiklabs-gcp-02-f24785f0fe3c and then click Create agent.
+
+On the Get started with Conversational Agents popup, select Build your own.
+
+On the Create agent page, for the agent display name, enter 'Employee Feedback Bot'.
+
+Set the location to 'global' and keep the Conversation start option 'Playbook' selected.
+
+Click Create.
+
+
+
+
+
+Settings>>
+Enable Cloud Logging and Conversation History to activate logging and store conversation records for your agent. Don't forget to save your settings update.
+
+
+
+
+
+Before working with the Playbook, create a 'Tool' named 'Record Employee Feedback' with a Type of 'OpenAPI'.
+
+For a Description, enter 'Used to record employee feedback'.
+
+You will create a Schema of type YAML. Paste the following into the Schema text box:
+```
+openapi: 3.0.0
+info:
+  title: Employee Feedback API
+  version: 1.0.0
+servers:
+  - url: 'YOUR_CLOUD_RUN_FUNCTION_URL'
+paths:
+  /:
+    YOUR_REQUEST_TYPE:
+      summary: Record employee feedback
+      operationId: recordEmployeeFeedback
+      requestBody:
+        description: Employee feedback and store number to record.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeFeedback'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: New row has been added          
+components:
+  schemas:
+    EmployeeFeedback:
+      type: object
+      required:
+        - feedback
+      properties:
+        YOUR_SCHEMA_PROPERTIES
+```
+
+
+
+In the spec you pasted, replace the strings identified in this table with their appropriate values:
+String to Replace		Lab Guidance
+YOUR_CLOUD_RUN_FUNCTION_URL	Your Cloud Run function's URL
+YOUR_REQUEST_TYPE		The request type that should be sent to your function
+YOUR_SCHEMA_PROPERTIES		Complete the definition of the EmployeeFeedback schema to include the feedback and store_number fields you defined in your BigQuery schema at the start of this lab
+
+
+student
+```
+YOUR_CLOUD_RUN_FUNCTION_URL	https://record-feedback-760323389195.us-east1.run.app
+YOUR_REQUEST_TYPE		post
+YOUR_SCHEMA_PROPERTIES		<please refer to my YAML below>
+```
+
+YAML
+```
+openapi: 3.0.0
+info:
+  title: Employee Feedback API
+  version: 1.0.0
+servers:
+  - url: 'https://record-feedback-760323389195.us-east1.run.app'
+paths:
+  /:
+    post:
+      summary: Record employee feedback
+      operationId: recordEmployeeFeedback
+      requestBody:
+        description: Employee feedback and store number to record.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeFeedback'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: New row has been added          
+components:
+  schemas:
+    EmployeeFeedback:
+      type: object
+      required:
+        - feedback
+      properties:
+        feedback:
+          type: string
+        store_number:
+          type: integer
+```
+
+
+
+Save the Tool.
+
+To allow the Tool to invoke the Cloud Run function, switch to your browser tab displaying the Cloud Console (not the Conversational Agents console) and use the search bar at the top of the console to navigate to IAM.
+
+Check the checkbox to 'Include Google-provided role grants'.
+
+Find the row for the Dialogflow Service Agent (you may need to refresh the page) and click the pencil edit icon on its row.
+
+Click + Add another role.
+
+Add the role the Agent needs to invoke Cloud Run functions.
+https://cloud.google.com/functions/docs/securing/authenticating#auth-func-to-func
+
+Click Save.
+
+
+
+
+
+
+
+======================================
+
+
+Task 7. Create a Conversational Agent Playbook
+Now that the Tool is ready, you can create a conversational agent that can receive feedback in natural language and use the Tool to write them to the BigQuery table via the Cloud Run function.
+
+In the browser tab with the Conversational Agents console, return to the Default Generative Playbook that has already been created.
+
+Change the Playbook name to 'Receive Employee Feedback'.
+
+For a Goal, enter:
+```
+Receive and record feedback about our stores identified by store number.
+```
+
+Write your own Instructions that prompt the agent to receive a store number and feedback, then use that to call its Record Employee Feedback Tool and thank the user for their feedback, letting them know it has been recorded.
+student
+```
+- Ask the user to provide a store_number (in integer) and feedback. Assume a store_number of 0 for feedback without a store_number:
+    - Use ${TOOL: Record Employee Feedback}
+    - Thank the user for entering a feedback and please visit our store again!
+```
+Save the Playbook.
+
+
+
+Use the Conversational Agents simulator (Conversational Agents simulator icon) to preview the conversational agent and make sure it is behaving as you would expect with the following chat input:
+```
+I went to store number 123. I found that everything in the bakery area was in need of a cleaning.
+```
+
+You should see a card indicating that the Record Employee Feedback Tool was used, and you can click on it to see the Tool input and response:
+Record Employee Feedback Tool card indicating a successful tool call.
+https://cdn.qwiklabs.com/bFbihYfYY1ZGbrYtXfDLDOo5gbrnEwk7BSbt0KEaXYs%3D
+
+Your chat should end with thanking the user.
+
+To confirm that feedback is being recorded, return to the browser tab displaying your BigQuery employee_feedback table and refresh the Preview tab to see new entries.
+
+Update your playbook instructions and re-test until your test conversations end with a clear message indicating that a response has been recorded, and you can see new feedback recorded in your BigQuery table.
+
+
+
+
+
+
+
+======================================
+
+
+Task 8. Integrate your conversational agent with your Gemini Enterprise app
+The pieces all come together now as you give your Gemini Enterprise assistant access to send messages to your conversational agent and receive its responses.
+
+Return to Gemini Enterprise and select your Gemini Enterprise app.
+
+Edit the app's Configurations and begin to add a new agent to your assistant.
+New Agent Card
+https://cdn.qwiklabs.com/cZgNm%2Fnqde3Tlzy3nXBRFlUYH9yQBmIthK71NZZnQWA%3D
+
+
+From the Conversational Agents console, copy the 'full resource name for your Employee Feedback Bot' agent and enter it in the New Agent card's Agent field.
+name
+projects/qwiklabs-gcp-02-f24785f0fe3c/locations/global/agents/8a4c7623-14ee-49e3-a1ae-68d7e4ef99ac
+url
+https://conversational-agents.cloud.google.com/projects/qwiklabs-gcp-02-f24785f0fe3c/locations/global/agents/8a4c7623-14ee-49e3-a1ae-68d7e4ef99ac/playbooks/00000000-0000-0000-0000-000000000000
+
+
+For an Agent display name, use 'Employee Feedback Bot'.
+
+For Instructions enter:
+```
+Record feedback when provided feedback and a store number.
+```
+
+Notice that these instructions instruct the Gemini Enterprise assistant to do the work of gathering the required information before passing the details to the conversational agent for a single turn of conversation.
+
+Save and publish your updates.
+
+
+
+
+
+
+
+======================================
+
+
+
+Task 9. Communicate with your conversational agent through the Gemini Enterprise assistant
+With the entire flow connected, you can see your Gemini Enterprise assistant communicate with your conversational agent, which in turn uses its Tool to record employee feedback.
+
+To access your app from the Gemini Enterprise page, navigate to the Overview tab in the left-hand menu, click Copy URL, and open it in a new browser tab. Alternatively, you can navigate to the Integration tab and copy the URL from the 'The link to your web app section'.
+https://vertexaisearch.cloud.google.com/home/cid/afc09b1f-00bf-4afa-a3f8-c7de7bf6e5f5
+
+Note: If you see a 404 error, you may need to give your app more time to be created. You can reload the page every few minutes until the Gemini Enterprise web app appears.
+
+
+
+
+
+
+To test the assistant's ability to use your 'Gmail action', using the primary search bar, ask:
+```
+Send an email to my_manager@qwiklabs.net with high-level insights from the Cymbal Shops Sales Analysis Report. Offer to discuss it further.   
+```
+
+If the output does not appear as a Gmail action you can Authorize, as pictured below, send the request to the assistant again. If it still doesn't work, the action may need a little more time to become active, so try again in a few minutes.
+
+Output:
+Email
+https://cdn.qwiklabs.com/2HzIy6MUZ4ubjHZUld6jOBfInRS8VKlLKUZb2oAmYHE%3D
+
+
+
+When the action dialog appears, click Authorize to open the OAuth Consent Screen you configured, and authorize it with your Qwiklabs student account.
+
+Once the application is authorized, click Send to send the email.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+To test the assistant's ability to use Grounding with Google Search, verify that the Google Search option is enabled on the primary search bar and ask:
+```
+What products are currently selling out in southeast Asia?
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+From the navigation menu of the Google Gemini Enterprise app navigate to the 'Agents' tab and click on the Employee Feedback Bot.
+Agents menu
+https://cdn.qwiklabs.com/9J8wgDE6wtxhteRgWdk%2BFnpGUw%2BehUlOVlGFKurOt0w%3D
+
+
+To test the assistant's ability to invoke your conversational agent, send a message:
+```
+I went to Cymbal Shops store 529 in Bangalore, and I found the produce to be very fresh and nice, but I was hoping to find a greater variety of fruit.
+```
+
+Under the assistant's response, there is an Options menu (three vertical dots). Expand it and click on the Show diagnostic info.
+Select the three dots and 'Show diagnostic info'
+https://cdn.qwiklabs.com/gl7B6nGmfQb7RgSFs21wC%2FK4Ls07BCp6EEzfuGTIPAU%3D
+
+In the diagnostic info displayed, confirm that your conversation has triggered invoking your Cloud Run function by finding "functionName": "Employee_Feedback_Bot".
+Note: If the Show Diagnostic Info panel displays only the access token and omits the function call details, please refresh the page and reopen the Diagnostic Info panel.
+Example of 'diagnostic info' confirming the agent is being called as a Tool
+https://cdn.qwiklabs.com/QqSbFslKyw%2Fo5veLKNwlkXZpebsjxHNvtH3VmEetItI%3D
+
+```
+{
+ "plannerSteps": [
+  {
+   "createTime": "2025-10-24T03:30:14.410763295Z",
+   "queryStep": {
+    "parts": [
+     {
+      "text": "I went to Cymbal Shops store 529 in Bangalore, and I found the produce to be very fresh and nice, but I was hoping to find a greater variety of fruit."
+     }
+    ]
+   }
+  },
+  {
+   "createTime": "2025-10-24T03:30:14.410795699Z",
+   "planStep": {
+    "parts": [
+     {
+      "functionCall": {
+       "args": {
+        "question": "I went to Cymbal Shops store 529 in Bangalore, and I found the produce to be very fresh and nice, but I was hoping to find a greater variety of fruit."
+       },
+       "functionName": "Employee_Feedback_Bot",
+       "functionId": "12255197033719135050"
+      }
+     }
+    ],
+    "role": "MODEL"
+   }
+  },
+  {
+   "createTime": "2025-10-24T03:30:19.881794511Z",
+   "toolStep": {
+    "role": "SERVER_TOOL",
+    "parts": [
+     {
+      "functionResult": {
+       "functionId": "12255197033719135050",
+       "functionName": "Employee_Feedback_Bot",
+       "content": {
+        "response": {
+         "output": "Thank you for your feedback! We're glad to hear you enjoyed the freshness of our produce. We'll take your comments about fruit variety into consideration. Please visit our store again!"
+        }
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "planStep": {
+    "parts": [
+     {
+      "text": "Thank you for your feedback! We're glad to hear you enjoyed the freshness of our produce. We'll take your comments about fruit variety into consideration. Please visit our store again!"
+     }
+    ],
+    "role": "TOOL",
+    "planStepId": "224945483916208599"
+   },
+   "createTime": "2025-10-24T03:30:19.881819959Z"
+  }
+ ]
+}
+```
+
+
+To confirm that feedback is being recorded, return to the browser tab displaying your BigQuery 'employee_feedback' table and refresh the Preview data again.
+
+
+
+
+
+
+
+
+
+======================================
+
+Reflections
+- The lab forgot to test whether the google drive data-store works. I tried it out and it managed to work
+- For the other sections of the lab, it went alright. If you are stuck with any steps, you can refer to the 2 learning labs in day 4 of the 'intelligent search' google cloud series
+  1. Deploy and Query Google Gemini Enterprise https://github.com/KaiquanMah/Training/tree/master/Google%20Cloud/Intelligent%20Search/day4-Deploy%20and%20Query%20Google%20Gemini%20Enterprise
+  2. Extend Gemini Enterprise Assistant Capabilities with Conversational Agents https://github.com/KaiquanMah/Training/tree/master/Google%20Cloud/Intelligent%20Search/day4-Extend%20Gemini%20Enterprise%20Assistant%20Capabilities%20with%20Conversational%20Agents
+
+
+
+
+
