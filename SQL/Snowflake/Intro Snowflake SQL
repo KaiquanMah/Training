@@ -1,0 +1,214 @@
+--CHAPTER 1
+
+-- Select pizza_type_id, pizza_size, and price from pizzas table
+SELECT pizza_type_id,
+	pizza_size,
+    price
+FROM pizzas
+
+PIZZA_TYPE_ID	PIZZA_SIZE	PRICE
+bbq_ckn	S	12.75
+bbq_ckn	M	16.75
+bbq_ckn	L	20.75
+cali_ckn	S	12.75
+cali_ckn	M	16.75
+spinach_fet	L	20.25
+veggie_veg	S	12
+veggie_veg	M	16
+veggie_veg	L	20.25
+Showing 96 out of 96 rows
+
+
+
+
+
+
+
+
+-- Count all pizza entries
+SELECT COUNT(*) AS count_all_pizzas
+FROM pizza_type
+
+COUNT_ALL_PIZZAS
+32
+
+
+
+
+
+
+
+
+-- Count all pizza entries
+SELECT COUNT(*) AS count_all_pizzas
+FROM pizza_type
+-- Apply filter on category for Classic pizza types
+WHERE category = 'Classic'
+
+
+COUNT_ALL_PIZZAS
+8
+
+
+
+
+
+
+
+
+
+-- Get information about the orders table
+DESC TABLE orders
+
+name	type	kind	null?	default	primary key	unique key	check	expression	comment	policy name	privacy domain
+ORDER_ID	NUMBER(38,0)	COLUMN	N	null	Y	N	null	null	null	null	null
+ORDER_DATE	DATE	COLUMN	Y	null	N	N	null	null	null	null	null
+ORDER_TIME	TIME(9)	COLUMN	Y	null	N	N	null	null	null	null	null
+
+
+
+-- Convert order_id to VARCHAR aliasing to order_id_string
+SELECT CAST(order_id AS STRING) AS order_id_string
+FROM orders
+
+
+
+
+SELECT price, 
+-- Convert price to NUMBER data type
+CAST(price AS NUMBER) AS price_dollars
+FROM pizzas
+
+PRICE	PRICE_DOLLARS
+12.75	13
+16.75	17
+20.75	21
+20.25	20
+Showing 96 out of 96 rows
+
+
+
+
+
+
+-- Capitalize each word in pizza_type_id
+SELECT INITCAP(pizza_type_id) AS capitalized_pizza_id 
+FROM pizza_type;
+
+CAPITALIZED_PIZZA_ID
+Bbq_Ckn
+Cali_Ckn
+Ckn_Alfredo
+Ckn_Pesto
+Southw_Ckn
+Thai_Ckn
+
+
+
+-- Combine the name and category columns
+SELECT CONCAT(name, ' - ', category) AS name_and_category
+FROM pizza_type
+
+NAME_AND_CATEGORY
+The Barbecue Chicken Pizza - Chicken
+The California Chicken Pizza - Chicken
+The Chicken Alfredo Pizza - Chicken
+
+
+
+
+
+
+-- Select the current date, current time
+SELECT current_date, current_time;
+
+CURRENT_DATE	CURRENT_TIME
+2025-10-27	23:34:44.133000
+
+
+
+
+
+
+
+-- Count the number of orders per day
+SELECT COUNT(*) AS orders_per_day, 
+-- Extract the day of the week and alias to order_day
+	EXTRACT(WEEKDAY FROM order_date) AS order_day
+FROM orders
+GROUP BY order_day
+ORDER BY orders_per_day DESC
+
+ORDERS_PER_DAY	ORDER_DAY
+3538	5
+3239	4
+3158	6
+3024	3
+2973	2
+2794	1
+2624	0
+Showing 7 out of 7 rows
+
+
+
+
+
+
+
+-- Get the month from order_date
+SELECT EXTRACT(MONTH FROM order_date) AS order_month, 
+    p.pizza_size, 
+    -- Calculate revenue
+    SUM(p.price * od.quantity) AS revenue
+FROM orders o
+INNER JOIN order_details od USING(order_id)
+INNER JOIN pizzas p USING(pizza_id)
+-- Appropriately group the query
+-- GROUP BY order_month, pizza_size
+GROUP BY ALL
+-- Sort by revenue in descending order
+ORDER BY revenue DESC
+
+ORDER_MONTH	PIZZA_SIZE	REVENUE
+7	L	33583.05
+5	L	32970.5
+6	XXL	71.9
+12	XXL	35.95
+Showing 59 out of 59 rows
+
+
+
+=============================================
+
+--CHAPTER 2
+
+
+LATERAL JOIN
+- right_hand_expression inline view/subquery can reference cols from left_hand_expression tables/views/subquery
+- RHS can perform more complex queries
+
+
+SELECT ...
+FROM <left_hand_expression> AS lhs,
+LATERAL (<right_hand_expression>);
+
+SELECT p.pizza_id, lat.name, lat.category
+FROM pizzas AS p,
+LATERAL (SELECT * 
+         FROM pizza_type AS t
+         -- Referencing outer query column: p.pizza_type_id
+         WHERE p.pizza_type_id = t.pizza_type_id
+        ) AS lat;
+
+
+SELECT *
+FROM orders AS o,
+LATERAL (-- Subquery calculating total_spent
+         SELECT SUM(p.price * od.quantity) AS total_spent
+         FROM order_details AS od
+         JOIN pizzas AS p ON od.pizza_id = p.pizza_id
+         WHERE o.order_id = od.order_id
+        ) AS t
+ORDERBY o.order_id;
+
+
