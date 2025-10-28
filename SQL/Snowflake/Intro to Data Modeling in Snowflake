@@ -1,0 +1,110 @@
+-- Describe the ecommerceonlineretail entity
+DESC TABLE ecommerceonlineretail;
+
+name	type	kind	null?	default	primary key	unique key	check	expression	comment	policy name	privacy domain
+INVOICENO	VARCHAR(10)	COLUMN	Y	null	N	N	null	null	null	null	null
+STOCKCODE	VARCHAR(15)	COLUMN	Y	null	N	N	null	null	null	null	null
+DESCRIPTION	VARCHAR(255)	COLUMN	Y	null	N	N	null	null	null	null	null
+QUANTITY	NUMBER(38,0)	COLUMN	Y	null	N	N	null	null	null	null	null
+INVOICEDATE	TIMESTAMP_NTZ(9)	COLUMN	Y	null	N	N	null	null	null	null	null
+UNITPRICE	NUMBER(10,2)	COLUMN	Y	null	N	N	null	null	null	null	null
+CUSTOMERID	NUMBER(38,0)	COLUMN	Y	null	N	N	null	null	null	null	null
+COUNTRY	VARCHAR(255)	COLUMN	Y	null	N	N	null	null	null	null	null
+
+
+invoiceno	stockcode	description	quantity	invoicedate	unitprice	customerid	country
+536365.0	21730	GLASS STAR FROSTED T-LIGHT HOLDER	6	2010-12-01 08:26:00	4.25	17850	United Kingdom
+536365.0	22752	SET 7 BABUSHKA NESTING BOXES	2	2010-12-01 08:26:00	7.65	17850	United Kingdom
+
+
+
+
+
+Conceptual data model
+- entities
+- relationships
+
+Logical data model
+- fields
+- cardinality (btw entities) - one-to-one, one-to-many, many-to-many
+- CREATE OR REPLACE TABLE
+
+Physical data model
+- data types
+- PK FK
+
+
+
+-- Create a new products entity
+CREATE OR REPLACE TABLE products(
+	-- List the entity's attributes
+	stockcode VARCHAR(255),
+    description VARCHAR(255)
+);
+
+
+-- Create a new 'orders' entity
+CREATE OR REPLACE TABLE orders (
+	-- List the invoice attributes
+	invoiceno VARCHAR(10),
+  invoicedate TIMESTAMP_NTZ(9),
+  
+  -- List the attributes related to price and quantity
+	-- 10 digits b4 decimal pt, 2dp
+  unitprice NUMBER(10,2),
+	-- 38 digits b4 decimal, no dp
+  quantity NUMBER(38,0)
+  -- ALTERNATIVELY
+  -- quantity INTEGER
+);
+
+
+
+
+-- Create customers table 
+CREATE OR REPLACE TABLE customers (
+  -- Define unique identifier
+  customerid NUMBER(38,0) PRIMARY KEY,
+  country VARCHAR(255)
+);
+
+
+
+-- Re-create orders table
+CREATE OR REPLACE TABLE orders (
+  -- Assign unique identifier column
+  invoiceno VARCHAR(10) PRIMARY KEY,
+  invoicedate TIMESTAMP_NTZ(9),
+  unitprice NUMBER(10,2),
+  quantity NUMBER(38,0),
+  customerid NUMBER(38,0)
+);
+
+CREATE OR REPLACE TABLE orders (
+  	invoiceno VARCHAR(10) PRIMARY KEY,
+  	invoicedate TIMESTAMP_NTZ(9),
+  	unitprice NUMBER(10,2),
+  	quantity NUMBER(38,0),
+  	-- Add columns that will refer the foreign key 
+	customerid NUMBER(38,0),
+  	stockcode VARCHAR(255)
+);
+
+
+
+
+
+CREATE OR REPLACE TABLE orders (
+  	invoiceno VARCHAR(10) PRIMARY KEY,
+  	invoicedate TIMESTAMP_NTZ(9),
+  	unitprice NUMBER(10,2),
+  	quantity NUMBER(38,0),
+  	customerid NUMBER(38,0),
+  	stockcode VARCHAR(255),
+  	-- Add foreign key refering to the foreign tables
+	FOREIGN KEY (customerid) REFERENCES customers(customerid),
+  	FOREIGN KEY (stockcode) REFERENCES products(stockcode)
+);
+
+
+
