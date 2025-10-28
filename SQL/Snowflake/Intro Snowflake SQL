@@ -186,6 +186,11 @@ Showing 59 out of 59 rows
 LATERAL JOIN
 - right_hand_expression inline view/subquery can reference cols from left_hand_expression tables/views/subquery
 - RHS can perform more complex queries
+- Can the LHS reference the RHS? What does the sentence mean?
+  - ❌ No, the LHS cannot reference the RHS. 
+  - The dependency is strictly one-way:
+  - LHS → RHS (allowed), 
+  - but RHS → LHS (not applicable, since RHS is evaluated after LHS row is known)
 
 
 SELECT ...
@@ -196,7 +201,7 @@ SELECT p.pizza_id, lat.name, lat.category
 FROM pizzas AS p,
 LATERAL (SELECT * 
          FROM pizza_type AS t
-         -- Referencing outer query column: p.pizza_type_id
+         -- Referencing LHS/outer query column: p.pizza_type_id
          WHERE p.pizza_type_id = t.pizza_type_id
         ) AS lat;
 
@@ -207,8 +212,52 @@ LATERAL (-- Subquery calculating total_spent
          SELECT SUM(p.price * od.quantity) AS total_spent
          FROM order_details AS od
          JOIN pizzas AS p ON od.pizza_id = p.pizza_id
+         -- reference LHS col: o.order_id
          WHERE o.order_id = od.order_id
         ) AS t
 ORDERBY o.order_id;
+
+
+
+
+-------
+
+Standard SQL vs Snowflake
+
+
+In **standard SQL**, subqueries in the FROM clause (also called derived tables) must be self-contained — they cannot refer to tables that appear elsewhere in the same FROM clause. 
+For example, this is not allowed:
+Here, the subquery tries to use o.order_id, 
+but o is defined in the same FROM clause—it’s not visible inside the subquery.
+```
+-- ❌ Invalid in standard SQL
+SELECT *
+FROM orders o,
+     (SELECT * FROM order_items oi WHERE oi.order_id = o.order_id) AS items;
+```
+
+
+vs
+
+BUT IN Snowflake
+LATERAL changes this rule. It tells the SQL engine:
+“Evaluate this right-hand subquery once for each row of the left-hand table, and allow it to see the columns from that row.” 
+
+The query below processes one row at a time from orders (LHS).
+For each row, it runs the RHS subquery, which can now use values from that specific row (e.g., o.order_id).
+It’s conceptually similar to a correlated subquery, but in the FROM clause instead of SELECT or WHERE.
+```
+-- ✅ Valid with LATERAL
+SELECT *
+FROM orders o,
+LATERAL (SELECT * FROM order_items oi WHERE oi.order_id = o.order_id) AS items;
+```
+
+
+
+
+
+-------
+
 
 
