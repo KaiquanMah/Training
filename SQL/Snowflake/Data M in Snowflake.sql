@@ -516,3 +516,224 @@ Whitney	530.874516666667
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+-- Define an album_map CTE to combine albums and artists
+WITH album_map AS (
+    SELECT
+        album.album_id, album.title AS album_name, artist.name AS artist_name,
+  		-- Determine if an album is a "Greatest Hits" album
+        CASE 
+            WHEN album_name ILIKE '%greatest%' THEN TRUE
+            ELSE FALSE
+        END AS is_greatest_hits
+    FROM store.album
+    JOIN store.artist ON album.artist_id = artist.artist_id
+), trimmed_invoicelines AS (
+    SELECT
+        invoiceline.invoice_id, track.album_id, invoice.total
+    FROM store.invoiceline
+    LEFT JOIN store.invoice ON invoiceline.invoice_id = invoice.invoice_id
+    LEFT JOIN store.track ON invoiceline.track_id = track.track_id
+)
+
+SELECT
+    album_map.album_name,
+    album_map.artist_name,
+    SUM(ti.total) AS total_sales_driven
+FROM trimmed_invoicelines AS ti
+JOIN album_map ON ti.album_id = album_map.album_id
+-- Use a subquery to only "Greatest Hits" records
+-- USING THE BOOLEAN FIELD TRUE/FALSE
+WHERE ti.album_id IN (SELECT album_id FROM album_map WHERE is_greatest_hits)
+GROUP BY album_map.album_name, album_map.artist_name, is_greatest_hits
+ORDER BY total_sales_driven DESC;
+
+ALBUM_NAME	ARTIST_NAME	TOTAL_SALES_DRIVEN
+Greatest Hits	Lenny Kravitz	372.51
+Greatest Kiss	Kiss	117.81
+Rotten Apples: Greatest Hits	Smashing Pumpkins	99.99
+Motley Crue Greatest Hits	Mötley Crüe	97.02
+Vault: Def Leppard's Greatest Hits	Def Leppard	97.02
+Greatest Hits I	Queen	93.06
+Greatest Hits II	Queen	91.08
+The Police Greatest Hits	The Police	83.16
+
+
+
+
+
+
+
+
+
+
+
+
+--hot genres
+DESC TABLE TRACK;
+name	type	kind	null?	default	primary key	unique key	check	expression	comment	policy name	privacy domain
+TRACK_ID	NUMBER(38,0)	COLUMN	Y		N	N					
+NAME	VARCHAR(16777216)	COLUMN	Y		N	N					
+ALBUM_ID	NUMBER(38,0)	COLUMN	Y		N	N					
+MEDIA_TYPE_ID	NUMBER(38,0)	COLUMN	Y		N	N					
+GENRE_ID	NUMBER(38,0)	COLUMN	Y		N	N					
+COMPOSER	VARCHAR(16777216)	COLUMN	Y		N	N					
+MILLISECONDS	NUMBER(38,0)	COLUMN	Y		N	N					
+BYTES	NUMBER(38,0)	COLUMN	Y		N	N					
+UNIT_PRICE	NUMBER(5,2)	COLUMN	Y		N	N					
+
+
+
+DESC TABLE GENRE;
+GENRE_ID	NUMBER(38,0)	COLUMN	Y		N	N					
+NAME	VARCHAR(16777216)	COLUMN	Y		N	N					
+
+
+
+
+	
+SELECT G.NAME, 
+COUNT(1) AS CNT
+FROM TRACK T
+JOIN GENRE G
+ON T.GENRE_ID=G.GENRE_ID
+GROUP BY G.NAME;
+
+NAME	CNT
+Science Fiction	13
+Sci Fi & Fantasy	11
+Rock	1279
+Soundtrack	43
+Jazz	128
+Bossa Nova	15
+Reggae	58
+Electronica/Dance	30
+Hip Hop/Rap	34
+Alternative & Punk	330
+Drama	57
+Alternative	40
+Classical	24
+Rock And Roll	12
+Heavy Metal	28
+World	28
+Comedy	16
+TV Shows	87
+Metal	373
+Blues	81
+Pop	45
+Latin	566
+Easy Listening	22
+R&B/Soul	59
+
+
+
+
+
+
+
+
+
+
+
+
+
+WITH genre_count AS (
+SELECT G.NAME, 
+COUNT(1) AS CNT
+FROM TRACK T
+JOIN GENRE G
+ON T.GENRE_ID=G.GENRE_ID
+GROUP BY G.NAME
+)
+
+SELECT NAME,
+  CASE
+    WHEN CNT<51 THEN 'Unpopular'
+    WHEN CNT<101 THEN 'Popular'
+    ELSE 'Very Popular'
+  END AS pops_level
+FROM GENRE_COUNT
+;
+
+
+NAME	POPS_LEVEL
+Science Fiction	Unpopular
+Sci Fi & Fantasy	Unpopular
+Rock	Very Popular
+Soundtrack	Unpopular
+Jazz	Very Popular
+Bossa Nova	Unpopular
+Reggae	Popular
+Electronica/Dance	Unpopular
+Hip Hop/Rap	Unpopular
+Alternative & Punk	Very Popular
+Drama	Popular
+Alternative	Unpopular
+Classical	Unpopular
+Rock And Roll	Unpopular
+Heavy Metal	Unpopular
+World	Unpopular
+Comedy	Unpopular
+TV Shows	Popular
+Metal	Very Popular
+Blues	Popular
+Pop	Unpopular
+Latin	Very Popular
+Easy Listening	Unpopular
+R&B/Soul	Popular
+
+
+
+
+
+
+
+
+
+	
+
+WITH genre_count AS (
+SELECT G.NAME, 
+COUNT(1) AS CNT
+FROM TRACK T
+JOIN GENRE G
+ON T.GENRE_ID=G.GENRE_ID
+GROUP BY G.NAME
+)
+
+SELECT NAME,
+  CASE
+    WHEN CNT<51 THEN 'Unpopular'
+    WHEN CNT<101 THEN 'Popular'
+    ELSE 'Very Popular'
+  END AS pops_level
+FROM GENRE_COUNT
+WHERE pops_level = 'Popular'
+;
+	
+NAME	POPS_LEVEL
+Reggae	Popular
+Drama	Popular
+TV Shows	Popular
+Blues	Popular
+R&B/Soul	Popular
+	
+
+	
+
+
+	
+
