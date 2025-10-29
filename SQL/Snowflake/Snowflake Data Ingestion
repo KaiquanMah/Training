@@ -30,3 +30,24 @@ Yes. You can ingest data using
 - Snowpipe Streaming
 - custom scripts using connectors or SDKs
 
+
+
+
+
+
+--CREATE STAGE for your files
+/* specify the file format */
+CREATE FILE FORMAT my_csv_format TYPE = 'CSV' 
+/* this will help if there are double quotes or apostrophes in your data */
+FIELD_OPTIONALLY_ENCLOSED_BY='"';
+
+/* Stage the data using the credentials you have */
+CREATE STAGE my_stage URL='s3://my-bucket/data/' CREDENTIALS=(AWS_KEY_ID='...' AWS_SECRET_KEY='...');
+
+
+--COPY from STAGE INTO table
+COPY INTO my_table FROM @my_stage FILE_FORMAT = (FORMAT_NAME = 'my_csv_format');
+SELECT * FROM my_table;
+
+
+
