@@ -452,3 +452,362 @@ user_4028	gym_6	2023-09-05 16:07:00	1.140127
 
 
 
+
+
+
+
+
+
+--semi-structured/JSON/VARIANT data
+SELECT
+    personal_info,
+	
+    -- Use the TO_NUMBER function to convert the age to a NUMBER
+    TO_NUMBER(personal_info:age),
+    -- Use bracket-notation to retrieve the member's gender
+	-- USE SINGLE QUOTE ' '
+	-- NOT DOUBLE QUOTE " "
+    personal_info['gender']
+
+FROM CORE_GYM.members
+
+-- Only retrieve members who are at least 25
+WHERE TO_NUMBER(personal_info:age) >= 25;
+
+PERSONAL_INFO	TO_NUMBER(PERSONAL_INFO:AGE)	PERSONAL_INFO['GENDER']
+{
+  "age": "56",
+  "gender": "Female",
+  "name": {
+    "first": "Chris",
+    "last": "Wilson"
+  }
+}							56						"Female"
+{
+  "age": "46",
+  "gender": "Non-binary",
+  "name": {
+    "first": "Michael",
+    "last": "Miller"
+  }
+}							46						"Non-binary"
+
+
+
+
+	
+SELECT
+    user_id,
+	-- Retrieve the member's first name using dot-notation
+    personal_info:name.first,
+FROM CORE_GYM.members;
+
+USER_ID	PERSONAL_INFO:NAME.FIRST
+user_1	"Chris"
+user_2	"Michael"
+
+
+	
+SELECT
+    user_id,
+    CONCAT(
+        personal_info:name.first,
+        ' ',
+		-- Add the last name to the CONCAT function call using bracket-notation
+		personal_info:name.last
+    ) AS member_description
+FROM CORE_GYM.members;
+
+USER_ID	MEMBER_DESCRIPTION
+user_1	Chris Wilson
+user_2	Michael Miller
+
+
+SELECT
+    user_id,
+    CONCAT(
+	    -- personal_info:name:first ALSO WORKS
+        personal_info:name.first,
+        ' ',
+        personal_info['name']['last'],
+        ' is a ',
+      	-- Add the age to the description
+        TO_NUMBER(personal_info:age),
+        ' year-old gym member.'
+    ) AS member_description
+
+FROM CORE_GYM.members;
+
+USER_ID	MEMBER_DESCRIPTION
+user_1	Chris Wilson is a 56 year-old gym member.
+user_2	Michael Miller is a 46 year-old gym member.
+
+
+
+
+
+
+
+
+
+
+
+
+-- COMMON TABLE EXPRESSIONS CTE
+
+-- Retrieves the user_id, first name, and last name from the members table
+WITH flattened_members AS (
+    SELECT
+        user_id,
+        personal_info:name.first AS first_name,
+        personal_info:name.last AS last_name,
+    FROM CORE_GYM.members),
+  
+-- high_performers should return all visits where > 500 calories were burned
+high_performers AS (
+    SELECT 
+        user_id,
+        TO_DATE(checkin_time) AS workout_date,
+        workout_type,
+        calories_burned
+    FROM CORE_GYM.visits
+    WHERE calories_burned > 500)
+
+SELECT
+    CONCAT(flattened_members.first_name, ' ', flattened_members.last_name) AS full_name,
+    high_performers.workout_date,
+    high_performers.workout_type,
+    high_performers.calories_burned
+FROM high_performers
+-- JOIN flattened_members to high_performers on the user_id field
+JOIN flattened_members ON flattened_members.user_id = high_performers.user_id;
+
+FULL_NAME	WORKOUT_DATE	WORKOUT_TYPE	CALORIES_BURNED
+Michael Garcia	2023-04-13	Yoga	1278
+Emily Rodriguez	2023-06-10	Cardio	858
+David Miller	2023-05-23	Yoga	1134
+
+
+
+
+
+
+	
+
+
+
+
+-- CAN USE CTE1 INSIDE CTE2
+-- Create a senior_members temporary result set
+WITH senior_members AS (
+    SELECT
+        user_id
+    FROM CORE_GYM.members
+    WHERE personal_info:age::NUMBER > 60
+)
+
+SELECT * FROM senior_members;
+
+
+
+
+WITH senior_members AS (
+    SELECT
+        user_id
+    FROM CORE_GYM.members
+    WHERE personal_info:age::NUMBER > 60
+), senior_member_visits AS (
+    SELECT
+        gym_id,
+        workout_type,
+        calories_burned
+    FROM CORE_GYM.visits
+  
+  	-- Filter records
+    WHERE user_id IN (SELECT * FROM senior_members)
+)
+
+SELECT * FROM senior_member_visits;
+
+
+
+
+
+
+
+WITH senior_members AS (
+    SELECT
+        user_id
+    FROM CORE_GYM.members
+    WHERE personal_info:age::NUMBER > 60
+), senior_member_visits AS (
+    SELECT
+        gym_id,
+        workout_type,
+        calories_burned
+    FROM CORE_GYM.visits
+    WHERE user_id IN (SELECT user_id FROM senior_members)
+)
+
+SELECT
+    gyms.location,
+    senior_member_visits.workout_type,
+    
+    -- Find the average calories burned for all senior member visits
+    AVG(senior_member_visits.calories_burned) AS avg_calories_burned
+
+FROM senior_member_visits
+LEFT JOIN CORE_GYM.gyms ON senior_member_visits.gym_id = gyms.gym_id
+GROUP BY gyms.location, senior_member_visits.workout_type;
+
+LOCATION	WORKOUT_TYPE	AVG_CALORIES_BURNED
+Dallas	Swimming	879.707483
+San Jose	CrossFit	899.829114
+Philadelphia	Cardio	829.234483
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- PIVOT DATA
+-- FROM "LONG N NARROW FORMAT" TO "WIDE FORMAT"
+PIVOT(-- Aggregation function
+	  SUM(field_to_agg)
+	
+	  -- Specify rows to pivot to columns
+	  FOR field_to_go_into_col_headers IN (ANY ORDER BY field_to_go_into_col_headers)
+	
+	  -- No need to GROUP BY!
+)
+
+
+	
+-- Create a CTE called workout_durations to prepare data to be pivoted
+WITH workout_durations AS (
+    SELECT
+        gym_id,
+        workout_type,
+        DATEDIFF(MINUTES, checkin_time, checkout_time) AS workout_length
+    FROM CORE_GYM.visits
+)
+
+SELECT
+    *
+FROM workout_durations
+
+-- Pivot the results, find the average workout length for each gym and workout type
+PIVOT(
+    AVG(workout_length) 
+    FOR workout_type IN (ANY ORDER BY workout_type)
+);
+
+
+GYM_ID	'Cardio'	'CrossFit'	'Pilates'	'Swimming'	'Weightlifting'	'Yoga'
+gym_10	104.683529	104.744836	102.956469	103.783455	103.981132	105.014899
+gym_5	104.789348	103.290400	103.814600	104.066706	102.884386	106.105457
+gym_4	105.654084	105.891357	105.000580	105.159710	106.104751	103.286880
+gym_1	105.609772	105.741560	106.795808	103.732164	105.397947	105.188794
+gym_9	104.941610	104.150735	104.679629	105.126329	104.914612	104.986684
+gym_3	102.552381	103.397900	104.221979	104.495752	104.161194	104.697499
+gym_6	105.730815	105.094282	104.388069	105.711628	103.299028	103.641429
+gym_7	105.077332	105.501732	104.017576	104.673422	105.628923	105.149481
+gym_2	104.298777	105.543255	104.601759	104.687612	104.781418	105.293671
+gym_8	105.781211	106.038439	104.102502	103.759786	104.056962	104.126590
+
+
+
+
+
+
+
+WITH user_workouts AS (
+    SELECT user_id,
+    gym_id,
+    workout_type
+    FROM COURSE_41769_DB_9F8F98C0ABA0418A8B0E1FA70214D8C9.CORE_GYM.VISITS
+)
+
+SELECT *
+FROM user_workouts
+PIVOT(
+    COUNT(user_id)
+	-- DO NOT ADD ',' ABOVE
+
+	-- BOTH 'FOR' lines below work
+    -- FOR workout_type IN (ANY)   
+    FOR workout_type IN (ANY ORDER BY workout_type)
+)
+;
+
+
+GYM_ID	'Cardio'	'CrossFit'	'Pilates'	'Swimming'	'Weightlifting'	'Yoga'
+gym_10	1700	1646	1654	1644	1696	1678
+gym_5	1671	1677	1726	1694	1678	1631
+gym_4	1616	1666	1724	1653	1747	1593
+gym_1	1576	1718	1670	1654	1656	1642
+gym_9	1627	1632	1723	1599	1663	1577
+gym_3	1575	1714	1829	1648	1675	1719
+gym_6	1668	1644	1626	1720	1749	1651
+gym_7	1694	1732	1650	1727	1625	1639
+gym_2	1717	1653	1592	1671	1679	1580
+gym_8	1586	1691	1639	1686	1738	1651
+
+
+Feedback: snowflake datacamp issues. also cant access from browser using the manual fix (URL, username, pw) because our IP is blocked from accessing the lab's URL, which was needed for the exercise above.
+
+
+
+
+
+
+
+
+-- EXCLUDE COL FROM SELECT CLAUSE
+-- Create a CTE called gym_workouts returns the user_id, gym_id, 
+-- workout_type, calories_burned and location for 'Premium' gym types
+WITH gym_workouts AS (
+    SELECT
+  		visits.user_id,
+        visits.gym_id,
+        visits.workout_type,
+  		visits.calories_burned,
+        gyms.location
+    FROM CORE_GYM.visits
+    JOIN CORE_GYM.gyms ON visits.gym_id = gyms.gym_id
+    WHERE gym_type = 'Premium'
+)
+
+SELECT
+	-- Do NOT include the gym_id field in the final output
+    * EXCLUDE gym_id
+FROM gym_workouts
+-- Pivot gym_workouts, find the sum of calories_burned for each 
+-- type of workout in workout_type
+PIVOT(
+    SUM(calories_burned) 
+    FOR workout_type IN (ANY ORDER BY workout_type)
+);
+
+USER_ID	LOCATION	'Cardio'	'CrossFit'	'Pilates'	'Swimming'	'Weightlifting'	'Yoga'
+user_2225	New York	null	null	null	1773	813	null
+user_244	San Antonio	795	344	845	null	null	993
+user_3023	San Antonio	null	319	null	1521	null	null
+user_4452	San Jose	null	null	null	589	842	null
+
+
+	
+
+
+
+	
+
+
