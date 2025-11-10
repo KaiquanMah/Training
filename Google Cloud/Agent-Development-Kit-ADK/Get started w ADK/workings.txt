@@ -1,0 +1,774 @@
+Get started with Agent Development Kit (ADK)
+
+
+Agent Development Kit offers several key advantages for developers building agentic applications:
+
+1
+Multi-Agent Systems: Build modular and scalable applications by composing multiple specialized agents in a HIERARCHY. Enable complex COORDINATION and delegation.
+
+2
+Rich Tool Ecosystem: Equip agents with diverse capabilities: 
+- use PRE-BUILT TOOLS (Search, Code Execution, etc.),
+- create custom functions,
+- integrate tools from third-party agent frameworks (LangChain, CrewAI), or 
+- even use other AGENTS as tools.
+
+3
+Flexible Orchestration: Define workflows using 
+- workflow agents (SequentialAgent, ParallelAgent, and LoopAgent) for PREDICTABLE PIPELINES pipelines, or 
+- leverage LLM-driven DYNAMIC routing (LlmAgent transfer) for adaptive behavior.
+
+4
+Integrated Developer Experience: Develop, test, and debug locally with a powerful CLI and an interactive dev UI. Inspect events, state, and agent execution step-by-step.
+
+5
+Built-in Evaluation: Systematically assess agent performance by evaluating both the FINAL RESPONSE quality and the step-by-step execution TRAJECTORY against predefined test cases.
+
+6
+Deployment Ready: CONTAINERISE and deploy your agents anywhere – run locally, scale with Vertex AI Agent Engine, or integrate into custom infrastructure using Cloud Run or Docker.
+
+
+
+
+
+While other Gen AI SDKs or agent frameworks also allow you to query models and even empower them with tools, dynamic coordination between multiple models requires a significant amount of work on your end.
+
+Agent Development Kit offers a higher-level framework than these tools, allowing you to easily connect multiple agents to one another for complex but easy-to-maintain workflows.
+https://cdn.qwiklabs.com/VXrLINHzg5G29sl6GGLWDZTNUgQgRCHrFg6r6HpWbk4%3D
+
+
+
+Additionally, it allows you to deploy these complex systems of agents to a fully-managed endpoint in Agent Engine, so you can focus on the agents' logic while infrastructure is allocated and scaled for you.
+
+
+
+---
+
+
+In this lab, you will 
+- create a single agent that can use a search tool
+- test agents in 
+1 ADK’s browser UI, 
+2 from a CLI chat interface, and 
+3 programmatically from within a script.
+
+
+
+You will consider:
+The key capabilities of Agent Development Kit
+The core concepts of ADK
+How to structure project directories for ADK
+The most fundamental parameters of agents in ADK, including how to specify model names and tools
+Some features of ADK’s browser UI
+How to control the output schema of an agent
+How to run agents in three ways (via the browser UI, programmatically, and via the CLI chat interface)
+
+
+
+====================
+
+
+Task 1. Install ADK and set up your environment
+
+Note: Using an Incognito browser window is recommended for most Qwiklabs to avoid confusion between your Qwiklabs student account and other accounts logged into Google Cloud. If you are using Chrome, the easiest way to accomplish this is to close any Incognito windows, then right click on the Open Google Cloud console button at the top of this lab and select Open link in Incognito window.
+
+
+
+Enable Vertex AI recommended APIs
+In this lab environment, the Vertex AI API has been enabled for you. If you were to follow these steps in your own project, you could enable it by navigating to Vertex AI and following the prompt to enable it.
+
+
+
+
+Prepare a Cloud Shell Editor tab
+With your Google Cloud console window selected, open Cloud Shell by pressing the G key and then the S key on your keyboard. Alternatively, you can click the Activate Cloud Shell button (Activate Cloud Shell) in the upper right of the Cloud console.
+
+Click Continue.
+
+When prompted to authorize Cloud Shell, click Authorize.
+
+In the upper right corner of the Cloud Shell Terminal panel, click the Open in new window button.
+
+
+
+In the Cloud Shell Terminal, enter the following to open the Cloud Shell Editor to your home directory:
+ie from Cloud Shell Terminal --> go into Cloud Shell 'Editor'
+```
+cloudshell workspace ~
+```
+
+
+Close any additional tutorial or Gemini panels that appear on the right side of the screen to save more of your window for your code editor.
+Throughout the rest of this lab, you can work in this window as your IDE with the Cloud Shell Editor and Cloud Shell Terminal.
+
+
+
+
+
+
+
+
+
+
+Download and install the ADK and code samples for this lab
+Update your PATH environment variable and install ADK by running the following commands in the Cloud Shell Terminal. Note: You will specify the version to ensure that the version of ADK that you install corresponds to the version used in this lab:
+```
+export PATH=$PATH:"/home/${USER}/.local/bin"
+python3 -m pip install google-adk
+```
+
+student_00_693da4cfd8ce@cloudshell:~ (qwiklabs-gcp-01-23fdef180edd)$ echo $PATH
+/opt/gradle/bin:/opt/maven/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/node_packages/node_modules/.bin:/usr/local/rvm/bin:/home/student_00_693da4cfd8ce/.gems/bin:/usr/local/rvm/bin:/home/student_00_693da4cfd8ce/gopath/bin:/google/gopath/bin:/google/flutter/bin:/usr/local/nvm/versions/node/v22.21.0/bin:/home/student_00_693da4cfd8ce/.local/bin
+
+
+
+
+
+
+
+Paste the following commands into the Cloud Shell Terminal to copy a file from a Cloud Storage bucket, and unzip it, creating a project directory with code for this lab:
+```
+gcloud storage cp gs://qwiklabs-gcp-01-23fdef180edd-bucket/adk_project.zip ./adk_project.zip
+unzip adk_project.zip
+```
+
+
+
+Copying gs://qwiklabs-gcp-01-23fdef180edd-bucket/adk_project.zip to file://./adk_project.zip
+  Completed files 1/1 | 25.4kiB/25.4kiB                                                                                                                
+Archive:  adk_project.zip
+   creating: adk_project/
+   creating: adk_project/llm_auditor/
+  inflating: adk_project/.DS_Store   
+  inflating: adk_project/requirements.txt  
+   creating: adk_project/my_google_search_agent/
+   creating: adk_project/app_agent/
+  inflating: adk_project/callback_logging.py  
+  inflating: adk_project/llm_auditor/__init__.py  
+  inflating: adk_project/llm_auditor/agent.py  
+   creating: adk_project/llm_auditor/sub_agents/
+  inflating: adk_project/my_google_search_agent/__init__.py  
+  inflating: adk_project/my_google_search_agent/.env  
+  inflating: adk_project/my_google_search_agent/agent.py  
+  inflating: adk_project/app_agent/.DS_Store  
+  inflating: adk_project/app_agent/__init__.py  
+  inflating: adk_project/app_agent/agent.py  
+  inflating: adk_project/llm_auditor/sub_agents/__init__.py  
+
+
+
+
+
+
+
+
+
+
+
+
+
+Install additional lab requirements with:
+```
+python3 -m pip install -r adk_project/requirements.txt
+```
+
+student_00_693da4cfd8ce@cloudshell:~/adk_project (qwiklabs-gcp-01-23fdef180edd)$ pwd
+/home/student_00_693da4cfd8ce/adk_project
+student_00_693da4cfd8ce@cloudshell:~/adk_project (qwiklabs-gcp-01-23fdef180edd)$ ls
+app_agent  callback_logging.py  llm_auditor  my_google_search_agent  requirements.txt
+
+student_00_693da4cfd8ce@cloudshell:~/adk_project (qwiklabs-gcp-01-23fdef180edd)$ cat requirements.txt 
+scikit-learn==1.7.1
+
+
+
+
+
+
+
+
+Core Concepts of Agent Development Kit
+Google ADK is built around a few core concepts that make it powerful and flexible:
+
+Agent: Agents are core building blocks designed to accomplish specific tasks. They can be powered by LLMs to reason, plan, and utilize tools to achieve goals, and can even collaborate on complex projects.
+
+Tools: Tools give agents abilities beyond conversation, letting them interact with external APIs, search information, run code, or call other services.
+
+Session Services: Session services handle the context of a single CONVERSATION (Session), including its HISTORY (Events) and the agent's working MEMORY for that conversation (State).
+
+Callbacks: Custom code snippets you provide to run at specific points in the agent's process, allowing for CHECKS, LOGGING, or behavior MODIFICATIONS.
+
+Artifact Management: Artifacts allow agents to save, load, and MANAGE FILES or binary data (like IMAGES or PDFs) associated with a session or user.
+
+Runner: The engine that manages the execution FLOW, ORCHESTRATES agent interactions based on Events, and coordinates with backend services.
+
+
+
+
+
+
+
+
+
+====================
+
+
+Task 2. Review the structure of Agent Development Kit project directories
+In the Cloud Shell Editor's file explorer pane, find the adk_project folder. Click it to toggle it open.
+
+This directory contains three other directories: my_google_search_agent, app_agent, and llm_auditor. Each of these directories represents a separate agent. Separating agents into their own directories within a project directory provides organization and allows Agent Development Kit to understand what agents are present.
+
+Click on the my_google_search_agent to explore an agent directory.
+
+Notice that the directory contains an __init__.py file and an agent.py file. An __init__.py file is typically used to identify a directory as a Python package that can be imported by other Python code. Click the init.py file to view its contents.
+
+Notice that the __init__.pyfile contains a single line, which imports from the agent.py file. ADK uses this to identify this directory as an agent package:
+```
+from . import agent
+```
+
+
+
+
+
+Now click on the agent.py file. This file consists of a simple agent. You will equip it with a powerful tool: the ability to search the internet using Google Search. Notice a few things about the file:
+1
+Notice the imports from google.adk: the Agent class and the google_search tool from the tools module
+2
+Read the code comments that describe the parameters that configure this simple agent.
+
+To use the imported google_search tool, it needs to be passed to the agent. Do that by pasting the following line into the agent.py file where indicated at the end of the Agent object creation:
+```
+    tools=[google_search]
+```
+
+Save the file.
+
+
+
+
+
+
+Tools enable an agent to perform actions beyond generating text. In this case, the google_search tool allows the agent to decide when it would like more information than it already has from its training data. It can then write a search query, use Google Search to search the web, and then base its response to the user on the results. When a model bases its response on additional information that it retrieves, it is called "grounding," and this overall process is known as "retrieval-augmented generation" or "RAG."
+
+You can learn more about how to use tools with ADK in the lab Empower ADK agents with tools.
+
+
+
+
+
+
+
+
+
+
+
+====================
+
+
+Task 3. Run the agent using the ADK's Dev UI
+
+ADK includes a development UI designed to run locally to help you develop and test your agents. It can help you visualize what each agent is doing and how multiple agents interact with one another. You will explore this interface in this task.
+
+
+When you run an agent, the ADK needs to know who is requesting the model API calls. You can provide this information in one of two ways. You can:
+
+1
+Provide a Gemini API key.
+https://aistudio.google.com/apikey
+
+2
+Authenticate your environment with Google Cloud credentials and associate your model API calls with a Vertex AI project and location.
+In this lab, you will take the Vertex AI approach.
+
+In the Cloud Shell Editor menus, select View > Toggle Hidden Files to view or hide your hidden files (files with a period at the start of their filename are hidden by default in most file systems). You may need to scroll down in this menu to find the Toggle Hidden Files option.
+
+In the Cloud Shell Editor file explorer pane, navigate to the adk_project/my_google_search_agent directory.
+
+Select the .env file in the my_google_search_agent directory.
+
+Paste these values over what is currently in the file to update the file to include your project ID:
+```
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=qwiklabs-gcp-01-23fdef180edd
+GOOGLE_CLOUD_LOCATION=us-central1
+MODEL=gemini-2.5-flash
+```
+Save the file.
+
+
+
+
+
+
+
+These variables play the following roles:
+
+GOOGLE_GENAI_USE_VERTEXAI=TRUE indicates that you will use Vertex AI for authentication as opposed to Gemini API key authentication.
+
+GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION provide the project and location with which to associate your model calls.
+
+MODEL is not required, but is stored here so that it can be loaded as another environment variable. This can be a convenient way to try different models in different deployment environments.
+
+When you test your agent using ADK's dev UI or the command-line chat interface, they will load and use an agent's `.env` file if one is present or else look for environment variables with the same names as those set here.
+
+In the Cloud Shell Terminal, ensure you are in the adk_project directory where your agent subdirectories are located by running:
+```
+cd ~/adk_project
+```
+
+
+
+Launch the Agent Development Kit Dev UI with the following command:
+```
+adk web
+```
+
+
+Output
+/home/student_00_693da4cfd8ce/.local/lib/python3.12/site-packages/google/adk/cli/fast_api.py:130: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/student_00_693da4cfd8ce/.local/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+INFO:     Started server process [2082]
+INFO:     Waiting for application startup.
+
++-----------------------------------------------------------------------------+
+| ADK Web Server started                                                      |
+|                                                                             |
+| For local testing, access at http://127.0.0.1:8000.                         |
++-----------------------------------------------------------------------------+
+
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+
+
+
+
+
+
+
+
+
+
+To view the web interface in a new tab, click the http://127.0.0.1:8000 link in the Terminal output, which will link you via proxy to this app running locally on your Cloud Shell instance.
+https://8000-cs-2b78770b-33a3-40b7-838d-b121438cd1bd.ql-asia-southeast1-glxv.cloudshell.dev/dev-ui/
+
+
+
+
+A new browser tab will open with the ADK Dev UI.
+
+From the Select an agent dropdown on the left, select my_google_search_agent.
+Dev UI
+https://cdn.qwiklabs.com/DPRu5%2BWKQuEhTFoR89rDY18CTD%2B6F8%2BV%2FUxhfsALABE%3D
+
+
+In order to encourage the agent to use its Google Search tool, enter the question:
+```
+What is some recent global news?
+```
+
+
+
+You will notice from the results that the agent is able to use Google Search to get up-to-date information, rather than having its information stop on the date when its model was trained.
+
+A response using grounding with Google search includes ready-to-display HTML "Search Suggestions" like those you see at the bottom of the agent's response. When you use grounding with Google Search, you are required to display these suggestions (https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/grounding-search-suggestions), which help users follow up on the information the model used for its response.
+
+
+
+
+
+
+Notice that in the left side bar, you are in the Trace tab by default. Click on your last query text (What is some recent global news?) to see a trace of how long different parts of your query took to execute. You can use this to debug more complex executions involving tool calls to understand how various processes contribute to the latency of your responses.
+
+Trace of the Agent call
+https://cdn.qwiklabs.com/kZA4M7mGfdpBs3m6j3Q%2B4gJSkM2tqztHwF9TreY6NSU%3D
+
+
+Click the agent icon (agent_icon) next to the agent's response (or an event from the list on the Events tab) to inspect the event returned by the agent, which includes the content returned to the user and groundingMetadata which details the search results that the response was based on.
+
+When you are finished exploring the dev UI, close this browser tab and return to your browser tab with the Cloud Shell Terminal, click on the terminal's pane, and press CTRL + C to stop the web server.
+
+
+
+
+
+
+
+
+
+INFO:     127.0.0.1:55376 - "GET / HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:55376 - "GET /dev-ui/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55376 - "GET /dev-ui/styles-EVMPSV3U.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55376 - "GET /dev-ui/chunk-2WH2EVR6.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55376 - "GET /dev-ui/polyfills-B6TNHZQ6.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55376 - "GET /dev-ui/main-OS2OH2S3.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55376 - "GET /dev-ui/assets/config/runtime-config.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55376 - "GET /dev-ui/adk_favicon.svg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55376 - "GET /list-apps?relative_path=./ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55376 - "GET /dev-ui/assets/ADK-512-color.svg HTTP/1.1" 200 OK
+2025-11-10 06:53:39,618 - INFO - adk_web_server.py:605 - New session created: fcf2dc10-8631-41e2-bd0b-c70accae8d58
+INFO:     127.0.0.1:55392 - "POST /apps/my_google_search_agent/users/user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55392 - "GET /builder/app/my_google_search_agent?ts=1762757618968 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55392 - "GET /apps/my_google_search_agent/users/user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55392 - "GET /apps/my_google_search_agent/users/user/sessions/fcf2dc10-8631-41e2-bd0b-c70accae8d58 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55392 - "GET /debug/trace/session/fcf2dc10-8631-41e2-bd0b-c70accae8d58 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55392 - "GET /apps/my_google_search_agent/users/user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "POST /run_sse HTTP/1.1" 200 OK
+2025-11-10 06:53:51,065 - INFO - envs.py:47 - Loaded .env file for my_google_search_agent at /home/student_00_693da4cfd8ce/adk_project/my_google_search_agent/.env
+2025-11-10 06:53:51,066 - INFO - envs.py:47 - Loaded .env file for my_google_search_agent at /home/student_00_693da4cfd8ce/adk_project/my_google_search_agent/.env
+2025-11-10 06:53:51,369 - INFO - agent_loader.py:127 - Found root_agent in my_google_search_agent.agent
+2025-11-10 06:53:51,430 - INFO - callback_logging.py:13 - [query to google_search_agent]: What is some recent global news?
+
+2025-11-10 06:53:51,585 - INFO - google_llm.py:133 - Sending out request, model: gemini-2.0-flash-001, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2025-11-10 06:53:51,587 - INFO - models.py:6856 - AFC is enabled with max remote calls: 10.
+2025-11-10 06:53:57,013 - INFO - _client.py:1740 - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1beta1/projects/qwiklabs-gcp-01-23fdef180edd/locations/us-central1/publishers/google/models/gemini-2.0-flash-001:generateContent "HTTP/1.1 200 OK"
+2025-11-10 06:53:57,024 - INFO - google_llm.py:186 - Response received from the model.
+2025-11-10 06:53:57,063 - INFO - callback_logging.py:21 - [response from google_search_agent]: Here are some recent global news highlights:
+
+*   **Typhoon Fung-wong:** Super Typhoon Fung-wong has made landfall in the northern Philippines, causing at least two deaths and displacing over a million people.
+*   **US Government Shutdown:** The US Senate is taking the first steps toward ending a 40-day government shutdown that has disrupted air travel and threatens the holiday shopping season.
+*   **Ukraine War:** Ukraine has launched drone strikes that are disrupting power supplies in Russian cities.
+*   **Gaza Conflict:** Israeli air raids continue in Gaza City, and Hamas has handed over the remains of an Israeli soldier killed in 2014. The death toll in Gaza has surpassed 69,000.
+*   **Climate Summit:** A climate summit heard from countries suffering harm and destruction linked to global warming.
+*   **South Korea:** South Korea has indicted former leader Yoon on charges of aiding the enemy.
+*   **BBC Boss Resignation:** Tim Davie, the head of the BBC, has resigned after criticism over editing of a Trump speech.
+*   **Gunvor Dropping Lukoil Assets:** Trading firm Gunvor, accused by the US of being a "Kremlin's puppet," is dropping its plan to buy Lukoil assets.
+*   **Poppy Ban Controversy:** The N.S. Supreme Court chief justice is defending a staff poppy ban in some courtrooms, citing the need to avoid any signs of favoritism.
+
+
+INFO:     127.0.0.1:51822 - "GET /apps/my_google_search_agent/users/user/sessions/fcf2dc10-8631-41e2-bd0b-c70accae8d58 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "GET /debug/trace/session/fcf2dc10-8631-41e2-bd0b-c70accae8d58 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "GET /debug/trace/session/fcf2dc10-8631-41e2-bd0b-c70accae8d58 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41790 - "GET /debug/trace/34c40799-720e-4707-8b56-efeef9f2cb65 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41800 - "GET /apps/my_google_search_agent/users/user/sessions/fcf2dc10-8631-41e2-bd0b-c70accae8d58/events/34c40799-720e-4707-8b56-efeef9f2cb65/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41800 - "GET /debug/trace/34c40799-720e-4707-8b56-efeef9f2cb65 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41800 - "GET /apps/my_google_search_agent/users/user/sessions/fcf2dc10-8631-41e2-bd0b-c70accae8d58/events/34c40799-720e-4707-8b56-efeef9f2cb65/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41800 - "GET /apps/my_google_search_agent/users/user/sessions/fcf2dc10-8631-41e2-bd0b-c70accae8d58/events/34c40799-720e-4707-8b56-efeef9f2cb65/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41790 - "GET /debug/trace/34c40799-720e-4707-8b56-efeef9f2cb65 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34164 - "GET /apps/my_google_search_agent/users/user/sessions/fcf2dc10-8631-41e2-bd0b-c70accae8d58/events/34c40799-720e-4707-8b56-efeef9f2cb65/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34168 - "GET /debug/trace/34c40799-720e-4707-8b56-efeef9f2cb65 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34168 - "GET /apps/my_google_search_agent/users/user/sessions/fcf2dc10-8631-41e2-bd0b-c70accae8d58/events/34c40799-720e-4707-8b56-efeef9f2cb65/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34164 - "GET /debug/trace/34c40799-720e-4707-8b56-efeef9f2cb65 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34164 - "GET /apps/my_google_search_agent/users/user/sessions/fcf2dc10-8631-41e2-bd0b-c70accae8d58/events/34c40799-720e-4707-8b56-efeef9f2cb65/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34168 - "GET /debug/trace/34c40799-720e-4707-8b56-efeef9f2cb65 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59434 - "GET /apps/my_google_search_agent/users/user/sessions/fcf2dc10-8631-41e2-bd0b-c70accae8d58 HTTP/1.1" 200 OK
+^CINFO:     Shutting down
+INFO:     Waiting for application shutdown.
+
++-----------------------------------------------------------------------------+
+| ADK Web Server shutting down...                                             |
++-----------------------------------------------------------------------------+
+
+INFO:     Application shutdown complete.
+INFO:     Finished server process [2082]
+
+Aborted!
+
+
+
+
+
+====================
+
+
+Task 4. Run an agent programmatically
+While the dev UI is great for testing and debugging, it is not suitable for presenting your agent to multiple users in production.
+
+To run an agent as part of a larger application, you will need to include a few additional components in your agent.py script that the web app handled for you in the previous task. Proceed with the following steps to open a script with these components to review them.
+
+In the Cloud Shell Terminal run the following commands to export environment variables. You can use this approach to SET ENVIRONMENT VARIABLES FOR ALL of your AGENTS to use if they do not have a .env file in their directory:
+```
+export GOOGLE_GENAI_USE_VERTEXAI=TRUE
+export GOOGLE_CLOUD_PROJECT=qwiklabs-gcp-01-23fdef180edd
+export GOOGLE_CLOUD_LOCATION=us-central1
+export MODEL=gemini-2.5-flash
+```
+
+
+
+In the Cloud Shell Editor file browser, select the adk_project/app_agent directory.
+
+Select the agent.py file in this directory.
+
+This agent is designed to run as part of an application. Read the commented code in agent.py, paying particular attention to the following components in the code:
+
+
+
+Component	Feature	Description
+InMemoryRunner()	Oversight of agent execution	The Runner is the code responsible for RECEIVING the user's QUERY, PASSING IT TO the APPROPRIATE AGENT, receiving the agent's RESPONSE event and passing it back TO THE CALLING APP or UI, and then triggering the following event. You can read more in the ADK documentation about the event loop.
+https://google.github.io/adk-docs/runtime/#the-heartbeat-the-event-loop-inner-workings
+
+
+runner.session_service.create_session()	CONVERSATION HISTORY & SHARED STATE	Sessions allow an agent to preserve state, remembering a list of items, the CURRENT STATUS of a TASK, or other 'current' information. This class creates a local session service for simplicity, but in production this could be handled by a database.
+
+types.Content() and types.Part()	Structured, multimodal messages	Instead of a simple string, the agent is passed a 'Content' OBJECT which can consist of MULTIPLE 'Parts'. This allows for COMPLEX MESSAGES, including text and MULTIMODAL CONTENT to be passed to the agent in a specific order.
+
+
+
+When you ran the agent in the dev UI, it created a session service, artifact service, and runner for you.
+When you write your own agents to deploy programmatically, it is RECOMMENDED that you PROVIDE THESE COMPONENTS as external services rather than relying on in-memory versions.
+
+
+
+
+
+Notice that the script includes a hardcoded query, which asks the agent:
+"What is the capital of France?"
+
+Run the following command in the Cloud Shell Terminal to run this agent programmatically:
+```
+python3 app_agent/agent.py
+```
+
+Selected Output:
+trivia_agent: The capital of France is Paris.
+
+
+student_00_693da4cfd8ce@cloudshell:~/adk_project (qwiklabs-gcp-01-23fdef180edd)$ python3 app_agent/agent.py
+** User says: {'parts': [{'text': 'What is the capital of France?'}], 'role': 'user'}
+** trivia_agent: The capital of France is Paris.
+Background thread shutting down, attempting to send 2 queued log entries to Cloud Logging...
+Waiting up to 5 seconds.
+Sent all pending logs.
+
+
+
+
+
+
+
+
+You can also define specific INPUT and/or OUTPUT SCHEMA for an agent.
+
+You will now add imports for the Pydantic schema classes BaseModel and Field and use them to define a schema class consisting of just one field, with a key of "capital" and a string value intended for the name of a country's capital city. 
+https://docs.pydantic.dev/1.10/usage/schema/
+
+You can paste these lines into your app_agent/agent.py file, just after your other imports:
+```
+from pydantic import BaseModel, Field
+
+class CountryCapital(BaseModel):
+    capital: str = Field(description="A country's capital.")
+```
+
+
+
+Important note: When you define an output schema, you cannot use tools or agent transfers.
+=> QUESTION: WHAT DOES THIS MEAN????
+- agent w output_schema defined -> constrains generated output
+- this means we cannot let an agent make dynamic decisions
+- so we cannot let the agent use tools OR transfer control of this agent to another agent????
+
+
+
+Within your root_agent's Agent definition, add these parameters to disable transfers (as you are required to do when using an output schema) and to set the output to be generated according to the CountryCapital schema you defined above:
+```
+        disallow_transfer_to_parent=True,
+        disallow_transfer_to_peers=True,
+        output_schema=CountryCapital,
+```
+
+
+
+
+Run the agent script again to see the response following the output_schema:
+```
+python3 app_agent/agent.py
+```
+
+
+student_00_693da4cfd8ce@cloudshell:~/adk_project (qwiklabs-gcp-01-23fdef180edd)$ python3 app_agent/agent.py
+** User says: {'parts': [{'text': 'What is the capital of France?'}], 'role': 'user'}
+** trivia_agent: {"capital": "Paris"}
+Background thread shutting down, attempting to send 2 queued log entries to Cloud Logging...
+Waiting up to 5 seconds.
+Sent all pending logs.
+
+
+
+
+====================
+
+
+Task 5. Chat with an agent via the command-line interface
+
+
+You can also chat with an agent in your local development environment by using the command line interface. This can be very handy for quickly debugging and testing agents as you develop them.
+
+Like the web interface, the command line interface also handles the creation of the session service, artifact service, and runner for your agent.
+
+
+
+To run an interactive session using the command line interface:
+Run the following in Cloud Shell Terminal:
+```
+adk run my_google_search_agent
+```
+
+
+student_00_693da4cfd8ce@cloudshell:~/adk_project (qwiklabs-gcp-01-23fdef180edd)$ adk run my_google_search_agent
+Log setup complete: /tmp/agents_log/agent.20251110_072141.log
+To access latest log: tail -F /tmp/agents_log/agent.latest.log
+/home/student_00_693da4cfd8ce/.local/lib/python3.12/site-packages/google/adk/cli/cli.py:155: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/student_00_693da4cfd8ce/.local/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Running agent google_search_agent, type exit to exit.
+[user]: k
+[google_search_agent]: I am ready. Ask me anything.
+
+
+
+
+
+
+
+
+Input the following message:
+```
+what are some new movies that have been released in the past month in India?
+```
+
+[user]: what are some new movies that have been released in the past month in India?
+[google_search_agent]: Here are some new movies that have been released in India in the past month (October 2025 - early November 2025):
+
+**In Theaters:**
+
+*   **Ikkis**
+*   **Sunny Sanskari Ki Tulsi Kumari**: A romantic comedy
+*   **Ek Deewane Ki Deewaniyat**: A romantic drama starring Harshvardhan Rane and Sonam Bajwa
+*   **Thamma:** A horror-comedy, part of the Maddock Horror Comedy Universe, starring Ayushmann Khurrana, Rashmika Mandanna, and Nawazuddin Siddiqui
+*   **Kantara: A Legend Chapter 1**: Arrived in Kerala theaters on October 2, 2025
+*   **Go Goa Gone 2**: A zom-com sequel
+*   **The Taj Story**: A courtroom-based social drama
+*   **Lord Curzon Ki Haveli**: A quirky black comedy thriller starring Rasika Dugal and Arjun Mathur
+*   **Nikka Zaildar 4**
+*   **Baramulla**: Released November 7, 2025
+*   **Bhagwat: Chapter One - Raakshas**: A crime thriller
+
+**Releases on OTT Platforms:**
+
+*   **Ufff Yeh Siyapaa**: A Hindi silent dark comedy, started streaming on Netflix on October 31, 2025
+*   **Thode Door Thode Paas**: A romantic family drama, premiering on November 7
+
+[user]: exit
+
+
+
+
+
+When you are finished chatting with the command line interface, enter 'exit' at the next user prompt to end the chat.
+
+
+
+
+
+====================
+
+
+Task 6. Preview a multi-agent example
+
+
+You will learn more about building multi-agent systems in the lab Build multi-agent systems with ADK, but because multi-agent capabilities are core to the Agent Development Kit experience, you can explore one multi-agent system now.
+
+This agentic system evaluates and improves the factual grounding of responses generated by LLMs. It includes: - a critic_agent to serve as an automated fact-checker - a reviser_agent to rewrite responses if needed to correct inaccuracies based on verified findings
+
+
+---
+
+To explore this agent:
+
+To explore this multi-agent system's code, use the Cloud Shell Editor file explorer to navigate to the directory adk_project/llm_auditor.
+
+Within the llm_auditor directory, select the agent.py file.
+
+Here are a few things to notice about this multi-agent example:
+1
+Notice the import and use of the SequentialAgent class. This is an example of a workflow class which passes control of the conversation from one agent to the next in order without awaiting a user turn in-between. When you run the agent, you will see responses from both the critic_agent and the reviser_agent, in that order, without waiting for a user turn.
+
+2
+Notice that these sub-agents are each imported from their own directories within a sub_agents directory.
+
+3
+In the sub-agents' directories, you will see the __init__.py and agent.py files like those you explored in the directory structure earlier, along with a prompt.py file, which provides a dedicated place for a complete, well-structured prompt to be stored and edited before it is imported into the agent.py file.
+
+
+Create a .env file for this agent and launch the dev UI again by running the following in the Cloud Shell Terminal:
+```
+cd ~/adk_project
+cat << EOF > llm_auditor/.env
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=qwiklabs-gcp-01-23fdef180edd
+GOOGLE_CLOUD_LOCATION=us-central1
+MODEL=gemini-2.5-flash
+EOF
+
+adk web
+```
+
+
+
+
+Note: If you did not shut down your previous adk web session, the default port of 8000 will be blocked, but you can launch the Dev UI with a new port by using adk web --port 8001, for example.
+
+
+Click the http://127.0.0.1:8000 link in the Terminal output. A new browser tab will open with the ADK Dev UI.
+
+From the Select an agent dropdown on the left, select llm_auditor.
+
+Start the conversation with the following false statement:
+```
+Double check this: Earth is further away from the Sun than Mars.
+```
+
+
+
+You should see two responses from the agent in the chat area:
+- First, a detailed response from the critic_agent checking the truthfulness of the statement based on fact-checking with Google Search.
+- Second, a short revised statement from the reviser_agent with a corrected version of your false input statement, for example, "Earth is closer to the Sun than Mars."
+
+
+
+Next to each response, click on the agent icon (agent_icon) to open the event panel for that response (or find the corresponding numbered event on the Events panel and select it). At the top of the event view, there is a graph that visualizes the relationships between the agents and tools in this multi-agent system. The agent responsible for this response will be highlighted.
+
+Feel free to explore the code further or ask for other fact-checking examples in the dev UI. Another example you can try is:
+```
+Q: Why is the sky blue? A: Because the sky reflects the color of the ocean.
+```
+
+
+
+If you would like to reset the conversation, use the + New Session link at the top right of the ADK Dev UI to restart the conversation.
+
+When you are finished asking questions of this agent, close the browser tab and press CTRL + C in the Terminal to stop the server.
+
+
+
+
+Human-in-the-loop pattern
+Even though this example uses a SequentialAgent workflow agent, you can think of this pattern as a human-in-the-loop pattern. When the SequentialAgent ends its sequence, the conversation goes back to its parent, the llm_auditor in this example, to get a new input turn from the user and then pass the conversation back around to the other agents.
+
+
+
+
+
+
+
+# 1. Navigate to the directory you want to zip.
+cd /home/student_00_693da4cfd8ce/adk_project
+
+# 2. Create the zip archive in the parent directory.
+# The '.' means "everything in the current directory".
+# The '-r' flag is for recursively including subdirectories.
+zip -r ../adk.zip .
+
+
+
+====================
+
+Reflections
+- 
+
+
