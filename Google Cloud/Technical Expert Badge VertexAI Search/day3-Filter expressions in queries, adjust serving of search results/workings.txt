@@ -1,0 +1,441 @@
+Deploy a Vertex AI Search app with a data store of structured data
+Configure and query serving controls to boost search results meeting certain criteria for certain searches
+Use a filter expression in a single query to modify its results
+
+
+
+
+
+
+Task 1. Import structured data to a BigQuery table
+Software is only as stable and secure as its dependencies. If the underlying packages imported into a project develop vulnerabilities, that can make the larger project vulnerable as well.
+
+In this lab, you will create a search application on a dataset from Open Source Insights. Open Source Insights is a service developed and hosted by Google to help developers better understand the structure, construction, and security of open source software packages.
+
+To learn more, you may save its website deps.dev to visit. (After you complete the lab, of course! 😊)
+deps.dev bigquery public dataset
+
+Press the G and then S keys or the Cloud Shell button (Cloud Shell button) found in the upper right of the console to open Cloud Shell Terminal.
+
+When prompted, click Continue and then Authorize.
+
+
+
+Run the following to create a BigQuery dataset named deps:
+bq mk --location us -d deps
+
+
+
+Run the following to populate a table named advisories with advisory data related to vulnerabilities in open source software. These advisories have been made available by Open Source Insights as a bigquery-public-data dataset.
+bq --location us query \
+--destination_table deps.advisories \
+--use_legacy_sql=false \
+"SELECT * EXCEPT(SourceId, Severity, ReferenceURLS, \
+Packages, Aliases), \
+ReferenceURLS[SAFE_OFFSET(1)] AS ReferenceURL \
+FROM bigquery-public-data.deps_dev_v1.AdvisoriesLatest, \
+UNNEST(Packages) \
+LIMIT 3000"
+
+
+
+
+Close the Cloud Shell Terminal panel.
+
+Navigate to BigQuery by searching for it at the top of the console.
+
+Within BigQuery Studio, in the Explorer panel, click on your Project ID to explore its resources, locate the deps dataset, and click the triangle icon next to its name to display its contents.
+
+Within the deps dataset, select the advisories table.
+
+Select the Preview tab to view the structured data. Some fields to inspect include:
+
+Title and Description which describe this advisory.
+Name identifies the affected package
+GitHubSeverity identifies the severity of this vulnerability, with values of UNKNOWN, CRITICAL, HIGH, MODERATE, and LOW
+System identifies which package manager hosted the affected package, for example PYPI for Python packages and NPM for JavaScript packages.
+
+
+
+
+==================================
+
+
+
+Task 2. Create a Data Store with Structured Data and a Search App
+
+
+Navigate to AI Applications by searching for it at the top of the console.
+
+On the Welcome to AI Applications screen, click Continue and Activate the API.
+
+On the left-hand navigation bar, select Data Stores.
+
+Click Create Data Store.
+
+For a Data Store source find the BigQuery card and click SELECT.
+
+For the kind of data to import, select Structured - BigQuery table with your own schema.
+
+For the BigQuery path, click Browse.
+
+Search for your 'advisories' table, select the radio button next to its name, and click Select.
+
+Click Continue.
+
+On the Schema page, assign the Name field name a key property of title, and similarly assign the Description field the key property of description. You may need to use the page selectors below the table to find the fields.
+
+Click CONTINUE.
+
+Name the data store: Deps.dev Advisories
+
+Click CREATE.
+
+
+
+
+
+
+
+
+On the left-hand navigation, click Apps.
+
+Click Create a new app.
+
+For an app type, find the card for Custom search (general) and click CREATE on it.
+
+Keep the Enterprise edition and Advanced LLM features boxes checked.
+
+Name the app: OSS Vulnerability Advisories
+
+For a company name, use: Open Source Software Team
+
+Select Continue.
+
+Select the Deps.dev Advisories data store.
+
+Click CREATE.
+
+
+
+
+
+
+
+
+==================================
+
+
+
+
+
+Task 3. Query the data store.
+The data store may need up to 5 minutes before it will be ready. You can select the data store from your app's Data menu and view the Activity tab. When you see the message Import Complete your data store is ready for use.
+Navigate to your app's Preview tab.
+
+Search for 'JS auth token'.
+
+Notice that you get results, but each search results is returned as a table without formatting or information hierarchy.
+https://cdn.qwiklabs.com/hEJkn1pSCY3fy2GD53XQKO8J8VpuuGjgqyLfzt92vX8%3D
+
+
+
+
+
+Select the Configurations tab in the left-hand navigation bar.
+
+Under the Data display options header, toggle open the section named Configure fields in results.
+
+Set the following pairs:
+
+Field	Data value
+Title	Name
+URL	ReferenceURL
+Text 1	Title
+Text 2	Description
+Metadata 1	System
+Metadata 2	GitHubSeverity
+
+Next to the Metadata 2 field, click the icon (carat) to toggle open the Template form field for this value.
+https://cdn.qwiklabs.com/OB5PXvI3CMi2MJvQWSUwUoC8ohXMUFDh8UuPlDCyvWc%3D
+
+
+
+Edit the Template to say: 'Severity: {value}'
+
+In the Preview on the right side, search again for JS auth token.
+
+The results now have visual structure and only the fields you've selected are displayed.
+
+However, the results returned likely include UNKNOWN or LOW Severity advisories. In the following tasks, you will configure the results to boost CRITICAL and HIGH severity results to serve those to the user first.
+
+Results now have visual structure
+Click Save and Publish.
+
+
+
+
+
+
+
+
+==================================
+
+
+Task 4. Create a serving control to boost results.
+From the top of the Configurations panel, select the Control tab.
+
+Click Create Control.
+
+For a Control name enter: Boost JS docs with CRITICAL & HIGH severity
+
+For a Control Type select Boost/bury.
+
+Click Continue.
+
+You decide this control should only effect searches for JavaScript vulnerabilities, so for Partial match query terms enter javascript and press return, then type js and press return. (Note: these terms must be lowercase.)
+
+Click Continue.
+
+Under the Select a data store dropdown, select your data store.
+
+
+
+
+For a filter expression, enter the following to match on either value for a string:
+GitHubSeverity: ANY("CRITICAL", "HIGH")
+
+
+
+Drag the Boost/bury value slider to 1.0 to push posts that match this filter higher in the search results.
+https://cdn.qwiklabs.com/69HwO9oxPcgwc%2B%2BqzH%2FDD6OZigPYpxenEXb6N4co2mg%3D
+image of Filter expression and boost score
+Click Continue.
+
+Keep the toggle enabled to publish immediately and click Submit.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+Task 5. Query the app from the command line with a filter
+
+The serving control needs 3-5 minutes from when you published it, so you may need to wait a few minutes before you see the intended results.
+While waiting for the serving control to take effect, you will use the command line to query the search application with a custom filter for this query.
+
+
+
+
+Navigate to the Integration tab on the left-hand navigation menu.
+
+Select the API tab to view an API query.
+
+In the Enter a search query field, enter database to populate the search query of the provided curl command.
+
+Click the Run in Cloud Shell button to open the Cloud Shell Terminal and populate it with this query.
+
+When prompted, Authorize Cloud Shell.
+
+The command should be pasted in the Cloud Shell Terminal pane. Select the Terminal pane and press return to run the command.
+
+You should observe search results in the Terminal, and if you scroll up through the results, you will notice that results currently come from several Systems like PYPI, NPM, and RUBYGEMS, meaning advisories related to several languages have been returned.
+
+
+
+--------
+
+student_00_6c9a90223262@cloudshell:~ (qwiklabs-gcp-03-26919e4f5a63)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+> -H "Content-Type: application/json" \
+> "https://discoveryengine.googleapis.com/v1alpha/projects/1026994604895/locations/global/collections/default_collection/engines/oss-vulnerabil
+> -d '{"query":"database","pageSize":10,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","userInfo":{"timeZone":"Asia/Singapore"}}'curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+> -H "Content-Type: application/json" \
+> "https://discoveryengine.googleapis.com/v1alpha/projects/1026994604895/locations/global/collections/default_collection/engines/oss-vulnerability-advisori_1760599219049/servingConfigs/default_search:search" \
+> -d '{"query":"database","pageSize":10,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","userInfo":{"timeZone":"Asia/Singapore"}}'
+{
+student_00_6c9a90223262@cloudshell:~ (qwiklabs-gcp-03-26919e4f5a63)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+> -H "Content-Type: application/json" \
+> "https://discoveryengine.googleapis.com/v1alpha/projects/1026994604895/locations/global/collections/default_collection/engines/oss-vulnerability-advisori_1760599219049/servingConfigs/default_search:search" \
+> -d '{"query":"database","pageSize":10,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","userInfo":{"timeZone":"Asia/Singapore"}}'
+{
+  "results": [
+    {
+      "id": "9c3eb5c292ef95cce9fd2dfb26a04d70",
+      "document": {
+        "name": "projects/1026994604895/locations/global/collections/default_collection/dataStores/deps-dev-advisories_1760599160006/branches/0/documents/9c3eb5c292ef95cce9fd2dfb26a04d70",
+        "id": "9c3eb5c292ef95cce9fd2dfb26a04d70",
+        "structData": {
+          "SourceURL": "https://osv.dev/vulnerability/PYSEC-2009-9",
+          "Description": "Zope Object Database (ZODB) before 3.8.2, when certain Zope Enterprise Objects (ZEO) database sharing is enabled, allows remote attackers to bypass authentication via vectors involving the ZEO network protocol.",
+          "System": "PYPI",
+          "Title": "PYSEC-2009-9",
+          "AffectedVersions": "Introduced: 0, Fixed: 3.8.2",
+          "ReferenceURL": "http://osvdb.org/56826",
+          "UnaffectedVersions": "",
+          "GitHubSeverity": "UNKNOWN",
+          "Source": "OSV",
+          "SnapshotAt": "2025-10-06 21:01:04.782994 UTC",
+          "Name": "zodb3",
+          "Disclosed": "2009-08-07 19:30:00 UTC"
+        },
+        "derivedStructData": {
+          "clearbox_escorer_score": 0.29190358519554138,
+          "is_exact_match_query": 0,
+          "can_fetch_raw_content": "true"
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 0.2919036,
+        "semanticSimilarityScore": 0.5925903,
+        "topicalityRank": 1,
+        "boostingFactor": 0,
+        "defaultRank": 1
+      }
+    }
+  ],
+  "totalSize": 1,
+  "attributionToken": "oQL0IAEKDAjUy8LHBhDP7aLVARIkNjhlYmY5MTQtMDAwMC0yZDM5LThhYzgtMzRjN2U5MjBjNjBiIgdHRU5FUklDKkiugJM3treMLZzWty2Q97IwjpHJMLaqojK7kfoxlZLFMMLwnhXUsp0Vjr6dFZ_Wty2-kfox4-uQN9PaiTe5qqIy0NqJN-DrkDcwAVKVAXByb2plY3RzLzEwMjY5OTQ2MDQ4OTUvbG9jYXRpb25zL2dsb2JhbC9jb2xsZWN0aW9ucy9kZWZhdWx0X2NvbGxlY3Rpb24vZW5naW5lcy9vc3MtdnVsbmVyYWJpbGl0eS1hZHZpc29yaV8xNzYwNTk5MjE5MDQ5L3NlcnZpbmdDb25maWdzL2RlZmF1bHRfc2VhcmNo",
+  "guidedSearchResult": {},
+  "summary": {},
+  "queryExpansionInfo": {}
+}
+
+
+--------
+
+
+
+
+
+
+
+
+
+
+
+To add a filter to return only results matching a specific System, you will modify the JSON of your curl command by adding a filter key with a filter expression. To do so, use the copy button on the API command from the Integration tab and paste it in a text document.
+
+Add the following before the closing curly brace of your JSON to return only results relating to Python: "filter":"System: ANY(\"PYPI\")". (Note: the backslashes are used to escape the double quotes so that they do not represent the end of the string of the filter expression.)
+
+This will make the end of the command look like this. (Notice the closing curly brace and single quote to end the JSON and the command):
+..."userInfo":{"timeZone":"America/New_York"},"filter":"System: ANY(\"PYPI\")"}'
+
+
+
+Copy and paste the modified command from your text document to Cloud Shell Terminal and press return to run the command.
+
+The search results should now only include results dealing with Python issues, as evidenced by each result containing the line:
+"System": "PYPI",
+
+
+
+--------
+
+
+student_00_6c9a90223262@cloudshell:~ (qwiklabs-gcp-03-26919e4f5a63)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+"https://discoveryengine.googleapis.com/v1alpha/projects/1026994604895/locations/global/collections/default_collection/engines/oss-vulnerability-advisori_1760599219049/servingConfigs/default_search:search" \
+-d '{"query":"database","pageSize":10,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","userInfo":{"timeZone":"Asia/Singapore"}, "filter": "System: ANY(\"PYPI\")"}'
+{
+  "results": [
+    {
+      "id": "9c3eb5c292ef95cce9fd2dfb26a04d70",
+      "document": {
+        "name": "projects/1026994604895/locations/global/collections/default_collection/dataStores/deps-dev-advisories_1760599160006/branches/0/documents/9c3eb5c292ef95cce9fd2dfb26a04d70",
+        "id": "9c3eb5c292ef95cce9fd2dfb26a04d70",
+        "structData": {
+          "Description": "Zope Object Database (ZODB) before 3.8.2, when certain Zope Enterprise Objects (ZEO) database sharing is enabled, allows remote attackers to bypass authentication via vectors involving the ZEO network protocol.",
+          "Name": "zodb3",
+          "System": "PYPI",
+          "GitHubSeverity": "UNKNOWN",
+          "UnaffectedVersions": "",
+          "SourceURL": "https://osv.dev/vulnerability/PYSEC-2009-9",
+          "Disclosed": "2009-08-07 19:30:00 UTC",
+          "Source": "OSV",
+          "Title": "PYSEC-2009-9",
+          "AffectedVersions": "Introduced: 0, Fixed: 3.8.2",
+          "SnapshotAt": "2025-10-06 21:01:04.782994 UTC",
+          "ReferenceURL": "http://osvdb.org/56826"
+        },
+        "derivedStructData": {
+          "can_fetch_raw_content": "true",
+          "clearbox_escorer_score": 0.29190358519554138,
+          "is_exact_match_query": 0
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 0.2919036,
+        "semanticSimilarityScore": 0.5925903,
+        "topicalityRank": 1,
+        "boostingFactor": 0,
+        "defaultRank": 1
+      }
+    }
+  ],
+  "totalSize": 1,
+  "attributionToken": "oQL0IAEKDAjRzsLHBhD_7vibARIkNjhmMGY1MjUtMDAwMC0yOGFhLWJhNjUtNTgyNDI5YjJkNzIwIgdHRU5FUklDKkjQ2ok3treMLY6-nRXUsp0V4OuQN66AkzfT2ok34-uQN7aqojK7kfoxjpHJML6R-jG5qqIylZLFMMLwnhWY1rctm9a3LZD3sjAwAVKVAXByb2plY3RzLzEwMjY5OTQ2MDQ4OTUvbG9jYXRpb25zL2dsb2JhbC9jb2xsZWN0aW9ucy9kZWZhdWx0X2NvbGxlY3Rpb24vZW5naW5lcy9vc3MtdnVsbmVyYWJpbGl0eS1hZHZpc29yaV8xNzYwNTk5MjE5MDQ5L3NlcnZpbmdDb25maWdzL2RlZmF1bHRfc2VhcmNo",
+  "guidedSearchResult": {},
+  "summary": {},
+  "queryExpansionInfo": {}
+}
+
+
+
+
+
+
+--------
+
+
+
+
+
+
+
+
+
+==================================
+
+
+Task 6. View the results of the serving control.
+
+Close the Cloud Shell Terminal pane and return to the Preview tab of the app.
+Repeat the search for: JS auth token
+If the serving control has had time to propagate, you should now observe advisories of severity HIGH and CRITICAL as configured in your serving control. If you are not yet seeing significantly more high-severity posts, give the serving control a few more minutes and try again.
+
+
+
+
+
+
+
+
+
+
+
+
+==================================
+
+
+
+Reflections:
+Some parts of the lab were confusing.
+1. When defining the schema of the bigquery table at the AI application data store, the schema was automatically detected. I was unable to change the field name and key property settings. Instead I had to create new fields. I am not sure whether this is the expected behaviour.
+2. The data store also takes a long time to sync, which has not completed indexing even by the end of the lab.
+3. The initial SQL query to populate the deps.advisories table could be updated to include relevant records needed for the lab, such as CRITICAL and HIGH severity 'JS auth token' records. The missing records because of this initial SQL query meant I had to use abit of creativity to test whether my configurations so far are working.
+
+
+
+
+
