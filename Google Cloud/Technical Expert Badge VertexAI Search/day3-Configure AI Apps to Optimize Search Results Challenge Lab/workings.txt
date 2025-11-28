@@ -1,0 +1,889 @@
+Create a metadata document for data store.
+Create a search app and data store using AI Applications.
+Configure display settings for your search results.
+Provide different search calls to filter results by department.
+Boost search results based on ratings.
+
+
+
+Objective
+The objective of this challenge lab is to demonstrate your proficiency in configuring search results from AI Applications. You will be tasked with implementing search serving controls to boost and bury results, filter entries from search results and display metadata in your search interface.
+
+
+This lab will challenge you to perform actions and automation across products. Instead of following step-by-step instructions, you are given a common business scenario and a set of tasks - you figure out how to complete them on your own! An automated scoring system (shown on this page) provides feedback on whether you have completed your tasks correctly.
+
+When you take a Challenge Lab, you will not be taught Google Cloud concepts. You will need to use your skills to assess how to build the solution to the challenge presented. This lab is only recommended for students who have those skills. Are you up for the challenge?
+
+
+
+
+
+================================
+
+
+
+
+Task 1. Create a metadata document for data store
+In this task, you will create a metadata file in JSONL format that describes unstructured document links and their metadata. You will then upload this file to a Cloud Storage bucket, preparing the data for ingestion into an AI Applications data store.
+
+
+Tip: For guidance, refer to the "Using structData" example in the Unstructured data documentation.
+https://cloud.google.com/generative-ai-app-builder/docs/prepare-data#storage-unstructured
+
+Using your local text editor or Cloud Shell Editor, create a metadata.json, based on the information in the table below.
+id	title	category	rating	Document URI
+doc-1	Heaven Resort	information	4.8	gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel1.pdf
+doc-2	Paradise Reef Resort	information	4.7	gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel2.pdf
+doc-3	AquaPulse Maldives	information	4.0	gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel3.pdf
+doc-4	Heaven Resort Financials	financials	4.8	gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel1-financials.pdf
+doc-5	Paradise Reef Resort Financials	financials	4.7	gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel2-financials.pdf
+doc-6	AquaPulse Maldives Financials	financials	4.0	gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel3-financials.pdf
+
+
+
+
+
+Upload metadata.json file to the Cloud Storage bucket gs://qwiklabs-gcp-03-2a6e0c70eba3.
+gsutil cp metadata.json gs://qwiklabs-gcp-03-2a6e0c70eba3/
+
+
+
+
+
+
+
+
+================================
+
+
+Task 2. Set up Google Identity
+Set up Google Identity as the identity provider for your AI Applications globally.
+
+
+
+
+
+
+
+
+
+
+
+================================
+
+
+Task 3. Create and query an unstructured data search app
+
+In this task, you will set up and configure an enterprise search application to process unstructured data efficiently. You will integrate a data store that ingests linked unstructured documents, configure fields and facet settings to enhance search relevance, and validate the application's functionality. Additionally, you will test the search feature by applying filters to retrieve only relevant documents based on specific categories.
+
+
+
+
+
+
+Create search app
+In the AI Applications console, create a new app of type Custom search (general) named cymbal-travel with company name Cymbal Travel in the global region.
+
+Configure this app to use a data store named Hotel PDFs that ingests 'linked unstructured data with metadata' using the metadata.json file you uploaded to : gs://qwiklabs-gcp-03-2a6e0c70eba3/metadata.json.
+>>Source - Cloud Storage
+>>Digital parser - because the PDF text can be selected, copy-pasted
+>>(Layout parser is used when OCR is needed to read text from images, tables/cols/headers inside PDFs to understand the document's structure)
+>>(create app AND data store at the same time)
+>>instead of creating data store 1st, then create the app
+
+
+Finally, preview the app and verify if it is working as intended.
+
+Note: It will take up to 15 minutes to import documents. Check the data store to see if the data has been parsed, ingested and indexed.
+
+
+
+
+
+
+
+The configuration options required for the following tasks will only appear after the data has been imported and indexed by the data store.
+
+Navigate to Configurations > UI and set up Configure fields in results as follows:
+Field Type	Value
+Title	title
+Text 1	category
+Text 2	rating
+
+In Configurations > UI, set up Facet settings as follows:
+Field	Value
+Field 1	category
+Display Name 1	Category
+
+Using the Configurations > UI menu's Test config panel, send the following search request to your app.
+```
+What hotels are available in the Maldives?
+```
+
+Use the facet you've configured to filter the Search results to display only documents of the category Information.
+https://cdn.qwiklabs.com/DkTmudYyeL0A8ACnOxh19UG%2FyJhIGM%2FALUaP47ylNZI%3D
+
+Note: It will take a few minutes for the facet to appear. Please retry the search every couple of minutes until the facet appears after you conduct the search, then select the facet and wait a few seconds before clicking the Check my progress button.
+
+
+
+
+
+
+
+
+
+
+================================
+
+
+Task 4. Filter responses to user requests
+
+In this task, you will enhance an unstructured data search application by implementing filtering strategies to restrict access to sensitive content, such as financial documents. 
+Additionally, you will refine search queries by applying category-based filters to retrieve only relevant documents, such as information or financial records, based on the search criteria.
+
+
+Send a search request from the command line using the Discovery Engine APIs and the 'default_search:search' endpoint and add the filter for 'category', so that it only returns 'information' documents.
+>>has an extra "filter" key inside the '-d' line
+```
+What hotels are available in the Maldives?
+```
+
+Tip: You can build on the API command found in the Integration tab, then add a filter: with the appropriate filter expression. Don't forget to escape quotation marks in your filter expression with a backslash (\).
+https://cloud.google.com/generative-ai-app-builder/docs/filter-search-metadata#examples_of_filter_expressions
+
+
+
+
+
+
+search WITHOUT generated answer
+---
+student_00_118642b5af2c@cloudshell:~ (qwiklabs-gcp-03-2a6e0c70eba3)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+"https://discoveryengine.googleapis.com/v1alpha/projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/servingConfigs/default_search:search" \
+-d '{"query":"What hotels are available in the Maldives?", "filter": "category: ANY(\"information\")", "pageSize":10,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","contentSearchSpec":{"extractiveContentSpec":{"maxExtractiveAnswerCount":1}},"facetSpecs":[{"facetKey":{"key":"category"},"limit":30}],"userInfo":{"timeZone":"Asia/Singapore"}}'
+
+
+
+
+
+{
+  "results": [
+    {
+      "id": "doc-2",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-2",
+        "id": "doc-2",
+        "structData": {
+          "category": "information",
+          "rating": 4.7,
+          "title": "Paradise Reef Resort"
+        },
+        "derivedStructData": {
+          "extractive_answers": [
+            {
+              "pageNumber": "1",
+              "content": "Paradise Reef Resort: Maldives Getaway Welcome to Paradise Reef Resort, your ultimate escape to the serene beauty of the Maldives. Nestled amidst the azure waters of the Indian Ocean, our resort oers an unparalleled experience of luxury, tranquility, and natural wonder."
+            }
+          ],
+          "can_fetch_raw_content": "true",
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel2.pdf"
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 1.0408868,
+        "semanticSimilarityScore": 0.7779731,
+        "topicalityRank": 5,
+        "documentAge": 489075.84,
+        "boostingFactor": 0,
+        "defaultRank": 1,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4.7
+          }
+        ]
+      }
+    },
+    {
+      "id": "doc-1",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-1",
+        "id": "doc-1",
+        "structData": {
+          "category": "information",
+          "rating": 4.8,
+          "title": "Heaven Resort"
+        },
+        "derivedStructData": {
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel1.pdf",
+          "extractive_answers": [
+            {
+              "pageNumber": "1",
+              "content": "Heaven Resort: Your Maldivian Escape Welcome to Paradise Reef Resort, an exclusive haven nestled in the heart of the Maldives. Here, tranquility meets luxury, and the vibrant underwater world is your playground."
+            }
+          ],
+          "can_fetch_raw_content": "true"
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 1.2750679,
+        "semanticSimilarityScore": 0.7662435,
+        "topicalityRank": 4,
+        "documentAge": 489075.84,
+        "boostingFactor": 0,
+        "defaultRank": 2,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4.8
+          }
+        ]
+      }
+    },
+    {
+      "id": "doc-3",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-3",
+        "id": "doc-3",
+        "structData": {
+          "title": "AquaPulse Maldives",
+          "rating": 4,
+          "category": "information"
+        },
+        "derivedStructData": {
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel3.pdf",
+          "extractive_answers": [
+            {
+              "content": "AquaPulse Maldives: Your Adventure Awaits Welcome to AquaPulse Maldives, the ultimate destination for young, adventurous souls seeking an unforgettable island experience! Forget your typical resort stay – we&#39;re all about high-energy activities, social connections, and creating memories that will last a lifetime.",
+              "pageNumber": "1"
+            }
+          ],
+          "can_fetch_raw_content": "true"
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 1.1769146,
+        "semanticSimilarityScore": 0.7153347,
+        "topicalityRank": 1,
+        "documentAge": 489075.84,
+        "boostingFactor": 0,
+        "defaultRank": 3,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4
+          }
+        ]
+      }
+    }
+  ],
+  "facets": [
+    {
+      "key": "category",
+      "values": [
+        {
+          "value": "information",
+          "count": "3",
+          "facetExpandFilter": "(category: ANY(\"information\")) AND category: ANY(\"information\")"
+        }
+      ],
+      "facetAccuracy": "EXACT"
+    }
+  ],
+  "totalSize": 3,
+  "attributionToken": "lAL0EwEKDAi5-sbHBhDtzv_tAhIkNjhmNzdjZDUtMDAwMC0yMTMxLWJlZjUtM2MyODZkM2UxOGU2IgdHRU5FUklDKkiQ97Iw4-uQN9SynRXC8J4VnNa3LZ_Wty3g65A3vpH6Ma6Akze7kfoxlZLFMI6-nRW1t4wtjpHJMNPaiTe2qqIyuaqiMtDaiTcwAVKIAXByb2plY3RzLzEwMzc4ODM1ODM0MjUvbG9jYXRpb25zL2dsb2JhbC9jb2xsZWN0aW9ucy9kZWZhdWx0X2NvbGxlY3Rpb24vZW5naW5lcy9jeW1iYWwtdHJhdmVsXzE3NjA2NzAwMDE5ODYvc2VydmluZ0NvbmZpZ3MvZGVmYXVsdF9zZWFyY2g",
+  "guidedSearchResult": {},
+  "summary": {},
+  "queryExpansionInfo": {}
+}
+
+---
+
+
+
+
+
+VS
+
+search with generated answer
+>> has an extra "session" key inside the '-d' line
+
+>> start a session 1st
+>>       AT THIS STAGE - WE DO NOT SEE A 'GENERATED ANSWER' -> the search results below look the same
+
+---
+student_00_118642b5af2c@cloudshell:~ (qwiklabs-gcp-03-2a6e0c70eba3)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+"https://discoveryengine.googleapis.com/v1alpha/projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/servingConfigs/default_search:search" \
+-d '{"query":"What hotels are available in the Maldives?", "filter": "category: ANY(\"information\")", "pageSize":10,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","contentSearchSpec":{"extractiveContentSpec":{"maxExtractiveAnswerCount":1}},"facetSpecs":[{"facetKey":{"key":"category"},"limit":30}],"userInfo":{"timeZone":"Asia/Singapore"},"session":"projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/sessions/-"}'
+
+
+
+
+{
+  "results": [
+    {
+      "id": "doc-2",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-2",
+        "id": "doc-2",
+        "structData": {
+          "title": "Paradise Reef Resort",
+          "category": "information",
+          "rating": 4.7
+        },
+        "derivedStructData": {
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel2.pdf",
+          "can_fetch_raw_content": "true",
+          "extractive_answers": [
+            {
+              "content": "Paradise Reef Resort: Maldives Getaway Welcome to Paradise Reef Resort, your ultimate escape to the serene beauty of the Maldives. Nestled amidst the azure waters of the Indian Ocean, our resort oers an unparalleled experience of luxury, tranquility, and natural wonder.",
+              "pageNumber": "1"
+            }
+          ]
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 1.0408868,
+        "semanticSimilarityScore": 0.7779731,
+        "topicalityRank": 5,
+        "documentAge": 489075.8,
+        "boostingFactor": 0,
+        "defaultRank": 1,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4.7
+          }
+        ]
+      }
+    },
+    {
+      "id": "doc-1",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-1",
+        "id": "doc-1",
+        "structData": {
+          "title": "Heaven Resort",
+          "category": "information",
+          "rating": 4.8
+        },
+        "derivedStructData": {
+          "extractive_answers": [
+            {
+              "pageNumber": "1",
+              "content": "Heaven Resort: Your Maldivian Escape Welcome to Paradise Reef Resort, an exclusive haven nestled in the heart of the Maldives. Here, tranquility meets luxury, and the vibrant underwater world is your playground."
+            }
+          ],
+          "can_fetch_raw_content": "true",
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel1.pdf"
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 1.2750679,
+        "semanticSimilarityScore": 0.7662435,
+        "topicalityRank": 4,
+        "documentAge": 489075.8,
+        "boostingFactor": 0,
+        "defaultRank": 2,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4.8
+          }
+        ]
+      }
+    },
+    {
+      "id": "doc-3",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-3",
+        "id": "doc-3",
+        "structData": {
+          "rating": 4,
+          "category": "information",
+          "title": "AquaPulse Maldives"
+        },
+        "derivedStructData": {
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel3.pdf",
+          "can_fetch_raw_content": "true",
+          "extractive_answers": [
+            {
+              "pageNumber": "1",
+              "content": "AquaPulse Maldives: Your Adventure Awaits Welcome to AquaPulse Maldives, the ultimate destination for young, adventurous souls seeking an unforgettable island experience! Forget your typical resort stay – we&#39;re all about high-energy activities, social connections, and creating memories that will last a lifetime."
+            }
+          ]
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 1.1769146,
+        "semanticSimilarityScore": 0.7153347,
+        "topicalityRank": 1,
+        "documentAge": 489075.8,
+        "boostingFactor": 0,
+        "defaultRank": 3,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4
+          }
+        ]
+      }
+    }
+  ],
+  "facets": [
+    {
+      "key": "category",
+      "values": [
+        {
+          "value": "information",
+          "count": "3",
+          "facetExpandFilter": "(category: ANY(\"information\")) AND category: ANY(\"information\")"
+        }
+      ],
+      "facetAccuracy": "EXACT"
+    }
+  ],
+  "totalSize": 3,
+  "attributionToken": "lAL0EwEKDAiR-cbHBhCOm_bYAxIkNjhmMWQ2YzEtMDAwMC0yYzA0LThkZTMtZmM0MTE2NzNjMjgxIgdHRU5FUklDKkjj65A3kPeyMI6-nRXT2ok3wvCeFY6RyTC-kfoxuaqiMuDrkDfQ2ok31LKdFZjWty2b1rctt7eMLbaqojKugJM3u5H6MZWSxTAwAVKIAXByb2plY3RzLzEwMzc4ODM1ODM0MjUvbG9jYXRpb25zL2dsb2JhbC9jb2xsZWN0aW9ucy9kZWZhdWx0X2NvbGxlY3Rpb24vZW5naW5lcy9jeW1iYWwtdHJhdmVsXzE3NjA2NzAwMDE5ODYvc2VydmluZ0NvbmZpZ3MvZGVmYXVsdF9zZWFyY2g",
+  "guidedSearchResult": {},
+  "summary": {},
+  "queryExpansionInfo": {},
+  "sessionInfo": {
+    "name": "projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/sessions/5343884860653379087",
+    "queryId": "projects/1037883583425/locations/global/questions/5343884860653379276"
+  }
+}
+
+
+---
+
+
+
+
+>> THEN EXTRACT the "sessionInfo" name AND queryId
+>>      AND RUN the command below (with these 2 session key-value pairs added)
+>>      DO NOT ADD 'filter' key to the '-d' line to 'generate answer'
+>>         (otherwise if you added 'filter' key like I did in the 1st block below, you will encounter an error)
+>>         (REMOVING 'filter' key like in the 2nd block below -> curl cmd runs successfully, BUT GAVE AN UNEXPECTED RESULT - CANT GENERATE SUMMARY)
+---
+student_00_118642b5af2c@cloudshell:~ (qwiklabs-gcp-03-2a6e0c70eba3)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+"https://discoveryengine.googleapis.com/v1alpha/projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/servingConfigs/default_search:answer" \
+-d '{"query":{"text":"What hotels are available in the Maldives?", "filter": "category: ANY(\"information\")","queryId":"projects/1037883583425/locations/global/questions/5343884860653379276"},"session":"projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/sessions/5343884860653379087","relatedQuestionsSpec":{"enable":true},"answerGenerationSpec":{"ignoreAdversarialQuery":true,"ignoreNonAnswerSeekingQuery":false,"ignoreLowRelevantContent":true,"multimodalSpec":{},"includeCitations":true,"modelSpec":{"modelVersion":"stable"}}}'
+
+
+
+
+
+{
+  "error": {
+    "code": 400,
+    "message": "Invalid JSON payload received. Unknown name \"filter\" at 'query': Cannot find field.",
+    "status": "INVALID_ARGUMENT",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.BadRequest",
+        "fieldViolations": [
+          {
+            "field": "query",
+            "description": "Invalid JSON payload received. Unknown name \"filter\" at 'query': Cannot find field."
+          }
+        ]
+      }
+    ]
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+student_00_118642b5af2c@cloudshell:~ (qwiklabs-gcp-03-2a6e0c70eba3)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+"https://discoveryengine.googleapis.com/v1alpha/projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/servingConfigs/default_search:answer" \
+-d '{"query":{"text":"What hotels are available in the Maldives?","queryId":"projects/1037883583425/locations/global/questions/5343884860653379276"},"session":"projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/sessions/5343884860653379087","relatedQuestionsSpec":{"enable":true},"answerGenerationSpec":{"ignoreAdversarialQuery":true,"ignoreNonAnswerSeekingQuery":false,"ignoreLowRelevantContent":true,"multimodalSpec":{},"includeCitations":true,"modelSpec":{"modelVersion":"stable"}}}'
+
+
+
+
+
+{
+  "answer": {
+    "name": "projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/sessions/5343884860653379087/answers/7324897096941801706",
+    "state": "SUCCEEDED",
+    "answerText": "A summary could not be generated for your search query. Here are some search results.",
+    "relatedQuestions": [
+      "What is your budget for the hotel stay?",
+      "What type of experience are you seeking?",
+      "Are you traveling with family or as a couple?",
+      "What dates are you planning to travel?",
+      "Do you prefer a beach villa or overwater bungalow?"
+    ],
+    "answerSkippedReasons": [
+      "NO_RELEVANT_CONTENT"
+    ]
+  },
+  "session": {
+    "name": "projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/sessions/5343884860653379087",
+    "state": "IN_PROGRESS",
+    "userPseudoId": "0x2f94d2c7487bb337",
+    "turns": [
+      {
+        "query": {
+          "queryId": "projects/1037883583425/locations/global/questions/5343884860653379276",
+          "text": "What hotels are available in the Maldives?"
+        },
+        "answer": "projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/sessions/5343884860653379087/answers/7324897096941801706"
+      }
+    ],
+    "startTime": "2025-10-17T03:48:35.364751Z",
+    "endTime": "2025-10-17T03:48:35.364751Z"
+  },
+  "answerQueryToken": "NMwKDAi-_sbHBhDZ04rpAhIkNjhmMWEzZjItMDAwMC0yNDI2LWIxZGUtYjhkYjM4ZmIxZTNh"
+}
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Send a search request from the command line using the Discovery Engine APIs and the default_search:search endpoint and add the filter for category, so that it only returns financials documents.
+```
+What is the revenue for the hotels in the Maldives?
+```
+
+Note: You should get results for the query using Discovery Engine APIs that display only financials documents.
+
+
+
+search WITHOUT generated answer
+---
+student_00_118642b5af2c@cloudshell:~ (qwiklabs-gcp-03-2a6e0c70eba3)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "Content-Type: application/json" "https://discoveryengine.googleapis.com/v1alpha/projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/servingConfigs/default_search:search" -d '{"query":"What hotels are available in the Maldives?", "filter": "category: ANY(\"financials\")", "pageSize":10,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","contentSearchSpec":{"extractiveContentSpec":{"maxExtractiveAnswerCount":1}},"facetSpecs":[{"facetKey":{"key":"category"},"limit":30}],"userInfo":{"timeZone":"Asia/Singapore"}}'
+
+
+
+
+
+{
+  "results": [
+    {
+      "id": "doc-5",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-5",
+        "id": "doc-5",
+        "structData": {
+          "title": "Paradise Reef Resort Financials",
+          "rating": 4.7,
+          "category": "financials"
+        },
+        "derivedStructData": {
+          "extractive_answers": [
+            {
+              "pageNumber": "1",
+              "content": "Paradise Reef Resort: Maldives Getaway Here&#39;s a revised version of the &quot;Paradise Reef Resort&quot; document with fictional financial information added: Paradise Reef Resort: Maldives Getaway Welcome to Paradise Reef Resort, your ultimate escape to the serene beauty of the Maldives."
+            }
+          ],
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel2-financials.pdf",
+          "can_fetch_raw_content": "true"
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 0.6987311,
+        "semanticSimilarityScore": 0.73901296,
+        "topicalityRank": 5,
+        "documentAge": 489076.1,
+        "boostingFactor": 0,
+        "defaultRank": 1,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4.7
+          }
+        ]
+      }
+    },
+    {
+      "id": "doc-4",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-4",
+        "id": "doc-4",
+        "structData": {
+          "rating": 4.8,
+          "category": "financials",
+          "title": "Heaven Resort Financials"
+        },
+        "derivedStructData": {
+          "can_fetch_raw_content": "true",
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel1-financials.pdf",
+          "extractive_answers": [
+            {
+              "pageNumber": "1",
+              "content": "Heaven Resort: Your Maldivian Escape Welcome to Heaven Resort, an exclusive haven nestled in the heart of the Maldives."
+            }
+          ]
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 1.3454597,
+        "semanticSimilarityScore": 0.69032484,
+        "topicalityRank": 4,
+        "documentAge": 489076.1,
+        "boostingFactor": 0,
+        "defaultRank": 2,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4.8
+          }
+        ]
+      }
+    },
+    {
+      "id": "doc-6",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-6",
+        "id": "doc-6",
+        "structData": {
+          "category": "financials",
+          "title": "AquaPulse Maldives Financials",
+          "rating": 4
+        },
+        "derivedStructData": {
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel3-financials.pdf",
+          "extractive_answers": [
+            {
+              "content": "AquaPulse Maldives: Your Adventure Awaits - Financial Overview Welcome to AquaPulse Maldives, the ultimate destination for young, adventurous souls seeking an unforgettable island experience!",
+              "pageNumber": "1"
+            }
+          ],
+          "can_fetch_raw_content": "true"
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 0.9491876,
+        "semanticSimilarityScore": 0.6637496,
+        "topicalityRank": 1,
+        "documentAge": 489076.1,
+        "boostingFactor": 0,
+        "defaultRank": 3,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4
+          }
+        ]
+      }
+    }
+  ],
+  "facets": [
+    {
+      "key": "category",
+      "values": [
+        {
+          "value": "financials",
+          "count": "3",
+          "facetExpandFilter": "(category: ANY(\"financials\")) AND category: ANY(\"financials\")"
+        }
+      ],
+      "facetAccuracy": "EXACT"
+    }
+  ],
+  "totalSize": 3,
+  "attributionToken": "lAL0EwEKDAjfgMfHBhDbw7LXAhIkNjhlZTk1ZTYtMDAwMC0yMGIxLWIxMjQtNTgyNDI5YWM3ZTc0IgdHRU5FUklDKki7kfox4OuQN8LwnhXUsp0Vjr6dFZjWty2ugJM3kPeyMNPaiTe-kfoxtqqiMre3jC2b1rctjpHJMLmqojLQ2ok34-uQN5WSxTAwAVKIAXByb2plY3RzLzEwMzc4ODM1ODM0MjUvbG9jYXRpb25zL2dsb2JhbC9jb2xsZWN0aW9ucy9kZWZhdWx0X2NvbGxlY3Rpb24vZW5naW5lcy9jeW1iYWwtdHJhdmVsXzE3NjA2NzAwMDE5ODYvc2VydmluZ0NvbmZpZ3MvZGVmYXVsdF9zZWFyY2g",
+  "guidedSearchResult": {},
+  "summary": {},
+  "queryExpansionInfo": {}
+}
+
+
+
+
+
+---
+
+
+
+
+================================
+
+
+Task 5. Boost results with higher ratings
+
+In this task, you will refine search results by implementing ranking strategies that prioritize higher-rated items while ensuring only relevant documents are retrieved. Additionally, you will optimize the search request by applying category-based filters and limiting the number of displayed results.
+
+
+Navigate to Configurations > Control and create a new control using the following parameters:
+Parameters	Value
+Control Name	ratings-boost
+Control Type	Boost/bury
+Data Store	Hotel PDFs
+Filter	Configure the filter for the property rating is above 4.1
+Boost/bury value	0.7
+
+
+
+
+
+Send a search request from the command line using the Discovery Engine APIs and the default_search:search endpoint and add the filter for category, so that it only returns information documents, and the filter for page_size to be 2, so that you only get the top 2 documents that have the highest rating.
+```
+What hotels are available in the Maldives?
+```
+
+Note: You should get results for the query using Discovery Engine APIs that display only information documents with the highest rating.
+
+
+
+
+
+
+
+search WITHOUT generated answer
+---
+student_00_118642b5af2c@cloudshell:~ (qwiklabs-gcp-03-2a6e0c70eba3)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+"https://discoveryengine.googleapis.com/v1alpha/projects/1037883583425/locations/global/collections/default_collection/engines/cymbal-travel_1760670001986/servingConfigs/default_search:search" \
+-d '{"query":"What hotels are available in the Maldives?", "filter": "category: ANY(\"information\")", "pageSize":2,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","contentSearchSpec":{"extractiveContentSpec":{"maxExtractiveAnswerCount":1}},"facetSpecs":[{"facetKey":{"key":"category"},"limit":30}],"userInfo":{"timeZone":"Asia/Singapore"}}'
+
+
+
+
+
+
+{
+  "results": [
+    {
+      "id": "doc-2",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-2",
+        "id": "doc-2",
+        "structData": {
+          "rating": 4.7,
+          "category": "information",
+          "title": "Paradise Reef Resort"
+        },
+        "derivedStructData": {
+          "extractive_answers": [
+            {
+              "pageNumber": "1",
+              "content": "Paradise Reef Resort: Maldives Getaway Welcome to Paradise Reef Resort, your ultimate escape to the serene beauty of the Maldives. Nestled amidst the azure waters of the Indian Ocean, our resort oers an unparalleled experience of luxury, tranquility, and natural wonder."
+            }
+          ],
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel2.pdf",
+          "can_fetch_raw_content": "true"
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 1.0408868,
+        "semanticSimilarityScore": 0.7779731,
+        "topicalityRank": 5,
+        "documentAge": 489076.16,
+        "boostingFactor": 0,
+        "defaultRank": 1,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4.7
+          }
+        ]
+      }
+    },
+    {
+      "id": "doc-1",
+      "document": {
+        "name": "projects/1037883583425/locations/global/collections/default_collection/dataStores/hotel-pdfs_1760670074909/branches/0/documents/doc-1",
+        "id": "doc-1",
+        "structData": {
+          "rating": 4.8,
+          "category": "information",
+          "title": "Heaven Resort"
+        },
+        "derivedStructData": {
+          "link": "gs://qwiklabs-gcp-03-2a6e0c70eba3/hotel1.pdf",
+          "extractive_answers": [
+            {
+              "content": "Heaven Resort: Your Maldivian Escape Welcome to Paradise Reef Resort, an exclusive haven nestled in the heart of the Maldives. Here, tranquility meets luxury, and the vibrant underwater world is your playground.",
+              "pageNumber": "1"
+            }
+          ],
+          "can_fetch_raw_content": "true"
+        }
+      },
+      "rankSignals": {
+        "keywordSimilarityScore": 1.2750679,
+        "semanticSimilarityScore": 0.7662435,
+        "topicalityRank": 4,
+        "documentAge": 489076.16,
+        "boostingFactor": 0,
+        "defaultRank": 2,
+        "customSignals": [
+          {
+            "name": "c.rating",
+            "value": 4.8
+          }
+        ]
+      }
+    }
+  ],
+  "facets": [
+    {
+      "key": "category",
+      "values": [
+        {
+          "value": "information",
+          "count": "3",
+          "facetExpandFilter": "(category: ANY(\"information\")) AND category: ANY(\"information\")"
+        }
+      ],
+      "facetAccuracy": "EXACT"
+    }
+  ],
+  "totalSize": 3,
+  "attributionToken": "lAL0EwEKDAjbgsfHBhCa8dOXARIkNjhmNjhjZDItMDAwMC0yMjU0LWJlMzctMTRjMTRlZWZkODQ0IgdHRU5FUklDKki-kfoxtreMLY6-nRXT2ok3jpHJMLuR-jG2qqIyuaqiMpWSxTCugJM31LKdFcLwnhWc1rctn9a3LZD3sjDg65A34-uQN9DaiTcwAVKIAXByb2plY3RzLzEwMzc4ODM1ODM0MjUvbG9jYXRpb25zL2dsb2JhbC9jb2xsZWN0aW9ucy9kZWZhdWx0X2NvbGxlY3Rpb24vZW5naW5lcy9jeW1iYWwtdHJhdmVsXzE3NjA2NzAwMDE5ODYvc2VydmluZ0NvbmZpZ3MvZGVmYXVsdF9zZWFyY2g",
+  "nextPageToken": "AN0gDZmVWZ0EzY0ETL3MTZi1CN1IjMtADMwATLxQ2Y4YjZ4YDJaIQiR74oQYwxWv-2IwgEyEgC",
+  "guidedSearchResult": {},
+  "summary": {},
+  "queryExpansionInfo": {}
+}
+
+
+
+
+
+---
+
+
+
+================================
+
+
+
+
+Reflection:
+Good challenge lab - relatively less issues compared to other labs or challenge labs I have completed as part of the series.
+
+The 'search with generated answer' functionality did not work as intended as a summary was not generated. Not sure whether this is the expected behaviour, or do we need to search for more things for the google search app to actually generate an answer.
+
+
+
