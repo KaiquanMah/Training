@@ -1,0 +1,360 @@
+Deploy a Gemini Enterprise app connected to a Google Drive data store and use the AI assistant to locate information from within your organization.
+
+For this lab, you’ll take on the role of a scientific conference organizer planning a conference to discuss the discovery of an exciting new exoplanet.
+
+
+In this lab, you learn how to:
+Configure AI Applications authentication
+Create a Google Drive data store
+Create a Gemini Enterprise app
+Use the AI assistant to find, summarize, and extract content from a data store
+Create a calendar invite with an assistant action
+
+
+
+
+
+
+================================
+
+Task 1. Add content to Google Drive and Google Calendar
+
+Navigate to Cloud Storage > Buckets and click on the existing bucket with the name:qwiklabs-gcp-04-115a0307fbe6.
+
+Download the files listed below to your local system to use as demo data:
+PlanetCon_Persephone.docx
+Persephone_Analysis_Report.pdf
+
+
+In the Incognito window where you have logged into the Google Cloud console, create a new tab and navigate to drive.google.com.
+
+Create a new folder in your Qwiklab student account’s drive and name it PlanetCon: Persephone.
+
+Upload the documents you downloaded from Cloud Storage to the folder you just created in Google Drive named PlanetCon: Persephone. These documents relate to the imaginary discovery of a new planet named "Persephone" and the organization of a conference planned for the scientific community to discuss it.
+
+In the same Incognito window, create a new tab, and navigate to calendar.google.com. Accept or dismiss any pop-ups.
+
+Ensure you are authenticated as your Qwiklabs student account by clicking the “s” in the circle in the upper right corner and confirming it is your student-04-5caaba21d911@qwiklabs.net account.
+
+
+In the upper left, click + Create and select Event from the dropdown menu.
+
+In the event-creation window that appears, name the event as Astronomers Lunch Planning Meeting, and set a start time of at least one hour from now.
+Select Save.
+
+
+
+
+
+
+
+================================
+
+
+
+Task 2. Configure an Identity Provider
+In the Google Cloud Console, navigate to the AI Applications page by searching for it at the top of the console.
+
+Click on Continue and activate the API
+https://cdn.qwiklabs.com/yrCus%2FzchwnC%2BhyqgAUK9XtwDqMGTuUrJ8L2LuJ0VAE%3D
+
+
+Select Settings from the left-hand navigation pane.
+
+On the row for the global location, click the pencil icon Edit Button.
+
+Select Google Identity as your identity provider.
+https://cdn.qwiklabs.com/eJahlK75dxpvYnfN5i%2B1y3I7%2BmCnvnPUbUViYSx6Hv0%3D
+Select Save.
+
+
+
+
+
+
+
+
+================================
+
+
+Task 3. Create Google Drive and Google Calendar Data Stores
+From the AI Applications menu, select Data Stores from the left-hand navigation pane.
+
+Select + Create data store.
+
+Locate the Google Drive card and click Select.
+
+For Choose drives you want to sync, select All.
+Note: While Gemini Enterprise makes it easier to find information across your data sources, it does not grant additional access. You will still only have access to the documents that have been shared with you via existing Drive permissions, and others will only have access to your documents that you have shared with them.
+
+Click Continue.
+Keep the default region as global, and for the Data connector name enter 'Google Drive'.
+Click Create.
+
+
+
+
+
+Follow the steps in this task again, only this time create a data store for Google Calendar data source with default configurations. For the Data connector name, enter 'Google Calendar'.
+
+The two data stores should be listed in the AI Applications > Data Stores panel.
+Listed data stores
+https://cdn.qwiklabs.com/G8Zsc1xPyG7x5I41lkSispN42nOF9vlB9XoVltzuB7I%3D
+
+
+
+
+
+================================
+
+
+Task 4. Deploy a Gemini Enterprise app
+
+From the AI Applications menu, select Apps from the left-hand navigation pane.
+
+Select + Create app.
+
+Find the Gemini Enterprise card and select Learn More.
+Gemini Enterprise
+https://cdn.qwiklabs.com/fn2jApOKknFza6RsU06GW%2FMbDqD%2ByR%2FJzh8gqJAB09I%3D
+
+Name your app 'Scientific Conferences App'.
+
+Under Advanced Options, for a company name, enter 'Scientific Conferences'.
+
+Click on Create.
+
+From the left-hand navigation pane, click on Connected data stores > Add existing data stores.
+
+Select the checkbox for the Google Drive and Google Calendar data stores you created earlier and click on Connect.
+
+
+
+
+
+
+
+================================
+
+
+Task 5. Set up an OAuth Consent Screen and Create client
+
+In order for the AI assistant to take actions on a user’s behalf, the user must grant access to your enterprise search and assistant app. To configure the OAuth consent screen and client, follow the following steps:
+
+In the search bar at the top of the Cloud Console, search for the Google Auth Platform and select it.
+Google Auth Platform
+https://cdn.qwiklabs.com/JqW0Q04Eq%2BeHSxbpeo5qeXGtBWL3da1%2F6wTjzDM8K9I%3D
+
+Click Get started.
+
+For App Name, enter 'Scientific Conferences App'.
+
+For the user support email, select your Qwiklabs student account 'student-04-5caaba21d911@qwiklabs.net'.
+
+Click Next.
+
+In the Audience section, select an Internal Audience.
+
+Click Next.
+
+In the Contact Information section, provide an email address, which can be your real professional email address or your Qwiklabs student account. Click Next.
+'student-04-5caaba21d911@qwiklabs.net'
+
+
+In the Finish section, agree to the terms.
+
+Click Create to create your OAuth consent screen.
+
+
+
+
+
+Your Google Auth Platform dashboard will display a banner that you haven’t created any clients yet. Select Create OAuth Client. If you don’t see this banner, select Clients on the left and then + Create Client.
+https://cdn.qwiklabs.com/Gnn9B8HYJEi%2BsiLR5zbTZKZD%2Bou6SZwZmpQl1G7hbqM%3D
+
+
+
+
+Select an Application type of 'Web application'.
+
+Name the client 'Gemini App Client'.
+
+Under Authorized redirect URIs, add 
+https://vertexaisearch.cloud.google.com/oauth-redirect
+
+Click Create.
+https://cdn.qwiklabs.com/tU7H%2B7dZGglXeCnkguYqpCWVvlZnQxAGsB7TtxurhBA%3D
+
+
+Once the OAuth client is created, close the pop-up by clicking OK. Then, select the OAuth Client named Gemini App Client. Copy the Client ID and Client Secret, and save them in a text document—you will need them shortly to enable actions.
+
+Client ID
+175581066897-kdqc2p4vbt9kc0g0na3mot333q3rlpiq.apps.googleusercontent.com
+Client secret
+GOCSPX-abcde890fgABCD12345efg
+
+
+
+
+
+
+
+================================
+
+Task 6. Enable a Google Calendar Action
+To configure the action, you’ll need to enable the Google Calendar API. To do so:
+
+In the search bar at the top of the Cloud Console, search for the Google Calendar API and select it.
+https://cdn.qwiklabs.com/2%2FzDmomPGSh4Pgr9dHoqFkAp0qifIBbXhKs8tAII%2BJc%3D
+Click Enable if the API is not already enabled.
+
+
+
+
+You can now add the action to your app. 
+Return to the Gemini Enterprise console.
+
+Click on the name of your Gemini Enterprise App: Scientific Conferences App.
+
+Select Actions from the left-side navigation.
+
+Select Add Action.
+
+Find the Calendar card and click Connect.
+https://cdn.qwiklabs.com/3GqLxZdGQ2NjPS8oM9yUMUd9zdNRx2OT5nKeNOov0ZM%3D
+
+Enter an Action connector name of calendar_action.
+https://cdn.qwiklabs.com/lMsDvRh44uaWqE9%2FWrrq%2Fg4SXdgJgiRltH8LlA8x5w4%3D
+
+Enter the Client ID and Client Secret of the OAuth client you created above and click on Verify Auth.
+
+Select the checkbox to enable the Create calendar event action to allow the assistant to create meetings based on requests in the Gemini Enterprise search bar.
+
+Click Finish Setup.
+
+
+
+
+
+
+
+
+
+================================
+
+
+Task 7. Query your Gemini Enterprise Assistant
+
+
+Take a 10-minute break for the app, its data stores, and actions to finish creating. The action is ready when its connector state shows as Active.
+https://cdn.qwiklabs.com/Y68lJl4duWpuDAUBd6QuUt5dbd03aqFdYCuRqToLmsk%3D
+
+
+
+
+
+
+To access your app from the Gemini Enterprise page, navigate to the Overview tab in the left-hand menu, click Copy URL, and open it in a new browser tab. Alternatively, you can navigate to the Integration tab and copy the URL from the The link to your web app section.
+https://vertexaisearch.cloud.google.com/home/cid/76e34724-6091-4122-ad12-fd860e8c09ac?hl=en_US
+https://vertexaisearch.cloud.google.com/home/cid/76e34724-6091-4122-ad12-fd860e8c09ac
+
+
+When configuring Gemini Enterprise in production, you could use a DNS record to configure this home page to be accessible from a subdomain of your website, like gemini-enterprise.my-domain.com.
+
+
+
+
+
+This home page is designed to give users easy access to the content and events they will find most useful. You will see a few sections:
+Agents: Use some Google-provided agents or create your own to help with tasks like research, iterating on ideas, or more.
+Prompts: Get suggestions for ways you can use the AI Assistant.
+For You: See recent files you've interacted with and upcoming calendar events. You should now see the files you added to your Drive and the upcoming Astronomers Lunch Planning Meeting you created.
+Note: If your data stores are still indexing, the files may require a little time to become accessible.
+
+
+
+
+In the search bar, enter the following query:
+what topics will be discussed at planetcon?
+
+
+You can see an answer generated by the app.
+To view the relevant supporting documents:
+
+Scroll down to the bottom of the answer and click on Sources to reveal the associated documents.
+https://cdn.qwiklabs.com/s3zBLUeb5dk0d4P4VdX6VlZER3kmdk13xTOHcjhVaAs%3D
+
+
+Sample Output:
+https://cdn.qwiklabs.com/lneFUthNg6bzjZiZ9SQvikKLEwTQ6MGe0fSfj2OB%2F%2Fo%3D
+
+
+
+
+
+
+
+
+
+Enter a different prompt in the primary search bar: 
+what is the size of Persephone compared to Earth?
+
+You should see a result that extracts the information you are looking for from the Persephone Analysis Report.pdf document you uploaded to your drive. Remember, there is no real exoplanet Persephone, so you know the model is not relying on training data, but is finding information in your uploaded data. You can further validate this by clicking the link icon and the card that appears below the response to be taken directly to the file that serves as the source of this information.
+
+Sample Output:
+https://cdn.qwiklabs.com/FadSfp1PyCWZ2JrDARZRG2kPIX1RLPD3fo19hcf6rNY%3D
+
+
+
+
+
+
+
+
+When you don’t have time to review a document, you can use the Gemini Enterprise AI assistant to create a useful summary for you. In the search bar, enter the following query: 
+summarize the document Persephone Analysis Report.
+
+Review the assistant’s response.
+
+Sample Output:
+https://cdn.qwiklabs.com/JH4KdU4CZmpDurJVNYeeemo1j0%2F6d1FXbEzr0AQFbtY%3D
+
+
+
+
+
+
+In the search bar, enter the following:
+Create a 1-hour meeting tomorrow at 10am for exoplanet-research@qwiklabs.net to review conference presentation proposals.
+
+The assistant will prepare a template calendar event for you to approve.
+
+Click Authorize to authorize the application using the OAuth Consent Screen you configured with your Qwiklabs student account (i.e. student-04-5caaba21d911@qwiklabs.net).
+- When you see the prompt window asking you to signing back in to the Scientific Conferences App, click Continue.
+- On the next prompt, click Allow to grant the app access to your Google account.
+Sample Output:
+https://cdn.qwiklabs.com/Q4pPGCwKYMFddGVzsEaet883tto8ntr1qgq%2F%2FHEw2Ok%3D
+
+
+Click Send and confirm the appearance of the event on your Google Calendar tab (or navigate to calendar.google.com in a new tab).
+https://cdn.qwiklabs.com/7%2FDlkCFtIu82XVRRn3Lb9ace0uBFmd9JiKJbi5bNDiI%3D
+
+
+Sample Output:
+https://cdn.qwiklabs.com/iB6TNm7BUm9K6it1sid1UjNt%2Fh5kFku3Fjin2s6fjcg%3D
+
+
+
+
+
+
+================================
+
+
+
+Reflections
+- Good intro to creating and Gemini Enterprise app (which integrates with Google Drive and Google Calendar)
+- Gemini Enterprise app = a private instance of the 'Gemini web UI'
+
+
+
