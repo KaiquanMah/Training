@@ -1,0 +1,796 @@
+Empower ADK agents with tools
+
+
+
+
+Objective
+In this lab, you will learn about the ecosystem of tools available to ADK agents. 
+You will also learn how to provide a function to an agent as a custom tool.
+
+After this lab, you will be able to:
+Provide prebuilt Google, LangChain, or CrewAI tools to an agent
+Discuss the importance of structured DOCSTRINGS and typing when writing functions for agent tools
+Write your OWN TOOL FUNCTIONS for an agent
+
+
+
+
+
+
+Tool use with the Agent Developer Kit
+Leveraging tools effectively is what truly distinguishes intelligent agents from basic models. A tool is a block of code, like a function or a method, that executes specific actions such as 
+- interacting with databases,
+- making API requests, or
+- invoking other external services.
+
+Tools empower agents to interact with other systems and perform actions beyond their core reasoning and generation capabilities. It's crucial to note that these tools operate independently of the agent's LLM, meaning that tools do not automatically possess their own reasoning abilities.
+
+
+
+Agent Development Kit provides developers with a diverse range of tool options:
+1 Pre-built Tools: Ready-to-use functionalities such as Google Search, Code Execution, and Retrieval-Augmented Generation (RAG) tools.
+2 Third-Party Tools: Seamless integration of tools from external libraries like LangChain and CrewAI.
+3 Custom Tools: The ability to create custom tools tailored to specific requirements, by using language specific constructs and Agents-as-Tools. The SDK also provides asynchronous capabilities through Long Running Function Tools.
+
+
+
+
+1 Available Pre-Built Tools from Google
+Google Search (google_search): Allows the agent to perform web searches using Google Search. You simply add google_search to the agent's tools.
+
+Code Execution (built_in_code_execution): This tool allows the agent to execute code, to perform calculations, data ANALYSIS, or interact with other systems programmatically. You can use the pre-built VertexCodeInterpreter or any code executor that implements the BaseCodeExecutor interface.
+
+Retrieval (retrieval): A package of tools designed to fetch information from various sources.
+
+Vertex AI Search Tool (VertexAiSearchTool): This tool integrates with Google Cloud's Vertex AI Search service to allow the agent to search through your INTERNAL AI Applications DATA STORES.
+
+
+
+
+
+
+
+
+=================
+
+Task 1. Install ADK and set up your environment
+
+
+
+Enable Vertex AI recommended APIs
+In this lab environment, the Vertex AI API has been enabled for you. If you were to follow these steps in your own project, you could enable it by navigating to Vertex AI and following the prompt to enable it.
+
+
+
+
+
+
+
+Prepare a Cloud Shell Editor tab
+With your Google Cloud console window selected, open Cloud Shell by pressing the G key and then the S key on your keyboard. Alternatively, you can click the Activate Cloud Shell button (Activate Cloud Shell) in the upper right of the Cloud console.
+
+Click Continue.
+
+When prompted to authorize Cloud Shell, click Authorize.
+
+In the upper right corner of the Cloud Shell Terminal panel, click the Open in new window button Open in new window button.
+
+In the Cloud Shell Terminal, enter the following to open the Cloud Shell Editor to your home directory:
+```
+cloudshell workspace ~
+```
+
+
+Close any additional tutorial or Gemini panels that appear on the right side of the screen to save more of your window for your code editor.
+Throughout the rest of this lab, you can work in this window as your IDE with the Cloud Shell Editor and Cloud Shell Terminal.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Download and install ADK and code samples for this lab
+Paste the following commands into the Cloud Shell Terminal to download code for this lab from a Cloud Storage bucket:
+```
+gcloud storage cp -r gs://qwiklabs-gcp-00-cfe44f6f9c59-bucket/adk_tools .
+```
+Update your PATH environment variable, install ADK, and install some additional requirements for this lab by running the following commands in the Cloud Shell Terminal.
+```
+export PATH=$PATH:"/home/${USER}/.local/bin"
+python3 -m pip install google-adk[extensions] -r adk_tools/requirements.txt
+```
+
+Note: google-adk[extensions] is used to install additional dependencies required for Crew AI tools.
+
+
+
+
+
+student_00_e116833fd931@cloudshell:~ (qwiklabs-gcp-00-cfe44f6f9c59)$ echo $PATH
+/opt/gradle/bin:/opt/maven/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/node_packages/node_modules/.bin:/usr/local/rvm/bin:/home/student_00_e116833fd931/.gems/bin:/usr/local/rvm/bin:/home/student_00_e116833fd931/gopath/bin:/google/gopath/bin:/google/flutter/bin:/usr/local/nvm/versions/node/v24.11.1/bin:/home/student_00_e116833fd931/.local/bin
+
+
+
+=================
+
+Task 2. Create a search app that will be used to ground responses on your own data Third-Party Tools
+
+
+
+
+In a later task, you will use the Google-provided Vertex AI Search tool to ground responses on your own data in an AI Applications data store. Since the app's data store needs a little while to ingest data, you will set it up now, then use it to ground responses on your data in a later task.
+
+In your browser tab still showing the Cloud Console, navigate to AI Applications by searching for it at the top of the console.
+
+Select the terms and conditions checkbox and click Continue and activate the API.
+
+From the left-hand navigation menu, select Data Stores.
+
+Select Create data store.
+
+Find the Cloud Storage card and click Select on it.
+
+Select Unstructured documents (PDF, HTML, TXT and more)
+
+Example documents have been uploaded to Cloud Storage for you. They relate to the fictional discovery of a new planet named Persephone. A fictional planet is used in this case so that the model cannot have learned anything about this planet during its training.
+
+For a GCS path, enter qwiklabs-gcp-00-cfe44f6f9c59-bucket/planet-search-docs
+
+Click Continue.
+
+Keep the location set to global.
+
+For a data store name, enter: 'Planet Search'
+
+Click Create.
+
+
+
+
+
+
+
+Click Apps on the left-hand nav.
+
+Click Create a new app.
+
+Find the card for a Custom search (general) app and click Create.
+
+Name the app 'Planet Search'
+
+Provide a Company name of 'Planet Conferences'
+
+Click Continue.
+
+Select the checkbox next to the Planet Search data store.
+
+Select Create.
+
+Once your app is created, click the AI Applications logo in the upper left to return to your app dashboard.
+
+Copy the ID value of your app displayed in the Apps table. Save it in a text document as you will need it later.
+planet-search_1764403192513
+
+For now, you will give the data store some time to ingest its data. Later you will provide your search app to an agent to ground its responses.
+
+
+
+
+
+
+
+=================
+
+Third-Party Tools
+ADK allows you to use tools available from third-party AI libraries like LangChain and CrewAI.
+
+
+
+
+Task 3. Use a LangChain Tool
+
+
+The LangChain community has created a large number of tool integrations to
+- access many sources of data,
+- integrate with various web products, and accomplish many things. 
+Using community tools within ADK can save you rewriting a tool that someone has already created.
+https://python.langchain.com/docs/integrations/tools/
+
+
+Back in your browser tab displaying the Cloud Shell Editor, use the file explorer on the left-hand side to navigate to the directory adk_tools/langchain_tool_agent.
+
+
+student_00_e116833fd931@cloudshell:~ (qwiklabs-gcp-00-cfe44f6f9c59)$ pwd
+/home/student_00_e116833fd931
+student_00_e116833fd931@cloudshell:~ (qwiklabs-gcp-00-cfe44f6f9c59)$ ls
+adk_tools  README-cloudshell.txt
+
+
+Write a .env file to provide authentication details for this agent directory by running the following in the Cloud Shell Terminal:
+```
+cd ~/adk_tools
+cat << EOF > langchain_tool_agent/.env
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=qwiklabs-gcp-00-cfe44f6f9c59
+GOOGLE_CLOUD_LOCATION=us-central1
+MODEL=gemini-2.5-flash
+EOF
+```
+
+Copy the .env file to the other agent directories you will use in this lab by running the following:
+```
+cp langchain_tool_agent/.env crewai_tool_agent/.env
+cp langchain_tool_agent/.env function_tool_agent/.env
+cp langchain_tool_agent/.env vertexai_search_tool_agent/.env
+```
+Click on the agent.py file in the langchain_tool_agent directory.
+
+Notice the import of the LangchainTool class. This is a wrapper class that allows you to use LangChain tools within Agent Development Kit.
+
+Add the following code where indicated in the agent.py file to add the LangChain Wikipedia tool to your agent. This will allow your agent to search for information on Wikipedia:
+```
+    tools = [
+        # Use the LangchainTool wrapper...
+        LangchainTool(
+            # to pass in a LangChain tool.
+            # In this case, the WikipediaQueryRun tool,
+            # which requires the WikipediaAPIWrapper as
+            # part of the tool.
+            tool=WikipediaQueryRun(
+              api_wrapper=WikipediaAPIWrapper()
+            )
+        )
+    ]
+```
+https://docs.langchain.com/oss/python/integrations/providers/overview
+https://www.wikipedia.org/
+
+
+
+
+In the Cloud Shell Terminal, from the adk_tools project directory, launch the Agent Development Kit Dev UI with the following commands:
+```
+adk web
+```
+
+
+Output
+```
+INFO:     Started server process [2434]
+INFO:     Waiting for application startup.
++-------------------------------------------------------+
+| ADK Web Server started                                |
+|                                                       |
+| For local testing, access at http://localhost:8000.   |
++-------------------------------------------------------+
+
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit) 
+To view the web interface in a new tab, click the http://127.0.0.1:8000 link in the Terminal output.
+```
+
+A new browser tab will open with the ADK Dev UI.
+
+From the Select an agent dropdown on the left, select the langchain_tool_agent from the dropdown.
+
+Query the agent with:
+```
+Who was Grace Hopper?
+```
+
+
+Output:
+Langchain Wikipedia Tool output
+https://cdn.qwiklabs.com/EGBnHPzbBor8%2B2uEPGcM5WGimGUG5mkdoukR26MecHw%3D
+
+
+
+
+Click the agent icon (agent_icon) next to the agent's chat bubble indicating the use of the wikipedia tool.
+
+Notice that the content includes a functionCall with the query to Wikipedia.
+
+At the top of the tab, click the forward button to move to the next event.
+
+Exploring this event, you can see the result retrieved from Wikipedia used to generate the model's response.
+
+When you are finished asking questions of this agent, close the dev UI browser tab.
+
+Select the Cloud Shell Terminal panel and press CTRL + C to stop the server.
+
+
+
+
+
+=================
+
+Task 4. Use a CrewAI Tool
+
+
+
+You can similarly use CrewAI Tools, using a CrewaiTool wrapper.
+https://github.com/crewAIInc/crewAI-tools
+
+
+
+To do so, using the Cloud Shell Editor file explorer, navigate to the directory adk_tools/crewai_tool_agent.
+
+Click on the agent.py file in the crewai_tool_agent directory.
+
+Notice the import of
+- the CrewaiTool class from ADK - for ADK to integrate with crewai tools
+- the ScrapeWebsiteTool from crewai_tools - to use specific crewai tool
+
+
+Add the following code where indicated in the agent.py file to add the CrewAI Scrape Website tool to your agent, along with a name and description:
+```
+    tools = [
+        CrewaiTool(
+            name="scrape_apnews",
+            description=(
+                """Scrapes the latest news content from
+                the Associated Press (AP) News website."""
+            ),
+            tool=ScrapeWebsiteTool(website_url='https://apnews.com/')
+        )
+    ]
+```
+
+https://docs.crewai.com/en/tools/web-scraping/scrapewebsitetool
+The ScrapeWebsiteTool will load content from the Associated Press news website 'apnews.com'.
+
+You'll run this agent using the command line interface to be familiar with it as a convenient way to test an agent quickly. In the Cloud Shell Terminal, from the adk_tools project directory, launch the agent with the ADK command line UI with:
+```
+adk run crewai_tool_agent
+```
+While the agent loads, it may display some warnings. You can ignore these. When you are presented the user: prompt, enter:
+```
+Get 10 of the latest headlines from AP News.
+```
+Output:
+```
+Using Tool: Read website content
+[crewai_tool_agent]: Here are the latest headlines from AP News:
+...
+```
+
+
+
+```
+student_00_e116833fd931@cloudshell:~/adk_tools (qwiklabs-gcp-00-cfe44f6f9c59)$ adk run crewai_tool_agent
+Log setup complete: /tmp/agents_log/agent.20251129_082432.log
+To access latest log: tail -F /tmp/agents_log/agent.latest.log
+/home/student_00_e116833fd931/.local/lib/python3.12/site-packages/google/adk/cli/cli.py:155: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/student_00_e116833fd931/.local/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+/usr/local/lib/python3.12/dist-packages/pydantic/_internal/_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+  warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+/home/student_00_e116833fd931/.local/lib/python3.12/site-packages/crewai_tools/tools/scrapegraph_scrape_tool/scrapegraph_scrape_tool.py:34: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+  @validator("website_url")
+/home/student_00_e116833fd931/.local/lib/python3.12/site-packages/crewai_tools/tools/selenium_scraping_tool/selenium_scraping_tool.py:26: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+  @validator("website_url")
+/home/student_00_e116833fd931/.local/lib/python3.12/site-packages/crewai_tools/tools/vision_tool/vision_tool.py:15: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+  @validator("image_path_url")
+
+
+
+
+
+
+Running agent crewai_tool_agent, type exit to exit.
+[user]: Get 10 of the latest headlines from AP News.
+
+/home/student_00_e116833fd931/.local/lib/python3.12/site-packages/google/adk/runners.py:1300: DeprecationWarning: deprecated
+  save_input_blobs_as_artifacts=run_config.save_input_blobs_as_artifacts,
+/home/student_00_e116833fd931/.local/lib/python3.12/site-packages/google/genai/_api_client.py:744: DeprecationWarning: Inheritance class AiohttpClientSession from ClientSession is discouraged
+  class AiohttpClientSession(aiohttp.ClientSession):  # type: ignore[misc]
+
+Using Tool: Read website content
+[crewai_tool_agent]: Here are 10 of the latest headlines from AP News:
+
+1.  Trinidad's leader backtracks and says US Marines are in the country working on airport radar
+2.  Peru to declare a state of emergency as migrants leaving Chile trigger backlash
+3.  On a trip to Tehran, an AP journalist sees a changing Iran
+4.  College freshman is deported flying home for Thanksgiving surprise
+5.  Trump says he wants to 'permanently pause' migration to the US from poorer countries
+6.  What a federal ban on THC-infused drinks and snacks could mean for the hemp industry
+7.  Trump says he plans to pardon former Honduran President Hernandez for 2024 drug trafficking sentence
+8.  HK fire claims 100 victims
+9.  Communities honor West Virginia National Guard members shot in Washington
+10. Eagles offensive coordinator Kevin Patullo will keep his job after Hurts, Barkley struggle again
+[user]: 
+```
+
+
+
+Notice that the command line interface also indicates to you when a tool is being used.
+
+In the Terminal, respond to the next user: prompt with exit to exit the command line interface.
+
+```
+[user]: exit
+Aborted!
+```
+
+
+Scroll back in your Terminal history to find where you ran adk run crewai_tool_agent, and notice that the command line interface provided you a log file to tail. Copy and run that command to view more details of the execution:
+```
+tail -F /tmp/agents_log/agent.latest.log
+```
+
+Press CTRL + C to stop tailing the log file and return to the command prompt.
+
+```
+student_00_e116833fd931@cloudshell:~/adk_tools (qwiklabs-gcp-00-cfe44f6f9c59)$ tail -F /tmp/agents_log/agent.latest.log
+7.  Trump says he plans to pardon former Honduran President Hernandez for 2024 drug trafficking sentence
+8.  HK fire claims 100 victims
+9.  Communities honor West Virginia National Guard members shot in Washington
+10. Eagles offensive coordinator Kevin Patullo will keep his job after Hurts, Barkley struggle again
+2025-11-29 08:28:43,623 - INFO - callback_logging.py:11 - [query to crewai_tool_agent]: tail -F /tmp/agents_log/agent.latest.log
+2025-11-29 08:28:43,839 - INFO - google_llm.py:163 - Sending out request, model: gemini-2.5-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2025-11-29 08:28:46,734 - INFO - google_llm.py:219 - Response received from the model.
+2025-11-29 08:28:46,736 - INFO - callback_logging.py:17 - [response from crewai_tool_agent]: I'm sorry, I cannot fulfill that request. I do not have access to the file system to execute `tail -F /tmp/agents_log/agent.latest.log`. My capabilities are limited to the tools provided, which include scraping AP News.
+2025-11-29 08:29:03,672 - INFO - runners.py:1346 - Closing runner...
+2025-11-29 08:29:03,673 - INFO - runners.py:1354 - Runner closed.
+```
+
+
+
+
+=================
+
+Task 5. Use a function as a custom tool
+
+
+When pre-built tools don't fully meet specific requirements, you can create your own tools. This allows for tailored functionality, such as connecting to proprietary databases or implementing unique algorithms.
+
+
+The most straightforward way to create a new tool is to write a standard Python function with a docstring written in a standard format and pass it to your model as a tool. This approach offers flexibility and quick integration.
+https://google.github.io/adk-docs/tools-custom/function-tools/#docstring
+
+
+When writing a function to be used as a tool, there are a few important things to keep in mind:
+1
+Parameters: Your function can accept ANY NUMBER of PARAMETERS, each of which can be of any JSON-serializable type (e.g., string, integer, list, dictionary). It's important to AVOID SETTING DEFAULT values for parameters, as the large language model (LLM) does not currently support interpreting them.
+
+2
+Return type: The PREFERRED return type for a Python Function Tool is a DICTIONARY. This allows you to structure the response with key-value pairs, providing context and clarity to the LLM. 
+For example, instead of returning a numeric error code, return a dictionary with an "error_message" key containing a human-readable EXPLANATION. 
+As a best practice, include a "status" key in your return dictionary to indicate the overall outcome (e.g., "success", "error", "pending"), providing the LLM with a clear signal about the operation's STATE.
+
+3
+Docstring: The docstring of your function serves as the tool's description and is sent to the LLM. Therefore, a well-written and comprehensive DOCSTRING is crucial for the LLM to understand how to use the tool effectively. Clearly explain the PURPOSE of the function, the MEANING of its PARAMETERS, and the EXPECTED RETURN VALUES.
+
+
+
+
+
+
+Define a function and use it as a tool by completing the following steps:
+
+Using the Cloud Shell Editor file explorer, navigate to the directory adk_tools/function_tool_agent.
+
+In the function_tool_agent directory, click on the agent.py file.
+
+
+Notice that the functions get_date() and write_journal_entry() have docstrings formatted properly for an ADK agent to know when and how to use them. They include:
+- A clear description of what each function does
+- an 'Args:' section describing the function's input parameters with JSON-serializable types
+- a 'Returns:' section describing what the function returns, with the preferred response type of a dict
+
+To pass the function to your agent to use as a tool, add the following code where indicated in the agent.py file:
+```
+    tools=[get_date, write_journal_entry]
+```
+
+You will run this agent using the dev UI to see how its tools allow you to easily visualize tool requests and responses. In the Cloud Shell Terminal, from the adk_tools project directory, run the dev UI again with the following command (if the server is still running from before, stop the running server first with CTRL+C, then run the following to start it again):
+```
+adk web
+```
+Click the http://127.0.0.1:8000 link in the Terminal output.
+
+A new browser tab will open with the ADK Dev UI.
+
+From the Select an agent dropdown on the left, select the function_tool_agent.
+
+Start a conversation with the agent with:
+```
+hello
+```
+The agent should prompt you about your day. Respond with a sentence about how your day is going (like It's been a good day. I did a cool ADK lab.) and it will write a journal entry for you.
+
+Example Output:
+Journaling Tool Function
+https://cdn.qwiklabs.com/M4AR%2BOHlB0enhYBCd4d1nLhObCJ2eKnJlKQCfp2eZ4g%3D
+
+
+
+Notice that your agent shows buttons for your custom tool's request and the response. You can click on each to see more information about each of these events.
+
+Close the dev UI tab.
+
+In the Cloud Shell Editor, you can find your dated journal entry file in the adk_tools directory. (You may want to use the Cloud Shell Editor's menu to enable View > Word Wrap to see the full text without lots of horizontal scrolling.)
+
+Stop the server, by clicking on the Cloud Shell Terminal panel and pressing CTRL + C.
+
+
+
+
+Best practices for writing functions to be used as tools include
+1
+FEWER PARAMETERS are Better: Minimize the number of parameters to reduce complexity.
+2
+Use SIMPLE DATA TYPES: Favor primitive data types like str and int over custom classes when possible.
+3
+Use MEANINGFUL NAMES: The function's name and parameter names significantly influence how the LLM interprets and utilizes the tool. Choose names that clearly reflect the function's purpose and the meaning of its inputs.
+4
+BREAK DOWN Complex Functions: Instead of a single
+* update_profile(profile: Profile) function, 
+create separate functions like 
+* update_name(name: str), 
+* update_age(age: int), etc.
+
+5
+Return STATUS: Include a "status" key in your return dictionary to indicate the overall outcome (e.g., "success", "error", "pending") to provide the LLM a clear signal about the operation's state.
+
+
+
+
+
+
+=================
+
+
+Task 6. Use Vertex AI Search as a tool to ground on your own data
+
+
+In this task, you will discover how easy it is to deploy a RAG application using an Agent Development Kit agent with the built-in Vertex AI Search tool from Google and the AI Applications data store you created earlier.
+
+
+
+
+Return to your Cloud Shell Editor tab and select the adk_tools/vertexai_search_tool_agent directory.
+
+Click on the agent.py file in the vertexai_search_tool_agent directory.
+
+Add an import of the VertexAiSearchTool class where indicated at the bottom of the imports:
+```
+from google.adk.tools import VertexAiSearchTool
+```
+
+
+Update the code where the VertexAiSearchTool is instantiated. In the path being passed to search_engine_id, update YOUR_PROJECT_ID to qwiklabs-gcp-00-cfe44f6f9c59 and update YOUR_SEARCH_APP_ID to the search app ID you copied in the earlier task.
+
+Add the following line where indicated in the agent definition to provide the agent the tool:
+```
+    tools=[vertexai_search_tool]
+```
+You can confirm your data store is ready for use by selecting the data store's name on the AI Applications > Data Stores page in the console.
+The Activity and Documents tabs provide statuses on the import and indexing of your documents. When the Activity tab reports "Import completed", your data store should be ready to query.
+
+
+
+In the Cloud Shell Terminal, from the adk_tools project directory, launch the command line interface with the following command. You'll include the --reload_agents flag so that the Dev UI reloads your agent when you make changes.
+```
+adk web --reload_agents
+```
+
+Note: If you did not shut down your previous adk web session, select the Cloud Shell Terminal panel where it is running and press CTRL + C. If you can't find the Cloud Shell Terminal tab you used before, the default port of 8000 will be blocked, but you can launch the Dev UI with a new port by using adk web --port 8001.
+
+Click the http://127.0.0.1:8000 to open the ADK Dev UI.
+
+From the Select an agent dropdown on the left, select the vertexai_search_tool_agent.
+
+
+
+
+Query the agent about the fictional planet described in your Cloud Storage documents with:
+```
+Is the new planet Persephone suitable for habitation?
+```
+
+Example output (yours may be a little different)
+```
+Based on the "Persephone Survey: What we Know So Far" document, Persephone exhibits several characteristics that suggest it could be habitable:
+
+- Location: It orbits within the habitable zone of its star.
+- Temperature: The average surface temperature is estimated to be around 18°C (64°F).
+...
+```
+
+
+
+
+
+
+
+
+
+
+
+Using AgentTool to integrate search tools with other tools
+Search tools come with an implementation limitation in that you CANNOT MIX SEARCH TOOLS AND NON-SEARCH TOOLS in the SAME AGENT.
+To get around this, you can "WRAP an agent with a search tool INSIDE USING an AgentTool", and then use that agent-as-a-tool to conduct searches alongside other tools.
+
+
+To see that in action:
+Ensure you have the adk_tools/vertexai_search_tool_agent/agent.py file open.
+
+Update the root_agent's tools parameter to include the get_date function tool:
+```
+    tools=[vertexai_search_tool, get_date]
+```
+In the ADK Dev UI, ask the agent:
+```
+What is today's date?
+```
+Expected output:
+Error showing message that multiple tools are supported when all are search tools.
+https://cdn.qwiklabs.com/c288d6l8RS55NVTrnJhLhnQhXZayOFt%2BlLH04fJkg7g%3D
+
+
+
+
+
+FIX
+Back in the adk_tools/vertexai_search_tool_agent/agent.py file, paste the following code above your root_agent. This agent is dedicated to using the search tool and contains both the search tool and instructions to use it:
+```
+vertexai_search_agent = Agent(
+    name="vertexai_search_agent",
+    model=os.getenv("MODEL"),
+    instruction="Use your search tool to look up facts.",
+    tools=[vertexai_search_tool]
+)
+```
+Then replace the root_agent's tools parameter with the following to wrap the agent created in the previous step with the AgentTool() :
+```
+    tools=[
+        AgentTool(vertexai_search_agent, skip_summarization=False),
+        get_date
+    ]
+```
+Now you can query your agent and receive both search results and use the get_date() function.
+
+Back in the ADK Dev UI browser tab, click + New Session.
+
+Ask again:
+```
+What is today's date?
+```
+The agent should respond with the correct date.
+
+Then to invoke the search tool, ask:
+```
+When is the PlanetCon conference?
+```
+
+Expected output:
+```
+The PlanetCon: Persephone conference is scheduled for October 26th - 28th, 2028.
+```
+
+
+Feel free to ask the agent more questions about this new planet and the conference where its discovery will be announced. When you are satisfied, close the dev UI tab.
+
+When you are finished asking questions of this agent, close the browser tab, select the Cloud Shell Terminal window where the server is running, and press CTRL + C to stop the server.
+
+
+
+
+
+
+
+=================
+
+
+Even More Types of Tools outside the lab
+
+
+
+1
+The LongRunningFunctionTool Class
+This tool is a subclass of FunctionTool. It's designed for tasks that require a significant amount of PROCESSING TIME that should be called without blocking the agent's execution.
+
+When using a LongRunningFunctionTool, your Python function can initiate the long-running operation and OPTIONALLY RETURN AN INTERMEDIATE RESULT to keep the model and user informed about the PROGRESS (e.g., status updates or estimated completion time). The agent can then continue with other tasks.
+
+An example is a human-in-the-loop scenario where the agent needs HUMAN APPROVAL before proceeding with a task.
+
+
+
+2
+Application Integration workflows as tools
+With Application Integration, you can use a drag-and-drop interface in the Google Cloud Console to build tools, DATA CONNECTIONS, and data TRANSFORMATIONS using Integration Connector’s 100+ pre-built connectors for Google Cloud products and third-party systems like Salesforce, ServiceNow, JIRA, SAP, and more. 
+
+You can then use an ADK ApplicationIntegrationToolset to allow your agents to CONNECT to those DATA SOURCES or CALL your WORKFLOWS.
+
+GCP's Application Integration = an Integration-Platform-as-a-Service
+https://docs.cloud.google.com/application-integration/docs/overview
+https://google.github.io/adk-docs/tools/google-cloud-tools/#application-integration-tools
+
+
+
+3
+Model Context Protocol (MCP) Tools
+Model Context Protocol (MCP) is an open standard designed to STANDARDISE how Large Language Models (LLMs) like Gemini and Claude COMMS WITH EXTERNAL APPS, DATA SOURCES, and TOOLS. 
+ADK helps you both use and consume MCP tools in your agents, whether you're trying to 
+- build a tool to CALL an MCP SERVICE, or
+- exposing an MCP SERVER FOR OTHER DEVELOPER or agents to interact with your tools.
+https://modelcontextprotocol.io/introduction
+
+
+Refer to the MCP Tools documentation for code samples and design patterns that help you use ADK together with MCP servers, including:
+1
+Using Existing MCP Servers within ADK: An ADK agent can act as an MCP client and USE TOOLS provided BY EXTERNAL MCP SERVERS.
+2
+Exposing ADK Tools via an MCP Server: How to build an MCP server that wraps ADK tools, making them accessible to any MCP client.
+https://google.github.io/adk-docs/tools-custom/mcp-tools/
+
+
+For more information on using MCP with ADK agents, see the lab "Use Model Context Protocol (MCP) Tools with ADK Agents".
+
+
+
+
+
+
+=================
+
+
+Checkpoint for our workings
+```
+$ zip -r adk_tools.zip adk_tools/
+
+
+$ python3 -m http.server
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+```
+
+Above, the terminal starts a web server in the current directory.
+Visit the URL in the browser to find the zip.
+
+
+
+
+=================
+
+Reflections
+- In task 3, after creating the .env files in the cloud shell terminal, the .env files are not found in the cloud shell editor for some weird reason
+BUT the .env files are actually found in the cloud shell terminal
+
+
+```
+student_00_e116833fd931@cloudshell:~/adk_tools (qwiklabs-gcp-00-cfe44f6f9c59)$ ls -la langchain_tool_agent/.env
+-rw-r--r-- 1 student_00_e116833fd931 student_00_e116833fd931 138 Nov 29 08:07 langchain_tool_agent/.env
+
+student_00_e116833fd931@cloudshell:~/adk_tools (qwiklabs-gcp-00-cfe44f6f9c59)$ # Check if .env exists in langchain_tool_agent
+ls -la langchain_tool_agent/
+
+drwxrwxr-x 2 student_00_e116833fd931 student_00_e116833fd931 4096 Nov 29 08:03 .
+drwxrwxr-x 6 student_00_e116833fd931 student_00_e116833fd931 4096 Nov 29 07:54 ..
+-rw-rw-r-- 1 student_00_e116833fd931 student_00_e116833fd931  952 Nov 29 07:54 agent.py
+-rw-r--r-- 1 student_00_e116833fd931 student_00_e116833fd931  138 Nov 29 08:07 .env
+-rw-rw-r-- 1 student_00_e116833fd931 student_00_e116833fd931   19 Nov 29 07:54 __init__.py
+
+
+student_00_e116833fd931@cloudshell:~/adk_tools (qwiklabs-gcp-00-cfe44f6f9c59)$ # Check all .env files across agent directories
+find . -name ".env" -type f
+
+./vertexai_search_tool_agent/.env
+./crewai_tool_agent/.env
+./langchain_tool_agent/.env
+./function_tool_agent/.env
+
+```
+
+
+- Otherwise, this was a good lab introducing LangChain Wikipedia tool, crewai web scraping tool, custom function tool, and a workaround mixing "agent-wrapping-rag-search-tool AND non-search-tool"
+- It would be great to explore the various pre-built Google tools beyond VertexAiSearchTool (used for RAG)
+
