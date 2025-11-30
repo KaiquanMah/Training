@@ -1,0 +1,509 @@
+Deploy ADK agents to Agent Engine
+
+Objective
+In this lab you will learn:
+- The benefits of deploying agents to Agent Engine
+- How to grant required ROLES to the Reasoning Engine Service Agent
+- How to DEPLOY an agent to Agent Engine using the ADK command line interface
+- How to QUERY an agent deployed to Agent Engine
+- How to MONITOR your deployed agents
+- How to DELETE agents
+
+In this lab, you will learn to deploy ADK agents to Agent Engine for a scalable, fully managed environment for your agentic workflows.
+This allows you to focus on the agents' logic while infrastructure is allocated and scaled for you.
+
+
+
+
+
+
+
+
+Agent Engine
+Vertex AI Agent Engine (formerly known as LangChain on Vertex AI or Vertex AI Reasoning Engine) is a fully managed Google Cloud service enabling developers to deploy, manage, and scale AI agents in production.
+
+You can learn more about its benefits in the Vertex AI Agent Engine documentation.
+https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview
+
+
+
+
+
+
+=================
+
+Task 1. Install ADK and set up your environment
+
+
+
+Enable Vertex AI recommended APIs
+In this lab environment, the Vertex AI API has been enabled for you. If you were to follow these steps in your own project, you could enable it by navigating to Vertex AI and following the prompt to enable it.
+
+
+
+
+
+
+Prepare a Cloud Shell Editor tab
+With your Google Cloud console window selected, open Cloud Shell by pressing the G key and then the S key on your keyboard. Alternatively, you can click the Activate Cloud Shell button (Activate Cloud Shell) in the upper right of the Cloud console.
+
+Click Continue.
+
+When prompted to authorize Cloud Shell, click Authorize.
+
+In the upper right corner of the Cloud Shell Terminal panel, click the Open in new window button Open in new window button.GS
+
+In the Cloud Shell Terminal, enter the following to open the Cloud Shell Editor to your home directory:
+```
+cloudshell workspace ~
+```
+
+Close any additional tutorial or Gemini panels that appear on the right side of the screen to save more of your window for your code editor.
+Throughout the rest of this lab, you can work in this window as your IDE with the Cloud Shell Editor and Cloud Shell Terminal.
+
+
+
+
+
+
+
+
+
+
+
+Download and install ADK and code samples for this lab
+Update your PATH environment variable and install ADK by running the following commands in the Cloud Shell Terminal.
+```
+export PATH=$PATH:"/home/${USER}/.local/bin"
+python3 -m pip install google-adk
+```
+
+student_00_33df1dc70dfc@cloudshell:~ (qwiklabs-gcp-01-4f328echo $PATH
+/opt/gradle/bin:/opt/maven/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/node_packages/node_modules/.bin:/usr/local/rvm/bin:/home/student_00_33df1dc70dfc/.gems/bin:/usr/local/rvm/bin:/home/student_00_33df1dc70dfc/gopath/bin:/google/gopath/bin:/google/flutter/bin:/usr/local/nvm/versions/node/v24.11.1/bin
+
+
+
+
+
+Paste the following commands into the Cloud Shell Terminal to copy a file from a Cloud Storage bucket, and unzip it, creating a project directory with code for this lab:
+```
+gcloud storage cp -r gs://qwiklabs-gcp-01-4f328473c969-bucket/adk_to_agent_engine .
+```
+Install additional lab requirements with:
+```
+python3 -m pip install -r adk_to_agent_engine/requirements.txt
+```
+
+
+Run the following commands to create a .env file in the adk_to_agent_engine directory. (Note: To view a hidden file beginning with a period, you can use the Cloud Shell Editor menus to enable View > Toggle Hidden Files):
+```
+cd ~/adk_to_agent_engine
+cat << EOF > .env
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=qwiklabs-gcp-01-4f328473c969
+GOOGLE_CLOUD_LOCATION=us-central1
+MODEL=gemini-2.5-flash
+EOF
+```
+
+Copy the .env file to the agent directory to provide your agent necessary authentication configurations once it is deployed:
+```
+cp .env transcript_summarization_agent/.env
+```
+
+
+
+
+
+
+
+
+=================
+
+
+Task 2. Deploy to Agent Engine using the command line deploy method
+
+ADK's command line interface provides shortcuts to deploy agents to Agent Engine, Cloud Run, and Google Kubernetes Engine (GKE). You can use the following base commands to deploy to each of these services:
+
+adk deploy agent_engine (with its command line args described under the @deploy.command("agent_engine") decorator)
+https://github.com/google/adk-python/blob/c52f9564330f0c00d82338cc58df28cb22400b6f/src/google/adk/cli/cli_tools_click.py#L1037
+
+adk deploy cloud_run (with its command line args described under the @deploy.command("cloud_run") decorator)
+https://github.com/google/adk-python/blob/c52f9564330f0c00d82338cc58df28cb22400b6f/src/google/adk/cli/cli_tools_click.py#L861
+
+adk deploy gke (with its command line args described under the @deploy.command("gke") decorator)
+https://github.com/google/adk-python/blob/c52f9564330f0c00d82338cc58df28cb22400b6f/src/google/adk/cli/cli_tools_click.py#L1192
+
+
+
+
+
+The `adk deploy agent_engine` command wraps your agent in a reasoning_engines.AdkApp class and deploys this app to Agent Engine's managed runtime, ready to receive agentic queries.
+https://docs.cloud.google.com/python/docs/reference/vertexai/latest/vertexai.preview.reasoning_engines.AdkApp#vertexai_preview_reasoning_engines_AdkApp
+
+
+When an AdkApp is deployed to Agent Engine, it automatically uses a VertexAiSessionService for persistent, managed session state. This provides multi-turn conversational memory without any additional configuration. 
+
+For LOCAL TESTING, the application defaults to a temporary, InMemorySessionService.
+https://google.github.io/adk-docs/sessions/session/#sessionservice-implementations
+
+
+
+
+
+
+
+
+
+
+To deploy an Agent Engine app using `adk deploy agent_engine`, complete the following steps:
+
+In the adk_to_agent_engine/transcript_summarization_agent directory, click on the agent.py file to review the instructions of this simple summarization agent.
+
+To deploy an agent, you must provide its requirements. In Cloud Shell Editor, right-click on the transcript_summarization_agent directory. (You may need to click Allow to enable the right-click menu.)
+
+Select New File...
+
+Name the file like a standard Python requirements file: requirements.txt
+
+Paste the following into the file:
+```
+google-cloud-aiplatform[adk,agent_engines]==1.110.0
+```
+Save the file.
+
+In the Cloud Shell Terminal, run the deploy command:
+```
+$ cd adk_to_agent_engine
+
+$ adk deploy agent_engine transcript_summarization_agent \
+--display_name "Transcript Summarizer" \
+--staging_bucket gs://qwiklabs-gcp-01-4f328473c969-bucket
+```
+
+
+
+
+
+
+student_00_33df1dc70dfc@cloudshell:~/adk_to_agent_engine$ adk deploy agent_engine transcript_summarization_agent --display_name "Transcript Summarizer" --staging_bucket gs://qwiklabs-gcp-01-4f328473c969-bucket
+Copying agent source code...
+Copying agent source code complete.
+Initializing Vertex AI...
+Use default project: 
+Resolving files and dependencies...
+Creating /tmp/agent_engine_deploy_src/20251130_070436/transcript_summarization_agent/requirements.txt...
+Created /tmp/agent_engine_deploy_src/20251130_070436/transcript_summarization_agent/requirements.txt
+Reading environment variables from /home/student_00_33df1dc70dfc/adk_to_agent_engine/transcript_summarization_agent/.env
+project='qwiklabs-gcp-01-4f328473c969' set by GOOGLE_CLOUD_PROJECT in /home/student_00_33df1dc70dfc/adk_to_agent_engine/transcript_summarization_agent/.env
+region='us-central1' set by GOOGLE_CLOUD_LOCATION in /home/student_00_33df1dc70dfc/adk_to_agent_engine/transcript_summarization_agent/.env
+Vertex AI initialized.
+Created /tmp/agent_engine_deploy_src/20251130_070436/agent_engine_app.py
+Files and dependencies resolved
+Running `absolufy-imports /tmp/agent_engine_deploy_src/20251130_070436/transcript_summarization_agent/__init__.py`
+Running `absolufy-imports /tmp/agent_engine_deploy_src/20251130_070436/transcript_summarization_agent/query_agent_engine.py`
+Running `absolufy-imports /tmp/agent_engine_deploy_src/20251130_070436/transcript_summarization_agent/agent.py`
+Deploying to agent engine...
+Reading requirements from requirements='/tmp/agent_engine_deploy_src/20251130_070436/transcript_summarization_agent/requirements.txt'
+Read the following lines: ['google-cloud-aiplatform[adk,agent_engines]']
+Identified the following requirements: {'pydantic': '2.11.7', 'cloudpickle': '3.1.1', 'google-cloud-aiplatform': '1.110.0'}
+The following requirements are missing: {'pydantic', 'cloudpickle'}
+The following requirements are appended: {'pydantic==2.11.7', 'cloudpickle==3.1.1'}
+The final list of requirements: ['google-cloud-aiplatform[adk,agent_engines]', 'pydantic==2.11.7', 'cloudpickle==3.1.1']
+Using bucket qwiklabs-gcp-01-4f328473c969-bucket
+Wrote to gs://qwiklabs-gcp-01-4f328473c969-bucket/agent_engine/agent_engine.pkl
+Writing to gs://qwiklabs-gcp-01-4f328473c969-bucket/agent_engine/requirements.txt
+Creating in-memory tarfile of extra_packages
+Writing to gs://qwiklabs-gcp-01-4f328473c969-bucket/agent_engine/dependencies.tar.gz
+Creating AgentEngine
+Create AgentEngine backing LRO: projects/1030688707078/locations/us-central1/reasoningEngines/6251466873766936576/operations/2675935101249912832
+View progress and logs at https://console.cloud.google.com/logs/query?project=qwiklabs-gcp-01-4f328473c969
+AgentEngine created. Resource name: projects/1030688707078/locations/us-central1/reasoningEngines/6251466873766936576
+To use this AgentEngine in another session:
+agent_engine = vertexai.agent_engines.get('projects/1030688707078/locations/us-central1/reasoningEngines/6251466873766936576')
+Cleaning up the temp folder: /tmp/agent_engine_deploy_src/20251130_070436
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You can follow the status from the log file that will be linked from the command's output. During deployment, the following steps are occurring:
+1
+A bundle of ARTIFACTS is generated locally, comprising:
+- *.pkl: a pickle file corresponding to local_agent.
+- requirements.txt: this file from the agent folder defining package
+requirements.https://docs.cloud.google.com/agent-builder/agent-engine/deploy#package-requirements
+- dependencies.tar.gz: a tar file containing any extra packages.
+https://docs.cloud.google.com/agent-builder/agent-engine/deploy#extra-packages
+eg
+agent.py
+
+
+2
+The bundle is UPLOADED TO CLOUD STORAGE (using a defined directory if specified) for staging the artifacts.
+https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy#gcs-directory
+
+3
+The Cloud Storage URIs for the respective ARTIFACTS are specified in the PackageSpec.
+https://docs.cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.reasoningEngines#PackageSpec
+
+4
+The Vertex AI Agent Engine service receives the request and BUILDS CONTAINERS and SPINS UP HTTP SERVERS on the backend.
+Note: Deployment should take about 10 minutes, but you can continue with this lab while it deploys.
+
+
+
+
+
+
+
+Quiz While Your Agent is Deploying
+Each of the adk deploy ... commands requires certain arguments to be set. For the most up-to-date arguments, click the linked commands in the list at the top of this task and look for the arguments marked as "Required".
+
+Some required arguments, like `--project` and `--region` from the `adk deploy agent_engine` deployment can load their values from the agent's .env file if present.
+https://github.com/google/adk-python/blob/c52f9564330f0c00d82338cc58df28cb22400b6f/src/google/adk/cli/cli_tools_click.py#L1042
+https://github.com/google/adk-python/blob/c52f9564330f0c00d82338cc58df28cb22400b6f/src/google/adk/cli/cli_tools_click.py#L1050
+
+
+Answer the following questions based on the arguments for adk deploy agent_engine:
+
+Q1
+The `--agent_engine_id` argument allows you to update an existing Agent Engine instance.
+YES True
+False
+
+```
+@click.option(
+    "--agent_engine_id",
+    type=str,
+    default=None,
+    help=(
+        "Optional. ID of the Agent Engine instance to update if it exists"
+        " (default: None, which means a new instance will be created)."
+        " The corresponding resource name in Agent Engine will be:"
+        " `projects/{project}/locations/{region}/reasoningEngines/{agent_engine_id}`."
+    ),
+)
+```
+
+
+
+Q2
+The `--trace_to_cloud` argument has a default value of True.
+True
+yes	False
+```
+@click.option(
+    "--trace_to_cloud",
+    type=bool,
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="Optional. Whether to enable Cloud Trace for Agent Engine.",
+)
+```
+
+
+
+
+
+
+Q3
+Which of the following is true about the `--adk_app` argument?
+NO	Is required.
+YES	Accepts a filename to define an ADK app.
+NO	Defaults to use your agent.py file.
+NO	Creates app files for you to edit.
+
+```
+@click.option(
+    "--adk_app",
+    type=str,
+    default="agent_engine_app",
+    help=(
+        "Optional. Python file for defining the ADK application"
+        " (default: a file named agent_engine_app.py)"
+    ),
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+=================
+
+
+Task 3. Get and query an agent deployed to Agent Engine
+
+
+To query the agent, you must first grant it the authorization to call models via Vertex AI.
+To see the service agent and its assigned role, navigate to IAM in the console.
+
+Click the checkbox to Include Google-provided role grants.
+
+Find the AI Platform Reasoning Engine Service Agent (service-PROJECT_NUMBER@gcp-sa-aiplatform-re.iam.gserviceaccount.com), and click the edit pencil icon in this service agent's row.
+principal	service-1030688707078@gcp-sa-aiplatform-re.iam.gserviceaccount.com
+name		AI Platform Reasoning Engine Service Agent 	
+role	
+	Vertex AI Reasoning Engine Service Agent - Gives Vertex AI Reasoning Engine the proper permissions to function. The aiplatform.reasoningEngines.create IAM permission implies read access to the GCS objects of the consumer project through this service agent.
+	Vertex AI User (adding here) - Grants access to use all resource in Vertex AI
+
+
+
+
+Click + Add another role.
+
+In the Select a role field, enter Vertex AI User. If you deploy an agent that uses tools to access other data, you would grant access to those systems to this service agent as well.
+
+Save your changes.
+
+
+
+
+
+Back in the Cloud Shell Editor, within the adk_to_agent_engine directory, open the file query_agent_engine.py.
+Review the code and comments to notice what it is doing.
+
+What does the code in this file do? Select all that apply.
+YES	Establish a logging client
+NO	Create a Cloud Storage client
+YES	Initialize Vertex AI
+YES	Load Agent Engine apps, filtering by display name
+YES	Create a session
+NO	Use Gemini to generate a new transcript
+YES	Query the summarizer agent
+
+
+
+
+
+
+Review the transcript passed to the agent, so that you can evaluate if it's generating an adequate summary.
+
+In the Cloud Shell Terminal, run the file from the adk_to_agent_engine directory with:
+```
+python3 transcript_summarization_agent/query_agent_engine.py
+```
+
+
+
+
+student_00_33df1dc70dfc@cloudshell:~/adk_to_agent_engine$ python3 transcript_summarization_agent/query_agent_engine.py
+
+Check env variables: environ({'SHELL': '/bin/bash', 'CLOUD_CODE_CLOUD_SHELL_AUTHENTICATION': 'true', 'COLORTERM': 'truecolor', 'TERM_PROGRAM_VERSION': '1.104.3-cde', 'GEMINI_CLI_IDE_SERVER_PORT': '37705', 'HISTSIZE': '1000', 'EDITOR_IN_CLOUD_SHELL': 'true', 'JAVA_HOME': '/usr/lib/jvm/java-17-openjdk-amd64', 'CLOUD_SHELL': 'true', 'DEVSHELL_PROJECT_ID': '', 'DOTNET_SKIP_FIRST_TIME_EXPERIENCE': '1', 'ASPNETCORE_URLS': 'http://*:8080', 'PWD': '/home/student_00_33df1dc70dfc/adk_to_agent_engine', 'LOGNAME': 'student_00_33df1dc70dfc', 'DEVSHELL_CLIENTS_DIR': '/var/run/google/devshell', 'VSCODE_GIT_ASKPASS_NODE': '/google/devshell/editor/code-oss-for-cloud-shell/node', 'HOME': '/home/student_00_33df1dc70dfc', 'LANG': 'en_US.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:', 'CLOUDSDK_CONFIG': '/tmp/tmp.HANkFioZ2c', 'MINIKUBE_FORCE_SYSTEMD': 'true', 'GIT_ASKPASS': '/google/devshell/editor/code-oss-for-cloud-shell/extensions/git/dist/askpass.sh', 'PROMPT_COMMAND': 'history -a;enableHistoryAppend &> /dev/null;update_devshell_project_id &> /dev/null ; update_devshell_project_id &> /dev/null', 'USE_PARTITIONED_COOKIES': 'true', 'DOTNET_BUNDLE_EXTRACT_BASE_DIR': '/home/student_00_33df1dc70dfc/.cache/dotnet_bundle_extract', 'GEMINI_DEFAULT_PROJECT': '', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'GEM_PATH': '/home/student_00_33df1dc70dfc/.gems:/usr/local/lib/ruby/gems/3.2.0/', 'GEM_HOME': '/home/student_00_33df1dc70dfc/.gems', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'CLOUDSHELL_OPEN_DIR': 'cloudshell_open', 'GEMINI_CLI_IDE_WORKSPACE_PATH': '/home/student_00_33df1dc70dfc', 'TERM': 'xterm-256color', 'CLOUDSDK_DIAGNOSTICS_HIDDEN_PROPERTY_ALLOWLIST': 'compute/gce_metadata_read_timeout_sec', 'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'student_00_33df1dc70dfc', 'VSCODE_GIT_IPC_HANDLE': '/tmp/vscode-git-1766e083df.sock', 'BASHRC_PATH': '/home/student_00_33df1dc70dfc/.bashrc', 'CLOUDSDK_DIAGNOSTICS_HIDDEN_PROPERTY_WHITELIST': 'compute/gce_metadata_read_timeout_sec', 'SHLVL': '3', '__TMP_CLOUDSDK_CONFIG': '/tmp/tmp.HANkFioZ2c', 'CONSOLIDATE_GCA_SPARKS': 'true', 'USER_EMAIL': 'student-00-33df1dc70dfc@qwiklabs.net', 'BASHRC_GOOGLE_PATH': '/google/devshell/bashrc.google', 'PS1': '\\[\x1b]633;A\x07\\]\\[\\e]0;${DEVSHELL_PROJECT_ID:-Cloud Shell}\\a\\]\\u@cloudshell:\\[\\033[1;34m\\]\\w$([[ -n $DEVSHELL_PROJECT_ID ]] && printf " \\[\\033[1;33m\\](%s)" ${DEVSHELL_PROJECT_ID} )\\[\\033[00m\\]$ \\[\x1b]633;B\x07\\]', 'MINIKUBE_HOME': '/google/minikube', 'DEBUGINFOD_URLS': 'https://debuginfod.ubuntu.com ', 'DOCKER_HOST': 'unix:///var/run/docker.sock', 'VSCODE_GIT_ASKPASS_MAIN': '/google/devshell/editor/code-oss-for-cloud-shell/extensions/git/dist/askpass-main.js', 'V2V_GCP_V2V_IMAGE': 'projects/v2v-community/global/images/family/v2v-stable', 'BROWSER': 'echo', 'PATH': '/google/devshell/editor/code-oss-for-cloud-shell/bin/remote-cli:/opt/gradle/bin:/opt/maven/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/node_packages/node_modules/.bin:/usr/local/rvm/bin:/home/student_00_33df1dc70dfc/.gems/bin:/usr/local/rvm/bin:/home/student_00_33df1dc70dfc/gopath/bin:/google/gopath/bin:/google/flutter/bin:/usr/local/nvm/versions/node/v24.11.1/bin:/home/student_00_33df1dc70dfc/.gems/bin:/usr/local/rvm/bin:/home/student_00_33df1dc70dfc/gopath/bin:/google/gopath/bin:/google/flutter/bin:/usr/local/nvm/versions/node/v24.11.1/bin:/home/student_00_33df1dc70dfc/.local/bin', 'HISTFILESIZE': '1000', 'CLOUD_SHELL_FRAME_ANCESTORS': 'https://*.corp.google.com:* https://*.sandbox.google.com:* https://console.cloud.google.com https://ide.cloud.google.com https://shell.cloud.google.com https://ssh.cloud.google.com', 'NEW_GCA_AUTH_FLOW': 'true', 'DEVSHELL_GCLOUD_CONFIG': 'cloudshell-14220', 'USE_GKE_GCLOUD_AUTH_PLUGIN': 'True', 'OLDPWD': '/home/student_00_33df1dc70dfc', 'MINIKUBE_WANTUPDATENOTIFICATION': 'false', 'GOPATH': '/home/student_00_33df1dc70dfc/gopath:/google/gopath', 'CREDENTIALS_SERVICE_PORT': '8998', 'TERM_PROGRAM': 'vscode', 'VSCODE_IPC_HOOK_CLI': '/tmp/vscode-ipc-db7f224e-8c4b-40d8-897c-4665d277ad2f.sock', '_': '/usr/bin/python3', 'GOOGLE_GENAI_USE_VERTEXAI': 'TRUE', 'GOOGLE_CLOUD_PROJECT': 'qwiklabs-gcp-01-4f328473c969', 'GOOGLE_CLOUD_LOCATION': 'us-central1', 'MODEL': 'gemini-2.5-flash'})
+
+[remote response] The virtual agent, a vehicle sales agent, assisted a user interested in buying a boat. After clarifying the user's budget of $50,000, the agent confirmed that this amount would secure "a very nice boat," leading the user to express readiness to proceed with the purchase.
+
+
+
+
+
+
+
+
+
+
+
+
+=================
+
+
+Task 4. View and delete agents deployed to Agent Engine
+
+
+When your agent has completed its deployment, return to a browser tab showing the Cloud Console and navigate to Agent Engine by searching for it and selecting it at the top of the Console.
+
+In the Region dropdown, make sure your location for this lab (us-central1) is selected.
+
+You will see your deployed agent's display name. Click on it to enter its monitoring dashboard.
+
+Notice both the Metrics and Session tabs that will each give you insights into how your agent is being used.
+
+When you are ready to delete your agent, select Deployment details from the top of its monitoring dashboard.
+
+Back in your browser tab running the Cloud Shell Terminal, paste the following command, but don't run it yet:
+```
+cd ~/adk_to_agent_engine
+python3 agent_engine_utils.py delete REPLACE_WITH_AE_ID
+```
+
+
+From the Agent Engine Deployment info panel, copy the Name field, which will have a format like: projects/qwiklabs-gcp-02-76ce2eed15a5/locations/us-central1/reasoningEngines/1467742469964693504.
+
+name		Transcript Summarizer
+resource name	projects/1030688707078/locations/us-central1/reasoningEngines/6251466873766936576
+identity	service-1030688707078@gcp-sa-aiplatform-re.iam.gserviceaccount.com
+
+
+
+Return to the Cloud Shell Terminal and replace the end of the command REPLACE_WITH_AE_ID with the resource name you've copied.
+Press Return to run the deletion command.
+
+```
+student_00_33df1dc70dfc@cloudshell:~/adk_to_agent_engine$ python3 agent_engine_utils.py delete projects/1030688707078/locations/us-central1/reasoningEngines/6251466873766936576
+
+Deleting AgentEngine resource: projects/1030688707078/locations/us-central1/reasoningEngines/6251466873766936576
+Delete AgentEngine backing LRO: projects/1030688707078/locations/us-central1/operations/3617292976486612992
+AgentEngine resource deleted: projects/1030688707078/locations/us-central1/reasoningEngines/6251466873766936576
+
+```
+
+
+To view the simple Python SDK code to list and delete agents, view the contents of the file adk_to_agent_engine/agent_engine_utils.py.
+
+
+
+
+
+=================
+
+
+Checkpoint for our workings
+```
+$ zip -r adk_lab_workings.zip adk_to_agent_engine/
+
+
+$ python3 -m http.server
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+```
+
+Above, the terminal starts a web server in the current directory.
+Visit the URL in the browser to find the zip.
+
+
+
+
+
+
+=================
+
+Reflections
+- Good intro to deploying a fully managed 'Agent Engine' service on Google Cloud
+
+
+
