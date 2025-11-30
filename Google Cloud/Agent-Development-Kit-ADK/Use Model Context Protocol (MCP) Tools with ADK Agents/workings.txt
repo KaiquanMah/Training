@@ -1,0 +1,939 @@
+Use Model Context Protocol (MCP) Tools with ADK Agents
+
+
+Overview
+In this lab, you will explore Model Context Protocol (MCP), an open standard that enables seamless integration between
+- EXTERNAL SERVICES,
+- data sources,
+- tools, and 
+- applications. 
+You will learn how to integrate MCP into your ADK agents, using tools provided by existing MCP servers to enhance your ADK workflows. Additionally, you will see how to expose ADK tools like load_web_page through a custom-built MCP server, enabling broader integration with MCP clients.
+
+
+
+
+
+
+
+What is Model Context Protocol (MCP)?
+
+Model Context Protocol (MCP) is an open standard designed to standardize how Large Language Models (LLMs) like Gemini and Claude communicate with external applications, data sources, and tools. Think of it as a universal connection mechanism that simplifies how LLMs obtain context, execute actions, and interact with various systems.
+
+MCP follows a CLIENT-SERVER ARCHITECTURE, DEFINING how
+- DATA (resources),
+- interactive TEMPLATES (PROMPTS), and
+- actionable functions (TOOLS) 
+are exposed by an MCP server and consumed by an MCP client (which could be an LLM host application or an AI agent).
+
+
+
+This lab covers two primary integration patterns:
+1
+Using existing MCP Servers within ADK: An ADK agent acts as an MCP CLIENT, leveraging TOOLS provided by EXTERNAL MCP servers.
+2
+Exposing ADK Tools via an MCP Server: Building an MCP SERVER that WRAPS ADK TOOLS, making them accessible to any MCP client.
+
+
+
+Objectives
+In this lab, you learn how to:
+- Use an ADK agent as an MCP client to interact with tools from existing MCP servers.
+- Configure and deploy your own MCP server to expose ADK tools to other clients.
+- Connect ADK agents with external tools through standardized MCP communication.
+- Enable seamless interaction between LLMs and tools using Model Context Protocol.
+
+
+
+
+
+=================
+
+
+Task 1. Install ADK and set up your environment
+
+In this lab environment, the Vertex AI API, Routes API and Directions API have been enabled for you.
+
+
+
+
+
+
+Prepare a Cloud Shell Editor tab
+With your Google Cloud console window selected, open Cloud Shell by pressing the G key and then the S key on your keyboard. Alternatively, you can click the Activate Cloud Shell button (Activate Cloud Shell) in the upper right of the Cloud console.
+
+Click Continue.
+
+When prompted to authorize Cloud Shell, click Authorize.
+
+In the upper right corner of the Cloud Shell Terminal panel, click the Open in new window button Open in new window button.
+
+In the Cloud Shell Terminal, enter the following to open the Cloud Shell Editor to your home directory:
+```
+cloudshell workspace ~
+```
+Close any additional tutorial or Gemini panels that appear on the right side of the screen to save more of your window for your code editor.
+
+Throughout the rest of this lab, you can work in this window as your IDE with the Cloud Shell Editor and Cloud Shell Terminal.
+
+
+
+
+
+
+
+
+
+
+
+
+Download and install ADK and code samples for this lab
+Install ADK by running the following command in the Cloud Shell Terminal.
+
+Note: You will specify the version to ensure that the version of ADK that you install corresponds to the version used in this lab. You can view the latest version number and release notes at the adk-python repo.
+https://github.com/google/adk-python/releases
+```
+sudo python3 -m pip install google-adk==1.5.0
+```
+
+
+Paste the following commands into the Cloud Shell Terminal to copy a file from a Cloud Storage bucket, and unzip it, creating a project directory with code for this lab:
+```
+gcloud storage cp gs://qwiklabs-gcp-04-51d977df463c-bucket/adk_mcp_tools.zip .
+unzip adk_mcp_tools.zip
+```
+
+
+Install additional lab requirements with:
+```
+python3 -m pip install -r adk_mcp_tools/requirements.txt
+```
+
+
+
+
+
+
+
+
+
+=================
+
+Task 2. Using Google Maps MCP server with ADK agents (ADK as an MCP client) in adk web
+
+
+This section demonstrates how to integrate tools from an external Google Maps MCP server into your ADK agents. This is the most common integration pattern when your ADK agent needs to use capabilities provided by an existing service that exposes an MCP interface. 
+
+You will see how the MCPToolset class can be directly added to your agent's tools list, enabling seamless connection to an MCP server, discovery of its tools, and making them available for your agent to use. These examples primarily focus on interactions within the adk web development environment.
+
+
+
+
+MCPToolset
+The MCPToolset class is ADK's primary mechanism for integrating tools from an MCP server.
+
+
+When you include an MCPToolset instance in your agent's tools list, it automatically handles the interaction with the specified MCP server. Here's how it works:
+1
+Connection Management: On initialization, MCPToolset establishes and manages the connection to the MCP server. This can be 
+- A LOCAL SERVER PROCESS (using StdioServerParameters for communication over standard input/output) or 
+- A REMOTE SERVER (using SseServerParams for Server-Sent Events). 
+The toolset also handles the GRACEFUL SHUTDOWN of this connection when the agent or application terminates.
+2
+Tool Discovery & Adaptation: Once connected, MCPToolset QUERIES the MCP server for its AVAILABLE TOOLS (via the list_tools MCP method). 
+It then converts the SCHEMAS of these discovered MCP tools into ADK-compatible BaseTool instances.
+3
+Exposure to Agent: These adapted tools are then made available to your LlmAgent as if they were native ADK tools.
+4
+Proxying Tool Calls: When your LlmAgent decides to use one of these tools, MCPToolset transparently proxies the CALL (using the call_tool MCP method) to the MCP server, SENDS the necessary ARGUMENTS, and RETURNS the server's RESPONSE back to the agent.
+5
+Filtering (Optional): You can use the tool_filter parameter when creating an MCPToolset to SELECT a specific SUBSET of TOOLS from the MCP server, rather than exposing all of them to your agent.
+
+
+
+
+
+
+
+Get API key and Enable APIs
+In this sub-section, you will generate a new API key named `GOOGLE_MAPS_API_KEY`.
+
+Open the browser tab displaying the Google Cloud Console (not your Cloud Shell Editor).
+
+You can close the Cloud Shell Terminal pane on this browser tab for more console area.
+
+Search for 'APIs & Services' > 'Credentials' in the search bar at the top of the page. 
+Select it from the results.
+
+On the Credentials page, click + Create Credentials at the top of the page, then select 'API key'.
+
+The API key created dialog will display your newly created API key. Be sure to save this key locally for later use in the lab.
+Click Close on the dialog box.
+AIzaSyBFiPEv2R978hhfRLanS4VpIvc-yPMixWA
+
+
+
+Your newly created key will be 'named API Key 1' by default. 
+Select the key, rename it to 'GOOGLE_MAPS_API_KEY', and click Save.
+
+
+
+
+
+
+
+
+
+
+
+
+Define your Agent with an MCPToolset for Google Maps
+In this sub-section, you will configure your agent to use the MCPToolset for Google Maps, enabling it to seamlessly provide directions and location-based information.
+
+In the Cloud Shell Editor's file explorer pane, find the adk_mcp_tools folder. Click it to toggle it open.
+
+Navigate to the directory adk_mcp_tools/google_maps_mcp_agent.
+
+Paste the following command in a plain text file, then update the YOUR_ACTUAL_API_KEY value with the Google Maps API key you generated and saved in a previous step:
+```
+cd ~/adk_mcp_tools
+cat << EOF > google_maps_mcp_agent/.env
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=qwiklabs-gcp-04-51d977df463c
+GOOGLE_CLOUD_LOCATION=us-east1
+GOOGLE_MAPS_API_KEY="YOUR_ACTUAL_API_KEY"
+MODEL=gemini-2.5-flash
+EOF
+```
+
+
+cat << EOF > google_maps_mcp_agent/.env
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=qwiklabs-gcp-04-51d977df463c
+GOOGLE_CLOUD_LOCATION=us-east1
+GOOGLE_MAPS_API_KEY=AIzaSyBFiPEv2R978hhfRLanS4VpIvc-yPMixWA
+MODEL=gemini-2.5-flash
+EOF
+
+
+
+
+
+
+Copy and paste the updated command to Cloud Shell Terminal to run it and write a .env file which will provide authentication details for this agent directory.
+
+Copy the .env file to the other agent directory you will use in this lab by running the following command:
+```
+cp google_maps_mcp_agent/.env adk_mcp_server/.env
+```
+
+
+
+Next, add the following code where indicated in the agent.py file to add the Google maps tool to your agent. This will allow your agent to use the MCPToolset for Google Maps to provide directions or location-based information.
+```
+tools=[
+    MCPToolset(
+    connection_params=StdioConnectionParams(
+        server_params=StdioServerParameters(
+            command='npx',
+            args=[
+                "-y",
+                "@modelcontextprotocol/server-google-maps",
+            ],
+            env={
+                "GOOGLE_MAPS_API_KEY": google_maps_api_key
+            }
+        ),
+        timeout=15,
+        ),
+    )
+],
+```
+
+
+
+From the adk_mcp_tools project directory, launch the Agent Development Kit Dev UI with the following command:
+```
+adk web
+```
+
+Output:
+```
+INFO:     Started server process [2434]
+INFO:     Waiting for application startup.
++----------------------------------------------------+
+| ADK Web Server started                             |
+|                                                    |
+| For local testing, access at http://localhost:8000.|
++----------------------------------------------------+
+
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+To view the web interface in a new tab, click the http://127.0.0.1:8000 link in the Terminal output.
+```
+
+
+A new browser tab will open with the ADK Dev UI. From the Select an agent dropdown on the left, select the google_maps_mcp_agent from the dropdown.
+
+Start a conversation with the agent and run the following prompts:
+```
+Get directions from GooglePlex to SFO.
+```
+Note: If your API call times out the first time you use it, click + New Session in the upper right of the ADK Dev UI and try again.
+
+```
+What's the route from Paris, France to Berlin, Germany?
+```
+Output:
+https://cdn.qwiklabs.com/B9Oj0P7GVJ8W0HOZSNrxe7UNK4D0%2BH5fWWGl27KN1rI%3D
+
+
+
+
+
+
+Click the agent icon next to the agent's chat bubble with a lightning bolt, which indicates a function call. This will open up the Event inspector for this event:
+https://cdn.qwiklabs.com/kM7LP3fhqXSAtGVy6CXplsc6BWXzC62OP54yZRbQaNY%3D
+
+
+
+Notice that agent graph indicates several different tools, identified by the wrench emoji (🔧). Even though you only imported one MCPToolset, that tool set came with the different tools you see listed here, such as maps_place_details and maps_directions.
+https://cdn.qwiklabs.com/HRaoPhpJ%2FliZSrns%2BD%2BVi5uCXMsf85A37TeJdppC9MQ%3D
+
+
+
+On the Request tab, you can see the structure of the request. You can use the arrows at the top of the Event inspector to browse the agent's thoughts, function calls, and responses.
+
+When you are finished asking questions of this agent, close the dev UI browser tab.
+
+Go back to the Cloud Shell Terminal panel and press CTRL + C to stop the server.
+
+
+
+
+
+
+
+
+
+
+
+
+```
+student_02_86dc079a6713@cloudshell:~/adk_mcp_tools (qwiklabs-gcp-04-51d977df463c)$ adk web
+/usr/local/lib/python3.12/dist-packages/google/adk/cli/fast_api.py:334: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/usr/local/lib/python3.12/dist-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+INFO:     Started server process [8832]
+INFO:     Waiting for application startup.
+
++-----------------------------------------------------------------------------+
+| ADK Web Server started                                                      |
+|                                                                             |
+| For local testing, access at http://localhost:8000.                         |
++-----------------------------------------------------------------------------+
+
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:51954 - "GET / HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:51954 - "GET /dev-ui/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51954 - "GET /dev-ui/polyfills-B6TNHZQ6.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:51968 - "GET /dev-ui/main-JAAWEV7F.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:51968 - "GET /dev-ui/styles-4VDSPQ37.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:51968 - "GET /dev-ui/assets/config/runtime-config.json HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:51968 - "GET /dev-ui/assets/ADK-512-color.svg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:51968 - "GET /list-apps?relative_path=./ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51968 - "GET /dev-ui/adk_favicon.svg HTTP/1.1" 304 Not Modified
+2025-11-30 08:41:14,961 - INFO - fast_api.py:445 - New session created
+INFO:     127.0.0.1:51968 - "POST /apps/google_maps_mcp_agent/users/user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51954 - "GET /apps/google_maps_mcp_agent/eval_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51968 - "GET /apps/google_maps_mcp_agent/eval_sets HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51968 - "GET /apps/google_maps_mcp_agent/users/user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51968 - "GET /apps/google_maps_mcp_agent/users/user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51968 - "POST /run_sse HTTP/1.1" 200 OK
+2025-11-30 08:41:18,201 - INFO - envs.py:47 - Loaded .env file for google_maps_mcp_agent at /home/student_02_86dc079a6713/adk_mcp_tools/google_maps_mcp_agent/.env
+2025-11-30 08:41:18,203 - INFO - envs.py:47 - Loaded .env file for google_maps_mcp_agent at /home/student_02_86dc079a6713/adk_mcp_tools/google_maps_mcp_agent/.env
+
+
+
+check environment variables: environ({'SHELL': '/bin/bash', 'CLOUD_CODE_CLOUD_SHELL_AUTHENTICATION': 'true', 'COLORTERM': 'truecolor', 'TERM_PROGRAM_VERSION': '1.104.3-cde', 'GEMINI_CLI_IDE_SERVER_PORT': '39771', 'HISTSIZE': '1000', 'EDITOR_IN_CLOUD_SHELL': 'true', 'GOOGLE_CLOUD_PROJECT': 'qwiklabs-gcp-04-51d977df463c', 'JAVA_HOME': '/usr/lib/jvm/java-17-openjdk-amd64', 'CLOUD_SHELL': 'true', 'GOOGLE_CLOUD_QUOTA_PROJECT': 'qwiklabs-gcp-04-51d977df463c', 'DEVSHELL_PROJECT_ID': 'qwiklabs-gcp-04-51d977df463c', 'DOTNET_SKIP_FIRST_TIME_EXPERIENCE': '1', 'ASPNETCORE_URLS': 'http://*:8080', 'PWD': '/home/student_02_86dc079a6713/adk_mcp_tools', 'LOGNAME': 'student_02_86dc079a6713', 'DEVSHELL_CLIENTS_DIR': '/var/run/google/devshell', 'VSCODE_GIT_ASKPASS_NODE': '/google/devshell/editor/code-oss-for-cloud-shell/node', 'HOME': '/home/student_02_86dc079a6713', 'LANG': 'en_US.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:', 'CLOUDSDK_CONFIG': '/tmp/tmp.2DlYHxVRyc', 'MINIKUBE_FORCE_SYSTEMD': 'true', 'GIT_ASKPASS': '/google/devshell/editor/code-oss-for-cloud-shell/extensions/git/dist/askpass.sh', 'PROMPT_COMMAND': 'history -a;enableHistoryAppend &> /dev/null;update_devshell_project_id &> /dev/null ; update_devshell_project_id &> /dev/null', 'USE_PARTITIONED_COOKIES': 'true', 'DOTNET_BUNDLE_EXTRACT_BASE_DIR': '/home/student_02_86dc079a6713/.cache/dotnet_bundle_extract', 'GEMINI_DEFAULT_PROJECT': '', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'GEM_PATH': '/home/student_02_86dc079a6713/.gems:/usr/local/lib/ruby/gems/3.2.0/', 'GEM_HOME': '/home/student_02_86dc079a6713/.gems', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'CLOUDSHELL_OPEN_DIR': 'cloudshell_open', 'GEMINI_CLI_IDE_WORKSPACE_PATH': '/home/student_02_86dc079a6713', 'TERM': 'xterm-256color', 'CLOUDSDK_DIAGNOSTICS_HIDDEN_PROPERTY_ALLOWLIST': 'compute/gce_metadata_read_timeout_sec', 'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'student_02_86dc079a6713', 'VSCODE_GIT_IPC_HANDLE': '/tmp/vscode-git-f7ba655ce7.sock', 'BASHRC_PATH': '/home/student_02_86dc079a6713/.bashrc', 'CLOUDSDK_DIAGNOSTICS_HIDDEN_PROPERTY_WHITELIST': 'compute/gce_metadata_read_timeout_sec', 'SHLVL': '3', '__TMP_CLOUDSDK_CONFIG': '/tmp/tmp.2DlYHxVRyc', 'CONSOLIDATE_GCA_SPARKS': 'true', 'USER_EMAIL': 'student-02-86dc079a6713@qwiklabs.net', 'BASHRC_GOOGLE_PATH': '/google/devshell/bashrc.google', 'PS1': '\\[\x1b]633;A\x07\\]\\[\\e]0;${DEVSHELL_PROJECT_ID:-Cloud Shell}\\a\\]\\u@cloudshell:\\[\\033[1;34m\\]\\w$([[ -n $DEVSHELL_PROJECT_ID ]] && printf " \\[\\033[1;33m\\](%s)" ${DEVSHELL_PROJECT_ID} )\\[\\033[00m\\]$ \\[\x1b]633;B\x07\\]', 'MINIKUBE_HOME': '/google/minikube', 'DEBUGINFOD_URLS': 'https://debuginfod.ubuntu.com ', 'DOCKER_HOST': 'unix:///var/run/docker.sock', 'VSCODE_GIT_ASKPASS_MAIN': '/google/devshell/editor/code-oss-for-cloud-shell/extensions/git/dist/askpass-main.js', 'V2V_GCP_V2V_IMAGE': 'projects/v2v-community/global/images/family/v2v-stable', 'BROWSER': 'echo', 'PATH': '/opt/gradle/bin:/opt/maven/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/node_packages/node_modules/.bin:/usr/local/rvm/bin:/home/student_02_86dc079a6713/.gems/bin:/usr/local/rvm/bin:/home/student_02_86dc079a6713/gopath/bin:/google/gopath/bin:/google/flutter/bin:/usr/local/nvm/versions/node/v24.11.1/bin', 'HISTFILESIZE': '1000', 'CLOUD_SHELL_FRAME_ANCESTORS': 'https://*.corp.google.com:* https://*.sandbox.google.com:* https://console.cloud.google.com https://ide.cloud.google.com https://shell.cloud.google.com https://ssh.cloud.google.com', 'NEW_GCA_AUTH_FLOW': 'true', 'DEVSHELL_GCLOUD_CONFIG': 'cloudshell-16143', 'USE_GKE_GCLOUD_AUTH_PLUGIN': 'True', 'OLDPWD': '/home/student_02_86dc079a6713', 'MINIKUBE_WANTUPDATENOTIFICATION': 'false', 'GOPATH': '/home/student_02_86dc079a6713/gopath:/google/gopath', 'CREDENTIALS_SERVICE_PORT': '8998', 'TERM_PROGRAM': 'vscode', 'VSCODE_IPC_HOOK_CLI': '/tmp/vscode-ipc-2896fdce-2f06-40a1-a39a-a97681d5b6c3.sock', '_': '/usr/local/bin/adk', 'GOOGLE_GENAI_USE_VERTEXAI': 'TRUE', 'GOOGLE_CLOUD_LOCATION': 'us-east1', 'GOOGLE_MAPS_API_KEY': 'AIzaSyBFiPEv2R978hhfRLanS4VpIvc-yPMixWA', 'MODEL': 'gemini-2.5-flash'})
+
+
+
+2025-11-30 08:41:18,235 - INFO - agent_loader.py:95 - Found root_agent in google_maps_mcp_agent.agent
+Google Maps MCP Server running on stdio
+/usr/local/lib/python3.12/dist-packages/google/adk/tools/mcp_tool/mcp_tool.py:85: UserWarning: [EXPERIMENTAL] BaseAuthenticatedTool: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__(
+2025-11-30 08:41:21,201 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 08:41:21,202 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 08:41:21,202 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 08:41:21,203 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 08:41:21,203 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 08:41:21,204 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 08:41:21,204 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 08:41:21,388 - INFO - google_llm.py:90 - Sending out request, model: gemini-2.5-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2025-11-30 08:41:21,389 - INFO - google_llm.py:96 - 
+LLM Request:
+-----------------------------------------------------------
+System Instruction:
+Help the user with mapping, directions, and finding places using Google Maps tools.
+
+You are an agent. Your internal name is "maps_assistant_agent".
+-----------------------------------------------------------
+Contents:
+{"parts":[{"text":"hello"}],"role":"user"}
+-----------------------------------------------------------
+Functions:
+maps_geocode: {'address': {'description': 'The address to geocode', 'type': <Type.STRING: 'STRING'>}} 
+maps_reverse_geocode: {'latitude': {'description': 'Latitude coordinate', 'type': <Type.NUMBER: 'NUMBER'>}, 'longitude': {'description': 'Longitude coordinate', 'type': <Type.NUMBER: 'NUMBER'>}} 
+maps_search_places: {'query': {'description': 'Search query', 'type': <Type.STRING: 'STRING'>}, 'location': {'description': 'Optional center point for the search', 'properties': {'latitude': {'type': <Type.NUMBER: 'NUMBER'>}, 'longitude': {'type': <Type.NUMBER: 'NUMBER'>}}, 'type': <Type.OBJECT: 'OBJECT'>}, 'radius': {'description': 'Search radius in meters (max 50000)', 'type': <Type.NUMBER: 'NUMBER'>}} 
+maps_place_details: {'place_id': {'description': 'The place ID to get details for', 'type': <Type.STRING: 'STRING'>}} 
+maps_distance_matrix: {'origins': {'description': 'Array of origin addresses or coordinates', 'items': {'type': <Type.STRING: 'STRING'>}, 'type': <Type.ARRAY: 'ARRAY'>}, 'destinations': {'description': 'Array of destination addresses or coordinates', 'items': {'type': <Type.STRING: 'STRING'>}, 'type': <Type.ARRAY: 'ARRAY'>}, 'mode': {'description': 'Travel mode (driving, walking, bicycling, transit)', 'enum': ['driving', 'walking', 'bicycling', 'transit'], 'type': <Type.STRING: 'STRING'>}} 
+maps_elevation: {'locations': {'description': 'Array of locations to get elevation for', 'items': {'properties': {'latitude': {'type': <Type.NUMBER: 'NUMBER'>}, 'longitude': {'type': <Type.NUMBER: 'NUMBER'>}}, 'required': ['latitude', 'longitude'], 'type': <Type.OBJECT: 'OBJECT'>}, 'type': <Type.ARRAY: 'ARRAY'>}} 
+maps_directions: {'origin': {'description': 'Starting point address or coordinates', 'type': <Type.STRING: 'STRING'>}, 'destination': {'description': 'Ending point address or coordinates', 'type': <Type.STRING: 'STRING'>}, 'mode': {'description': 'Travel mode (driving, walking, bicycling, transit)', 'enum': ['driving', 'walking', 'bicycling', 'transit'], 'type': <Type.STRING: 'STRING'>}} 
+-----------------------------------------------------------
+
+2025-11-30 08:41:21,390 - INFO - models.py:7421 - AFC is enabled with max remote calls: 10.
+2025-11-30 08:41:23,342 - INFO - _client.py:1740 - HTTP Request: POST https://us-east1-aiplatform.googleapis.com/v1beta1/projects/qwiklabs-gcp-04-51d977df463c/locations/us-east1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-11-30 08:41:23,353 - INFO - google_llm.py:175 - 
+LLM Response:
+-----------------------------------------------------------
+Text:
+Hello! I can help you with mapping, directions, and finding places. What can I do for you today?
+
+-----------------------------------------------------------
+Function calls:
+
+-----------------------------------------------------------
+Raw response:
+{"sdk_http_response":{"headers":{"content-type":"application/json; charset=UTF-8","vary":"Origin, X-Origin, Referer","content-encoding":"gzip","date":"Sun, 30 Nov 2025 08:41:23 GMT","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","transfer-encoding":"chunked"}},"candidates":[{"content":{"parts":[{"text":"Hello! I can help you with mapping, directions, and finding places. What can I do for you today?\n"}],"role":"model"},"finish_reason":"STOP","avg_logprobs":-0.053743571043014526}],"create_time":"2025-11-30T08:41:22.704152Z","response_id":"MgMsaZj9KteAkvQP19vz8Ag","model_version":"gemini-2.5-flash","usage_metadata":{"candidates_token_count":24,"candidates_tokens_details":[{"modality":"TEXT","token_count":24}],"prompt_token_count":275,"prompt_tokens_details":[{"modality":"TEXT","token_count":275}],"total_token_count":299,"traffic_type":"ON_DEMAND"},"automatic_function_calling_history":[]}
+-----------------------------------------------------------
+
+2025-11-30 08:41:23,356 - INFO - fast_api.py:817 - Generated event in agent run streaming: {"content":{"parts":[{"text":"Hello! I can help you with mapping, directions, and finding places. What can I do for you today?\n"}],"role":"model"},"usageMetadata":{"candidatesTokenCount":24,"candidatesTokensDetails":[{"modality":"TEXT","tokenCount":24}],"promptTokenCount":275,"promptTokensDetails":[{"modality":"TEXT","tokenCount":275}],"totalTokenCount":299,"trafficType":"ON_DEMAND"},"invocationId":"e-8491b74e-353b-4792-9b2d-7f5be611b897","author":"maps_assistant_agent","actions":{"stateDelta":{},"artifactDelta":{},"requestedAuthConfigs":{}},"id":"lhZrlGcg","timestamp":1764492081.214466}
+INFO:     127.0.0.1:51968 - "GET /apps/google_maps_mcp_agent/users/user/sessions/94e67a2c-8dfe-4ce7-89d3-e0cf8566f497 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44864 - "GET /debug/trace/session/94e67a2c-8dfe-4ce7-89d3-e0cf8566f497 HTTP/1.1" 200 OK
+```
+
+
+
+
+
+
+
+
+
+
+=================
+
+Task 3. Building an MCP server with ADK tools (MCP server exposing ADK)
+
+
+In this section, you'll learn how to expose the ADK load_web_page tool through a custom-built MCP server. This pattern allows you to wrap existing ADK tools and make them accessible to any standard MCP client application.
+
+
+
+
+
+Create the MCP Server Script and Implement Server Logic
+Return to your Cloud Shell Editor tab and select the adk_mcp_tools/adk_mcp_server directory.
+
+A Python file named adk_server.py has been prepared and commented for you. Take some time to review that file, reading the comments to understand how the code wraps a tool and serves it as an MCP server. Notice how it allows MCP clients to list available tools as well as invoke the ADK tool asynchronously, handling requests and responses in an MCP-compliant format.
+
+
+
+
+
+
+
+
+Test the Custom MCP Server with an ADK Agent
+Click on the agent.py file in the adk_mcp_server directory.
+
+Update the path to your adk_server.py file.
+```
+/home/student_02_86dc079a6713/adk_mcp_tools/adk_mcp_server/adk_server.py
+```
+
+
+Next, add the following code where indicated in the agent.py file to add the MCPToolset to your agent. An ADK agent acts as a client to the MCP server. This ADK agent will use MCPToolset to connect to your adk_server.py script.
+```
+tools=[
+    MCPToolset(
+    connection_params=StdioConnectionParams(
+        server_params=StdioServerParameters(
+            command="python3", # Command to run your MCP server script
+            args=[PATH_TO_YOUR_MCP_SERVER_SCRIPT], # Argument is the path to the script
+        ),
+        timeout=15,
+        ),
+        tool_filter=['load_web_page'] # Optional: ensure only specific tools are loaded
+    )
+],
+```
+
+
+
+To run the MCP server, start the adk_server.py script by running the following command in Cloud Shell Terminal:
+```
+python3 ~/adk_mcp_tools/adk_mcp_server/adk_server.py
+```
+
+
+
+Output:
+```
+student_02_86dc079a6713@cloudshell:~/adk_mcp_tools (qwiklabs-gcp-04-51d977df463c)$ python3 ~/adk_mcp_tools/adk_mcp_server/adk_server.py
+
+
+Initializing ADK load_web_page tool...
+ADK tool 'load_web_page' initialized and ready to be exposed via MCP.
+ADK tool info: <google.adk.tools.function_tool.FunctionTool object at 0x7aa421b44140>
+ADK tool info: {'name': 'load_web_page', 'description': 'Fetches the content in the url and returns the text in it.\n\nArgs:\n    url (str): The url to browse.\n\nReturns:\n    str: The text content of the url.', 'is_long_running': False, 'func': <function load_web_page at 0x7aa417153380>, '_ignore_params': ['tool_context', 'input_stream']}
+Creating MCP Server instance...
+Launching MCP Server to expose ADK tools via stdio...
+MCP Stdio Server: Starting handshake with client...
+
+```
+
+
+
+
+
+
+Open a new Cloud Shell Terminal tab by clicking the add-session-button button at the top of the Cloud Shell Terminal window.
+
+In the Cloud Shell Terminal, from the adk_mcp_tools project directory, launch the Agent Development Kit Dev UI with the following command:
+```
+cd ~/adk_mcp_tools
+adk web
+```
+
+
+To view the web interface in a new tab, click the http://127.0.0.1:8000 link in the Terminal output.
+
+From the Select an agent dropdown on the left, select the adk_mcp_server from the dropdown.
+
+Query the agent with:
+```
+Load the content from https://example.com.
+```
+
+Output:
+
+Agent response
+
+What happens here:
+1
+The ADK agent (web_reader_mcp_client_agent) uses the MCPToolset to connect to your adk_server.py.
+2
+The MCP server will receive the call_tool request, execute the ADK load_web_page tool, and return the result.
+3
+The ADK agent will then relay this information. You should see logs from both the ADK Web UI (and its terminal) and from your adk_server.py terminal in the Cloud Shell Terminal tab where it is running.
+
+This demonstrates that ADK tools can be encapsulated within an MCP server, making them accessible to a broad range of MCP-compliant clients including ADK agents.
+
+
+
+
+
+
+```
+student_02_86dc079a6713@cloudshell:~ (qwiklabs-gcp-04-51d977df463c)$ cd ~/adk_mcp_tools
+adk web
+/usr/local/lib/python3.12/dist-packages/google/adk/cli/fast_api.py:334: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/usr/local/lib/python3.12/dist-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+INFO:     Started server process [12529]
+INFO:     Waiting for application startup.
+
++-----------------------------------------------------------------------------+
+| ADK Web Server started                                                      |
+|                                                                             |
+| For local testing, access at http://localhost:8000.                         |
++-----------------------------------------------------------------------------+
+
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+
+
+
+INFO:     127.0.0.1:56974 - "GET / HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:56974 - "GET /dev-ui/ HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56974 - "GET /dev-ui/polyfills-B6TNHZQ6.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56974 - "GET /dev-ui/main-JAAWEV7F.js HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56974 - "GET /dev-ui/styles-4VDSPQ37.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56974 - "GET /dev-ui/assets/config/runtime-config.json HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56974 - "GET /dev-ui/assets/ADK-512-color.svg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:56974 - "GET /list-apps?relative_path=./ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /dev-ui/adk_favicon.svg HTTP/1.1" 304 Not Modified
+
+
+
+2025-11-30 08:56:21,350 - INFO - fast_api.py:445 - New session created
+INFO:     127.0.0.1:56974 - "POST /apps/adk_mcp_server/users/user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48838 - "GET /apps/adk_mcp_server/eval_sets HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /apps/adk_mcp_server/eval_results HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /apps/adk_mcp_server/users/user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56974 - "GET /apps/adk_mcp_server/users/user/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42322 - "POST /run_sse HTTP/1.1" 200 OK
+2025-11-30 08:59:34,450 - INFO - envs.py:47 - Loaded .env file for adk_mcp_server at /home/student_02_86dc079a6713/adk_mcp_tools/adk_mcp_server/.env
+2025-11-30 08:59:34,458 - INFO - envs.py:47 - Loaded .env file for adk_mcp_server at /home/student_02_86dc079a6713/adk_mcp_tools/adk_mcp_server/.env
+2025-11-30 08:59:34,510 - INFO - agent_loader.py:95 - Found root_agent in adk_mcp_server.agent
+/usr/local/lib/python3.12/dist-packages/google/adk/tools/mcp_tool/mcp_tool.py:85: UserWarning: [EXPERIMENTAL] BaseAuthenticatedTool: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__(
+2025-11-30 08:59:43,944 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 08:59:44,135 - INFO - google_llm.py:90 - Sending out request, model: gemini-2.5-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+
+
+
+
+2025-11-30 08:59:44,136 - INFO - google_llm.py:96 - 
+LLM Request:
+-----------------------------------------------------------
+System Instruction:
+Use the 'load_web_page' tool to fetch content from a URL provided by the user.
+
+You are an agent. Your internal name is "web_reader_mcp_client_agent".
+-----------------------------------------------------------
+Contents:
+{"parts":[{"text":"Load the content from https://example.com."}],"role":"user"}
+-----------------------------------------------------------
+Functions:
+load_web_page: {'url': {'type': <Type.STRING: 'STRING'>}} 
+-----------------------------------------------------------
+
+
+
+
+
+2025-11-30 08:59:44,136 - INFO - models.py:7421 - AFC is enabled with max remote calls: 10.
+2025-11-30 08:59:46,169 - INFO - _client.py:1740 - HTTP Request: POST https://us-east1-aiplatform.googleapis.com/v1beta1/projects/qwiklabs-gcp-04-51d977df463c/locations/us-east1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-11-30 08:59:46,175 - WARNING - types.py:5169 - Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+
+
+
+
+2025-11-30 08:59:46,176 - INFO - google_llm.py:175 - 
+LLM Response:
+-----------------------------------------------------------
+Text:
+None
+-----------------------------------------------------------
+Function calls:
+name: load_web_page, args: {'url': 'https://example.com'}
+-----------------------------------------------------------
+
+
+Raw response:
+{"sdk_http_response":{"headers":{"content-type":"application/json; charset=UTF-8","vary":"Origin, X-Origin, Referer","content-encoding":"gzip","date":"Sun, 30 Nov 2025 08:59:46 GMT","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","transfer-encoding":"chunked"}},"candidates":[{"content":{"parts":[{"function_call":{"args":{"url":"https://example.com"},"name":"load_web_page"}}],"role":"model"},"finish_reason":"STOP","avg_logprobs":-0.30180018598383124}],"create_time":"2025-11-30T08:59:45.457732Z","response_id":"gQcsaYT4G8iCkvQP19uroQM","model_version":"gemini-2.5-flash","usage_metadata":{"candidates_token_count":11,"candidates_tokens_details":[{"modality":"TEXT","token_count":11}],"prompt_token_count":104,"prompt_tokens_details":[{"modality":"TEXT","token_count":104}],"thoughts_token_count":50,"total_token_count":165,"traffic_type":"ON_DEMAND"},"automatic_function_calling_history":[]}
+-----------------------------------------------------------
+
+
+
+
+2025-11-30 08:59:46,177 - INFO - fast_api.py:817 - Generated event in agent run streaming: {"content":{"parts":[{"functionCall":{"id":"adk-785a0222-613d-420b-9fe8-351ce20b0444","args":{"url":"https://example.com"},"name":"load_web_page"}}],"role":"model"},"usageMetadata":{"candidatesTokenCount":11,"candidatesTokensDetails":[{"modality":"TEXT","tokenCount":11}],"promptTokenCount":104,"promptTokensDetails":[{"modality":"TEXT","tokenCount":104}],"thoughtsTokenCount":50,"totalTokenCount":165,"trafficType":"ON_DEMAND"},"invocationId":"e-ae71d17e-42c8-432b-989e-10213c4677fa","author":"web_reader_mcp_client_agent","actions":{"stateDelta":{},"artifactDelta":{},"requestedAuthConfigs":{}},"longRunningToolIds":[],"id":"IGhruEpv","timestamp":1764493183.946711}
+2025-11-30 08:59:46,961 - INFO - fast_api.py:817 - Generated event in agent run streaming: {"content":{"parts":[{"functionResponse":{"id":"adk-785a0222-613d-420b-9fe8-351ce20b0444","name":"load_web_page","response":{"result":{"content":[{"type":"text","text":"\"This domain is for use in documentation examples without needing permission. Avoid use in operations.\""}],"isError":false}}}}],"role":"user"},"invocationId":"e-ae71d17e-42c8-432b-989e-10213c4677fa","author":"web_reader_mcp_client_agent","actions":{"stateDelta":{},"artifactDelta":{},"requestedAuthConfigs":{}},"id":"lxqlobfx","timestamp":1764493186.960523}
+2025-11-30 08:59:46,978 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+
+
+
+
+2025-11-30 08:59:47,105 - INFO - google_llm.py:90 - Sending out request, model: gemini-2.5-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+
+2025-11-30 08:59:47,106 - INFO - google_llm.py:96 - 
+LLM Request:
+-----------------------------------------------------------
+System Instruction:
+Use the 'load_web_page' tool to fetch content from a URL provided by the user.
+
+You are an agent. Your internal name is "web_reader_mcp_client_agent".
+-----------------------------------------------------------
+Contents:
+{"parts":[{"text":"Load the content from https://example.com."}],"role":"user"}
+{"parts":[{"function_call":{"args":{"url":"https://example.com"},"name":"load_web_page"}}],"role":"model"}
+{"parts":[{"function_response":{"name":"load_web_page","response":{"result":{"content":[{"type":"text","text":"\"This domain is for use in documentation examples without needing permission. Avoid use in operations.\""}],"isError":false}}}}],"role":"user"}
+-----------------------------------------------------------
+Functions:
+load_web_page: {'url': {'type': <Type.STRING: 'STRING'>}} 
+-----------------------------------------------------------
+
+
+
+
+
+2025-11-30 08:59:47,106 - INFO - models.py:7421 - AFC is enabled with max remote calls: 10.
+2025-11-30 08:59:48,936 - INFO - _client.py:1740 - HTTP Request: POST https://us-east1-aiplatform.googleapis.com/v1beta1/projects/qwiklabs-gcp-04-51d977df463c/locations/us-east1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+
+
+
+2025-11-30 08:59:48,939 - INFO - google_llm.py:175 - 
+LLM Response:
+-----------------------------------------------------------
+Text:
+The content of the page is: "This domain is for use in documentation examples without needing permission. Avoid use in operations."
+-----------------------------------------------------------
+Function calls:
+
+-----------------------------------------------------------
+Raw response:
+{"sdk_http_response":{"headers":{"content-type":"application/json; charset=UTF-8","vary":"Origin, X-Origin, Referer","content-encoding":"gzip","date":"Sun, 30 Nov 2025 08:59:48 GMT","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","transfer-encoding":"chunked"}},"candidates":[{"content":{"parts":[{"text":"The content of the page is: \"This domain is for use in documentation examples without needing permission. Avoid use in operations.\""}],"role":"model"},"finish_reason":"STOP","avg_logprobs":-0.07676303386688232}],"create_time":"2025-11-30T08:59:48.391252Z","response_id":"hAcsadTwF8rBwbkPs_bRuQU","model_version":"gemini-2.5-flash","usage_metadata":{"candidates_token_count":25,"candidates_tokens_details":[{"modality":"TEXT","token_count":25}],"prompt_token_count":145,"prompt_tokens_details":[{"modality":"TEXT","token_count":145}],"total_token_count":170,"traffic_type":"ON_DEMAND"},"automatic_function_calling_history":[]}
+-----------------------------------------------------------
+
+
+
+
+
+
+2025-11-30 08:59:48,940 - INFO - fast_api.py:817 - Generated event in agent run streaming: {"content":{"parts":[{"text":"The content of the page is: \"This domain is for use in documentation examples without needing permission. Avoid use in operations.\""}],"role":"model"},"usageMetadata":{"candidatesTokenCount":25,"candidatesTokensDetails":[{"modality":"TEXT","tokenCount":25}],"promptTokenCount":145,"promptTokensDetails":[{"modality":"TEXT","tokenCount":145}],"totalTokenCount":170,"trafficType":"ON_DEMAND"},"invocationId":"e-ae71d17e-42c8-432b-989e-10213c4677fa","author":"web_reader_mcp_client_agent","actions":{"stateDelta":{},"artifactDelta":{},"requestedAuthConfigs":{}},"id":"TTyT8Mqo","timestamp":1764493186.980071}
+INFO:     127.0.0.1:42322 - "GET /apps/adk_mcp_server/users/user/sessions/90bef28e-bdd3-4c3b-b19d-e24703dab4c4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42322 - "GET /debug/trace/session/90bef28e-bdd3-4c3b-b19d-e24703dab4c4 HTTP/1.1" 200 OK
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+2025-11-30 09:13:58,126 - INFO - models.py:7421 - AFC is enabled with max remote calls: 10.
+2025-11-30 09:13:58,203 - ERROR - fast_api.py:820 - Error in event_generator: string indices must be integers, not 'str'
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/cli/fast_api.py", line 809, in event_generator
+    async for event in runner.run_async(
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/runners.py", line 203, in run_async
+    async for event in invocation_context.agent.run_async(invocation_context):
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/agents/base_agent.py", line 147, in run_async
+    async for event in self._run_async_impl(ctx):
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/agents/llm_agent.py", line 275, in _run_async_impl
+    async for event in self._llm_flow.run_async(ctx):
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 282, in run_async
+    async for event in self._run_one_step_async(invocation_context):
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 314, in _run_one_step_async
+    async for llm_response in self._call_llm_async(
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/flows/llm_flows/base_llm_flow.py", line 539, in _call_llm_async
+    async for llm_response in llm.generate_content_async(
+  File "/usr/local/lib/python3.12/dist-packages/google/adk/models/google_llm.py", line 170, in generate_content_async
+    response = await self.api_client.aio.models.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/google/genai/models.py", line 7427, in generate_content
+    response = await self._generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/google/genai/models.py", line 6394, in _generate_content
+    response = await self._api_client.async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/google/genai/_api_client.py", line 1111, in async_request
+    result = await self._async_request(http_request=http_request, stream=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/google/genai/_api_client.py", line 1056, in _async_request
+    return await self._async_retry(  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/tenacity/asyncio/__init__.py", line 111, in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/tenacity/asyncio/__init__.py", line 153, in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/tenacity/_utils.py", line 99, in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/tenacity/__init__.py", line 418, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/tenacity/__init__.py", line 185, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/local/lib/python3.12/dist-packages/tenacity/asyncio/__init__.py", line 114, in __call__
+    result = await fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/google/genai/_api_client.py", line 977, in _async_request_once
+    f'Bearer {await self._async_access_token()}'
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/google/genai/_api_client.py", line 822, in _async_access_token
+    await asyncio.to_thread(_refresh_auth, self._credentials)
+  File "/usr/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/google/genai/_api_client.py", line 200, in _refresh_auth
+    credentials.refresh(Request())  # type: ignore[no-untyped-call]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/google/auth/compute_engine/credentials.py", line 126, in refresh
+    self._retrieve_info(request)
+  File "/usr/local/lib/python3.12/dist-packages/google/auth/compute_engine/credentials.py", line 103, in _retrieve_info
+    self._service_account_email = info["email"]
+                                  ~~~~^^^^^^^^^
+TypeError: string indices must be integers, not 'str'
+
+
+
+
+INFO:     127.0.0.1:39760 - "GET /apps/adk_mcp_server/users/user/sessions/90bef28e-bdd3-4c3b-b19d-e24703dab4c4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39760 - "GET /debug/trace/session/90bef28e-bdd3-4c3b-b19d-e24703dab4c4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44220 - "POST /run_sse HTTP/1.1" 200 OK
+2025-11-30 09:14:26,179 - INFO - envs.py:47 - Loaded .env file for adk_mcp_server at /home/student_02_86dc079a6713/adk_mcp_tools/adk_mcp_server/.env
+2025-11-30 09:14:26,181 - INFO - mcp_session_manager.py:289 - Cleaning up disconnected session: stdio_session
+2025-11-30 09:14:26,219 - WARNING - mcp_session_manager.py:293 - Error during disconnected session cleanup: Attempted to exit cancel scope in a different task than it was entered in
+/usr/local/lib/python3.12/dist-packages/google/adk/tools/mcp_tool/mcp_tool.py:85: UserWarning: [EXPERIMENTAL] BaseAuthenticatedTool: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__(
+2025-11-30 09:14:36,708 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 09:14:36,872 - INFO - google_llm.py:90 - Sending out request, model: gemini-2.5-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+
+
+
+
+2025-11-30 09:14:36,872 - INFO - google_llm.py:96 - 
+LLM Request:
+-----------------------------------------------------------
+System Instruction:
+Use the 'load_web_page' tool to fetch content from a URL provided by the user.
+
+You are an agent. Your internal name is "web_reader_mcp_client_agent".
+-----------------------------------------------------------
+Contents:
+{"parts":[{"text":"Load the content from https://example.com."}],"role":"user"}
+{"parts":[{"function_call":{"args":{"url":"https://example.com"},"name":"load_web_page"}}],"role":"model"}
+{"parts":[{"function_response":{"name":"load_web_page","response":{"result":{"content":[{"type":"text","text":"\"This domain is for use in documentation examples without needing permission. Avoid use in operations.\""}],"isError":false}}}}],"role":"user"}
+{"parts":[{"text":"The content of the page is: \"This domain is for use in documentation examples without needing permission. Avoid use in operations.\""}],"role":"model"}
+{"parts":[{"text":"https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/"}],"role":"user"}
+{"parts":[{"text":"load https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/"}],"role":"user"}
+-----------------------------------------------------------
+Functions:
+load_web_page: {'url': {'type': <Type.STRING: 'STRING'>}} 
+-----------------------------------------------------------
+
+
+
+
+
+2025-11-30 09:14:36,873 - INFO - models.py:7421 - AFC is enabled with max remote calls: 10.
+2025-11-30 09:14:39,298 - INFO - _client.py:1740 - HTTP Request: POST https://us-east1-aiplatform.googleapis.com/v1beta1/projects/qwiklabs-gcp-04-51d977df463c/locations/us-east1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-11-30 09:14:39,306 - WARNING - types.py:5169 - Warning: there are non-text parts in the response: ['function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+2025-11-30 09:14:39,306 - INFO - google_llm.py:175 - 
+LLM Response:
+-----------------------------------------------------------
+Text:
+None
+-----------------------------------------------------------
+Function calls:
+name: load_web_page, args: {'url': 'https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/'}
+-----------------------------------------------------------
+Raw response:
+{"sdk_http_response":{"headers":{"content-type":"application/json; charset=UTF-8","vary":"Origin, X-Origin, Referer","content-encoding":"gzip","date":"Sun, 30 Nov 2025 09:14:39 GMT","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","transfer-encoding":"chunked"}},"candidates":[{"content":{"parts":[{"function_call":{"args":{"url":"https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/"},"name":"load_web_page"}}],"role":"model"},"finish_reason":"STOP","avg_logprobs":-0.2700327985426959}],"create_time":"2025-11-30T09:14:38.198886Z","response_id":"_gosaeaRDM6AkvQPgau-4Qw","model_version":"gemini-2.5-flash","usage_metadata":{"candidates_token_count":34,"candidates_tokens_details":[{"modality":"TEXT","token_count":34}],"prompt_token_count":227,"prompt_tokens_details":[{"modality":"TEXT","token_count":227}],"thoughts_token_count":78,"total_token_count":339,"traffic_type":"ON_DEMAND"},"automatic_function_calling_history":[]}
+-----------------------------------------------------------
+
+2025-11-30 09:14:39,307 - INFO - fast_api.py:817 - Generated event in agent run streaming: {"content":{"parts":[{"functionCall":{"id":"adk-05a21aa3-afa7-401c-b58a-b7f8da95cea3","args":{"url":"https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/"},"name":"load_web_page"}}],"role":"model"},"usageMetadata":{"candidatesTokenCount":34,"candidatesTokensDetails":[{"modality":"TEXT","tokenCount":34}],"promptTokenCount":227,"promptTokensDetails":[{"modality":"TEXT","tokenCount":227}],"thoughtsTokenCount":78,"totalTokenCount":339,"trafficType":"ON_DEMAND"},"invocationId":"e-e40d1dd2-7825-484f-a3df-3342ba094450","author":"web_reader_mcp_client_agent","actions":{"stateDelta":{},"artifactDelta":{},"requestedAuthConfigs":{}},"longRunningToolIds":[],"id":"Q6qvVr76","timestamp":1764494076.709949}
+2025-11-30 09:14:39,512 - INFO - fast_api.py:817 - Generated event in agent run streaming: {"content":{"parts":[{"functionResponse":{"id":"adk-05a21aa3-afa7-401c-b58a-b7f8da95cea3","name":"load_web_page","response":{"result":{"content":[{"type":"text","text":"\"Failed to fetch url: https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/\""}],"isError":false}}}}],"role":"user"},"invocationId":"e-e40d1dd2-7825-484f-a3df-3342ba094450","author":"web_reader_mcp_client_agent","actions":{"stateDelta":{},"artifactDelta":{},"requestedAuthConfigs":{}},"id":"UK6aXnEp","timestamp":1764494079.512341}
+2025-11-30 09:14:39,525 - WARNING - base_authenticated_tool.py:72 - auth_config or auth_config.auth_scheme is missing. Will skip authentication.Using FunctionTool instead if authentication is not required.
+2025-11-30 09:14:39,648 - INFO - google_llm.py:90 - Sending out request, model: gemini-2.5-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+2025-11-30 09:14:39,649 - INFO - google_llm.py:96 - 
+LLM Request:
+-----------------------------------------------------------
+System Instruction:
+Use the 'load_web_page' tool to fetch content from a URL provided by the user.
+
+You are an agent. Your internal name is "web_reader_mcp_client_agent".
+-----------------------------------------------------------
+Contents:
+{"parts":[{"text":"Load the content from https://example.com."}],"role":"user"}
+{"parts":[{"function_call":{"args":{"url":"https://example.com"},"name":"load_web_page"}}],"role":"model"}
+{"parts":[{"function_response":{"name":"load_web_page","response":{"result":{"content":[{"type":"text","text":"\"This domain is for use in documentation examples without needing permission. Avoid use in operations.\""}],"isError":false}}}}],"role":"user"}
+{"parts":[{"text":"The content of the page is: \"This domain is for use in documentation examples without needing permission. Avoid use in operations.\""}],"role":"model"}
+{"parts":[{"text":"https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/"}],"role":"user"}
+{"parts":[{"text":"load https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/"}],"role":"user"}
+{"parts":[{"function_call":{"args":{"url":"https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/"},"name":"load_web_page"}}],"role":"model"}
+{"parts":[{"function_response":{"name":"load_web_page","response":{"result":{"content":[{"type":"text","text":"\"Failed to fetch url: https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/\""}],"isError":false}}}}],"role":"user"}
+-----------------------------------------------------------
+Functions:
+load_web_page: {'url': {'type': <Type.STRING: 'STRING'>}} 
+-----------------------------------------------------------
+
+2025-11-30 09:14:39,649 - INFO - models.py:7421 - AFC is enabled with max remote calls: 10.
+2025-11-30 09:14:42,558 - INFO - _client.py:1740 - HTTP Request: POST https://us-east1-aiplatform.googleapis.com/v1beta1/projects/qwiklabs-gcp-04-51d977df463c/locations/us-east1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+
+
+
+
+2025-11-30 09:14:42,561 - INFO - google_llm.py:175 - 
+LLM Response:
+-----------------------------------------------------------
+Text:
+I am sorry, I am unable to load the content from the URL. The page returned an error: "Failed to fetch url: https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/".
+-----------------------------------------------------------
+Function calls:
+
+-----------------------------------------------------------
+Raw response:
+{"sdk_http_response":{"headers":{"content-type":"application/json; charset=UTF-8","vary":"Origin, X-Origin, Referer","content-encoding":"gzip","date":"Sun, 30 Nov 2025 09:14:42 GMT","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","transfer-encoding":"chunked"}},"candidates":[{"content":{"parts":[{"text":"I am sorry, I am unable to load the content from the URL. The page returned an error: \"Failed to fetch url: https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/\"."}],"role":"model"},"finish_reason":"STOP","avg_logprobs":-0.4182696683066232}],"create_time":"2025-11-30T09:14:40.939619Z","response_id":"AAssaeOsOe2Awt0P8ongmAk","model_version":"gemini-2.5-flash","usage_metadata":{"candidates_token_count":56,"candidates_tokens_details":[{"modality":"TEXT","token_count":56}],"prompt_token_count":307,"prompt_tokens_details":[{"modality":"TEXT","token_count":307}],"thoughts_token_count":221,"total_token_count":584,"traffic_type":"ON_DEMAND"},"automatic_function_calling_history":[]}
+-----------------------------------------------------------
+
+
+
+
+2025-11-30 09:14:42,562 - INFO - fast_api.py:817 - Generated event in agent run streaming: {"content":{"parts":[{"text":"I am sorry, I am unable to load the content from the URL. The page returned an error: \"Failed to fetch url: https://mothership.sg/2025/11/fire-telok-blangah-coffee-shop/\"."}],"role":"model"},"usageMetadata":{"candidatesTokenCount":56,"candidatesTokensDetails":[{"modality":"TEXT","tokenCount":56}],"promptTokenCount":307,"promptTokensDetails":[{"modality":"TEXT","tokenCount":307}],"thoughtsTokenCount":221,"totalTokenCount":584,"trafficType":"ON_DEMAND"},"invocationId":"e-e40d1dd2-7825-484f-a3df-3342ba094450","author":"web_reader_mcp_client_agent","actions":{"stateDelta":{},"artifactDelta":{},"requestedAuthConfigs":{}},"id":"VAXxBSU3","timestamp":1764494079.527376}
+INFO:     127.0.0.1:44220 - "GET /apps/adk_mcp_server/users/user/sessions/90bef28e-bdd3-4c3b-b19d-e24703dab4c4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44220 - "GET /debug/trace/session/90bef28e-bdd3-4c3b-b19d-e24703dab4c4 HTTP/1.1" 200 OK
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+=================
+
+
+Checkpoint for our workings
+```
+$ zip -r adk_lab_workings.zip adk_mcp_tools/
+
+
+$ python3 -m http.server
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+```
+
+Above, the terminal starts a web server in the current directory.
+Visit the URL in the browser to find the zip.
+
+
+
+
+
+
+=================
+
+Reflections
+- It would have been great to explore more tools in the MCP server, which the ADK agent can call
+- The ADK load_web_page tool has some issues because it cannot load other webpages, such as a news site (without paywall) which I tested
+
+
+
+
+
+
+
