@@ -1,0 +1,652 @@
+Connect to Remote Agents with ADK AND Agent2Agent (A2A) SDK
+
+
+The Agent2Agent (A2A) protocol addresses a critical challenge in the AI landscape: enabling Gen AI agents, built on DIVERSE FRAMEWORKS by different COMPANIES running on separate SERVERS, to COMMUNICATE and collaborate effectively - as agents, not just as tools. 
+
+A2A aims to provide a common language for agents, fostering a more interconnected, powerful, and innovative AI ecosystem.
+
+
+
+A2A is built around a few core concepts that make it powerful and flexible:
+- Standardized Communication: JSON-RPC 2.0 over HTTP(S).
+- Agent Discovery: Agent Cards detail an agent's CAPABILITIES and CONNECTION INFO, so agents can DISCOVER EACH OTHER and learn about each other's capabilities
+- Rich Data Exchange: Handles TEXT, FILES, and structured JSON data.
+- Flexible Interaction: Supports SYNCHRONOUS request/response, streaming (SSE), and ASYNCHRONOUS push notifications.
+- Enterprise-Ready: Designed with security, authentication, and observability in mind.
+
+
+
+
+
+
+
+
+Objectives
+In this lab, you will:
+- Deploy an ADK AGENT AS AN A2A SERVER
+- Prepare a JSON Agent Card to describe an A2A agent's CAPABILITIES
+- Enable another ADK agent to READ the Agent Card of your deployed A2A agent AND USE it as a sub-agent
+
+
+
+
+
+
+
+
+
+
+
+=================
+
+
+Task 1. Install ADK and set up your environment
+
+
+In this lab environment, the Vertex AI API and Cloud Run API have been enabled for you. If you were to follow these steps in your own project, you would enable them by navigating to Vertex AI and following the prompt to enable it.
+
+
+
+
+
+
+
+
+
+Prepare a Cloud Shell Editor tab
+
+With your Google Cloud console window selected, open Cloud Shell by pressing the G key and then the S key on your keyboard. Alternatively, you can click the Activate Cloud Shell button (Activate Cloud Shell) in the upper right of the Cloud console.
+
+Click Continue.
+
+When prompted to authorize Cloud Shell, click Authorize.
+
+In the upper right corner of the Cloud Shell Terminal panel, click the Open in new window button Open in new window button.
+
+In the Cloud Shell Terminal, enter the following to open the Cloud Shell Editor to your home directory:
+```
+cloudshell workspace ~
+```
+Close any additional tutorial or Gemini panels that appear on the right side of the screen to save more of your window for your code editor.
+
+Throughout the rest of this lab, you can work in this window as your IDE with the Cloud Shell Editor and Cloud Shell Terminal.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Download and install the ADK and code samples for this lab
+Install ADK by running the following command in the Cloud Shell Terminal. Note: You will specify the version to ensure that the version of ADK that you install corresponds to the version used in this lab:
+```
+# Install ADK and the A2A Python SDK
+cd ~
+export PATH=$PATH:"/home/${USER}/.local/bin"
+python3 -m pip install google-adk==1.8.0 a2a-sdk==0.2.16
+pip install --upgrade google-genai
+# Correcting a typo in this version
+sed -i 's/{a2a_option}"/{a2a_option} "/' ~/.local/lib/python3.12/site-packages/google/adk/cli/cli_deploy.py
+```
+
+
+The bug seems to be with the google-adk v1.8.0 library
+
+sed
+= Stream EDitor to parse/xform text
+..read text line by line from input/file
+..apply cmd to each line
+..outputs result
+
+-i
+= in-place
+with -i
+..read file
+..modify file directly in memory
+..overwrite orig file
+vs
+without -i
+..read file
+..modify file
+..print modified content to terminal
+..orig file untouched
+
+
+'s/{a2a_option}"/{a2a_option} "/'
+- '' single quotes = prevent shell from interpreting special char eg {}"
+- s = substitute = find n replace text
+- / = delimiter for ur substitute cmd
+..usual format: s/FIND_THIS/REPLACE_WITH_THIS/FLAGS
+..FIND_THIS = {a2a_option}"
+..REPLACE_WITH_THIS = {a2a_option} "
+..seems to be adding a ' ' whitespace at the end
+
+
+Full cmd
+sed -i 's/{a2a_option}"/{a2a_option} "/' ~/.local/lib/python3.12/site-packages/google/adk/cli/cli_deploy.py
+Back portion
+~/.local/lib/python3.12/site-packages/google/adk/cli/cli_deploy.py
+= full path to the file tt sed will wk on
+
+
+
+
+If we use sed 'without -i'
+sed 's/world/friend/' test.txt > new_test.txt
+sed -i 's/{a2a_option}"/{a2a_option} "/' ~/.local/lib/python3.12/site-packages/google/adk/cli/cli_deploy.py > ~/.local/lib/python3.12/site-packages/google/adk/cli/cli_deploy_v2.py
+
+
+
+
+
+
+
+student_02_662505c180dc@cloudshell:~ (qwiklabs-gcp-03-59adce8aad4e)$ echo $PATH
+/opt/gradle/bin:/opt/maven/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/node_packages/node_modules/.bin:/usr/local/rvm/bin:/home/student_02_662505c180dc/.gems/bin:/usr/local/rvm/bin:/home/student_02_662505c180dc/gopath/bin:/google/gopath/bin:/google/flutter/bin:/usr/local/nvm/versions/node/v24.11.1/bin:/home/student_02_662505c180dc/.local/bin
+
+
+
+
+
+
+Paste the following commands into the Cloud Shell Terminal to copy lab code from a Cloud Storage bucket and unzip it:
+```
+gcloud storage cp gs://qwiklabs-gcp-03-59adce8aad4e-bucket/adk_and_a2a.zip ./adk_and_a2a.zip
+unzip adk_and_a2a.zip
+```
+
+
+
+
+
+
+
+
+
+
+
+=================
+
+Task 2. Explore the ADK agent you will make available remotely
+
+
+For the purposes of this lab, imagine you work for a stadium maintenance company: Cymbal Stadiums. 
+As part of a recent project, you developed an image generation-agent that can create illustrations according to your brand guidelines. 
+Now, several DIFFERENT TEAMS in your organization WANT TO USE it too.
+
+If you were to copy the code for use as a sub-agent by many agents, it would be very difficult to maintain and improve all of these copies.
+
+
+
+
+Instead, you can DEPLOY the AGENT ONCE as an agent wrapped with an A2A server, and the other teams' agents can incorporate it by QUERYING it REMOTELY.
+
+1
+In the Cloud Shell Editor's file explorer pane, navigate to the 'adk_and_a2a/illustration_agent' directory. 
+This directory contains the ADK agent you will make available remotely. Click the directory to toggle it open.
+
+2
+Open the agent.py file on this directory and scroll to the section labeled # Tools.
+
+3
+Notice the generate_image() function, which will be used as a tool by this agent. It receives a prompt and performs a 2-step process.
+First, it uses the Google Gen AI SDK to call generate_content(), which returns the raw image data directly in the response.
+Second, the function uses the Cloud Storage library to UPLOAD these image bytes to a GCS BUCKET.
+Finally, the tool returns the public URL of the newly created image file.
+
+4
+Notice that the instruction provided to the root_agent provides specific instructions to the agent to use image-generation prompts that respect the company's brand guidelines. For example, it specifies:
+
+- a specific ILLUSTRATION STYLE: (Corporate Memphis)
+https://en.wikipedia.org/wiki/Corporate_Memphis
+
+- a COLOUR PALETTE (purples and greens on sunset gradients)
+
+- examples of stadium/sports and maintenance IMAGERY because it is a stadium maintenance company
+
+
+5
+To see it in action, you'll first need to write a .env file to set environment variables needed by ADK agents. Run the following in the Cloud Shell Terminal to write this file in this directory.
+```
+cd ~/adk_and_a2a
+cat << EOF > illustration_agent/.env
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=qwiklabs-gcp-03-59adce8aad4e
+GOOGLE_CLOUD_LOCATION=global
+MODEL=gemini-2.5-flash
+IMAGE_MODEL=gemini-2.5-flash-image
+EOF
+```
+
+
+6
+Run the following to copy the .env to another agent directory you'll use in this lab:
+```
+cp illustration_agent/.env slide_content_agent/.env
+```
+
+
+7
+Now from the Cloud Shell Terminal, launch the ADK dev UI with:
+```
+adk web
+```
+Output
+
+INFO:     Started server process [2434]
+INFO:     Waiting for application startup.
++-------------------------------------------------------+
+| ADK Web Server started                                |
+|                                                       |
+| For local testing, access at http://localhost:8000.   |
++-------------------------------------------------------+
+
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit) 
+
+
+
+
+
+
+8
+To view the web interface in a new tab, click the http://127.0.0.1:8000 link at the bottom of the Terminal output.
+A new browser tab will open with the ADK Dev UI.
+From the Select an agent dropdown on the left, select the illustration_agent from the dropdown.
+
+9
+Query the agent with some text that could be used in a recruitment slide deck:
+```
+By supporting each other, we get big things done!
+```
+
+10
+After about 10 seconds, the agent should respond with the prompt it generated and a URL to preview the image. Click the image URL to preview the image, then click Back in your browser to return to the Dev UI.
+
+
+
+11
+Notice that the prompt you provided to the agent didn't mention sports, stadiums, or maintenance work, but the agent took your text and the brand guidelines and combined them into a single prompt for the image generation model.
+
+When you are finished exploring the base agent, close the browser tab.
+Click on the Cloud Shell Terminal pane and press CTRL + C to stop the server.
+
+
+
+
+
+
+
+
+
+=================
+
+Task 3. Deploy the agent as an A2A Server
+
+
+
+You'll now take the steps to deploy this agent as a remote A2A agent.
+
+An A2A Agent identifies itself and its capabilities by serving an Agent Card. 
+https://a2a-protocol.org/latest/topics/agent-discovery/#the-role-of-the-agent-card
+
+
+Run the following to create an agent.json file.
+```
+touch illustration_agent/agent.json
+```
+
+Open the agent.json file within the adk_and_a2a/illustration_agent directory and paste in the following contents:
+```
+{
+    "name": "illustration_agent",
+    "description": "An agent designed to generate branded illustrations for Cymbal Stadiums.",
+    "defaultInputModes": ["text/plain"],
+    "defaultOutputModes": ["application/json"],
+    "skills": [
+    {
+        "id": "illustrate_text",
+        "name": "Illustrate Text",
+        "description": "Generate an illustration to illustrate the meaning of provided text.",
+        "tags": ["illustration", "image generation"]
+    }
+    ],
+    "url": "https://illustration-agent-609900280938.us-east1.run.app/a2a/illustration_agent",
+    "capabilities": {},
+    "version": "1.0.0"
+}
+```
+
+Save the file.
+
+Review the JSON in the agent.json file. 
+Notice that it gives the agent a name and description and identifies some skills. 
+It also indicates a url where the agent itself can be called.
+
+
+The agent's url is constructed to be its Cloud Run service URL once you have deployed it following the instructions in this lab.
+
+While similar in name to skills, the parameter CAPABILITIES here is RESERVED TO INDICATE abilities like STREAMING.
+
+
+
+
+
+
+
+Run the following to create a requirements.txt file in the illustration_agent directory.
+```
+touch illustration_agent/requirements.txt
+```
+Select the file, and paste the following into the file.
+```
+google-adk==1.8.0
+a2a-sdk==0.2.16
+```
+Save the file.
+
+
+
+
+In the following command, you will use `adk deploy cloud_run` with the `--a2a` flag to deploy your agent to Cloud Run as an A2A server.
+You can learn more about deploying agents to Cloud Run by searching for the lab "Deploy ADK agents to Cloud Run". 
+
+In this command:
+
+- the --project and --region define the PROJECT and REGION in which your Cloud Run service will be deployed
+
+- the --service_name defines the name for the Cloud Run service
+
+- the --a2a flag indicates it should be hosted as an A2A agent.
+This means 2 things:
+..your agent will be wrapped by a CLASS WHICH BRIDGES ADK and A2A agents: the A2aAgentExecutor.
+https://github.com/google/adk-python/blob/main/src/google/adk/a2a/executor/a2a_agent_executor.py 
+This class translates 'A2A Protocol's language of tasks and messages' to an 'ADK Runner in its language of events'.
+..A2A tasks, messages https://a2a-protocol.org/latest/topics/key-concepts/#fundamental-communication-elements
+..ADK events https://google.github.io/adk-docs/events/
+..the Agent Card will be hosted as well at `CLOUD_RUN_URL/a2a/AGENT_NAME/.well-known/agent.json`. 
+Note: While this version of the card will be usable soon, the dynamic rewriting of the agent's url currently does not work with Cloud Run, so we won't use it in this version of this lab.
+
+
+
+
+Deploy the agent to Cloud Run as an A2A server with the following command:
+```
+adk deploy cloud_run \
+    --project qwiklabs-gcp-03-59adce8aad4e \
+    --region us-east1 \
+    --service_name illustration-agent \
+    --a2a \
+    illustration_agent
+```
+
+
+You will be prompted to allow unauthenticated responses for this container.
+For the sake of lab testing, enter Y into the Cloud Shell Terminal (for "yes") and press return.
+
+Note: Deployment should take about 5-10 minutes. If you encounter a PERMISSION_DENIED error, try running the above command again.
+
+
+
+
+Expected output:
+You will see steps relating to 
+- building a Dockerfile and
+- deploying the container, then
+- deploying the service, followed by
+```
+Service [illustration-agent] revision [illustration-agent-00001-xpp] has been deployed and is serving 100 percent of traffic.
+Service URL: https://illustration-agent-609900280938.us-east1.run.app
+```
+
+
+
+
+
+
+
+
+
+
+
+
+student_02_662505c180dc@cloudshell:~/adk_and_a2a (qwiklabs-gcp-03-59adce8aad4e)$ adk deploy cloud_run \
+    --project qwiklabs-gcp-03-59adce8aad4e \
+    --region us-east1 \
+    --service_name illustration-agent \
+    --a2a \
+    illustration_agent
+Start generating Cloud Run source files in /tmp/cloud_run_deploy_src/20251201_084958
+Copying agent source code...
+Copying agent source code complete.
+Creating Dockerfile...
+Creating Dockerfile complete: /tmp/cloud_run_deploy_src/20251201_084958/Dockerfile
+Deploying to Cloud Run...
+
+
+
+Allow unauthenticated invocations to [illustration-agent] (y/N)?  y
+
+Building using Dockerfile and deploying container to Cloud Run service [illustration-agent] in project [qwiklabs-gcp-03-59adce8aad4e] region [us-east1]
+-  Building and deploying new service... Uploading sources.                  
+\  Building and deploying new service... Uploading sources.                  
+  -  Uploading sources...                                                    
+  \  Uploading sources...                                                    
+|  Building and deploying new service... Building Container.                 
+  .  Routing traffic...                                                      
+  OK Uploading sources...                                                    
+  |  Building Container... Logs are available at [https://console.cloud.googl
+  e.com/cloud-build/builds;region=us-east1/ddf2a3fc-ada0-4ea2-920d-59acab2b9d9
+  d3?project=609900280938].                                                  0
+  .  Creating Revision...                                                    
+  .  Routing traffic...                                                      
+  .  Setting IAM Policy...      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+student_02_662505c180dc@cloudshell:~/adk_and_a2a (qwiklabs-gcp-03-59adce8aad4e)$ adk deploy cloud_run \
+    --project qwiklabs-gcp-03-59adce8aad4e \
+    --region us-east1 \
+    --service_name illustration-agent \
+    --a2a \
+    illustration_agent
+Start generating Cloud Run source files in /tmp/cloud_run_deploy_src/20251201_084958
+Copying agent source code...
+Copying agent source code complete.
+Creating Dockerfile...
+Creating Dockerfile complete: /tmp/cloud_run_deploy_src/20251201_084958/Dockerfile
+Deploying to Cloud Run...
+
+
+
+Allow unauthenticated invocations to [illustration-agent] (y/N)?  y
+
+Building using Dockerfile and deploying container to Cloud Run service [illustration-agent] in project [qwiklabs-gcp-03-59adce8aad4e] region [us-east1]
+-  Building and deploying new service... Uploading sources.                  
+\  Building and deploying new service... Uploading sources.                  
+  -  Uploading sources...                                                    
+  \  Uploading sources...                                                    
+OK Building and deploying new service... Done.                               
+  .  Routing traffic...                                                      
+  OK Uploading sources...                                                    
+  OK Building Container... Logs are available at [https://console.cloud.googl
+  e.com/cloud-build/builds;region=us-east1/ddf2a3fc-ada0-4ea2-920d-59acab2b9d9
+  d3?project=609900280938].                                                  0
+  OK Creating Revision...                                                    
+  OK Routing traffic...                                                      
+  OK Setting IAM Policy...                                                   
+Done.                                                                        
+Service [illustration-agent] revision [illustration-agent-00001-kd4] has been deployed and is serving 100 percent of traffic.
+Service URL: https://illustration-agent-609900280938.us-east1.run.app
+INFO: Display format: "none"
+Cleaning up the temp folder: /tmp/cloud_run_deploy_src/20251201_084958
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=================
+
+Task 4. Enable another ADK agent to call this agent remotely
+
+
+
+In this task, you will provide a second ADK agent the ability to identify your illustration agent's CAPABILITIES and CALL IT REMOTELY.
+
+This second agent will be an agent tasked with CREATING CONTENTS for SLIDES.
+It will 
+- write a HEADLINE and
+- a couple of sentences of BODY text, then
+- transfer to the illustration agent to generate an IMAGE to illustrate that text.
+
+
+
+
+
+In the Cloud Shell Terminal, run the following command to copy the Agent Card JSON file to your adk_and_a2a directory and change its name to indicate that it represents the illustration_agent.
+```
+cp illustration_agent/agent.json illustration-agent-card.json
+
+```
+
+
+
+
+
+In the Cloud Shell Editor's file explorer pane, navigate to the 'adk_and_a2a/slide_content_agent' and open the agent.py file.
+Review this agent's instruction to see it will take a user's suggestion for a slide and write a headline & body text, then transfer to your A2A agent to illustrate the slide.
+
+
+Paste the following code under the # Agents header to add the remote agent using the RemoteA2aAgent class from ADK:
+```
+illustration_agent = RemoteA2aAgent(
+    name="illustration_agent",
+    description="Agent that generates illustrations.",
+    agent_card=(
+        "illustration-agent-card.json"
+    ),
+)
+```
+https://github.com/google/adk-python/blob/main/src/google/adk/agents/remote_a2a_agent.py
+
+
+
+
+
+
+
+
+
+Add the illustration_agent as a sub-agent of the root_agent by adding the following parameter to the root_agent:
+```
+sub_agents=[illustration_agent]
+```
+Save the file.
+
+
+
+
+
+
+
+Launch the UI from the Cloud Shell Terminal with:
+```
+cd ~/adk_and_a2a
+adk web
+```
+Once again, click the http://127.0.0.1:8000 link in the Terminal output.
+
+
+A new browser tab will open with the ADK Dev UI.
+From the Select an agent dropdown on the left, select the slide_content_agent from the dropdown.
+
+Query the agent with an idea for a slide:
+```
+Create content for a slide about our excellent on-the-job training.
+```
+
+
+You should see the following output:
+- A HEADLINE and BODY text written by the slide_content_agent itself
+- A CALL to transfer_to_agent, indicating a transfer to the illustration_agent
+- The RESPONSE from the illustration_agent with a LINK you can click on to see the new IMAGE
+
+
+
+
+
+
+
+
+
+
+
+Check env variables: environ({'SHELL': '/bin/bash', 'CLOUD_CODE_CLOUD_SHELL_AUTHENTICATION': 'true', 'COLORTERM': 'truecolor', 'TERM_PROGRAM_VERSION': '1.104.3-cde', 'GEMINI_CLI_IDE_SERVER_PORT': '36543', 'HISTSIZE': '1000', 'EDITOR_IN_CLOUD_SHELL': 'true', 'GOOGLE_CLOUD_PROJECT': 'qwiklabs-gcp-03-59adce8aad4e', 'JAVA_HOME': '/usr/lib/jvm/java-17-openjdk-amd64', 'CLOUD_SHELL': 'true', 'GOOGLE_CLOUD_QUOTA_PROJECT': 'qwiklabs-gcp-03-59adce8aad4e', 'DEVSHELL_PROJECT_ID': 'qwiklabs-gcp-03-59adce8aad4e', 'DOTNET_SKIP_FIRST_TIME_EXPERIENCE': '1', 'ASPNETCORE_URLS': 'http://*:8080', 'PWD': '/home/student_02_662505c180dc/adk_and_a2a', 'LOGNAME': 'student_02_662505c180dc', 'DEVSHELL_CLIENTS_DIR': '/var/run/google/devshell', 'VSCODE_GIT_ASKPASS_NODE': '/google/devshell/editor/code-oss-for-cloud-shell/node', 'HOME': '/home/student_02_662505c180dc', 'LANG': 'en_US.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:', 'CLOUDSDK_CONFIG': '/tmp/tmp.M6OLkGzwsw', 'MINIKUBE_FORCE_SYSTEMD': 'true', 'GIT_ASKPASS': '/google/devshell/editor/code-oss-for-cloud-shell/extensions/git/dist/askpass.sh', 'PROMPT_COMMAND': 'history -a;enableHistoryAppend &> /dev/null;update_devshell_project_id &> /dev/null ; update_devshell_project_id &> /dev/null', 'USE_PARTITIONED_COOKIES': 'true', 'DOTNET_BUNDLE_EXTRACT_BASE_DIR': '/home/student_02_662505c180dc/.cache/dotnet_bundle_extract', 'GEMINI_DEFAULT_PROJECT': '', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'GEM_PATH': '/home/student_02_662505c180dc/.gems:/usr/local/lib/ruby/gems/3.2.0/', 'GEM_HOME': '/home/student_02_662505c180dc/.gems', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'CLOUDSHELL_OPEN_DIR': 'cloudshell_open', 'GEMINI_CLI_IDE_WORKSPACE_PATH': '/home/student_02_662505c180dc', 'TERM': 'xterm-256color', 'CLOUDSDK_DIAGNOSTICS_HIDDEN_PROPERTY_ALLOWLIST': 'compute/gce_metadata_read_timeout_sec', 'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'student_02_662505c180dc', 'VSCODE_GIT_IPC_HANDLE': '/tmp/vscode-git-8e43fd59e3.sock', 'BASHRC_PATH': '/home/student_02_662505c180dc/.bashrc', 'CLOUDSDK_DIAGNOSTICS_HIDDEN_PROPERTY_WHITELIST': 'compute/gce_metadata_read_timeout_sec', 'SHLVL': '3', '__TMP_CLOUDSDK_CONFIG': '/tmp/tmp.M6OLkGzwsw', 'CONSOLIDATE_GCA_SPARKS': 'true', 'USER_EMAIL': 'student-02-662505c180dc@qwiklabs.net', 'BASHRC_GOOGLE_PATH': '/google/devshell/bashrc.google', 'PS1': '\\[\x1b]633;A\x07\\]\\[\\e]0;${DEVSHELL_PROJECT_ID:-Cloud Shell}\\a\\]\\u@cloudshell:\\[\\033[1;34m\\]\\w$([[ -n $DEVSHELL_PROJECT_ID ]] && printf " \\[\\033[1;33m\\](%s)" ${DEVSHELL_PROJECT_ID} )\\[\\033[00m\\]$ \\[\x1b]633;B\x07\\]', 'MINIKUBE_HOME': '/google/minikube', 'DEBUGINFOD_URLS': 'https://debuginfod.ubuntu.com ', 'DOCKER_HOST': 'unix:///var/run/docker.sock', 'VSCODE_GIT_ASKPASS_MAIN': '/google/devshell/editor/code-oss-for-cloud-shell/extensions/git/dist/askpass-main.js', 'V2V_GCP_V2V_IMAGE': 'projects/v2v-community/global/images/family/v2v-stable', 'BROWSER': 'echo', 'PATH': '/opt/gradle/bin:/opt/maven/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/node_packages/node_modules/.bin:/usr/local/rvm/bin:/home/student_02_662505c180dc/.gems/bin:/usr/local/rvm/bin:/home/student_02_662505c180dc/gopath/bin:/google/gopath/bin:/google/flutter/bin:/usr/local/nvm/versions/node/v24.11.1/bin:/home/student_02_662505c180dc/.local/bin', 'HISTFILESIZE': '1000', 'CLOUD_SHELL_FRAME_ANCESTORS': 'https://*.corp.google.com:* https://*.sandbox.google.com:* https://console.cloud.google.com https://ide.cloud.google.com https://shell.cloud.google.com https://ssh.cloud.google.com', 'NEW_GCA_AUTH_FLOW': 'true', 'DEVSHELL_GCLOUD_CONFIG': 'cloudshell-22330', 'USE_GKE_GCLOUD_AUTH_PLUGIN': 'True', 'OLDPWD': '/home/student_02_662505c180dc', 'MINIKUBE_WANTUPDATENOTIFICATION': 'false', 'GOPATH': '/home/student_02_662505c180dc/gopath:/google/gopath', 'CREDENTIALS_SERVICE_PORT': '8998', 'TERM_PROGRAM': 'vscode', 'VSCODE_IPC_HOOK_CLI': '/tmp/vscode-ipc-30ff01ab-7246-4341-b5f2-844fcc135979.sock', '_': '/home/student_02_662505c180dc/.local/bin/adk', 'GOOGLE_GENAI_USE_VERTEXAI': 'TRUE', 'GOOGLE_CLOUD_LOCATION': 'global', 'MODEL': 'gemini-2.5-flash', 'IMAGE_MODEL': 'gemini-2.5-flash-image'})
+
+
+
+
+
+
+
+
+
+
+
+
+=================
+
+
+Checkpoint for our workings
+```
+$ zip -r adk_lab_workings.zip adk_and_a2a/
+
+
+$ python3 -m http.server
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+```
+
+Above, the terminal starts a web server in the current directory.
+Visit the URL in the browser to find the zip.
+
+
+
+
+
+
+=================
+
+Reflections
+- Good intro to deploying an ADK agent to cloud run as an A2A service, then used by another ADK agent
+- It seems that the "Deploy ADK agents to Cloud Run" training recommended by the lab is missing or not available/found
+
