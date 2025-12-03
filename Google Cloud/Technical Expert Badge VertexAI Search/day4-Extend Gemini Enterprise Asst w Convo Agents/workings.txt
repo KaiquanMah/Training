@@ -1,0 +1,861 @@
+In this lab, you will enhance your Gemini Enterprise assistant by enabling it to handle employee business travel requests. 
+**The assistant will communicate with a conversational agent that processes these requests**. To facilitate this, you will integrate an **OpenAPI Tool**, allowing the conversational agent to interact with a **Cloud Run function**. This function will then **write the travel requests directly to BigQuery** for storage and further processing.
+
+
+
+Objectives
+Deploy a Cloud Run function.
+Create an OpenAPI Tool for conversational agents to be able to call your Cloud Run function.
+Deploy a Gemini Enterprise app.
+Create a simple generative conversational agent using a Playbook.
+Integrate your conversational agent into your Gemini Enterprise app.
+
+
+
+
+
+
+
+
+=============================================
+
+
+
+Task 1. Create a BigQuery table where travel requests can be recorded
+In this task, you'll create a table to serve as the destination to store incoming travel requests that will be sent to the Gemini Enterprise assistant.
+
+Open a Cloud Shell terminal, by pressing the G key followed by the S key on your keyboard.
+
+Click the Authorize button when prompted to authorize Cloud Shell.
+
+In your Cloud Shell terminal, paste the following to create a travel_requests_schema.json file to define the schema for a BigQuery table which will be used to record travel requests:
+```
+cat > travel_requests_schema.json << EOF
+[
+  {
+    "name": "user",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "travel_purpose",
+    "type": "STRING",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "departure_city",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "destination_city",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "departure_date",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "return_date",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  }
+]
+EOF
+```
+
+Run the following commands in Cloud Shell to 
+- create the BigQuery dataset travel and
+- create the table booking_requests, 
+using the schema defined in the travel_requests_schema.json file:
+
+```
+bq --location=US mk -d travel
+bq mk -t travel.booking_requests travel_requests_schema.json
+```
+
+Once the dataset and table have been successfully created, you can close the Cloud Shell panel by clicking the X in the upper right of the terminal panel.
+
+
+
+student_01_b5cb7b25f798@cloudshell:~ (qwiklabs-gcp-00-796b4b93b961)$ bq --location=US mk -d travel
+bq mk -t travel.booking_requests travel_requests_schema.json
+Dataset 'qwiklabs-gcp-00-796b4b93b961:travel' successfully created.
+Table 'qwiklabs-gcp-00-796b4b93b961:travel.booking_requests' successfully created.
+
+
+
+
+
+
+
+
+
+
+
+
+=============================================
+
+
+
+Task 2. Create a Cloud Run Function to record the requests
+In this task, you'll create the Cloud Run function that will take requests sent as JSON and write them to the table you created above.
+
+
+
+Using the search bar at the top of the Cloud Console, navigate to Cloud Run.
+https://cdn.qwiklabs.com/EAuHce4n8fNagFJmaL8Sqzjfmd9ZT90aHuqzltDwfXo%3D
+
+From the options at the top of the Cloud Run console, select Write a Function.
+
+Under the Configure header, enter a Service name of record-travel-request.
+
+Set the Region to us-central1.
+
+Under the Endpoint URL header, copy the provided URL and paste it in a text document. You will need to access it later.
+https://record-travel-request-475636355257.us-central1.run.app
+
+
+
+Set the Runtime to Python 3.12.
+
+Under the Authentication header, selet Require authentication.
+
+Keep the other settings as default and select Create. 
+The Source tab for the function will be loaded.
+
+Rename the Function entry point to record_travel_request.
+
+Click the 'requirements.txt' file on the left, delete its contents, and paste in the following:
+```
+functions-framework==3.*
+google-cloud-bigquery
+```
+
+
+
+
+Click the 'main.py' file on the left, delete its contents, and paste in the following code. 
+This function will take the travel request details provided to a POST request as JSON and write those values to a new row in the BigQuery table you created earlier:
+
+
+original code
+```
+import functions_framework
+
+@functions_framework.http
+def hello_http(request):
+    """HTTP Cloud Function.
+    Args:
+        request (flask.Request): The request object.
+        <https://flask.palletsprojects.com/en/1.1.x/api/#incoming-request-data>
+    Returns:
+        The response text, or any set of values that can be turned into a
+        Response object using `make_response`
+        <https://flask.palletsprojects.com/en/1.1.x/api/#flask.make_response>.
+    """
+    request_json = request.get_json(silent=True)
+    request_args = request.args
+
+    if request_json and 'name' in request_json:
+        name = request_json['name']
+    elif request_args and 'name' in request_args:
+        name = request_args['name']
+    else:
+        name = 'World'
+    return 'Hello {}!'.format(name)
+```
+
+
+new code
+```
+import functions_framework
+from google.cloud import bigquery
+
+@functions_framework.http
+def record_travel_request(request):
+    """Writes travel requests to BigQuery.
+    Args:
+        request (flask.Request): A request object with JSON
+          containing fields for user, travel_purpose, departure_city,
+          destination_city, departure_date, and return_date.
+    Returns:
+        JSON response containing a 'message' field indicating the
+          status of the request.
+    """
+    request_json = request.get_json(silent=True)
+    request_args = request.args
+    print("JSON:" + str(request_json))
+    print("args:" + str(request_args))
+
+    bq_client = bigquery.Client()
+    table_id = "qwiklabs-gcp-00-796b4b93b961.travel.booking_requests"
+
+    row_to_insert = [
+        {"user": request_json["user"],
+        "travel_purpose": request_json["travel_purpose"],
+        "departure_city": request_json.get("departure_city",""),
+        "destination_city": request_json.get("destination_city",""),
+        "departure_date": request_json.get("departure_date",""),
+        "return_date": request_json.get("return_date",""),
+        },
+    ]
+
+    errors = bq_client.insert_rows_json(table_id, row_to_insert)  # Make an API request.
+    if errors == []:
+        return {"message": "New row has been added."}
+    else:
+        return {"message": "Encountered errors while inserting rows: {}".format(errors)}
+```
+
+
+
+
+
+Wait till all the steps of creating the service are completed in the upper left, then click Save and redeploy.
+
+Wait until the Deploying revision activities all show a Completed status message.
+https://cdn.qwiklabs.com/RxO3O%2BqVpdTbesXMoqTC46q1PJO6A3rPVkzsHdPoHNM%3D
+
+
+
+
+
+Click Test at the top of the Cloud Run console.
+
+Paste these values into the Configure payload test input field:
+```
+{
+"user": "Ursula Matthews",
+"travel_purpose": "farm inspection",
+"departure_city": "Santiago",
+"destination_city": "Doha",
+"departure_date": "2025-09-08",
+"return_date": "2025-09-16"
+}
+```
+At the bottom of the testing pane, click Test in Cloud shell.
+
+The Cloud Shell terminal window will open, and a curl command will be prepared for you to call your function. Select the Terminal window and press enter or return on your keyboard to send the command.
+```
+curl -X POST "https://record-travel-request-475636355257.us-central1.run.app" \
+-H "Authorization: bearer $(gcloud auth print-identity-token)" \
+-H "Content-Type: application/json" \
+-d '{
+"user": "Ursula Matthews",
+"travel_purpose": "farm inspection",
+"departure_city": "Santiago",
+"destination_city": "Doha",
+"departure_date": "2025-09-08",
+"return_date": "2025-09-16"
+}'
+```
+
+You should see a successful execution response:
+https://cdn.qwiklabs.com/hKAeGzKy1Ei%2F3LiwBnFFGWnIlkcSqLu4QRpEruIUDHE%3D
+```
+student_01_b5cb7b25f798@cloudshell:~ (qwiklabs-gcp-00-796b4b93b961)$ curl -X POST "https://record-travel-request-475636355257.us-central1.run.app" \
+> -H "Authorization: bearer $(gcloud auth print-identity-token)" \
+> -H "Content-Type: application/json" \
+> -d '{ "user": "Ursula Matthews", "travel_purpose": "farm inspection", "departure_city": "Santiago", "destination_city": "Doha", "departure_date": "2025-09-08", "return_date": "2025-09-16" }'
+{"message":"New row has been added."}
+```
+
+Close the Cloud Shell Terminal by pressing the X in the upper right of the Cloud Shell panel.
+
+
+
+
+
+
+Open a new browser tab (or if you are using Chrome, duplicate your current browser tab by right-clicking on it and selecting Duplicate). In the new tab, navigate to BigQuery.
+
+In the BigQuery Explorer pane, select your project ID qwiklabs-gcp-00-796b4b93b961.
+
+Select the travel dataset.
+
+Select the booking_requests table.
+
+Select the Preview tab to see travel requests that have been recorded. Keep this tab open to return and check for new rows as you work through the other components in this lab.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=============================================
+
+
+
+Task 3. Create a Conversational Agent Tool to call the Cloud Run Function
+
+In this task, you'll create a Tool in the Conversational Agent console that can call the Cloud Run function. Your conversational agent will be able to use this Tool to record the travel requests.
+
+At the top of the Google Cloud Console, search for Dialogflow API and select it.
+https://cdn.qwiklabs.com/DwBSYJCP6pWfoDNpeW7C%2Btv2u2cWucc4oCDmf9uLqdw%3D
+
+Click Enable.
+
+
+
+
+Navigate to AI Applications by searching for it at the top of the console.
+Click on Continue and activate the API.
+For an app type, find the card for 'Conversational agent' and select Create. This will open the Conversational Agents console in a new tab.
+
+In the Get started with Conversational Agents pane, select 'Build your own'.
+https://cdn.qwiklabs.com/eCGYdEDoLyfDkk%2BEpTQBrVwiivEWr7tGpkTK5a7thCE%3D
+
+For your agent's Display name, use Corporate Travel Bot.
+
+Set the location to global.
+
+Keep the Conversation start option Playbook selected.
+
+Click Create.
+
+After the Conversational Agent Playbook is created. Dismiss any instructional pop-ups and select the Settings button on the top right-hand side of the UI.
+
+Navigate to General > Logging Settings.
+
+Click the checkboxes for Enable Cloud Logging and Enable conversation history to enable the Cloud Logging and conversation history features for your agent.
+
+Click the Save button at the top of the Settings pane to save your changes.
+https://cdn.qwiklabs.com/9thwBRxyJoe56mBTePZTWCVxKRyJlwZrik5w2f97%2FuA%3D
+
+
+
+
+
+
+
+Before you create a Playbook, you will create a Tool that the playbook can use to call the Cloud Run function you created. From the left-hand navigation menu, select Tools.
+https://cdn.qwiklabs.com/Ci8WFHxffz4YDtlGIhKL4Yiu%2B22jGT1rK7V6qjezaOc%3D
+
+Click + Create.
+
+For Tool name enter Record Travel Request.
+
+Keep the Type set to OpenAPI.
+
+For a Description, enter Used to record a travel request.
+
+For Schema, keep the type YAML selected, and paste the following into the text box. This OpenAPI spec describes an API with:
+- A server url set to your Cloud Functions domain
+- A path called / that accepts POST requests that include JSON in a schema called TravelRequest
+- A definition of that TravelRequest schema to include the fields you defined in your BigQuery schema at the start of this lab:
+```
+openapi: 3.0.0
+info:
+  title: Travel Requests API
+  version: 1.0.0
+servers:
+  - url: 'YOUR_CLOUD_RUN_FUNCTION_URL'
+paths:
+  /:
+    post:
+      summary: Record a new travel request
+      operationId: recordTravelRequest
+      requestBody:
+        description: Travel request to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "New row has been added."
+components:
+  schemas:
+    TravelRequest:
+      type: object
+      required:
+        - user
+        - travel_purpose
+      properties:
+        user:
+          type: string
+        travel_purpose:
+          type: string
+        departure_city:
+          type: string
+        destination_city:
+          type: string
+        departure_date:
+          type: string
+        return_date:
+          type: string
+```
+
+
+
+Replace YOUR_CLOUD_RUN_FUNCTION_URL in the spec above with your Cloud Run function's URL that you copied earlier.
+YAML
+```
+openapi: 3.0.0
+info:
+  title: Travel Requests API
+  version: 1.0.0
+servers:
+  - url: 'https://record-travel-request-475636355257.us-central1.run.app'
+paths:
+  /:
+    post:
+      summary: Record a new travel request
+      operationId: recordTravelRequest
+      requestBody:
+        description: Travel request to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "New row has been added."
+components:
+  schemas:
+    TravelRequest:
+      type: object
+      required:
+        - user
+        - travel_purpose
+      properties:
+        user:
+          type: string
+        travel_purpose:
+          type: string
+        departure_city:
+          type: string
+        destination_city:
+          type: string
+        departure_date:
+          type: string
+        return_date:
+          type: string
+```
+
+Click Save at the top of the Tools pane.
+
+
+
+
+
+
+
+To allow the Tool to invoke the Cloud Run function, switch to your browser tab displaying the Cloud Console (not the Conversational Agents console) and use the search bar at the top of the console to navigate to 'IAM'.
+
+Check the checkbox to Include Google-provided role grants.
+
+Find the row for the Dialogflow Service Agent (you may need to refresh the page) and click the pencil edit icon on its row.
+
+Click + Add another role.
+
+In the Select a role field, enter Cloud Run Invoker.
+
+Click Save.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=============================================
+
+
+Task 4. Create a Conversational Agent Playbook
+
+In this task, you'll create the conversational agent that can receive requests in natural language and use the Tool to write them to the BigQuery table via the Cloud Run function.
+
+In the browser tab with the Conversational Agents console, use the left-hand navigation menu to select Playbooks.
+
+Select the Default Generative Playbook that has already been created.
+
+Change the Playbook name to Confirm Travel Data.
+
+For a Goal, enter: Help users book travel.
+
+For Instructions, paste the following into the text field:
+```
+- Ask the user to provide for user name, travel purpose, departure city, destination city, and a range of dates. Assume a year of 2025 for dates without a year:
+    - Use ${TOOL:Record Travel Request}
+    - Let the user know that they should receive a list of flights to choose from in their email within 24 hours.
+```
+
+
+These Playbook instructions are designed for use by Gemini Enterprise because it only includes one turn of conversation, even though it does multiple things within that turn (invokes its tool and generates a response). Later, you will give the Gemini Enterprise agent the responsibility for gathering the relevant info before invoking this Playbook.
+
+Click Save at the top of the Playbook pane.
+
+In the upper right of the Conversational Agents console, click the Toggle simulator chat button (Toggle Simulation) to preview the conversational agent.
+
+In the Enter text input box at the bottom of this panel, start the chat with 
+`Can you help me book a flight?`
+
+Provide a name, travel purpose, departure city, destination city, and a date range (for example, 
+`Joe Smith. Customer Presentation. Berlin to Valencia. Feb 21 to 28.`
+) to observe how the agent behaves.
+
+
+
+You should see a card indicating that the Record Travel Request Tool was used, and you can click on it to see the Tool input and response:
+https://cdn.qwiklabs.com/lMhD5bwDEVWi2XJlxQfpThBKKO8xXizvN5EHEwgw%2B%2BE%3D
+
+Note: Change the model in case of output other than 200 and restart the chat by resetting the conversation (Reset conversation).
+
+
+
+Your chat should end with a statement similar to:
+https://cdn.qwiklabs.com/PrXJr83Ly47zeh7wQZkOQtOUXczjhk7k7vcze8JFvjQ%3D
+
+
+
+
+
+
+
+
+
+
+
+
+
+=============================================
+
+
+
+Task 5. Create a BigQuery Data Store
+In this task, you'll be deploying a Gemini Enterprise app, and to do so, you'll need to create a data store. We'll set up a BigQuery data store, allowing you to query and access previously recorded travel requests and integrate Google as the Identity Provider.
+
+Switch back to your Google Cloud Console browser tab and navigate to AI Applications by searching for it at the top of the console.
+
+Select Settings from the left-hand navigation pane.
+
+On the row for the global location, click the pencil icon Edit Button.
+
+Select Google Identity as your identity provider and click on Save.
+Google Identity Provider
+https://cdn.qwiklabs.com/8XdqPxOxsk3W22gBFv4jnKvp3SwSCumR3uwLXIbA2xM%3D
+
+
+
+
+
+
+Select Data Stores from the left-hand navigation pane.
+
+Click + Create data store.
+
+Search for BigQuery to locate the BigQuery card and click Select on it.
+
+For the kind of data, keep the default choice of Structured - BigQuery table with your own schema.
+
+For the BigQuery path select Browse.
+
+Search for dataset travel.
+
+Select the radio button next to your table name: booking_requests.
+
+Click Select.
+
+Click Continue.
+
+You can keep the schema as it is and click Continue.
+
+For a name, enter Travel Requests.
+
+Click Create.
+
+
+
+
+
+
+
+
+
+
+
+
+
+=============================================
+
+
+
+Task 6. Create a Gemini Enterprise app
+In this task, you'll create a new Gemini Enterprise app and link it to a data store.
+
+Navigate to AI Applications > Apps > + Create app.
+
+Find the Gemini Enterprise card and click Learn More to create a Gemini Enterprise app.
+
+For an app name, enter Cymbal Gemini Enterprise App.
+
+Set the location to global.
+
+Under Advanced Options, for the Company name, enter Cymbal Shops.
+
+Click Create.
+
+From the left-hand navigation pane, click on Connected data stores > Add existing data store.
+
+On the Data pane, select the Travel Requests data store you created above.
+
+Click on Connect.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=============================================
+
+
+
+
+Task 7. Integrate your conversational agent with your Gemini Enterprise app
+In this task, you'll grant your Gemini Enterprise assistant the ability to send messages to your conversational agent and receive its responses.
+
+Navigate to Gemini Enterprise > Apps and select Cymbal Gemini Enterprise App App.
+
+From the left-hand navigation, select Configurations.
+
+Select the Assistant tab.
+
+Under the Agents header, select Add an item. 
+A card will be displayed to connect a 'New Agent':
+https://cdn.qwiklabs.com/yketWQS3VRKOxJtlcfQeRjJd7M2%2BZxssuOyOjNy3cxI%3D
+
+
+Select your browser tab displaying your Conversational Agents console.
+
+From the Agent dropdown at the top of the console, select View all agents.
+
+At the end of your Corporate Travel Bot agent's row, select the Options icon (three vertical dots) and select Copy name.
+name
+projects/qwiklabs-gcp-00-796b4b93b961/locations/global/agents/a5199c71-5044-463e-90da-5b946a43987d
+link
+https://conversational-agents.cloud.google.com/projects/qwiklabs-gcp-00-796b4b93b961/locations/global/agents/a5199c71-5044-463e-90da-5b946a43987d/playbooks/00000000-0000-0000-0000-000000000000
+
+
+
+
+Navigate back to your AI Applications tab, and in the New Agent card, paste the copied value in the Agent field.
+
+For an Agent display name, use Corporate Travel Bot.
+
+For Instructions enter:
+```
+Use for booking travel by providing a user, travel purpose, departure city, destination city, and a date range.
+```
+
+Notice that these instructions instruct the Gemini Enterprise assistant to do the work of gathering the required information before passing the details to the conversational agent for a single turn of conversation.
+
+Click Done.
+
+Click Save and publish at the bottom of the pane.
+
+Note: Agent creation in Gemini Enterprise App can take up to 10 minutes. If the steps below do not proceed as expected, allow more time for app creation.
+
+
+
+
+
+
+
+
+
+
+
+
+=============================================
+
+
+
+
+Task 8. Communicate with your conversational agent through the Gemini Enterprise assistant
+
+In this task, your Gemini Enterprise assistant will be able to communicate with the conversational agent, which will then utilize its tool to record travel requests.
+
+To access your app from the Gemini Enterprise page, click on your app named Cymbal Gemini Enterprise App and navigate to the Overview tab in the left-hand menu. Then, click Copy URL, and open the link in a new browser tab. Alternatively, you can navigate to the Integration tab and copy the URL from the 'The link to your web app' section.
+```
+https://vertexaisearch.cloud.google.com/home/cid/91e9be6f-b192-4087-8ea3-f83f63f767bc
+```
+
+
+As stated at the start of this task, if you see a 404 error, you may need to give your app more time to be created. You can reload the page every few minutes until the Gemini Enterprise web app appears.
+
+Navigate to the Agents and select Corporate Travel Bot.
+
+In the primary search bar, enter:
+```
+Book travel for Alex Cymbal from Singapore to Council Bluffs, Iowa, departing on April 1 and returning on April 14, 2025, for a data center tour.
+```
+
+
+Your assistant should have responded that your request has been recorded, and you will receive a follow up email within 24 hours.
+
+Please note, in this activity you used very minimal Playbook instructions and no conversation examples, which means that this agent will not be very robust. If you need to restart the conversation to try it again, click the New button in the upper left.
+
+
+
+Under the assistant's response, there is an Options menu (three vertical dots). Expand it and click on the Show diagnostic info.
+Select the three dots and 'Show diagnostic info'
+https://cdn.qwiklabs.com/Vf8JgBKmWaG1oGFARTf3yYlmP2G7hHD0Zi1EpO7pzUw%3D
+
+In the diagnostic info displayed, confirm that your conversation has triggered invoking your Cloud Run function by finding "functionName": "Corporate_Travel_Bot".
+
+Note: If the Show Diagnostic Info panel displays only the access token and omits the function call details, please refresh the page and reopen the Diagnostic Info panel.
+Diagnostic info confirming the agent is being called as a Tool
+https://cdn.qwiklabs.com/dw9W8nBYAHz05GVfwiqrg1ByRiXg1Dw731GcPanjxbU%3D
+
+```
+{
+ "plannerSteps": [
+  {
+   "createTime": "2025-10-24T01:50:45.494838875Z",
+   "queryStep": {
+    "parts": [
+     {
+      "text": "Book travel for Alex Cymbal from Singapore to Council Bluffs, Iowa, departing on April 1 and returning on April 14, 2025, for a data center tour."
+     }
+    ]
+   }
+  },
+  {
+   "planStep": {
+    "role": "MODEL",
+    "parts": [
+     {
+      "functionCall": {
+       "args": {
+        "question": "Book travel for Alex Cymbal from Singapore to Council Bluffs, Iowa, departing on April 1 and returning on April 14, 2025, for a data center tour."
+       },
+       "functionName": "Corporate_Travel_Bot",
+       "functionId": "2148595905805384078"
+      }
+     }
+    ]
+   },
+   "createTime": "2025-10-24T01:50:45.494870943Z"
+  },
+  {
+   "createTime": "2025-10-24T01:50:49.449194615Z",
+   "toolStep": {
+    "role": "SERVER_TOOL",
+    "parts": [
+     {
+      "functionResult": {
+       "functionId": "2148595905805384078",
+       "functionName": "Corporate_Travel_Bot",
+       "content": {
+        "response": {
+         "output": "Your travel request has been recorded. You should receive a list of flights to choose from in your email within 24 hours."
+        }
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "planStep": {
+    "parts": [
+     {
+      "text": "Your travel request has been recorded. You should receive a list of flights to choose from in your email within 24 hours."
+     }
+    ],
+    "planStepId": "12380262096165689969",
+    "role": "TOOL"
+   },
+   "createTime": "2025-10-24T01:50:49.449221334Z"
+  }
+ ]
+}
+```
+
+
+
+
+
+To confirm that requests are being recorded, return to the browser tab displaying your BigQuery booking_requests table. On the Preview tab, click the Refresh icon to view the latest data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=============================================
+
+
+
+
+Reflections
+- It would be great to go through what other tools and tool types are available
+- Initially it was challenging to understand how the gemini enterprise app integrates with an agent and a cloud run function. After doing the exercise, this became more clear.
+- OpenAI = the conversational agent
+- tool = cloud run function
+- agent equipped with a tool = OpenAI with the cloud run fn
+- Because from the lab description, it seemed as if there was some 'conversational agent', some 'OpenAI tool', some 'cloud run fn', and it was confusing how these integrate together with 'gemini enterprise app'
+
+
+
+
+
