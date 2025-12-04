@@ -73,3 +73,94 @@ The capital of Belgium is Brussels. It serves as the administrative center of th
 
 
 
+
+
+
+
+# Exploring datasets on the Hub!
+The Hugging Face hub is home to 100,000's of datasets, across domains, languages, sizes, and modalities.
+You've been provided with a dataset from the Hub designed to help LLMs reason about math problems.
+https://assets.datacamp.com/production/repositories/6536/datasets/cf0dd3d85082816f10216621777f5de6a5226168/hub_dataset.png
+
+Considering the dataset card, which of the following statements are true?
+YES    There are > 4 million rows
+YES    It is available under the MIT license
+NO    The dataset contain images
+YES    The dataset is called MathX-5M
+
+
+
+
+
+
+
+# Loading datasets
+After you've chosen your dataset, it's time to load it with the datasets library!
+In this case, you'll load the "validation" split of the "TIGER-Lab/MMLU-Pro" dataset, which is a benchmark evaluation dataset.
+The load_dataset module from the datasets package is already loaded for you.
+Use the correct function to load the "TIGER-Lab/MMLU-Pro" dataset and specify the "validation" split.
+```
+# Load the "validation" split of the TIGER-Lab/MMLU-Pro dataset
+my_dataset = load_dataset("TIGER-Lab/MMLU-Pro", split="validation")
+
+# Display dataset details
+print(my_dataset)
+```
+<script.py> output:
+    Dataset({
+        features: ['question_id', 'question', 'options', 'answer', 'answer_index', 'cot_content', 'category', 'src'],
+        num_rows: 70
+    })
+
+
+
+
+
+# Working with huggingface datasets
+There will likely be many occasions when you will need to preprocess/work with a dataset before using it within a ML task.
+2 common preprocessing tasks are filtering and selecting (or slicing).
+Given the size of these datasets, Hugging Face leverages arrow file types.
+
+This means performing preprocessing is slightly different than what you might be used to.
+Fortunately, there's already methods to help with this!
+
+The dataset is already loaded for you under wikipedia.
+
+Part 1
+- Filter the dataset for rows with the term "football" in the text column and save as filtered.
+- Select a single example from the filtered dataset and save as example.
+```
+# Filter the documents
+filtered = wikipedia.filter(lambda row: "football" in row["text"])
+
+# Create a sample dataset
+example = filtered.select(range(1))
+
+print(example[0]["text"])
+```
+    Luis Miguel Aparecido Alves (born May 25, 1985), known as Gugu, is a Brazilian football player currently playing for Iraklis Psachna F.C.
+    
+    External links
+    
+    1985 births
+    Living people
+    Brazilian men's footballers
+    Thrasyvoulos F.C. players
+    Ionikos F.C. players
+    Super League Greece players
+    Expatriate men's footballers in Greece
+    Brazilian expatriate men's footballers
+    Men's association football midfielders
+
+
+
+    
+Part 2
+- Which soccer player, born May 25, was the single example returned from the filtered list?
+YES    Luis Miguel Aparecido Alves
+Lionel Messi
+Diego Maradona
+
+
+
+
