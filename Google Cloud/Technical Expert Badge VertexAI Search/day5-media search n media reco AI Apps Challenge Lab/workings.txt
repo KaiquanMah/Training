@@ -1,0 +1,640 @@
+Perform actions and automation across products. Instead of following step-by-step instructions, you are given a common business scenario and a set of tasks - you figure out how to complete them on your own! An automated scoring system (shown on this page) provides feedback on whether you have completed your tasks correctly.
+
+
+
+In this challenge lab, you build two media-oriented applications with AI Applications.
+1
+A media search application that helps users find specific movies.
+2
+A media recommendation application that, given a movie, suggests other movies a user is likely to engage with based on their previous activity.
+
+
+
+Online documentation	
+Get started with media search
+https://cloud.google.com/generative-ai-app-builder/docs/try-media-search
+Get started with media recommendations
+https://cloud.google.com/generative-ai-app-builder/docs/try-media-recommendations
+Connect a third-party data source
+https://docs.cloud.google.com/generative-ai-app-builder/docs/create-data-store-es#connect_a_third-party_data_source
+About media documents and data stores
+https://cloud.google.com/generative-ai-app-builder/docs/media-documents
+Create and manage media serving configs
+https://cloud.google.com/generative-ai-app-builder/docs/serving-configs
+
+Learning Path	
+Intelligent Search: Media Search and Recommendations
+https://partner.skills.google/paths/2300
+
+
+
+
+Tasks
+Prepare product and user data by importing and transforming data into BigQuery.
+Create a media search application and configure the necessary Data Store for products.
+Set up a media recommendation application, configuring personalized recommendations and tuning business objectives.
+Configure features like search-as-you-type, user event collection, and data display options to improve user experience.
+Test the applications by simulating searches and recommendations, ensuring they work as expected.
+
+
+
+
+
+
+
+
+
+=======================
+
+Task 1. Prepare movie data and user event data
+In this task, you will 
+- create BigQuery dataset and
+- import movie and user event data from Cloud Storage.
+
+A BigQuery view is then created to transform the movie data, including converting categories to an array, replacing null homepage values with a Google search URL, and formatting the data into a JSON structure.
+
+
+https://cloud.google.com/bigquery/docs/datasets#create-dataset
+https://cloud.google.com/bigquery/docs/tables#console
+https://cloud.google.com/bigquery/docs/schemas#specify_schemas
+https://cloud.google.com/bigquery/docs/views#creating_a_view
+
+
+
+Create a BigQuery dataset named cymbal_media_app_dataset.
+
+Create a table in the cymbal_media_app_dataset dataset named cym_movies, importing the data from the following Cloud Storage object: qwiklabs-gcp-00-08159c07c760/movies.csv. You can allow the import to auto-detect the schema in the data file.
+
+Create another table in the cymbal_media_app_dataset dataset named cymbal_user_events, importing the data from the following Cloud Storage object: qwiklabs-gcp-00-08159c07c760/user_events.json. You need to explicitly define the schema using the following definition:
+```
+[
+     {
+         "name": "userPseudoId",
+         "type": "STRING",
+         "mode": "REQUIRED"
+     },
+     {
+         "name": "eventType",
+         "type": "STRING",
+         "mode": "REQUIRED"
+     },
+     {
+         "name": "eventTime",
+         "type": "STRING",
+         "mode": "REQUIRED"
+     },
+     {
+         "name": "documents",
+         "type": "RECORD",
+         "mode": "REPEATED",
+         "fields": [
+             {
+                 "name": "id",
+                 "type": "INTEGER",
+                 "mode": "NULLABLE"
+             },
+             {
+                 "name": "name",
+                 "type": "INTEGER",
+                 "mode": "NULLABLE"
+             }
+         ]
+     }
+ ]
+```
+
+
+
+Check that your data has imported correctly. You should have 86,537 rows in the cym_movies table, and 16,916,912 rows in the cymbal_user_events table.
+
+
+When you create a media search application, and create the Data Store during the application creation flow, you must present the data as structured data with metadata. Additionally, you will want to ensure you're using the right attribute names, defining strings correctly, etc. Details can be found in the media documents and Data Stores documentation.
+https://cloud.google.com/generative-ai-app-builder/docs/media-documents
+
+
+You will perform the transformation using a BigQuery logical view. For information on creating views, see the relevant Bigquery documentation.
+https://cloud.google.com/bigquery/docs/views#sql
+
+
+
+
+Create a BigQuery logical view using the following DDL statement in BigQuery:
+```
+CREATE OR REPLACE VIEW
+    cymbal_media_app_dataset.movies_view AS (
+    WITH
+        t AS (
+        SELECT
+            CAST(movieId AS string) AS id,
+            title AS title,
+            SPLIT(genres, "|") AS categories,
+            homepage,
+            IFNULL(homepage, CONCAT('https://www.google.com/search?q=', REGEXP_REPLACE(LOWER(title), r'\s+', '+')) ) AS uri,
+            "2023-01-01T00:00:00Z" AS available_time,
+            EXTRACT(YEAR
+            FROM
+                release_date) AS production_year,
+            runtime AS media_duration,
+            "movie" AS media_type,
+            poster_path as poster_uri
+        FROM
+            `cymbal_media_app_dataset.cym_movies`)
+    SELECT
+        id,
+        "default_schema" AS schemaId,
+        NULL AS parentDocumentId,
+        TO_JSON_STRING( STRUCT( title AS title,
+            categories AS categories,
+            uri AS uri,
+            production_year AS production_year,
+            available_time AS available_time,
+            media_duration AS media_duration,
+            poster_uri as poster_uri,
+            media_type AS media_type ) ) AS jsonData
+    FROM
+        t)
+```
+
+
+
+
+What is this view doing? (Select all that are correct)
+YES	Converting the categories column to an array of strings
+NO	Converting null homepage values to a blank string
+YES	Building a JSON string that includes all the movie metadata
+YES	Changing column names to match the media application default schema
+YES	Replacing null homepage values with a Google search URL
+NO	Converting the categories column to a comma-delimited string
+
+
+What columns are being projected in the new view?
+YES	id, schemaId, parentDocumentId, jsonData
+NO	title, categories, uri, production_year, available_time, media_duration, and media_type
+
+
+
+
+
+=======================
+
+
+Task 2. Create a Media Search Application and Data Store
+
+
+In this task, you will enable the required APIs for AI Applications and create a Media Search application. Then import movie data and user event data into your media Data Store from BigQuery.
+
+Enable AI Applications API.
+
+Create a Media Search application named 'media_search_app'. As part of the application creation process, create a media Data Store named 'movie_data_store'.
+..Media search
+..Search engine designed for media libraries, including images, videos, and audio files.
+
+
+Import document data into your Data Store with the following options:
+
+Setting	Value
+Source	BigQuery
+Path	qwiklabs-gcp-00-08159c07c760.cymbal_media_app_dataset.movies_view
+
+Wait a minute or two, until the activity area of the data page for your application shows several thousand items succeeded.
+https://cdn.qwiklabs.com/Fkw%2BkHQ6JDLgduOphCEYzD2ioZQZ%2FYOrlZCeWteZPVQ%3D
+
+
+
+
+
+=> ABOVE, WE HAD A 'movie_data_store' reading from the BigQuery 'movies_view'
+=> HERE/BELOW, WHICH DATA STORE SHOULD WE CREATE AND IMPORT USER EVENTS INTO????
+Import user events into your Data Store with the following options:
+Setting	Value
+Source	BigQuery
+Path	qwiklabs-gcp-00-08159c07c760.cymbal_media_app_dataset.cymbal_user_events
+
+Wait for the rest of your documents to finish importing - this will take 5-6 minutes. If your documents have finished importing, but your events are still in progress, you can proceed.
+
+Confirm that there have been no errors during import, and that the imported documents look correct.
+
+Note: When the activity page shows your user events fully loaded, with no errors, the event data still isn't entirely usable. If you look at the EVENTS tab in your Data Store page, it won't show any historical events available. It can take hours for these events to show on this page, and to be usable for search and recommendations.
+
+The search application will work at this point, though not at optimal efficiency without the event data imported. It should be fine for the purposes of this lab though. You may proceed.
+
+Check that your application is working using the Preview pane. For example, you could search for 'cym_movies' with the search string 'Interstellar'.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======================
+
+
+Task 3. Update Application Configuration
+In this task, you will update application configuration to improve functionality. Enabling user event collection captures interactions for valuable data analysis. Activating search-as-you-type provides instant results, enhancing responsiveness. Adjusting data display ensures relevant info is clear in search results. These changes optimize performance and create a better search experience.
+
+
+For your Media Search application named media_search_app, confirm that Enable user event collection is activated.
+What does this feature do?
+NO	Enables the API, allowing you to have other applications write event data into the Data Store
+NO	Allows batch import of historical user event data
+YES	Automatically records events whenever a user searches using this application
+
+
+
+
+
+Activate Enable search-as-you-type and test that the feature is working.
+What does this feature do?
+NO	Automatically opens a Web page for the top result
+NO	Enables autocomplete
+YES	Shows results and dynamically filters as you type your query
+
+
+
+
+Modify your Data display options to map the following fields:
+Field	Data attribute
+Title	title
+Thumbnail	poster_uri
+URL	uri
+Text 1	categories
+
+Save and Publish your configuration and test to ensure the changes are working
+
+True or false: Setting display data options actually limits the data you see in search results.
+YES	True
+False
+
+
+
+
+
+=======================
+
+
+
+
+Task 4. Access media search application using the Discovery Engine API
+In this task, you will access media search application named media_search_app using the Discovery Engine API. Use the AI Applications's Integration API page to construct a CURL request that queries the application.
+
+
+Using the AI Applications> Integration > API page, construct a CURL request that calls your application with a query of miracle.
+
+Edit your request to set the page size to 3.
+
+Confirm that you received three responses and that they seem appropriate.
+
+
+```
+curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+"https://discoveryengine.googleapis.com/v1alpha/projects/506621020287/locations/global/collections/default_collection/engines/media-search-app_1762224421632/servingConfigs/default_search:search" \
+-d '{"query":"miracle","pageSize":3,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","userInfo":{"timeZone":"Asia/Singapore"}}'
+
+
+
+
+
+
+
+
+
+
+
+
+student_00_c65551c32081@cloudshell:~ (qwiklabs-gcp-00-08159c07c760)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+"https://discoveryengine.googleapis.com/v1alpha/projects/506621020287/locations/global/collections/default_collection/engines/media-search-app_1762224421632/servingConfigs/default_search:search" \
+-d '{"query":"miracle","pageSize":3,"queryExpansionSpec":{"condition":"AUTO"},"spellCorrectionSpec":{"mode":"AUTO"},"languageCode":"en-US","userInfo":{"timeZone":"Asia/Singapore"}}'
+{
+  "results": [
+    {
+      "id": "7263",
+      "document": {
+        "name": "projects/506621020287/locations/global/collections/default_collection/dataStores/movie-data-store_1762224441289/branches/0/documents/7263",
+        "id": "7263",
+        "structData": {
+          "media_type": "movie",
+          "production_year": 2004,
+          "uri": "https://www.google.com/search?q=miracle+(2004)",
+          "categories": [
+            "Drama"
+          ],
+          "media_duration": 135,
+          "poster_uri": "https://image.tmdb.org/t/p/w500/bQsgMzDjLKUpLzOoijuIWPJvaf0.jpg",
+          "title": "Miracle (2004)",
+          "available_time": "2023-01-01T00:00:00Z"
+        },
+        "derivedStructData": {
+          "can_fetch_raw_content": "true"
+        }
+      }
+    },
+    {
+      "id": "141606",
+      "document": {
+        "name": "projects/506621020287/locations/global/collections/default_collection/dataStores/movie-data-store_1762224441289/branches/0/documents/141606",
+        "id": "141606",
+        "structData": {
+          "title": "Miracle on Ice (1981)",
+          "media_type": "movie",
+          "production_year": 1981,
+          "uri": "https://www.google.com/search?q=miracle+on+ice+(1981)",
+          "available_time": "2023-01-01T00:00:00Z",
+          "poster_uri": "https://image.tmdb.org/t/p/w500/ljV7oejb4OqceZSF3zSSSjZmbKg.jpg",
+          "media_duration": 132,
+          "categories": [
+            "Children",
+            "Drama"
+          ]
+        },
+        "derivedStructData": {
+          "can_fetch_raw_content": "true"
+        }
+      }
+    },
+    {
+      "id": "274681",
+      "document": {
+        "name": "projects/506621020287/locations/global/collections/default_collection/dataStores/movie-data-store_1762224441289/branches/0/documents/274681",
+        "id": "274681",
+        "structData": {
+          "categories": [
+            "Documentary"
+          ],
+          "media_type": "movie",
+          "available_time": "2023-01-01T00:00:00Z",
+          "title": "Of Miracles and Men (2015)",
+          "poster_uri": "https://image.tmdb.org/t/p/w500/4q5ARYXT6zfo5rUShP7eLXH7uXO.jpg",
+          "production_year": 2015,
+          "uri": "https://www.google.com/search?q=of+miracles+and+men+(2015)",
+          "media_duration": 103
+        },
+        "derivedStructData": {
+          "can_fetch_raw_content": "true"
+        }
+      }
+    }
+  ],
+  "totalSize": 866,
+  "attributionToken": "kAL0DwEKDAjD2qXIBhDZhL2eAhIkNjkwNmQ4YmQtMDAwMC0yZmE4LThjOTMtMDg5ZTA4Mjk0Zjc0IgVNRURJQSpEuaqiMo6-nRWf1rctu5H6MbaqojKOkckwvpH6MZD3sjDg65A309qJN5zWty3Usp0VwvCeFezgry3j65A3treMLdDaiTcwAVKKAXByb2plY3RzLzUwNjYyMTAyMDI4Ny9sb2NhdGlvbnMvZ2xvYmFsL2NvbGxlY3Rpb25zL2RlZmF1bHRfY29sbGVjdGlvbi9lbmdpbmVzL21lZGlhLXNlYXJjaC1hcHBfMTc2MjIyNDQyMTYzMi9zZXJ2aW5nQ29uZmlncy9kZWZhdWx0X3NlYXJjaA",
+  "nextPageToken": "AN3YGN5IDOwUWO4ATLzkzY40COhZmMtADMwATLjJGOkZDM5YDJaIwyKeOlQYAy1O8wIwgEzEgC",
+  "guidedSearchResult": {},
+  "summary": {},
+  "queryExpansionInfo": {}
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======================
+
+
+Task 5. Create a Media Recommendations application
+
+n this task, you will create a Media recommendations application to optimize content recommendations based on the click-through rate (CTR). By configuring settings like recommendation type, business objective, and data store, you aim to improve the accuracy and relevance of the recommendations, ultimately enhancing user engagement and increasing CTR.
+
+
+Answer the following questions about recommendation types and business objectives.
+
+Which recommendation types are based on the activity of all users?
+YES	Most Popular	- ACROSS ALL CONTENT, FOR ALL USERS
+YES	More Like This	- SIMILAR TO THIS CONTENT, FOR ALL USERS
+Others You May Like	- SPECIFIC USER HISTORY AND CURRENT/THIS CONTENT/ITEM
+Recommended for You	- SPECIFIC USER HISTORY
+
+
+
+
+
+What does the Conversion rate optimization objective do? (Select all that are correct)
+NO	Optimizes for movies that are CLICKED ON when recommended
+NO	Recommends movies that are likely to be WATCHED LONGER than others
+YES	Considers the PERCENTAGE of the movie watched by users
+YES	Maximizes the LIKELIHOOD a user CONSUMES RECOMMENDED CONTENT up to a THRESHOLD
+
+
+
+
+
+
+Create a Media recommendations application, with the following settings:
+Setting			Value
+Name			media_rec_app
+Recommendation type	Others you may like
+Business Objective	Click-through rate (CTR)
+Data Store		movie_data_store
+
+..Recommendation engine
+Recommend similar content in websites, documents and any other structured content
+..Media recommendations
+Recommendations specialized for consumer focused media applications (e.g. audio/video streaming, digital publishing)
+..Retail recommendations
+Recommendations specialized for e-commerce applications
+
+
+True or false: You see a green checkbox indicating enough documents.
+True
+
+Look at the conditions at the top of the page.
+True or false: Your event data fulfills one set of conditions.
+False
+
+
+
+As noted earlier, the user event data has not been fully assimilated, and thus isn't available for training your recommendation model. The 16 million user events will take 12-24 hours to fully assimilate, at which point your model will start training.
+
+Though you won't have a chance to complete training of the recommendation model for the application you've created, you can continue in the lab checking training settings and serving configurations for the application.
+
+
+Check the training status for your recommendation model and note that training has not yet started. Answer the following question about your training settings:
+How often will tuning occur?
+NO	Daily
+NO	Monthly
+YES	Every three months
+
+
+
+
+
+Now, configure serving on your application to demote a result if the user has played the content for at least 30 seconds.
+
+Configure serving on your application to diversify recommendations, with the following settings:
+Setting				Value
+Diversification type		Rules based
+Enable diversification level	Low
+
+
+What will this diversification do?
+YES	Show results with different categories, with a maximum of 3 per category
+NO	Use semantic similarity to produce better-performing diversification
+NO	Show more results
+
+Enable diversification level
+..Low
+Recommendation results will show up to 3 items per category
+..Medium
+Recommendation results will show up to 2 items per category
+..High
+Recommendation results will show up to 1 item per category
+..Auto
+Number of recommended items per category will be automatically determined, based on data
+
+
+
+
+Visit the integration page, select a document, and note the CURL request that would be used to get recommendations for movies based on an existing movie.
+```
+curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+https://discoveryengine.googleapis.com/v1beta/projects/506621020287/locations/global/collections/default_collection/engines/media-rec-app_1762226039204/servingConfigs/media-rec-app_1762226039204:recommend \
+-d '{"userEvent":{"eventType":"view-item","userPseudoId":"<USER_PSEUDO_ID>","documents":[{"id":"1"}]}}'
+```
+
+
+```
+student_00_c65551c32081@cloudshell:~ (qwiklabs-gcp-00-08159c07c760)$ curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+> -H "Content-Type: application/json" \
+> https://discoveryengine.googleapis.com/v1beta/projects/506621020287/locations/global/collections/default_collection/engines/media-rec-app_1762226039204/servingConfigs/media-rec-app_1762226039204:recommend \
+> -d '{"userEvent":{"eventType":"view-item","userPseudoId":"<USER_PSEUDO_ID>","documents":[{"id":"1"}]}}'
+{
+  "error": {
+    "code": 404,
+    "message": "Engine projects/506621020287/locations/global/collections/default_collection/engines/media-rec-app_1762226039204 not found.",
+    "status": "NOT_FOUND"
+  }
+}
+```
+
+
+The recommended method is being called on what type of resource?
+engine
+datastore
+operation
+YES	servingConfig
+
+
+
+
+
+
+
+
+Even after assimilating all the event data, training your media recommendation model will take 24+ hours, so you won't be able to test the application you built in this lab. Here's an example of a recommendation request that starts with movie document 1 for the movie Toy Story:
+
+Example Command
+```
+    curl -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+        -H "Content-Type: application/json" \
+        https://discoveryengine.googleapis.com/v1beta/projects/376236993954/locations/global/collections/default_collection/engines/media-rec-app_1740501539611/servingConfigs/media-rec-app_1740501539611:recommend \
+        -d '{"userEvent":{"eventType":"view-item","userPseudoId":"a1b2c3","documents":[{"id":"1"}]}}'
+```
+
+Example Output
+```
+    {
+        "results": [
+            {
+            "id": "260"
+            },
+            {
+            "id": "58559"
+            },
+            {
+            "id": "858"
+            },
+            {
+            "id": "318"
+            },
+            {
+            "id": "225173"
+            },
+            {
+            "id": "608"
+            },
+            {
+            "id": "109487"
+            },
+            {
+            "id": "7153"
+            },
+            {
+            "id": "50872"
+            },
+            {
+            "id": "254726"
+            },
+            {
+            "id": "4993"
+            },
+            {
+            "id": "2571"
+            },
+            {
+            "id": "60069"
+            },
+            {
+            "id": "296"
+            },
+            {
+            "id": "527"
+            },
+            {
+            "id": "1210"
+            },
+            {
+            "id": "4306"
+            },
+            {
+            "id": "2959"
+            },
+            {
+            "id": "5952"
+            },
+            {
+            "id": "4886"
+            }
+        ],
+        "attributionToken": "ChM5NTIyNDYyNzE1NTE5NzA1OTg4GhttZWRpYS1yZWMtYXBwXzE3NDA1MDE1Mzk2MTEiG21lZGlhLXJlYy1hcHBfMTc0MDUwMTUzOTYxMSgAMAJ"
+    }
+```
+
+
+
+
+
+=======================
+
+
+
+
+Reflections
+- Task 2 has missing instructions. WHICH DATA STORE SHOULD WE CREATE AND IMPORT USER EVENTS INTO????
+
+
+
+
+
+
+
+
+
+
+
