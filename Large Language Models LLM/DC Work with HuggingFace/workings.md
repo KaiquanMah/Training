@@ -322,7 +322,6 @@ print(short_summary_text[0]["summary_text"])
 Part 2
 * Repeat these steps for a summarization pipeline that has a minimum length of 50 and maximum of 150.
 ```
-# Generate a summary of original_text between 1 and 10 tokens
 short_summarizer = pipeline(task="summarization", 
                             model="cnicu/t5-small-booksum", 
                             min_new_tokens=50, 
@@ -401,6 +400,78 @@ output = my_pipeline("This course is pretty good, I guess.")
 print(f"Sentiment using AutoClasses: {output[0]['label']}")
 ```
 
+
+
+
+
+
+
+
+
+# Text classification vs summarisation vs QnA
+Text classification
+* label news articles - sports, tech, public policy
+* social media posts - POS/NEG
+
+summarisation
+* from contract, get list of key clauses
+* from 10-page financial report, get brief overview
+
+QnA
+* From co doc, find maternity leave policy details
+* From annual report, find Q3 REV
+
+
+
+
+
+# Extracting text with PyPDF
+PyPDF lets us extract text from PDFs, making it easy to work with multi-page documents like policy files.
+In this exercise, you’ll load the US_Employee_Policy.pdf, extract its content page by page, and combine it into a single string, preparing the text for a question-answering pipeline.
+* Import the required class from pypdf and use it to load the PDF file.
+* Access each page and extract its content using the correct method.
+
+```
+from pypdf import PdfReader
+
+# Extract text from the PDF
+reader = PdfReader("US_Employee_Policy.pdf")
+
+# Extract text from all pages
+document_text = ""
+for page in reader.pages: 
+    document_text += page.extract_text()
+
+print(document_text)
+```
+
+
+
+
+# Building a Q&A pipeline
+In the previous exercise, we extracted text from a multi-page document using PyPDF and prepared it as a single string.
+Now, you’ll build a question-answering pipeline using Hugging Face to retrieve specific answers from the document.
+Both the pipeline module and document_text have been preloaded for you.
+* Initialize a question-answering pipeline with the correct task and model.
+* Pass the question and document_text to the pipeline.
+* Print the result to view the answer.
+
+```
+# Load the question-answering pipeline
+qa_pipeline = pipeline(task="question-answering", 
+                       model="distilbert-base-cased-distilled-squad")
+
+question = "What is the notice period for resignation?"
+
+# Get the answer from the QA pipeline
+result = qa_pipeline(question=question, 
+                     context=document_text)
+
+# Print the answer
+print(f"Document text: {document_text}")
+print(f"Result: {result}")
+print(f"Answer: {result['answer']}")
+```
 
 
 
