@@ -337,5 +337,71 @@ print(short_summary_text[0]["summary_text"])
 
 
 
+# When to use AutoModels and AutoTokenizers?
+* Pipelines and AutoModels with AutoTokenizers are two approaches to working with Hugging Face models, each suited for different use cases.
+* Pipelines offer simplicity, while AutoModels and AutoTokenizers provide more control and customization.
+
+Pipelines
+* **Quick** way to classify customer reviews as POS/NEG - **sentiment analysis**
+* **Simple text summarisation** for news articles
+* quickly **compare multiple text generation models**
+
+Auto Classes
+* customer support model tt **prioritises** 'Urgent' category more often
+* **tokenise** Fin Rpts, **add custom tokens** for terms eg EBITDA, ROI
+
+
+
+
+# Tokenizing text with AutoTokenizer
+* AutoTokenizers simplify text preparation by automatically handling cleaning, normalization, and tokenization.
+* They ensure the text is processed just as the model expects.
+* In this exercise, explore how AutoTokenizer transforms text into tokens ready for machine learning tasks.
+* Import the required class from transformers, load the tokenizer using the correct method, and split input text into tokens.
+
+```
+# Import necessary library for tokenization
+from transformers import AutoTokenizer
+
+# Load the tokenizer
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased-finetuned-sst-2-english")
+
+# Split input text into tokens
+tokens = tokenizer.tokenize("AI: Making robots smarter and humans lazier!")
+
+# Display the tokenized output
+print(f"Tokenized output: {tokens}")
+```
+
+
+
+
+# Using AutoClasses
+* You’ve seen how tokenizers work and explored their role in preparing text for models.
+* Now, let’s take it a step further by combining AutoModels and AutoTokenizers with the pipeline() function.
+* It's a nice balance of control and convenience.
+* Continue with the sentiment analysis task and combine AutoClasses with the pipeline module.
+* `AutoModelForSequenceClassification, AutoTokenizer and pipeline` from the transformers library have already been imported for you.
+* Download the model and tokenizer and save as my_model and my_tokenizer, respectively.
+* Create the pipeline and save as my_pipeline.
+* Predict the output using my_pipeline and save as output.
+
+```
+# Download the model and tokenizer
+my_model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased-finetuned-sst-2-english")
+my_tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased-finetuned-sst-2-english")
+
+# Create the pipeline
+my_pipeline = pipeline(task="sentiment-analysis", 
+                        model=my_model, 
+                        tokenizer=my_tokenizer)
+
+# Predict the sentiment
+output = my_pipeline("This course is pretty good, I guess.")
+print(f"Sentiment using AutoClasses: {output[0]['label']}")
+```
+
+
+
 
 
