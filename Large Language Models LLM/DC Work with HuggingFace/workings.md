@@ -262,7 +262,76 @@ print(f"Top Label: {output['labels'][0]} with score: {output['scores'][0]}")
 
 
 
+# Summarizing long text
+Summarization reduces large text into manageable content, helping readers quickly grasp key points from lengthy articles or documents.
 
+There are 2 main types:
+* extractive, which selects key sentences from the original text, and
+* abstractive, which generates new sentences summarizing main ideas.
+
+In this exercise, you’ll create an **abstractive summarization pipeline** using Hugging Face's pipeline() function and the cnicu/t5-small-booksum model. 
+You’ll summarize text from a Wikipedia page on Greece, comparing the abstractive model's rephrased output to the original.
+
+The pipeline function from the transformers library and the original_text have already been loaded for you.
+* Create the summarization pipeline using the task "summarization" and save as summarizer.
+* Use the new pipeline to create a summary of the text and save as summary_text.
+* Compare the length of the original and summary text.
+
+
+```
+# Create the summarization pipeline
+summarizer = pipeline(task="summarization", 
+                      model="cnicu/t5-small-booksum")
+
+# Summarize the text
+summary_text = summarizer(original_text)
+
+# Compare the length
+print(f"Original text length: {len(original_text)}")
+print(f"Summary length: {len(summary_text[0]['summary_text'])}")
+```
+
+
+
+
+
+
+
+
+# Adjusting the summary length
+* The pipeline() function, has two important parameters: min_new_tokens and max_new_tokens.
+* These are useful for adjusting the length of the resulting summary text to be short, longer, or within a certain number of words.
+* You might want to do this if there are space constraints (i.e., small storage), to enhance readability, or improve the quality of the summary.
+* You'll experiment with a short and long summarizer by setting these two parameters to a small range, then a wider range.
+* pipeline from the transformers library and the original_text have already been loaded for you.
+
+Part 1
+* Create a summarization pipeline to summarize original_text to between 1 and 10 tokens.
+```
+# Generate a summary of original_text between 1 and 10 tokens
+short_summarizer = pipeline(task="summarization", 
+                            model="cnicu/t5-small-booksum", 
+                            min_new_tokens=1, 
+                            max_new_tokens=10)
+
+short_summary_text = short_summarizer(original_text)
+
+print(short_summary_text[0]["summary_text"])
+```
+
+Part 2
+* Repeat these steps for a summarization pipeline that has a minimum length of 50 and maximum of 150.
+```
+# Generate a summary of original_text between 1 and 10 tokens
+short_summarizer = pipeline(task="summarization", 
+                            model="cnicu/t5-small-booksum", 
+                            min_new_tokens=50, 
+                            max_new_tokens=150)
+
+short_summary_text = short_summarizer(original_text)
+
+print(short_summary_text[0]["summary_text"])
+```
 
 
 
