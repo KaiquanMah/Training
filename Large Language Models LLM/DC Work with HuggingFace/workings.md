@@ -287,9 +287,21 @@ summarizer = pipeline(task="summarization",
 summary_text = summarizer(original_text)
 
 # Compare the length
-print(f"Original text length: {len(original_text)}")
+print(f"Original text length: {len(original_tex
+t)}")
+print(f"Original text: {original_text}")
 print(f"Summary length: {len(summary_text[0]['summary_text'])}")
+print(f"Summary text: {summary_text[0]['summary_text']}")
 ```
+Original text length: 829
+Original text: 
+Greece has many islands, with estimates ranging from somewhere around 1,200 to 6,000, depending on the minimum size to take into account. The number of inhabited islands is variously cited as between 166 and 227.
+The Greek islands are traditionally grouped into the following clusters: the Argo-Saronic Islands in the Saronic Gulf near Athens; the Cyclades, a large but dense collection occupying the central part of the Aegean Sea; the North Aegean islands, a loose grouping off the west coast of Turkey; the Dodecanese, another loose collection in the southeast between Crete and Turkey; the Sporades, a small tight group off the coast of Euboea; and the Ionian Islands, chiefly located to the west of the mainland in the Ionian Sea. Crete with its surrounding islets and Euboea are traditionally excluded from this grouping.
+
+Summary length: 473
+Summary text: Greece has many islands, with estimates ranging from somewhere around 1,200 to 6,000 depending on the minimum size to take into account. The number of inhabited islands is variously cited as between 166 and 227. The Greek islands are traditionally grouped into the following clusters: the Argo-Saronic Islands in the Saronic Gulf near Athens; the Cyclades, a large but dense collection occupying the central part of the Aegean Sea; the North Aegesan islands, an loose group
+
+
 
 
 
@@ -318,19 +330,25 @@ short_summary_text = short_summarizer(original_text)
 
 print(short_summary_text[0]["summary_text"])
 ```
+    Greece has many islands, with estimates ranging from
 
+    
 Part 2
 * Repeat these steps for a summarization pipeline that has a minimum length of 50 and maximum of 150.
 ```
-short_summarizer = pipeline(task="summarization", 
+long_summarizer = pipeline(task="summarization", 
                             model="cnicu/t5-small-booksum", 
                             min_new_tokens=50, 
                             max_new_tokens=150)
 
-short_summary_text = short_summarizer(original_text)
+long_summary_text = long_summarizer(original_text)
 
-print(short_summary_text[0]["summary_text"])
+print(long_summary_text[0]["summary_text"])
 ```
+    Greece has many islands, with estimates ranging from somewhere around 1,200 to 6,000 depending on the minimum size to take into account. The number of inhabited islands is variously cited as between 166 and 227. The Greek islands are traditionally grouped into the following clusters: the Argo-Saronic Islands in the Saronic Gulf near Athens; the Cyclades, a large but dense collection occupying the central part of the Aegean Sea; the North Aegesan islands, an loose group
+
+
+
 
 
 
@@ -371,7 +389,8 @@ tokens = tokenizer.tokenize("AI: Making robots smarter and humans lazier!")
 # Display the tokenized output
 print(f"Tokenized output: {tokens}")
 ```
-
+    Tokenized output: ['ai', ':', 'making', 'robots', 'smarter', 'and', 'humans', 'la', '##zier', '!']
+    
 
 
 
@@ -444,7 +463,38 @@ for page in reader.pages:
 
 print(document_text)
 ```
+    US Employee Policy Document
+    Welcome to the US Employee Policy document. This document outlines the policies and benefits
+    available to all employees. Please read carefully to understand your entitlements and
+    responsibilities.
+    1. Vacation Policy:
+    Employees are entitled to 25 vacation days annually.
+    2. Sick Leave:
+    Employees may take up to 10 sick days per year.
+    3. Notice Period:
+    Employees are required to give a 2-week notice before resignation.Work and Leave Policies
+    4. Public Holidays:
+    The company observes 12 public holidays annually.
+    5. Maternity Leave:
+    Employees are entitled to up to 16 weeks of maternity leave.
+    6. Paternity Leave:
+    Employees are entitled to up to 10 days of paternity leave.
+    7. Volunteer Days:
+    Each employee is allowed 1 volunteer day annually to contribute to social causes.Additional Information
+    8. Probation Period:
+    New employees undergo a 3-month probation period.
+    9. Remote Work:
+    Employees may work remotely up to 2 days per week.
+    10. Retirement Age:
+    The standard retirement age is 65 years.
+    For further questions, please contact the HR department.
 
+
+
+
+
+
+    
 
 
 
@@ -472,7 +522,37 @@ print(f"Document text: {document_text}")
 print(f"Result: {result}")
 print(f"Answer: {result['answer']}")
 ```
+    Document text: US Employee Policy Document
+    Welcome to the US Employee Policy document. This document outlines the policies and benefits
+    available to all employees. Please read carefully to understand your entitlements and
+    responsibilities.
+    1. Vacation Policy:
+    Employees are entitled to 25 vacation days annually.
+    2. Sick Leave:
+    Employees may take up to 10 sick days per year.
+    3. Notice Period:
+    Employees are required to give a 2-week notice before resignation.Work and Leave Policies
+    4. Public Holidays:
+    The company observes 12 public holidays annually.
+    5. Maternity Leave:
+    Employees are entitled to up to 16 weeks of maternity leave.
+    6. Paternity Leave:
+    Employees are entitled to up to 10 days of paternity leave.
+    7. Volunteer Days:
+    Each employee is allowed 1 volunteer day annually to contribute to social causes.Additional Information
+    8. Probation Period:
+    New employees undergo a 3-month probation period.
+    9. Remote Work:
+    Employees may work remotely up to 2 days per week.
+    10. Retirement Age:
+    The standard retirement age is 65 years.
+    For further questions, please contact the HR department.
 
+    
+    Result: {'score': 0.8854646682739258, 'start': 412, 'end': 418, 'answer': '2-week'}
+
+    
+    Answer: 2-week
 
 
 
