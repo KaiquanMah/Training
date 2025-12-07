@@ -418,7 +418,7 @@ my_pipeline = pipeline(task="sentiment-analysis",
 output = my_pipeline("This course is pretty good, I guess.")
 print(f"Sentiment using AutoClasses: {output[0]['label']}")
 ```
-
+Sentiment using AutoClasses: POSITIVE
 
 
 
