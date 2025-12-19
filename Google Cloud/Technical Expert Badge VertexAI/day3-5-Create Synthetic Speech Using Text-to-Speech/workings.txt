@@ -1,0 +1,530 @@
+Task 1. Enable the Text-to-Speech API
+The Cloud Text-to-Speech API page shows details, metrics and more.
+
+Enable the API:
+
+In the Navigation menu (Navigation menu icon), click APIs and Services > Library.
+
+Enter text-to-speech in the Search for APIs & Services box, then click Cloud Text-to-Speech API from the search results.
+
+Click Enable to enable the Cloud Text-to-Speech API.
+
+https://cloud.google.com/text-to-speech/docs/reference/rest/?apix=true
+
+
+
+
+
+
+
+
+
+
+
+============================================
+
+
+
+
+Task 2. Create a virtual environment
+MISSING STEP >> OPEN CLOUD SHELL
+gcloud config set compute/region us-central1
+
+
+
+Python virtual environments are used to isolate package installation from the system.
+
+Install the virtualenv environment:
+sudo apt-get install -y virtualenv
+
+Build the virtual environment:
+python3 -m venv venv
+
+Activate the virtual environment:
+source venv/bin/activate
+
+
+
+
+
+
+
+
+
+
+
+============================================
+
+Task 3. Create a service account
+You use a service account to authenticate your calls to the Text-to-Speech API.
+
+Create a service account:
+
+Run the following command in Cloud Shell:
+gcloud iam service-accounts create tts-qwiklab
+
+Generate a key to use that service account:
+gcloud iam service-accounts keys create tts-qwiklab.json --iam-account tts-qwiklab@qwiklabs-gcp-03-3821d6fe5c13.iam.gserviceaccount.com
+
+Finally, set the GOOGLE_APPLICATION_CREDENTIALS environment variable to the location of your key file:
+export GOOGLE_APPLICATION_CREDENTIALS=tts-qwiklab.json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+============================================
+
+
+
+Task 4. Get a list of available voices
+The Text-to-Speech API provides different voices and languages that you can use to create audio files. You can use any of the available voices as the speaker for your content.
+https://cloud.google.com/text-to-speech/docs/list-voices-and-types
+
+
+Note: The Text-to-Speech API includes several premium voices, known as WaveNet voices, that generate more natural-sounding synthetic speech. These voices are also a bit more expensive than other available voices. Refer to the Cloud Text-to-Speech pricing page for more details.
+https://cloud.google.com/text-to-speech/docs/list-voices-and-types#wavenet_voices
+https://cloud.google.com/text-to-speech/pricing?hl=en
+
+
+
+Still in Cloud Shell, use the following curl command to list the voices available when you use the Text-to-Speech API to create synthetic speech:
+curl -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+    -H "Content-Type: application/json; charset=utf-8" \
+    "https://texttospeech.googleapis.com/v1/voices"
+
+
+Extra - export to JSON
+curl -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+    -H "Content-Type: application/json; charset=utf-8" \
+    "https://texttospeech.googleapis.com/v1/voices" > voices.json
+
+
+
+
+The Text-to-Speech API returns a JSON-formatted result that looks similar to the following:
+
+{
+  "voices": [
+    {
+      "languageCodes": [
+        "es-ES"
+      ],
+      "name": "es-ES-Standard-A",
+      "ssmlGender": "FEMALE",
+      "naturalSampleRateHertz": 24000
+    },
+    {
+      "languageCodes": [
+        "ja-JP"
+      ],
+      "name": "ja-JP-Standard-A",
+      "ssmlGender": "FEMALE",
+      "naturalSampleRateHertz": 22050
+    },
+    {
+      "languageCodes": [
+        "pt-BR"
+      ],
+      "name": "pt-BR-Standard-A",
+      "ssmlGender": "FEMALE",
+      "naturalSampleRateHertz": 24000
+    },
+    ...
+  ]
+}
+
+
+
+In the curl command results, notice that each voice has four fields:
+- name: The voice ID you provide to request that voice.
+- ssmlGender: The gender of the voice to speak the text, as defined in the SSML W3 Recommendation.
+- naturalSampleRateHertz: The sampling rate of the voice.
+- languageCodes: The list of language codes associated with that voice.
+Also notice that some languages have several voices to choose from.
+
+
+
+Scope the results returned from the API to just a single language code:
+curl -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+    -H "Content-Type: application/json; charset=utf-8" \
+    "https://texttospeech.googleapis.com/v1/voices?language_code=en"
+
+
+curl -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+    -H "Content-Type: application/json; charset=utf-8" \
+    "https://texttospeech.googleapis.com/v1/voices?language_code=en" > voices_en.json
+
+
+
+
+
+============================================
+
+
+
+Task 5. Create synthetic speech from text
+Now that you've seen how to get the names of voices to speak your text, it's time to create some synthetic speech!
+
+
+
+
+5A Build your request
+For this, use the Cloud Shell Editor to build your request to the Text-to-Speech API in a text file named synthesize-text.json.
+
+In Cloud Shell, click Open Editor to open the Cloud Shell Editor.
+
+In the action bar, click File > New file.
+
+In the Select File Type or Enter File Name field, enter synthesize-text.json.
+
+Click OK.
+
+Add the following code to synthesize-text.json:
+
+{
+    'input':{
+        'text':'Cloud Text-to-Speech API allows developers to include
+           natural-sounding, synthetic human speech as playable audio in
+           their applications. The Text-to-Speech API converts text or
+           Speech Synthesis Markup Language (SSML) input into audio data
+           like MP3 or LINEAR16 (the encoding used in WAV files).'
+    },
+    'voice':{
+        'languageCode':'en-gb',
+        'name':'en-GB-Standard-A',
+        'ssmlGender':'FEMALE'
+    },
+    'audioConfig':{
+        'audioEncoding':'MP3'
+    }
+}
+
+Click File > Save to save the file.
+
+
+The JSON-formatted request provides three objects:
+- input: Provides the TEXT TO translate into synthetic SPEECH.
+- voice: Object specifies the voice to use for the synthetic speech.
+- audioConfig: Tells the Text-to-Speech API what kind of AUDIO ENCODING to SEND BACK.
+Click Open Terminal to return to the terminal.
+
+Call the Text-to-Speech API:
+
+curl -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d @synthesize-text.json "https://texttospeech.googleapis.com/v1/text:synthesize" \
+  > synthesize-text.txt
+
+The output of this call is saved to a file called synthesize-text.txt.
+
+Click Open Editor and open the synthesize-text.txt file. Notice that the Text-to-Speech API provides the audio output in base64-encoded text assigned to the audioContent field, similar to what's shown below:
+{
+  "audioContent": "//NExAASGoHwABhGudEACdzqFXfRE4EY3AACkD/zX4ADf/6J/[...]"
+}
+
+
+
+
+
+
+
+
+
+
+-------
+
+
+5B Translate the response
+To translate the response into audio, you select the audio data synthesize-text.txt contains and decode it into an audio file - for this lab, an MP3 file. There are many ways to do this, this lab provides some simple Python code.
+
+In the action bar, click File > New file.
+
+In the Select File Type or Enter File Name field, type then enter tts_decode.py.
+
+Click OK.
+
+Type or copy the following into tts_decode.py:
+
+import argparse
+from base64 import decodebytes
+import json
+
+"""
+Usage:
+        python tts_decode.py --input "synthesize-text.txt" \
+        --output "synthesize-text-audio.mp3"
+
+"""
+
+def decode_tts_output(input_file, output_file):
+    """ Decode output from Cloud Text-to-Speech.
+
+    input_file: the response from Cloud Text-to-Speech
+    output_file: the name of the audio file to create
+
+    """
+
+    with open(input_file) as input:
+        response = json.load(input)
+        audio_data = response['audioContent']
+
+        with open(output_file, "wb") as new_file:
+            new_file.write(decodebytes(audio_data.encode('utf-8')))
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description="Decode output from Cloud Text-to-Speech",
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--input',
+                       help='The response from the Text-to-Speech API.',
+                       required=True)
+    parser.add_argument('--output',
+                       help='The name of the audio file to create',
+                       required=True)
+
+    args = parser.parse_args()
+    decode_tts_output(args.input, args.output)
+
+Save tts_decode.py.
+
+
+
+
+
+
+-----------------
+
+
+5C Create and run the audio file
+To create an audio file from the response you received from the Text-to-Speech API:
+
+Click Open Terminal to return to Cloud Shell.
+
+Create the audio file synthesize-text-audio.mp3:
+
+python tts_decode.py --input "synthesize-text.txt" --output "synthesize-text-audio.mp3"
+
+Click Open Editor to open the Cloud Shell Editor.
+
+Click synthesize-text-audio.mp3 in the left pane to open the file.
+
+Play the audio to listen to the file. You hear the synthetic voice speak the text that you provided to it!
+
+
+
+
+
+============================================
+
+
+Task 6. Create synthetic speech from SSML
+In addition to using text, you can also provide input to the Text-to-Speech API in the form of Speech Synthesis Markup Language (SSML). SSML defines an XML format for representing synthetic speech. Using SSML input, you can more precisely control pauses, emphasis, pronunciation, pitch, speed, and other qualities in the synthetic speech output.
+https://cloud.google.com/text-to-speech/docs/ssml
+
+
+
+
+6A Build your request
+First, build your request to the Text-to-Speech API in a text file titled synthesize-ssml.json.
+
+Still in the Cloud Shell Editor, in the action bar, click File > New file.
+
+In the Select File Type or Enter File Name field, type then enter synthesize-ssml.json.
+
+Click OK.
+
+Type or copy the following into synthesize-ssml.json:
+
+{
+    'input':{
+        'ssml':'<speak><s>
+           <emphasis level="moderate">Cloud Text-to-Speech API</emphasis>
+           allows developers to include natural-sounding
+           <break strength="x-weak"/>
+           synthetic human speech as playable audio in their
+           applications.</s>
+           <s>The Text-to-Speech API converts text or
+           <prosody rate="slow">Speech Synthesis Markup Language</prosody>
+           <say-as interpret-as=\"characters\">SSML</say-as>
+           input into audio data
+           like <say-as interpret-as=\"characters\">MP3</say-as> or
+           <sub alias="linear sixteen">LINEAR16</sub>
+           <break strength="weak"/>
+           (the encoding used in
+           <sub alias="wave">WAV</sub> files).</s></speak>'
+    },
+    'voice':{
+        'languageCode':'en-gb',
+        'name':'en-GB-Standard-A',
+        'ssmlGender':'FEMALE'
+    },
+    'audioConfig':{
+        'audioEncoding':'MP3'
+    }
+}
+
+
+Notice that the input object of the JSON payload to send includes some different stuff this time around:
+- Rather than a text field, the input object has a ssml field instead.
+- The ssml field contains XML-formatted content with the <speak> element as its root.
+Each of the elements present in this XML representation of the input affects the output of the synthetic speech.
+
+
+
+Specifically, the elements in this sample have the following effects:
+<s> contains a sentence.
+<emphasis> adds stress on the enclosed word or phrase.
+<break> inserts a pause in the speech.
+<prosody> customizes the pitch, speaking rate, or volume of the enclosed text, as specified by the rate, pitch, or volume attributes.
+<say-as> provides more guidance about how to interpret and then say the enclosed text, for example, whether to speak a sequence of numbers as ordinal or cardinal.
+<sub> specifies a substitution value to speak for the enclosed text.
+Note: You can see the full list of SSML elements supported by Cloud Text-to-Speech by reviewing the SSML reference.
+
+
+Click Open Terminal to open the Cloud Shell terminal.
+
+Call the Text-to-Speech API, and save the output to a file called synthesize-ssml.txt:
+
+curl -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d @synthesize-ssml.json "https://texttospeech.googleapis.com/v1/text:synthesize" \
+  > synthesize-ssml.txt
+
+
+
+
+-----------
+
+
+
+
+
+
+6B Create and run the audio file
+Again, you need to decode the output from the Text-to-Speech API before you can hear the audio.
+
+Click Open Terminal. Run the following command to generate an audio file named synthesize-ssml-audio.mp3 using the tts_decode.py utility that you created previously:
+python tts_decode.py --input "synthesize-ssml.txt" --output "synthesize-ssml-audio.mp3"
+
+
+Click Open Editor.
+
+Click synthesize-ssml-audio.mp3 in the left pane, then play the embedded audio file.
+
+Notice the differences in the SSML output and the text file output: although both audio files say the same words, the SSML output speaks them a bit differently, adding pauses and different pronunciations for abbreviations.
+
+
+
+
+
+
+
+
+
+
+
+
+============================================
+
+
+
+
+
+Task 7. Configure audio output and device profiles
+Going beyond SSML, you can provide even more customization to your synthetic speech output created by the Text-to-Speech API. You can specify 
+- other audio ENCODINGS, 
+- change the PITCH of the audio output, and even 
+- request that the output be OPTIMIZED for a SPECIFIC type of HARDWARE.
+
+
+
+
+7A Build your request
+Build your request to the Text-to-Speech API in a text file titled synthesize-with-settings.json:
+
+In the action bar, click File > New file.
+
+In the Select File Type or Enter File Name field, type then enter synthesize-with-settings.json.
+
+Click OK.
+
+Type or copy the following into synthesize-with-settings.json:
+
+{
+    'input':{
+        'text':'The Text-to-Speech API is ideal for any application
+          that plays audio of human speech to users. It allows you
+          to convert arbitrary strings, words, and sentences into
+          the sound of a person speaking the same things.'
+    },
+    'voice':{
+        'languageCode':'en-us',
+        'name':'en-GB-Standard-A',
+        'ssmlGender':'FEMALE'
+    },
+    'audioConfig':{
+      'speakingRate': 1.15,
+      'pitch': -2,
+      'audioEncoding':'OGG_OPUS',
+      'effectsProfileId': ['headphone-class-device']
+    }
+}
+
+Save the file.
+
+
+Notice the audioConfig object now contains additional fields:
+- The speakingRate field specifies a SPEED at which the speaker says the voice. A value of 1.0 is the normal speed for the voice, 0.5 is half that fast, and 2.0 is twice as fast.
+- The pitch field specifies a difference in tone to speak the words. The value here specifies a number of semitones lower (NEGATIVE) or higher (POSITIVE) to speak the words.
+- The audioEncoding field specifies the audio encoding to use for the data. The accepted values for this field are LINEAR16, MP3, and OGG_OPUS.
+- The effectsProfileId field requests that the Text-to-Speech API optimizes the audio output for a specific playback device. The API applies an predefined audio profile to the output that enhances the audio quality on the specified class of devices.
+Note: The Audio Profiles feature is in Beta release status. Review the guide for details about how to use it in your application. All other settings described here are generally available for normal use in your application.
+
+
+
+
+Click Open Terminal.
+
+Call the Text-to-Speech API:
+
+curl -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d @synthesize-with-settings.json "https://texttospeech.googleapis.com/v1beta1/text:synthesize" \
+  > synthesize-with-settings.txt
+
+The output of this call is saved to a file called synthesize-with-settings.txt.
+
+
+
+
+
+
+
+-------------------------
+
+
+
+
+7B Create and run the audio file
+Run the following command to generate an audio file named synthesize-with-settings-audio.mp3 from the output received from the Text-to-Speech API:
+python tts_decode.py --input "synthesize-with-settings.txt" --output "synthesize-with-settings-audio.ogg"
+
+Click Open Editor to open the Cloud Shell Editor.
+
+Click synthesize-with-settings-audio.mp3 in the left pane to open the file and then play the audio.
+
+Play the synthesize-with-settings-audio.mp3 audio file as well as the other audio files you created in this lab. Notice that the voice on the audio speaks a bit faster and lower than the other audio files.
+
+
+
