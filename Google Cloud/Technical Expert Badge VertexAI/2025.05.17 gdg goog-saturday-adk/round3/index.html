@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive t-SNE 3D Visualization</title>
+
+    <!-- Embedded CSS -->
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap; /* Allows wrapping on smaller screens */
+            height: 100vh; /* Full viewport height */
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        .visualization-area {
+            flex: 2; /* Takes up more space */
+            min-width: 400px; /* Minimum width */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #fff;
+            position: relative; /* Needed for status absolute positioning */
+        }
+
+        .visualization-area h2 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+
+        #visualization-container {
+            width: 100%;
+            flex-grow: 1; /* Takes available height */
+            position: relative; /* Needed for canvas absolute positioning */
+            background-color: #eee; /* Background for the canvas area */
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        #visualization-container canvas {
+            display: block; /* Remove extra space below canvas */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #status {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            z-index: 10; /* Ensure it's above canvas */
+        }
+
+
+        .controls-and-explanations {
+            flex: 1; /* Takes less space */
+            min-width: 300px; /* Minimum width */
+            max-width: 400px; /* Maximum width */
+            overflow-y: auto; /* Allow scrolling if content overflows */
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            border-left: 1px solid #ddd;
+        }
+
+        .controls, .explanations {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .controls:last-child, .explanations:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .controls h2, .explanations h2 {
+             color: #0056b3;
+             margin-top: 0;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .control-group label {
+            margin-right: 10px;
+            font-weight: bold;
+            min-width: 100px; /* Align labels */
+        }
+
+        .control-group input[type="number"] {
+            flex-grow: 1; /* Take available space */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-width: 100px; /* Limit width */
+        }
+
+        .param-info {
+            margin-left: 5px;
+            font-size: 0.9em;
+            color: #555;
+            cursor: help;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            background-color: #eee;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .explanations ul {
+            padding-left: 20px;
+        }
+
+        .explanations li {
+            margin-bottom: 10px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto; /* Allow content to define height */
+                overflow: auto; /* Allow scrolling */
+            }
+
+            .visualization-area, .controls-and-explanations {
+                min-width: auto;
+                max-width: none;
+                flex: none; /* Remove flex grow */
+                width: 100%; /* Full width */
+                border-left: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .visualization-area {
+                 height: 60vh; /* Give visualization a fixed height on small screens */
+            }
+
+             .controls-and-explanations {
+                 order: 1; /* Place controls/explanations first on small screens */
+             }
+
+             .visualization-area {
+                 order: 2; /* Place visualization second */
+             }
+        }
+    </style>
+
+    <!-- External Libraries from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.159.0/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/examples/jsm/controls/OrbitControls.js"></script>
+    <!-- tsne-js might need tfjs -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.13.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@keithpc/tsne-js@1.0.0/dist/tsne.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="visualization-area">
+            <h2>t-SNE 3D Visualization</h2>
+            <div id="visualization-container">
+                <!-- Three.js canvas will be appended here by script -->
+            </div>
+            <div id="status">Status: Ready</div>
+        </div>
+
+        <div class="controls-and-explanations">
+            <div class="controls">
+                <h2>Parameters</h2>
+                <div class="control-group">
+                    <label for="perplexity">Perplexity:</label>
+                    <input type="number" id="perplexity" value="30" min="5" max="50">
+                    <span class="param-info" title="Balances attention between local and global aspects of the data. Typical values are between 5 and 50.">?</span>
+                </div>
+                <div class="control-group">
+                    <label for="learningRate">Learning Rate:</label>
+                    <input type="number" id="learningRate" value="200" min="10" max="1000">
+                     <span class="param-info" title="Controls how quickly the algorithm moves points. A value too low can result in a poor embedding, while a value too high can cause points to clump together.">?</span>
+                </div>
+                 <div class="control-group">
+                    <label for="iterations">Iterations:</label>
+                    <input type="number" id="iterations" value="500" min="100" max="5000" step="100">
+                     <span class="param-info" title="The number of steps the optimization algorithm runs. More iterations generally lead to a better result but take longer.">?</span>
+                </div>
+                <button id="run-tsne-button">Run t-SNE</button>
+            </div>
+
+            <div class="explanations">
+                <h2>What is t-SNE?</h2>
+                <p>
+                    t-distributed Stochastic Neighbor Embedding (t-SNE) is a dimensionality reduction technique particularly well-suited for the visualization of high-dimensional datasets. It maps high-dimensional data points into a lower-dimensional space (like 2D or 3D) while trying to preserve the relationships between nearby points.
+                </p>
+                <p>
+                    Unlike methods like PCA, which focus on preserving large pairwise distances to maximize variance, t-SNE focuses on preserving small pairwise distances, meaning it tries to keep points that are close together in the high-dimensional space close together in the low-dimensional embedding. This makes it excellent at revealing clusters and local structure in data.
+                </p>
+
+                <h2>How to Interpret the Visualization</h2>
+                <p>
+                    Each point in the 3D visualization represents a single data point from the original high-dimensional dataset. The color of a point indicates its original class label.
+                </p>
+                <p>
+                    Clusters of points with the same color suggest that these points were similar in the high-dimensional space. The distance between clusters in the 3D visualization is less reliable than the distances *within* clusters. t-SNE is good at showing *if* points are clustered, but not necessarily the exact separation distance or relative size between different clusters.
+                </p>
+                 <p>
+                    Use your mouse/touchpad to rotate, pan, and zoom the 3D view to explore the structure.
+                 </p>
+
+                 <h2>Parameter Effects</h2>
+                 <p>
+                     Experiment with the parameters above and click "Run t-SNE" to see how they affect the resulting 3D layout.
+                 </p>
+                 <ul>
+                     <li><strong>Perplexity:</strong> Can be thought of as a guess about the number of close neighbors each point has. Higher perplexity considers more neighbors, potentially revealing global structure, while lower perplexity focuses more on local structure.</li>
+                     <li><strong>Learning Rate:</strong> Affects the step size during optimization. Too low, and convergence is slow; too high, and the optimization might overshoot or become unstable, leading to poor embeddings.</li>
+                     <li><strong>Iterations:</strong> The algorithm iteratively adjusts point positions. More iterations allow more time for the points to settle into a stable configuration, but computation takes longer.</li>
+                 </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Embedded JavaScript -->
+    <script type="text/javascript">
+        // --- Three.js Setup ---
+        let scene, camera, renderer, controls;
+        let pointGeometry, pointMaterial, pointMesh;
+        let pointGroup; // Group to hold all points for easy clearing
+
+        const visualizationContainer = document.getElementById('visualization-container');
+        const statusDiv = document.getElementById('status');
+
+        function initThreeJS() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff); // White background
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, visualizationContainer.clientWidth / visualizationContainer.clientHeight, 0.1, 1000);
+            camera.position.z = 50;
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(visualizationContainer.clientWidth, visualizationContainer.clientHeight);
+            visualizationContainer.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+            controls.dampingFactor = 0.25;
+            controls.screenSpacePanning = false;
+            controls.maxDistance = 200;
+            controls.minDistance = 1;
+
+            // Lighting (Optional, but good if using materials affected by light)
+            const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+
+            // Point representation (using spheres)
+            pointGeometry = new THREE.SphereGeometry(0.5, 8, 8); // Radius, widthSegments, heightSegments
+            // We'll create materials dynamically based on color
+
+            // Group for points
+            pointGroup = new THREE.Group();
+            scene.add(pointGroup);
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize, false);
+
+            // Start animation loop
+            animate();
+        }
+
+        function onWindowResize() {
+            camera.aspect = visualizationContainer.clientWidth / visualizationContainer.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(visualizationContainer.clientWidth, visualizationContainer.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+            renderer.render(scene, camera);
+        }
+
+        // --- Data Generation ---
+        let highDimData = [];
+        let labels = [];
+        const numPoints = 200;
+        const numDimensions = 15;
+        const numClusters = 4;
+        const pointsPerCluster = numPoints / numClusters;
+        const clusterSeparation = 10; // Distance between cluster centers
+        const noiseLevel = 2; // Spread of points within a cluster
+
+        const colors = [
+            new THREE.Color(0xff0000), // Red
+            new THREE.Color(0x00ff00), // Green
+            new THREE.Color(0x0000ff), // Blue
+            new THREE.Color(0xffff00), // Yellow
+            new THREE.Color(0xff00ff), // Magenta
+            new THREE.Color(0x00ffff)  // Cyan
+        ];
+
+        function generateData() {
+            highDimData = [];
+            labels = [];
+            const clusterCenters = [];
+
+            // Generate cluster centers
+            for (let i = 0; i < numClusters; i++) {
+                const center = [];
+                for (let j = 0; j < numDimensions; j++) {
+                    // Place centers along axes or randomly
+                    center.push(Math.random() * clusterSeparation * (Math.random() > 0.5 ? 1 : -1));
+                }
+                clusterCenters.push(center);
+            }
+
+            // Generate points around centers
+            for (let i = 0; i < numPoints; i++) {
+                const clusterIndex = Math.floor(i / pointsPerCluster);
+                const center = clusterCenters[clusterIndex];
+                const point = [];
+                for (let j = 0; j < numDimensions; j++) {
+                    // Add noise to the center
+                    point.push(center[j] + (Math.random() - 0.5) * 2 * noiseLevel);
+                }
+                highDimData.push(point);
+                labels.push(clusterIndex);
+            }
+
+            console.log(`Generated ${numPoints} points in ${numDimensions} dimensions with ${numClusters} clusters.`);
+        }
+
+        // --- t-SNE Computation ---
+        let tsne;
+        let tsneWorker;
+
+        function createTSNE() {
+            // Create Web Worker for t-SNE computation
+            tsneWorker = new Worker('tsne-worker.js');
+
+            tsneWorker.onmessage = function(e) {
+                if (e.data.type === 'progress') {
+                    setStatus(`Running t-SNE... Step ${e.data.step}/500`);
+                } else if (e.data.type === 'complete') {
+                    updateVisualization(e.data.result);
+                    disableControls(false);
+                    setStatus('t-SNE computation complete');
+                } else if (e.data.type === 'error') {
+                    setStatus('t-SNE computation failed');
+                    disableControls(false);
+            const normalizedData = highDimData.map(point => 
+                point.map(val => (val - Math.min(...point)) / (Math.max(...point) - Math.min(...point)))
+            );
+
+            // Use requestAnimationFrame for non-blocking computation
+            function computeTSNE() {
+                const options = {
+                    dim: 3,
+                    perplexity: parseFloat(document.getElementById('perplexity').value),
+                    learningRate: parseFloat(document.getElementById('learningRate').value),
+                    nIter: 500
+                };
+
+                tsne = new TSNE(options);
+                tsne.initSync(normalizedData);
+
+                let currentIteration = 0;
+                const maxIterations = 500;
+
+                function stepTSNE() {
+                    if (currentIteration < maxIterations) {
+                        tsne.step();
+                        currentIteration++;
+
+                        // Update status periodically
+                        if (currentIteration % 50 === 0) {
+                            setStatus(`Running t-SNE... Step ${currentIteration}/${maxIterations}`);
+                        }
+
+                        // Use requestAnimationFrame for smoother UI
+                        requestAnimationFrame(stepTSNE);
+                    } else {
+                        // Computation complete
+                        const output3d = tsne.getSolution();
+                        updateVisualization(output3d);
+                        disableControls(false);
+                        setStatus('t-SNE computation complete');
+                    }
+                }
+
+                // Start the computation
+                requestAnimationFrame(stepTSNE);
+            }
+
+            // Defer computation to avoid blocking
+            setTimeout(computeTSNE, 0);
+        }
+
+        function runTSNE() {
+            disableControls(true);
+            setStatus('Preparing t-SNE...');
+            createTSNE();
+        }
+
+        // --- Visualization Update ---
+        function updateVisualization(output3d) {
+            // Clear previous points
+            if (pointGroup) {
+                scene.remove(pointGroup);
+                // Dispose geometries and materials if they were created per point
+                // In this case, we reuse pointGeometry, but materials are per color
+                pointGroup.children.forEach(child => {
+                    if (child.material) child.material.dispose();
+                });
+                pointGroup.children = []; // Clear children array
+            }
+            pointGroup = new THREE.Group();
+            scene.add(pointGroup);
+
+            // Find min/max for scaling
+            let minX = Infinity, minY = Infinity, minZ = Infinity;
+            let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+
+            output3d.forEach(p => {
+                minX = Math.min(minX, p[0]); maxX = Math.max(maxX, p[0]);
+                minY = Math.min(minY, p[1]); maxY = Math.max(maxY, p[1]);
+                minZ = Math.min(minZ, p[2]); maxZ = Math.max(maxZ, p[2]);
+            });
+
+            const rangeX = maxX - minX;
+            const rangeY = maxY - minY;
+            const rangeZ = maxZ - minZ;
+            const maxRange = Math.max(rangeX, rangeY, rangeZ);
+
+            // Scale factor to fit within a reasonable view (e.g., +/- 20 units)
+            const targetRange = 40;
+            const scale = maxRange > 0 ? targetRange / maxRange : 1;
+
+            // Offset to center the points
+            const offsetX = -(minX + maxX) / 2;
+            const offsetY = -(minY + maxY) / 2;
+            const offsetZ = -(minZ + maxZ) / 2;
+
+
+            // Add new points
+            for (let i = 0; i < output3d.length; i++) {
+                const p = output3d[i];
+                const label = labels[i];
+                const color = colors[label % colors.length]; // Cycle through colors
+
+                const material = new THREE.MeshBasicMaterial({ color: color });
+                const sphere = new THREE.Mesh(pointGeometry, material); // Reuse geometry
+
+                // Apply scaling and centering
+                sphere.position.set(
+                    (p[0] + offsetX) * scale,
+                    (p[1] + offsetY) * scale,
+                    (p[2] + offsetZ) * scale
+                );
+
+                pointGroup.add(sphere);
+            }
+
+            console.log(`Added ${output3d.length} points to the visualization.`);
+        }
+
+        // --- UI and Event Handling ---
+        const runButton = document.getElementById('run-tsne-button');
+        const perplexityInput = document.getElementById('perplexity');
+        const learningRateInput = document.getElementById('learningRate');
+        const iterationsInput = document.getElementById('iterations');
+
+        runButton.addEventListener('click', runTSNE);
+
+        function setStatus(message) {
+            statusDiv.textContent = `Status: ${message}`;
+        }
+
+        function disableControls(disabled) {
+            runButton.disabled = disabled;
+            perplexityInput.disabled = disabled;
+            learningRateInput.disabled = disabled;
+            iterationsInput.disabled = disabled;
+        }
+
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            generateData();
+            initThreeJS();
+            createTSNE(); // Initialize t-SNE with default parameters and data
+            // Optional: Run t-SNE automatically on load
+            runTSNE();
+        });
+    </script>
+</body>
+</html>

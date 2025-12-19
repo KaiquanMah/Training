@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding t-SNE: Visualizing 3D to 2D Reduction</title>
+    <script src="https://cdn.plot.ly/plotly-2.29.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsne-js@1.0.3/tsne.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #0056b3;
+        }
+        .explanation, .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e9e9e9;
+            border-radius: 5px;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: center;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .control-group input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .visualization-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .plot-container {
+            flex: 1;
+            min-width: 400px; /* Ensure plots have a minimum size */
+            height: 500px; /* Fixed height for plots */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Understanding t-SNE: Visualizing 3D to 2D Reduction</h1>
+
+        <div class="explanation">
+            <h2>What is t-SNE?</h2>
+            <p>t-Distributed Stochastic Neighbor Embedding (t-SNE) is a dimensionality reduction technique particularly well-suited for visualizing high-dimensional datasets. [22]</p>
+            <p>Its primary goal is to embed high-dimensional data points into a lower-dimensional space (typically 2D or 3D) such that similar points are modeled by nearby points and dissimilar points are modeled by distant points. [2]</p>
+            <p>Unlike linear methods like Principal Component Analysis (PCA), t-SNE focuses on preserving local neighborhoods, making it effective at revealing clusters and structures in the data that might not be apparent with linear transformations. [2]</p>
+
+            <h2>Key Parameters:</h2>
+            <ul>
+                <li><strong>Perplexity:</strong> Related to the number of nearest neighbors used in the algorithm. A higher perplexity considers more neighbors. It can be thought of as a smooth measure of the effective number of neighbors. [16]</li>
+                <li><strong>Learning Rate:</strong> Determines the step size during the optimization process. A learning rate that is too low can result in a slow convergence, while a learning rate that is too high can lead to unstable optimization and a poor embedding. [2]</li>
+                <li><strong>Number of Iterations:</strong> The number of steps the optimization algorithm runs. More iterations generally lead to a better-converged embedding, but also take longer.</li>
+            </ul>
+
+            <h2>Instructions:</h2>
+            <p>Use the controls below to generate new 3D data or run the t-SNE algorithm on the current data. Adjust the parameters to see how they affect the 2D embedding. Hover over points in either plot to highlight the corresponding point in the other plot.</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="perplexity">Perplexity:</label>
+                <input type="number" id="perplexity" value="30" min="5" max="50">
+            </div>
+            <div class="control-group">
+                <label for="learningRate">Learning Rate:</label>
+                <input type="number" id="learningRate" value="100" min="10" max="1000">
+            </div>
+            <div class="control-group">
+                <label for="iterations">Iterations:</label>
+                <input type="number" id="iterations" value="500" min="100" max="5000">
+            </div>
+            <button id="generateDataBtn">Generate New Random 3D Data</button>
+            <button id="runTsneBtn">Run t-SNE Calculation</button>
+        </div>
+        <div class="status" id="status">Status: Ready</div>
+
+        <div class="visualization-area">
+            <div id="original3dPlot" class="plot-container"></div>
+            <div id="tsne2dPlot" class="plot-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let originalData = [];
+        let tsneData = [];
+        let tsne;
+        const numPoints = 200;
+        const numClusters = 3;
+        const clusterColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']; // Plotly default colors
+
+        // Function to generate random 3D data with clusters
+        function generate3dData(numPoints, numClusters) {
+            const data = [];
+            const clusterCenters = [];
+            // Generate random cluster centers
+            for (let i = 0; i < numClusters; i++) {
+                clusterCenters.push([
+                    Math.random() * 10 - 5,
+                    Math.random() * 10 - 5,
+                    Math.random() * 10 - 5
+                ]);
+            }
+
+            // Generate points around cluster centers
+            for (let i = 0; i < numPoints; i++) {
+                const clusterId = Math.floor(Math.random() * numClusters);
+                const center = clusterCenters[clusterId];
+                const point = [
+                    center[0] + (Math.random() - 0.5) * 2,
+                    center[1] + (Math.random() - 0.5) * 2,
+                    center[2] + (Math.random() - 0.5) * 2
+                ];
+                data.push({
+                    x: point[0],
+                    y: point[1],
+                    z: point[2],
+                    cluster: clusterId,
+                    id: i // Assign a unique ID to each point
+                });
+            }
+            return data;
+        }
+
+        // Function to plot 3D data
+        function plot3d(data) {
+            const plotDiv = document.getElementById('original3dPlot');
+            const x = data.map(p => p.x);
+            const y = data.map(p => p.y);
+            const z = data.map(p => p.z);
+            const colors = data.map(p => clusterColors[p.cluster]);
+            const ids = data.map(p => p.id); // Store original IDs
+
+            const trace = {
+                x: x,
+                y: y,
+                z: z,
+                mode: 'markers',
+                type: 'scatter3d',
+                marker: {
+                    color: colors,
+                    size: 5,
+                    opacity: 0.8
+                },
+                customdata: ids // Store original IDs in customdata
+            };
+
+            const layout = {
+                title: 'Original 3D Data',
+                margin: { l: 0, r: 0, b: 0, t: 40 },
+                scene: {
+                    xaxis: { title: 'X' },
+                    yaxis: { title: 'Y' },
+                    zaxis: { title: 'Z' }
+                },
+                hovermode: 'closest'
+            };
+
+            Plotly.newPlot(plotDiv, [trace], layout);
+
+            // Add hover event listener to 3D plot
+            plotDiv.on('plotly_hover', function(eventData) {
+                if (eventData.points && eventData.points.length > 0) {
+                    const pointIndex = eventData.points[0].pointIndex;
+                    highlightPoint(pointIndex, 'hover');
+                }
+            });
+
+            plotDiv.on('plotly_unhover', function(eventData) {
+                 if (eventData.points && eventData.points.length > 0) {
+                    const pointIndex = eventData.points[0].pointIndex;
+                    unhighlightPoint(pointIndex, 'hover');
+                }
+            });
+
+             // Add click event listener to 3D plot (optional, can be used for persistent highlight)
+            // plotDiv.on('plotly_click', function(eventData) {
+            //     if (eventData.points && eventData.points.length > 0) {
+            //         const pointIndex = eventData.points[0].pointIndex;
+            //         // Implement persistent highlight logic if needed
+            //     }
+            // });
+        }
+
+        // Function to plot 2D t-SNE data
+        function plot2d(data, originalClusterIds) {
+            const plotDiv = document.getElementById('tsne2dPlot');
+            const x = data.map(p => p[0]);
+            const y = data.map(p => p[1]);
+            const colors = originalClusterIds.map(clusterId => clusterColors[clusterId]);
+            const ids = originalData.map(p => p.id); // Use original IDs
+
+            const trace = {
+                x: x,
+                y: y,
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    color: colors,
+                    size: 5,
+                    opacity: 0.8
+                },
+                 customdata: ids // Store original IDs in customdata
+            };
+
+            const layout = {
+                title: 't-SNE 2D Embedding',
+                margin: { l: 40, r: 0, b: 40, t: 40 },
+                xaxis: { title: 't-SNE Dim 1' },
+                yaxis: { title: 't-SNE Dim 2' },
+                 hovermode: 'closest'
+            };
+
+            Plotly.newPlot(plotDiv, [trace], layout);
+
+             // Add hover event listener to 2D plot
+            plotDiv.on('plotly_hover', function(eventData) {
+                if (eventData.points && eventData.points.length > 0) {
+                    const pointIndex = eventData.points[0].pointIndex;
+                     highlightPoint(pointIndex, 'hover');
+                }
+            });
+
+             plotDiv.on('plotly_unhover', function(eventData) {
+                 if (eventData.points && eventData.points.length > 0) {
+                    const pointIndex = eventData.points[0].pointIndex;
+                    unhighlightPoint(pointIndex, 'hover');
+                }
+            });
+
+             // Add click event listener to 2D plot (optional)
+            // plotDiv.on('plotly_click', function(eventData) {
+            //     if (eventData.points && eventData.points.length > 0) {
+            //         const pointIndex = eventData.points[0].pointIndex;
+            //         // Implement persistent highlight logic if needed
+            //     }
+            // });
+        }
+
+        // Function to highlight a point in both plots
+        function highlightPoint(pointIndex, type) {
+            const originalPlotDiv = document.getElementById('original3dPlot');
+            const tsnePlotDiv = document.getElementById('tsne2dPlot');
+
+            // Get the original ID of the hovered/clicked point
+            const originalId = originalPlotDiv.data[0].customdata[pointIndex];
+
+            // Find the index of this original ID in both plot data arrays
+            const originalPlotIndex = originalPlotDiv.data[0].customdata.indexOf(originalId);
+            const tsnePlotIndex = tsnePlotDiv.data[0].customdata.indexOf(originalId);
+
+
+            if (originalPlotIndex !== -1) {
+                 const originalColors = originalPlotDiv.data[0].marker.color.slice(); // Create a copy
+                 const originalSizes = originalPlotDiv.data[0].marker.size.slice(); // Create a copy
+
+                 originalColors[originalPlotIndex] = '#ff0000'; // Highlight color
+                 originalSizes[originalPlotIndex] = 8; // Increased size
+
+                 const update3d = {
+                    'marker.color': [originalColors],
+                    'marker.size': [originalSizes]
+                 };
+                 Plotly.restyle(originalPlotDiv, update3d, [0]); // Apply to the first trace
+            }
+
+             if (tsnePlotIndex !== -1) {
+                const tsneColors = tsnePlotDiv.data[0].marker.color.slice(); // Create a copy
+                const tsneSizes = tsnePlotDiv.data[0].marker.size.slice(); // Create a copy
+
+                tsneColors[tsnePlotIndex] = '#ff0000'; // Highlight color
+                tsneSizes[tsnePlotIndex] = 8; // Increased size
+
+                const update2d = {
+                    'marker.color': [tsneColors],
+                    'marker.size': [tsneSizes]
+                };
+                Plotly.restyle(tsnePlotDiv, update2d, [0]); // Apply to the first trace
+            }
+        }
+
+         // Function to unhighlight a point in both plots
+        function unhighlightPoint(pointIndex, type) {
+             const originalPlotDiv = document.getElementById('original3dPlot');
+            const tsnePlotDiv = document.getElementById('tsne2dPlot');
+
+            // Get the original ID of the hovered/clicked point
+            const originalId = originalPlotDiv.data[0].customdata[pointIndex];
+
+            // Find the index of this original ID in both plot data arrays
+            const originalPlotIndex = originalPlotDiv.data[0].customdata.indexOf(originalId);
+            const tsnePlotIndex = tsnePlotDiv.data[0].customdata.indexOf(originalId);
+
+             if (originalPlotIndex !== -1) {
+                 const originalColors = originalPlotDiv.data[0].marker.color.slice(); // Create a copy
+                 const originalSizes = originalPlotDiv.data[0].marker.size.slice(); // Create a copy
+
+                 originalColors[originalPlotIndex] = clusterColors[originalData[originalPlotIndex].cluster]; // Revert to original color
+                 originalSizes[originalPlotIndex] = 5; // Revert to original size
+
+                 const update3d = {
+                    'marker.color': [originalColors],
+                    'marker.size': [originalSizes]
+                 };
+                 Plotly.restyle(originalPlotDiv, update3d, [0]); // Apply to the first trace
+            }
+
+             if (tsnePlotIndex !== -1) {
+                const tsneColors = tsnePlotDiv.data[0].marker.color.slice(); // Create a copy
+                const tsneSizes = tsnePlotDiv.data[0].marker.size.slice(); // Create a copy
+
+                tsneColors[tsnePlotIndex] = clusterColors[originalData[tsnePlotIndex].cluster]; // Revert to original color
+                tsneSizes[tsnePlotIndex] = 5; // Revert to original size
+
+                const update2d = {
+                    'marker.color': [tsneColors],
+                    'marker.size': [tsneSizes]
+                };
+                Plotly.restyle(tsnePlotDiv, update2d, [0]); // Apply to the first trace
+            }
+        }
+
+
+        // Function to run t-SNE
+        async function runTsne() {
+            const perplexity = parseFloat(document.getElementById('perplexity').value);
+            const learningRate = parseFloat(document.getElementById('learningRate').value);
+            const iterations = parseInt(document.getElementById('iterations').value);
+            const statusDiv = document.getElementById('status');
+            const runBtn = document.getElementById('runTsneBtn');
+
+            if (originalData.length === 0) {
+                statusDiv.textContent = 'Status: Generate data first.';
+                return;
+            }
+
+            runBtn.disabled = true;
+            statusDiv.textContent = 'Status: Calculating t-SNE...';
+
+            const data3d = originalData.map(p => [p.x, p.y, p.z]);
+            const originalClusterIds = originalData.map(p => p.cluster);
+
+            tsne = new tsnejs.tSNE({
+                dim: 2,
+                perplexity: perplexity,
+                learningRate: learningRate,
+                // The tsne-js library doesn't have a direct 'iterations' parameter in the constructor
+                // We will run it step-by-step
+            });
+
+            tsne.initDataRaw(data3d);
+
+            // Run t-SNE iteratively to show progress (optional, but good for visualization)
+            for (let i = 0; i < iterations; i++) {
+                tsne.step();
+                if ((i + 1) % 50 === 0 || i === iterations - 1) {
+                     statusDiv.textContent = `Status: Calculating t-SNE... Iteration ${i + 1}/${iterations}`;
+                     // Optionally update the 2D plot periodically here for live visualization
+                     // plot2d(tsne.getSolution(), originalClusterIds);
+                }
+                 // Add a small delay to allow the browser to update the UI
+                 await new Promise(resolve => setTimeout(resolve, 0));
+            }
+
+
+            tsneData = tsne.getSolution();
+            plot2d(tsneData, originalClusterIds);
+
+            statusDiv.textContent = `Status: t-SNE calculation finished in ${iterations} iterations.`;
+            runBtn.disabled = false;
+        }
+
+        // Event listeners for buttons
+        document.getElementById('generateDataBtn').addEventListener('click', () => {
+            originalData = generate3dData(numPoints, numClusters);
+            plot3d(originalData);
+            // Clear the 2D plot
+            Plotly.newPlot('tsne2dPlot', [], {
+                 title: 't-SNE 2D Embedding (Run t-SNE to see results)',
+                 margin: { l: 40, r: 0, b: 40, t: 40 },
+                 xaxis: { title: 't-SNE Dim 1' },
+                 yaxis: { title: 't-SNE Dim 2' },
+            });
+            document.getElementById('status').textContent = 'Status: New data generated. Ready to run t-SNE.';
+        });
+
+        document.getElementById('runTsneBtn').addEventListener('click', runTsne);
+
+        // Initial data generation and plotting on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            originalData = generate3dData(numPoints, numClusters);
+            plot3d(originalData);
+             Plotly.newPlot('tsne2dPlot', [], {
+                 title: 't-SNE 2D Embedding (Run t-SNE to see results)',
+                 margin: { l: 40, r: 0, b: 40, t: 40 },
+                 xaxis: { title: 't-SNE Dim 1' },
+                 yaxis: { title: 't-SNE Dim 2' },
+            });
+            document.getElementById('status').textContent = 'Status: Initial data generated. Ready to run t-SNE.';
+        });
+
+    </script>
+</body>
+</html>
