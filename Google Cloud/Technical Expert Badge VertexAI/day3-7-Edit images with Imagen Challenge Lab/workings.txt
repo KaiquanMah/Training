@@ -1,0 +1,143 @@
+Objective
+In this lab, you will demonstrate your ability to edit & enhance images with generative AI without distorting the product featured in the image.
+
+Specifically, you will demonstrate your ability to implement the following techniques:
+Outpainting
+Mask-free editing
+Inpainting Insertion
+Inpainting Removal
+Background Swapping
+
+
+
+
+Overview
+Imagen on Vertex AI brings Google's state of the art image generative AI capabilities to application developers.
+
+Marketers might pay particular attention to Imagen's capabilities to edit images. Its features allows a user to start with a photo of a particular product and expand the image, add things to the image, remove things from the image, or change the setting of the image -- all without modifying the featured product. This expands the use of generative AI for images to marketers working with existing products.
+
+Learn more about Imagen on Vertex AI.
+https://cloud.google.com/vertex-ai/generative-ai/docs/image/overview
+
+
+This lab will challenge you to perform actions and automation across products. Instead of following step-by-step instructions, you are given a common business scenario and a set of tasks - you figure out how to complete them on your own! An automated scoring system (shown on this page) provides feedback on whether you have completed your tasks correctly.
+When you take a Challenge Lab, you will not be taught Google Cloud concepts. You will need to use your skills to assess how to build the solution to the challenge presented. This lab is only recommended for students who have those skills. Are you up for the challenge?
+
+
+
+
+
+
+=======================================
+
+
+
+
+Task 1. Prepare the environment in Vertex AI Workbench
+In the Google Cloud console, navigate to Vertex AI by searching for it at the top of the console.
+
+Click Enable all recommended APIs.
+
+Search for Workbench in the console's top search bar, and click on the first result to navigate to Vertex AI Workbench.
+
+Under Instances, click on Open JupyterLab next to your generative-ai-jupyterlab instance. JupyterLab will launch in a new tab.
+
+In the new tab, under Launcher in the Notebook section, select Python 3 (ipykernel) to create a new .ipynb notebook.
+
+In the Explorer on the left, right-click on the newly created file, select Rename, and change the name to image-editing.ipynb.
+
+In the first code cell of the Python notebook, install the necessary Google Cloud dependencies using the following command:
+!python3 -m pip install --upgrade --quiet google-genai
+
+
+Either click the play button play at the top or enter SHIFT+ENTER on your keyboard to execute the cell.
+
+To use the newly installed packages in this Jupyter runtime, you must restart the runtime. In the Jupyter Lab menus, select Kernel > Restart Kernel....
+
+When prompted to confirm, select Restart.
+
+Run the following in a cell to download a starting product image and a Python file with some helpful image editing helper functions.
+
+!gcloud storage cp gs://qwiklabs-gcp-00-5ea23e119474-bucket/empty-bowl-on-empty-table.png .
+!gcloud storage cp gs://qwiklabs-gcp-00-5ea23e119474-bucket/image_editing_utils.py .
+!gcloud storage cp gs://qwiklabs-gcp-00-5ea23e119474-bucket/place-setting-mask.png .
+
+
+
+
+
+Import the required libraries by adding the following to a new cell and running it with SHIFT+ENTER:
+
+from google import genai
+from google.genai.types import (
+    Image,
+    EditImageConfig,
+    RawReferenceImage,
+    MaskReferenceImage,
+    MaskReferenceConfig,
+)
+
+import image_editing_utils
+
+
+
+
+
+Initialize the Google Gen AI SDK with your project and location and define a bucket to be used.
+
+PROJECT_ID = "qwiklabs-gcp-00-5ea23e119474"
+LOCATION = "us-central1"
+gcs_bucket = "qwiklabs-gcp-00-5ea23e119474-bucket"
+
+client = genai.Client(
+    vertexai=True,
+    project=PROJECT_ID,
+    location=LOCATION
+)
+
+
+
+
+Display the image of your product, a specific ceramic bowl. Throughout this lab, you will edit and enhance the surroundings of this bowl, but you will not allow it to be replaced with a generic different bowl.
+
+original_image = Image.from_file(
+    location="empty-bowl-on-empty-table.png",
+    mime_type="image/png"
+)
+original_image.show()
+
+
+Output:
+
+Starting Image
+
+Run the following code to save your original_image locally and upload it to Cloud Storage:
+
+dest_filename = "empty-bowl-on-empty-table-copy.png"
+original_image.save(dest_filename)
+image_editing_utils.upload_file_to_gcs(
+    gcs_bucket, dest_filename, dest_filename)
+
+
+
+
+
+
+
+
+=======================================
+
+
+Readings for this challenge lab:
+- https://github.com/KaiquanMah/Training/blob/master/Google%20Cloud/Technical%20Expert%20Badge%20VertexAI/day1-3-Edit%20images%20with%20Imagen/imagen3_editing-Part1%20Inpaint%20insert.ipynb
+- https://github.com/KaiquanMah/Training/blob/master/Google%20Cloud/Technical%20Expert%20Badge%20VertexAI/day1-3-Edit%20images%20with%20Imagen/imagen3_editing-Part2%20Inpaint%20Remove%2C%20Bkgd%20swap%2C%20Outpaint%2C%20Maskfree%20edit.ipynb
+- https://github.com/GoogleCloudPlatform/generative-ai/blob/main/vision/getting-started/imagen3_editing.ipynb - especially for the class id table
+
+For the remaining parts of this challenge lab, please refer to the notebooks in this folder.
+
+
+
+
+Feedback:
+Vertex AI Workbench Jupyterlab - kept encountering saving issues, which was frustrating for a time-constrained challenge lab
+
