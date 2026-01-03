@@ -1,0 +1,309 @@
+Agent Development Kit (ADK) is a modular and extensible open-source framework for building AI agents. While ADK provides its own built-in evaluation module, this lab demonstrates how to use the Vertex AI Generative AI Evaluation Service to assess the performance of an ADK-based agent. 
+
+This approach offers a broader, explainable, and quality-controlled toolkit to evaluate generative models or applications using custom metrics and human-aligned benchmarks.
+
+
+
+Objective
+Build and run a LOCAL ADK agent.
+Create and format an AGENT EVALUATION DATASET.
+Evaluate agent performance using:
+- Single TOOL usage evaluation
+- TRAJECTORY-based evaluation
+- RESPONSE QUALITY evaluation
+Use Vertex AI’s Evaluation Service to generate explainable metrics and benchmark results.
+
+
+
+
+
+
+
+You will evaluate an ADK agent using Vertex AI Generative AI Evaluation.
+You
+- built and executed the agent locally, 
+- prepared a custom evaluation dataset, and 
+- assessed the 
+  - agent’s tool usage, 
+  - action trajectory, and 
+  - final response quality using built-in evaluation tools
+
+You evaluated the agent using the following components:
+- ADK (Agent Development Kit) for building and running the agent
+- A structured evaluation dataset with expected tool usage and references
+- Vertex AI Gen AI Evaluation Service
+- Tool usage evaluation metrics
+- Trajectory matching for step-by-step accuracy
+- Response quality metrics such as ROUGE and grounding confidence
+
+
+
+
+
+Readings
+- Metrics
+https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval
+- Bring your own dataset BYOD
+https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset
+
+
+
+===========================
+
+
+Task 1. Prepare the environment in Vertex AI Workbench
+In the Google Cloud console, navigate to Vertex AI by searching for it at the top of the console.
+
+Navigate to the Vertex AI > Dashboard page and click on Enable all recommended APIs.
+
+Search for Workbench in the console's top search bar, and click on the first result to navigate to Vertex AI > Workbench.
+
+Under Instances, click on Open JupyterLab next to your vertex-ai-jupyterlab instance. JupyterLab will launch in a new tab.
+
+Open the evaluating_adk_agent-v1.1.0.ipynb file.
+
+---
+Note: If you do not see notebooks in JupyterLab, please follow these additional steps to reset the instance:
+1. Close the browser tab for JupyterLab, and return to the Workbench home page.
+
+2. Select the checkbox next to the instance name, and click Reset.
+
+3. After the Open JupyterLab button is enabled again, wait one minute, and then click Open JupyterLab.
+---
+In the Select Kernel dialog, choose Python 3 from the list of available kernels.
+
+In the first code cell of the Python notebook, install the necessary Google Cloud dependencies.
+
+Either click the play button at the top or enter SHIFT+ENTER on your keyboard to execute the cell.
+
+To use the newly installed packages in this Jupyter runtime, you must restart the runtime. Wait for the [*] beside the cell to change to [1] to show that the cell has completed, then in the Jupyter Lab menus, select Kernel > Restart Kernel....
+
+When prompted to confirm, select Restart.
+
+Once the kernel has restarted, run the following in a new cell to set Google Cloud project information and initialize Vertex AI
+
+Run through the Getting Started, Import libraries, Define helper functions and the Set Google Cloud project information sections of the notebook.
+
+For PROJECT_ID use qwiklabs-gcp-00-1c1e83b66667, and for BUCKET_NAME use qwiklabs-gcp-00-1c1e83b66667. All EvalTask results will be stored in this bucket.
+
+Note: You can skip any notebook cells that are noted Colab only. 
+If you experience a 429 response from any of the notebook cell executions, wait 1 minute before running the cell again to proceed.
+
+
+
+
+
+
+
+===========================
+
+
+
+Task 2. Build and Run the ADK Agent
+In this task, you will build your application using the Agent Development Kit (ADK), integrating the Gemini model and defining custom tools to simulate a product research agent.
+
+1
+Define Tools:
+Create get_product_details() and get_product_price() functions to return product information and pricing.
+
+2
+Set the Model:
+Assign "gemini-2.0-flash" to the model variable.
+
+3
+Assemble the Agent:
+Define agent_parsed_outcome(query) to:
+- Set application, user, and session IDs.
+- Initialize the Agent with instructions and tools.
+- Start a session and run the agent.
+- Parse and return the response.
+
+4
+Test the Agent:
+- Run queries like "Get product details for shoes" using agent_parsed_outcome().
+- Display the output using Markdown.
+
+Note: You may see warnings while running some steps. Those can be ignored.
+
+
+
+
+
+===========================
+
+Task 3. Evaluate an ADK Agent with Vertex AI Gen AI Evaluation
+In this task, you will evaluate your ADK-based agent using the Vertex AI Gen AI Evaluation service. This includes building an evaluation dataset, running an evaluation task to check tool selection, and visualizing the results.
+
+
+1
+Understand Evaluation Goals:
+Learn about key evaluation types:
+- Monitoring: Tool selection, trajectory, response quality.
+- Observability: Latency and failure rate.
+
+
+2
+Prepare Evaluation Dataset:
+- Define a set of PROMPTS and their EXPECTED TOOL CALLS (REFERENCE TRAJECTORY).
+- Create a Pandas DataFrame with these examples.
+- Optionally include GENERATED RESPONSES and predicted trajectories.
+
+
+3
+Display Sample Data:
+Use display_dataframe_rows() to preview a few rows from the dataset.
+
+
+4
+Set Evaluation Metric:
+Use TrajectorySingleToolUse to check if the CORRECT TOOL was used, REGARDLESS OF TOOL ORDER.
+
+
+5
+Run Evaluation Task:
+Create an EvalTask using the dataset and metrics.
+Run the task with agent_parsed_outcome and a unique experiment run name.
+Store and organize results using output_uri_prefix.
+
+
+6
+Visualize Results:
+Display a sample of the evaluation metrics using helper functions to interpret the agent’s behavior.
+
+
+
+
+
+
+
+
+===========================
+
+
+Task 4. Perform Trajectory Evaluation
+In this task, you will evaluate your agent’s tool usage sequence (trajectory) to determine if it is making logical and effective tool choices in the correct order based on the user's prompt.
+
+
+1
+Understand Trajectory Evaluation:
+Evaluate whether the agent uses the right tools in the correct sequence. This goes beyond checking if the right tool was used — it assesses the full reasoning path.
+
+
+2
+Set Trajectory Metrics:
+Use ground-truth-based metrics to measure different aspects of the agent’s trajectory:
+trajectory_exact_match: SAME TOOLS, same ORDER.
+trajectory_in_order_match: Reference tools in correct order (EXTRAS ALLOWED).
+trajectory_any_order_match: All reference tools used (ORDER/extras DONT MATTER).
+trajectory_precision: Share of predicted actions found in the reference. (PREDICTED ACTIONS VS REFERENCE ACTIONS)
+trajectory_recall: Share of reference actions found in the prediction. (DIDNT MISS OUR REFERENCE ACTIONS NEEDED)
+
+
+
+3
+Run Evaluation Task:
+Create an EvalTask with the evaluation dataset and trajectory metrics.
+Run the task with agent_parsed_outcome and assign a unique run name.
+Store results under a designated output path.
+
+
+4
+Visualize Results:
+Display a sample of metric results using display_dataframe_rows.
+Generate bar plots to visualize trajectory metrics using plot_bar_plot.
+
+
+
+
+
+
+
+===========================
+
+
+
+Task 5. Conduct Response Evaluation
+In this task, you will evaluate the final responses generated by the ADK agent, both in terms of language quality and how well the response follows the agent's tool usage.
+
+
+
+5A - evaluate safety, coherence
+1
+Understand Response Evaluation:
+Evaluate the quality and appropriateness of the agent's final output using built-in and custom response metrics.
+
+
+2
+Set Response Metrics:
+Start with base response metrics such as:
+- safety: Checks for safe, non-toxic outputs.
+- coherence: Assesses FLUENCY and LOGICAL FLOW/ORDER.
+
+
+3
+Run Evaluation Task:
+Use an EvalTask to evaluate responses from agent_parsed_outcome using the selected response metrics.
+Assign a unique run name and store results in the configured bucket path.
+
+
+4
+Visualize Results:
+Use helper functions to display evaluation results for inspection.
+
+
+
+
+
+-----
+
+
+5B evaluate trajectory AND safety
+5
+Define Custom Metric for Trajectory-Conditioned Response:
+- Create a criteria to assess if the response logically follows the TRAJECTORY.
+- Define a BINARY RUBRIC: 1 = Follows trajectory, 0 = Does not follow.
+- Use PointwiseMetricPromptTemplate to generate the EVALUATION PROMPT.
+- Define a new PointwiseMetric using this template.
+
+
+6
+Set Combined Response and Trajectory Metrics
+Combine trajectory and response-level metrics:
+- trajectory_exact_match (TOOLS N ORDER)
+- trajectory_in_order_match (EXTRAS ALLOWED)
+- safety
+- response_follows_trajectory (custom)
+
+
+
+
+7
+Run Custom Evaluation Task:
+Create a new EvalTask with the combined metrics.
+Run evaluation and visualize sample results with plots and tables.
+
+
+
+
+===========================
+
+
+Task 6
+Note: Bonus – You can optionally bring your own dataset and evaluate a LangGraph-based agent using Vertex AI Gen AI Evaluation.
+
+This allows you to apply the same evaluation metrics (tool usage, trajectory, response quality) on your CUSTOM AGENT LOGIC and PROMPTS.
+
+
+
+
+
+
+===========================
+
+
+Reflections
+- For the 'Bring your own dataset' section, it would be great to explain the difference between reference_trajectory vs predicted_trajectory. Why are we defining 'predicted_trajectory' here and not letting the model's actual trajectory be added to 'predicted_trajectory'?
+- Why does the 'response' list of values look alittle incomplete? How does this affect evaluation? Because in the third prompt asking the LLM to retrieve the product details AND price of headphones, the response was only the product details without price, yet in the evaluation task, it seems that there are both product details AND price. I find it difficult to link from the 'Bring Your Own Dataset' 'byod_eval_data' section to the evaluation results. There were missing links / explanations along the way.
+
+
+
